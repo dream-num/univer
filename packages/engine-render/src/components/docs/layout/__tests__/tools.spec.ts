@@ -32,9 +32,14 @@ import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
     clearFontCreateConfigCache,
     columnIterator,
+    compareDocumentSkeletonNestedPagePathOrder,
+    documentSkeletonLineIterator,
+    documentSkeletonTableIterator,
     getCharSpaceApply,
     getCharSpaceConfig,
     getColumnByDivide,
+    getDocumentSkeletonColumnPagePathInfo,
+    getDocumentSkeletonNestedPageOffset,
     getFontConfigFromLastGlyph,
     getFontCreateConfig,
     getGlyphGroupWidth,
@@ -467,6 +472,7 @@ describe('docs layout tools extra', () => {
         expect((mergedMin as any).a.v).toBe(3);
 
         const pageCell = { id: 'cell-page' };
+        const columnPage = { id: 'column-page' };
         const root = {
             pages: [
                 {
@@ -474,10 +480,311 @@ describe('docs layout tools extra', () => {
                     skeTables: new Map([
                         ['t1', { rows: [{ cells: [pageCell] }] }],
                     ]),
+                    skeColumnGroups: new Map([
+                        ['cg1', { columns: [{ page: columnPage }] }],
+                    ]),
                 },
             ],
         };
         expect(getPageFromPath(root as any, ['pages', 0])).toBe(root.pages[0]);
         expect(getPageFromPath(root as any, ['pages', 0, 'skeTables', 't1', 'rows', 0, 'cells', 0])).toBe(pageCell);
+        expect(getPageFromPath(root as any, ['pages', 0, 'skeColumnGroups', 'cg1', 'columns', 0, 'page'])).toBe(columnPage);
+    });
+
+    it('iterates document skeleton lines with nested table and column layout context', () => {
+        const page = {
+            marginLeft: 60,
+            marginRight: 40,
+            marginTop: 10,
+            pageHeight: 800,
+            pageWidth: 600,
+            sections: [createLineSection(1, 5, 100)],
+            skeTables: new Map([['table-1', {
+                tableId: 'table-1',
+                left: 100,
+                top: 40,
+                width: 300,
+                rows: [{
+                    top: 0,
+                    cells: [{
+                        left: 20,
+                        marginLeft: 3,
+                        marginRight: 2,
+                        marginTop: 4,
+                        pageWidth: 200,
+                        sections: [createLineSection(2, 7, 80)],
+                    }],
+                }],
+            }]]),
+            skeColumnGroups: new Map([['column-group-1', {
+                columnGroupId: 'column-group-1',
+                left: 20,
+                top: 120,
+                columns: [{
+                    left: 200,
+                    top: 0,
+                    width: 300,
+                    page: {
+                        marginLeft: 0,
+                        marginRight: 0,
+                        marginTop: 0,
+                        pageHeight: 80,
+                        pageWidth: 160,
+                        sections: [createLineSection(3, 10, 120)],
+                    },
+                }],
+            }]]),
+        };
+
+        const contexts: unknown[] = [];
+        documentSkeletonLineIterator([page as any], {
+            docsLeft: 0,
+            pageMarginTop: 30,
+            tableCellInsetX: 6,
+            unitId: 'doc-1',
+        }, (context) => contexts.push({
+            paragraphIndex: context.line.paragraphIndex,
+            pageIndex: context.pageIndex,
+            pageLeft: context.pageLeft,
+            sectionTop: context.sectionTop,
+            source: context.source,
+            visualLeft: context.visualLeft,
+            visualWidth: context.visualWidth,
+            clipLeft: context.clipLeft,
+            clipRight: context.clipRight,
+        }));
+
+        expect(contexts).toEqual([
+            {
+                clipLeft: undefined,
+                clipRight: undefined,
+                pageIndex: 0,
+                pageLeft: 60,
+                paragraphIndex: 1,
+                sectionTop: 10,
+                source: 'page',
+                visualLeft: 65,
+                visualWidth: 495,
+            },
+            {
+                clipLeft: 160,
+                clipRight: 378,
+                pageIndex: 0,
+                pageLeft: 183,
+                paragraphIndex: 2,
+                sectionTop: 54,
+                source: 'table-cell',
+                visualLeft: 189,
+                visualWidth: 183,
+            },
+            {
+                clipLeft: undefined,
+                clipRight: undefined,
+                pageIndex: 0,
+                pageLeft: 280,
+                paragraphIndex: 3,
+                sectionTop: 130,
+                source: 'column',
+                visualLeft: 290,
+                visualWidth: 290,
+            },
+        ]);
+    });
+
+    it('iterates top-level and column nested tables with document geometry', () => {
+        const page = {
+            marginLeft: 60,
+            marginRight: 40,
+            marginTop: 10,
+            pageHeight: 800,
+            pageWidth: 600,
+            sections: [createLineSection(1, 5, 100)],
+            skeTables: new Map([['table-1', {
+                tableId: 'table-1',
+                left: 100,
+                top: 40,
+                width: 300,
+                height: 44,
+                rows: [{
+                    top: 0,
+                    height: 44,
+                    index: 0,
+                    cells: [{
+                        left: 20,
+                        marginLeft: 3,
+                        marginRight: 2,
+                        marginTop: 4,
+                        marginBottom: 5,
+                        pageWidth: 200,
+                        pageHeight: 44,
+                        sections: [createLineSection(2, 7, 80)],
+                    }],
+                }],
+            }]]),
+            skeColumnGroups: new Map([['column-group-1', {
+                columnGroupId: 'column-group-1',
+                left: 20,
+                top: 120,
+                columns: [{
+                    left: 200,
+                    top: 8,
+                    width: 300,
+                    page: {
+                        marginLeft: 4,
+                        marginRight: 6,
+                        marginTop: 6,
+                        pageHeight: 80,
+                        pageWidth: 160,
+                        sections: [createLineSection(3, 10, 120)],
+                        skeTables: new Map([['nested-table-1', {
+                            tableId: 'nested-table-1',
+                            left: 12,
+                            top: 14,
+                            width: 120,
+                            height: 36,
+                            rows: [{
+                                top: 0,
+                                height: 36,
+                                index: 0,
+                                cells: [{
+                                    left: 10,
+                                    marginLeft: 2,
+                                    marginRight: 3,
+                                    marginTop: 5,
+                                    marginBottom: 4,
+                                    pageWidth: 60,
+                                    pageHeight: 36,
+                                    sections: [createLineSection(4, 9, 50)],
+                                }],
+                            }],
+                        }]]),
+                    },
+                }],
+            }]]),
+        };
+
+        const tables = Array.from(documentSkeletonTableIterator([page as any], {
+            docsLeft: 7,
+            docsTop: 9,
+            pageMarginTop: 30,
+            tableCellInsetX: 6,
+            unitId: 'doc-1',
+        }));
+
+        expect(tables.map((context) => ({
+            cells: context.cells.map((cell) => ({
+                cellRect: cell.cellRect,
+                clipLeft: cell.clipLeft,
+                clipRight: cell.clipRight,
+                visualLeft: cell.visualLeft,
+                visualWidth: cell.visualWidth,
+            })),
+            pageIndex: context.pageIndex,
+            source: context.source,
+            tableId: context.table.tableId,
+            tableRect: context.tableRect,
+        }))).toEqual([
+            {
+                cells: [{
+                    cellRect: { bottom: 98, left: 190, right: 385, top: 63 },
+                    clipLeft: 167,
+                    clipRight: 385,
+                    visualLeft: 196,
+                    visualWidth: 183,
+                }],
+                pageIndex: 0,
+                source: 'page',
+                tableId: 'table-1',
+                tableRect: { bottom: 103, left: 167, right: 467, top: 59 },
+            },
+            {
+                cells: [{
+                    cellRect: { bottom: 199, left: 315, right: 370, top: 172 },
+                    clipLeft: 303,
+                    clipRight: 370,
+                    visualLeft: 321,
+                    visualWidth: 43,
+                }],
+                pageIndex: 0,
+                source: 'column',
+                tableId: 'nested-table-1',
+                tableRect: { bottom: 203, left: 303, right: 423, top: 167 },
+            },
+        ]);
+    });
+
+    it('resolves column child page offsets from skeleton parents', () => {
+        const columnPage = {};
+        const column = {
+            left: 60,
+            page: columnPage,
+            top: 4,
+        };
+        const columnGroup = {
+            columnGroupId: 'cg-1',
+            columns: [column],
+            left: 20,
+            top: 30,
+        };
+        (columnPage as { parent?: unknown }).parent = column;
+        (column as { parent?: unknown }).parent = columnGroup;
+
+        expect(getDocumentSkeletonNestedPageOffset(columnPage as never)).toEqual({
+            left: 80,
+            top: 34,
+        });
+        expect(getDocumentSkeletonNestedPageOffset({ parent: { cells: [] } } as never)).toBeUndefined();
+    });
+
+    it('compares nested column page paths within the same column group', () => {
+        const firstColumn = {
+            path: ['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page'],
+        };
+        const secondColumn = {
+            path: ['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 1, 'page'],
+        };
+        const otherGroup = {
+            path: ['pages', 0, 'skeColumnGroups', 'cg-2', 'columns', 0, 'page'],
+        };
+        const body = {
+            path: ['pages', 0],
+        };
+
+        expect(compareDocumentSkeletonNestedPagePathOrder(firstColumn as never, secondColumn as never)).toBe(true);
+        expect(compareDocumentSkeletonNestedPagePathOrder(secondColumn as never, firstColumn as never)).toBe(false);
+        expect(compareDocumentSkeletonNestedPagePathOrder(firstColumn as never, otherGroup as never)).toBeUndefined();
+        expect(compareDocumentSkeletonNestedPagePathOrder(firstColumn as never, body as never)).toBeUndefined();
+    });
+
+    it('parses nested column page paths through one shared helper', () => {
+        expect(getDocumentSkeletonColumnPagePathInfo({
+            path: ['pages', 2, 'skeColumnGroups', 'cg-1', 'columns', 3, 'page'],
+        })).toEqual({
+            columnGroupId: 'cg-1',
+            columnIndex: 3,
+            pageIndex: 2,
+        });
+        expect(getDocumentSkeletonColumnPagePathInfo({
+            path: ['pages', 2, 'skeTables', 'table-1', 'rows', 0, 'cells', 0],
+        })).toBeUndefined();
     });
 });
+
+function createLineSection(paragraphIndex: number, columnLeft: number, columnWidth: number) {
+    return {
+        top: 0,
+        columns: [{
+            left: columnLeft,
+            width: columnWidth,
+            lines: [{
+                lineHeight: 24,
+                marginBottom: 0,
+                marginTop: 0,
+                paddingBottom: 0,
+                paddingTop: 0,
+                paragraphIndex,
+                top: 0,
+            }],
+        }],
+    };
+}

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+import type { INodePosition } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
 import {
     compareNodePositionInTable,
     isInSameTableCell,
     isInSameTableCellData,
     isValidRectRange,
+    NodePositionConvertToRectRange,
 } from '../convert-rect-range';
 
-function createNodePosition(path: Array<string | number>) {
+function createNodePosition(path: Array<string | number>): INodePosition {
     return {
         page: 0,
         section: 0,
@@ -31,7 +34,7 @@ function createNodePosition(path: Array<string | number>) {
         divide: 0,
         glyph: 0,
         path,
-    } as never;
+    } as INodePosition;
 }
 
 describe('selection rect range helpers', () => {
@@ -47,6 +50,128 @@ describe('selection rect range helpers', () => {
         expect(isValidRectRange(sameCell, nonTable)).toBe(false);
         expect(isInSameTableCell(sameCell, createNodePosition(['pages', 0, 'skeTables', 'table#-#0', 'rows', 0, 'cells', 0]))).toBe(true);
         expect(isInSameTableCell(sameCell, otherCell)).toBe(false);
+    });
+
+    it('ignores column page paths when converting rect ranges', () => {
+        const columnPosition = createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page']);
+        const columnPage = { parent: { parent: { columnGroupId: 'cg-1' } } };
+        const skeleton = {
+            findCharIndexByPosition: () => 1,
+            getSkeletonData: () => ({
+                pages: [{
+                    skeColumnGroups: new Map([
+                        ['cg-1', { columns: [{ page: columnPage }] }],
+                    ]),
+                }],
+            }),
+        };
+        const convertor = new NodePositionConvertToRectRange({} as never, skeleton as never);
+
+        expect(convertor.getNodePositionGroup(columnPosition, columnPosition)).toBeUndefined();
+    });
+
+    it('projects rect ranges for table cells inside column groups through column offsets', () => {
+        const firstCell = {
+            left: 0,
+            pageWidth: 50,
+            segmentId: 'table-in-column',
+            sections: [{ columns: [{ lines: [{}] }] }],
+        };
+        const secondCell = {
+            left: 50,
+            pageWidth: 50,
+            segmentId: 'table-in-column',
+            sections: [{ columns: [{ lines: [{}] }] }],
+        };
+        const row = {
+            cells: [firstCell, secondCell],
+            height: 20,
+            index: 0,
+            top: 0,
+        };
+        const table = {
+            left: 7,
+            rows: [row],
+            tableId: 'table-in-column',
+            top: 0,
+        };
+        const columnPage = {
+            marginLeft: 5,
+            marginTop: 0,
+            skeTables: new Map([['table-in-column', table]]),
+        };
+        const columnGroupColumn = {
+            left: 60,
+            page: columnPage,
+            top: 4,
+        };
+        const columnGroup = {
+            columnGroupId: 'cg-1',
+            columns: [columnGroupColumn],
+            left: 20,
+            top: 30,
+        };
+        const page = {
+            marginLeft: 0,
+            marginTop: 0,
+            pageHeight: 500,
+            pageWidth: 500,
+            skeColumnGroups: new Map([['cg-1', columnGroup]]),
+            skeTables: new Map(),
+        };
+
+        (firstCell as { parent?: unknown }).parent = row;
+        (secondCell as { parent?: unknown }).parent = row;
+        (row as { parent?: unknown }).parent = table;
+        (table as { parent?: unknown }).parent = columnPage;
+        (columnPage as { parent?: unknown }).parent = columnGroupColumn;
+        (columnGroupColumn as { parent?: unknown }).parent = columnGroup;
+        (columnGroup as { parent?: unknown }).parent = page;
+
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'unit-1',
+                }),
+                getSnapshot: () => ({
+                    tableSource: {
+                        'table-in-column': {
+                            tableRows: [{
+                                tableCells: [{}, {}],
+                            }],
+                        },
+                    },
+                }),
+            }),
+        };
+        const anchor = {
+            ...createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page', 'skeTables', 'table-in-column', 'rows', 0, 'cells', 0]),
+            pageType: DocumentSkeletonPageType.CELL,
+        } as never;
+        const focus = {
+            ...createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page', 'skeTables', 'table-in-column', 'rows', 0, 'cells', 1]),
+            pageType: DocumentSkeletonPageType.CELL,
+        } as never;
+        const convertor = new NodePositionConvertToRectRange({
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(anchor, focus);
+
+        expect(result?.pointGroup[0]).toEqual([
+            { x: 92, y: 34 },
+            { x: 192, y: 34 },
+            { x: 192, y: 54 },
+            { x: 92, y: 54 },
+            { x: 92, y: 34 },
+        ]);
     });
 
     it('detects same table-cell data across pages and compares table order', () => {

@@ -88,6 +88,32 @@ describe('test case in html and udm convert', () => {
         expect(html).toBe('<p class="UniverNormal" >=SUM(<span style="font-family: Arial; color: #9e6de3;">F15:G18</span>)</p>');
     });
 
+    it('applies registered export transformers before converting UDM to HTML', () => {
+        const convertor = new UDMToHtmlService({
+            transformDocumentForHtmlExport: (doc) => ({
+                ...doc,
+                body: {
+                    dataStream: 'Exported\r\n',
+                    paragraphs: [{ paragraphId: 'para_docs_ui_fixture_73', startIndex: 'Exported'.length }],
+                    sectionBreaks: [{ startIndex: 'Exported\r\n'.length - 1 }],
+                },
+            }),
+        });
+
+        const html = convertor.convert([{
+            id: '',
+            documentStyle: {},
+            body: {
+                dataStream: 'Original\r\n',
+                paragraphs: [{ paragraphId: 'para_docs_ui_fixture_74', startIndex: 'Original'.length }],
+                sectionBreaks: [{ startIndex: 'Original\r\n'.length - 1 }],
+            },
+        }]);
+
+        expect(html).toContain('Exported');
+        expect(html).not.toContain('Original');
+    });
+
     it('Should convert textRun to Html', () => {
         const documentBody = getTestBody();
         const expectedHtml = '<span style="font-family: Microsoft YaHei; color: #000000; font-size: 24pt;"><strong>塘月</strong></span>';

@@ -34,6 +34,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    DocBlockMoveValidatorService,
     DocSelectionManagerService,
     DocSkeletonManagerService,
     DocStateChangeManagerService,
@@ -41,6 +42,7 @@ import {
 } from '@univerjs/docs';
 import { DocumentViewModel, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
+import { DocHtmlExportService } from '../../../services/clipboard/udm-to-html/doc-html-export.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
@@ -117,11 +119,13 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
             injector.add([DocSelectionManagerService]);
+            injector.add([DocBlockMoveValidatorService]);
             injector.add([DocMenuStyleService]);
             injector.add([DocStateEmitService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([DocIMEInputManagerService]);
             injector.add([DocSelectionRenderService]);
+            injector.add([DocHtmlExportService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

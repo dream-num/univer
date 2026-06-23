@@ -24,6 +24,8 @@ export enum DataStreamTreeNodeType {
     TABLE = 'TABLE',
     TABLE_ROW = 'TABLE_ROW',
     TABLE_CELL = 'TABLE_CELL',
+    COLUMN_GROUP = 'COLUMN_GROUP',
+    COLUMN = 'COLUMN',
     BLOCK = 'BLOCK',
     CUSTOM_BLOCK = 'CUSTOM_BLOCK', // \b  images, mentions, etc. that do not participate in document flow
 }
@@ -38,6 +40,11 @@ export enum DataStreamTreeTokenType {
     TABLE_CELL_END = '\x1D', // table cell end
     TABLE_ROW_END = '\x0E', // table row end
     TABLE_END = '\x0F', // table end
+    // column group.
+    COLUMN_GROUP_START = '\x12', // column group start
+    COLUMN_START = '\x13', // column start
+    COLUMN_END = '\x14', // column end
+    COLUMN_GROUP_END = '\x15', // column group end
     // block.
     BLOCK_START = '\x10', // block start
     BLOCK_END = '\x11', // block end

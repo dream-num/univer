@@ -33,9 +33,9 @@ import {
     isCjkRightAlignedPunctuation,
     ptToPixel,
 } from '../../../../basics/tools';
+import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { FontCache } from '../shaping-engine/font-cache';
 import { validationGrid } from '../tools';
-import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy } from '../../document-compatibility';
 
 export function isSpace(char: string) {
     const SPACE_CHARS = [' ', '\u{00A0}', '　'];
@@ -162,6 +162,10 @@ export function _createSkeletonWordOrLetter(
         DT.TABLE_ROW_END,
         DT.TABLE_CELL_START,
         DT.TABLE_CELL_END,
+        DT.COLUMN_GROUP_START,
+        DT.COLUMN_START,
+        DT.COLUMN_END,
+        DT.COLUMN_GROUP_END,
         DT.BLOCK_START,
         DT.BLOCK_END,
         DT.CUSTOM_RANGE_START,

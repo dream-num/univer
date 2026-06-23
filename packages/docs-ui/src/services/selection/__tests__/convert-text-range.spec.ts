@@ -44,6 +44,36 @@ describe('selection convert text range helpers', () => {
         expect(compareNodePosition(end, start)).toEqual({ start, end });
     });
 
+    it('orders positions in different document columns by their column-group path', () => {
+        const firstColumnEnd = {
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 2,
+            path: ['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page'],
+        } as never;
+        const secondColumnStart = {
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 0,
+            path: ['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 1, 'page'],
+        } as never;
+
+        expect(compareNodePositionLogic(firstColumnEnd, secondColumnStart)).toBe(true);
+        expect(compareNodePositionLogic(secondColumnStart, firstColumnEnd)).toBe(false);
+        expect(compareNodePosition(secondColumnStart, firstColumnEnd)).toEqual({
+            start: firstColumnEnd,
+            end: secondColumnStart,
+        });
+    });
+
     it('merges cursor fragments into one text range', () => {
         expect(getOneTextSelectionRange([])).toBeUndefined();
         expect(getOneTextSelectionRange([
@@ -196,6 +226,214 @@ describe('selection convert text range helpers', () => {
         const result = convertor.getRangePointData(position, position);
 
         expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(70);
+    });
+
+    it('projects column page cursors through the column group offset', () => {
+        const glyph = {
+            bBox: { ba: 8, bd: 2 },
+            count: 1,
+            glyphType: 'LETTER',
+            left: 20,
+            width: 10,
+        };
+        const columnPage = {
+            marginLeft: 0,
+            marginTop: 0,
+            sections: [{
+                columns: [{
+                    left: 0,
+                    lines: [{
+                        asc: 10,
+                        divides: [{
+                            glyphGroup: [glyph],
+                            left: 0,
+                            paddingLeft: 0,
+                        }],
+                        lineHeight: 20,
+                        marginBottom: 0,
+                        marginTop: 0,
+                        paddingTop: 0,
+                        top: 0,
+                    }],
+                }],
+                top: 0,
+            }],
+        };
+        const columnGroupColumn = {
+            left: 60,
+            page: columnPage,
+            top: 4,
+        };
+        const columnGroup = {
+            columnGroupId: 'cg-1',
+            columns: [columnGroupColumn],
+            left: 20,
+            top: 30,
+        };
+        const page = {
+            marginLeft: 0,
+            marginTop: 0,
+            pageHeight: 500,
+            pageWidth: 500,
+            skeColumnGroups: new Map([['cg-1', columnGroup]]),
+            skeTables: new Map(),
+        };
+
+        (columnPage as { parent?: unknown }).parent = columnGroupColumn;
+        (columnGroupColumn as { parent?: unknown }).parent = columnGroup;
+        (columnGroup as { parent?: unknown }).parent = page;
+
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'unit-1',
+                }),
+            }),
+        };
+        const position: INodePosition = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+            line: 0,
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page'],
+            section: 0,
+            segmentPage: 0,
+        };
+
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(position, position);
+
+        expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(100);
+    });
+
+    it('projects table cell cursors inside column groups through the column and table offsets', () => {
+        const glyph = {
+            bBox: { ba: 8, bd: 2 },
+            count: 1,
+            glyphType: 'LETTER',
+            left: 20,
+            width: 10,
+        };
+        const cell = {
+            left: 30,
+            marginLeft: 3,
+            marginTop: 0,
+            sections: [{
+                columns: [{
+                    left: 0,
+                    lines: [{
+                        asc: 10,
+                        divides: [{
+                            glyphGroup: [glyph],
+                            left: 0,
+                            paddingLeft: 0,
+                        }],
+                        lineHeight: 20,
+                        marginBottom: 0,
+                        marginTop: 0,
+                        paddingTop: 0,
+                        top: 0,
+                    }],
+                }],
+                top: 0,
+            }],
+        };
+        const row = {
+            cells: [cell],
+            height: 20,
+            index: 0,
+            top: 0,
+        };
+        const table = {
+            left: 7,
+            rows: [row],
+            tableId: 'table-in-column',
+            top: 0,
+        };
+        const columnPage = {
+            marginLeft: 5,
+            marginTop: 0,
+            sections: [],
+            skeTables: new Map([['table-in-column', table]]),
+        };
+        const columnGroupColumn = {
+            left: 60,
+            page: columnPage,
+            top: 4,
+        };
+        const columnGroup = {
+            columnGroupId: 'cg-1',
+            columns: [columnGroupColumn],
+            left: 20,
+            top: 30,
+        };
+        const page = {
+            marginLeft: 0,
+            marginTop: 0,
+            pageHeight: 500,
+            pageWidth: 500,
+            skeColumnGroups: new Map([['cg-1', columnGroup]]),
+            skeTables: new Map(),
+        };
+
+        (cell as { parent?: unknown }).parent = row;
+        (row as { parent?: unknown }).parent = table;
+        (table as { parent?: unknown }).parent = columnPage;
+        (columnPage as { parent?: unknown }).parent = columnGroupColumn;
+        (columnGroupColumn as { parent?: unknown }).parent = columnGroup;
+        (columnGroup as { parent?: unknown }).parent = page;
+
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'unit-1',
+                }),
+            }),
+        };
+        const position: INodePosition = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+            line: 0,
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page', 'skeTables', 'table-in-column', 'rows', 0, 'cells', 0],
+            section: 0,
+            segmentPage: 0,
+        };
+
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(position, position);
+
+        expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(145);
     });
 
     it('excludes layout-only paragraph spacing from text selection height', () => {

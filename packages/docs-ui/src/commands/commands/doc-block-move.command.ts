@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, JSONXAc
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, Tools, UniverInstanceType } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocBlockMoveValidatorService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IMoveDocBlockCommandParams {
     unitId?: string;
@@ -56,10 +56,17 @@ export const MoveDocBlockCommand: ICommand<IMoveDocBlockCommandParams> = {
         }
 
         const previousDocumentData = doc.getSnapshot();
-        const { nextDocumentData, movedRange } = buildMoveDocBlockActions({
+        const moveResult = buildMoveDocBlockActions({
             documentData: previousDocumentData,
             sourceRange: params.sourceRange,
             targetOffset: params.targetOffset,
+        });
+        const { nextDocumentData, movedRange } = accessor.get(DocBlockMoveValidatorService).transformMoveResult({
+            unitId: doc.getUnitId(),
+            sourceRange: params.sourceRange,
+            targetOffset: params.targetOffset,
+            previousDocumentData,
+            result: moveResult,
         });
         const actions = buildReplaceDocumentBodyActions(previousDocumentData, nextDocumentData);
 
@@ -145,6 +152,7 @@ function buildReplaceDocumentBodyActions(previousDocumentData: IDocumentData, ne
         jsonX.replaceOp(['body', 'paragraphs'], previousBody.paragraphs, nextBody.paragraphs),
         jsonX.replaceOp(['body', 'sectionBreaks'], previousBody.sectionBreaks, nextBody.sectionBreaks),
         jsonX.replaceOp(['body', 'tables'], previousBody.tables, nextBody.tables),
+        jsonX.replaceOp(['body', 'columnGroups'], previousBody.columnGroups, nextBody.columnGroups),
         jsonX.replaceOp(['body', 'customBlocks'], previousBody.customBlocks, nextBody.customBlocks),
         jsonX.replaceOp(['body', 'blockRanges'], previousBody.blockRanges, nextBody.blockRanges),
         jsonX.replaceOp(['body', 'customRanges'], previousBody.customRanges, nextBody.customRanges),
@@ -179,6 +187,9 @@ function remapBodyIndexesAfterMove(
     })).sort((left, right) => left.startIndex - right.startIndex);
 
     body.tables = body.tables?.map((table) => remapExclusiveRange(table, startOffset, endOffset, targetOffset, insertOffset, moveLength))
+        .sort((left, right) => left.startIndex - right.startIndex);
+
+    body.columnGroups = body.columnGroups?.map((columnGroup) => remapExclusiveRange(columnGroup, startOffset, endOffset, targetOffset, insertOffset, moveLength))
         .sort((left, right) => left.startIndex - right.startIndex);
 
     body.blockRanges = body.blockRanges?.map((blockRange) => remapInclusiveRange(blockRange, startOffset, endOffset, targetOffset, insertOffset, moveLength))
@@ -219,7 +230,7 @@ function remapExclusiveRange<T extends { startIndex: number; endIndex: number }>
     return {
         ...range,
         startIndex: remapIndexAfterMove(range.startIndex, startOffset, endOffset, targetOffset, insertOffset, moveLength),
-        endIndex: remapIndexAfterMove(range.endIndex, startOffset, endOffset, targetOffset, insertOffset, moveLength),
+        endIndex: remapExclusiveEndIndexAfterMove(range.endIndex, startOffset, endOffset, targetOffset, insertOffset, moveLength),
     };
 }
 
@@ -260,6 +271,18 @@ function remapIndexAfterMove(index: number, startOffset: number, endOffset: numb
     }
 
     return index;
+}
+
+function remapExclusiveEndIndexAfterMove(index: number, startOffset: number, endOffset: number, targetOffset: number, insertOffset: number, moveLength: number): number {
+    if (index > startOffset && index <= endOffset) {
+        return insertOffset + index - startOffset;
+    }
+
+    if (targetOffset > endOffset && index >= endOffset && index <= targetOffset) {
+        return index - moveLength;
+    }
+
+    return remapIndexAfterMove(index, startOffset, endOffset, targetOffset, insertOffset, moveLength);
 }
 
 function clamp(value: number, min: number, max: number): number {

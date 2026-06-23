@@ -301,7 +301,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 this._docEventManagerService.hoverParagraphLeft$,
                 this._docEventManagerService.hoverTableRealTime$ ?? new BehaviorSubject<Nullable<ITableBound>>(null),
             ])
-                .pipe(throttleTime(16))
+                .pipe(throttleTime(16, undefined, { leading: true, trailing: true }))
                 .subscribe(([p, left, table]) => {
                     const paragraph = p ?? left;
                     handleHoverTarget(paragraph, table);

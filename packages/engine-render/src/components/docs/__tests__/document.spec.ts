@@ -177,6 +177,7 @@ function createPage(pageType: DocumentSkeletonPageType, segmentId: string, backg
         ed: 2,
         skeDrawings: new Map(),
         skeTables: new Map(),
+        skeColumnGroups: new Map(),
         segmentId,
         type: pageType,
         renderConfig: {
@@ -241,6 +242,72 @@ function attachTable(page: any) {
     row.parent = table;
     cellPage.parent = row;
     page.skeTables.set('table-1', table);
+}
+
+function setFirstTextGlyph(page: any, content: string) {
+    const glyph = page.sections[0].columns[0].lines[1].divides[0].glyphGroup[0];
+    glyph.content = content;
+    glyph.raw = content;
+    glyph.count = content.length;
+}
+
+function attachColumnGroup(page: any) {
+    const leftPage = createPage(DocumentSkeletonPageType.BODY, 'column-left');
+    const rightPage = createPage(DocumentSkeletonPageType.BODY, 'column-right');
+    leftPage.marginLeft = 0;
+    leftPage.marginTop = 0;
+    leftPage.marginRight = 0;
+    leftPage.marginBottom = 0;
+    rightPage.marginLeft = 0;
+    rightPage.marginTop = 0;
+    rightPage.marginRight = 0;
+    rightPage.marginBottom = 0;
+    setFirstTextGlyph(leftPage, 'L');
+    setFirstTextGlyph(rightPage, 'R');
+
+    const columnGroup = {
+        columns: [
+            {
+                columnId: 'column-left',
+                left: 0,
+                top: 0,
+                width: 70,
+                height: 80,
+                st: 0,
+                ed: 10,
+                page: leftPage,
+            },
+            {
+                columnId: 'column-right',
+                left: 90,
+                top: 0,
+                width: 70,
+                height: 80,
+                st: 11,
+                ed: 20,
+                page: rightPage,
+            },
+        ],
+        width: 160,
+        height: 80,
+        top: 20,
+        left: 12,
+        st: 0,
+        ed: 20,
+        columnGroupId: 'column-group-1',
+        columnGroupSource: {
+            columnGroupId: 'column-group-1',
+            gap: { v: 20 },
+            columns: [],
+        },
+        parent: page,
+    } as any;
+
+    columnGroup.columns.forEach((column: any) => {
+        column.parent = columnGroup;
+        column.page.parent = column;
+    });
+    page.skeColumnGroups.set(columnGroup.columnGroupId, columnGroup);
 }
 
 describe('documents render', () => {
@@ -1149,6 +1216,286 @@ describe('documents render', () => {
         expect(lineWidths).toEqual([5]);
         expect(strokeStyles).toEqual(['#ff0000']);
         expect(ctx.stroke).toHaveBeenCalledTimes(1);
+
+        documents.dispose();
+    });
+
+    it('draws column group child pages at their column offsets', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.sections[0].columns[0].lines = [];
+        bodyPage.marginLeft = 0;
+        bodyPage.marginTop = 0;
+        bodyPage.renderConfig.centerAngle = 0;
+        bodyPage.renderConfig.vertexAngle = 0;
+        attachColumnGroup(bodyPage);
+
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        bodyPage.parent = skeletonData;
+
+        const documents = new Documents('docs-column-group', {
+            getSkeletonData: () => skeletonData,
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 260,
+            height: 180,
+        });
+        scene.addObject(documents, 1);
+
+        const spanRecords: Array<{ content: string; x: number }> = [];
+        const spanExtension = {
+            uKey: 'DocsSpanExtension',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {},
+            clearCache: vi.fn(),
+            draw: vi.fn(function (this: any, _ctx: unknown, _parentScale: unknown, glyph: any) {
+                if (['L', 'R'].includes(glyph.content)) {
+                    spanRecords.push({
+                        content: glyph.content,
+                        x: this.extensionOffset.spanStartPoint.x,
+                    });
+                }
+            }),
+        };
+        vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([
+            spanExtension,
+        ] as any);
+
+        documents.draw(canvas.getContext(), {
+            viewBound: { left: 0, top: 0, right: 900, bottom: 700 },
+            cacheBound: { left: 0, top: 0, right: 900, bottom: 700 },
+        } as any);
+
+        expect(spanRecords.map((record) => record.content)).toEqual(['L', 'R']);
+        expect(spanRecords[1].x - spanRecords[0].x).toBeGreaterThanOrEqual(90);
+
+        documents.dispose();
+    });
+
+    it('clips table cell content with parent page margins', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.marginLeft = 30;
+        bodyPage.marginTop = 40;
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 4;
+        cell.marginTop = 6;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+        cell.sections[0].columns[0].lines = [];
+
+        const documents = new Documents('docs-table-cell-clip');
+        (documents as any)._drawLiquid = {
+            x: 12,
+            y: 20,
+            translateSave: vi.fn(),
+            translateRestore: vi.fn(),
+            translateSection: vi.fn(),
+            translateColumn: vi.fn(),
+        };
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            bodyPage,
+            cell,
+            [],
+            null,
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(42, 60, 120, 60);
+
+        documents.dispose();
+    });
+
+    it('clips column group nested page content with the column align offset', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.marginLeft = 30;
+        bodyPage.marginTop = 40;
+        attachColumnGroup(bodyPage);
+        const columnGroup = bodyPage.skeColumnGroups.get('column-group-1')!;
+        const nestedPage = columnGroup.columns[0].page;
+        nestedPage.marginLeft = 4;
+        nestedPage.marginTop = 6;
+        nestedPage.sections[0].columns[0].lines = [];
+
+        const documents = new Documents('docs-column-group-clip');
+        (documents as any)._drawLiquid = {
+            x: 12,
+            y: 20,
+            translateSave: vi.fn(),
+            translateRestore: vi.fn(),
+            translateSection: vi.fn(),
+            translateColumn: vi.fn(),
+        };
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            bodyPage,
+            nestedPage,
+            [],
+            null,
+            [],
+            { x: 100, y: 200 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(116, 226, 200, 420);
+
+        documents.dispose();
+    });
+
+    it('draws tables inside column group nested pages', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachColumnGroup(bodyPage);
+        const nestedPage = bodyPage.skeColumnGroups.get('column-group-1')!.columns[0].page;
+        attachTable(nestedPage);
+        nestedPage.marginLeft = 4;
+        nestedPage.marginTop = 6;
+        nestedPage.sections[0].columns[0].lines = [];
+
+        const documents = new Documents('docs-column-group-table');
+        const translate = vi.fn();
+        (documents as any)._drawLiquid = {
+            x: 12,
+            y: 20,
+            translateSave: vi.fn(),
+            translateRestore: vi.fn(),
+            translate,
+            translateSection: vi.fn(),
+            translateColumn: vi.fn(),
+        };
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+        const drawTable = vi.spyOn(documents as any, '_drawTable').mockImplementation(() => undefined);
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            bodyPage,
+            nestedPage,
+            [],
+            null,
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(drawTable).toHaveBeenCalledWith(
+            ctx,
+            expect.objectContaining({
+                marginLeft: 0,
+                marginTop: 0,
+            }),
+            nestedPage.skeTables,
+            [],
+            null,
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+        expect(translate).toHaveBeenCalledWith(4, 6);
+
+        documents.dispose();
+    });
+
+    it('does not draw persistent backgrounds behind column group columns', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.marginLeft = 3;
+        bodyPage.marginTop = 5;
+        attachColumnGroup(bodyPage);
+        const documents = new Documents('docs-column-group-background');
+        const translateSave = vi.fn();
+        const translateRestore = vi.fn();
+        const translate = vi.fn();
+        (documents as any)._drawLiquid = {
+            x: 10,
+            y: 20,
+            translateSave,
+            translateRestore,
+            translate,
+        };
+        const rects: Array<{ x: number; y: number; width: number; height: number }> = [];
+        const fillStyles: string[] = [];
+        const ctx = {
+            beginPath: vi.fn(),
+            closePath: vi.fn(),
+            fill: vi.fn(),
+            getScale: () => ({ scaleX: 1, scaleY: 1 }),
+            rect: vi.fn((x: number, y: number, width: number, height: number) => {
+                rects.push({ x, y, width, height });
+            }),
+            restore: vi.fn(),
+            save: vi.fn(),
+            set fillStyle(value: string) {
+                fillStyles.push(value);
+            },
+        } as any;
+        const drawNestedPageContent = vi
+            .spyOn(documents as any, '_drawNestedPageContent')
+            .mockImplementation(() => undefined);
+
+        (documents as any)._drawColumnGroups(
+            ctx,
+            bodyPage,
+            bodyPage.skeColumnGroups,
+            [],
+            null,
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(fillStyles).toEqual([]);
+        expect(rects).toEqual([]);
+        expect(ctx.fill).not.toHaveBeenCalled();
+        expect(drawNestedPageContent).toHaveBeenCalledTimes(2);
 
         documents.dispose();
     });

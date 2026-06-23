@@ -679,12 +679,28 @@ export class DocMoveCursorController extends Disposable {
         } = {
             distance: Number.POSITIVE_INFINITY,
         };
+        const nearestEmptyParagraphNode: {
+            glyph?: IDocumentSkeletonGlyph;
+            distance: number;
+        } = {
+            distance: Number.POSITIVE_INFINITY,
+        };
 
         for (const divide of line.divides) {
             const divideLeft = divide.left;
 
             for (const glyph of divide.glyphGroup) {
                 if (!this._isCursorAddressableGlyph(glyph)) {
+                    if (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH && glyph.count > 0) {
+                        const { left } = glyph;
+                        const leftSide = divideLeft + left;
+                        const distance = Math.abs(offsetLeft - leftSide);
+
+                        if (distance < nearestEmptyParagraphNode.distance) {
+                            nearestEmptyParagraphNode.glyph = glyph;
+                            nearestEmptyParagraphNode.distance = distance;
+                        }
+                    }
                     continue;
                 }
                 const { left } = glyph;
@@ -699,13 +715,15 @@ export class DocMoveCursorController extends Disposable {
             }
         }
 
-        if (nearestNode.glyph == null) {
+        const nearestGlyph = nearestNode.glyph ?? nearestEmptyParagraphNode.glyph;
+
+        if (nearestGlyph == null) {
             return;
         }
 
         const { segmentPage } = nodePosition;
 
-        return docSkeleton.findPositionByGlyph(nearestNode.glyph, segmentPage);
+        return docSkeleton.findPositionByGlyph(nearestGlyph, segmentPage);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

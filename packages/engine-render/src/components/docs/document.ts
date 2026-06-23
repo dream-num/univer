@@ -16,6 +16,8 @@
 
 import type { DocumentFlavor, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
 import type {
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
@@ -41,8 +43,8 @@ import { Vector2 } from '../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
-import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
+import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { Liquid } from './liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
@@ -169,6 +171,7 @@ export class Documents extends DocComponent {
                 footerId,
                 renderConfig = {},
                 skeTables,
+                skeColumnGroups = new Map(),
             } = page;
             const {
                 verticalAlign = VerticalAlign.TOP, // Do not make changes, otherwise the document will not render.
@@ -454,6 +457,22 @@ export class Documents extends DocComponent {
                 }
             }
 
+            if (skeColumnGroups.size > 0) {
+                this._drawColumnGroups(
+                    ctx,
+                    page,
+                    skeColumnGroups,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    alignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
+            }
+
             this._resetRotation(ctx, finalAngle);
 
             const footerSkeletonPage = skeFooters.get(footerId)?.get(pageWidth);
@@ -579,6 +598,51 @@ export class Documents extends DocComponent {
 
             if (hasDocsTableHorizontalViewport(viewport)) {
                 ctx.restore();
+            }
+
+            drawLiquid.translateRestore();
+        }
+    }
+
+    private _drawColumnGroups(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        skeColumnGroups: Map<string, IDocumentSkeletonColumnGroup>,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale
+    ) {
+        const drawLiquid = this._drawLiquid;
+        if (drawLiquid == null) {
+            return;
+        }
+
+        for (const columnGroup of skeColumnGroups.values()) {
+            drawLiquid.translateSave();
+            drawLiquid.translate(columnGroup.left, columnGroup.top);
+
+            for (const column of columnGroup.columns) {
+                drawLiquid.translateSave();
+                drawLiquid.translate(column.left, column.top);
+                this._drawNestedPageContent(
+                    ctx,
+                    page,
+                    column.page,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    alignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
+                drawLiquid.translateRestore();
             }
 
             drawLiquid.translateRestore();
@@ -814,18 +878,88 @@ export class Documents extends DocComponent {
             return;
         }
         this._drawTableCellBordersAndBg(ctx, page, cell, false);
-        const { sections, marginLeft, marginTop } = cell;
 
-        // eslint-disable-next-line no-param-reassign
-        alignOffsetNoAngle = Vector2.create(alignOffsetNoAngle.x + marginLeft, alignOffsetNoAngle.y + marginTop);
+        this._drawNestedPageContent(
+            ctx,
+            page,
+            cell,
+            extensions,
+            backgroundExtension,
+            glyphExtensionsExcludeBackground,
+            alignOffsetNoAngle,
+            centerAngle,
+            vertexAngle,
+            renderConfig,
+            parentScale
+        );
+    }
+
+    private _drawNestedPageContent(
+        ctx: UniverRenderingContext,
+        parentPage: IDocumentSkeletonPage,
+        nestedPage: IDocumentSkeletonPage,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        const { sections, marginLeft, marginTop, skeTables } = nestedPage;
+        const alignOffset = Vector2.create(alignOffsetNoAngle.x + marginLeft, alignOffsetNoAngle.y + marginTop);
 
         ctx.save();
         const { x, y } = this._drawLiquid;
-        const { pageWidth, pageHeight } = cell;
+        const { pageWidth, pageHeight } = nestedPage;
+        const clipOrigin = getNestedPageClipOrigin(parentPage, nestedPage, { x, y }, alignOffset);
         ctx.beginPath();
-        ctx.rectByPrecision(x + page.marginLeft, y + page.marginTop, pageWidth, pageHeight);
+        ctx.rectByPrecision(clipOrigin.x, clipOrigin.y, pageWidth, pageHeight);
         ctx.closePath();
         ctx.clip();
+
+        if (skeTables.size > 0) {
+            if (isColumnGroupNestedPage(nestedPage)) {
+                this._drawLiquid.translateSave();
+                this._drawLiquid.translate(alignOffset.x, alignOffset.y);
+                this._drawTable(
+                    ctx,
+                    {
+                        ...nestedPage,
+                        marginLeft: 0,
+                        marginTop: 0,
+                    },
+                    skeTables,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    Vector2.create(0, 0),
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
+                this._drawLiquid.translateRestore();
+            } else {
+                this._drawTable(
+                    ctx,
+                    nestedPage,
+                    skeTables,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    alignOffset,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
+            }
+        }
 
         for (const section of sections) {
             const { columns } = section;
@@ -840,8 +974,6 @@ export class Documents extends DocComponent {
                 this._drawLiquid.translateColumn(column);
 
                 const linesCount = lines.length;
-
-                const alignOffset = alignOffsetNoAngle;
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
@@ -865,7 +997,7 @@ export class Documents extends DocComponent {
                     } else {
                         this._drawLiquid.translateSave();
                         this._drawLiquid.translateLine(line, true, true);
-                        this._drawLineBackground(ctx, cell, line, page.marginLeft, page.marginTop);
+                        this._drawLineBackground(ctx, nestedPage, line);
 
                         const divideLength = divides.length;
 
@@ -939,7 +1071,7 @@ export class Documents extends DocComponent {
                         }
 
                         if (line.borderBottom) {
-                            this._drawBorderBottom(ctx, cell, line, page.marginLeft, page.marginTop);
+                            this._drawBorderBottom(ctx, nestedPage, line, parentPage.marginLeft, parentPage.marginTop);
                         }
 
                         this._drawLiquid.translateRestore();
@@ -1337,6 +1469,31 @@ function setTableCellBorderDash(ctx: UniverRenderingContext, dashStyle?: DashSty
     }
 
     ctx.setLineDash([0]);
+}
+
+function isColumnGroupNestedPage(page: IDocumentSkeletonPage): boolean {
+    const parent = page.parent as IDocumentSkeletonColumnGroupColumn | undefined;
+
+    return parent?.columnId != null && parent.parent?.columnGroupId != null;
+}
+
+function getNestedPageClipOrigin(
+    parentPage: IDocumentSkeletonPage,
+    nestedPage: IDocumentSkeletonPage,
+    drawOrigin: { x: number; y: number },
+    alignOffset: Vector2
+): { x: number; y: number } {
+    if (isColumnGroupNestedPage(nestedPage)) {
+        return {
+            x: drawOrigin.x + alignOffset.x,
+            y: drawOrigin.y + alignOffset.y,
+        };
+    }
+
+    return {
+        x: drawOrigin.x + parentPage.marginLeft,
+        y: drawOrigin.y + parentPage.marginTop,
+    };
 }
 
 function fillRectByPrecisionBounds(

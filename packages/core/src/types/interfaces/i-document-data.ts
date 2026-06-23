@@ -133,6 +133,8 @@ export interface IDocumentBody {
 
     tables?: ICustomTable[]; // Table
 
+    columnGroups?: ICustomColumnGroup[]; // ColumnGroup
+
     blockRanges?: IDocumentBlockRange[]; // Generic structured block range, e.g. callout, quote, code.
 
     // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents
@@ -949,6 +951,43 @@ export interface ICustomTable {
     endIndex: number;
     // A unique ID associated with a table.
     tableId: string;
+}
+
+export interface ICustomColumnGroup {
+    startIndex: number;
+    endIndex: number;
+    // A unique ID associated with a column group.
+    columnGroupId: string;
+    columns?: IColumn[];
+    gap?: INumberUnit;
+    layout?: ColumnLayoutType;
+    responsive?: ColumnResponsiveType;
+    version?: number;
+}
+
+export enum ColumnLayoutType {
+    FIXED = 'fixed',
+    AUTO = 'auto',
+}
+
+export enum ColumnResponsiveType {
+    STACK = 'stack',
+    SHRINK = 'shrink',
+}
+
+export interface IColumnGroup {
+    columnGroupId: string;
+    columns: IColumn[];
+    gap: INumberUnit;
+    layout: ColumnLayoutType;
+    responsive: ColumnResponsiveType;
+    version?: number;
+}
+
+export interface IColumn {
+    columnId: string;
+    widthRatio: number;
+    minWidth?: INumberUnit;
 }
 
 /**

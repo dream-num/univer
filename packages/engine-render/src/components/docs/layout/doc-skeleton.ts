@@ -25,7 +25,7 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
+import { DataStreamTreeTokenType, PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import {
     DocumentSkeletonPageType,
@@ -33,12 +33,12 @@ import {
     LineType,
     PageLayoutType,
 } from '../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { Liquid } from '../liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { dealWithSection } from './block/section';
 import { getTableIdAndSliceIndex } from './block/table';
-import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { Hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
@@ -97,6 +97,18 @@ function getPagePath(page: IDocumentSkeletonPage) {
     // eslint-disable-next-line ts/no-explicit-any
     let parent: any = skeNode.parent;
     while (parent) {
+        if (parent.page === skeNode && parent.parent?.columns) {
+            const index = parent.parent.columns.indexOf(parent);
+
+            if (index !== -1) {
+                path.unshift('columns', index, 'page');
+            }
+
+            skeNode = parent.parent;
+            parent = skeNode?.parent;
+            continue;
+        }
+
         if (parent.pages) {
             const index = parent.pages.indexOf(skeNode);
 
@@ -117,6 +129,8 @@ function getPagePath(page: IDocumentSkeletonPage) {
             }
         } else if (parent.skeTables && parent.skeTables.has(skeNode.tableId)) {
             path.unshift('skeTables', skeNode.tableId);
+        } else if (parent.skeColumnGroups && parent.skeColumnGroups.has(skeNode.columnGroupId)) {
+            path.unshift('skeColumnGroups', skeNode.columnGroupId);
         }
 
         skeNode = parent;
@@ -124,6 +138,65 @@ function getPagePath(page: IDocumentSkeletonPage) {
     }
 
     return path;
+}
+
+function getBoundaryGlyphInPage(page: IDocumentSkeletonPage, useLast: boolean) {
+    const sections = useLast ? [...page.sections].reverse() : page.sections;
+
+    for (const section of sections) {
+        const columns = useLast ? [...section.columns].reverse() : section.columns;
+        for (const column of columns) {
+            const lines = useLast ? [...column.lines].reverse() : column.lines;
+            for (const line of lines) {
+                const divides = useLast ? [...line.divides].reverse() : line.divides;
+                for (const divide of divides) {
+                    const glyphGroup = useLast ? [...divide.glyphGroup].reverse() : divide.glyphGroup;
+                    const glyph = glyphGroup.find((item) => item.content?.length);
+
+                    if (glyph) {
+                        return {
+                            section,
+                            column,
+                            line,
+                            divide,
+                            glyph,
+                        };
+                    }
+                }
+            }
+        }
+    }
+}
+
+function isHitTestAddressableGlyph(glyph: IDocumentSkeletonGlyph): boolean {
+    return Boolean(glyph.content?.length) ||
+        (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH && glyph.count > 0);
+}
+
+function resolveMostSpecificPageByCharIndex(page: IDocumentSkeletonPage, charIndex: number): IDocumentSkeletonPage {
+    for (const table of page.skeTables?.values() ?? []) {
+        for (const row of table.rows) {
+            for (const cell of row.cells) {
+                const { st, ed } = cell;
+
+                if (charIndex >= st && charIndex <= ed) {
+                    return resolveMostSpecificPageByCharIndex(cell, charIndex);
+                }
+            }
+        }
+    }
+
+    for (const columnGroup of page.skeColumnGroups?.values() ?? []) {
+        for (const column of columnGroup.columns) {
+            const { st, ed } = column;
+
+            if (charIndex >= st && charIndex <= ed) {
+                return resolveMostSpecificPageByCharIndex(column.page, charIndex);
+            }
+        }
+    }
+
+    return page;
 }
 
 export class DocumentSkeleton extends Skeleton {
@@ -724,7 +797,7 @@ export class DocumentSkeleton extends Skeleton {
         nestLevel: number = 0
         // eslint-disable-next-line ts/no-explicit-any
     ): any {
-        const { sections, skeTables } = segmentPage;
+        const { sections, skeTables, skeColumnGroups = new Map() } = segmentPage;
         this._findLiquid.translateSave();
 
         const pageLeft = this._findLiquid.x;
@@ -821,7 +894,7 @@ export class DocumentSkeleton extends Skeleton {
                                 const { x: startX } = this._findLiquid;
 
                                 for (const glyph of glyphGroup) {
-                                    if (!glyph.content || glyph.content.length === 0) {
+                                    if (!isHitTestAddressableGlyph(glyph)) {
                                         continue;
                                     }
 
@@ -952,6 +1025,65 @@ export class DocumentSkeleton extends Skeleton {
 
                         this._findLiquid?.translateRestore();
                     }
+
+                    this._findLiquid?.translateRestore();
+                }
+
+                this._findLiquid?.translateRestore();
+            }
+        }
+
+        if (skeColumnGroups.size > 0) {
+            for (const columnGroup of skeColumnGroups.values()) {
+                const { top: columnGroupTop, left: columnGroupLeft, width: columnGroupWidth, height: columnGroupHeight, columns } = columnGroup;
+                const absoluteColumnGroupLeft = this._findLiquid.x + columnGroupLeft;
+                const absoluteColumnGroupTop = this._findLiquid.y + columnGroupTop;
+
+                if (
+                    x < absoluteColumnGroupLeft ||
+                    x > absoluteColumnGroupLeft + columnGroupWidth ||
+                    y < absoluteColumnGroupTop ||
+                    y > absoluteColumnGroupTop + columnGroupHeight
+                ) {
+                    continue;
+                }
+
+                this._findLiquid?.translateSave();
+                this._findLiquid?.translate(columnGroupLeft, columnGroupTop);
+
+                for (const column of columns) {
+                    const absoluteColumnLeft = absoluteColumnGroupLeft + column.left;
+                    const absoluteColumnTop = absoluteColumnGroupTop + column.top;
+
+                    if (
+                        x < absoluteColumnLeft ||
+                        x > absoluteColumnLeft + column.width ||
+                        y < absoluteColumnTop ||
+                        y > absoluteColumnTop + column.height
+                    ) {
+                        continue;
+                    }
+
+                    const nestedCache: INearestCache = {
+                        nearestNodeList: [],
+                        nearestNodeDistanceList: [],
+                    };
+
+                    this._findLiquid?.translateSave();
+                    this._findLiquid?.translate(column.left, column.top);
+
+                    exactMatch = exactMatch ?? this._collectNearestNode(
+                        column.page,
+                        DocumentSkeletonPageType.CELL,
+                        column.page,
+                        segmentId,
+                        pi,
+                        nestedCache,
+                        x,
+                        y,
+                        pageLength,
+                        nestLevel + 1
+                    ) ?? this._getNearestNode(nestedCache.nearestNodeList, nestedCache.nearestNodeDistanceList);
 
                     this._findLiquid?.translateRestore();
                 }
@@ -1273,7 +1405,7 @@ export class DocumentSkeleton extends Skeleton {
                 continue;
             }
 
-            const { pageWidth, skeTables } = page;
+            const { pageWidth } = page;
             let segmentPage = page;
 
             if (segmentId) {
@@ -1288,39 +1420,30 @@ export class DocumentSkeleton extends Skeleton {
                 }
             }
 
-            // Find node from tables.
             if (segmentId === '') {
-                let foundCell = false;
-                for (const table of skeTables.values()) {
-                    const { rows } = table;
-
-                    for (const row of rows) {
-                        const { cells } = row;
-
-                        for (const cell of cells) {
-                            const { st, ed } = cell;
-
-                            if (charIndex >= st && charIndex <= ed) {
-                                segmentPage = cell;
-                                foundCell = true;
-                                break;
-                            }
-                        }
-
-                        if (foundCell) {
-                            break;
-                        }
-                    }
-
-                    if (foundCell) {
-                        break;
-                    }
-                }
+                segmentPage = resolveMostSpecificPageByCharIndex(page, charIndex);
             }
 
             const { sections, st, ed } = segmentPage;
+            const segmentPageParent = segmentPage.parent as { page?: IDocumentSkeletonPage; parent?: { columnGroupId?: string } } | undefined;
+            const isColumnSegmentPage = segmentId === '' &&
+                segmentPageParent?.page === segmentPage &&
+                segmentPageParent.parent?.columnGroupId;
 
             if (charIndex < st || charIndex > ed) {
+                if (isColumnSegmentPage) {
+                    const boundary = getBoundaryGlyphInPage(segmentPage, charIndex >= ed);
+
+                    if (boundary) {
+                        return {
+                            page: segmentPage,
+                            pageType: segmentPage.type,
+                            segmentPageIndex,
+                            ...boundary,
+                        };
+                    }
+                }
+
                 continue;
             }
 
@@ -1375,6 +1498,19 @@ export class DocumentSkeleton extends Skeleton {
                             }
                         }
                     }
+                }
+            }
+
+            if (isColumnSegmentPage) {
+                const boundary = getBoundaryGlyphInPage(segmentPage, charIndex >= segmentPage.ed);
+
+                if (boundary) {
+                    return {
+                        page: segmentPage,
+                        pageType: segmentPage.type,
+                        segmentPageIndex,
+                        ...boundary,
+                    };
                 }
             }
         }

@@ -72,6 +72,7 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
         if (originBody == null) {
             return false;
         }
+
         const { startOffset, collapsed } = range;
         const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [

@@ -347,6 +347,54 @@ describe('ContextMenuPanel', () => {
         expect(TestState.cancels).toBe(1);
     });
 
+    it('confirms the first visual menu item from Enter while only the menu container is focused', async () => {
+        renderWithDependencies(
+            <ContextMenuPanel
+                menuType="keyboard-menu"
+                autoFocus
+                autoFocusTarget="container"
+                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
+            />,
+            {
+                'keyboard-menu': [
+                    {
+                        key: 'insert',
+                        order: 0,
+                        children: [
+                            createButtonItem('heading-1', {
+                                title: 'docs-ui.heading1',
+                                tooltip: 'docs-ui.heading1',
+                            }),
+                            createButtonItem('callout', {
+                                title: 'docs-ui.callout',
+                                tooltip: 'docs-ui.callout',
+                            }),
+                        ],
+                    },
+                ],
+            }
+        );
+
+        await nextFrame();
+
+        const panel = document.querySelector('[tabindex="-1"]') as HTMLDivElement;
+        const headingButton = screen.getByRole('button', { name: 'translated:docs-ui.heading1' });
+
+        expect(document.activeElement).toBe(panel);
+
+        fireEvent.keyDown(panel, { key: 'Enter' });
+        expect(TestState.selectedOptions).toEqual([{
+            id: 'heading-1',
+            label: 'heading-1',
+            commandId: undefined,
+            params: undefined,
+            value: undefined,
+        }]);
+
+        fireEvent.keyDown(panel, { key: 'ArrowDown' });
+        expect(document.activeElement).toBe(headingButton);
+    });
+
     it('selects an option from a selector submenu with the selector command id', () => {
         renderWithDependencies(
             <ContextMenuPanel
@@ -399,6 +447,75 @@ describe('ContextMenuPanel', () => {
             value: '#ff0000',
         }]);
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+    });
+
+    it('executes a button selector parent on click and passes parent params to submenu options', () => {
+        renderWithDependencies(
+            <ContextMenuPanel
+                menuType="format-menu"
+                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
+            />,
+            {
+                'format-menu': [
+                    {
+                        key: 'format',
+                        order: 0,
+                        children: [
+                            {
+                                key: 'column',
+                                order: 0,
+                                item: {
+                                    id: 'insert-column',
+                                    type: MenuItemType.BUTTON_SELECTOR,
+                                    icon: 'GridIcon',
+                                    title: 'docs-ui.column',
+                                    tooltip: 'docs-ui.column',
+                                    commandId: 'doc.command.insert-column',
+                                    selectionsCommandId: 'doc.command.insert-column',
+                                    params: {
+                                        paragraphMenuPlacement: 'below',
+                                    },
+                                    selections: [
+                                        {
+                                            label: 'two columns',
+                                            value: '2',
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            }
+        );
+
+        const columnButton = screen.getByRole('button', { name: 'translated:docs-ui.column' });
+        fireEvent.click(columnButton);
+
+        expect(TestState.selectedOptions).toEqual([{
+            id: 'insert-column',
+            label: 'column',
+            commandId: 'doc.command.insert-column',
+            params: {
+                paragraphMenuPlacement: 'below',
+            },
+            value: undefined,
+        }]);
+
+        TestState.selectedOptions = [];
+        fireEvent.mouseEnter(columnButton.parentElement as HTMLElement);
+        expect(screen.getByText('translated:two columns')).not.toBeNull();
+        fireEvent.click(screen.getByText('translated:two columns').closest('button') as HTMLButtonElement);
+
+        expect(TestState.selectedOptions).toEqual([{
+            id: 'insert-column',
+            label: 'column',
+            commandId: 'doc.command.insert-column',
+            params: {
+                paragraphMenuPlacement: 'below',
+            },
+            value: '2',
+        }]);
     });
 
     it('keeps the newly hovered submenu open when moving across sibling submenu items', () => {

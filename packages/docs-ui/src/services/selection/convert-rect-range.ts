@@ -17,7 +17,7 @@
 import type { ITable, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocsTableRenderViewport, IDocumentOffsetConfig, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
 import { Tools } from '@univerjs/core';
-import { DocumentSkeletonPageType, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, documentSkeletonTableIterator, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
 
 // The anchor and focus need to be in the same table,
@@ -278,6 +278,12 @@ export class NodePositionConvertToRectRange {
         const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
         const unitId = getDocumentUnitId(docSkeleton);
         const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
+        const nestedTableContexts = documentSkeletonTableIterator(pages, {
+            docsLeft: this._documentOffsetConfig.docsLeft ?? 0,
+            docsTop: this._documentOffsetConfig.docsTop ?? 0,
+            pageMarginTop,
+            unitId,
+        });
 
         const skipPageIndex = pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? startPage : startSegmentPage;
 
@@ -302,6 +308,64 @@ export class NodePositionConvertToRectRange {
             }
 
             if (table == null) {
+                const nestedTableContext = nestedTableContexts.find((context) => (
+                    context.pageIndex === p &&
+                    context.source === 'column' &&
+                    context.tableId.startsWith(tableId)
+                ));
+                if (nestedTableContext) {
+                    const nestedTable = nestedTableContext.table;
+                    const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+                    const nestedX = nestedTableContext.tableRect.left - nestedTable.left;
+                    const nestedY = nestedTableContext.tableRect.top;
+
+                    if (intersectsMergedCell) {
+                        const rows = nestedTable.rows.filter((row) => row.index >= startRow && row.index <= endRow);
+                        const firstRow = rows[0];
+                        const lastRow = rows[rows.length - 1];
+                        const startX = getColumnBoundary(nestedTable, startColumn);
+                        const endX = getColumnBoundary(nestedTable, endColumn + 1);
+
+                        if (firstRow && lastRow && startX != null && endX != null) {
+                            pushViewportClippedPoints(pointGroup, {
+                                startX: nestedX + nestedTable.left + startX,
+                                startY: nestedY + firstRow.top,
+                                endX: nestedX + nestedTable.left + endX,
+                                endY: nestedY + lastRow.top + lastRow.height,
+                            }, viewport, nestedX + nestedTable.left);
+                        }
+
+                        this._liquid.restorePagePadding(page);
+                        this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                        continue;
+                    }
+
+                    for (const row of nestedTable.rows) {
+                        if (row.index >= startRow && row.index <= endRow) {
+                            const cells = findNonEmptyCellPages(row.cells, startColumn, endColumn);
+
+                            if (cells == null) {
+                                continue;
+                            }
+
+                            const [rowStartCell, rowEndCell] = cells;
+
+                            const position = {
+                                startX: nestedX + rowStartCell.left + nestedTable.left,
+                                startY: nestedY + row.top,
+                                endX: nestedX + rowEndCell.left + rowEndCell.pageWidth + nestedTable.left,
+                                endY: nestedY + row.top + row.height,
+                            };
+
+                            pushViewportClippedPoints(pointGroup, position, viewport, nestedX + nestedTable.left);
+                        }
+                    }
+
+                    this._liquid.restorePagePadding(page);
+                    this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                    continue;
+                }
+
                 this._liquid.restorePagePadding(page);
                 this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                 continue;
@@ -462,6 +526,10 @@ export class NodePositionConvertToRectRange {
 
         const { path: anchorPath } = anchorPosition;
         const { path: focusPath } = focusPosition;
+        if (anchorPath.indexOf('cells') === -1 || focusPath.indexOf('cells') === -1) {
+            return;
+        }
+
         const anchorCell = getPageFromPath(skeletonData, anchorPath);
         const focusCell = getPageFromPath(skeletonData, focusPath);
 
@@ -469,18 +537,24 @@ export class NodePositionConvertToRectRange {
             return;
         }
 
-        const tableId = anchorCell.segmentId;
-        const anchorRow = (anchorCell.parent as IDocumentSkeletonRow).index;
-        const anchorColumn = (anchorCell.parent as IDocumentSkeletonRow).cells.indexOf(anchorCell);
+        const anchorRow = anchorCell.parent as IDocumentSkeletonRow;
+        const focusRow = focusCell.parent as IDocumentSkeletonRow;
+        if (!Array.isArray(anchorRow?.cells) || !Array.isArray(focusRow?.cells)) {
+            return;
+        }
 
-        const focusRow = (focusCell?.parent as IDocumentSkeletonRow).index;
-        const focusColumn = (focusCell?.parent as IDocumentSkeletonRow).cells.indexOf(focusCell);
+        const tableId = anchorCell.segmentId;
+        const anchorRowIndex = anchorRow.index;
+        const anchorColumn = anchorRow.cells.indexOf(anchorCell);
+
+        const focusRowIndex = focusRow.index;
+        const focusColumn = focusRow.cells.indexOf(focusCell);
 
         const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
         const tableSource = docSkeleton.getViewModel().getSnapshot().tableSource?.[sourceTableId];
         const rawRange = {
-            startRowIndex: Math.min(anchorRow, focusRow),
-            endRowIndex: Math.max(anchorRow, focusRow),
+            startRowIndex: Math.min(anchorRowIndex, focusRowIndex),
+            endRowIndex: Math.max(anchorRowIndex, focusRowIndex),
             startColumnIndex: Math.min(anchorColumn, focusColumn),
             endColumnIndex: Math.max(anchorColumn, focusColumn),
         };

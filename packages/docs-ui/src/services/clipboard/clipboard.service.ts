@@ -68,6 +68,7 @@ import {
     wrapClipboardHtml,
 } from './internal-fragment';
 import { UDMToHtmlService } from './udm-to-html/convertor';
+import { DocHtmlExportService } from './udm-to-html/doc-html-export.service';
 
 HtmlToUDMService.use(LarkPastePlugin);
 HtmlToUDMService.use(UniverPastePlugin);
@@ -145,16 +146,18 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     private _clipboardHooks: IDocClipboardHook[] = [];
 
     private _htmlToUDM = new HtmlToUDMService();
-    private _umdToHtml = new UDMToHtmlService();
+    private readonly _umdToHtml: UDMToHtmlService;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
+        @Inject(DocHtmlExportService) docHtmlExportService: DocHtmlExportService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
+        this._umdToHtml = new UDMToHtmlService(docHtmlExportService);
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy, ranges?: ITextRangeWithStyle[]): Promise<boolean> {

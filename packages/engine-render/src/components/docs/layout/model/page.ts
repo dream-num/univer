@@ -193,6 +193,7 @@ function _getNullPage(
         ed: 0,
         skeDrawings: new Map(),
         skeTables: new Map(),
+        skeColumnGroups: new Map(),
         type,
         segmentId,
     };
@@ -394,7 +395,7 @@ export function createSkeletonCellPages(
 
     updateBlockIndex(pages, cellNode.startIndex);
 
-    applyTrailingCellBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
+    applyTrailingBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
 
     updateInlineDrawingCoordsAndBorder(ctx, pages);
     expandCellPageHeightForInlineDrawings(pages);
@@ -417,7 +418,7 @@ export function expandCellPageHeightForInlineDrawings(pages: IDocumentSkeletonPa
     }
 }
 
-function applyTrailingCellBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], body: Nullable<IDocumentBody>, cellEndIndex: number) {
+export function applyTrailingBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], body: Nullable<IDocumentBody>, containerEndIndex: number) {
     const blockRanges = body?.blockRanges;
     const trailingBlockRangeSpace = 28;
     if (!blockRanges?.length) {
@@ -436,8 +437,8 @@ function applyTrailingCellBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], b
             continue;
         }
 
-        const hasLaterParagraphInCell = body?.paragraphs?.some((paragraph) => paragraph.startIndex > paragraphIndex && paragraph.startIndex < cellEndIndex);
-        if (hasLaterParagraphInCell) {
+        const hasLaterParagraphInContainer = body?.paragraphs?.some((paragraph) => paragraph.startIndex > paragraphIndex && paragraph.startIndex < containerEndIndex);
+        if (hasLaterParagraphInContainer) {
             continue;
         }
 

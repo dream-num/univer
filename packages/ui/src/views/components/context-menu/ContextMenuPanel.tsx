@@ -1225,6 +1225,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         clearSubmenuCloseTimer();
         setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
     };
+    const getSelectorOptionParams = (option: IValueOption) => option.params ?? selectorItem.params;
 
     const itemVariant: ContextMenuItemVariant = compact
         ? headerAction ? 'compactHeaderAction' : 'compact'
@@ -1471,6 +1472,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                             onChange={(optionValue) => {
                                                                 onSubmenuOptionSelect?.({
                                                                     ...option,
+                                                                    params: getSelectorOptionParams(option),
                                                                     value: optionValue,
                                                                     id: menuItem.id,
                                                                     label: menuKey,
@@ -1493,6 +1495,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                             onClick={() => {
                                                                 onSubmenuOptionSelect?.({
                                                                     ...option,
+                                                                    params: getSelectorOptionParams(option),
                                                                     id: menuItem.id,
                                                                     label: menuKey,
                                                                     commandId: option.commandId ?? selectionsCommandId,

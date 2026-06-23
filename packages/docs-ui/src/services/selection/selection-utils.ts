@@ -28,7 +28,7 @@ import type {
 } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
 import { RANGE_DIRECTION, Tools } from '@univerjs/core';
-import { getOffsetRectForDom } from '@univerjs/engine-render';
+import { getDocumentSkeletonColumnPagePathInfo, getOffsetRectForDom } from '@univerjs/engine-render';
 import { isInSameTableCell, isInSameTableCellData, isValidRectRange } from './convert-rect-range';
 import { compareNodePosition } from './convert-text-range';
 import { convertPositionsToRectRanges, RectRange } from './rect-range';
@@ -37,6 +37,44 @@ import { TextRange } from './text-range';
 interface IDocRangeList {
     textRanges: TextRange[];
     rectRanges: RectRange[];
+}
+
+function isInSameColumnPage(anchorPosition: INodePosition, focusPosition: INodePosition): boolean {
+    const anchorColumnInfo = getDocumentSkeletonColumnPagePathInfo(anchorPosition);
+    const focusColumnInfo = getDocumentSkeletonColumnPagePathInfo(focusPosition);
+
+    return !!anchorColumnInfo && !!focusColumnInfo &&
+        anchorColumnInfo.pageIndex === focusColumnInfo.pageIndex &&
+        anchorColumnInfo.columnGroupId === focusColumnInfo.columnGroupId &&
+        anchorColumnInfo.columnIndex === focusColumnInfo.columnIndex;
+}
+
+function getColumnInputBoundaryCollapsedPosition(
+    anchorPosition: INodePosition,
+    focusPosition: INodePosition,
+    skeleton: DocumentSkeleton
+): Nullable<INodePosition> {
+    const anchorColumnInfo = getDocumentSkeletonColumnPagePathInfo(anchorPosition);
+    const focusColumnInfo = getDocumentSkeletonColumnPagePathInfo(focusPosition);
+
+    if (
+        !anchorColumnInfo ||
+        !focusColumnInfo ||
+        anchorColumnInfo.pageIndex !== focusColumnInfo.pageIndex ||
+        anchorColumnInfo.columnGroupId !== focusColumnInfo.columnGroupId ||
+        anchorColumnInfo.columnIndex + 1 !== focusColumnInfo.columnIndex
+    ) {
+        return;
+    }
+
+    const anchorOffset = skeleton.findCharIndexByPosition(anchorPosition);
+    const focusOffset = skeleton.findCharIndexByPosition(focusPosition);
+
+    if (anchorOffset == null || focusOffset == null || anchorOffset <= focusOffset) {
+        return;
+    }
+
+    return anchorPosition;
 }
 
 export function getTextRangeFromCharIndex(
@@ -133,6 +171,26 @@ export function getRangeListFromSelection(
         string,
         number
     ] = [scene, document, skeleton, anchorPosition, focusPosition, style, segmentId, segmentPage];
+
+    const collapsedColumnPosition = getColumnInputBoundaryCollapsedPosition(anchorPosition, focusPosition, skeleton);
+
+    if (collapsedColumnPosition) {
+        textRanges.push(new TextRange(scene, document, skeleton, collapsedColumnPosition, collapsedColumnPosition, style, segmentId, segmentPage));
+
+        return {
+            textRanges,
+            rectRanges,
+        };
+    }
+
+    if (isInSameColumnPage(anchorPosition, focusPosition)) {
+        textRanges.push(new TextRange(...rangeParams));
+
+        return {
+            textRanges,
+            rectRanges,
+        };
+    }
 
     // TODO: @JOCS handle NEST table.
     // Handle selection in same table cell.

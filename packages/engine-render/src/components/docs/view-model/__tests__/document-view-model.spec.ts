@@ -182,6 +182,61 @@ describe('DocumentViewModel', () => {
                 },
             ]);
         });
+
+        it('parses column group tokens into column nodes', () => {
+            const ds = [
+                DataStreamTreeTokenType.COLUMN_GROUP_START,
+                DataStreamTreeTokenType.COLUMN_START,
+                'A',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.COLUMN_END,
+                DataStreamTreeTokenType.COLUMN_START,
+                'B',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.COLUMN_END,
+                DataStreamTreeTokenType.COLUMN_GROUP_END,
+                DataStreamTreeTokenType.SECTION_BREAK,
+            ].join('');
+
+            const { sectionList } = parseDataStreamToTree(ds);
+            const columnGroup = findFirstNodeByType(sectionList[0], DataStreamTreeNodeType.COLUMN_GROUP)!;
+
+            expect(columnGroup).toBeTruthy();
+            expect(columnGroup.startIndex).toBe(0);
+            expect(columnGroup.children.map((column: any) => column.nodeType)).toEqual([
+                DataStreamTreeNodeType.COLUMN,
+                DataStreamTreeNodeType.COLUMN,
+            ]);
+            expect(columnGroup.children.map((column: any) => column.children[0].content)).toEqual([
+                `A${DataStreamTreeTokenType.PARAGRAPH}`,
+                `B${DataStreamTreeTokenType.PARAGRAPH}`,
+            ]);
+        });
+
+        it('keeps section break nodes inside columns', () => {
+            const ds = [
+                DataStreamTreeTokenType.COLUMN_GROUP_START,
+                DataStreamTreeTokenType.COLUMN_START,
+                'A',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.SECTION_BREAK,
+                DataStreamTreeTokenType.COLUMN_END,
+                DataStreamTreeTokenType.COLUMN_START,
+                'B',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.SECTION_BREAK,
+                DataStreamTreeTokenType.COLUMN_END,
+                DataStreamTreeTokenType.COLUMN_GROUP_END,
+                DataStreamTreeTokenType.SECTION_BREAK,
+            ].join('');
+
+            const { sectionList } = parseDataStreamToTree(ds);
+            const columnGroup = findFirstNodeByType(sectionList[0], DataStreamTreeNodeType.COLUMN_GROUP)!;
+            const firstColumnSection = columnGroup.children[0].children[0];
+
+            expect(firstColumnSection.nodeType).toBe(DataStreamTreeNodeType.SECTION_BREAK);
+            expect(firstColumnSection.children[0].content).toBe(`A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`);
+        });
     });
 
     describe('DocumentViewModel class', () => {

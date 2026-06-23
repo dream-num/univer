@@ -41,6 +41,7 @@ export function getEmptySnapshot(
             textRuns: [],
             customBlocks: [],
             tables: [],
+            columnGroups: [],
             blockRanges: [],
             customRanges: [],
             customDecorations: [],

@@ -117,6 +117,38 @@ describe('DocMoveCursorController movement helpers', () => {
         expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(lastTextGlyph, -1);
     });
 
+    it('uses a paragraph glyph as the vertical cursor target for empty paragraph lines', () => {
+        const controller = createControllerHarness();
+        const paragraphGlyph = {
+            count: 1,
+            content: DataStreamTreeTokenType.PARAGRAPH,
+            left: 0,
+            streamType: DataStreamTreeTokenType.PARAGRAPH,
+        };
+        const line = { divides: [] as unknown[] };
+        const divide = { left: 0, glyphGroup: [paragraphGlyph], parent: line };
+        line.divides = [divide];
+        Object.assign(paragraphGlyph, { parent: divide });
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn(() => ({ glyph: 0 })),
+        };
+
+        expect(controller._matchPositionByLeftOffset(skeleton, line, 0, { segmentPage: -1 })).toEqual({ glyph: 0 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(paragraphGlyph, -1);
+    });
+
+    it('keeps column boundary tokens out of the default cursor skip list', () => {
+        const controller = createControllerHarness();
+
+        const skipTokens = controller._getCursorSkipTokens();
+
+        expect(skipTokens).not.toContain(DataStreamTreeTokenType.COLUMN_GROUP_START);
+        expect(skipTokens).not.toContain(DataStreamTreeTokenType.COLUMN_START);
+        expect(skipTokens).not.toContain(DataStreamTreeTokenType.COLUMN_END);
+        expect(skipTokens).not.toContain(DataStreamTreeTokenType.COLUMN_GROUP_END);
+    });
+
     it('resolves document start and end offsets', () => {
         const controller = createControllerHarness();
 

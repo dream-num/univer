@@ -17,6 +17,7 @@
 import { BooleanNumber, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
+import { createSkeletonLetterGlyph } from '../../../model/glyph';
 import { fontLibrary } from '../../../shaping-engine/font-library';
 import * as textShapingModule from '../../../shaping-engine/text-shaping';
 import { shaping } from '../shaping';
@@ -251,6 +252,26 @@ describe('shaping', () => {
         const customBlockGlyph = allGlyphs.find((g) => g.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
         expect(customBlockGlyph).toBeDefined();
         expect(customBlockGlyph!.width).toBe(0);
+    });
+
+    it('shapes column group tokens as zero-width placeholders', () => {
+        const columnTokens = [
+            DataStreamTreeTokenType.COLUMN_GROUP_START,
+            DataStreamTreeTokenType.COLUMN_START,
+            DataStreamTreeTokenType.COLUMN_END,
+            DataStreamTreeTokenType.COLUMN_GROUP_END,
+        ];
+        for (const token of columnTokens) {
+            const glyph = createSkeletonLetterGlyph(token, {
+                fontStyle: {},
+                textStyle: {},
+            } as any);
+
+            expect(glyph.raw).toBe(token);
+            expect(glyph.streamType).toBe(token);
+            expect(glyph.width).toBe(0);
+            expect(glyph.content).toBe('');
+        }
     });
 
     it('shapes text with useOpenType when font library is ready', () => {

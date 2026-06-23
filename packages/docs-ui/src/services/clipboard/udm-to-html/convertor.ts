@@ -17,6 +17,7 @@
 import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITextRun, ITextStyle } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
+import type { DocHtmlExportService } from './doc-html-export.service';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -710,6 +711,11 @@ function hasVisibleHtml(html: string): boolean {
 }
 
 export class UDMToHtmlService {
+    constructor(
+        private readonly _docHtmlExportService?: Pick<DocHtmlExportService, 'transformDocumentForHtmlExport'>
+    ) {
+    }
+
     convert(docList: IDocumentData[]): string {
         if (docList.length === 0) {
             throw new Error('The bodyList length at least to be 1');
@@ -718,7 +724,7 @@ export class UDMToHtmlService {
         let html = '';
 
         for (const doc of Tools.deepClone(docList)) {
-            html += convertBodyToHtml(doc);
+            html += convertBodyToHtml(this._docHtmlExportService?.transformDocumentForHtmlExport(doc) ?? doc);
         }
 
         return html;

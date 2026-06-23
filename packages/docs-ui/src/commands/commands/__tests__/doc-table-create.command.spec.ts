@@ -502,6 +502,23 @@ describe('doc table create command helpers', () => {
         expect(tableSource?.tableColumns.map((column) => column.size.width.v)).toEqual([90, 90, 90, 90]);
     });
 
+    it('preserves the current table width when inserting a column into a narrow table', async () => {
+        const fixture = createTableFixture();
+        fixture.documentData.tableSource![TABLE_ID].tableColumns.forEach((column) => {
+            column.size.width.v = 80;
+        });
+        const testBed = createTableCommandBed(fixture);
+        const commandService = testBed.get(ICommandService);
+        setActiveTableRange(testBed, fixture.cellRanges[1].startIndex + 1);
+
+        const result = await commandService.executeCommand(DocTableInsertColumnRightCommand.id);
+        await awaitTime(0);
+
+        const tableSource = testBed.doc.getSnapshot().tableSource?.[TABLE_ID];
+        expect(result).toBe(true);
+        expect(tableSource?.tableColumns.map((column) => column.size.width.v)).toEqual([60, 60, 60, 60]);
+    });
+
     it('executes below-row and left-column insertion aliases', async () => {
         const rowFixture = createTableFixture();
         const rowTestBed = createTableCommandBed(rowFixture);

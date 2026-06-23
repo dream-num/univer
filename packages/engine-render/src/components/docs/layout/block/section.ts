@@ -23,6 +23,7 @@ import type { ILayoutContext } from '../tools';
 import { DataStreamTreeNodeType } from '@univerjs/core';
 import { createSkeletonPage } from '../model/page';
 import { dealWithBlockError } from './block-error';
+import { appendColumnGroupBlockLine, createColumnGroupSkeleton } from './column';
 import { dealWidthParagraph } from './paragraph/paragraph-layout';
 
 export function dealWithSection(
@@ -80,6 +81,20 @@ export function dealWithSection(
                 currentPageCache,
                 sectionBreakConfig
             );
+        }
+
+        if (paragraphNode.nodeType === DataStreamTreeNodeType.COLUMN_GROUP) {
+            const columnGroupSkeleton = createColumnGroupSkeleton(
+                ctx,
+                currentPageCache,
+                viewModel,
+                paragraphNode,
+                sectionBreakConfig
+            );
+
+            if (columnGroupSkeleton && appendColumnGroupBlockLine(currentPageCache, columnGroupSkeleton)) {
+                skeletonPages = [currentPageCache];
+            }
         }
 
         if (skeletonPages.length === 0) {

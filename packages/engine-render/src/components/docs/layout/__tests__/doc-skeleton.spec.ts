@@ -17,6 +17,7 @@
 import {
     ColumnSeparatorType,
     createDocumentModelWithStyle,
+    DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
     LocaleService,
@@ -80,6 +81,7 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
         tableId,
         sections: [section],
         skeTables: new Map(),
+        skeColumnGroups: new Map(),
     } as any;
 
     divide.parent = line;
@@ -101,6 +103,64 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
 }
 
 describe('doc skeleton', () => {
+    it('uses empty paragraph glyphs as mouse hit-test targets', () => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        const emptyParagraphGlyph = {
+            st: 4,
+            ed: 4,
+            count: 1,
+            width: 0,
+            left: 0,
+            xOffset: 0,
+            content: '',
+            raw: DataStreamTreeTokenType.PARAGRAPH,
+            streamType: DataStreamTreeTokenType.PARAGRAPH,
+            glyphType: GlyphType.WORD,
+        } as any;
+        const emptyDivide = {
+            st: 4,
+            ed: 4,
+            left: 0,
+            glyphGroup: [emptyParagraphGlyph],
+        } as any;
+        const emptyLine = {
+            st: 4,
+            ed: 4,
+            top: 30,
+            lineHeight: 20,
+            divides: [emptyDivide],
+        } as any;
+
+        emptyParagraphGlyph.parent = emptyDivide;
+        emptyDivide.parent = emptyLine;
+        emptyLine.parent = body.column;
+        body.column.lines.push(emptyLine);
+        body.column.ed = 4;
+        body.section.ed = 4;
+        body.page.ed = 4;
+
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 210, height: 297 },
+                },
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+        const skeletonData = {
+            pages: [body.page],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        (skeleton as any)._skeletonData = skeletonData;
+        body.page.parent = skeletonData;
+
+        const node = skeleton.findNodeByCoord(new Vector2(20, 50), PageLayoutType.VERTICAL, 0, 0);
+
+        expect(node?.node).toBe(emptyParagraphGlyph);
+    });
+
     it('covers size and position search for body/header/footer/cell pages', () => {
         const body = createPage(DocumentSkeletonPageType.BODY, 0);
         const header = createPage(DocumentSkeletonPageType.HEADER, 200);
@@ -321,6 +381,258 @@ describe('doc skeleton', () => {
 
         (skeleton as any)._translatePage(body.page, PageLayoutType.VERTICAL, 1, 2);
         expect((skeleton as any)._findLiquid.x).toBeGreaterThanOrEqual(0);
+    });
+
+    it('finds nodes by coordinate inside column group columns', () => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        const columnPage = createPage(DocumentSkeletonPageType.CELL, 100);
+        body.column.lines = [];
+        body.page.ed = 110;
+        body.section.ed = 110;
+        body.column.ed = 110;
+        columnPage.page.pageWidth = 100;
+        columnPage.page.pageHeight = 80;
+        columnPage.page.marginLeft = 0;
+        columnPage.page.marginTop = 0;
+        columnPage.page.marginRight = 0;
+        columnPage.page.marginBottom = 0;
+        columnPage.glyphs.glyphA.left = 0;
+        columnPage.glyphs.glyphA.width = 10;
+        columnPage.divide.glyphGroup = [columnPage.glyphs.glyphA];
+
+        const columnGroup = {
+            columns: [
+                {
+                    columnId: 'col-1',
+                    left: 60,
+                    top: 0,
+                    width: 100,
+                    height: 80,
+                    st: 100,
+                    ed: 110,
+                    page: columnPage.page,
+                },
+            ],
+            width: 180,
+            height: 80,
+            top: 30,
+            left: 20,
+            st: 90,
+            ed: 110,
+            columnGroupId: 'cg-1',
+            parent: body.page,
+        } as any;
+        columnGroup.columns[0].parent = columnGroup;
+        columnPage.page.parent = columnGroup.columns[0];
+        body.page.skeColumnGroups.set('cg-1', columnGroup);
+
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 210, height: 297 },
+                },
+            }),
+            getHeaderFooterTreeMap: () => ({
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+        const skeletonData = {
+            pages: [body.page],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        body.page.parent = skeletonData as any;
+        (skeleton as any)._skeletonData = skeletonData;
+
+        const node = skeleton.findNodeByCoord(
+            Vector2.FromArray([90, 45]),
+            PageLayoutType.VERTICAL,
+            0,
+            0
+        );
+
+        expect(node?.node).toBe(columnPage.glyphs.glyphA);
+        expect(skeleton.findNodeByCharIndex(100)).toBe(columnPage.glyphs.glyphA);
+        expect(skeleton.findNodePositionByCharIndex(110)?.path).toEqual([
+            'pages',
+            0,
+            'skeColumnGroups',
+            'cg-1',
+            'columns',
+            0,
+            'page',
+        ]);
+    });
+
+    it('resolves char positions inside tables nested in column group columns', () => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        const columnPage = createPage(DocumentSkeletonPageType.CELL, 100);
+        const cellPage = createPage(DocumentSkeletonPageType.CELL, 130, 'nested-table');
+        body.column.lines = [];
+        body.page.ed = 150;
+        body.section.ed = 150;
+        body.column.ed = 150;
+        columnPage.page.st = 100;
+        columnPage.page.ed = 150;
+        columnPage.section.ed = 150;
+        columnPage.column.ed = 150;
+        cellPage.glyphs.glyphA.left = 0;
+        cellPage.glyphs.glyphA.width = 10;
+        cellPage.divide.glyphGroup = [cellPage.glyphs.glyphA];
+
+        const row = {
+            cells: [cellPage.page],
+            index: 0,
+            top: 0,
+        } as any;
+        const table = {
+            rows: [row],
+            tableId: 'nested-table',
+            parent: columnPage.page,
+        } as any;
+        row.parent = table;
+        cellPage.page.parent = row;
+        columnPage.page.skeTables = new Map([['nested-table', table]]);
+
+        const columnGroup = {
+            columns: [{
+                columnId: 'col-1',
+                left: 60,
+                top: 0,
+                width: 100,
+                height: 80,
+                st: 100,
+                ed: 150,
+                page: columnPage.page,
+            }],
+            width: 180,
+            height: 80,
+            top: 30,
+            left: 20,
+            st: 90,
+            ed: 150,
+            columnGroupId: 'cg-1',
+            parent: body.page,
+        } as any;
+        columnGroup.columns[0].parent = columnGroup;
+        columnPage.page.parent = columnGroup.columns[0];
+        body.page.skeColumnGroups.set('cg-1', columnGroup);
+
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 210, height: 297 },
+                },
+            }),
+            getHeaderFooterTreeMap: () => ({
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+        const skeletonData = {
+            pages: [body.page],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        body.page.parent = skeletonData as any;
+        (skeleton as any)._skeletonData = skeletonData;
+
+        expect(skeleton.findNodeByCharIndex(130)).toBe(cellPage.glyphs.glyphA);
+        expect(skeleton.findNodePositionByCharIndex(130)?.path).toEqual([
+            'pages',
+            0,
+            'skeColumnGroups',
+            'cg-1',
+            'columns',
+            0,
+            'page',
+            'skeTables',
+            'nested-table',
+            'rows',
+            0,
+            'cells',
+            0,
+        ]);
+    });
+
+    it('does not search column content when the coordinate is below the column group bounds', () => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        const columnPage = createPage(DocumentSkeletonPageType.CELL, 100);
+        body.line.top = 130;
+        body.page.height = 260;
+        body.page.pageHeight = 260;
+        body.page.ed = 110;
+        body.section.ed = 110;
+        body.column.ed = 110;
+        columnPage.page.pageWidth = 100;
+        columnPage.page.pageHeight = 500;
+        columnPage.page.marginLeft = 0;
+        columnPage.page.marginTop = 0;
+        columnPage.page.marginRight = 0;
+        columnPage.page.marginBottom = 0;
+        columnPage.glyphs.glyphA.left = 0;
+        columnPage.glyphs.glyphA.width = 10;
+        columnPage.divide.glyphGroup = [columnPage.glyphs.glyphA];
+
+        const columnGroup = {
+            columns: [{
+                columnId: 'col-1',
+                left: 60,
+                top: 0,
+                width: 100,
+                height: 80,
+                st: 100,
+                ed: 110,
+                page: columnPage.page,
+            }],
+            width: 180,
+            height: 80,
+            top: 30,
+            left: 20,
+            st: 90,
+            ed: 110,
+            columnGroupId: 'cg-1',
+            parent: body.page,
+        } as any;
+        columnGroup.columns[0].parent = columnGroup;
+        columnPage.page.parent = columnGroup.columns[0];
+        body.page.skeColumnGroups.set('cg-1', columnGroup);
+
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 210, height: 297 },
+                },
+            }),
+            getHeaderFooterTreeMap: () => ({
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+        const skeletonData = {
+            pages: [body.page],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        body.page.parent = skeletonData as any;
+        (skeleton as any)._skeletonData = skeletonData;
+
+        const node = skeleton.findNodeByCoord(
+            Vector2.FromArray([170, 145]),
+            PageLayoutType.VERTICAL,
+            0,
+            0
+        );
+
+        expect(Object.values(body.glyphs)).toContain(node?.node);
+        expect(node?.node).not.toBe(columnPage.glyphs.glyphA);
     });
 
     it('covers continuous-section helper and index lookup fallback branches', () => {

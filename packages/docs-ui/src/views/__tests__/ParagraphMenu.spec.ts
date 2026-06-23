@@ -15,10 +15,12 @@
  */
 
 import type { IDocumentBlockRange } from '@univerjs/core';
+import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import { DocumentBlockRangeType, NamedStyleType } from '@univerjs/core';
+import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { describe, expect, it } from 'vitest';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand } from '../../commands/commands/list.command';
@@ -30,6 +32,8 @@ import {
     getParagraphMenuCommandTargetRange,
     getParagraphMenuHiddenItemIds,
     getParagraphMenuResolvedCommand,
+    isEmptyParagraphMenuTarget,
+    shouldExecuteParagraphMenuMove,
     shouldUseInsertBelowRange,
 } from '../ParagraphMenu';
 
@@ -159,5 +163,58 @@ describe('ParagraphMenu command behavior', () => {
         })).toBe(true);
         expect(shouldUseInsertBelowRange('docs.operation.insert-divider', { id: INSERT_BELLOW_MENU_ID })).toBe(true);
         expect(shouldUseInsertBelowRange(AlignCenterCommand.id, { id: AlignCenterCommand.id })).toBe(false);
+    });
+
+    it('keeps insert-below placement when a selector option supplies a value', () => {
+        const resolved = getParagraphMenuResolvedCommand({
+            id: 'doc.command.insert-column-group',
+            commandId: 'doc.command.insert-column-group',
+            value: '3',
+            params: {
+                paragraphMenuPlacement: 'below',
+            },
+        });
+
+        expect(resolved).toEqual({
+            commandId: 'doc.command.insert-column-group',
+            params: {
+                paragraphMenuPlacement: 'below',
+                value: '3',
+            },
+        });
+    });
+
+    it('does not treat a whitespace-only paragraph as an empty paragraph target', () => {
+        expect(isEmptyParagraphMenuTarget('   \r', {
+            paragraphStart: 0,
+            paragraphEnd: 4,
+        } as IMutiPageParagraphBound)).toBe(false);
+    });
+
+    it('consults registered move validators before executing a paragraph drag move', () => {
+        const validatorService = new DocBlockMoveValidatorService();
+        const seenContexts: IDocBlockMoveValidationContext[] = [];
+
+        validatorService.registerValidator((context) => {
+            seenContexts.push(context);
+            return false;
+        });
+
+        expect(shouldExecuteParagraphMenuMove(validatorService, {
+            unitId: 'doc-1',
+            sourceRange: {
+                startOffset: 10,
+                endOffset: 20,
+            },
+            targetOffset: 30,
+        })).toBe(false);
+        expect(seenContexts).toEqual([{
+            unitId: 'doc-1',
+            sourceRange: {
+                startOffset: 10,
+                endOffset: 20,
+            },
+            targetOffset: 30,
+        }]);
     });
 });

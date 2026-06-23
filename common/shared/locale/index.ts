@@ -2,6 +2,8 @@ import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
+const LOCALE_FILE_NAME_PATTERN = /^[a-z]{2}-[A-Z]{2}\.ts$/;
+
 export interface IDiscoverUniverUiLocalesOptions {
     rootDir?: string;
     uiPackageDir?: string;
@@ -53,7 +55,7 @@ export function discoverUniverUiLocales(options: IDiscoverUniverUiLocalesOptions
     }
 
     return readdirSync(localeDir, { withFileTypes: true })
-        .filter((entry) => entry.isFile() && entry.name.endsWith('.ts'))
+        .filter((entry) => entry.isFile() && LOCALE_FILE_NAME_PATTERN.test(entry.name))
         .map((entry) => path.basename(entry.name, '.ts'))
         .sort((left, right) => left.localeCompare(right));
 }

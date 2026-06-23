@@ -89,7 +89,10 @@ async function editCommentFromThread(page: Page, originalText: string, updatedTe
     if (snapshotName) {
         await expect(card).toHaveScreenshot(generateSnapshotName(snapshotName), {
             maxDiffPixels: 100,
-            mask: [card.locator('time')],
+            mask: [
+                card.locator(':scope > div').first(),
+                card.locator('time'),
+            ],
         });
     }
 

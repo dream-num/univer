@@ -16,6 +16,7 @@
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { Dispatch, SetStateAction } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -117,7 +118,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
 
     return (
         <div className="univer-flex univer-h-full univer-flex-col">
-            <Input autoFocus value={searchText} placeholder={localeService.t('sheets-table-ui.filter.search-placeholder')} onChange={onSearchValueChange} />
+            <Input autoFocus value={searchText} placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.search-placeholder')} onChange={onSearchValueChange} />
             <div
                 className={clsx(`
                   univer-mt-2 univer-box-border univer-flex univer-h-[180px] univer-max-h-[180px] univer-flex-grow
@@ -138,7 +139,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                 onChange={onCheckAllToggled}
                             >
                                 <div className="univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm">
-                                    <span className="univer-flex-1 univer-truncate">{`${localeService.t('sheets-table-ui.filter.select-all')}`}</span>
+                                    <span className="univer-flex-1 univer-truncate">{`${localeService.t<LocaleKey>('sheets-table-ui.filter.select-all')}`}</span>
                                     <span className="univer-ml univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
                                 </div>
                             </Checkbox>

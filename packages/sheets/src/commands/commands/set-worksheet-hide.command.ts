@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import {
     BooleanNumber,
@@ -60,7 +61,7 @@ export const SetWorksheetHideCommand: ICommand = {
         const worksheets = workbook.getSheets();
         const visibleWorksheets = worksheets.filter((sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE);
         if (visibleWorksheets.length === 1) {
-            errorService.emit(localeService.t('sheets.info.hideSheet'));
+            errorService.emit(localeService.t<LocaleKey>('sheets.info.hideSheet'));
             return false;
         }
 

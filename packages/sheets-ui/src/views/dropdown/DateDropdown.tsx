@@ -16,6 +16,7 @@
 
 import type { DateKit } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
 import { dateKit, LocaleService } from '@univerjs/core';
 import { borderTopClassName, Button, Calendar, clsx, TimeInput } from '@univerjs/design';
@@ -76,7 +77,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                 className={clsx('univer-mt-2 univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
             >
                 <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
-                    {localeService.t('sheets-ui.data-validation.alert.ok')}
+                    {localeService.t<LocaleKey>('sheets-ui.data-validation.alert.ok')}
                 </Button>
             </footer>
         </div>

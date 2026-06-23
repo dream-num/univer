@@ -17,7 +17,15 @@
 import type { IDocumentBody, IDocumentData, IUser } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { BuildTextUtils, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    BuildTextUtils,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
+    LocaleService,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
@@ -140,7 +148,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     editorId={editorId}
                     autoFocus={autoFocus}
                     keyboardEventConfig={keyboardEventConfig}
-                    placeholder={localeService.t('thread-comment-ui.editor.placeholder')}
+                    placeholder={localeService.t<LocaleKey>('thread-comment-ui.editor.placeholder')}
                     initialValue={comment?.text && getSnapshot(comment.text)}
                     onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
                     isSingle={false}
@@ -168,7 +176,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                                 commandService.executeCommand(SetActiveCommentOperation.id);
                             }}
                         >
-                            {localeService.t('thread-comment-ui.editor.cancel')}
+                            {localeService.t<LocaleKey>('thread-comment-ui.editor.cancel')}
                         </Button>
                         <Button
                             type="button"
@@ -176,7 +184,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                             disabled={!canSubmit}
                             onClick={handleSave}
                         >
-                            {localeService.t(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
+                            {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
                         </Button>
                     </div>
                 )

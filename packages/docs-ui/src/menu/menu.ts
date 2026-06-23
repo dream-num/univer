@@ -700,27 +700,27 @@ const FLOAT_TEXT_STYLE_OPTIONS = [
     },
     {
         icon: 'H1Icon',
-        label: 'docs-ui.toolbar.heading.1',
+        label: 'docs-ui.toolbar.heading.leading1',
         value: NamedStyleType.HEADING_1,
     },
     {
         icon: 'H2Icon',
-        label: 'docs-ui.toolbar.heading.2',
+        label: 'docs-ui.toolbar.heading.leading2',
         value: NamedStyleType.HEADING_2,
     },
     {
         icon: 'H3Icon',
-        label: 'docs-ui.toolbar.heading.3',
+        label: 'docs-ui.toolbar.heading.leading3',
         value: NamedStyleType.HEADING_3,
     },
     {
         icon: 'H4Icon',
-        label: 'docs-ui.toolbar.heading.4',
+        label: 'docs-ui.toolbar.heading.leading4',
         value: NamedStyleType.HEADING_4,
     },
     {
         icon: 'H5Icon',
-        label: 'docs-ui.toolbar.heading.5',
+        label: 'docs-ui.toolbar.heading.leading5',
         value: NamedStyleType.HEADING_5,
     },
     {

@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { ISidebarService } from '@univerjs/ui';
@@ -35,7 +36,7 @@ export const SidebarDocDrawingOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 sidebarService.open({
-                    header: { title: localeService.t('docs-drawing-ui.panel.title') },
+                    header: { title: localeService.t<LocaleKey>('docs-drawing-ui.panel.title') },
                     children: { label: COMPONENT_DOC_DRAWING_PANEL },
                     onClose: () => {
                         drawingManagerService.focusDrawing(null);

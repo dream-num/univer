@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, Nullable, Workbook } from '@univerjs/core';
-import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IAccessor,
+    ICellData,
+    ICommand,
+    IMutationInfo,
+    IObjectMatrixPrimitiveType,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 import type { IUniverSheetsConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
     cloneWorksheetData,
@@ -305,11 +317,11 @@ export const CopySheetCommand: ICommand = {
 
 // If Sheet1(Copy) already exists and you copy Sheet1, you should get Sheet1(Copy2)
 export function getCopyUniqueSheetName(workbook: Workbook, localeService: LocaleService, name: string): string {
-    let output = `${name} ${localeService.t('sheets.tabs.sheetCopy', '')}`;
+    let output = `${name} ${localeService.t<LocaleKey>('sheets.tabs.sheetCopy', '')}`;
     let count = 2;
 
     while (workbook.checkSheetName(output)) {
-        output = `${name} ${localeService.t('sheets.tabs.sheetCopy', `${count}`)}`;
+        output = `${name} ${localeService.t<LocaleKey>('sheets.tabs.sheetCopy', `${count}`)}`;
         count++;
     }
     return output;

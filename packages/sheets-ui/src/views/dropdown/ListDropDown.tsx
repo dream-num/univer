@@ -17,11 +17,9 @@
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
-import {
-    ColorKit,
-    LocaleService,
-} from '@univerjs/core';
+import { ColorKit, LocaleService } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
@@ -49,7 +47,18 @@ interface ISelectListProps {
 }
 
 function SelectList(props: ISelectListProps) {
-    const { value, onChange, multiple, options, title, onEdit, style, location, showEdit: showEditOnDropdown, showSearch: showSearchOnDropdown } = props;
+    const {
+        value,
+        onChange,
+        multiple,
+        options,
+        title,
+        onEdit,
+        style,
+        location,
+        showEdit: showEditOnDropdown,
+        showSearch: showSearchOnDropdown,
+    } = props;
     const localeService = useDependency(LocaleService);
     const { row, col, unitId, subUnitId } = location;
 
@@ -104,12 +113,11 @@ function SelectList(props: ISelectListProps) {
                 <div className="univer-box-border univer-flex univer-w-full univer-px-2">
                     <input
                         ref={searchRef}
-                        className={`
-                          univer-w-full univer-rounded-md univer-border univer-border-[rgba(13,13,13,0.12)] univer-px-2
-                          univer-py-1 univer-text-sm
+                        className={clsx(`
+                          univer-w-full univer-rounded-md univer-px-2 univer-py-1 univer-text-sm
                           focus:univer-border-primary-500 focus:univer-outline-none
                           dark:!univer-bg-black dark:!univer-text-white
-                        `}
+                        `, borderClassName)}
                         type="text"
                         value={lowerFilter}
                         autoFocus
@@ -173,7 +181,9 @@ function SelectList(props: ISelectListProps) {
                                     ? (
                                         <>
                                             <span>{item.label.substring(0, index)}</span>
-                                            <span className="univer-font-semibold">{item.label.substring(index, index + lowerFilter.length)}</span>
+                                            <span className="univer-font-semibold">
+                                                {item.label.substring(index, index + lowerFilter.length)}
+                                            </span>
                                             <span>{item.label.substring(index + lowerFilter.length)}</span>
                                         </>
                                     )
@@ -201,7 +211,7 @@ function SelectList(props: ISelectListProps) {
                         `}
                         onClick={onEdit}
                     >
-                        {localeService.t('sheets-ui.data-validation.list.edit')}
+                        {localeService.t<LocaleKey>('sheets-ui.data-validation.list.edit')}
                     </a>
                 </div>
             )}
@@ -233,7 +243,7 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
     return (
         <SelectList
             style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
-            title={multiple ? localeService.t('sheets-ui.data-validation.listMultiple.dropdown') : localeService.t('sheets-ui.data-validation.list.dropdown')}
+            title={multiple ? localeService.t<LocaleKey>('sheets-ui.data-validation.listMultiple.dropdown') : localeService.t<LocaleKey>('sheets-ui.data-validation.list.dropdown')}
             value={getListDropdownValue(localValue, multiple)}
             multiple={multiple}
             onChange={async (newValue) => {

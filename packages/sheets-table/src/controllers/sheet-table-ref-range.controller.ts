@@ -14,14 +14,37 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
-
 import type { IMutationInfo, Workbook } from '@univerjs/core';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IRemoveRowColCommandParams } from '@univerjs/sheets';
+import type {
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IInsertRowMutationParams,
+    IRemoveRowColCommandParams,
+} from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
 import type { ITableColumnJson, ITableJson } from '../types/type';
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { getSheetCommandTarget, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    Rectangle,
+} from '@univerjs/core';
+import {
+    getSheetCommandTarget,
+    InsertColCommand,
+    InsertColMutation,
+    InsertRowCommand,
+    InsertRowMutation,
+    RefRangeService,
+    RemoveColCommand,
+    RemoveColMutation,
+    RemoveRowCommand,
+    RemoveRowMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
@@ -350,7 +373,7 @@ export class SheetTableRefRangeController extends Disposable {
                     }
                     const header: string[] = [];
                     for (let i = startColumn; i <= endColumn; i++) {
-                        header.push(convertCellDataToString(worksheet?.getCell(startRow, i)) || getColumnName(i - startColumn + 1, this._localeService.t('sheets-table.columnPrefix')));
+                        header.push(convertCellDataToString(worksheet?.getCell(startRow, i)) || getColumnName(i - startColumn + 1, this._localeService.t<LocaleKey>('sheets-table.columnPrefix')));
                     }
                     undos.push({
                         id: AddSheetTableMutation.id,

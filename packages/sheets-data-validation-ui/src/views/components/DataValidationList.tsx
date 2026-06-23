@@ -16,10 +16,16 @@
 
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams } from '@univerjs/sheets-data-validation';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
-import { AddSheetDataValidationCommand, createDefaultNewRule, RemoveSheetAllDataValidationCommand, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import {
+    AddSheetDataValidationCommand,
+    createDefaultNewRule,
+    RemoveSheetAllDataValidationCommand,
+    SheetDataValidationModel,
+} from '@univerjs/sheets-data-validation';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
@@ -119,12 +125,12 @@ export function DataValidationList(props: { workbook: Workbook }) {
                 {(rules.length && !hasDisableRule)
                     ? (
                         <Button onClick={handleRemoveAll}>
-                            {localeService.t('sheets-data-validation-ui.panel.removeAll')}
+                            {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.removeAll')}
                         </Button>
                     )
                     : null}
                 <Button variant="primary" onClick={handleAddRule}>
-                    {localeService.t('sheets-data-validation-ui.panel.add')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.add')}
                 </Button>
             </div>
         </div>

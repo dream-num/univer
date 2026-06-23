@@ -15,8 +15,16 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import type { ITableSetConfig } from '../../types/type';
-import { CommandType, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    ILogService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+} from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SheetInterceptorService } from '@univerjs/sheets';
 import { TableManager } from '../../models/table-manager';
@@ -59,7 +67,7 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
             const tableNameValidation = validateSheetTableName(name, existingNamesSet);
             if (!tableNameValidation.valid) {
                 const logService = accessor.get(ILogService);
-                logService.warn(localeService.t('sheets-table.tableNameError'));
+                logService.warn(localeService.t<LocaleKey>('sheets-table.tableNameError'));
                 return false;
             }
 

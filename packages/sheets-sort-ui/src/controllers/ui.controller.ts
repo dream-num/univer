@@ -15,6 +15,7 @@
  */
 
 import type { UIPartsService } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
@@ -108,7 +109,7 @@ export class SheetsSortUIController extends RxDisposable {
             id: CUSTOM_SORT_DIALOG_ID,
             draggable: true,
             width: CUSTOM_SORT_PANEL_WIDTH,
-            title: { title: `${this._localeService.t('sheets-sort-ui.general.sort-custom')}: ${serializeRange(location.range)}` },
+            title: { title: `${this._localeService.t<LocaleKey>('sheets-sort-ui.general.sort-custom')}: ${serializeRange(location.range)}` },
             children: { label: 'CustomSortPanel' },
             destroyOnClose: true,
             defaultPosition: getCustomSortDialogDefaultPosition(),

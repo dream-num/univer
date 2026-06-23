@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, ICommandService, IConfirmService, LocaleService } from '@univerjs/core';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../views/table/create/component-name';
 import { CreateDocTableCommand } from '../commands/table/doc-table-create.command';
@@ -51,7 +52,7 @@ export const DocCreateTableOperation: ICommand = {
                 },
             },
             width: 'auto',
-            title: { title: localeService.t('docs-ui.toolbar.table.insert') },
+            title: { title: localeService.t<LocaleKey>('docs-ui.toolbar.table.insert') },
             onConfirm: () => {
                 commandService.executeCommand(CreateDocTableCommand.id, tableCreateParams);
                 confirmService.close(COMPONENT_DOC_CREATE_TABLE_CONFIRM_ID);

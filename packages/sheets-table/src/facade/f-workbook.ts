@@ -15,9 +15,27 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IAddSheetTableCommandParams, IDeleteSheetTableParams, ISetSheetTableParams, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
-import { customNameCharacterCheck, ILogService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { AddSheetTableCommand, DeleteSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
+import type {
+    IAddSheetTableCommandParams,
+    IDeleteSheetTableParams,
+    ISetSheetTableParams,
+    ITableFilterItem,
+    ITableInfo,
+    ITableInfoWithUnitId,
+    ITableOptions,
+    ITableRange,
+} from '@univerjs/sheets-table';
+import {
+    customNameCharacterCheck,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    AddSheetTableCommand,
+    DeleteSheetTableCommand,
+    SetSheetTableFilterCommand,
+    SheetTableService,
+} from '@univerjs/sheets-table';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 /**
@@ -201,9 +219,14 @@ export class FWorkbookSheetsTableMixin extends FWorkbook implements IFWorkbookSh
         return sheetTableService.getTableList(unitId);
     }
 
-    override async addTable(subUnitId: string, tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<string | undefined> {
+    override async addTable(
+        subUnitId: string,
+        tableName: string,
+        rangeInfo: ITableRange,
+        tableId?: string,
+        options?: ITableOptions
+    ): Promise<string | undefined> {
         const sheetTableService = this._injector.get(SheetTableService);
-        const localeService = this._injector.get(LocaleService);
 
         const univerInstanceService = this._injector.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -215,8 +238,6 @@ export class FWorkbookSheetsTableMixin extends FWorkbook implements IFWorkbookSh
         }
         const isValidName = customNameCharacterCheck(tableName, sheetNameSet);
         if (!isValidName) {
-            const logService = this._injector.get(ILogService);
-            logService.warn(localeService.t('sheets-table.tableNameError'));
             return undefined;
         }
 

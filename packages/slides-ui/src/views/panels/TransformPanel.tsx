@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderTopClassName, clsx, InputNumber } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -189,7 +190,7 @@ export default function TransformPanel(props: IProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('slides-ui.image-panel.transform.title')}</div>
+                <div>{localeService.t<LocaleKey>('slides-ui.image-panel.transform.title')}</div>
             </header>
 
             <div
@@ -199,7 +200,7 @@ export default function TransformPanel(props: IProps) {
                 `}
             >
                 <div>
-                    <span>{localeService.t('slides-ui.image-panel.transform.width')}</span>
+                    <span>{localeService.t<LocaleKey>('slides-ui.image-panel.transform.width')}</span>
                     <InputNumber
                         min={1}
                         value={width}
@@ -207,7 +208,7 @@ export default function TransformPanel(props: IProps) {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('slides-ui.image-panel.transform.height')}</span>
+                    <span>{localeService.t<LocaleKey>('slides-ui.image-panel.transform.height')}</span>
                     <InputNumber
                         min={1}
                         value={height}
@@ -217,15 +218,15 @@ export default function TransformPanel(props: IProps) {
             </div>
             <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div>
-                    <span>{localeService.t('slides-ui.image-panel.transform.x')}</span>
+                    <span>{localeService.t<LocaleKey>('slides-ui.image-panel.transform.x')}</span>
                     <InputNumber min={0} precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
                 </div>
                 <div>
-                    <span>{localeService.t('slides-ui.image-panel.transform.y')}</span>
+                    <span>{localeService.t<LocaleKey>('slides-ui.image-panel.transform.y')}</span>
                     <InputNumber min={0} precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
                 </div>
                 <div>
-                    <span>{localeService.t('slides-ui.image-panel.transform.rotate')}</span>
+                    <span>{localeService.t<LocaleKey>('slides-ui.image-panel.transform.rotate')}</span>
                     <InputNumber
                         precision={1}
                         value={rotation}

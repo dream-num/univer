@@ -15,6 +15,7 @@
  */
 
 import type { IDataValidationRuleOptions } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { DataValidationRenderMode, LocaleService } from '@univerjs/core';
 import { FormLayout, Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -30,16 +31,16 @@ export function ListRenderModeInput(props: IListRenderModeInputProps) {
     const localeService = useDependency(LocaleService);
 
     return (
-        <FormLayout label={localeService.t('sheets-data-validation-ui.renderMode.label')}>
+        <FormLayout label={localeService.t<LocaleKey>('sheets-data-validation-ui.renderMode.label')}>
             <RadioGroup value={`${value.renderMode ?? DataValidationRenderMode.CUSTOM}`} onChange={(renderMode) => onChange({ ...value, renderMode: +renderMode })}>
                 <Radio value={`${DataValidationRenderMode.CUSTOM}`}>
-                    {localeService.t('sheets-data-validation-ui.renderMode.chip')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.renderMode.chip')}
                 </Radio>
                 <Radio value={`${DataValidationRenderMode.ARROW}`}>
-                    {localeService.t('sheets-data-validation-ui.renderMode.arrow')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.renderMode.arrow')}
                 </Radio>
                 <Radio value={`${DataValidationRenderMode.TEXT}`}>
-                    {localeService.t('sheets-data-validation-ui.renderMode.text')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.renderMode.text')}
                 </Radio>
             </RadioGroup>
         </FormLayout>

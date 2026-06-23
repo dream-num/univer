@@ -17,6 +17,7 @@
 import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
+import type { LocaleKey } from '../../locale/types';
 import {
     DocumentFlavor,
     ICommandService,
@@ -71,30 +72,30 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const transformer = scene.getTransformerByCreate();
 
     const HORIZONTAL_RELATIVE_FROM = [{
-        label: localeService.t('docs-drawing-ui.image-position.column'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.column'),
         value: String(ObjectRelativeFromH.COLUMN),
     }, {
-        label: localeService.t('docs-drawing-ui.image-position.page'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.page'),
         value: String(ObjectRelativeFromH.PAGE),
     }, {
-        label: localeService.t('docs-drawing-ui.image-position.margin'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.margin'),
         value: String(ObjectRelativeFromH.MARGIN),
     }];
 
     const VERTICAL_RELATIVE_FROM = [{
-        label: localeService.t('docs-drawing-ui.image-position.line'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.line'),
         value: String(ObjectRelativeFromV.LINE),
         disabled: documentFlavor === DocumentFlavor.MODERN,
     }, {
-        label: localeService.t('docs-drawing-ui.image-position.page'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.page'),
         value: String(ObjectRelativeFromV.PAGE),
         disabled: documentFlavor === DocumentFlavor.MODERN,
     }, {
-        label: localeService.t('docs-drawing-ui.image-position.margin'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.margin'),
         value: String(ObjectRelativeFromV.MARGIN),
         disabled: documentFlavor === DocumentFlavor.MODERN,
     }, {
-        label: localeService.t('docs-drawing-ui.image-position.paragraph'),
+        label: localeService.t<LocaleKey>('docs-drawing-ui.image-position.paragraph'),
         value: String(ObjectRelativeFromV.PARAGRAPH),
     }];
 
@@ -378,7 +379,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('docs-drawing-ui.image-position.title')}</div>
+                <div>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.title')}</div>
             </header>
 
             <div
@@ -387,7 +388,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('docs-drawing-ui.image-position.horizontal')}</div>
+                <div>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.horizontal')}</div>
             </div>
 
             <div
@@ -397,7 +398,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 `}
             >
                 <div>
-                    <span>{localeService.t('docs-drawing-ui.image-position.absolutePosition')}</span>
+                    <span>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.absolutePosition')}</span>
                     <InputNumber
                         min={MIN_OFFSET}
                         max={MAX_OFFSET}
@@ -413,7 +414,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('docs-drawing-ui.image-position.toTheRightOf')}</span>
+                    <span>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.toTheRightOf')}</span>
                     <Select
                         value={String(hPosition.relativeFrom)}
                         disabled={disabled}
@@ -429,7 +430,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('docs-drawing-ui.image-position.vertical')}</div>
+                <div>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.vertical')}</div>
             </div>
 
             <div
@@ -439,7 +440,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 `}
             >
                 <div>
-                    <span>{localeService.t('docs-drawing-ui.image-position.absolutePosition')}</span>
+                    <span>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.absolutePosition')}</span>
                     <InputNumber
                         min={MIN_OFFSET}
                         max={MAX_OFFSET}
@@ -455,7 +456,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('docs-drawing-ui.image-position.bellow')}</span>
+                    <span>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.bellow')}</span>
                     <Select
                         disabled={disabled}
                         value={String(vPosition.relativeFrom)}
@@ -471,7 +472,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('docs-drawing-ui.image-position.options')}</div>
+                <div>{localeService.t<LocaleKey>('docs-drawing-ui.image-position.options')}</div>
             </div>
 
             <div>
@@ -480,7 +481,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                     checked={followTextMove}
                     onChange={handleFollowTextMoveCheck}
                 >
-                    {localeService.t('docs-drawing-ui.image-position.moveObjectWithText')}
+                    {localeService.t<LocaleKey>('docs-drawing-ui.image-position.moveObjectWithText')}
                 </Checkbox>
             </div>
         </div>

@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { Rect } from '@univerjs/engine-render';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderTopClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
 import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
@@ -89,7 +90,7 @@ export default function ArrangePanel(props: IProps) {
                           dark:!univer-text-gray-200
                         `}
                     >
-                        <div>{localeService.t('slides-ui.panel.fill.title')}</div>
+                        <div>{localeService.t<LocaleKey>('slides-ui.panel.fill.title')}</div>
                     </div>
                 </div>
                 <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">

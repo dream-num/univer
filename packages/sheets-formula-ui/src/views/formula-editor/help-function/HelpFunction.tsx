@@ -16,6 +16,7 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../../../locale/types';
 import { LocaleService, noop } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon, MoreIcon } from '@univerjs/icons';
@@ -98,8 +99,8 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
     const [contentVisible, setContentVisible] = useState(false);
     const localeService = useDependency(LocaleService);
-    const required = localeService.t('sheets-formula-ui.prompt.required');
-    const optional = localeService.t('sheets-formula-ui.prompt.optional');
+    const required = localeService.t<LocaleKey>('sheets-formula-ui.prompt.required');
+    const optional = localeService.t<LocaleKey>('sheets-formula-ui.prompt.optional');
     const editorId = editor.getEditorId();
     const [position$] = useEditorPosition(editorId, !!functionInfo, [functionInfo, paramIndex]);
     function handleSwitchActive(paramIndex: number) {
@@ -188,13 +189,13 @@ export function HelpFunction(props: IHelpFunctionProps) {
                         >
                             <div className="univer-mt-3">
                                 <Params
-                                    title={localeService.t('sheets-formula-ui.prompt.helpExample')}
+                                    title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
                                     value={`${functionInfo.functionName}(${functionInfo.functionParameter
                                         .map((item) => item.example)
                                         .join(',')})`}
                                 />
                                 <Params
-                                    title={localeService.t('sheets-formula-ui.prompt.helpAbstract')}
+                                    title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpAbstract')}
                                     value={functionInfo.description}
                                 />
                                 {functionInfo &&

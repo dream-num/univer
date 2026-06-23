@@ -17,13 +17,31 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPoint } from '@univerjs/protocol';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import {
+    IAuthzIoService,
+    ICommandService,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleService,
+    Tools,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
 import { Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { baseProtectionActions, DeleteRangeProtectionCommand, DeleteWorksheetProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookCreateProtectPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import {
+    baseProtectionActions,
+    DeleteRangeProtectionCommand,
+    DeleteWorksheetProtectionCommand,
+    RangeProtectionRuleModel,
+    SetWorksheetActiveOperation,
+    WorkbookCreateProtectPermission,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { distinctUntilChanged, merge } from 'rxjs';
@@ -215,12 +233,12 @@ export function SheetPermissionPanelList() {
                 <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(true)}>
                     <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': isCurrentSheet })}>
                         {' '}
-                        {localeService.t('sheets-ui.permission.panel.currentSheet')}
+                        {localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet')}
                     </div>
                     <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': isCurrentSheet })} />
                 </div>
                 <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(false)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': !isCurrentSheet })}>{localeService.t('sheets-ui.permission.panel.allSheet')}</div>
+                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': !isCurrentSheet })}>{localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet')}</div>
                     <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': !isCurrentSheet })} />
                 </div>
             </div>
@@ -305,7 +323,7 @@ export function SheetPermissionPanelList() {
                                         {(hasManagerPermission || hasDeletePermission) && (
                                             <div className="univer-flex univer-items-center">
                                                 {hasManagerPermission && (
-                                                    <Tooltip title={localeService.t('sheets-ui.permission.panel.edit')}>
+                                                    <Tooltip title={localeService.t<LocaleKey>('sheets-ui.permission.panel.edit')}>
                                                         <div
                                                             className={`
                                                               univer-box-border univer-h-6 univer-rounded-sm univer-p-1
@@ -318,7 +336,7 @@ export function SheetPermissionPanelList() {
                                                     </Tooltip>
                                                 )}
                                                 {hasDeletePermission && (
-                                                    <Tooltip title={localeService.t('sheets-ui.permission.panel.delete')}>
+                                                    <Tooltip title={localeService.t<LocaleKey>('sheets-ui.permission.panel.delete')}>
                                                         <div
                                                             className={`
                                                               univer-box-border univer-h-6 univer-rounded-sm univer-p-1
@@ -348,7 +366,7 @@ export function SheetPermissionPanelList() {
                                                   dark:!univer-text-white
                                                 `}
                                             >
-                                                {localeService.t('sheets-ui.permission.panel.created')}
+                                                {localeService.t<LocaleKey>('sheets-ui.permission.panel.created')}
                                             </span>
                                             <span
                                                 className={`
@@ -356,7 +374,7 @@ export function SheetPermissionPanelList() {
                                                   dark:!univer-text-white
                                                 `}
                                             >
-                                                {editPermission ? `${localeService.t('sheets-ui.permission.panel.iCanEdit')}` : `${localeService.t('sheets-ui.permission.panel.iCanNotEdit')}`}
+                                                {editPermission ? `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanEdit')}` : `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanNotEdit')}`}
                                             </span>
 
                                         </div>
@@ -367,7 +385,7 @@ export function SheetPermissionPanelList() {
                                                   dark:!univer-text-white
                                                 `}
                                             >
-                                                {localeService.t('sheets-ui.permission.panel.viewPermission')}
+                                                {localeService.t<LocaleKey>('sheets-ui.permission.panel.viewPermission')}
                                             </span>
                                             <span
                                                 className={`
@@ -375,7 +393,7 @@ export function SheetPermissionPanelList() {
                                                   dark:!univer-text-white
                                                 `}
                                             >
-                                                {viewPermission ? `${localeService.t('sheets-ui.permission.panel.iCanView')}` : `${localeService.t('sheets-ui.permission.panel.iCanNotView')}`}
+                                                {viewPermission ? `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanView')}` : `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanNotView')}`}
                                             </span>
                                         </div>
                                         {rule.description && (
@@ -401,7 +419,7 @@ export function SheetPermissionPanelList() {
                         className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
                     >
                         <img width={240} height={120} src={panelListEmptyBase64} alt="" draggable={false} />
-                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t('sheets-ui.permission.dialog.listEmpty')}</p>
+                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}</p>
                     </div>
                 )}
 
@@ -412,7 +430,7 @@ export function SheetPermissionPanelList() {
                         variant="primary"
                         onClick={() => {
                             const sidebarProps = {
-                                header: { title: `${localeService.t('sheets-ui.permission.panel.title')}` },
+                                header: { title: `${localeService.t<LocaleKey>('sheets-ui.permission.panel.title')}` },
                                 children: {
                                     label: UNIVER_SHEET_PERMISSION_PANEL,
                                     showDetail: true,
@@ -423,7 +441,7 @@ export function SheetPermissionPanelList() {
                         }}
                     >
                         <div>+ </div>
-                        {localeService.t('sheets-ui.permission.button.addNewPermission')}
+                        {localeService.t<LocaleKey>('sheets-ui.permission.button.addNewPermission')}
                     </Button>
                 </div>
             )}

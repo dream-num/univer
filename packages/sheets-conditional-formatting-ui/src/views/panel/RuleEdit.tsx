@@ -21,6 +21,7 @@ import type {
     IConditionFormattingRule,
     ISetCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
+import type { LocaleKey } from '../../locale/types';
 import type { IStyleEditorProps } from './rule-edit/type';
 import {
     ICommandService,
@@ -92,12 +93,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
     }, [props.rule]);
 
     const options = [
-        { label: localeService.t('sheets-conditional-formatting-ui.ruleType.highlightCell'), value: '1' },
-        { label: localeService.t('sheets-conditional-formatting-ui.panel.rankAndAverage'), value: '2' },
-        { label: localeService.t('sheets-conditional-formatting-ui.ruleType.dataBar'), value: '3' },
-        { label: localeService.t('sheets-conditional-formatting-ui.ruleType.colorScale'), value: '4' },
-        { label: localeService.t('sheets-conditional-formatting-ui.ruleType.formula'), value: '5' },
-        { label: localeService.t('sheets-conditional-formatting-ui.ruleType.iconSet'), value: '6' },
+        { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.highlightCell'), value: '1' },
+        { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.rankAndAverage'), value: '2' },
+        { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.dataBar'), value: '3' },
+        { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.colorScale'), value: '4' },
+        { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.formula'), value: '5' },
+        { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.iconSet'), value: '6' },
     ];
 
     const [ruleType, setRuleType] = useState(() => {
@@ -213,7 +214,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         };
         const ranges = getRanges();
         if (ranges.length < 1) {
-            setErrorText(localeService.t('sheets-conditional-formatting-ui.errorMessage.rangeError'));
+            setErrorText(localeService.t<LocaleKey>('sheets-conditional-formatting-ui.errorMessage.rangeError'));
             return;
         }
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
@@ -253,12 +254,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
 
         if (v) {
             if (rangeText.length < 1) {
-                setErrorText(localeService.t('sheets-conditional-formatting-ui.errorMessage.rangeError'));
+                setErrorText(localeService.t<LocaleKey>('sheets-conditional-formatting-ui.errorMessage.rangeError'));
             } else {
                 setErrorText(undefined);
             }
         } else {
-            setErrorText(localeService.t('sheets-conditional-formatting-ui.errorMessage.rangeError'));
+            setErrorText(localeService.t<LocaleKey>('sheets-conditional-formatting-ui.errorMessage.rangeError'));
         }
     };
     return (
@@ -269,7 +270,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-conditional-formatting-ui.panel.range')}
+                {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.range')}
             </div>
             <div className="univer-mt-4">
                 <RangeSelector
@@ -287,7 +288,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-conditional-formatting-ui.panel.styleType')}
+                {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleType')}
             </div>
             <Select
                 className="univer-mt-4 univer-w-full"
@@ -301,9 +302,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 onChange={onStyleChange}
             />
             <div className="univer-mt-4 univer-flex univer-justify-end">
-                <Button onClick={handleCancel}>{localeService.t('sheets-conditional-formatting-ui.panel.cancel')}</Button>
+                <Button onClick={handleCancel}>{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.cancel')}</Button>
                 <Button className="univer-ml-3" variant="primary" onClick={handleSubmit}>
-                    {localeService.t('sheets-conditional-formatting-ui.panel.submit')}
+                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.submit')}
                 </Button>
             </div>
         </div>

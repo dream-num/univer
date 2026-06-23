@@ -16,6 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../../locale/types';
 import { generateRandomId, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -173,14 +174,14 @@ export const DefinedNameContainer = () => {
 
     const getInsertDefinedName = () => {
         const count = definedNames.length + 1;
-        const name = localeService.t('sheets-ui.definedName.defaultName') + count;
+        const name = localeService.t<LocaleKey>('sheets-ui.definedName.defaultName') + count;
         if (definedNamesService.getValueByName(unitId, name) == null) {
             return name;
         }
 
         let i = count + 1;
         while (true) {
-            const newName = localeService.t('sheets-ui.definedName.defaultName') + i;
+            const newName = localeService.t<LocaleKey>('sheets-ui.definedName.defaultName') + i;
             if (definedNamesService.getValueByName(unitId, newName) == null) {
                 return newName;
             }
@@ -247,7 +248,7 @@ export const DefinedNameContainer = () => {
                     onClick={openInsertCloseKeyEditor}
                 >
                     <IncreaseIcon />
-                    <span className="univer-ml-1">{localeService.t('sheets-ui.definedName.addButton')}</span>
+                    <span className="univer-ml-1">{localeService.t<LocaleKey>('sheets-ui.definedName.addButton')}</span>
                 </Button>
                 {editState && (
                     <DefinedNameInput
@@ -322,7 +323,10 @@ export const DefinedNameContainer = () => {
                                               dark:hover:!univer-bg-gray-600
                                             `}
                                         >
-                                            <Tooltip title={localeService.t('sheets-ui.definedName.updateButton')} placement="top">
+                                            <Tooltip
+                                                title={localeService.t<LocaleKey>('sheets-ui.definedName.updateButton')}
+                                                placement="top"
+                                            >
                                                 <a
                                                     className={`
                                                       univer-rounded univer-p-1
@@ -336,7 +340,10 @@ export const DefinedNameContainer = () => {
                                                     <PenIcon />
                                                 </a>
                                             </Tooltip>
-                                            <Tooltip title={localeService.t('sheets-ui.definedName.deleteButton')} placement="top">
+                                            <Tooltip
+                                                title={localeService.t<LocaleKey>('sheets-ui.definedName.deleteButton')}
+                                                placement="top"
+                                            >
                                                 <a
                                                     className={`
                                                       univer-rounded univer-p-1 univer-text-red-600
@@ -359,7 +366,7 @@ export const DefinedNameContainer = () => {
                                     onClose={handleDeleteClose}
                                     onConfirm={() => { handleDeleteConfirm(definedName.id); }}
                                 >
-                                    {localeService.t('sheets-ui.definedName.deleteConfirmText')}
+                                    {localeService.t<LocaleKey>('sheets-ui.definedName.deleteConfirmText')}
                                 </Confirm>
 
                                 {definedName.id === editorKey && (

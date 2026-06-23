@@ -18,6 +18,7 @@ import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { ISearchItem, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
@@ -56,12 +57,12 @@ export function SelectFunction(props: ISelectFunctionProps) {
         );
 
     options.unshift({
-        label: localeService.t('sheets-formula-ui.moreFunctions.allFunctions'),
+        label: localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.allFunctions'),
         value: allTypeValue,
     });
 
-    const required = localeService.t('sheets-formula-ui.prompt.required');
-    const optional = localeService.t('sheets-formula-ui.prompt.optional');
+    const required = localeService.t<LocaleKey>('sheets-formula-ui.prompt.required');
+    const optional = localeService.t<LocaleKey>('sheets-formula-ui.prompt.optional');
 
     useEffect(() => {
         handleSelectChange(allTypeValue);
@@ -161,7 +162,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 <Select value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
-                    placeholder={localeService.t('sheets-formula-ui.moreFunctions.searchFunctionPlaceholder')}
+                    placeholder={localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.searchFunctionPlaceholder')}
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}
                     onChange={handleSearchInputChange}
@@ -212,12 +213,12 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
 
                     <FunctionParams
-                        title={localeService.t('sheets-formula-ui.moreFunctions.syntax')}
+                        title={localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.syntax')}
                         value={<FunctionHelp prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
                     />
 
                     <FunctionParams
-                        title={localeService.t('sheets-formula-ui.prompt.helpExample')}
+                        title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
                         value={`${functionInfo.functionName}(${functionInfo.functionParameter
                             .map((item) => item.example)
                             .join(',')})`}

@@ -15,7 +15,18 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
-import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentViewModel,
+    IMouseEvent,
+    IPageRenderConfig,
+    IPathProps,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    RenderComponentType,
+} from '@univerjs/engine-render';
+import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     Disposable,
@@ -400,12 +411,12 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
                             ctx.translate(0, marginTop + 1);
                             TextBubbleShape.drawWith(ctx, {
-                                text: localeService.t('docs-ui.headerFooter.header'),
+                                text: localeService.t<LocaleKey>('docs-ui.headerFooter.header'),
                                 color: HEADER_FOOTER_FILL_COLOR,
                             });
                             ctx.translate(0, pageHeight - marginTop - marginBottom);
                             TextBubbleShape.drawWith(ctx, {
-                                text: localeService.t('docs-ui.headerFooter.footer'),
+                                text: localeService.t<LocaleKey>('docs-ui.headerFooter.footer'),
                                 color: HEADER_FOOTER_FILL_COLOR,
                             });
                         }

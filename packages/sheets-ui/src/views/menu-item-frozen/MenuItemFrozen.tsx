@@ -15,6 +15,7 @@
  */
 
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import type { IMenuItemFrozenProps } from './interface';
 import { LocaleService, Tools } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
@@ -61,9 +62,9 @@ export const MenuItemFrozen = (props: IMenuItemFrozenProps) => {
 
     return (
         <>
-            {type === 'row' && localeService.t('sheets-ui.rightClick.freezeRow', value.row)}
-            {type === 'col' && localeService.t('sheets-ui.rightClick.freezeCol', value.col)}
-            {type === 'all' && localeService.t('sheets-ui.rightClick.freezeCell', value.row, value.col)}
+            {type === 'row' && localeService.t<LocaleKey>('sheets-ui.rightClick.freezeRow', value.row)}
+            {type === 'col' && localeService.t<LocaleKey>('sheets-ui.rightClick.freezeCol', value.col)}
+            {type === 'all' && localeService.t<LocaleKey>('sheets-ui.rightClick.freezeCell', value.row, value.col)}
         </>
     );
 };

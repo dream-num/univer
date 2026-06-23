@@ -16,6 +16,7 @@
 
 import type { ICommand, ModernDocumentWidthMode, PaperType } from '@univerjs/core';
 import type { IConfirmPartMethodOptions } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 import type { IDocPageSetupCommandParams } from '../commands/doc-page-setup.command';
 import {
     CommandType,
@@ -39,7 +40,7 @@ export const DocOpenPageSettingCommand: ICommand = {
         const disposable = confirmService.open({
             id: PAGE_SETTING_COMPONENT_ID,
             title: {
-                label: localeService.t('docs-ui.page-settings.document-setting'),
+                label: localeService.t<LocaleKey>('docs-ui.page-settings.document-setting'),
             },
             children: {
                 label: PAGE_SETTING_COMPONENT_ID,
@@ -69,8 +70,8 @@ export const DocOpenPageSettingCommand: ICommand = {
                     pageSize: paperSize,
                 } as IDocPageSetupCommandParams);
             },
-            confirmText: localeService.t('docs-ui.page-settings.confirm'),
-            cancelText: localeService.t('docs-ui.page-settings.cancel'),
+            confirmText: localeService.t<LocaleKey>('docs-ui.page-settings.confirm'),
+            cancelText: localeService.t<LocaleKey>('docs-ui.page-settings.cancel'),
         });
 
         return true;

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import type { Injector } from '@univerjs/core';
 import type { ITableFilterItem } from '@univerjs/sheets-table';
+import type { LocaleKey } from '../../locale/types';
 import type { IConditionCompareTypeEnum } from './type';
 import { LocaleService } from '@univerjs/core';
-import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
+import {
+    TableConditionTypeEnum,
+    TableDateCompareTypeEnum,
+    TableNumberCompareTypeEnum,
+    TableStringCompareTypeEnum,
+} from '@univerjs/sheets-table';
 import { ConditionSubComponentEnum } from './type';
 
 export function getCascaderListOptions(injector: Injector) {
@@ -28,175 +32,175 @@ export function getCascaderListOptions(injector: Injector) {
     return [
         {
             value: TableConditionTypeEnum.String,
-            label: localeService.t(`sheets-table-ui.condition.${TableConditionTypeEnum.String}`),
+            label: localeService.t<LocaleKey>(`sheets-table-ui.condition.${TableConditionTypeEnum.String}`),
             children: [
                 {
                     value: TableStringCompareTypeEnum.Equal,
-                    label: localeService.t(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.Equal}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.Equal}`),
                 },
                 {
                     value: TableStringCompareTypeEnum.NotEqual,
-                    label: localeService.t(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.NotEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.NotEqual}`),
                 },
                 {
                     value: TableStringCompareTypeEnum.Contains,
-                    label: localeService.t(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.Contains}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.Contains}`),
                 },
                 {
                     value: TableStringCompareTypeEnum.NotContains,
-                    label: localeService.t(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.NotContains}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.NotContains}`),
                 },
                 {
                     value: TableStringCompareTypeEnum.StartsWith,
-                    label: localeService.t(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.StartsWith}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.StartsWith}`),
                 },
                 {
                     value: TableStringCompareTypeEnum.EndsWith,
-                    label: localeService.t(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.EndsWith}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.string.compare.${TableStringCompareTypeEnum.EndsWith}`),
                 },
             ],
         },
         {
             value: TableConditionTypeEnum.Number,
-            label: localeService.t(`sheets-table-ui.condition.${TableConditionTypeEnum.Number}`),
+            label: localeService.t<LocaleKey>(`sheets-table-ui.condition.${TableConditionTypeEnum.Number}`),
             children: [
                 {
                     value: TableNumberCompareTypeEnum.Equal,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Equal}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Equal}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.NotEqual,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.NotEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.NotEqual}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.GreaterThan,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.GreaterThan}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.GreaterThan}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.GreaterThanOrEqual,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.GreaterThanOrEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.GreaterThanOrEqual}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.LessThan,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.LessThan}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.LessThan}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.LessThanOrEqual,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.LessThanOrEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.LessThanOrEqual}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.Between,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Between}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Between}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.NotBetween,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.NotBetween}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.NotBetween}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.Above,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Above}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Above}`),
                 },
                 {
                     value: TableNumberCompareTypeEnum.Below,
-                    label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Below}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.Below}`),
                 },
                 // {
                 //     value: TableNumberCompareTypeEnum.TopN,
-                //     label: localeService.t(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.TopN}`),
+                //     label: localeService.t<LocaleKey>(`sheets-table-ui.number.compare.${TableNumberCompareTypeEnum.TopN}`),
                 // },
             ],
         },
         {
             value: TableConditionTypeEnum.Date,
-            label: localeService.t(`sheets-table-ui.condition.${TableConditionTypeEnum.Date}`),
+            label: localeService.t<LocaleKey>(`sheets-table-ui.condition.${TableConditionTypeEnum.Date}`),
             children: [
                 {
                     value: TableDateCompareTypeEnum.Equal,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Equal}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Equal}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.NotEqual,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NotEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NotEqual}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.After,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.After}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.After}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.AfterOrEqual,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.AfterOrEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.AfterOrEqual}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Before,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Before}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Before}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.BeforeOrEqual,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.BeforeOrEqual}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.BeforeOrEqual}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Between,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Between}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Between}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.NotBetween,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NotBetween}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NotBetween}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Today,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Today}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Today}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Yesterday,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Yesterday}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Yesterday}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Tomorrow,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Tomorrow}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Tomorrow}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.ThisWeek,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.ThisWeek}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.ThisWeek}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.LastWeek,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.LastWeek}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.LastWeek}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.NextWeek,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NextWeek}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NextWeek}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.ThisMonth,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.ThisMonth}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.ThisMonth}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.LastMonth,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.LastMonth}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.LastMonth}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.NextMonth,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NextMonth}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NextMonth}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.ThisYear,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.ThisYear}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.ThisYear}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.LastYear,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.LastYear}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.LastYear}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.NextYear,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NextYear}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.NextYear}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Quarter,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Quarter}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Quarter}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Month,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Month}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Month}`),
                 },
             ],
         },
@@ -213,70 +217,70 @@ export function getConditionDateSelect(injector: Injector, dateType?: TableDateC
             return [
                 {
                     value: TableDateCompareTypeEnum.Q1,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q1}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q1}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Q2,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q2}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q2}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Q3,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q3}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q3}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.Q4,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q4}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.Q4}`),
                 },
             ];
         case TableDateCompareTypeEnum.Month:
             return [
                 {
                     value: TableDateCompareTypeEnum.M1,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M1}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M1}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M2,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M2}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M2}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M3,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M3}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M3}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M4,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M4}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M4}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M5,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M5}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M5}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M6,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M6}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M6}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M7,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M7}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M7}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M8,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M8}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M8}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M9,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M9}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M9}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M10,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M10}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M10}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M11,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M11}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M11}`),
                 },
                 {
                     value: TableDateCompareTypeEnum.M12,
-                    label: localeService.t(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M12}`),
+                    label: localeService.t<LocaleKey>(`sheets-table-ui.date.compare.${TableDateCompareTypeEnum.M12}`),
                 },
             ];
         default:

@@ -131,8 +131,8 @@ export function H1HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleK
         id: H1HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H1Icon',
-        title: 'docs-ui.toolbar.heading.1',
-        tooltip: 'docs-ui.toolbar.heading.1',
+        title: 'docs-ui.toolbar.heading.leading1',
+        tooltip: 'docs-ui.toolbar.heading.leading1',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_1),
@@ -144,8 +144,8 @@ export function H2HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleK
         id: H2HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H2Icon',
-        title: 'docs-ui.toolbar.heading.2',
-        tooltip: 'docs-ui.toolbar.heading.2',
+        title: 'docs-ui.toolbar.heading.leading2',
+        tooltip: 'docs-ui.toolbar.heading.leading2',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_2),
@@ -157,8 +157,8 @@ export function H3HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleK
         id: H3HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H3Icon',
-        title: 'docs-ui.toolbar.heading.3',
-        tooltip: 'docs-ui.toolbar.heading.3',
+        title: 'docs-ui.toolbar.heading.leading3',
+        tooltip: 'docs-ui.toolbar.heading.leading3',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_3),
@@ -170,8 +170,8 @@ export function H4HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleK
         id: H4HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H4Icon',
-        title: 'docs-ui.toolbar.heading.4',
-        tooltip: 'docs-ui.toolbar.heading.4',
+        title: 'docs-ui.toolbar.heading.leading4',
+        tooltip: 'docs-ui.toolbar.heading.leading4',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_4),
@@ -183,8 +183,8 @@ export function H5HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleK
         id: H5HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H5Icon',
-        title: 'docs-ui.toolbar.heading.5',
-        tooltip: 'docs-ui.toolbar.heading.5',
+        title: 'docs-ui.toolbar.heading.leading5',
+        tooltip: 'docs-ui.toolbar.heading.leading5',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_5),
@@ -236,8 +236,8 @@ export function EmptyParagraphH1MenuItemFactory(): IMenuButtonItem<LocaleKey> {
         id: H1HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H1Icon',
-        title: 'docs-ui.toolbar.heading.1',
-        tooltip: 'docs-ui.toolbar.heading.1',
+        title: 'docs-ui.toolbar.heading.leading1',
+        tooltip: 'docs-ui.toolbar.heading.leading1',
     };
 }
 
@@ -246,8 +246,8 @@ export function EmptyParagraphH2MenuItemFactory(): IMenuButtonItem<LocaleKey> {
         id: H2HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H2Icon',
-        title: 'docs-ui.toolbar.heading.2',
-        tooltip: 'docs-ui.toolbar.heading.2',
+        title: 'docs-ui.toolbar.heading.leading2',
+        tooltip: 'docs-ui.toolbar.heading.leading2',
     };
 }
 
@@ -256,8 +256,8 @@ export function EmptyParagraphH3MenuItemFactory(): IMenuButtonItem<LocaleKey> {
         id: H3HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H3Icon',
-        title: 'docs-ui.toolbar.heading.3',
-        tooltip: 'docs-ui.toolbar.heading.3',
+        title: 'docs-ui.toolbar.heading.leading3',
+        tooltip: 'docs-ui.toolbar.heading.leading3',
     };
 }
 
@@ -266,8 +266,8 @@ export function EmptyParagraphH4MenuItemFactory(): IMenuButtonItem<LocaleKey> {
         id: H4HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H4Icon',
-        title: 'docs-ui.toolbar.heading.4',
-        tooltip: 'docs-ui.toolbar.heading.4',
+        title: 'docs-ui.toolbar.heading.leading4',
+        tooltip: 'docs-ui.toolbar.heading.leading4',
     };
 }
 
@@ -276,8 +276,8 @@ export function EmptyParagraphH5MenuItemFactory(): IMenuButtonItem<LocaleKey> {
         id: H5HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H5Icon',
-        title: 'docs-ui.toolbar.heading.5',
-        tooltip: 'docs-ui.toolbar.heading.5',
+        title: 'docs-ui.toolbar.heading.leading5',
+        tooltip: 'docs-ui.toolbar.heading.leading5',
     };
 }
 
@@ -513,8 +513,8 @@ export function ParagraphMenuInsertBelowHeadingH1MenuItemFactory(accessor: IAcce
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H1Icon',
-        title: 'docs-ui.toolbar.heading.1',
-        tooltip: 'docs-ui.toolbar.heading.1',
+        title: 'docs-ui.toolbar.heading.leading1',
+        tooltip: 'docs-ui.toolbar.heading.leading1',
         params: { commandId: H1HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -526,8 +526,8 @@ export function ParagraphMenuInsertBelowHeadingH2MenuItemFactory(accessor: IAcce
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H2Icon',
-        title: 'docs-ui.toolbar.heading.2',
-        tooltip: 'docs-ui.toolbar.heading.2',
+        title: 'docs-ui.toolbar.heading.leading2',
+        tooltip: 'docs-ui.toolbar.heading.leading2',
         params: { commandId: H2HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -539,8 +539,8 @@ export function ParagraphMenuInsertBelowHeadingH3MenuItemFactory(accessor: IAcce
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H3Icon',
-        title: 'docs-ui.toolbar.heading.3',
-        tooltip: 'docs-ui.toolbar.heading.3',
+        title: 'docs-ui.toolbar.heading.leading3',
+        tooltip: 'docs-ui.toolbar.heading.leading3',
         params: { commandId: H3HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -552,8 +552,8 @@ export function ParagraphMenuInsertBelowHeadingH4MenuItemFactory(accessor: IAcce
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H4Icon',
-        title: 'docs-ui.toolbar.heading.4',
-        tooltip: 'docs-ui.toolbar.heading.4',
+        title: 'docs-ui.toolbar.heading.leading4',
+        tooltip: 'docs-ui.toolbar.heading.leading4',
         params: { commandId: H4HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -565,8 +565,8 @@ export function ParagraphMenuInsertBelowHeadingH5MenuItemFactory(accessor: IAcce
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H5Icon',
-        title: 'docs-ui.toolbar.heading.5',
-        tooltip: 'docs-ui.toolbar.heading.5',
+        title: 'docs-ui.toolbar.heading.leading5',
+        tooltip: 'docs-ui.toolbar.heading.leading5',
         params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };

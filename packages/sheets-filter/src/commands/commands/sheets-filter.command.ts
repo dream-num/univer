@@ -16,13 +16,37 @@
 
 import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMarkDirtyFilterChangeMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import type { FilterColumn } from '../../models/filter-model';
 import type { IAutoFilter, IFilterColumn } from '../../models/types';
-import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../mutations/sheets-filter.mutation';
-import { CommandType, ErrorService, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
-import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, MarkDirtyFilterChangeMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
+} from '../mutations/sheets-filter.mutation';
+import {
+    CommandType,
+    ErrorService,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    sequenceExecute,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    expandToContinuousRange,
+    getSheetCommandTarget,
+    isSingleCellSelection,
+    MarkDirtyFilterChangeMutation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
-import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../mutations/sheets-filter.mutation';
+import {
+    ReCalcSheetsFilterMutation,
+    RemoveSheetsFilterMutation,
+    SetSheetsFilterCriteriaMutation,
+    SetSheetsFilterRangeMutation,
+} from '../mutations/sheets-filter.mutation';
 
 /**
  * Parameters of command {@link SetSheetFilterRangeCommand}.
@@ -56,7 +80,7 @@ export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandPar
         if (range.endRow === range.startRow) {
             const errorService = accessor.get(ErrorService);
             const localeService = accessor.get(LocaleService);
-            errorService.emit(localeService.t('sheets-filter.command.not-valid-filter-range'));
+            errorService.emit(localeService.t<LocaleKey>('sheets-filter.command.not-valid-filter-range'));
             return false;
         }
 

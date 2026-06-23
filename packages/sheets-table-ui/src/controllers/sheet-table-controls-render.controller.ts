@@ -16,16 +16,50 @@
 
 import type { EventState, IRange, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { LocaleKey } from '../locale/types';
 import type { ITableControlHitRegion } from '../views/widgets/table-controls-util';
-import { CommandType, Disposable, fromCallback, ICommandService, Inject, Injector, IPermissionService, LocaleService, toDisposable } from '@univerjs/core';
+import {
+    CommandType,
+    Disposable,
+    fromCallback,
+    ICommandService,
+    Inject,
+    Injector,
+    IPermissionService,
+    LocaleService,
+    toDisposable,
+} from '@univerjs/core';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
-import { SheetRangeThemeModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookPermissionService } from '@univerjs/sheets';
-import { DeleteSheetTableCommand, SetSheetTableCommand, SheetTableInsertColumnAtCommand, SheetTableInsertRowAtCommand, TableManager } from '@univerjs/sheets-table';
-import { getTransformCoord, ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    SheetRangeThemeModel,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorkbookPermissionService,
+} from '@univerjs/sheets';
+import {
+    DeleteSheetTableCommand,
+    SetSheetTableCommand,
+    SheetTableInsertColumnAtCommand,
+    SheetTableInsertRowAtCommand,
+    TableManager,
+} from '@univerjs/sheets-table';
+import {
+    getTransformCoord,
+    ISheetSelectionRenderService,
+    SetScrollOperation,
+    SetZoomRatioOperation,
+    SHEET_VIEW_KEY,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
-import { SHEET_TABLE_RENAME_DIALOG, SHEET_TABLE_RENAME_DIALOG_ID, SHEET_TABLE_THEME_PANEL, SHEET_TABLE_THEME_PANEL_ID } from '../const';
+import {
+    SHEET_TABLE_RENAME_DIALOG,
+    SHEET_TABLE_RENAME_DIALOG_ID,
+    SHEET_TABLE_THEME_PANEL,
+    SHEET_TABLE_THEME_PANEL_ID,
+} from '../const';
 import { TABLE_CONTROL_INSERT_BUTTON_SIZE, TABLE_CONTROL_TOP_GAP_SIZE } from '../views/widgets/table-controls-util';
 import { SheetTableControlsShape } from '../views/widgets/table-controls.shape';
 import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
@@ -144,10 +178,10 @@ export class SheetTableControlsRenderController extends Disposable implements IR
 
         this._syncTopTableGap(skeleton);
         this._shape.setMenuLabels({
-            rename: this._localeService.t('sheets-table-ui.rename'),
-            'update-range': this._localeService.t('sheets-table-ui.updateRange'),
-            'set-theme': this._localeService.t('sheets-table-ui.setTheme'),
-            delete: this._localeService.t('sheets-table-ui.removeTable'),
+            rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
+            'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
+            'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
+            delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
         });
 
         const unitId = this._context.unit.getUnitId();
@@ -288,7 +322,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     private _openRenameDialog(unitId: string, tableId: string): void {
         this._dialogService.open({
             id: SHEET_TABLE_RENAME_DIALOG_ID,
-            title: { title: this._localeService.t('sheets-table-ui.rename') },
+            title: { title: this._localeService.t<LocaleKey>('sheets-table-ui.rename') },
             draggable: true,
             destroyOnClose: true,
             mask: true,
@@ -335,7 +369,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
 
         this._sidebarService.open({
             id: SHEET_TABLE_THEME_PANEL_ID,
-            header: { title: this._localeService.t('sheets-table-ui.tableStyle') },
+            header: { title: this._localeService.t<LocaleKey>('sheets-table-ui.tableStyle') },
             children: {
                 label: SHEET_TABLE_THEME_PANEL,
                 oldConfig: table.getTableConfig(),

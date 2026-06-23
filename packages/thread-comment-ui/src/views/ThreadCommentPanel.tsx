@@ -17,6 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { Observable } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import type { ThreadCommentPanelSection } from './thread-comment-panel/util';
 import type { IThreadCommentTreeProps } from './ThreadCommentTree';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
@@ -207,11 +208,11 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                             options={[
                                 {
                                     value: 'current',
-                                    label: localeService.t('thread-comment-ui.filter.sheet.current'),
+                                    label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.current'),
                                 },
                                 {
                                     value: 'all',
-                                    label: localeService.t('thread-comment-ui.filter.sheet.all'),
+                                    label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.all'),
                                 },
                             ]}
                             onChange={setUnit}
@@ -224,19 +225,19 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     options={[
                         {
                             value: 'all',
-                            label: localeService.t('thread-comment-ui.filter.status.all'),
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.all'),
                         },
                         {
                             value: 'resolved',
-                            label: localeService.t('thread-comment-ui.filter.status.resolved'),
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.resolved'),
                         },
                         {
                             value: 'unsolved',
-                            label: localeService.t('thread-comment-ui.filter.status.unsolved'),
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.unsolved'),
                         },
                         {
                             value: 'concern_me',
-                            label: localeService.t('thread-comment-ui.filter.status.concernMe'),
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.concernMe'),
                         },
                     ]}
                     onChange={setStatus}
@@ -251,12 +252,12 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                           dark:!univer-text-gray-200
                         `}
                     >
-                        {localeService.t('thread-comment-ui.panel.empty')}
+                        {localeService.t<LocaleKey>('thread-comment-ui.panel.empty')}
                         {isFiltering
                             ? (
                                 <div className="univer-mt-2 univer-flex univer-flex-row">
                                     <Button onClick={onReset}>
-                                        {localeService.t('thread-comment-ui.panel.reset')}
+                                        {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
                                 </div>
                             )
@@ -265,7 +266,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     <div className="univer-mt-2 univer-flex univer-flex-row">
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
-                                            {localeService.t('thread-comment-ui.panel.addComment')}
+                                            {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
                                         </Button>
                                     </div>
                                 )
@@ -277,7 +278,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {unSolvedComments.map(renderComment('unsolved'))}
                         {solvedComments.length > 0 && (
                             <div className="univer-text-xs">
-                                {localeService.t('thread-comment-ui.panel.solved')}
+                                {localeService.t<LocaleKey>('thread-comment-ui.panel.solved')}
                             </div>
                         )}
                         {solvedComments.map(renderComment('solved'))}

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Switch, Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
@@ -37,11 +38,11 @@ export function FilterSyncSwitch() {
             `}
         >
             <div className="univer-flex univer-items-center univer-gap-1">
-                <span>{localeService.t('sheets-filter-ui.sync.title')}</span>
+                <span>{localeService.t<LocaleKey>('sheets-filter-ui.sync.title')}</span>
                 <Tooltip
                     title={enabled
-                        ? localeService.t('sheets-filter-ui.sync.statusTips.off')
-                        : localeService.t('sheets-filter-ui.sync.statusTips.on')}
+                        ? localeService.t<LocaleKey>('sheets-filter-ui.sync.statusTips.off')
+                        : localeService.t<LocaleKey>('sheets-filter-ui.sync.statusTips.on')}
                     asChild
                 >
                     <InfoIcon className="univer-block" />
@@ -51,8 +52,8 @@ export function FilterSyncSwitch() {
                 defaultChecked={enabled}
                 onChange={(checked) => {
                     const message = checked
-                        ? localeService.t('sheets-filter-ui.sync.switchTips.on')
-                        : localeService.t('sheets-filter-ui.sync.switchTips.off');
+                        ? localeService.t<LocaleKey>('sheets-filter-ui.sync.switchTips.on')
+                        : localeService.t<LocaleKey>('sheets-filter-ui.sync.switchTips.off');
                     sheetsFilterSyncController.setEnabled(checked);
                     messageService.show({
                         content: message,

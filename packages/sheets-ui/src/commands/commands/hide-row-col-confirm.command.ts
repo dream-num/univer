@@ -15,9 +15,14 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { getSheetCommandTarget, SetColHiddenCommand, SetRowHiddenCommand, SheetsSelectionsService } from '@univerjs/sheets';
-
+import {
+    getSheetCommandTarget,
+    SetColHiddenCommand,
+    SetRowHiddenCommand,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { isAllColumnsCovered, isAllRowsCovered } from './utils/selection-utils';
 
 export const HideRowConfirmCommand: ICommand = {
@@ -45,11 +50,11 @@ export const HideRowConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.hide-row',
                 title: {
-                    title: localeService.t('sheets-ui.info.problem'),
+                    title: localeService.t<LocaleKey>('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('sheets-ui.rightClick.hideAllRowsAlert') },
-                cancelText: localeService.t('sheets-ui.button.cancel'),
-                confirmText: localeService.t('sheets-ui.button.confirm'),
+                children: { title: localeService.t<LocaleKey>('sheets-ui.rightClick.hideAllRowsAlert') },
+                cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+                confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
             });
 
             return false;
@@ -87,11 +92,11 @@ export const HideColConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.hide-col',
                 title: {
-                    title: localeService.t('sheets-ui.info.problem'),
+                    title: localeService.t<LocaleKey>('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('sheets-ui.rightClick.hideAllColumnsAlert') },
-                cancelText: localeService.t('sheets-ui.button.cancel'),
-                confirmText: localeService.t('sheets-ui.button.confirm'),
+                children: { title: localeService.t<LocaleKey>('sheets-ui.rightClick.hideAllColumnsAlert') },
+                cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+                confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
             });
 
             return false;

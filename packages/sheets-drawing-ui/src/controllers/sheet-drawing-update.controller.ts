@@ -18,7 +18,14 @@ import type { IAccessor, IDrawingParam, IRange, Nullable, Workbook } from '@univ
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { IInsertDrawingCommandParams, ISetDrawingArrangeCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import type {
+    IInsertDrawingCommandParams,
+    ISetDrawingArrangeCommandParams,
+    ISetDrawingCommandParams,
+    ISheetDrawing,
+    ISheetDrawingPosition,
+} from '@univerjs/sheets-drawing';
+import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     BuildTextUtils,
@@ -54,7 +61,13 @@ import {
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { attachRangeWithCoord, SetRangeValuesCommand, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    attachRangeWithCoord,
+    SetRangeValuesCommand,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import {
     drawingPositionToTransform,
     InsertSheetDrawingCommand,
@@ -164,7 +177,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
             this._messageService.show({
                 type: MessageType.Error,
-                content: this._localeService.t('sheets-drawing-ui.update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+                content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
             });
             return false;
         } else if (fileLength === 0) {
@@ -202,17 +215,17 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('sheets-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('sheets-drawing-ui.update-status.invalidImageType'),
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.invalidImageType'),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('sheets-drawing-ui.update-status.invalidImage'),
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.invalidImage'),
                 });
             }
         }
@@ -274,17 +287,17 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('sheets-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('sheets-drawing-ui.update-status.invalidImageType'),
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.invalidImageType'),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('sheets-drawing-ui.update-status.invalidImage'),
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.invalidImage'),
                 });
             }
         }

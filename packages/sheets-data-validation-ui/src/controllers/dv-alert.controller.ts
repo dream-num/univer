@@ -16,7 +16,15 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { BaseDataValidator } from '@univerjs/data-validation';
-import { DataValidationStatus, Disposable, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    DataValidationStatus,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
@@ -73,7 +81,7 @@ export class DataValidationAlertController extends Disposable {
                     }
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: this._localeService.t('sheets-data-validation-ui.error.title'),
+                        title: this._localeService.t<LocaleKey>('sheets-data-validation-ui.error.title'),
                         message: validator?.getRuleFinalError(rule, cellPos.location),
                         location: cellPos.location,
                         width: 200,

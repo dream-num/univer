@@ -16,7 +16,14 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
-import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { LocaleKey } from '../../../locale/types';
+import {
+    IAuthzIoService,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
 import { Avatar, borderClassName, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
@@ -96,17 +103,20 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
 
     return (
         <>
-            <FormLayout className="univer-font-medium" label={localeService.t('sheets-ui.permission.panel.editPermission')}>
+            <FormLayout
+                className="univer-font-medium"
+                label={localeService.t<LocaleKey>('sheets-ui.permission.panel.editPermission')}
+            >
                 <RadioGroup
                     value={editState}
                     onChange={(v) => onEditStateChange(v as EditStateEnum)}
                     className="univer-flex univer-flex-col"
                 >
                     <Radio value={EditStateEnum.OnlyMe}>
-                        <span>{localeService.t('sheets-ui.permission.panel.onlyICanEdit')}</span>
+                        <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.onlyICanEdit')}</span>
                     </Radio>
                     <Radio value={EditStateEnum.DesignedUserCanEdit}>
-                        <span>{localeService.t('sheets-ui.permission.panel.designedUserCanEdit')}</span>
+                        <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.designedUserCanEdit')}</span>
                     </Radio>
                 </RadioGroup>
             </FormLayout>
@@ -118,8 +128,8 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                     `, borderClassName)}
                 >
                     <div className="univer-flex univer-items-center univer-justify-between univer-text-sm">
-                        <span>{localeService.t('sheets-ui.permission.panel.designedPerson')}</span>
-                        <span className="univer-cursor-pointer univer-text-primary-600" onClick={handleAddPerson}>{localeService.t('sheets-ui.permission.panel.addPerson')}</span>
+                        <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.designedPerson')}</span>
+                        <span className="univer-cursor-pointer univer-text-primary-600" onClick={handleAddPerson}>{localeService.t<LocaleKey>('sheets-ui.permission.panel.addPerson')}</span>
                     </div>
                     <div className="univer-my-2 univer-h-px univer-bg-gray-200" />
                     <div className="univer-flex-1">
@@ -147,8 +157,14 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                             borderless
                                             value="edit"
                                             options={[
-                                                { label: `${localeService.t('sheets-ui.permission.panel.canEdit')}`, value: 'edit' },
-                                                { label: `${localeService.t('sheets-ui.permission.panel.delete')}`, value: 'delete' },
+                                                {
+                                                    label: `${localeService.t<LocaleKey>('sheets-ui.permission.panel.canEdit')}`,
+                                                    value: 'edit',
+                                                },
+                                                {
+                                                    label: `${localeService.t<LocaleKey>('sheets-ui.permission.panel.delete')}`,
+                                                    value: 'delete',
+                                                },
                                             ]}
                                             onChange={(v) => {
                                                 if (v === 'delete') {
@@ -170,7 +186,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                     <p
                                         className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400"
                                     >
-                                        {localeService.t('sheets-ui.permission.dialog.userEmpty')}
+                                        {localeService.t<LocaleKey>('sheets-ui.permission.dialog.userEmpty')}
                                     </p>
                                 </div>
                             )}
@@ -178,7 +194,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
 
                 </div>
             )}
-            <FormLayout className="univer-font-medium" label={localeService.t('sheets-ui.permission.panel.viewPermission')}>
+            <FormLayout className="univer-font-medium" label={localeService.t<LocaleKey>('sheets-ui.permission.panel.viewPermission')}>
                 <RadioGroup
                     value={viewState}
                     onChange={(v) => onViewStateChange(v as ViewStateEnum)}
@@ -188,10 +204,10 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                     `}
                 >
                     <Radio value={ViewStateEnum.OthersCanView}>
-                        <span>{localeService.t('sheets-ui.permission.panel.othersCanView')}</span>
+                        <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.othersCanView')}</span>
                     </Radio>
                     <Radio value={ViewStateEnum.NoOneElseCanView}>
-                        <span>{localeService.t('sheets-ui.permission.panel.noOneElseCanView')}</span>
+                        <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.noOneElseCanView')}</span>
                     </Radio>
                 </RadioGroup>
             </FormLayout>

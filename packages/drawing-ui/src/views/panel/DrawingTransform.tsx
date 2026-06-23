@@ -16,6 +16,7 @@
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
+import type { LocaleKey } from '../../locale/types';
 import { debounce, LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -360,7 +361,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('drawing-ui.image-panel.transform.title')}</div>
+                <div>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.title')}</div>
             </header>
 
             <div
@@ -370,7 +371,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                 `}
             >
                 <div>
-                    <span>{localeService.t('drawing-ui.image-panel.transform.width')}</span>
+                    <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.width')}</span>
                     <InputNumber
                         precision={1}
                         value={width}
@@ -379,7 +380,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('drawing-ui.image-panel.transform.height')}</span>
+                    <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.height')}</span>
                     <InputNumber
                         precision={1}
                         value={height}
@@ -388,7 +389,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('drawing-ui.image-panel.transform.lock')}</span>
+                    <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.lock')}</span>
                     <div className="univer-text-center">
                         <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
                     </div>
@@ -402,15 +403,15 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                 `}
             >
                 <div>
-                    <span>{localeService.t('drawing-ui.image-panel.transform.x')}</span>
+                    <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.x')}</span>
                     <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
                 </div>
                 <div>
-                    <span>{localeService.t('drawing-ui.image-panel.transform.y')}</span>
+                    <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.y')}</span>
                     <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
                 </div>
                 <div>
-                    <span>{localeService.t('drawing-ui.image-panel.transform.rotate')}</span>
+                    <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.rotate')}</span>
                     <InputNumber
                         precision={1}
                         value={rotation}

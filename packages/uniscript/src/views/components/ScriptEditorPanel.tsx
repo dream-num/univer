@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { DisposableCollection, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
 import { IMessageService, IShortcutService, useDependency } from '@univerjs/ui';
@@ -97,7 +98,7 @@ export function ScriptEditorPanel() {
             </div>
             <div className="univer-mt-2.5">
                 <Button variant="primary" onClick={startExecution}>
-                    {localeService.t('uniscript.panel.execute')}
+                    {localeService.t<LocaleKey>('uniscript.panel.execute')}
                 </Button>
             </div>
         </div>
@@ -116,13 +117,13 @@ function useExecution(getMonacoEditor: () => Nullable<editor.IStandaloneCodeEdit
                 .execute(model.getValue())
                 .then(() => {
                     messageService.show({
-                        content: localeService.t('uniscript.message.success'),
+                        content: localeService.t<LocaleKey>('uniscript.message.success'),
                         type: MessageType.Success,
                     });
                 })
                 .catch(() => {
                     messageService.show({
-                        content: localeService.t('uniscript.message.failed'),
+                        content: localeService.t<LocaleKey>('uniscript.message.failed'),
                         type: MessageType.Error,
                     });
                 });

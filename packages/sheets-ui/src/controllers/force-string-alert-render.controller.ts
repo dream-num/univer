@@ -17,7 +17,17 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../config/config';
-import { CellValueType, Disposable, getNumfmtParseValueFilter, IConfigService, Inject, isRealNum, isTextFormat, LocaleService } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    CellValueType,
+    Disposable,
+    getNumfmtParseValueFilter,
+    IConfigService,
+    Inject,
+    isRealNum,
+    isTextFormat,
+    LocaleService,
+} from '@univerjs/core';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -100,8 +110,8 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
 
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: this._localeService.t('sheets-ui.info.error'),
-                        message: this._localeService.t('sheets-ui.info.forceStringInfo'),
+                        title: this._localeService.t<LocaleKey>('sheets-ui.info.error'),
+                        message: this._localeService.t<LocaleKey>('sheets-ui.info.forceStringInfo'),
                         location,
                         width: 200,
                         height: 74,

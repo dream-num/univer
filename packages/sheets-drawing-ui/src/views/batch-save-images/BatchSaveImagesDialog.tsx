@@ -15,6 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, CheckboxGroup, FormLayout, Select } from '@univerjs/design';
 import { useHighlightRange } from '@univerjs/sheets-ui';
@@ -102,7 +103,7 @@ export function BatchSaveImagesDialog() {
             dialogService.close(BATCH_SAVE_IMAGES_DIALOG_ID);
         } catch (err) {
             console.error('Failed to save images:', err);
-            setError(localeService.t('sheets-drawing-ui.save.error'));
+            setError(localeService.t<LocaleKey>('sheets-drawing-ui.save.error'));
         } finally {
             setSaving(false);
         }
@@ -112,25 +113,25 @@ export function BatchSaveImagesDialog() {
 
     return (
         <div className="univer-flex univer-flex-col">
-            <FormLayout label={localeService.t('sheets-drawing-ui.save.imageCount')}>
+            <FormLayout label={localeService.t<LocaleKey>('sheets-drawing-ui.save.imageCount')}>
                 <div className="univer-text-sm univer-text-gray-600">{images.length}</div>
             </FormLayout>
 
-            <FormLayout label={localeService.t('sheets-drawing-ui.save.fileNameConfig')}>
+            <FormLayout label={localeService.t<LocaleKey>('sheets-drawing-ui.save.fileNameConfig')}>
                 <CheckboxGroup value={fileNameParts} onChange={handleFileNamePartsChange} direction="vertical">
                     <Checkbox value={FileNamePart.CELL_ADDRESS} disabled={!hasAvailableColumns}>
-                        {localeService.t('sheets-drawing-ui.save.useRowCol')}
+                        {localeService.t<LocaleKey>('sheets-drawing-ui.save.useRowCol')}
                     </Checkbox>
                     {hasAvailableColumns && (
                         <Checkbox value={FileNamePart.COLUMN_VALUE}>
-                            {localeService.t('sheets-drawing-ui.save.useColumnValue')}
+                            {localeService.t<LocaleKey>('sheets-drawing-ui.save.useColumnValue')}
                         </Checkbox>
                     )}
                 </CheckboxGroup>
             </FormLayout>
 
             {showColumnSelect && (
-                <FormLayout label={localeService.t('sheets-drawing-ui.save.selectColumn')}>
+                <FormLayout label={localeService.t<LocaleKey>('sheets-drawing-ui.save.selectColumn')}>
                     <Select
                         value={selectedColumn}
                         options={columnOptions}
@@ -149,14 +150,14 @@ export function BatchSaveImagesDialog() {
                 `}
             >
                 <Button onClick={handleCancel} disabled={saving}>
-                    {localeService.t('sheets-drawing-ui.save.cancel')}
+                    {localeService.t<LocaleKey>('sheets-drawing-ui.save.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     onClick={handleConfirm}
                     disabled={saving || images.length === 0}
                 >
-                    {saving ? localeService.t('sheets-drawing-ui.save.saving') : localeService.t('sheets-drawing-ui.save.confirm')}
+                    {saving ? localeService.t<LocaleKey>('sheets-drawing-ui.save.saving') : localeService.t<LocaleKey>('sheets-drawing-ui.save.confirm')}
                 </Button>
             </div>
         </div>

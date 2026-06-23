@@ -27,6 +27,7 @@ import type {
     UniverRenderingContext,
 } from '@univerjs/engine-render';
 import type { IUniverDocsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
 import {
     DataStreamTreeTokenType,
     Disposable,
@@ -113,13 +114,13 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
 
     private _getLocale(): IParagraphPlaceholderLocale {
         return {
-            heading1: this._localeService.t('docs-ui.placeholder.heading1'),
-            heading2: this._localeService.t('docs-ui.placeholder.heading2'),
-            heading3: this._localeService.t('docs-ui.placeholder.heading3'),
-            heading4: this._localeService.t('docs-ui.placeholder.heading4'),
-            heading5: this._localeService.t('docs-ui.placeholder.heading5'),
-            listItem: this._localeService.t('docs-ui.placeholder.listItem'),
-            normalText: this._localeService.t('docs-ui.placeholder.normalText'),
+            heading1: this._localeService.t<LocaleKey>('docs-ui.placeholder.heading1'),
+            heading2: this._localeService.t<LocaleKey>('docs-ui.placeholder.heading2'),
+            heading3: this._localeService.t<LocaleKey>('docs-ui.placeholder.heading3'),
+            heading4: this._localeService.t<LocaleKey>('docs-ui.placeholder.heading4'),
+            heading5: this._localeService.t<LocaleKey>('docs-ui.placeholder.heading5'),
+            listItem: this._localeService.t<LocaleKey>('docs-ui.placeholder.listItem'),
+            normalText: this._localeService.t<LocaleKey>('docs-ui.placeholder.normalText'),
         };
     }
 }

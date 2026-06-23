@@ -14,10 +14,36 @@
  * limitations under the License.
  */
 
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
+import type {
+    CellValue,
+    DataValidationOperator,
+    ICellData,
+    IDataValidationRule,
+    IRange,
+    ISheetDataValidationRule,
+    IStyleData,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
-import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../locale/types';
+import {
+    DataValidationRenderMode,
+    DataValidationType,
+    isFormulaString,
+    IUniverInstanceService,
+    numfmt,
+    Rectangle,
+    Tools,
+    UniverInstanceType,
+    WrapStrategy,
+} from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    isReferenceString,
+    LexerTreeBuilder,
+    sequenceNodeType,
+} from '@univerjs/engine-formula';
 import { deserializeListOptions } from '@univerjs/sheets';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationListCacheService } from '../services/dv-list-cache.service';
@@ -123,9 +149,9 @@ export class ListValidator extends BaseSheetValidator {
                 ? valid
                     ? !isIntersects ?
                         undefined :
-                        this.localeService.t('sheets-data-validation.validFail.listIntersects') :
-                    this.localeService.t('sheets-data-validation.validFail.listInvalid')
-                : this.localeService.t('sheets-data-validation.validFail.list'),
+                        this.localeService.t<LocaleKey>('sheets-data-validation.validFail.listIntersects') :
+                    this.localeService.t<LocaleKey>('sheets-data-validation.validFail.listInvalid')
+                : this.localeService.t<LocaleKey>('sheets-data-validation.validFail.list'),
         };
     }
 
@@ -184,11 +210,11 @@ export class ListValidator extends BaseSheetValidator {
     }
 
     override generateRuleName() {
-        return this.localeService.t('sheets-data-validation.list.name');
+        return this.localeService.t<LocaleKey>('sheets-data-validation.list.name');
     }
 
     override generateRuleErrorMessage(): string {
-        return this.localeService.t('sheets-data-validation.list.error');
+        return this.localeService.t<LocaleKey>('sheets-data-validation.list.error');
     }
 
     private _getUnitAndSubUnit(currentUnitId?: string, currentSubUnitId?: string): { unitId: string; subUnitId: string } | null {

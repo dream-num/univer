@@ -16,8 +16,14 @@
 
 import type { IAccessor, IRange } from '@univerjs/core';
 import type { IAddSheetTableCommandParams } from '@univerjs/sheets-table';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    expandToContinuousRange,
+    getSheetCommandTarget,
+    isSingleCellSelection,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { AddSheetTableCommand } from '@univerjs/sheets-table';
 import { IDialogService } from '@univerjs/ui';
 import { TABLE_SELECTOR_DIALOG } from '../../const';
@@ -88,7 +94,7 @@ export async function openRangeSelector(
         };
         dialogService.open({
             id: TABLE_SELECTOR_DIALOG,
-            title: { title: localeService.t('sheets-table-ui.selectRange') },
+            title: { title: localeService.t<LocaleKey>('sheets-table-ui.selectRange') },
             draggable: true,
             destroyOnClose: true,
             mask: false,

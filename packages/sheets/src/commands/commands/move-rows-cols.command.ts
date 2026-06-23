@@ -16,6 +16,7 @@
 
 import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../basics';
+import type { LocaleKey } from '../../locale/types';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
@@ -106,12 +107,12 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            errorService.emit(localeService.t('sheets.info.partOfCell'));
+            errorService.emit(localeService.t<LocaleKey>('sheets.info.partOfCell'));
             return false;
         }
 
         if (rowAcrossMergedCell(toRow, worksheet)) {
-            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
+            errorService.emit(localeService.t<LocaleKey>('sheets.info.acrossMergedCell'));
             return false;
         }
 
@@ -260,12 +261,12 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            errorService.emit(localeService.t('sheets.info.partOfCell'));
+            errorService.emit(localeService.t<LocaleKey>('sheets.info.partOfCell'));
             return false;
         }
 
         if (columnAcrossMergedCell(toCol, worksheet)) {
-            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
+            errorService.emit(localeService.t<LocaleKey>('sheets.info.acrossMergedCell'));
             return false;
         }
 

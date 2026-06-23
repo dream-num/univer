@@ -15,6 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { IDialogService } from '@univerjs/ui';
 import { IBatchSaveImagesService } from '../../services/batch-save-images.service';
@@ -43,7 +44,7 @@ export const SaveCellImagesCommand: ICommand = {
         // Multiple images: open batch save dialog
         const localeService = accessor.get(LocaleService);
         const selectionRange = batchSaveService.getSelectionRangeNotation();
-        const titleText = `${localeService.t('sheets-drawing-ui.save.title')} (${selectionRange})`;
+        const titleText = `${localeService.t<LocaleKey>('sheets-drawing-ui.save.title')} (${selectionRange})`;
 
         dialogService.open({
             id: BATCH_SAVE_IMAGES_DIALOG_ID,

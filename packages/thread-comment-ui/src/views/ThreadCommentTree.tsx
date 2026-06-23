@@ -17,6 +17,7 @@
 import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
@@ -172,7 +173,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                             className="hover:univer-bg-gray-200"
                                                             onClick={() => onEditingChange?.(true)}
                                                         >
-                                                            {localeService.t('thread-comment-ui.item.edit')}
+                                                            {localeService.t<LocaleKey>('thread-comment-ui.item.edit')}
                                                         </a>
                                                     </li>
                                                     <li>
@@ -180,7 +181,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                             className="hover:univer-bg-gray-200"
                                                             onClick={handleDeleteItem}
                                                         >
-                                                            {localeService.t('thread-comment-ui.item.delete')}
+                                                            {localeService.t<LocaleKey>('thread-comment-ui.item.delete')}
                                                         </a>
                                                     </li>
                                                 </ul>

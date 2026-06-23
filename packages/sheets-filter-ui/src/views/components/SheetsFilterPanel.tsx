@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
@@ -115,14 +116,14 @@ export function FilterPanel() {
                 `}
             >
                 <Button variant="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
-                    {localeService.t('sheets-filter-ui.panel.clear-filter')}
+                    {localeService.t<LocaleKey>('sheets-filter-ui.panel.clear-filter')}
                 </Button>
                 <span className="univer-flex univer-gap-2">
                     <Button variant="default" onClick={onCancel}>
-                        {localeService.t('sheets-filter-ui.panel.cancel')}
+                        {localeService.t<LocaleKey>('sheets-filter-ui.panel.cancel')}
                     </Button>
                     <Button disabled={!canApply} variant="primary" onClick={onApply}>
-                        {localeService.t('sheets-filter-ui.panel.confirm')}
+                        {localeService.t<LocaleKey>('sheets-filter-ui.panel.confirm')}
                     </Button>
                 </span>
             </div>
@@ -134,8 +135,8 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
-        { label: localeService.t('sheets-filter-ui.panel.by-values'), value: FilterBy.VALUES },
-        { label: localeService.t('sheets-filter-ui.panel.by-colors'), value: FilterBy.COLORS },
-        { label: localeService.t('sheets-filter-ui.panel.by-conditions'), value: FilterBy.CONDITIONS },
+        { label: localeService.t<LocaleKey>('sheets-filter-ui.panel.by-values'), value: FilterBy.VALUES },
+        { label: localeService.t<LocaleKey>('sheets-filter-ui.panel.by-colors'), value: FilterBy.COLORS },
+        { label: localeService.t<LocaleKey>('sheets-filter-ui.panel.by-conditions'), value: FilterBy.CONDITIONS },
     ], [locale, localeService]);
 }

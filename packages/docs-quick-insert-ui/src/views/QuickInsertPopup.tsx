@@ -15,7 +15,15 @@
  */
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
-import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
+import {
+    CommandType,
+    Direction,
+    DisposableCollection,
+    generateRandomId,
+    ICommandService,
+    LocaleService,
+    toDisposable,
+} from '@univerjs/core';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';

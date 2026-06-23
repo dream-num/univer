@@ -15,6 +15,7 @@
  */
 
 import type { IDataValidationRuleOptions } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -43,7 +44,7 @@ export function DateShowTimeOption(props: IDateShowTimeOptionProps) {
                     });
                 }}
             >
-                {localeService.t('sheets-data-validation-ui.showTime.label')}
+                {localeService.t<LocaleKey>('sheets-data-validation-ui.showTime.label')}
             </Checkbox>
         </FormLayout>
     );

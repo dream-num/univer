@@ -57,6 +57,11 @@ class TestRenderManagerService {
     hasViewport = true;
     viewportScrollX = 0;
     viewportScrollY = 0;
+    canvasElement: { getBoundingClientRect: () => { left: number; top: number; width: number }; style: { width: string } } | null = {
+        getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
+        style: { width: '1000px' },
+    };
+
     readonly onTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
 
@@ -71,10 +76,7 @@ class TestRenderManagerService {
         return {
             unitId,
             engine: {
-                getCanvasElement: () => ({
-                    getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
-                    style: { width: '1000px' },
-                }),
+                getCanvasElement: () => this.canvasElement,
             },
             mainComponent: {
                 getOffsetConfig: () => ({
@@ -213,6 +215,19 @@ describe('DocCanvasPopManagerService', () => {
         rect.right = 130;
         commandService.emit(RichTextEditingMutation.id);
         expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 10, bottom: 30 });
+    });
+
+    it('ignores stale rect popup updates after the render canvas is released', () => {
+        const { service, popupService, renderManagerService, commandService } = createService();
+
+        service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'stale-rect' }, 'doc-1');
+        const popup = popupService.popups.get('popup-1');
+        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+
+        renderManagerService.canvasElement = null;
+
+        expect(() => commandService.emit(RichTextEditingMutation.id)).not.toThrow();
+        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
     });
 
     it('updates object anchored popups after zoom commands and removes popup on dispose', () => {

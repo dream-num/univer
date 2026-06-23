@@ -105,6 +105,10 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
     const documentOffsetConfig = document.getOffsetConfig();
     const { docsLeft, docsTop } = documentOffsetConfig;
     const canvasElement = engine.getCanvasElement();
+    if (canvasElement == null) {
+        return;
+    }
+
     const canvasClientRect = canvasElement.getBoundingClientRect();
     const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
     const { top, left, width } = canvasClientRect; // real width affected by scale
@@ -139,6 +143,10 @@ export class DocCanvasPopManagerService extends Disposable {
             const { scene, engine } = currentRender;
             const bound: IBoundRectNoAngle = typeof rect === 'function' ? rect() : rect;
             const canvasElement = engine.getCanvasElement();
+            if (canvasElement == null) {
+                return;
+            }
+
             const canvasClientRect = canvasElement.getBoundingClientRect();
             const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
 
@@ -156,7 +164,11 @@ export class DocCanvasPopManagerService extends Disposable {
         };
 
         const position = calc();
-        const position$ = new BehaviorSubject(position);
+        if (position == null) {
+            throw new Error(`Current render canvas not found, unitId: ${currentRender.unitId}`);
+        }
+
+        const position$ = new BehaviorSubject<IBoundRectNoAngle>(position);
         const disposable = new DisposableCollection();
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
@@ -171,12 +183,18 @@ export class DocCanvasPopManagerService extends Disposable {
         const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-                position$.next(calc());
+                const newPosition = calc();
+                if (newPosition) {
+                    position$.next(newPosition);
+                }
             }));
         }
 
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
-            position$.next(calc());
+            const newPosition = calc();
+            if (newPosition) {
+                position$.next(newPosition);
+            }
         }));
 
         return {

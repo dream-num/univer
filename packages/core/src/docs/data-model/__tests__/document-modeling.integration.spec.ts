@@ -16,7 +16,9 @@
 
 import type { IDocumentData } from '../../../types/interfaces/i-document-data';
 import { describe, expect, it } from 'vitest';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../../common/const';
 import { BooleanNumber, HorizontalAlign, TextDecoration, TextDirection } from '../../../types/enum/text-style';
+import { DocumentFlavor } from '../../../types/interfaces/i-document-data';
 import { DocumentDataModel } from '../document-data-model';
 import { JSONX } from '../json-x/json-x';
 import { ParagraphStyleBuilder, RichTextBuilder, TextDecorationBuilder, TextStyleBuilder } from '../rich-text-builder';
@@ -75,6 +77,73 @@ function createDocSnapshot(id = 'doc-main'): IDocumentData {
 }
 
 describe('DocumentDataModel + RichTextBuilder integration', () => {
+    it('should hydrate missing default fields for partial normal document snapshots', () => {
+        const model = new DocumentDataModel({ id: 'partial-doc', title: 'Partial Doc' });
+
+        expect(model.getUnitId()).toBe('partial-doc');
+        expect(model.getTitle()).toBe('Partial Doc');
+        expect(model.getBody()?.dataStream).toBe('\r\n');
+        expect(model.getSnapshot().headers).toEqual({});
+        expect(model.getSnapshot().footers).toEqual({});
+        expect(model.getDrawings()).toEqual({});
+        expect(model.getDrawingsOrder()).toEqual([]);
+        expect(model.getSettings()).toEqual({});
+        expect(model.getSnapshot().tableSource).toEqual({});
+        expect(model.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.MODERN);
+        expect(model.getDocumentStyle().pageSize).toBeDefined();
+        expect(() => model.updateDocumentDataMargin({ t: 10 })).not.toThrow();
+        expect(model.getDocumentStyle().marginTop).toBe(10);
+
+        model.reset({ id: 'partial-doc', title: 'Reset Partial Doc' });
+
+        expect(model.getTitle()).toBe('Reset Partial Doc');
+        expect(model.getBody()?.dataStream).toBe('\r\n');
+        expect(model.getSnapshot().headers).toEqual({});
+        expect(model.getDrawings()).toEqual({});
+        expect(model.getSettings()).toEqual({});
+
+        model.dispose();
+    });
+
+    it('should keep internal editor document snapshots shallow', () => {
+        const model = new DocumentDataModel({
+            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            title: 'Editor Doc',
+            documentStyle: {},
+            body: {
+                dataStream: 'Draft\r\n',
+            },
+        });
+
+        expect(model.getUnitId()).toBe(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        expect(model.getTitle()).toBe('Editor Doc');
+        expect(model.getBody()?.dataStream).toBe('Draft\r\n');
+        expect(model.getSnapshot().headers).toBeUndefined();
+        expect(model.getSnapshot().footers).toBeUndefined();
+        expect(model.getDrawings()).toBeUndefined();
+        expect(model.getDrawingsOrder()).toBeUndefined();
+        expect(model.getSettings()).toBeUndefined();
+        expect(model.getSnapshot().tableSource).toBeUndefined();
+        expect(model.getDocumentStyle()).toEqual({});
+
+        model.reset({
+            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            title: 'Reset Editor Doc',
+            documentStyle: {},
+            body: {
+                dataStream: 'Reset\r\n',
+            },
+        });
+
+        expect(model.getTitle()).toBe('Reset Editor Doc');
+        expect(model.getBody()?.dataStream).toBe('Reset\r\n');
+        expect(model.getSnapshot().headers).toBeUndefined();
+        expect(model.getSettings()).toBeUndefined();
+        expect(model.getDocumentStyle()).toEqual({});
+
+        model.dispose();
+    });
+
     it('should perform typical editing operations and reflect them in the document snapshot', () => {
         const model = new DocumentDataModel(createDocSnapshot());
         expect(model.getUnitId()).toBe('doc-main');
@@ -211,7 +280,7 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
 
         expect(model.getCustomRanges()).toEqual([]);
         expect(model.getCustomDecorations()).toEqual([]);
-        expect(model.getSettings()).toBeUndefined();
+        expect(model.getSettings()).toEqual({});
         expect(model.apply(null as never)).toBeUndefined();
         expect(model.change$.getValue()).toBe(initialChangeCount);
 

@@ -19,6 +19,7 @@ import type { IDocumentBody, IDocumentData, IDocumentRenderConfig, IDocumentStyl
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
 import { BehaviorSubject } from 'rxjs';
+import { isInternalEditorID } from '../../common/const';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { generateRandomId } from '../../shared/random-id';
 import { Tools } from '../../shared/tools';
@@ -32,6 +33,48 @@ export const DEFAULT_DOC = {
     id: 'default_doc',
     documentStyle: {},
 };
+
+function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData {
+    if (snapshot.id != null && isInternalEditorID(snapshot.id)) {
+        return { ...DEFAULT_DOC, ...snapshot } as IDocumentData;
+    }
+
+    const defaultSnapshot = getEmptySnapshot(snapshot.id, snapshot.locale, snapshot.title);
+
+    if (Tools.isEmptyObject(snapshot)) {
+        return defaultSnapshot;
+    }
+
+    const mergedSnapshot = Tools.commonExtend<IDocumentData>(defaultSnapshot, snapshot);
+    const { documentStyle, settings } = snapshot;
+
+    if (documentStyle != null) {
+        if (documentStyle.pageSize != null) {
+            documentStyle.pageSize = {
+                ...defaultSnapshot.documentStyle.pageSize,
+                ...documentStyle.pageSize,
+            };
+        }
+
+        if (documentStyle.renderConfig != null) {
+            documentStyle.renderConfig = {
+                ...defaultSnapshot.documentStyle.renderConfig,
+                ...documentStyle.renderConfig,
+            };
+        }
+
+        mergedSnapshot.documentStyle = Tools.commonExtend(defaultSnapshot.documentStyle, documentStyle);
+    }
+
+    if (settings != null) {
+        mergedSnapshot.settings = {
+            ...defaultSnapshot.settings,
+            ...settings,
+        };
+    }
+
+    return mergedSnapshot;
+}
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -55,7 +98,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
     constructor(snapshot: Partial<IDocumentData>) {
         super();
 
-        this.snapshot = { ...DEFAULT_DOC, ...snapshot };
+        this.snapshot = createDocumentSnapshot(snapshot);
         this._name$.next(this.snapshot.title ?? 'No Title');
     }
 
@@ -288,7 +331,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             throw new Error('Cannot reset a document model with a different unit id!');
         }
 
-        this.snapshot = { ...DEFAULT_DOC, ...snapshot };
+        this.snapshot = createDocumentSnapshot(snapshot);
         this._initializeHeaderFooterModel();
         this.change$.next(this.change$.value + 1);
     }

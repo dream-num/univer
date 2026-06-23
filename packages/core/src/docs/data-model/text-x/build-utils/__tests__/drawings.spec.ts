@@ -108,7 +108,7 @@ describe('drawing build utils', () => {
         expect(getRichTextEditPath(doc, 'header-1')).toEqual(['headers', 'header-1', 'body']);
         expect(() => getRichTextEditPath(doc, 'missing-segment')).toThrow('Segment id not found in headers or footers');
         expect(() => getRichTextEditPath(new DocumentDataModel({ id: 'doc-no-segment', body: { dataStream: 'Body\r\n' } }), 'missing')).toThrow(
-            'Document data model must have headers or footers when update by segment id'
+            'Segment id not found in headers or footers'
         );
 
         const actions = addDrawing({
@@ -146,9 +146,12 @@ describe('drawing build utils', () => {
     });
 
     it('should return false when drawing insertion targets a missing body', () => {
+        const documentDataModel = new DocumentDataModel({ id: 'doc-without-body' });
+        delete documentDataModel.getSnapshot().body;
+
         const result = addDrawing({
             selection: { startOffset: 0, endOffset: 0, collapsed: true },
-            documentDataModel: new DocumentDataModel({ id: 'doc-without-body' }),
+            documentDataModel,
             drawings: [{
                 unitId: 'doc-without-body',
                 subUnitId: '',
@@ -166,5 +169,6 @@ describe('drawing build utils', () => {
         });
 
         expect(result).toBe(false);
+        documentDataModel.dispose();
     });
 });

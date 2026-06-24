@@ -18,11 +18,15 @@ import type { Observable, Subscription } from 'rxjs';
 import type { IMenuSchema } from '../menu/menu-manager.service';
 import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { startWith } from 'rxjs/operators';
+import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { IMenuManagerService } from '../menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../menu/types';
 
 export const IRibbonService = createIdentifier<IRibbonService>('univer.ribbon-service');
+
+function isSameHiddenMap(previous: boolean[], current: boolean[]): boolean {
+    return previous.length === current.length && previous.every((hidden, index) => hidden === current[index]);
+}
 
 export interface IRibbonService {
     ribbon$: Observable<IMenuSchema[]>;
@@ -110,7 +114,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         this.disposeWithMe(
             combineLatest([
                 this._menuManagerService.menuChanged$.pipe(startWith(undefined)),
-                this._univerInstanceService.focused$.pipe(startWith(undefined)),
+                this._univerInstanceService.focused$.pipe(startWith(undefined), distinctUntilChanged()),
             ]).subscribe(() => {
                 this._updateRibbon();
             })
@@ -148,7 +152,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         this._hiddenSubscription?.unsubscribe();
 
         this._hiddenSubscription = combineLatest(hiddenObservableMap)
-            .pipe(startWith(new Array(hiddenObservableMap.length).fill(false)))
+            .pipe(
+                startWith(new Array(hiddenObservableMap.length).fill(false)),
+                distinctUntilChanged(isSameHiddenMap)
+            )
             .subscribe((hiddenMap) => {
                 const newRibbon: IMenuSchema[] = [];
 

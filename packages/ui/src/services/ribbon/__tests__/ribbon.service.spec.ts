@@ -33,12 +33,14 @@ import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager
 import { MenuManagerPosition, RibbonPosition } from '../../menu/types';
 import { DesktopRibbonService, IRibbonService } from '../ribbon.service';
 
-function createService() {
+function createService(univerInstanceService?: { focused$: BehaviorSubject<string | null> }) {
     const injector = new Injector();
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
-    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add(univerInstanceService
+        ? [IUniverInstanceService, univerInstanceService as never]
+        : [IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
     injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
     return {
@@ -148,5 +150,71 @@ describe('DesktopRibbonService', () => {
 
         ribbonSub.unsubscribe();
         activeSub.unsubscribe();
+    });
+
+    it('does not republish the ribbon when hidden states emit unchanged values', () => {
+        const { service, menuManagerService } = createService();
+        const hidden$ = new BehaviorSubject(false);
+        const ribbons: IMenuSchema[][] = [];
+        const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    order: 0,
+                    [`${RibbonPosition.START}.stable-group`]: {
+                        order: 0,
+                        stableCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'stable-command', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+
+        const publishCountAfterInitialHiddenState = ribbons.length;
+        hidden$.next(false);
+
+        expect(ribbons.length).toBe(publishCountAfterInitialHiddenState);
+
+        hidden$.next(true);
+
+        expect(ribbons.length).toBe(publishCountAfterInitialHiddenState + 1);
+
+        ribbonSub.unsubscribe();
+    });
+
+    it('does not republish the ribbon when focus emits the same unit id', () => {
+        const focused$ = new BehaviorSubject<string | null>('unit-1');
+        const { service, menuManagerService } = createService({ focused$ });
+        const ribbons: IMenuSchema[][] = [];
+        const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    order: 0,
+                    [`${RibbonPosition.START}.focus-group`]: {
+                        order: 0,
+                        focusCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'focus-command', type: MenuItemType.BUTTON }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+
+        const publishCountAfterMenuLoad = ribbons.length;
+        focused$.next('unit-1');
+
+        expect(ribbons.length).toBe(publishCountAfterMenuLoad);
+
+        focused$.next('unit-2');
+
+        expect(ribbons.length).toBe(publishCountAfterMenuLoad + 1);
+
+        ribbonSub.unsubscribe();
     });
 });

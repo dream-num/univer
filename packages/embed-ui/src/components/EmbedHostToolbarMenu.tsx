@@ -265,7 +265,6 @@ function mountFullscreenProductRibbon(params: {
             childType: params.descriptor.childType,
             childUnitId: params.descriptor.childUnitId,
             embedId: params.descriptor.embedId,
-            menuTitlePrefix: contribution.productName,
             surface: 'ribbon',
         });
         if (productMenuDisposable) {
@@ -280,7 +279,6 @@ function mountFullscreenProductRibbon(params: {
         childUnitId: params.descriptor.childUnitId,
         embedId: params.descriptor.embedId,
         menuSchema: undefined,
-        menuTitlePrefix: contribution.productName,
     });
 }
 

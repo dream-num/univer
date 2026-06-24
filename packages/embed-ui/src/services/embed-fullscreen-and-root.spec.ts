@@ -96,7 +96,6 @@ describe('embed fullscreen helpers and react roots', () => {
         expect(productMenus.mountMenu).toHaveBeenCalledWith(expect.objectContaining({
             childType: UniverInstanceType.UNIVER_SHEET,
             childUnitId: 'child-1',
-            menuTitlePrefix: 'Sheets',
             surface: 'ribbon',
         }));
         disposable?.dispose();

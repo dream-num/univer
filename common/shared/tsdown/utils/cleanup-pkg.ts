@@ -20,6 +20,9 @@ type CleanupPackageJson = IPackageJson & {
         main: string;
         module: string;
     };
+    univerCli?: {
+        publishWildcardExports?: boolean;
+    };
 };
 interface IDerivedDependencyGroups {
     dependencies: StringMap;
@@ -357,8 +360,16 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
 }
 
 function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
-    const hasLocales = fs.existsSync(path.resolve(packageDir, 'src/locale'));
+    const localeDir = path.resolve(packageDir, 'src/locale');
+    const localeNames = fs.existsSync(localeDir)
+        ? fs.readdirSync(localeDir)
+            .filter((fileName) => path.extname(fileName) === '.ts')
+            .map((fileName) => path.basename(fileName, '.ts'))
+            .sort((left, right) => left.localeCompare(right))
+        : [];
+    const hasLocales = localeNames.length > 0;
     const hasFacade = fs.existsSync(path.resolve(packageDir, 'src/facade/index.ts'));
+    const publishWildcardExports = pkg.univerCli?.publishWildcardExports !== false;
 
     pkg.publishConfig = {
         access: 'public',
@@ -370,23 +381,41 @@ function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
                 require: './lib/cjs/index.js',
                 types: './lib/types/index.d.ts',
             },
-            './*': {
-                import: './lib/es/*',
-                require: './lib/cjs/*',
-                types: './lib/types/index.d.ts',
-            },
         },
     };
 
+    if (publishWildcardExports) {
+        pkg.publishConfig.exports['./*'] = {
+            import: './lib/es/*',
+            require: './lib/cjs/*',
+            types: './lib/types/index.d.ts',
+        };
+    }
+
     pkg.exports ||= {};
 
+    if (!publishWildcardExports) {
+        delete pkg.exports['./locale/*'];
+    }
+
     if (hasLocales) {
-        pkg.exports['./locale/*'] = './src/locale/*.ts';
-        pkg.publishConfig.exports['./locale/*'] = {
-            import: './lib/es/locale/*.js',
-            require: './lib/cjs/locale/*.js',
-            types: './lib/types/locale/*.d.ts',
-        };
+        if (publishWildcardExports) {
+            pkg.exports['./locale/*'] = './src/locale/*.ts';
+            pkg.publishConfig.exports['./locale/*'] = {
+                import: './lib/es/locale/*.js',
+                require: './lib/cjs/locale/*.js',
+                types: './lib/types/locale/*.d.ts',
+            };
+        } else {
+            for (const localeName of localeNames) {
+                pkg.exports[`./locale/${localeName}`] = `./src/locale/${localeName}.ts`;
+                pkg.publishConfig.exports[`./locale/${localeName}`] = {
+                    import: `./lib/es/locale/${localeName}.js`,
+                    require: `./lib/cjs/locale/${localeName}.js`,
+                    types: `./lib/types/locale/${localeName}.d.ts`,
+                };
+            }
+        }
     }
 
     if (hasFacade) {
@@ -399,7 +428,9 @@ function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
         pkg.publishConfig.exports['./lib/facade'] = pkg.publishConfig.exports['./facade'];
     }
 
-    pkg.publishConfig.exports['./lib/*'] = './lib/*';
+    if (publishWildcardExports) {
+        pkg.publishConfig.exports['./lib/*'] = './lib/*';
+    }
 }
 
 function assignPeerDependencies(pkg: CleanupPackageJson, peerDeps: StringMap) {

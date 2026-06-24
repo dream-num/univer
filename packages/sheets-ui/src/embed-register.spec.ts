@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsEmbedRuntimeService, wireSheetsFloatPreviewBridge } from './embed-register';

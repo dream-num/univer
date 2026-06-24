@@ -24,6 +24,7 @@ import type { IRefSelection } from './hooks/use-highlight';
 import {
     BuildTextUtils,
     createInternalEditorID,
+    DisposableCollection,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
@@ -31,6 +32,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IConfigService,
+    Injector,
     IUniverInstanceService,
     noop,
     UniverInstanceType,
@@ -38,6 +40,7 @@ import {
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { createEditorUndoRedoKeyboardConfig, DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
+import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, resolveActiveEmbedRuntimeDomScope, resolveEmbedRuntimeDomScope } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
@@ -45,7 +48,7 @@ import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, u
 import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
-import { useFocus } from './hooks/use-focus';
+import { hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, useFocus } from './hooks/use-focus';
 import { useFormulaSelecting } from './hooks/use-formula-selection';
 import { useFormulaToken } from './hooks/use-formula-token';
 import { useDocHight, useSheetHighlight } from './hooks/use-highlight';
@@ -154,6 +157,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
     const editorService = useDependency(IEditorService);
     const commandService = useDependency(ICommandService);
+    const injector = useDependency(Injector);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const onChange = useEvent(propOnChange);
     useImperativeHandle(ref, () => ({
@@ -167,9 +171,9 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
     const editorRef = useRef<Editor>(undefined);
-    const editor = editorRef.current;
+    const [editor, setEditor] = useState<Editor>();
     const [isFocus, setIsFocus] = useState(_isFocus);
-    const formulaEditorContainerRef = useRef(null);
+    const formulaEditorContainerRef = useRef<HTMLDivElement>(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -180,7 +184,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const formulaTextRef = useStateRef(formulaText);
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editorId, isFocus, disableOnClick: disableSelectionOnClick });
+    const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editor, editorId, isFocus, disableOnClick: disableSelectionOnClick });
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
@@ -304,15 +308,56 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                 },
                 canvasStyle,
             }, formulaEditorContainerRef.current);
-            const editor = editorService.getEditor(editorId)! as Editor;
-            editorRef.current = editor;
+            const registeredEditor = editorService.getEditor(editorId)! as Editor;
+            editorRef.current = registeredEditor;
+            setEditor(registeredEditor);
             highlight(initValue, false, true);
         }
 
         return () => {
+            editorRef.current = undefined;
             dispose?.dispose();
         };
     }, []);
+
+    useEffect(() => {
+        const formulaEditorContainer = formulaEditorContainerRef.current;
+        if (!isFocus || !formulaEditorContainer || !injector.has(EmbedRuntimeFocusCoordinator)) {
+            return undefined;
+        }
+
+        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
+        const scope = resolveEmbedRuntimeDomScope(formulaEditorContainer) ??
+            focusCoordinator.resolveRuntimeScopeByChildUnitId(editorId) ??
+            resolveActiveEmbedRuntimeDomScope(formulaEditorContainer.ownerDocument);
+        if (!scope) {
+            return undefined;
+        }
+
+        const collection = new DisposableCollection();
+        const interactionBoundaryService = injector.has(EmbedInteractionBoundaryService)
+            ? injector.get(EmbedInteractionBoundaryService)
+            : undefined;
+
+        collection.add(focusCoordinator.acquireLease({
+            embedId: scope.embedId,
+            role: 'child-editor',
+            owner: 'sheet-formula-editor',
+            hostUnitId: scope.hostUnitId,
+            childUnitId: scope.childUnitId,
+            associatedChildUnitIds: [editorId],
+        }));
+        if (interactionBoundaryService) {
+            collection.add(interactionBoundaryService.registerOwnedElement(scope.embedId, formulaEditorContainer));
+        }
+        collection.add(focusCoordinator.registerElement({
+            embedId: scope.embedId,
+            role: 'child-editor',
+            element: formulaEditorContainer,
+        }));
+
+        return () => collection.dispose();
+    }, [editorId, injector, isFocus]);
 
     useLayoutEffect(() => {
         let focusRetryFrame = 0;
@@ -347,11 +392,11 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     }, [_isFocus, docSelectionRenderService, editor, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
-    useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId, editorId, disableContextMenu);
+    useRefactorEffect(isFocus, Boolean(isSelecting), unitId, editorId, disableContextMenu);
     useLeftAndRightArrow(Boolean(isFocus && isFocusing && moveCursor), selectingMode, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
-        if (!isFocusing) {
+        if (!isFocusing && !hasActiveFormulaEmbedInteraction(formulaEditorContainerRef.current)) {
             return;
         }
 
@@ -371,7 +416,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         }
     });
     useSheetSelectionChange(
-        isFocus && Boolean(isSelecting && docFocusing),
+        isFocus && Boolean(isSelecting),
         isFocus,
         isSelectingRef,
         unitId,
@@ -403,7 +448,17 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
+        if (hasActiveFormulaEmbedInteraction(formulaEditorContainerRef.current)) {
+            return;
+        }
+        if (!shouldRefocusFormulaEditorOnMouseUp({
+            target: event.target,
+            isFocusing,
+            isPointerSelecting: docSelectionRenderService?.isOnPointerEvent,
+        })) {
+            return;
+        }
         setIsFocus(true);
         onFocus();
         focus();
@@ -424,6 +479,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             >
                 <div
                     ref={formulaEditorContainerRef}
+                    data-u-comp="formula-editor"
                     className="univer-relative univer-size-full"
                     onMouseUp={handleMouseUp}
                 />

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { resolveFloatDomOverflow } from './FloatDom';
+import { resolveFloatDomCurrentUnitId, resolveFloatDomOverflow } from './FloatDom';
 
 describe('resolveFloatDomOverflow', () => {
     it('keeps regular float dom layers clipped', () => {
@@ -35,5 +35,13 @@ describe('resolveFloatDomOverflow', () => {
             outerOverflow: 'visible',
             innerOverflow: 'visible',
         });
+    });
+});
+
+describe('resolveFloatDomCurrentUnitId', () => {
+    it('resolves the focused unit id when the focused observable emits a unit object', () => {
+        expect(resolveFloatDomCurrentUnitId(undefined, {
+            getUnitId: () => 'doc-1',
+        })).toBe('doc-1');
     });
 });

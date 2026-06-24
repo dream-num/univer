@@ -26,7 +26,9 @@ import { EmbedChildViewRegistryService } from './embed-child-view-registry.servi
 import { EmbedFloatingActiveService } from './embed-floating-active.service';
 import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry.service';
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
+import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
 import { EmbedOverlayRootService } from './embed-overlay-root.service';
+import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
 import { EmbedSceneCanvasCaptureService } from './embed-scene-canvas-capture.service';
 
 export const EMBED_DUPLICATE_CHILD_UNIT_ERROR_CODE = 'EMBED_DUPLICATE_CHILD_UNIT';
@@ -141,6 +143,18 @@ export class EmbedMountService {
             runtimeScope,
         };
         disposables.push(runtimeScopeDisposable);
+        const runtimeBoundaryDisposable = this._registerRuntimeBoundary(descriptor, context.hostElement, renderScope, runtimeScope.roots);
+        if (runtimeBoundaryDisposable) {
+            disposables.push(runtimeBoundaryDisposable);
+        }
+        if (this._injector.has(EmbedRuntimeFocusCoordinator)) {
+            disposables.push(this._injector.get(EmbedRuntimeFocusCoordinator).registerRuntimeScope({
+                embedId: descriptor.embedId,
+                hostUnitId: descriptor.hostUnitId,
+                childUnitId: descriptor.childUnitId,
+                childType: descriptor.childType,
+            }));
+        }
         disposables.push(this._registerChildFocusBridge(descriptor, context.hostElement, renderScope.mode, runtimeScope.instanceService));
         disposables.push(this._sceneCanvasCaptureService.registerContext(childContext));
         const restoreFocusAfterMount = this._createMountFocusRestorer(descriptor);
@@ -340,6 +354,62 @@ export class EmbedMountService {
         };
     }
 
+    private _registerRuntimeBoundary(
+        descriptor: IEmbedDescriptor,
+        hostElement: HTMLElement,
+        renderScope: IEmbedRenderScope,
+        roots: IEmbedChildContainerContext['runtimeScope']['roots']
+    ): IDisposable | undefined {
+        const hasInteractionBoundary = this._injector.has(EmbedInteractionBoundaryService);
+        const hasFocusCoordinator = this._injector.has(EmbedRuntimeFocusCoordinator);
+        if (!hasInteractionBoundary && !hasFocusCoordinator) {
+            return undefined;
+        }
+
+        const interactionBoundaryService = hasInteractionBoundary
+            ? this._injector.get(EmbedInteractionBoundaryService)
+            : undefined;
+        const focusCoordinator = hasFocusCoordinator
+            ? this._injector.get(EmbedRuntimeFocusCoordinator)
+            : undefined;
+        const elements = new Map<HTMLElement, 'runtime' | 'child-popup'>();
+        const addElement = (element: HTMLElement | undefined, role: 'runtime' | 'child-popup') => {
+            if (!element) {
+                return;
+            }
+
+            const previousRole = elements.get(element);
+            if (!previousRole || previousRole === 'runtime') {
+                elements.set(element, role);
+            }
+        };
+
+        addElement(hostElement, 'runtime');
+        addElement(renderScope.rootElement, 'runtime');
+        addElement(renderScope.contentRoot, 'runtime');
+        addElement(renderScope.canvasRoot, 'runtime');
+        addElement(renderScope.overlayRoot, 'runtime');
+        addElement(roots.root, 'runtime');
+        addElement(roots.content, 'runtime');
+        addElement(roots.canvas, 'runtime');
+        addElement(roots.overlay, 'runtime');
+        addElement(renderScope.popupRoot, 'child-popup');
+        addElement(roots.popup, 'child-popup');
+
+        const disposables = [...elements].flatMap(([element, role]) => [
+            interactionBoundaryService?.registerRoot(descriptor.embedId, element),
+            focusCoordinator?.registerElement({
+                embedId: descriptor.embedId,
+                role,
+                element,
+            }),
+        ].filter((disposable): disposable is IDisposable => !!disposable));
+
+        return toDisposable(() => {
+            [...disposables].reverse().forEach((disposable) => disposable.dispose());
+        });
+    }
+
     private _normalizeHostMountResult(result: ReturnType<NonNullable<IEmbedHostContainerContribution['mount']>>): IEmbedHostMountResult {
         if (!result) {
             return {};
@@ -396,6 +466,27 @@ export class EmbedMountService {
             if (mode === 'float' && scopedInstanceService) {
                 scopedInstanceService.setCurrentUnitForType(descriptor.childUnitId);
                 scopedInstanceService.focusUnit(descriptor.childUnitId);
+            }
+            if (mode === 'float' && this._injector.has(IUniverInstanceService)) {
+                const instanceService = this._injector.get(IUniverInstanceService);
+                const getCurrentUnitOfType = (instanceService as unknown as {
+                    getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
+                }).getCurrentUnitOfType;
+                const getFocusedUnit = (instanceService as unknown as {
+                    getFocusedUnit?: () => { getUnitId: () => string } | null | undefined;
+                }).getFocusedUnit;
+                if (
+                    typeof getCurrentUnitOfType !== 'function' ||
+                    getCurrentUnitOfType.call(instanceService, descriptor.childType)?.getUnitId() !== descriptor.childUnitId
+                ) {
+                    instanceService.setCurrentUnitForType(descriptor.childUnitId);
+                }
+                if (
+                    typeof getFocusedUnit !== 'function' ||
+                    getFocusedUnit.call(instanceService)?.getUnitId() !== descriptor.childUnitId
+                ) {
+                    instanceService.focusUnit(descriptor.childUnitId);
+                }
             }
             if (mode === 'tab' && this._injector.has(IUniverInstanceService)) {
                 const instanceService = this._injector.get(IUniverInstanceService);

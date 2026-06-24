@@ -32,6 +32,7 @@ import { fromEvent } from 'rxjs';
 type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
+const EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
 const givingBackFocusElements = [
     'app-layout',
     // 'univer-toolbar-btn',
@@ -175,7 +176,11 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
 
-                if (this._rootContainerElement?.contains(target) && givingBackFocusElements.some((item) => target.dataset.uComp === item)) {
+                if (
+                    this._rootContainerElement?.contains(target) &&
+                    givingBackFocusElements.some((item) => target.dataset.uComp === item) &&
+                    !isEmbedOwnedFocusTarget(target)
+                ) {
                     queueMicrotask(() => this.focus());
                     return;
                 }
@@ -199,4 +204,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
 function getFocusingUniverEditorStatus(): boolean {
     return (document.activeElement as HTMLElement)?.dataset.uComp === 'editor';
+}
+
+function isEmbedOwnedFocusTarget(target: HTMLElement): boolean {
+    return target.closest?.(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
 }

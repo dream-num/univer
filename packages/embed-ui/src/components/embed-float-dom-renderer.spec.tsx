@@ -18,9 +18,9 @@
  * @vitest-environment jsdom
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { Root } from 'react-dom/client';
+import { UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
@@ -31,10 +31,11 @@ import { EmbedFloatPreviewService } from '../services/embed-float-preview.servic
 import { EmbedFloatingActiveService } from '../services/embed-floating-active.service';
 import { EmbedFloatingGeometryService } from '../services/embed-floating-geometry.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
-import { EmbedInteractionBoundaryService } from '../services/embed-interaction-boundary.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '../services/embed-interaction-boundary.service';
 import { EmbedMountService } from '../services/embed-mount.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from '../services/embed-readonly-preview-registry.service';
+import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../services/embed-runtime-focus-coordinator.service';
 import { EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, EmbedFloatDomRenderer } from './EmbedFloatDomRenderer';
 
 const dependencyMap = vi.hoisted(() => new Map<unknown, unknown>());
@@ -86,7 +87,11 @@ describe('EmbedFloatDomRenderer', () => {
     let interactionBoundaryService: {
         registerRoot: ReturnType<typeof vi.fn>;
         contains: ReturnType<typeof vi.fn>;
+        hasRecentInteraction: ReturnType<typeof vi.fn>;
+        hasRecentInteractionFor: ReturnType<typeof vi.fn>;
+        activatePortalScope: ReturnType<typeof vi.fn>;
     };
+    let disposePortalScope: ReturnType<typeof vi.fn>;
     let readonlyPreviewProvider: {
         childType: UniverInstanceType;
         supportedLayouts: string[];
@@ -100,6 +105,8 @@ describe('EmbedFloatDomRenderer', () => {
         childType: UniverInstanceType;
         handleWheel: ReturnType<typeof vi.fn>;
     };
+    let focusCoordinator: EmbedRuntimeFocusCoordinator;
+    let descriptor: IEmbedDescriptor;
     let stage: 'inactive' | 'stage1' | 'stage2';
 
     beforeEach(() => {
@@ -154,8 +161,9 @@ describe('EmbedFloatDomRenderer', () => {
             value: vi.fn(),
         });
 
+        descriptor = createFloatDescriptor();
         dependencyMap.set(EmbedModelService, {
-            getDescriptor: vi.fn(() => createFloatDescriptor()),
+            getDescriptor: vi.fn(() => descriptor),
         });
         floatingActiveService = {
             active$,
@@ -178,9 +186,27 @@ describe('EmbedFloatDomRenderer', () => {
             clearFloating: vi.fn(),
         };
         dependencyMap.set(EmbedActivationService, activationService);
+        disposePortalScope = vi.fn();
         interactionBoundaryService = {
-            registerRoot: vi.fn(() => ({ dispose: vi.fn() })),
+            registerRoot: vi.fn((embedId: string, element: HTMLElement) => {
+                const previousOwner = element.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+                element.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, embedId);
+
+                return {
+                    dispose: vi.fn(() => {
+                        if (previousOwner == null) {
+                            element.removeAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+                            return;
+                        }
+
+                        element.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, previousOwner);
+                    }),
+                };
+            }),
             contains: vi.fn(() => false),
+            hasRecentInteraction: vi.fn(() => false),
+            hasRecentInteractionFor: vi.fn(() => false),
+            activatePortalScope: vi.fn(() => ({ dispose: disposePortalScope })),
         };
         dependencyMap.set(EmbedInteractionBoundaryService, interactionBoundaryService);
         dependencyMap.set(EmbedMountService, {
@@ -210,6 +236,8 @@ describe('EmbedFloatDomRenderer', () => {
             get: vi.fn(() => undefined),
         };
         dependencyMap.set(EmbedPassiveViewportRegistryService, passiveViewportRegistry);
+        focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        dependencyMap.set(EmbedRuntimeFocusCoordinator, focusCoordinator);
     });
 
     afterEach(() => {
@@ -217,6 +245,11 @@ describe('EmbedFloatDomRenderer', () => {
         container.remove();
         dependencyMap.clear();
     });
+
+    function flushQueuedAnimationFrames(timestamp = 16) {
+        const callbacks = animationFrameCallbacks.splice(0);
+        callbacks.forEach((callback) => callback(timestamp));
+    }
 
     it('mounts the live child runtime while inactive as the single visual source', async () => {
         await renderFloatBlock();
@@ -247,6 +280,105 @@ describe('EmbedFloatDomRenderer', () => {
 
         expect(mountIntoHostElement).toHaveBeenCalledTimes(1);
         expect(unmount).not.toHaveBeenCalled();
+    });
+
+    it('holds an embed portal scope while the live child runtime is in stage2', async () => {
+        await renderFloatBlock();
+
+        expect(interactionBoundaryService.activatePortalScope).not.toHaveBeenCalled();
+
+        stage = 'stage2';
+        await act(async () => {
+            active$.next({});
+        });
+
+        expect(interactionBoundaryService.activatePortalScope).toHaveBeenCalledWith('embed-1', document);
+
+        stage = 'inactive';
+        await act(async () => {
+            active$.next({});
+        });
+
+        expect(disposePortalScope).toHaveBeenCalledTimes(1);
+    });
+
+    it('marks the runtime popup slot as child popup focus scope while stage2 is active', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+
+        const popupRoot = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__popup');
+
+        expect(popupRoot?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-popup');
+        expect(focusCoordinator.containsElement('embed-1', popupRoot)).toBe(true);
+    });
+
+    it('marks floating chrome controls as owned by their embed', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+
+        const chrome = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+        const overlayRoot = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__overlay');
+        const fullscreenButton = document.body.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
+        const dragHandle = document.body.querySelector<HTMLElement>('[data-embed-float-drag-handle]');
+        const menuButton = document.createElement('button');
+        overlayRoot?.appendChild(menuButton);
+
+        expect(chrome?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(chrome?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('floating-menu');
+        expect(overlayRoot?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(overlayRoot?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('floating-menu');
+        expect(menuButton.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('floating-menu');
+        expect(fullscreenButton?.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(fullscreenButton?.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('floating-menu');
+        expect(dragHandle?.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(focusCoordinator.containsElement('embed-1', fullscreenButton)).toBe(true);
+    });
+
+    it('removes inactive floating chrome and popup slots from child focus ownership', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+        const chrome = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+        const overlayRoot = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__overlay');
+        const popupRoot = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__popup');
+        expect(chrome).not.toBeNull();
+        expect(overlayRoot).not.toBeNull();
+        expect(popupRoot).not.toBeNull();
+        expect(focusCoordinator.containsElement('embed-1', overlayRoot)).toBe(true);
+        expect(focusCoordinator.containsElement('embed-1', popupRoot)).toBe(true);
+
+        overlayRoot?.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'runtime');
+        popupRoot?.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-popup');
+
+        stage = 'inactive';
+        await act(async () => {
+            active$.next({});
+        });
+
+        expect(chrome?.style.pointerEvents).toBe('none');
+        expect(overlayRoot?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBeNull();
+        expect(popupRoot?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBeNull();
+        expect(focusCoordinator.containsElement('embed-1', overlayRoot)).toBe(false);
+        expect(focusCoordinator.containsElement('embed-1', popupRoot)).toBe(false);
+    });
+
+    it('clears stale inactive chrome focus roles restored from a previous registration', async () => {
+        await renderFloatBlock();
+        const overlayRoot = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__overlay');
+        expect(overlayRoot).not.toBeNull();
+        overlayRoot?.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'runtime');
+
+        stage = 'stage2';
+        await act(async () => {
+            active$.next({});
+        });
+        expect(overlayRoot?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('floating-menu');
+
+        stage = 'inactive';
+        await act(async () => {
+            active$.next({});
+        });
+
+        expect(overlayRoot?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBeNull();
     });
 
     it('invalidates floating geometry when stage changes', async () => {
@@ -359,6 +491,45 @@ describe('EmbedFloatDomRenderer', () => {
         expect(runtimeRoots.popup.getAttribute('data-embed-popup-root')).toBe('true');
         expect(runtimeRoots.content).not.toBe(runtimeRoots.canvas);
         expect(runtimeRoots.overlay).not.toBe(hostElement);
+    });
+
+    it('registers runtime roots with the focus coordinator so canvas focus remains child-owned', async () => {
+        await renderFloatBlock({ initialStage: 'stage2' });
+
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        runtimeRoots.canvas.appendChild(canvas);
+
+        expect(focusCoordinator.containsElement('embed-1', canvas)).toBe(true);
+        expect(focusCoordinator.containsElement('embed-other', canvas)).toBe(false);
+    });
+
+    it('keeps child editor focus leased without cancelling runtime canvas mousedown', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2', interactionFlow: 'doc-block' });
+
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        runtimeRoots.canvas.appendChild(canvas);
+
+        const activeEditor = document.createElement('div');
+        activeEditor.tabIndex = -1;
+        activeEditor.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        activeEditor.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-editor');
+        document.body.appendChild(activeEditor);
+        activeEditor.focus();
+
+        const event = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+        });
+        const dispatched = canvas.dispatchEvent(event);
+
+        expect(dispatched).toBe(true);
+        expect(event.defaultPrevented).toBe(false);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+
+        activeEditor.remove();
     });
 
     it('restores cached view state after mounting the stage2 runtime', async () => {
@@ -787,6 +958,118 @@ describe('EmbedFloatDomRenderer', () => {
         }
     });
 
+    it('keeps inactive docs sheet-like chrome synced while host canvas scroll changes its viewport rect', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 1024 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 8000 });
+        container.style.overflow = 'auto';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 1600,
+            height: 1024,
+            right: 1600,
+            bottom: 1100,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        let viewportRect = {
+            left: 12,
+            top: 201,
+            width: 1420,
+            height: 823,
+            right: 1432,
+            bottom: 1024,
+            x: 12,
+            y: 201,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (this.classList.contains('univer-embed-float-dom__content')) {
+                return viewportRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ docsSheetLike: true });
+
+            const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+            expect(chrome).not.toBeNull();
+            expect(chrome!.style.top).toBe('201px');
+
+            viewportRect = {
+                ...viewportRect,
+                top: -687,
+                bottom: 136,
+                y: -687,
+            } as DOMRect;
+
+            await act(async () => {
+                flushQueuedAnimationFrames(16);
+            });
+
+            expect(chrome!.style.top).toBe('76px');
+            expect(chrome!.style.height).toBe('60px');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
+    });
+
+    it('keeps inactive docs custom-block chrome synced while host canvas scroll changes its block rect', async () => {
+        let rect = {
+            left: 309,
+            top: 24361,
+            width: 716,
+            height: 401,
+            right: 1025,
+            bottom: 24762,
+            x: 309,
+            y: 24361,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return rect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ docsCustomBlock: true });
+
+            const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+            expect(chrome).not.toBeNull();
+            expect(chrome!.style.top).toBe('24361px');
+
+            rect = {
+                ...rect,
+                top: 5292,
+                bottom: 5693,
+                y: 5292,
+            } as DOMRect;
+
+            await act(async () => {
+                flushQueuedAnimationFrames(16);
+            });
+
+            expect(chrome!.style.top).toBe('5292px');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+        }
+    });
+
     it('hides docs sheet-like chrome when only a tiny edge remains visible', async () => {
         Object.defineProperty(container, 'clientHeight', { configurable: true, value: 1024 });
         Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 8000 });
@@ -851,6 +1134,225 @@ describe('EmbedFloatDomRenderer', () => {
             expect(chrome!.style.height).toBe('10px');
             expect(chrome!.style.visibility).toBe('hidden');
             expect(chrome!.style.pointerEvents).toBe('none');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
+    });
+
+    it('disables docs sheet-like live runtime interaction when only a tiny edge remains visible', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 1024 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 8000 });
+        container.style.overflow = 'auto';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 1600,
+            height: 1024,
+            right: 1600,
+            bottom: 1100,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const outerRect = {
+            left: 388,
+            top: -1001,
+            width: 823,
+            height: 1087,
+            right: 1211,
+            bottom: 86,
+            x: 388,
+            y: -1001,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const viewportRect = {
+            left: 12,
+            top: -901,
+            width: 1580,
+            height: 987,
+            right: 1592,
+            bottom: 86,
+            x: 12,
+            y: -901,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (this.classList.contains('univer-embed-float-dom__content')) {
+                return viewportRect;
+            }
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return outerRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ docsSheetLike: true, initialStage: 'stage2' });
+
+            const liveRoot = document.querySelector<HTMLElement>('.univer-embed-float-dom__live');
+            const gate = document.querySelector<HTMLElement>('[data-embed-float-interaction-gate]');
+            expect(liveRoot).not.toBeNull();
+            expect(gate).not.toBeNull();
+            expect(liveRoot!.style.pointerEvents).toBe('none');
+            expect(gate!.style.pointerEvents).toBe('none');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
+    });
+
+    it('disables docs sheet-like popup interaction when only a tiny edge remains visible', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 1024 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 8000 });
+        container.style.overflow = 'auto';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 1600,
+            height: 1024,
+            right: 1600,
+            bottom: 1100,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const outerRect = {
+            left: 388,
+            top: -1001,
+            width: 823,
+            height: 1087,
+            right: 1211,
+            bottom: 86,
+            x: 388,
+            y: -1001,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const viewportRect = {
+            left: 12,
+            top: -901,
+            width: 1580,
+            height: 987,
+            right: 1592,
+            bottom: 86,
+            x: 12,
+            y: -901,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (this.classList.contains('univer-embed-float-dom__content')) {
+                return viewportRect;
+            }
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return outerRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ docsSheetLike: true, initialStage: 'stage2' });
+
+            const popupRoot = document.querySelector<HTMLElement>('[data-embed-popup-root]');
+            expect(popupRoot).not.toBeNull();
+            expect(popupRoot!.style.pointerEvents).toBe('none');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
+    });
+
+    it('keeps docs sheet-like popup interaction enabled when the runtime is visible but floating controls are hidden', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 1024 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 8000 });
+        container.style.overflow = 'auto';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 1600,
+            height: 1024,
+            right: 1600,
+            bottom: 1100,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const outerRect = {
+            left: 388,
+            top: -1001,
+            width: 823,
+            height: 1109,
+            right: 1211,
+            bottom: 108,
+            x: 388,
+            y: -1001,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const viewportRect = {
+            left: 12,
+            top: -901,
+            width: 1580,
+            height: 1009,
+            right: 1592,
+            bottom: 108,
+            x: 12,
+            y: -901,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (this.classList.contains('univer-embed-float-dom__content')) {
+                return viewportRect;
+            }
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return outerRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ docsSheetLike: true, initialStage: 'stage2' });
+
+            const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+            const contentRoot = document.querySelector<HTMLElement>('.univer-embed-float-dom__content');
+            const liveRoot = document.querySelector<HTMLElement>('.univer-embed-float-dom__live');
+            const popupRoot = document.querySelector<HTMLElement>('[data-embed-popup-root]');
+            const overlayRoot = document.querySelector<HTMLElement>('[data-embed-overlay-root]');
+            expect(chrome).not.toBeNull();
+            expect(contentRoot).not.toBeNull();
+            expect(liveRoot).not.toBeNull();
+            expect(popupRoot).not.toBeNull();
+            expect(overlayRoot).not.toBeNull();
+            expect(chrome!.style.height).toBe('32px');
+            expect(chrome!.style.visibility).toBe('');
+            expect(overlayRoot!.style.visibility).toBe('hidden');
+            expect(contentRoot!.style.pointerEvents).toBe('none');
+            expect(liveRoot!.style.pointerEvents).toBe('none');
+            expect(popupRoot!.style.pointerEvents).toBe('none');
+            expect(document.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas')!.style.pointerEvents).toBe('auto');
+            expect(document.querySelector<HTMLElement>('.univer-embed-float-dom__live-content')!.style.pointerEvents).toBe('none');
         } finally {
             HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
             delete (container as { clientHeight?: number }).clientHeight;
@@ -937,6 +1439,102 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
     });
 
+    it('clears stage2 when a child editor lease is active but the pointer moves to the host', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+        const childEditorLease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'cell-editor',
+        });
+
+        await act(async () => {
+            document.body.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                clientX: 120,
+                clientY: 120,
+            }));
+        });
+
+        expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
+        childEditorLease.dispose();
+    });
+
+    it('keeps stage active when pointer events originate from a registered child editor portal', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+        const externalEditor = document.createElement('div');
+        document.body.appendChild(externalEditor);
+        focusCoordinator.registerElement({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            element: externalEditor,
+        });
+
+        await act(async () => {
+            externalEditor.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                clientX: 120,
+                clientY: 120,
+            }));
+        });
+
+        externalEditor.remove();
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+    });
+
+    it('keeps stage active when focus moves inside an active child popup', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2', interactionFlow: 'doc-block' });
+        const childPopupLease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-popup',
+            owner: 'date-picker',
+        });
+        const hostEditor = document.createElement('div');
+        hostEditor.id = '__editor_docs-embed-host';
+        document.body.appendChild(hostEditor);
+
+        await act(async () => {
+            hostEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+        childPopupLease.dispose();
+        hostEditor.remove();
+    });
+
+    it('keeps stage active when host focus follows a recent child portal interaction', async () => {
+        stage = 'stage2';
+        interactionBoundaryService.hasRecentInteractionFor.mockReturnValue(true);
+        await renderFloatBlock({ initialStage: 'stage2', interactionFlow: 'doc-block' });
+        const hostEditor = document.createElement('div');
+        hostEditor.id = '__editor_docs-embed-host';
+        document.body.appendChild(hostEditor);
+
+        await act(async () => {
+            hostEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        expect(interactionBoundaryService.hasRecentInteractionFor).toHaveBeenCalledWith('embed-1', document);
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+        hostEditor.remove();
+    });
+
+    it('clears the floating activation when focus moves to an unowned host element', async () => {
+        await renderFloatBlock();
+        const hostEditor = document.createElement('div');
+        hostEditor.id = '__editor_docs-embed-host';
+        document.body.appendChild(hostEditor);
+
+        await act(async () => {
+            hostEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        hostEditor.remove();
+        expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
+    });
+
     it('keeps stage active when pointer events originate from registered interaction boundaries', async () => {
         await renderFloatBlock();
         const externalPortal = document.createElement('div');
@@ -960,8 +1558,10 @@ describe('EmbedFloatDomRenderer', () => {
         await renderFloatBlock({ docsSheetLike: true });
         const floatDom = document.querySelector<HTMLElement>('[data-embed-float-dom="true"]');
         const content = document.querySelector<HTMLElement>('.univer-embed-float-dom__content');
+        const liveCanvas = document.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas');
         expect(floatDom).not.toBeNull();
         expect(content).not.toBeNull();
+        expect(liveCanvas).not.toBeNull();
         floatDom!.getBoundingClientRect = () => ({
             bottom: -1311,
             height: 476,
@@ -984,6 +1584,17 @@ describe('EmbedFloatDomRenderer', () => {
             y: 0,
             toJSON: () => ({}),
         } as DOMRect);
+        liveCanvas!.getBoundingClientRect = () => ({
+            bottom: 887,
+            height: 887,
+            left: 388,
+            right: 1344,
+            top: 0,
+            width: 956,
+            x: 388,
+            y: 0,
+            toJSON: () => ({}),
+        } as DOMRect);
 
         await act(async () => {
             document.body.dispatchEvent(new PointerEvent('pointerdown', {
@@ -994,6 +1605,114 @@ describe('EmbedFloatDomRenderer', () => {
         });
 
         expect(activationService.clearFloating).not.toHaveBeenCalled();
+    });
+
+    it('does not keep doc table-like focus from empty bleed space outside the live runtime', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ docsSheetLike: true, initialStage: 'stage2', interactionFlow: 'doc-block' });
+        const floatDom = document.querySelector<HTMLElement>('[data-embed-float-dom="true"]');
+        const content = document.querySelector<HTMLElement>('.univer-embed-float-dom__content');
+        const liveCanvas = document.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas');
+        expect(floatDom).not.toBeNull();
+        expect(content).not.toBeNull();
+        expect(liveCanvas).not.toBeNull();
+        floatDom!.getBoundingClientRect = () => ({
+            bottom: 19204,
+            height: 19004,
+            left: 388,
+            right: 1211,
+            top: -4558,
+            width: 823,
+            x: 388,
+            y: -4558,
+            toJSON: () => ({}),
+        } as DOMRect);
+        content!.getBoundingClientRect = () => ({
+            bottom: 999,
+            height: 923,
+            left: 12,
+            right: 1592,
+            top: 76,
+            width: 1580,
+            x: 12,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect);
+        liveCanvas!.getBoundingClientRect = () => ({
+            bottom: 999,
+            height: 923,
+            left: 388,
+            right: 1592,
+            top: 76,
+            width: 1204,
+            x: 388,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect);
+
+        await act(async () => {
+            document.body.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                clientX: 300,
+                clientY: 175,
+            }));
+        });
+
+        expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
+    });
+
+    it('clears doc table-like block focus when the host canvas is clicked above the runtime content', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ docsSheetLike: true, initialStage: 'stage2', interactionFlow: 'doc-block' });
+        const floatDom = document.querySelector<HTMLElement>('[data-embed-float-dom="true"]');
+        const content = document.querySelector<HTMLElement>('.univer-embed-float-dom__content');
+        const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome[data-embed-id="embed-1"]');
+        expect(floatDom).not.toBeNull();
+        expect(content).not.toBeNull();
+        expect(chrome).not.toBeNull();
+        floatDom!.getBoundingClientRect = () => ({
+            bottom: 19204,
+            height: 19004,
+            left: 388,
+            right: 1211,
+            top: 200,
+            width: 823,
+            x: 388,
+            y: 200,
+            toJSON: () => ({}),
+        } as DOMRect);
+        content!.getBoundingClientRect = () => ({
+            bottom: 1223,
+            height: 1023,
+            left: 12,
+            right: 1592,
+            top: 200,
+            width: 1580,
+            x: 12,
+            y: 200,
+            toJSON: () => ({}),
+        } as DOMRect);
+        chrome!.getBoundingClientRect = () => ({
+            bottom: 1099,
+            height: 899,
+            left: 12,
+            right: 1592,
+            top: 200,
+            width: 1580,
+            x: 12,
+            y: 200,
+            toJSON: () => ({}),
+        } as DOMRect);
+
+        await act(async () => {
+            document.body.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                clientX: 80,
+                clientY: 175,
+            }));
+        });
+
+        expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
     });
 
     it('does not demote stage2 runtime interactions back to stage1', async () => {
@@ -1015,8 +1734,26 @@ describe('EmbedFloatDomRenderer', () => {
         expect(floatingActiveService.activate).not.toHaveBeenCalledWith(expect.anything(), 'stage1');
     });
 
-    it('focuses the runtime canvas on stage2 pointer interactions', async () => {
+    it('does not force-focus the runtime canvas for sheet stage2 pointer interactions', async () => {
         await renderFloatBlock();
+        stage = 'stage2';
+        await act(async () => {
+            active$.next({});
+        });
+
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        runtimeRoots.canvas.appendChild(canvas);
+
+        await act(async () => {
+            canvas.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        });
+
+        expect(document.activeElement).not.toBe(canvas);
+    });
+
+    it('focuses the runtime canvas for slide stage2 pointer interactions', async () => {
+        await renderFloatBlock({ childType: UniverInstanceType.UNIVER_SLIDE });
         stage = 'stage2';
         await act(async () => {
             active$.next({});
@@ -1055,7 +1792,7 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
-    it('restores the runtime canvas focus after a host delayed refocus', async () => {
+    it('does not steal focus back after another element explicitly focuses', async () => {
         await renderFloatBlock();
         stage = 'stage2';
         await act(async () => {
@@ -1076,7 +1813,7 @@ describe('EmbedFloatDomRenderer', () => {
             await new Promise((resolve) => setTimeout(resolve, 20));
         });
 
-        expect(document.activeElement).toBe(canvas);
+        expect(document.activeElement).toBe(hostInput);
         hostInput.remove();
     });
 
@@ -1101,6 +1838,36 @@ describe('EmbedFloatDomRenderer', () => {
         });
 
         expect(document.activeElement).toBe(editorInput);
+    });
+
+    it('does not steal focus from a registered child editor mounted outside the runtime root', async () => {
+        await renderFloatBlock();
+        stage = 'stage2';
+        await act(async () => {
+            active$.next({});
+        });
+
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        const externalEditorInput = document.createElement('input');
+        runtimeRoots.canvas.appendChild(canvas);
+        document.body.appendChild(externalEditorInput);
+        const registration = focusCoordinator.registerElement({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            element: externalEditorInput,
+        });
+        externalEditorInput.focus();
+
+        await act(async () => {
+            canvas.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+            animationFrameCallbacks.splice(0).forEach((callback) => callback(16));
+            await new Promise((resolve) => setTimeout(resolve, 140));
+        });
+
+        expect(document.activeElement).toBe(externalEditorInput);
+        registration.dispose();
+        externalEditorInput.remove();
     });
 
     it('notifies the host when the interaction gate promotes into stage2', async () => {
@@ -1164,7 +1931,54 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalledWith(createFloatDescriptor(), 'stage1');
     });
 
-    it('focuses the runtime canvas after a doc-block gate click enters stage2', async () => {
+    it('lets doc-block clicks pass through the interaction gate before stage2 starts', async () => {
+        await renderFloatBlock({ interactionFlow: 'doc-block' });
+
+        const styleText = document.getElementById('univer-embed-float-dom-styles')?.textContent ?? '';
+
+        expect(styleText).toContain('.univer-embed-float-dom[data-embed-interaction-flow="doc-block"] .univer-embed-float-dom__interaction-gate');
+    });
+
+    it('activates doc-block stage2 from the live runtime before the child handles the first click', async () => {
+        await renderFloatBlock({ interactionFlow: 'doc-block' });
+
+        const live = document.querySelector('[data-embed-float-live]');
+        expect(live).not.toBeNull();
+
+        await act(async () => {
+            live!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, clientX: 12, clientY: 12 }));
+        });
+
+        expect(activationService.activateFloating).toHaveBeenCalledWith(createFloatDescriptor(), 'stage2');
+        expect(document.querySelector('[data-embed-interaction-flow="doc-block"]')).not.toBeNull();
+    });
+
+    it('suppresses host doc interaction during the doc-block pointer that enters stage2', async () => {
+        const hostEditor = document.createElement('div');
+        hostEditor.id = '__editor_docs-host-1';
+        document.body.appendChild(hostEditor);
+        let suppressedDuringActivation: boolean | undefined;
+        activationService.activateFloating.mockImplementation(() => {
+            suppressedDuringActivation = focusCoordinator.shouldSuppressHostInteraction('host-1', hostEditor);
+            stage = 'stage2';
+            active$.next({});
+        });
+        await renderFloatBlock({ interactionFlow: 'doc-block' });
+
+        const live = document.querySelector('[data-embed-float-live]');
+        expect(live).not.toBeNull();
+
+        await act(async () => {
+            live!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, clientX: 12, clientY: 12 }));
+            await Promise.resolve();
+        });
+
+        expect(suppressedDuringActivation).toBe(true);
+        expect(focusCoordinator.shouldSuppressHostInteraction('host-1', hostEditor)).toBe(true);
+        hostEditor.remove();
+    });
+
+    it('does not force-focus a sheet doc-block runtime canvas after entering stage2', async () => {
         activationService.activateFloating.mockImplementation(() => {
             stage = 'stage2';
             active$.next({});
@@ -1183,11 +1997,191 @@ describe('EmbedFloatDomRenderer', () => {
             await Promise.resolve();
         });
 
-        expect(document.activeElement).toBe(canvas);
-        expect(activationService.focusFloatingRuntime).toHaveBeenCalledWith(createFloatDescriptor());
+        expect(document.activeElement).not.toBe(canvas);
+        expect(activationService.focusFloatingRuntime).not.toHaveBeenCalled();
     });
 
-    it('focuses a doc-block runtime canvas mounted in the content slot', async () => {
+    it('does not focus the runtime canvas while a child editor lease is active', async () => {
+        activationService.activateFloating.mockImplementation(() => {
+            stage = 'stage2';
+            active$.next({});
+        });
+        await renderFloatBlock({ interactionFlow: 'doc-block' });
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        const focusSpy = vi.spyOn(canvas, 'focus');
+        runtimeRoots.canvas.appendChild(canvas);
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'cell-editor',
+        });
+
+        const gate = document.querySelector('[data-embed-float-interaction-gate]');
+        expect(gate).not.toBeNull();
+
+        await act(async () => {
+            gate!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, clientX: 12, clientY: 12 }));
+            gate!.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1, clientX: 12, clientY: 12 }));
+            animationFrameCallbacks.splice(0).forEach((callback) => callback(16));
+            await Promise.resolve();
+        });
+
+        expect(focusSpy).not.toHaveBeenCalled();
+        lease.dispose();
+    });
+
+    it('keeps a child interaction lease for the whole stage2 runtime session', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        runtimeRoots.canvas.appendChild(canvas);
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(true);
+
+        await act(async () => {
+            canvas.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+        });
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(true);
+
+        await act(async () => {
+            document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+        });
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(true);
+
+        stage = 'inactive';
+        await act(async () => {
+            active$.next({});
+        });
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(false);
+    });
+
+    it('holds a blocking child focus lease for body-level popup pointer interactions', async () => {
+        vi.useFakeTimers();
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+        const popup = document.createElement('div');
+        popup.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        popup.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-popup');
+        const input = document.createElement('input');
+        input.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-popup');
+        popup.appendChild(input);
+        document.body.appendChild(popup);
+
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1', { ignoreOwners: ['stage2-runtime', 'doc-block-stage2-runtime'] })).toBe(false);
+
+        await act(async () => {
+            input.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+        });
+
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1', { ignoreOwners: ['stage2-runtime', 'doc-block-stage2-runtime'] })).toBe(true);
+
+        await act(async () => {
+            document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+        });
+
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+
+        const hostEditor = document.createElement('div');
+        hostEditor.id = '__editor_docs-embed-host';
+        document.body.appendChild(hostEditor);
+        await act(async () => {
+            hostEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+
+        await act(async () => {
+            vi.runOnlyPendingTimers();
+            await Promise.resolve();
+        });
+
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1', { ignoreOwners: ['stage2-runtime', 'doc-block-stage2-runtime'] })).toBe(false);
+
+        await act(async () => {
+            hostEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
+
+        hostEditor.remove();
+        popup.remove();
+        vi.useRealTimers();
+    });
+
+    it('releases body-level child editor focus when leaving stage2', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+        const editorPortal = document.createElement('div');
+        editorPortal.tabIndex = -1;
+        editorPortal.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        editorPortal.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-editor');
+        document.body.appendChild(editorPortal);
+        editorPortal.focus();
+
+        expect(document.activeElement).toBe(editorPortal);
+
+        stage = 'inactive';
+        await act(async () => {
+            active$.next({});
+        });
+
+        expect(document.activeElement).not.toBe(editorPortal);
+        editorPortal.remove();
+    });
+
+    it('keeps ordinary stage2 runtime sessions blocking for host focus recovery', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2' });
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+    });
+
+    it('treats doc-block stage2 runtime sessions as host-blocking while allowing child runtime focus', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2', interactionFlow: 'doc-block' });
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasHostPreservingChildFocusLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1')).toBe(true);
+        expect(focusCoordinator.hasBlockingChildFocusLease('embed-1', { ignoreOwners: ['doc-block-stage2-runtime'] })).toBe(false);
+    });
+
+    it('does not retry runtime canvas focus for sheet doc-block sessions', async () => {
+        activationService.activateFloating.mockImplementation(() => {
+            stage = 'stage2';
+            active$.next({});
+        });
+        await renderFloatBlock({ interactionFlow: 'doc-block' });
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const canvas = document.createElement('canvas');
+        const focusSpy = vi.spyOn(canvas, 'focus');
+        runtimeRoots.canvas.appendChild(canvas);
+
+        const gate = document.querySelector('[data-embed-float-interaction-gate]');
+        expect(gate).not.toBeNull();
+
+        await act(async () => {
+            gate!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, clientX: 12, clientY: 12 }));
+            gate!.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1, clientX: 12, clientY: 12 }));
+            const callbacks = animationFrameCallbacks.splice(0);
+            callbacks.forEach((callback) => callback(16));
+            animationFrameCallbacks.splice(0).forEach((callback) => callback(32));
+            await Promise.resolve();
+        });
+
+        expect(focusSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not force-focus a sheet doc-block runtime canvas mounted in the content slot', async () => {
         activationService.activateFloating.mockImplementation(() => {
             stage = 'stage2';
             active$.next({});
@@ -1206,11 +2200,11 @@ describe('EmbedFloatDomRenderer', () => {
             await Promise.resolve();
         });
 
-        expect(document.activeElement).toBe(canvas);
-        expect(activationService.focusFloatingRuntime).toHaveBeenCalledWith(createFloatDescriptor());
+        expect(document.activeElement).not.toBe(canvas);
+        expect(activationService.focusFloatingRuntime).not.toHaveBeenCalled();
     });
 
-    it('focuses the runtime canvas when it is mounted after a doc-block enters stage2', async () => {
+    it('does not force-focus a sheet runtime canvas mounted after a doc-block enters stage2', async () => {
         activationService.activateFloating.mockImplementation(() => {
             stage = 'stage2';
             active$.next({});
@@ -1233,7 +2227,40 @@ describe('EmbedFloatDomRenderer', () => {
             animationFrameCallbacks.splice(0).forEach((callback) => callback(16));
         });
 
-        expect(document.activeElement).toBe(canvas);
+        expect(document.activeElement).not.toBe(canvas);
+    });
+
+    it('keeps doc-block stage2 active when the shared app-shell editor receives child focus', async () => {
+        stage = 'stage2';
+        await renderFloatBlock({ initialStage: 'stage2', interactionFlow: 'doc-block' });
+        const appShell = document.createElement('div');
+        appShell.id = 'app';
+        const selectionContainer = document.createElement('div');
+        selectionContainer.id = 'univer-doc-selection-container-__INTERNAL_EDITOR__DOCS_NORMAL';
+        const sharedEditor = document.createElement('div');
+        sharedEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
+        sharedEditor.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        sharedEditor.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-editor');
+        selectionContainer.appendChild(sharedEditor);
+        appShell.appendChild(selectionContainer);
+        document.body.appendChild(appShell);
+        const childEditorLease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'sheet-cell-editor',
+            hostUnitId: 'host-1',
+            childUnitId: 'child-1',
+            associatedChildUnitIds: ['__INTERNAL_EDITOR__DOCS_NORMAL'],
+        });
+
+        await act(async () => {
+            sharedEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+
+        childEditorLease.dispose();
+        appShell.remove();
     });
 
     it('keeps the default floating-stage flow entering stage1 first', async () => {
@@ -1248,6 +2275,27 @@ describe('EmbedFloatDomRenderer', () => {
         });
 
         expect(activationService.activateFloating).toHaveBeenCalledWith(createFloatDescriptor(), 'stage1');
+    });
+
+    it('blurs child runtime focus while the default floating-stage flow is only in stage1', async () => {
+        await renderFloatBlock({ initialStage: 'stage1', childType: UniverInstanceType.UNIVER_DOC });
+        const childEditor = document.createElement('div');
+        childEditor.tabIndex = -1;
+        childEditor.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        childEditor.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-editor');
+        document.body.appendChild(childEditor);
+
+        childEditor.focus();
+        expect(document.activeElement).toBe(childEditor);
+
+        await act(async () => {
+            active$.next({});
+            await Promise.resolve();
+        });
+
+        expect(document.activeElement).not.toBe(childEditor);
+
+        childEditor.remove();
     });
 
     it('does not promote stage1 to stage2 after a drag intent', async () => {
@@ -1447,6 +2495,38 @@ describe('EmbedFloatDomRenderer', () => {
         }
     });
 
+    it('scrolls doc-block table-like horizontal wheel when the event lands on the live child runtime', async () => {
+        await renderFloatBlock({ docsSheetLike: true, interactionFlow: 'doc-block' });
+
+        const liveRoot = document.querySelector<HTMLElement>('.univer-embed-float-dom__live');
+        expect(liveRoot).not.toBeNull();
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const runtimeTarget = document.createElement('canvas');
+        const onRuntimeWheel = vi.fn((event: WheelEvent) => event.preventDefault());
+        runtimeTarget.addEventListener('wheel', onRuntimeWheel);
+        runtimeRoots.canvas.appendChild(runtimeTarget);
+        Object.defineProperties(liveRoot!, {
+            clientWidth: { configurable: true, value: 100 },
+            scrollWidth: { configurable: true, value: 300 },
+        });
+        liveRoot!.scrollLeft = 0;
+
+        const wheel = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            clientX: 0,
+            clientY: 0,
+            deltaX: 80,
+        });
+        await act(async () => {
+            runtimeTarget.dispatchEvent(wheel);
+        });
+
+        expect(liveRoot!.scrollLeft).toBe(80);
+        expect(onRuntimeWheel).not.toHaveBeenCalled();
+        expect(wheel.defaultPrevented).toBe(true);
+    });
+
     it('scrolls docs table-like bleed before a passive child provider on rightward wheel', async () => {
         mountIntoHostElement.mockReturnValue({ context: createChildContext({ layout: 'docs-sticky-base' }) });
         passiveViewportRegistry.get.mockReturnValue(passiveViewportProvider);
@@ -1587,7 +2667,7 @@ describe('EmbedFloatDomRenderer', () => {
         } as DOMRect);
 
         await act(async () => {
-            animationFrameCallbacks.shift()?.(0);
+            flushQueuedAnimationFrames(0);
         });
 
         expect(passiveViewportProvider.handleWheel).toHaveBeenCalledWith(expect.objectContaining({
@@ -1870,6 +2950,36 @@ describe('EmbedFloatDomRenderer', () => {
         expect(wheel.defaultPrevented).toBe(true);
     });
 
+    it('lets table-like doc block stage2 vertical wheel continue when host scrolling is unavailable', async () => {
+        mountIntoHostElement.mockReturnValue({ context: createChildContext({ layout: 'doc-width-scale' }) });
+        const onHostWheel = vi.fn(() => false);
+
+        await renderFloatBlock({ onHostWheel, syncHostVerticalScroll: true });
+        stage = 'stage2';
+        await act(async () => {
+            active$.next({});
+        });
+
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const runtimeTarget = document.createElement('div');
+        const onChildWheel = vi.fn();
+        runtimeTarget.addEventListener('wheel', onChildWheel);
+        runtimeRoots.content.appendChild(runtimeTarget);
+
+        const wheel = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaY: 80,
+        });
+        await act(async () => {
+            runtimeTarget.dispatchEvent(wheel);
+        });
+
+        expect(onHostWheel).toHaveBeenCalledTimes(1);
+        expect(onChildWheel).toHaveBeenCalledTimes(1);
+        expect(wheel.defaultPrevented).toBe(false);
+    });
+
     it('routes stage2 docs-sticky vertical wheel to the host canvas when the docs viewport is not a dom scrollport', async () => {
         const hostViewport = document.createElement('section');
         const hostCanvas = document.createElement('canvas');
@@ -1987,7 +3097,7 @@ describe('EmbedFloatDomRenderer', () => {
         } as DOMRect);
 
         await act(async () => {
-            animationFrameCallbacks.shift()?.(0);
+            flushQueuedAnimationFrames(0);
         });
 
         expect(passiveViewportProvider.handleWheel).toHaveBeenCalledWith(expect.objectContaining({
@@ -2050,7 +3160,7 @@ describe('EmbedFloatDomRenderer', () => {
         } as DOMRect);
 
         await act(async () => {
-            animationFrameCallbacks.shift()?.(0);
+            flushQueuedAnimationFrames(0);
         });
 
         expect(passiveViewportProvider.handleWheel).toHaveBeenCalledWith(expect.objectContaining({
@@ -2172,7 +3282,9 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
-    async function renderFloatBlock(props?: { docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
+    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
+        const childType = props?.childType ?? UniverInstanceType.UNIVER_SHEET;
+        descriptor = createFloatDescriptor({ childType });
         const renderer = (
             <EmbedFloatDomRenderer
                 initialStage={props?.initialStage}
@@ -2187,7 +3299,7 @@ describe('EmbedFloatDomRenderer', () => {
                     hostUnitId: 'host-1',
                     hostAnchorId: 'anchor-1',
                     childUnitId: 'child-1',
-                    childType: 2 as UniverInstanceType,
+                    childType,
                 }}
             />
         );
@@ -2195,23 +3307,26 @@ describe('EmbedFloatDomRenderer', () => {
         await act(async () => {
             root.render(props?.docsSheetLike
                 ? <div data-embed-docs-custom-block-sheet-like="true">{renderer}</div>
-                : renderer);
+                : props?.docsCustomBlock
+                    ? <div className="univer-embed-docs-custom-block">{renderer}</div>
+                    : renderer);
         });
     }
 });
 
-function createFloatDescriptor(): IEmbedDescriptor {
+function createFloatDescriptor(overrides: { childType?: UniverInstanceType } = {}): IEmbedDescriptor {
+    const childType = overrides.childType ?? UniverInstanceType.UNIVER_SHEET;
     return {
         embedId: 'embed-1',
         hostUnitId: 'host-1',
-        hostType: 1 as UniverInstanceType,
+        hostType: UniverInstanceType.UNIVER_DOC,
         hostAnchorId: 'anchor-1',
         entry: 'sheets-floating-object',
         childUnitId: 'child-1',
-        childType: 2 as UniverInstanceType,
+        childType,
         source: {
             kind: 'empty',
-            unitType: 2 as UniverInstanceType,
+            unitType: childType,
         },
         sourceMeta: {
             floating: {

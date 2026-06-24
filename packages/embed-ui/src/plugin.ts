@@ -48,6 +48,7 @@ import { EmbedOverlayRootService } from './services/embed-overlay-root.service';
 import { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
 import { EmbedProductMenuRegistryService } from './services/embed-product-menu-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
+import { EmbedRuntimeFocusCoordinator } from './services/embed-runtime-focus-coordinator.service';
 import { EmbedSceneCanvasCaptureService } from './services/embed-scene-canvas-capture.service';
 import { flushPendingEmbedUIContributions } from './services/embed-ui-contribution-register';
 import { EmbedUndoBridgeService } from './services/embed-undo-bridge.service';
@@ -106,6 +107,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedPassiveViewportRegistryService],
             [EmbedProductMenuRegistryService],
             [EmbedReadonlyPreviewRegistryService],
+            [EmbedRuntimeFocusCoordinator],
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
@@ -202,6 +204,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedPassiveViewportRegistryService],
             [EmbedProductMenuRegistryService],
             [EmbedReadonlyPreviewRegistryService],
+            [EmbedRuntimeFocusCoordinator],
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],
         ]);

@@ -24,7 +24,7 @@ import {
     Optional,
     UniverInstanceType,
 } from '@univerjs/core';
-import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
+import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     BuiltInUIPart,
@@ -66,7 +66,8 @@ export class DocUIController extends Disposable {
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
         @IConfigService protected readonly _configService: IConfigService,
-        @Optional(EmbedInteractionBoundaryService) protected readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
+        @Optional(EmbedInteractionBoundaryService) _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
+        @Optional(EmbedRuntimeFocusCoordinator) protected readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -122,7 +123,7 @@ export class DocUIController extends Disposable {
     private _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, (unitId: string) => {
-                if (this._shouldPreserveEmbedFocus()) {
+                if (this._shouldPreserveEmbedFocus(unitId)) {
                     return;
                 }
 
@@ -134,13 +135,11 @@ export class DocUIController extends Disposable {
         );
     }
 
-    private _shouldPreserveEmbedFocus(): boolean {
-        const activeElement = document.activeElement;
-        if (this._embedInteractionBoundaryService?.contains(undefined, activeElement)) {
+    private _shouldPreserveEmbedFocus(unitId: string): boolean {
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId)) {
             return true;
         }
 
-        const ownerDocument = activeElement?.ownerDocument ?? document;
-        return this._embedInteractionBoundaryService?.hasRecentInteraction(ownerDocument) === true;
+        return false;
     }
 }

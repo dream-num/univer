@@ -183,6 +183,31 @@ describe('DocFloatDomController', () => {
         controller.dispose();
     });
 
+    it('keeps embed custom block float doms visible when focus moves into child units', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledWith(expect.objectContaining({
+            eventPassThrough: false,
+            preserveOnFocusChange: true,
+        }));
+
+        controller.dispose();
+    });
+
     it('updates float dom position from its own host viewport scroll even when current doc focus changes', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,

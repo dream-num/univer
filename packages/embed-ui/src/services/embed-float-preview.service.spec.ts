@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedChildContainerContext, IEmbedFloatPreviewProvider, IEmbedFloatPreviewRenderRequest } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';

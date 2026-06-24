@@ -52,20 +52,25 @@ import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-se
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
-import { FormulaSelectingType } from './use-formula-selection';
+import { FormulaSelectingType, resolveFormulaSelectionWorkbook } from './use-formula-selection';
 import { calcHighlightRanges } from './use-highlight';
 import { useStateRef } from './use-state-ref';
 
-const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
+export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
     const { editor, lexerTreeBuilder } = opts;
     const currentDocSelections = editor?.getSelectionRanges();
-    if (currentDocSelections?.length !== 1) {
-        return;
-    }
-    const docRange = currentDocSelections[0];
-    const offset = docRange.startOffset - 1;
     const dataStream = (editor?.getDocumentData().body?.dataStream ?? '\r\n').slice(0, -2);
     const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream.slice(1)) ?? [];
+    let offset: number;
+
+    if (currentDocSelections?.length === 1) {
+        offset = currentDocSelections[0].startOffset - 1;
+    } else if (dataStream.startsWith('=')) {
+        offset = Math.max(dataStream.length - 1, 0);
+    } else {
+        return;
+    }
+
     const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
     const updatingRefIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
     return {
@@ -95,6 +100,10 @@ export function getSelectionsForFormulaRefUpdate(
     return { orderedSelections, insertedSelection };
 }
 
+export function getLastFormulaSelection(selections: IRange[]): IRange | undefined {
+    return selections[selections.length - 1];
+}
+
 export function createSelectionChangeHandler<TSelection>(opts: {
     initialSelectionsCount: number;
     onSelectionsChange: (selections: TSelection[], isEnd: boolean, isCtrlAddMode?: boolean) => void;
@@ -103,11 +112,15 @@ export function createSelectionChangeHandler<TSelection>(opts: {
     let pendingCtrlAddCount = 0;
 
     return (selections: TSelection[], isEnd: boolean, options?: { initial?: boolean }) => {
-        if (options?.initial) {
+        if (options?.initial && selections.length <= opts.initialSelectionsCount) {
             return;
         }
 
-        const isCtrlAddMode = selections.length > prevSelectionsCount;
+        if (selections.length === 0) {
+            return;
+        }
+
+        const isCtrlAddMode = !options?.initial && prevSelectionsCount > 0 && selections.length > prevSelectionsCount;
         if (isCtrlAddMode && !isEnd) {
             pendingCtrlAddCount = selections.length;
             return;
@@ -121,6 +134,34 @@ export function createSelectionChangeHandler<TSelection>(opts: {
 
         opts.onSelectionsChange(selections, isEnd, isCtrlAddMode || shouldApplyPendingCtrlAdd);
     };
+}
+
+export function replaceFormulaControlSelection(
+    selections: IRange[],
+    index: number,
+    newRange: IRange
+): IRange[] | undefined {
+    const current = selections[index];
+    if (!current) {
+        return undefined;
+    }
+
+    const nextRange = {
+        ...newRange,
+        sheetId: current.sheetId,
+        unitId: current.unitId,
+    };
+    const nextSelections = [...selections];
+    nextSelections[index] = nextRange;
+    return nextSelections;
+}
+
+export function getInitialFormulaReferenceSelectionCount(renderSelectionCount: number, formulaReferenceCount: number, selectingType?: FormulaSelectingType): number {
+    if (selectingType === FormulaSelectingType.NEED_ADD && formulaReferenceCount === 0) {
+        return 0;
+    }
+
+    return Math.max(renderSelectionCount, formulaReferenceCount);
 }
 
 export const useSheetSelectionChange = (
@@ -148,7 +189,8 @@ export const useSheetSelectionChange = (
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
     const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
-    const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
+    const activeWorkbook = resolveFormulaSelectionWorkbook(currentUnit, workbook);
+    const render = renderManagerService.getRenderById(activeWorkbook?.getUnitId() ?? unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
@@ -162,31 +204,37 @@ export const useSheetSelectionChange = (
                 if (nodeIndex === -1 && sequenceNodes.length) {
                     return;
                 }
-                const range = selections[selections.length - 1];
+                const range = getLastFormulaSelection(selections);
+                if (!range) {
+                    return;
+                }
                 const lastNodes = sequenceNodes.splice(nodeIndex + 1);
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,
-                    unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
+                    unitId: range.unitId ?? activeWorkbook!.getUnitId(),
+                    sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                 const result = sequenceNodeToText(newSequenceNodes);
                 handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
             } else {
-                const range = selections[selections.length - 1];
+                const range = getLastFormulaSelection(selections);
+                if (!range) {
+                    return;
+                }
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,
-                    unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
+                    unitId: range.unitId ?? activeWorkbook!.getUnitId(),
+                    sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const result = sequenceNodeToText(sequenceNodes);
@@ -198,9 +246,9 @@ export const useSheetSelectionChange = (
             const node = sequenceNodes[nodeIndex];
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const oldToken = node.token;
-                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 if (isAcrossWorkbook) {
-                    node.token = serializeRangeWithSpreadsheet(currentUnit?.getUnitId() ?? '', sheetName, last);
+                    node.token = serializeRangeWithSpreadsheet(activeWorkbook?.getUnitId() ?? '', sheetName, last);
                 } else {
                     node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
                 }
@@ -213,10 +261,10 @@ export const useSheetSelectionChange = (
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,
-                    unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
+                    unitId: range.unitId ?? activeWorkbook!.getUnitId(),
+                    sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
                 };
-                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 return refRanges[0];
@@ -233,7 +281,7 @@ export const useSheetSelectionChange = (
                         nodeRange.sheetName = sheetName;
                     }
 
-                    if (((nodeRange.unitId || unitId) !== currentUnit?.getUnitId())) {
+                    if (((nodeRange.unitId || unitId) !== activeWorkbook?.getUnitId())) {
                         return item.token;
                     }
 
@@ -281,10 +329,10 @@ export const useSheetSelectionChange = (
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
-            const initialSelectionsCount = Math.max(
+            const initialSelectionsCount = getInitialFormulaReferenceSelectionCount(
                 refSelectionsRenderService.getSelectionDataWithStyle().length,
-                refSelectionsService.getCurrentSelections().length,
-                getRefSelections().length
+                getRefSelections().length,
+                isSelectingRef.current
             );
             const handleSelectionsChange = createSelectionChangeHandler<ISelectionWithCoord>({
                 initialSelectionsCount,
@@ -295,6 +343,9 @@ export const useSheetSelectionChange = (
             let isInitialMoveEnd = true;
 
             const disposableCollection = new DisposableCollection();
+            disposableCollection.add(refSelectionsRenderService.selectionMoveStart$.subscribe((selections) => {
+                handleSelectionsChange(selections, false);
+            }));
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
                 handleSelectionsChange(selections, false);
             }));
@@ -321,11 +372,10 @@ export const useSheetSelectionChange = (
                         control.selectionScaling$
                             .subscribe((newRange) => {
                                 const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
-                                const current = selections[index];
-                                newRange.sheetId = current.sheetId;
-                                newRange.unitId = current.unitId;
-                                selections[index] = newRange;
-                                onSelectionsChange(selections, false);
+                                const nextSelections = replaceFormulaControlSelection(selections, index, newRange);
+                                if (nextSelections) {
+                                    onSelectionsChange(nextSelections, false);
+                                }
                             })
                     );
 
@@ -333,11 +383,10 @@ export const useSheetSelectionChange = (
                         control.selectionMoving$
                             .subscribe((newRange) => {
                                 const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
-                                const current = selections[index];
-                                newRange.sheetId = current.sheetId;
-                                newRange.unitId = current.unitId;
-                                selections[index] = newRange;
-                                onSelectionsChange(selections, true);
+                                const nextSelections = replaceFormulaControlSelection(selections, index, newRange);
+                                if (nextSelections) {
+                                    onSelectionsChange(nextSelections, true);
+                                }
                             })
                     );
                 });
@@ -423,7 +472,7 @@ export const useSheetSelectionChange = (
                 sheetSkeletonManagerService,
                 themeService,
                 univerInstanceService,
-                currentWorkbook: currentUnit!,
+                currentWorkbook: activeWorkbook!,
             });
         });
 

@@ -18,8 +18,9 @@
  * @vitest-environment jsdom
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+    blurHostDocSelectionWhenEmbedRuntimeEntersStage,
     createDocsTableLikeCustomBlockWheelHandler,
     resolveDocsCustomBlockRuntimeViewportHeight,
     resolveDocsTableLikeCustomBlockRuntimeContentHeight,
@@ -138,6 +139,36 @@ describe('shouldSyncDocsTableLikeCustomBlockBleedOnScroll', () => {
 
         expect(shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root, outer)).toBe(true);
         expect(shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root, window)).toBe(true);
+    });
+});
+
+describe('blurHostDocSelectionWhenEmbedRuntimeEntersStage', () => {
+    it('blurs host doc selection when a docs custom block enters interactive stage2', () => {
+        const blur = vi.fn();
+        const renderManagerService = {
+            getRenderById: vi.fn(() => ({
+                with: vi.fn(() => ({ blur })),
+            })),
+        };
+
+        blurHostDocSelectionWhenEmbedRuntimeEntersStage(renderManagerService as never, 'host-doc', 'stage2');
+
+        expect(renderManagerService.getRenderById).toHaveBeenCalledWith('host-doc');
+        expect(blur).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps host doc selection unchanged before the custom block becomes interactive', () => {
+        const blur = vi.fn();
+        const renderManagerService = {
+            getRenderById: vi.fn(() => ({
+                with: vi.fn(() => ({ blur })),
+            })),
+        };
+
+        blurHostDocSelectionWhenEmbedRuntimeEntersStage(renderManagerService as never, 'host-doc', 'stage1');
+
+        expect(renderManagerService.getRenderById).not.toHaveBeenCalled();
+        expect(blur).not.toHaveBeenCalled();
     });
 });
 

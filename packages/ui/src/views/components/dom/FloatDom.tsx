@@ -171,7 +171,7 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
     const focusUnit = useObservable(instanceService.focused$);
-    const currentUnitId = typeof unitId === 'string' ? unitId : typeof focusUnit === 'string' ? focusUnit : null;
+    const currentUnitId = resolveFloatDomCurrentUnitId(unitId, focusUnit);
 
     return layers?.filter((layer) => shouldRenderFloatDomLayer(layer[1], currentUnitId))?.map((layer) => (
         <FloatDomSingle
@@ -181,6 +181,28 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
         />
     ));
 };
+
+export function resolveFloatDomCurrentUnitId(unitId: string | undefined, focusedUnit: unknown): string | null {
+    if (typeof unitId === 'string') {
+        return unitId;
+    }
+
+    if (typeof focusedUnit === 'string') {
+        return focusedUnit;
+    }
+
+    if (
+        focusedUnit != null &&
+        typeof focusedUnit === 'object' &&
+        'getUnitId' in focusedUnit &&
+        typeof focusedUnit.getUnitId === 'function'
+    ) {
+        const focusedUnitId = focusedUnit.getUnitId();
+        return typeof focusedUnitId === 'string' ? focusedUnitId : null;
+    }
+
+    return null;
+}
 
 export function resolveFloatDomOverflow(props: {
     customBlockRenderViewport?: {

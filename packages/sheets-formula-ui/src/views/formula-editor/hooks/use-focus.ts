@@ -17,24 +17,64 @@
 import type { Editor } from '@univerjs/docs-ui';
 import { Tools } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
+import { isEventTargetInSameEmbedInteractionBoundary } from '@univerjs/embed-ui';
 import { useDependency, useEvent } from '@univerjs/ui';
+
+export function focusFormulaEditor(
+    editorService: Pick<IEditorService, 'focus'>,
+    editor?: Pick<Editor, 'getEditorId' | 'getSelectionRanges' | 'setSelectionRanges' | 'getDocumentData' | 'docSelectionRenderService'>,
+    offset?: number
+) {
+    if (!editor) {
+        return;
+    }
+
+    editorService.focus(editor.getEditorId());
+    if (editor.docSelectionRenderService.isOnPointerEvent) {
+        return;
+    }
+
+    const selections = [...editor.getSelectionRanges()];
+    if (Tools.isDefine(offset)) {
+        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+    } else if (!selections.length) {
+        const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
+        const offset = Math.max(body.length - 2, 0);
+        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+    } else {
+        editor.setSelectionRanges(selections);
+    }
+}
+
+export function shouldSkipFormulaEditorMouseUpFocus(_target: EventTarget | null): boolean {
+    return false;
+}
+
+export function shouldRefocusFormulaEditorOnMouseUp(options: {
+    target: EventTarget | null;
+    isFocusing: boolean | undefined;
+    isPointerSelecting: boolean | undefined;
+}): boolean {
+    if (shouldSkipFormulaEditorMouseUpFocus(options.target)) {
+        return false;
+    }
+
+    if (options.isPointerSelecting || options.isFocusing) {
+        return false;
+    }
+
+    return true;
+}
+
+export function hasActiveFormulaEmbedInteraction(scopeElement: HTMLElement | null | undefined): boolean {
+    const ownerDocument = scopeElement?.ownerDocument;
+    return isEventTargetInSameEmbedInteractionBoundary(scopeElement, ownerDocument?.activeElement);
+}
 
 export const useFocus = (editor?: Editor) => {
     const editorService = useDependency(IEditorService);
     const focus = useEvent((offset?: number) => {
-        if (editor) {
-            editorService.focus(editor.getEditorId());
-            const selections = [...editor.getSelectionRanges()];
-            if (Tools.isDefine(offset)) {
-                editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-            } else if (!selections.length && !editor.docSelectionRenderService.isOnPointerEvent) {
-                const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
-                const offset = Math.max(body.length - 2, 0);
-                editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-            } else {
-                editor.setSelectionRanges(selections);
-            }
-        };
+        focusFormulaEditor(editorService, editor, offset);
     });
 
     return focus;

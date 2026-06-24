@@ -22,11 +22,13 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FX_BAR_EDITOR,
     LocaleType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { EditingRenderController } from '../editing.render-controller';
@@ -206,5 +208,40 @@ describe('EditingRenderController business methods', () => {
         expect(controller._undoRedoService.clearUndoRedo).toHaveBeenCalledWith(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         expect(formulaBarEditor.setSelectionRanges).toHaveBeenCalledWith([], false);
         expect(formulaBarEditor.blur).toHaveBeenCalled();
+    });
+
+    it('syncs the active sheet editor selection instead of the host document selection on focus', () => {
+        const { controller, workbook } = createController();
+        const focus$ = new Subject<boolean>();
+        const hostSelectionSync = vi.fn();
+        const cellEditorSelectionSync = vi.fn();
+        const disposableCollection = { add: vi.fn() };
+
+        controller._cellEditorManagerService.focus$ = focus$;
+        controller._univerInstanceService.getCurrentUnitOfType.mockImplementation((type: UniverInstanceType) => {
+            if (type === UniverInstanceType.UNIVER_DOC) {
+                return { getUnitId: () => 'host-doc' };
+            }
+
+            return workbook;
+        });
+        controller._renderManagerService.getRenderById.mockImplementation((unitId: string) => ({
+            with: vi.fn(() => {
+                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    return { sync: cellEditorSelectionSync };
+                }
+                if (unitId === 'host-doc') {
+                    return { sync: hostSelectionSync };
+                }
+
+                return undefined;
+            }),
+        }));
+
+        controller._initialCursorSync(disposableCollection);
+        focus$.next(true);
+
+        expect(cellEditorSelectionSync).toHaveBeenCalledTimes(1);
+        expect(hostSelectionSync).not.toHaveBeenCalled();
     });
 });

@@ -180,6 +180,7 @@ describe('EmbedMountService', () => {
         const hosts = [firstHost, secondHost];
         const focusCoordinator = new EmbedRuntimeFocusCoordinator();
         const interactionBoundaryService = new EmbedInteractionBoundaryService();
+        const focusOwnerService = new EmbedFocusOwnerService();
         const instanceService = {
             currentUnitId: 'other',
             setCurrentUnitForType: vi.fn((unitId: string) => {
@@ -198,6 +199,7 @@ describe('EmbedMountService', () => {
                 [IContextService, contextService],
                 [EmbedRuntimeFocusCoordinator, focusCoordinator],
                 [EmbedInteractionBoundaryService, interactionBoundaryService],
+                [EmbedFocusOwnerService, focusOwnerService],
             ],
         });
         const first = createDescriptor({
@@ -239,10 +241,16 @@ describe('EmbedMountService', () => {
         expect(focusCoordinator.isChildUnitRuntimeEvent('host-1', firstChildInput)).toBe(false);
         expect(firstHost.getAttribute('aria-hidden')).toBe('true');
         expect(secondHost.getAttribute('aria-hidden')).toBeNull();
+        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-2');
+        expect(instanceService.focusUnit).toHaveBeenCalledWith('child-2');
+        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_UNIT, true);
+        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SHEET, true);
+        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, false);
+        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SLIDE, false);
+        expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'tab-2', childUnitId: 'child-2' });
         firstChildInput.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
         expect(popupPortal.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('tab-1');
         expect(popupPortal.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-popup');
-        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-2');
         firstHost.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_UNIT, true);
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, true);

@@ -33,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
@@ -52,7 +52,8 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Optional(EmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
+        @Optional(EmbedInteractionBoundaryService) _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
+        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -106,6 +107,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                         return;
                     }
 
+                    if (!isInternalEditorID(this._context.unitId) && this._isEmbedChildInteractionActive(this._context.unitId)) {
+                        return;
+                    }
+
                     this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params, {
                         unitId: this._context.unitId,
                         subUnitId: this._context.unitId,
@@ -134,7 +139,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
-            if (this._isEmbedInteractionEvent(evt)) {
+            if (this._isEmbedInteractionEvent(evt, unitId)) {
                 return;
             }
 
@@ -143,6 +148,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (docDataModel?.getUnitId() !== unitId) {
                 this._instanceSrv.setCurrentUnitForType(unitId);
             }
+            this._instanceSrv.focusUnit(unitId);
 
             const skeleton = this._docSkeletonManagerService.getSkeleton();
             const { offsetX, offsetY } = evt;
@@ -201,7 +207,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
-            if (this._isEmbedInteractionEvent(evt)) {
+            if (this._isEmbedInteractionEvent(evt, unitId)) {
                 return;
             }
 
@@ -212,7 +218,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
-            if (this._isEmbedInteractionEvent(evt)) {
+            if (this._isEmbedInteractionEvent(evt, unitId)) {
                 return;
             }
 
@@ -248,13 +254,29 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         this._editorService.focus(unitId);
     }
 
-    private _isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
+    private _isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent, unitId: string): boolean {
+        if (isInternalEditorID(unitId)) {
+            return false;
+        }
+
         const target = (evt as Event).target;
-        if (this._embedInteractionBoundaryService?.contains(undefined, target, evt as Event)) {
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitRuntimeEvent(unitId, target, evt as Event)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(unitId)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId, target, evt as Event)) {
             return true;
         }
 
         return isEmbedInteractionEvent(evt);
+    }
+
+    private _isEmbedChildInteractionActive(unitId: string): boolean {
+        return this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId) === true;
     }
 
     private _commandExecutedListener() {
@@ -271,7 +293,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                     return;
                 }
 
-                if (this._embedInteractionBoundaryService?.hasRecentInteraction()) {
+                if (this._isEmbedChildInteractionActive(documentId)) {
                     return;
                 }
 
@@ -293,6 +315,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             // and can be set to the previous cursor position in the future.
             // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
             if (!isInternalEditor) {
+                if (this._isEmbedChildInteractionActive(unitId)) {
+                    return;
+                }
+
                 //TODO: @JOCS Only for docs. move to docs in the future.
                 this._docSelectionRenderService.focus();
                 const docDataModel = this._context.unit;
@@ -315,7 +341,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
 
 function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
     const target = (evt as Event).target;
-    if (target instanceof Element && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
+    if (typeof Element !== 'undefined' && target instanceof Element && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
         return true;
     }
 
@@ -338,7 +364,7 @@ function getEventClientPoint(evt: IPointerEvent | IMouseEvent, target: EventTarg
         return { clientX: evt.clientX, clientY: evt.clientY };
     }
 
-    if (target instanceof Element && Number.isFinite(evt.offsetX) && Number.isFinite(evt.offsetY)) {
+    if (typeof Element !== 'undefined' && target instanceof Element && Number.isFinite(evt.offsetX) && Number.isFinite(evt.offsetY)) {
         const rect = target.getBoundingClientRect();
         return {
             clientX: rect.left + evt.offsetX,

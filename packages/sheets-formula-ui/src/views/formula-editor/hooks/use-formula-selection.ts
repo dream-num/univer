@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, IAccessor, IUnitRangeName, Workbook } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -27,9 +28,17 @@ import { filter } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 import { useStateRef } from './use-state-ref';
 
-function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
+export function resolveFormulaSelectionDataStream(accssor: IAccessor, editor?: Pick<Editor, 'getDocumentData'>, editorId?: string) {
+    const editorDataStream = editor?.getDocumentData().body?.dataStream;
+    if (editorDataStream != null) {
+        return { dataStream: editorDataStream, offset: 0 };
+    }
+
     const univerInstanceService = accssor.get(IUniverInstanceService);
-    const documentModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const editorDocumentModel = editorId
+        ? univerInstanceService.getUnit<DocumentDataModel>(editorId, UniverInstanceType.UNIVER_DOC)
+        : undefined;
+    const documentModel = editorDocumentModel ?? univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     if (!documentModel?.getBody()) {
         return;
@@ -52,9 +61,22 @@ export function shouldSkipReferenceEditingByPointer(isDisabledByPointer: boolean
     return isDisabledByPointer && !disableOnClick;
 }
 
+export function resolveFormulaSelectionWorkbook<TWorkbook>(currentWorkbook: TWorkbook | null | undefined, fallbackWorkbook: TWorkbook | null | undefined): TWorkbook | undefined {
+    return currentWorkbook ?? fallbackWorkbook ?? undefined;
+}
+
+export function resolveFormulaSelectionCursorIndex(activeRange: { collapsed?: boolean; startOffset?: number } | undefined, dataStream: string): number {
+    const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
+    if (index <= 0 && dataStream.startsWith('=') && dataStream.length > 0) {
+        return dataStream.length;
+    }
+
+    return index;
+}
+
 // eslint-disable-next-line max-lines-per-function
-export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; disableOnClick?: boolean; unitId: string; subUnitId: string }) {
-    const { editorId, isFocus, disableOnClick, unitId, subUnitId } = opts;
+export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; isFocus: boolean; disableOnClick?: boolean; unitId: string; subUnitId: string }) {
+    const { editor, editorId, isFocus, disableOnClick, unitId, subUnitId } = opts;
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetRenderer = renderManagerService.getRenderById(unitId);
@@ -80,14 +102,17 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
 
     // eslint-disable-next-line complexity
     const calculateSelectingType = useEvent(() => {
-        const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentWorkbook = resolveFormulaSelectionWorkbook(
+            univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET),
+            workbook
+        );
         if (!currentWorkbook) return;
         const currentSheet = currentWorkbook.getActiveSheet();
-        const activeRange = docSelectionRenderService?.getActiveTextRange();
-        const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
-        const config = getCurrentBodyDataStreamAndOffset(injector);
+        const activeRange = editor?.getSelectionRanges()?.[0] ?? docSelectionRenderService?.getActiveTextRange();
+        const config = resolveFormulaSelectionDataStream(injector, editor, editorId);
         if (!config) return;
         const dataStream = config?.dataStream?.slice(0, -2);
+        const index = resolveFormulaSelectionCursorIndex(activeRange, dataStream);
         const nodes = (lexerTreeBuilder.sequenceNodesBuilder(dataStream) ?? []).map((node) => {
             if (typeof node === 'object') {
                 if (node.nodeType === sequenceNodeType.REFERENCE) {
@@ -119,7 +144,10 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
                 isDisabledByPointer.current = false;
 
                 const { sheetName, unitId } = focusingNode.range;
-                const currentUnitId = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                const currentUnitId = resolveFormulaSelectionWorkbook(
+                    univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET),
+                    workbook
+                )?.getUnitId();
                 if (unitId && unitId !== currentUnitId) {
                     setIsSelecting(FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE);
                 } else if (
@@ -148,6 +176,31 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
 
         return () => sub.unsubscribe();
     }, [calculateSelectingType, docSelectionManagerService.textSelection$, editorId]);
+
+    useEffect(() => {
+        if (!isFocus || !editor) {
+            return;
+        }
+
+        const sub = editor.input$.subscribe(() => {
+            queueMicrotask(calculateSelectingType);
+        });
+
+        return () => sub.unsubscribe();
+    }, [calculateSelectingType, editor, isFocus]);
+
+    useEffect(() => {
+        if (!isFocus) {
+            return;
+        }
+
+        const editorDocumentModel = univerInstanceService.getUnit<DocumentDataModel>(editorId, UniverInstanceType.UNIVER_DOC);
+        const sub = editorDocumentModel?.change$?.subscribe(() => {
+            queueMicrotask(calculateSelectingType);
+        });
+
+        return () => sub?.unsubscribe();
+    }, [calculateSelectingType, editorId, isFocus, univerInstanceService]);
 
     useEffect(() => {
         if (!isFocus) {

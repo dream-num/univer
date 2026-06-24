@@ -185,7 +185,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (!this._currentEditCell || !this._currentEditCellState) return;
 
         const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
-        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._getWorkbookForEditUnit(unitId);
         if (!workbook || workbook.getUnitId() !== unitId) return;
 
         const worksheet = workbook.getActiveSheet();
@@ -302,7 +302,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (!this._currentEditCell) return;
 
         const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
-        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._getWorkbookForEditUnit(unitId);
         if (!workbook || workbook.getUnitId() !== unitId) return;
 
         const worksheet = workbook.getActiveSheet();
@@ -408,6 +408,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             editorUnitId: this._editorUnitId,
             isInArrayFormulaRange: cell?.isInArrayFormulaRange,
         };
+    }
+
+    private _getWorkbookForEditUnit(unitId: string): Nullable<Workbook> {
+        return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) ??
+            this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     }
 
     getCurrentEditorId() {

@@ -146,6 +146,14 @@ class TestUniverInstanceService {
     }
 }
 
+class TestUniverInstanceServiceWithDifferentCurrent extends TestUniverInstanceService {
+    override getCurrentUnitOfType(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SHEET
+            ? { getUnitId: () => 'host-or-other-sheet' }
+            : null;
+    }
+}
+
 class TestRenderManagerService {
     readonly sheetCanvasElement = {
         style: { width: '800px' },
@@ -400,6 +408,40 @@ describe('SheetCellEditorResizeService', () => {
             startY: 60,
             endX: 230,
             endY: 104,
+            show: true,
+        }));
+    });
+
+    it('uses the editing unit renderer even when the current sheet unit is different', async () => {
+        vi.stubGlobal('window', new EventTarget());
+        vi.stubGlobal('document', { activeElement: { dataset: {} } });
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceServiceWithDifferentCurrent as never }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([ThemeService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([SheetCellEditorResizeService]);
+
+        injector.get(SheetCellEditorResizeService).fitTextSize();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        expect(editorManager.getState()).toEqual(expect.objectContaining({
+            startX: 120,
+            startY: 90,
+            endX: 250,
+            endY: 134,
             show: true,
         }));
     });

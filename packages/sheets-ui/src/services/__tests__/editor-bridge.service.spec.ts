@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IContextService,
     Injector,
     IUniverInstanceService,
     ThemeService,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
@@ -52,7 +69,10 @@ function createService(options?: { hasFocusEditor?: boolean }) {
         },
         univerInstanceService: {
             getTypeOfUnitDisposed$: vi.fn(() => unitDisposed$.asObservable()),
-            getCurrentUnitOfType: vi.fn(() => workbook),
+            getCurrentUnitOfType: vi.fn((_type?: UniverInstanceType) => workbook),
+            getUnit: vi.fn((unitId: string, type?: UniverInstanceType) => unitId === 'unit-1'
+                ? mocks.univerInstanceService.getCurrentUnitOfType(type as never)
+                : null),
         },
         editorService: {
             getFocusEditor: vi.fn(() => (options?.hasFocusEditor ? { id: 'existing' } : null)),
@@ -82,6 +102,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
     class TestUniverInstanceService {
         getTypeOfUnitDisposed$ = mocks.univerInstanceService.getTypeOfUnitDisposed$;
         getCurrentUnitOfType = mocks.univerInstanceService.getCurrentUnitOfType;
+        getUnit = mocks.univerInstanceService.getUnit;
     }
 
     class TestEditorService {
@@ -315,6 +336,65 @@ describe('EditorBridgeService', () => {
         expect(body.textRuns[0].ts.cl.rgb).toBe('#d0d0d0');
 
         service.refreshEditCellPosition(true);
+        expect(service.getEditCellLayout()?.position.startX).toBeGreaterThan(0);
+    });
+
+    it('builds and refreshes the edit cell state from the target unit when current sheet unit is different', () => {
+        const { service, mocks } = createService();
+        const documentModel = {
+            documentStyle: {
+                renderConfig: {},
+            },
+            getBody: () => ({ dataStream: 'Embedded\r\n', textRuns: [] }),
+            setZoomRatio: vi.fn(),
+        };
+        const worksheet = {
+            getSheetId: () => 'sheet-1',
+            getCellRaw: vi.fn(() => ({ v: 'Embedded' })),
+            getCell: vi.fn(() => ({ v: 'Embedded' })),
+            getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
+            getBlankCellDocumentModel: vi.fn(() => ({ documentModel })),
+        };
+        const childWorkbook = {
+            getUnitId: () => 'unit-1',
+            getActiveSheet: () => worksheet,
+        };
+        mocks.univerInstanceService.getCurrentUnitOfType.mockReturnValue({
+            getUnitId: () => 'host-or-other-sheet',
+            getActiveSheet: () => null,
+        } as never);
+        mocks.univerInstanceService.getUnit.mockImplementation((unitId: string, type?: UniverInstanceType) => (
+            unitId === 'unit-1' && type === UniverInstanceType.UNIVER_SHEET ? childWorkbook : null
+        ) as never);
+        mocks.sheetSkeletonService.getSkeleton.mockReturnValue({
+            getNoMergeCellWithCoordByIndex: (row: number, column: number) => ({
+                startX: column * 80,
+                startY: row * 24,
+                endX: column * 80 + 80,
+                endY: row * 24 + 24,
+            }),
+        } as never);
+        mocks.renderManagerService.getRenderUnitById.mockReturnValue({
+            with: () => ({
+                getViewPort: () => ({ viewportKey: 'embedded-main' }),
+            }),
+        } as never);
+
+        service.setEditCell(createPositionedEditCellParam());
+
+        expect(service.getEditLocation()).toEqual(expect.objectContaining({
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            row: 1,
+            column: 2,
+        }));
+        expect(service.getEditCellLayout()).toEqual(expect.objectContaining({
+            canvasOffset: { left: 12, top: 18 },
+            scaleX: 2,
+            scaleY: 1.5,
+        }));
+
+        service.refreshEditCellPosition();
         expect(service.getEditCellLayout()?.position.startX).toBeGreaterThan(0);
     });
 });

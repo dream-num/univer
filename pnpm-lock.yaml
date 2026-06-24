@@ -2141,6 +2141,9 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
+      '@univerjs/embed-ui':
+        specifier: workspace:*
+        version: link:../embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

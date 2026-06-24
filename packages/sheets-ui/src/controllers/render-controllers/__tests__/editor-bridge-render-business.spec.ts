@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
+import type { EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '@univerjs/embed-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -59,7 +63,17 @@ function createCommandService() {
     };
 }
 
-function createController(options?: { editorVisible?: boolean; forceKeepVisible?: boolean; focusedUnitId?: string }) {
+function createController(options?: {
+    currentEditLocation?: { unitId: string; sheetId: string; row: number; column: number };
+    currentEditCellState?: { documentLayoutObject?: { documentModel?: { getSnapshot?: () => { body?: { dataStream?: string } } } } };
+    editorVisible?: boolean;
+    forceKeepVisible?: boolean;
+    focusedUnitId?: string;
+    isEmbedRuntimeEvent?: boolean;
+    isEmbedActiveSession?: boolean;
+    focusingSheet?: boolean;
+    isEmbedRuntimeEventImpl?: (unitId: string | undefined, target?: EventTarget | null, event?: Event) => boolean;
+}) {
     const workbook$ = new Subject<any>();
     const selectionMoveEnd$ = new Subject<any>();
     const selectionMoveStart$ = new Subject<any>();
@@ -83,7 +97,7 @@ function createController(options?: { editorVisible?: boolean; forceKeepVisible?
     workbook.getCurrentUnitOfType.mockReturnValue(workbook as any);
     const commandService = createCommandService();
     const contextValues = new Map<string, unknown>([
-        [FOCUSING_SHEET, true],
+        [FOCUSING_SHEET, options?.focusingSheet ?? true],
         [FOCUSING_FX_BAR_EDITOR, false],
     ]);
     const context = {
@@ -110,6 +124,8 @@ function createController(options?: { editorVisible?: boolean; forceKeepVisible?
             : null),
     };
     const editorBridgeService = {
+        getEditCellState: vi.fn(() => options?.currentEditCellState ?? null),
+        getEditLocation: vi.fn(() => options?.currentEditLocation ?? null),
         isVisible: vi.fn(() => ({ visible: options?.editorVisible ?? false })),
         isForceKeepVisible: vi.fn(() => options?.forceKeepVisible ?? false),
         refreshEditCellState: vi.fn(),
@@ -163,7 +179,11 @@ function createController(options?: { editorVisible?: boolean; forceKeepVisible?
                     })),
                 },
             })),
-        } as any
+        } as any,
+        {
+            isChildUnitRuntimeEvent: vi.fn((unitId, target, event) => options?.isEmbedRuntimeEventImpl?.(unitId, target, event) ?? options?.isEmbedRuntimeEvent ?? false),
+            isChildUnitInActiveSession: vi.fn(() => options?.isEmbedActiveSession ?? false),
+        } as unknown as EmbedRuntimeFocusCoordinator
     );
     workbook$.next(workbook);
 
@@ -179,6 +199,7 @@ function createController(options?: { editorVisible?: boolean; forceKeepVisible?
         spreadsheetLeftTopPlaceholder,
         spreadsheetRowHeader,
         workbook,
+        workbook$,
     };
 }
 
@@ -220,6 +241,35 @@ describe('EditorBridgeRenderController business flows', () => {
         controller.dispose();
     });
 
+    it('does not reactivate the same edit cell for repeated selection sync events', () => {
+        const { commandService, controller, selectionMoveEnd$, selectionSet$ } = createController({
+            currentEditLocation: {
+                unitId: 'unit-1',
+                sheetId: 'sheet-1',
+                row: 1,
+                column: 2,
+            },
+        });
+
+        const selection = [{
+            primary: {
+                actualRow: 3,
+                actualColumn: 4,
+                startRow: 3,
+                startColumn: 4,
+                endRow: 3,
+                endColumn: 4,
+            },
+        }];
+
+        selectionSet$.next(selection);
+        selectionMoveEnd$.next(selection);
+
+        expect(commandService.executeCommand).not.toHaveBeenCalledWith(SetActivateCellEditOperation.id, expect.anything());
+
+        controller.dispose();
+    });
+
     it('opens sheet editing from double click and keyboard input, then refreshes a hidden editor after formatting commands', () => {
         const { commandService, controller, editorBridgeService, inputBefore$, spreadsheet } = createController();
 
@@ -250,6 +300,43 @@ describe('EditorBridgeRenderController business flows', () => {
         controller.dispose();
     });
 
+    it('opens sheet editing from keyboard input while the sheet is an active embed child session', () => {
+        const { commandService, controller, inputBefore$ } = createController({
+            focusingSheet: false,
+            focusedUnitId: 'unit-1',
+            isEmbedActiveSession: true,
+        });
+
+        inputBefore$.next({ event: { data: '=', which: 187 } });
+
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: 187,
+            unitId: 'unit-1',
+        });
+
+        controller.dispose();
+    });
+
+    it('does not stack keyboard input listeners when the current workbook emits repeatedly', () => {
+        const { commandService, controller, inputBefore$, workbook, workbook$ } = createController();
+
+        workbook$.next(workbook);
+        workbook$.next(workbook);
+        inputBefore$.next({ event: { data: '=', which: 187 } });
+
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(1);
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: 187,
+            unitId: 'unit-1',
+        });
+
+        controller.dispose();
+    });
+
     it('hides a visible editor from sheet pointer actions but keeps it while formula range input is active', () => {
         const keepVisible = createController({ editorVisible: true, forceKeepVisible: true });
         keepVisible.spreadsheet.onPointerDown$.emit({});
@@ -274,6 +361,126 @@ describe('EditorBridgeRenderController business flows', () => {
 
         normal.commandService.syncExecuteCommand.mockClear();
         normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id }, { fromCollab: true });
+        expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
+
+        normal.controller.dispose();
+    });
+
+    it('keeps a visible embedded cell editor when pointer down originates inside the same embed owner', () => {
+        const normal = createController({ editorVisible: true });
+        const embedRoot = document.createElement('div');
+        const editorTarget = document.createElement('div');
+        embedRoot.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        editorTarget.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        editorTarget.setAttribute('data-u-comp', 'editor');
+        document.body.append(embedRoot, editorTarget);
+
+        normal.spreadsheet.onPointerDown$.emit({ target: editorTarget });
+        expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
+
+        editorTarget.getBoundingClientRect = () => ({
+            x: 100,
+            y: 200,
+            left: 100,
+            top: 200,
+            right: 180,
+            bottom: 224,
+            width: 80,
+            height: 24,
+            toJSON: () => {},
+        });
+        normal.spreadsheet.onPointerDown$.emit({ clientX: 120, clientY: 210 });
+        expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
+
+        normal.spreadsheet.onPointerDown$.emit({ target: document.createElement('div') });
+        expect(normal.commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
+
+        normal.controller.dispose();
+        embedRoot.remove();
+        editorTarget.remove();
+    });
+
+    it('hides a visible embedded cell editor when a regular edit points at the child runtime canvas', () => {
+        const normal = createController({ editorVisible: true, isEmbedRuntimeEvent: true });
+        const runtimeCanvas = document.createElement('canvas');
+
+        normal.spreadsheet.onPointerDown$.emit({ target: runtimeCanvas });
+
+        expect(normal.commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
+
+        normal.controller.dispose();
+    });
+
+    it('keeps a visible embedded cell editor when formula range selection points at the child runtime canvas', () => {
+        const normal = createController({
+            editorVisible: true,
+            isEmbedRuntimeEvent: true,
+            isEmbedActiveSession: true,
+            currentEditCellState: {
+                documentLayoutObject: {
+                    documentModel: {
+                        getSnapshot: () => ({ body: { dataStream: '=SUM(' } }),
+                    },
+                },
+            },
+        });
+        const runtimeCanvas = document.createElement('canvas');
+
+        normal.spreadsheet.onPointerDown$.emit({ target: runtimeCanvas });
+
+        expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
+
+        normal.controller.dispose();
+    });
+
+    it('passes engine pointer coordinates to embed runtime detection for formula range selection', () => {
+        const runtimeCanvas = document.createElement('canvas');
+        const normal = createController({
+            editorVisible: true,
+            isEmbedActiveSession: true,
+            currentEditCellState: {
+                documentLayoutObject: {
+                    documentModel: {
+                        getSnapshot: () => ({ body: { dataStream: '=SUM(' } }),
+                    },
+                },
+            },
+            isEmbedRuntimeEventImpl: (_unitId, _target, event) => (
+                (event as unknown as { clientX?: number; clientY?: number })?.clientX === 120 &&
+                (event as unknown as { clientX?: number; clientY?: number })?.clientY === 210
+            ),
+        });
+
+        normal.spreadsheet.onPointerDown$.emit({ target: runtimeCanvas, clientX: 120, clientY: 210 });
+
+        expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
+
+        normal.controller.dispose();
+    });
+
+    it('keeps an embedded formula editor visible during worksheet activation without a pointer event', () => {
+        const normal = createController({
+            editorVisible: true,
+            isEmbedActiveSession: true,
+            currentEditCellState: {
+                documentLayoutObject: {
+                    documentModel: {
+                        getSnapshot: () => ({ body: { dataStream: '=A1\r\n' } }),
+                    },
+                },
+            },
+        });
+
+        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id });
+
         expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
 
         normal.controller.dispose();

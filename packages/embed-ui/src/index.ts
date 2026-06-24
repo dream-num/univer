@@ -85,7 +85,12 @@ export { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.
 export { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
 export { EmbedHostLifecycleService, type IEmbedHostCopyContext, type IEmbedHostCreateContext, type IEmbedHostRemoveContext } from './services/embed-host-lifecycle.service';
 export { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
-export { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
+export {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EmbedInteractionBoundaryService,
+    getEmbedInteractionBoundaryOwnerId,
+    isEventTargetInSameEmbedInteractionBoundary,
+} from './services/embed-interaction-boundary.service';
 export {
     EMBED_DUPLICATE_CHILD_UNIT_ERROR_CODE,
     EmbedDuplicateChildUnitError,
@@ -110,6 +115,23 @@ export {
     observeEmbedRenderTargetResize,
     refreshEmbedChildRender,
 } from './services/embed-render-child-view-contribution';
+export {
+    EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+    EmbedRuntimeFocusCoordinator,
+    type EmbedRuntimeFocusRole,
+    type IEmbedRuntimeFocusElementRegistration,
+    type IEmbedRuntimeFocusLeaseOptions,
+} from './services/embed-runtime-focus-coordinator.service';
+export {
+    EMBED_CHILD_UNIT_ID_ATTRIBUTE,
+    EMBED_FLOAT_DOM_ATTRIBUTE,
+    EMBED_HOST_UNIT_ID_ATTRIBUTE,
+    EMBED_ID_ATTRIBUTE,
+    type IEmbedRuntimeDomScope,
+    resolveActiveEmbedRuntimeDomScope,
+    resolveEmbedFloatDomContainer,
+    resolveEmbedRuntimeDomScope,
+} from './services/embed-runtime-scope-dom';
 export {
     captureEmbedContextSceneCanvas,
     type EmbedSceneCanvasCaptureResult,

@@ -111,10 +111,10 @@ export class DocViewScaleService extends Disposable implements IRenderModule {
     }
 
     getBaseWidth(): number {
-        const documentStyle = this._context.unit.getSnapshot().documentStyle;
+        const documentStyle = this._context.unit?.getSnapshot?.()?.documentStyle;
         return resolveDocFitBaseWidth({
-            documentFlavor: documentStyle.documentFlavor,
-            documentStylePageWidth: documentStyle.pageSize?.width,
+            documentFlavor: documentStyle?.documentFlavor,
+            documentStylePageWidth: documentStyle?.pageSize?.width,
         });
     }
 
@@ -133,6 +133,10 @@ export class DocViewScaleService extends Disposable implements IRenderModule {
     }
 
     getUserZoomRatio(): number {
+        if (this._context.unit == null) {
+            return 1;
+        }
+
         return getDocEffectiveZoomRatio(this._context.unit);
     }
 

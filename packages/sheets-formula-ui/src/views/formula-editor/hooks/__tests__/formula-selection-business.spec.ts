@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
+import { isEventTargetInSameEmbedInteractionBoundary } from '@univerjs/embed-ui';
 import { sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it, vi } from 'vitest';
-import { shouldSkipReferenceEditingByPointer } from '../use-formula-selection';
+import { focusFormulaEditor, hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, shouldSkipFormulaEditorMouseUpFocus } from '../use-focus';
+import { FormulaSelectingType, resolveFormulaSelectionCursorIndex, resolveFormulaSelectionDataStream, resolveFormulaSelectionWorkbook, shouldSkipReferenceEditingByPointer } from '../use-formula-selection';
 import { buildTextRuns, calcHighlightRanges } from '../use-highlight';
-import { createSelectionChangeHandler, getSelectionsForFormulaRefUpdate } from '../use-sheet-selection-change';
+import { createSelectionChangeHandler, getInitialFormulaReferenceSelectionCount, getLastFormulaSelection, getSelectionsForFormulaRefUpdate, prepareSelectionChangeContext, replaceFormulaControlSelection } from '../use-sheet-selection-change';
 
 function range(row: number, col: number, sheetId = 'sheet1', unitId = 'unit1') {
     return {
@@ -32,10 +36,144 @@ function range(row: number, col: number, sheetId = 'sheet1', unitId = 'unit1') {
 }
 
 describe('formula selection update helpers', () => {
+    it('does not rewrite editor selections while doc pointer selection is in progress', () => {
+        const editorService = {
+            focus: vi.fn(),
+        };
+        const editor = {
+            getEditorId: vi.fn(() => 'editor-1'),
+            getSelectionRanges: vi.fn(() => [{ startOffset: 1, endOffset: 1, collapsed: true }]),
+            setSelectionRanges: vi.fn(),
+            getDocumentData: vi.fn(() => ({ body: { dataStream: 'abc\r\n' } })),
+            docSelectionRenderService: {
+                isOnPointerEvent: true,
+            },
+        };
+
+        focusFormulaEditor(editorService as never, editor as never);
+
+        expect(editorService.focus).toHaveBeenCalledWith('editor-1');
+        expect(editor.setSelectionRanges).not.toHaveBeenCalled();
+    });
+
+    it('keeps formula editor mouse-up refocus available when the editor canvas handled the pointer interaction', () => {
+        const canvas = document.createElement('canvas');
+        canvas.dataset.uComp = 'render-canvas';
+        const button = document.createElement('button');
+
+        expect(shouldSkipFormulaEditorMouseUpFocus(canvas)).toBe(false);
+        expect(shouldSkipFormulaEditorMouseUpFocus(button)).toBe(false);
+    });
+
+    it('does not refocus the formula editor on mouse-up when the editor is already focused', () => {
+        const canvas = document.createElement('canvas');
+        canvas.dataset.uComp = 'render-canvas';
+
+        expect(shouldRefocusFormulaEditorOnMouseUp({
+            target: canvas,
+            isFocusing: true,
+            isPointerSelecting: false,
+        })).toBe(false);
+    });
+
+    it('does not refocus the formula editor while pointer text selection is active', () => {
+        const canvas = document.createElement('canvas');
+        canvas.dataset.uComp = 'render-canvas';
+
+        expect(shouldRefocusFormulaEditorOnMouseUp({
+            target: canvas,
+            isFocusing: false,
+            isPointerSelecting: true,
+        })).toBe(false);
+    });
+
+    it('refocuses the formula editor on mouse-up only when focus was lost and no pointer selection is active', () => {
+        const canvas = document.createElement('canvas');
+        canvas.dataset.uComp = 'render-canvas';
+
+        expect(shouldRefocusFormulaEditorOnMouseUp({
+            target: canvas,
+            isFocusing: false,
+            isPointerSelecting: false,
+        })).toBe(true);
+    });
+
+    it('treats sheet range selection inside the same embed owner as an active formula interaction', () => {
+        const block = document.createElement('div');
+        const editorHost = document.createElement('div');
+        const sheetCanvas = document.createElement('canvas');
+        block.setAttribute('data-embed-interaction-boundary-owner', 'embed-1');
+        block.append(editorHost, sheetCanvas);
+        document.body.appendChild(block);
+
+        sheetCanvas.tabIndex = -1;
+        sheetCanvas.focus();
+
+        expect(isEventTargetInSameEmbedInteractionBoundary(editorHost, sheetCanvas)).toBe(true);
+        expect(hasActiveFormulaEmbedInteraction(editorHost)).toBe(true);
+
+        block.remove();
+    });
+
     it('only skips reference editing when pointer-origin editing is still disabled and click editing is allowed', () => {
         expect(shouldSkipReferenceEditingByPointer(true)).toBe(true);
         expect(shouldSkipReferenceEditingByPointer(true, true)).toBe(false);
         expect(shouldSkipReferenceEditingByPointer(false)).toBe(false);
+    });
+
+    it('falls back to the formula editor workbook when the focused current workbook is unavailable', () => {
+        const fallbackWorkbook = { unitId: 'embedded-sheet' };
+
+        expect(resolveFormulaSelectionWorkbook(undefined, fallbackWorkbook)).toBe(fallbackWorkbook);
+        expect(resolveFormulaSelectionWorkbook(null, fallbackWorkbook)).toBe(fallbackWorkbook);
+        expect(resolveFormulaSelectionWorkbook({ unitId: 'current-sheet' }, fallbackWorkbook)).toEqual({ unitId: 'current-sheet' });
+    });
+
+    it('reads formula selection text from the formula editor instead of the current host document', () => {
+        const accessor = {
+            get: vi.fn(() => ({
+                getCurrentUniverDocInstance: vi.fn(() => ({
+                    getBody: () => ({ dataStream: 'host document text\r\n' }),
+                })),
+            })),
+        };
+        const editor = {
+            getDocumentData: vi.fn(() => ({
+                body: {
+                    dataStream: '=SUM(\r\n',
+                },
+            })),
+        };
+
+        expect(resolveFormulaSelectionDataStream(accessor as never, editor as never)).toEqual({
+            dataStream: '=SUM(\r\n',
+            offset: 0,
+        });
+    });
+
+    it('reads formula selection text from the editor unit before falling back to the current host document', () => {
+        const accessor = {
+            get: vi.fn(() => ({
+                getUnit: vi.fn((unitId: string) => unitId === 'formula-editor'
+                    ? { getBody: () => ({ dataStream: '=A1\r\n' }) }
+                    : undefined),
+                getCurrentUniverDocInstance: vi.fn(() => ({
+                    getBody: () => ({ dataStream: 'host document text\r\n' }),
+                })),
+            })),
+        };
+
+        expect(resolveFormulaSelectionDataStream(accessor as never, undefined, 'formula-editor')).toEqual({
+            dataStream: '=A1\r\n',
+            offset: 0,
+        });
+    });
+
+    it('uses the end of a fresh formula when the editor selection offset is still stale', () => {
+        expect(resolveFormulaSelectionCursorIndex({ collapsed: true, startOffset: 0 }, '=')).toBe(1);
+        expect(resolveFormulaSelectionCursorIndex({ collapsed: true, startOffset: 0 }, '=SUM(')).toBe(5);
+        expect(resolveFormulaSelectionCursorIndex({ collapsed: true, startOffset: 0 }, 'plain')).toBe(0);
+        expect(resolveFormulaSelectionCursorIndex({ collapsed: true, startOffset: 2 }, '=A1')).toBe(2);
     });
 
     it('reorders the active selection into the formula reference being edited and keeps ctrl-added ranges separate', () => {
@@ -69,6 +207,92 @@ describe('formula selection update helpers', () => {
 
         handler([range(3, 3)], false);
         expect(onSelectionsChange).toHaveBeenLastCalledWith([range(3, 3)], false, false);
+    });
+
+    it('keeps the first user-created formula reference when no initial reference selection exists', () => {
+        const onSelectionsChange = vi.fn();
+        const handler = createSelectionChangeHandler({
+            initialSelectionsCount: 0,
+            onSelectionsChange,
+        });
+
+        handler([range(7, 5)], true, { initial: true });
+
+        expect(onSelectionsChange).toHaveBeenCalledWith([range(7, 5)], true, false);
+    });
+
+    it('uses the formula text end as the insertion context when the embedded editor selection is temporarily empty', () => {
+        const lexerTreeBuilder = {
+            sequenceNodesBuilder: vi.fn(() => []),
+        };
+        const editor = {
+            getSelectionRanges: vi.fn(() => []),
+            getDocumentData: vi.fn(() => ({ body: { dataStream: '=\r\n' } })),
+        };
+
+        expect(prepareSelectionChangeContext({
+            editor: editor as never,
+            lexerTreeBuilder: lexerTreeBuilder as never,
+        })).toMatchObject({
+            offset: 0,
+            nodeIndex: -1,
+            updatingRefIndex: -1,
+            sequenceNodes: [],
+        });
+    });
+
+    it('does not create a fallback formula context for non-formula editor text', () => {
+        const lexerTreeBuilder = {
+            sequenceNodesBuilder: vi.fn(() => []),
+        };
+        const editor = {
+            getSelectionRanges: vi.fn(() => []),
+            getDocumentData: vi.fn(() => ({ body: { dataStream: 'plain\r\n' } })),
+        };
+
+        expect(prepareSelectionChangeContext({
+            editor: editor as never,
+            lexerTreeBuilder: lexerTreeBuilder as never,
+        })).toBeUndefined();
+    });
+
+    it('applies a click-created formula reference from selection start before pointer-up controls are reset', () => {
+        const onSelectionsChange = vi.fn();
+        const handler = createSelectionChangeHandler({
+            initialSelectionsCount: 0,
+            onSelectionsChange,
+        });
+
+        handler([range(7, 5)], false);
+        handler([], true);
+
+        expect(onSelectionsChange).toHaveBeenCalledWith([range(7, 5)], false, false);
+        expect(onSelectionsChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts only rendered formula reference controls and parsed formula references as initial references', () => {
+        expect(getInitialFormulaReferenceSelectionCount(0, 0)).toBe(0);
+        expect(getInitialFormulaReferenceSelectionCount(0, 2)).toBe(2);
+        expect(getInitialFormulaReferenceSelectionCount(1, 0)).toBe(1);
+        expect(getInitialFormulaReferenceSelectionCount(1, 0, FormulaSelectingType.NEED_ADD)).toBe(0);
+        expect(getInitialFormulaReferenceSelectionCount(1, 1, FormulaSelectingType.NEED_ADD)).toBe(1);
+    });
+
+    it('keeps formula control ranges scoped to the current selection unit and sheet', () => {
+        const selections = [range(0, 0, 'sheet1', 'unit1')];
+
+        expect(replaceFormulaControlSelection(selections, 0, range(2, 2, 'other-sheet', 'other-unit'))).toEqual([
+            range(2, 2, 'sheet1', 'unit1'),
+        ]);
+    });
+
+    it('ignores stale formula control events when the matching selection data is unavailable', () => {
+        expect(replaceFormulaControlSelection([], 0, range(2, 2))).toBeUndefined();
+    });
+
+    it('returns no formula selection for empty selection events', () => {
+        expect(getLastFormulaSelection([])).toBeUndefined();
+        expect(getLastFormulaSelection([range(1, 1), range(2, 2)])).toEqual(range(2, 2));
     });
 });
 

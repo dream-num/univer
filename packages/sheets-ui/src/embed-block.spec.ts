@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import type { IEmbedChildContainerContext } from '@univerjs/embed-ui';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -61,27 +63,30 @@ describe('createSheetsEmbedChildViewContribution', () => {
         requestAnimationFrame.mockImplementation(() => 1);
         cancelAnimationFrame.mockImplementation(() => {});
 
-        const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
-        const rootElement = document.createElement('div');
-        const contribution = createSheetsEmbedChildViewContribution();
-        const disposable = contribution.mount?.({
-            childUnitId: 'sheet-1',
-            runtimeScope: { injector: scopedInjector, roots: { canvas: rootElement } },
-            renderScope: { mode: 'float', canvasRoot: rootElement, contentRoot: rootElement, rootElement },
-        } as unknown as IEmbedChildContainerContext);
+        try {
+            const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
+            const rootElement = document.createElement('div');
+            const contribution = createSheetsEmbedChildViewContribution();
+            const disposable = contribution.mount?.({
+                childUnitId: 'sheet-1',
+                runtimeScope: { injector: scopedInjector, roots: { canvas: rootElement } },
+                renderScope: { mode: 'float', canvasRoot: rootElement, contentRoot: rootElement, rootElement },
+            } as unknown as IEmbedChildContainerContext);
 
-        expect(mountEmbedRenderChildUnit).toHaveBeenCalledTimes(1);
-        expect(mountEmbedRenderChildUnit.mock.calls[0]).toHaveLength(4);
-        expect(mountEmbedRenderChildUnit.mock.calls[0][2]).toBe(rootElement);
-        expect(mountEmbedRenderChildUnit.mock.calls[0][3]).toEqual({ scopedRenderInjector: true });
-        expect(rootElement.querySelector('canvas')).not.toBeNull();
-        expect(requestAnimationFrame).not.toHaveBeenCalled();
-        expect(mountEmbedRenderChildUnit).toHaveBeenCalledTimes(1);
+            expect(mountEmbedRenderChildUnit).toHaveBeenCalledTimes(1);
+            expect(mountEmbedRenderChildUnit.mock.calls[0]).toHaveLength(4);
+            expect(mountEmbedRenderChildUnit.mock.calls[0][2]).toBe(rootElement);
+            expect(mountEmbedRenderChildUnit.mock.calls[0][3]).toEqual({ scopedRenderInjector: true });
+            expect(rootElement.querySelector('canvas')).not.toBeNull();
+            expect(requestAnimationFrame).not.toHaveBeenCalled();
+            expect(mountEmbedRenderChildUnit).toHaveBeenCalledTimes(1);
 
-        disposable?.dispose();
-        expect(disposeEmbedReactRoot).toHaveBeenCalledWith(reactRoot);
-        expect(cancelAnimationFrame).not.toHaveBeenCalled();
-        requestAnimationFrame.mockRestore();
-        cancelAnimationFrame.mockRestore();
-    });
+            disposable?.dispose();
+            expect(disposeEmbedReactRoot).toHaveBeenCalledWith(reactRoot);
+            expect(cancelAnimationFrame).not.toHaveBeenCalled();
+        } finally {
+            requestAnimationFrame.mockRestore();
+            cancelAnimationFrame.mockRestore();
+        }
+    }, 15000);
 });

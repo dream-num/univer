@@ -38,6 +38,7 @@ import { EmbedHostAnchorModelService } from './embed-host-anchor-model.service';
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
 import { EmbedHostLifecycleService } from './embed-host-lifecycle.service';
 import { EmbedHostMenuOverrideService } from './embed-host-menu-override.service';
+import { EmbedHostRestoreService } from './embed-host-restore.service';
 import { EmbedOverlayRootService } from './embed-overlay-root.service';
 import { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution } from './embed-product-menu-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from './embed-readonly-preview-registry.service';
@@ -56,6 +57,14 @@ describe('embed-ui registries and commands', () => {
             afterCreateAnchor: vi.fn(),
             afterRemoveAnchor: vi.fn(),
             activateAnchor: vi.fn(),
+            restoreAnchor: vi.fn(() => ({
+                embedId: 'embed-1',
+                entry: 'sheets-sheet-tab' as const,
+                hostAnchorId: 'anchor-1',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                hostUnitId: 'host-1',
+                kind: 'sheets-sheet-tab' as const,
+            })),
         };
 
         service.register(contribution);
@@ -87,6 +96,7 @@ describe('embed-ui registries and commands', () => {
         service.afterCreateAnchor({ embedId: 'embed-1', hostUnitId: 'host-1', hostType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-sheet-tab', hostAnchorId: 'anchor-1', descriptor });
         service.afterRemoveAnchor({ embedId: 'embed-1', hostUnitId: 'host-1', hostType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-sheet-tab', hostAnchorId: 'anchor-1', descriptor });
         service.activateAnchor({ embedId: 'embed-1', hostUnitId: 'host-1', hostType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-sheet-tab', hostAnchorId: 'anchor-1', descriptor });
+        expect(service.restoreAnchor({ embedId: 'embed-1', hostUnitId: 'host-1', hostType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-sheet-tab', hostAnchorId: 'anchor-1', descriptor })).toMatchObject({ hostAnchorId: 'anchor-1' });
 
         expect(() => service.createAnchorPlan({
             embedId: 'fallback',
@@ -110,6 +120,14 @@ describe('embed-ui registries and commands', () => {
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
         })).toThrow('EMBED_HOST_ADAPTER_CREATE_ANCHOR_NOT_IMPLEMENTED');
+        expect(() => service.restoreAnchor({
+            embedId: 'fallback',
+            hostUnitId: 'host-1',
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
+            hostAnchorId: 'fallback-anchor',
+            descriptor,
+        })).toThrow('EMBED_HOST_ADAPTER_RESTORE_ANCHOR_NOT_IMPLEMENTED');
         expect(service.removeAnchorPlan({
             embedId: 'fallback',
             hostUnitId: 'host-1',
@@ -120,6 +138,46 @@ describe('embed-ui registries and commands', () => {
             redoMutations: [{ id: REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID, params: expect.any(Object) }],
             undoMutations: [{ id: CREATE_EMBED_HOST_ANCHOR_MUTATION_ID, params: expect.any(Object) }],
         });
+    });
+
+    it('restores descriptors and host anchor records without command services', () => {
+        const descriptor = createDescriptor({
+            hostAnchorId: 'anchor-1',
+            hostUnitId: 'host-1',
+        });
+        const model = {
+            addDescriptor: vi.fn(),
+            getDescriptor: vi.fn(() => descriptor),
+        };
+        const adapter = {
+            restoreAnchor: vi.fn(() => ({
+                embedId: descriptor.embedId,
+                entry: descriptor.entry,
+                hostAnchorId: descriptor.hostAnchorId,
+                hostType: descriptor.hostType,
+                hostUnitId: descriptor.hostUnitId,
+                kind: 'docs-custom-block' as const,
+            })),
+        };
+        const anchorModel = {
+            setAnchor: vi.fn(),
+        };
+        const service = new EmbedHostRestoreService(
+            model as never,
+            adapter as never,
+            anchorModel as never
+        );
+
+        expect(service.restoreEmbed({ descriptor, hostContext: { restored: true } })).toBe(descriptor);
+        expect(adapter.restoreAnchor).toHaveBeenCalledWith(expect.objectContaining({
+            descriptor,
+            hostAnchorId: 'anchor-1',
+            hostContext: { restored: true },
+        }));
+        expect(model.addDescriptor).toHaveBeenCalledWith('host-1', descriptor);
+        expect(anchorModel.setAnchor).toHaveBeenCalledWith(expect.objectContaining({
+            hostAnchorId: 'anchor-1',
+        }));
     });
 
     it('tracks host anchors and simple registries', () => {

@@ -261,6 +261,7 @@ export class DocFloatDomController extends Disposable {
                     id: rectParam.drawingId,
                     componentKey: rectParam.componentKey,
                     eventPassThrough: preserveRuntimeGeometry ? false : undefined,
+                    preserveOnFocusChange: preserveRuntimeGeometry,
                     onPointerDown: (evt) => {
                         canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                     },

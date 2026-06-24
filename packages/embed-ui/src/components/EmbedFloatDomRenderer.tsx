@@ -14,30 +14,38 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { EmbedRuntimeFocusRole } from '../services/embed-runtime-focus-coordinator.service';
 import type { EmbedFloatingStage, EmbedInteractionFlow, IEmbedChildContainerContext } from '../types/embed-ui';
+import { UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE } from '../common/embed-runtime-slots';
 import { EmbedActivationService } from '../services/embed-activation.service';
+import { shouldPassDocsStickyVerticalWheelToHost } from '../services/embed-docs-sticky-wheel';
 import { EmbedFloatPreviewService } from '../services/embed-float-preview.service';
 import { EmbedFloatingActiveService } from '../services/embed-floating-active.service';
 import { EmbedFloatingGeometryService } from '../services/embed-floating-geometry.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
-import { shouldPassDocsStickyVerticalWheelToHost } from '../services/embed-docs-sticky-wheel';
-import { EmbedInteractionBoundaryService } from '../services/embed-interaction-boundary.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '../services/embed-interaction-boundary.service';
 import { EmbedMountService } from '../services/embed-mount.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
+import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../services/embed-runtime-focus-coordinator.service';
 import { EmbedFloatFullscreenButton } from './EmbedFloatFullscreenButton';
 
 const CLICK_DISTANCE_THRESHOLD = 4;
 const CLICK_DURATION_THRESHOLD = 500;
+const EMBED_CHILD_POINTER_INTERACTION_GRACE_MS = 650;
 export const EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT = 'univer:embed-float-drag-handle:pointerdown';
 const EMBED_FORWARDED_WHEEL_EVENT = Symbol('univer.embed.forwarded-wheel-event');
+const EMBED_HOST_VERTICAL_WHEEL_ATTEMPTED_EVENT = Symbol('univer.embed.host-vertical-wheel-attempted-event');
 const EMBED_FLOAT_DOM_RECT_CACHE = new Map<HTMLElement, IEmbedFloatDomRectCache>();
+const EMBED_STAGE2_FOCUS_OWNER = 'stage2-runtime';
+const EMBED_DOC_BLOCK_STAGE2_FOCUS_OWNER = 'doc-block-stage2-runtime';
+const EMBED_STAGE2_RUNTIME_FOCUS_OWNERS = [EMBED_STAGE2_FOCUS_OWNER, EMBED_DOC_BLOCK_STAGE2_FOCUS_OWNER];
 
 interface IEmbedFloatDomRectCache {
     left: number;
@@ -95,16 +103,59 @@ export function EmbedFloatDomRenderer(props: {
     const interactionBoundaryService = useDependency(EmbedInteractionBoundaryService);
     const mountService = useDependency(EmbedMountService);
     const passiveViewportRegistry = useDependency(EmbedPassiveViewportRegistryService);
+    const focusCoordinator = useDependency(EmbedRuntimeFocusCoordinator);
     const data = normalizeFloatDomData(props.data);
     const [mountVersion, setMountVersion] = useState(0);
     const [stage, setStage] = useState<EmbedFloatingStage>(() => initialStage ?? (data?.embedId ? floatingActiveService.getStage(data.embedId) : 'inactive'));
     const previousStageRef = useRef<EmbedFloatingStage>(stage);
     const clickIntentRef = useRef<ClickIntentState | undefined>(undefined);
     const childContextRef = useRef<IEmbedChildContainerContext | undefined>(undefined);
+    const stageSessionLeaseRef = useRef<IDisposable | undefined>(undefined);
+    const pointerInteractionLeaseRef = useRef<IDisposable | undefined>(undefined);
     const fullscreenRemountFrameRef = useRef<FrameHandle | undefined>(undefined);
     const fullscreenRemountTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined);
     const hostScrollSyncOffsetRef = useRef(0);
     const geometryInvalidationFramesRef = useRef<FrameHandle[]>([]);
+    const releaseStage2SessionLease = useCallback(() => {
+        stageSessionLeaseRef.current?.dispose();
+        stageSessionLeaseRef.current = undefined;
+    }, []);
+    const acquireStage2SessionLease = useCallback(() => {
+        if (!data?.embedId || stageSessionLeaseRef.current) {
+            return;
+        }
+
+        stageSessionLeaseRef.current = focusCoordinator.acquireLease({
+            embedId: data.embedId,
+            role: 'child-session',
+            owner: interactionFlow === 'doc-block' ? EMBED_DOC_BLOCK_STAGE2_FOCUS_OWNER : EMBED_STAGE2_FOCUS_OWNER,
+            hostUnitId: data.hostUnitId,
+            childUnitId: data.childUnitId,
+            childType: data.childType,
+        });
+    }, [data?.childType, data?.childUnitId, data?.embedId, data?.hostUnitId, focusCoordinator, interactionFlow]);
+    const releaseStage2SessionLeaseIfActivationDoesNotStick = useCallback(() => {
+        if (!data?.embedId) {
+            return;
+        }
+
+        const embedId = data.embedId;
+        requestFrame(() => {
+            if (floatingActiveService.getStage(embedId) !== 'stage2') {
+                releaseStage2SessionLease();
+            }
+        });
+    }, [data?.embedId, floatingActiveService, releaseStage2SessionLease]);
+
+    useEffect(() => {
+        if (!data?.embedId || stage !== 'stage2') {
+            return undefined;
+        }
+
+        acquireStage2SessionLease();
+
+        return releaseStage2SessionLease;
+    }, [acquireStage2SessionLease, data?.embedId, releaseStage2SessionLease, stage]);
 
     useEffect(() => {
         const previousStage = previousStageRef.current;
@@ -114,6 +165,16 @@ export function EmbedFloatDomRenderer(props: {
             geometryService.invalidate({ embedId: data?.embedId, reason: 'stage-change' });
         }
         if (previousStage === 'stage2' && stage !== 'stage2') {
+            blurRuntimeFocusIfOwnedByBlock(
+                data?.embedId,
+                getRuntimeRootElements(
+                    liveRootRef.current,
+                    liveContentRootRef.current,
+                    liveCanvasRootRef.current,
+                    overlayRootRef.current,
+                    popupRootRef.current
+                )
+            );
             onRuntimeStageExit?.();
         }
     }, [data?.embedId, geometryService, onRuntimeStageEnter, onRuntimeStageExit, stage]);
@@ -178,17 +239,46 @@ export function EmbedFloatDomRenderer(props: {
         }
 
         const embedId = data.embedId;
-        const roots = [
-            liveRootRef.current,
-            liveContentRootRef.current,
-            liveCanvasRootRef.current,
-            overlayRootRef.current,
-            popupRootRef.current,
-        ].filter((root): root is HTMLDivElement => !!root);
-        const disposables = roots.map((root) => interactionBoundaryService.registerRoot(embedId, root));
+        const roots: Array<{ element: HTMLElement; role: EmbedRuntimeFocusRole }> = [
+            { element: liveRootRef.current, role: 'runtime' },
+            { element: liveContentRootRef.current, role: 'runtime' },
+            { element: liveCanvasRootRef.current, role: 'runtime' },
+        ].filter((root): root is { element: HTMLElement; role: EmbedRuntimeFocusRole } => !!root.element);
+        if (stage === 'stage2') {
+            [
+                { element: chromeRef.current, role: 'floating-menu' },
+                { element: overlayRootRef.current, role: 'floating-menu' },
+                { element: popupRootRef.current, role: 'child-popup' },
+            ].forEach((root) => {
+                if (root.element) {
+                    roots.push(root as { element: HTMLElement; role: EmbedRuntimeFocusRole });
+                }
+            });
+        }
+        const disposables = roots.flatMap(({ element, role }) => [
+            interactionBoundaryService.registerRoot(embedId, element),
+            focusCoordinator.registerElement({
+                embedId,
+                role,
+                element,
+            }),
+        ]);
 
         return () => disposables.forEach((disposable) => disposable.dispose());
-    }, [data?.embedId, interactionBoundaryService]);
+    }, [data?.embedId, focusCoordinator, interactionBoundaryService, stage]);
+
+    useEffect(() => {
+        if (!data?.embedId || stage !== 'stage2') {
+            return undefined;
+        }
+
+        const ownerDocument = containerRef.current?.ownerDocument ??
+            liveRootRef.current?.ownerDocument ??
+            (typeof document === 'undefined' ? undefined : document);
+        const disposable = interactionBoundaryService.activatePortalScope(data.embedId, ownerDocument);
+
+        return () => disposable.dispose();
+    }, [data?.embedId, interactionBoundaryService, stage]);
 
     useEffect(() => {
         const root = containerRef.current;
@@ -265,23 +355,28 @@ export function EmbedFloatDomRenderer(props: {
         let lastWidth: number | undefined;
         let lastHeight: number | undefined;
         let lastChromeVisible: boolean | undefined;
+        let lastChromeControlsVisible: boolean | undefined;
         const syncChromeRect = () => {
             const docsSheetLikeChrome = isDocsSheetLikeChrome(container);
             const rect = resolveChromeAnchorRect(container);
-            const chromeVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT;
+            const chromeVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_RUNTIME_INTERACTION_HEIGHT;
+            const chromeControlsVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT;
+            syncRuntimeInteractionVisibility(container, chrome, chromeVisible, stage);
+            syncChromeControlsVisibility(chrome, chromeControlsVisible, stage);
             if (docsSheetLikeChrome) {
                 chrome.style.setProperty('--univer-embed-floating-menu-top', '8px');
             } else {
                 chrome.style.removeProperty('--univer-embed-floating-menu-top');
             }
             chrome.style.visibility = chromeVisible ? '' : 'hidden';
-            chrome.style.pointerEvents = chromeVisible ? '' : 'none';
+            chrome.style.pointerEvents = chromeVisible && stage !== 'inactive' ? '' : 'none';
             if (
                 rect.left === lastLeft &&
                 rect.top === lastTop &&
                 rect.width === lastWidth &&
                 rect.height === lastHeight &&
-                chromeVisible === lastChromeVisible
+                chromeVisible === lastChromeVisible &&
+                chromeControlsVisible === lastChromeControlsVisible
             ) {
                 return;
             }
@@ -291,6 +386,7 @@ export function EmbedFloatDomRenderer(props: {
             lastWidth = rect.width;
             lastHeight = rect.height;
             lastChromeVisible = chromeVisible;
+            lastChromeControlsVisible = chromeControlsVisible;
             EMBED_FLOAT_DOM_RECT_CACHE.set(container, {
                 left: rect.left,
                 top: rect.top,
@@ -349,7 +445,8 @@ export function EmbedFloatDomRenderer(props: {
         window.addEventListener('scroll', scheduleChromeRectSync, true);
         window.addEventListener('wheel', scheduleChromeRectSync, true);
         window.addEventListener('resize', scheduleChromeRectSync);
-        if (stage !== 'inactive' && typeof window.requestAnimationFrame === 'function') {
+        const shouldContinuouslySyncChrome = stage !== 'inactive' || isDocsCustomBlockChrome(container);
+        if (shouldContinuouslySyncChrome && typeof window.requestAnimationFrame === 'function') {
             frameId = window.requestAnimationFrame(syncChromeRectOnFrame);
         }
 
@@ -366,6 +463,8 @@ export function EmbedFloatDomRenderer(props: {
             window.removeEventListener('resize', scheduleChromeRectSync);
             EMBED_FLOAT_DOM_RECT_CACHE.delete(container);
             chrome.removeAttribute('style');
+            syncRuntimeInteractionVisibility(container, chrome, true, 'stage2');
+            syncChromeControlsVisibility(chrome, true, 'stage2');
             if (originalParent?.isConnected) {
                 originalParent.insertBefore(chrome, originalNextSibling);
             } else {
@@ -397,6 +496,7 @@ export function EmbedFloatDomRenderer(props: {
                 container.contains(target) ||
                 chrome?.contains(target) ||
                 target.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]') ||
+                focusCoordinator.containsElement(data.embedId, target, event) ||
                 interactionBoundaryService.contains(data.embedId, target, event) ||
                 isPointInsideFloatBlock(container, event)
             ) {
@@ -405,10 +505,58 @@ export function EmbedFloatDomRenderer(props: {
 
             activationService.clearFloating(data.embedId, data.hostUnitId);
         };
+        const clearWhenFocusLeavesBlock = (event: FocusEvent) => {
+            const container = containerRef.current;
+            const chrome = chromeRef.current;
+            const target = event.target as HTMLElement | null;
+            const ownerDocument = container?.ownerDocument ?? target?.ownerDocument;
+            const hasActiveChildEditorOrPopup = focusCoordinator.hasBlockingChildFocusLease(data.embedId, {
+                ignoreOwners: EMBED_STAGE2_RUNTIME_FOCUS_OWNERS,
+            });
+            if (
+                !container ||
+                !target ||
+                hasActiveChildEditorOrPopup ||
+                interactionBoundaryService.hasRecentInteractionFor(data.embedId, ownerDocument) ||
+                !isHostFocusSurface(target) ||
+                container.contains(target) ||
+                chrome?.contains(target) ||
+                target.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]') ||
+                focusCoordinator.containsElement(data.embedId, target, event) ||
+                interactionBoundaryService.contains(data.embedId, target, event)
+            ) {
+                return;
+            }
+
+            activationService.clearFloating(data.embedId, data.hostUnitId);
+        };
 
         document.addEventListener('pointerdown', clearWhenPointerLeavesBlock, true);
-        return () => document.removeEventListener('pointerdown', clearWhenPointerLeavesBlock, true);
-    }, [activationService, data?.embedId, data?.hostUnitId, interactionBoundaryService]);
+        document.addEventListener('focusin', clearWhenFocusLeavesBlock, true);
+        return () => {
+            document.removeEventListener('pointerdown', clearWhenPointerLeavesBlock, true);
+            document.removeEventListener('focusin', clearWhenFocusLeavesBlock, true);
+        };
+    }, [activationService, data?.embedId, data?.hostUnitId, focusCoordinator, interactionBoundaryService]);
+
+    useEffect(() => {
+        if (stage === 'stage2') {
+            return;
+        }
+
+        pointerInteractionLeaseRef.current?.dispose();
+        pointerInteractionLeaseRef.current = undefined;
+        blurRuntimeFocusIfOwnedByBlock(
+            data?.embedId,
+            getRuntimeRootElements(
+                liveRootRef.current,
+                liveContentRootRef.current,
+                liveCanvasRootRef.current,
+                overlayRootRef.current,
+                popupRootRef.current
+            )
+        );
+    }, [data?.embedId, stage]);
 
     useEffect(() => {
         const gate = gateRef.current;
@@ -477,7 +625,9 @@ export function EmbedFloatDomRenderer(props: {
                 return;
             }
             if (interactionFlow === 'doc-block') {
+                acquireStage2SessionLease();
                 activationService.activateFloating(descriptor, 'stage2');
+                releaseStage2SessionLeaseIfActivationDoesNotStick();
                 return;
             }
             activationService.activateFloating(descriptor, 'stage1');
@@ -493,7 +643,7 @@ export function EmbedFloatDomRenderer(props: {
             gate.removeEventListener('pointerup', finishIntent, true);
             gate.removeEventListener('pointercancel', clearIntent, true);
         };
-    }, [activationService, data?.embedId, data?.hostUnitId, embedModelService, floatingActiveService, interactionFlow]);
+    }, [acquireStage2SessionLease, activationService, data?.embedId, data?.hostUnitId, embedModelService, floatingActiveService, interactionFlow, releaseStage2SessionLeaseIfActivationDoesNotStick]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -504,6 +654,9 @@ export function EmbedFloatDomRenderer(props: {
         }
 
         const onWheel = (event: WheelEvent) => {
+            if (isEmbedForwardedWheelEvent(event)) {
+                return;
+            }
             if (event.ctrlKey || event.metaKey) {
                 return;
             }
@@ -556,7 +709,11 @@ export function EmbedFloatDomRenderer(props: {
         };
 
         gate.addEventListener('wheel', onWheel, { passive: false });
-        return () => gate.removeEventListener('wheel', onWheel);
+        liveRoot.addEventListener('wheel', onWheel, { capture: true, passive: false });
+        return () => {
+            gate.removeEventListener('wheel', onWheel);
+            liveRoot.removeEventListener('wheel', onWheel, { capture: true });
+        };
     }, [data?.embedId, floatingActiveService, geometryService, passiveViewportRegistry, props.onHostWheel, props.syncHostVerticalScroll]);
 
     useEffect(() => {
@@ -580,15 +737,13 @@ export function EmbedFloatDomRenderer(props: {
                 return;
             }
 
-            if (props.onHostWheel?.(event, childContext) === true) {
-                scheduleGeometryInvalidation('host-scroll');
-                event.preventDefault();
-                event.stopPropagation();
-                event.stopImmediatePropagation();
+            if (isHostVerticalWheelAttempted(event)) {
                 return;
             }
+            markHostVerticalWheelAttempted(event);
 
-            if (scrollHostScrollPortByWheel(container, event)) {
+            const hostHandled = props.onHostWheel?.(event, childContext) === true || scrollHostScrollPortByWheel(container, event);
+            if (hostHandled) {
                 scheduleGeometryInvalidation('host-scroll');
                 event.preventDefault();
                 event.stopPropagation();
@@ -607,7 +762,7 @@ export function EmbedFloatDomRenderer(props: {
             liveRoot.removeEventListener('wheel', onStage2Wheel, { capture: true });
             liveRoot.removeEventListener('scroll', onRuntimeScroll, true);
         };
-    }, [data?.embedId, floatingActiveService, geometryService, props.onHostWheel]);
+    }, [data?.embedId, floatingActiveService, geometryService, props.onHostWheel, props.syncHostVerticalScroll]);
 
     useEffect(() => {
         return () => {
@@ -622,28 +777,6 @@ export function EmbedFloatDomRenderer(props: {
             return undefined;
         }
 
-        let refocusTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
-        let refocusSecondTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
-        let refocusFinalTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
-        let refocusFrames: FrameHandle[] = [];
-        const clearScheduledRefocus = () => {
-            if (refocusTimer != null) {
-                globalThis.clearTimeout(refocusTimer);
-                refocusTimer = undefined;
-            }
-            if (refocusSecondTimer != null) {
-                globalThis.clearTimeout(refocusSecondTimer);
-                refocusSecondTimer = undefined;
-            }
-            if (refocusFinalTimer != null) {
-                globalThis.clearTimeout(refocusFinalTimer);
-                refocusFinalTimer = undefined;
-            }
-            if (refocusFrames.length) {
-                refocusFrames.forEach(cancelFrame);
-                refocusFrames = [];
-            }
-        };
         const isRuntimeFocused = () => {
             const activeElement = liveRoot.ownerDocument.activeElement;
             if (!activeElement) {
@@ -662,6 +795,12 @@ export function EmbedFloatDomRenderer(props: {
             if (data?.embedId && floatingActiveService.getStage(data.embedId) !== 'stage2') {
                 return;
             }
+            if (!shouldAutoFocusRuntimeCanvas(data?.childType)) {
+                return;
+            }
+            if (focusCoordinator.hasBlockingChildFocusLease(data?.embedId, { ignoreOwners: EMBED_STAGE2_RUNTIME_FOCUS_OWNERS })) {
+                return;
+            }
             if (!force && isRuntimeFocused()) {
                 return;
             }
@@ -670,20 +809,26 @@ export function EmbedFloatDomRenderer(props: {
             }
             canvas.focus({ preventScroll: true });
         };
-        const scheduleFrameRefocus = (canvas: HTMLCanvasElement, remainingFrames: number) => {
-            if (remainingFrames <= 0) {
+        const focusCanvas = (event: PointerEvent) => {
+            const currentStage = data?.embedId ? floatingActiveService.getStage(data.embedId) : 'inactive';
+            if (data?.embedId && currentStage !== 'stage2') {
+                if (interactionFlow !== 'doc-block' || !data.hostUnitId) {
+                    return;
+                }
+
+                const descriptor = embedModelService.getDescriptor(data.hostUnitId, data.embedId);
+                if (!descriptor?.childUnitId) {
+                    return;
+                }
+
+                acquireStage2SessionLease();
+                activationService.activateFloating(descriptor, 'stage2');
+                releaseStage2SessionLeaseIfActivationDoesNotStick();
+            }
+            if (isChildEditorOrPopupRuntimeElement(event.target)) {
                 return;
             }
-
-            const frame = requestFrame(() => {
-                refocusFrames = refocusFrames.filter((handle) => handle !== frame);
-                focusRuntimeCanvas(canvas);
-                scheduleFrameRefocus(canvas, remainingFrames - 1);
-            });
-            refocusFrames.push(frame);
-        };
-        const focusCanvas = (event: PointerEvent) => {
-            if (data?.embedId && floatingActiveService.getStage(data.embedId) !== 'stage2') {
+            if (focusCoordinator.hasBlockingChildFocusLease(data?.embedId, { ignoreOwners: EMBED_STAGE2_RUNTIME_FOCUS_OWNERS })) {
                 return;
             }
 
@@ -708,29 +853,96 @@ export function EmbedFloatDomRenderer(props: {
                 return;
             }
 
-            clearScheduledRefocus();
             focusRuntimeCanvas(canvas, true);
-            refocusTimer = globalThis.setTimeout(() => {
-                refocusTimer = undefined;
-                focusRuntimeCanvas(canvas);
-            }, 0);
-            refocusSecondTimer = globalThis.setTimeout(() => {
-                refocusSecondTimer = undefined;
-                focusRuntimeCanvas(canvas);
-            }, 16);
-            scheduleFrameRefocus(canvas, 30);
-            refocusFinalTimer = globalThis.setTimeout(() => {
-                refocusFinalTimer = undefined;
-                focusRuntimeCanvas(canvas);
-            }, 500);
         };
 
         liveRoot.addEventListener('pointerdown', focusCanvas, true);
-        return () => {
-            clearScheduledRefocus();
-            liveRoot.removeEventListener('pointerdown', focusCanvas, true);
+        return () => liveRoot.removeEventListener('pointerdown', focusCanvas, true);
+    }, [acquireStage2SessionLease, activationService, data?.embedId, data?.hostUnitId, embedModelService, floatingActiveService, focusCoordinator, interactionFlow, releaseStage2SessionLeaseIfActivationDoesNotStick]);
+
+    useEffect(() => {
+        const liveRoot = liveRootRef.current;
+        const ownerDocument = liveRoot?.ownerDocument;
+        if (!liveRoot || !ownerDocument || !data?.embedId) {
+            return undefined;
+        }
+
+        let releasePointerLeaseTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
+        const cancelScheduledPointerLeaseRelease = () => {
+            if (releasePointerLeaseTimer == null) {
+                return;
+            }
+
+            globalThis.clearTimeout(releasePointerLeaseTimer);
+            releasePointerLeaseTimer = undefined;
         };
-    }, [activationService, data?.embedId, data?.hostUnitId, embedModelService, floatingActiveService]);
+        const releasePointerLease = () => {
+            cancelScheduledPointerLeaseRelease();
+            pointerInteractionLeaseRef.current?.dispose();
+            pointerInteractionLeaseRef.current = undefined;
+        };
+        const releasePointerLeaseAfterClick = () => {
+            cancelScheduledPointerLeaseRelease();
+            releasePointerLeaseTimer = globalThis.setTimeout(() => {
+                releasePointerLeaseTimer = undefined;
+                pointerInteractionLeaseRef.current?.dispose();
+                pointerInteractionLeaseRef.current = undefined;
+            }, EMBED_CHILD_POINTER_INTERACTION_GRACE_MS);
+        };
+        const acquireRuntimePointerLease = () => {
+            if (floatingActiveService.getStage(data.embedId) !== 'stage2') {
+                return;
+            }
+
+            releasePointerLease();
+            pointerInteractionLeaseRef.current = focusCoordinator.acquireLease({
+                embedId: data.embedId,
+                role: 'child-editor',
+                owner: 'runtime-pointer',
+                hostUnitId: data.hostUnitId,
+                childUnitId: data.childUnitId,
+                childType: data.childType,
+            });
+        };
+        const acquireOwnedPortalPointerLease = (event: PointerEvent) => {
+            if (floatingActiveService.getStage(data.embedId) !== 'stage2') {
+                return;
+            }
+            const target = event.target;
+            if (target instanceof Node && liveRoot.contains(target)) {
+                return;
+            }
+            const isOwnedChildInteraction = focusCoordinator.containsElement(data.embedId, target, event) ||
+                interactionBoundaryService.contains(data.embedId, target, event);
+            if (!isOwnedChildInteraction) {
+                return;
+            }
+
+            releasePointerLease();
+            const role = getRuntimeFocusRole(target) ?? 'child-editor';
+            pointerInteractionLeaseRef.current = focusCoordinator.acquireLease({
+                embedId: data.embedId,
+                role: role === 'runtime' || role === 'child-session' || role === 'floating-menu' ? 'child-editor' : role,
+                owner: 'runtime-pointer',
+                hostUnitId: data.hostUnitId,
+                childUnitId: data.childUnitId,
+                childType: data.childType,
+            });
+        };
+
+        liveRoot.addEventListener('pointerdown', acquireRuntimePointerLease, true);
+        ownerDocument.addEventListener('pointerdown', acquireOwnedPortalPointerLease, true);
+        ownerDocument.addEventListener('pointerup', releasePointerLeaseAfterClick, true);
+        ownerDocument.addEventListener('pointercancel', releasePointerLeaseAfterClick, true);
+
+        return () => {
+            liveRoot.removeEventListener('pointerdown', acquireRuntimePointerLease, true);
+            ownerDocument.removeEventListener('pointerdown', acquireOwnedPortalPointerLease, true);
+            ownerDocument.removeEventListener('pointerup', releasePointerLeaseAfterClick, true);
+            ownerDocument.removeEventListener('pointercancel', releasePointerLeaseAfterClick, true);
+            releasePointerLease();
+        };
+    }, [data?.childUnitId, data?.embedId, data?.hostUnitId, floatingActiveService, focusCoordinator, interactionBoundaryService]);
 
     useEffect(() => {
         if (stage !== 'stage2' || interactionFlow !== 'doc-block') {
@@ -742,8 +954,7 @@ export function EmbedFloatDomRenderer(props: {
             return undefined;
         }
 
-        let retryFrames: FrameHandle[] = [];
-        let retryTimers: Array<ReturnType<typeof globalThis.setTimeout>> = [];
+        let retryFrame: FrameHandle | undefined;
         const getCanvas = () => findRuntimeCanvas(getRuntimeRootElements(
             liveCanvasRootRef.current,
             liveContentRootRef.current,
@@ -766,8 +977,14 @@ export function EmbedFloatDomRenderer(props: {
             ).some((root) => root.contains(activeElement));
         };
         const focusRuntime = () => {
+            if (!shouldAutoFocusRuntimeCanvas(data?.childType)) {
+                return;
+            }
             const canvas = getCanvas();
             if (!canvas) {
+                return;
+            }
+            if (focusCoordinator.hasBlockingChildFocusLease(data?.embedId, { ignoreOwners: EMBED_STAGE2_RUNTIME_FOCUS_OWNERS })) {
                 return;
             }
             if (isRuntimeFocused()) {
@@ -786,30 +1003,20 @@ export function EmbedFloatDomRenderer(props: {
             }
             canvas.focus({ preventScroll: true });
         };
-        const scheduleFrameRefocus = (remainingFrames: number) => {
-            if (remainingFrames <= 0) {
-                return;
-            }
-
-            const frame = requestFrame(() => {
-                retryFrames = retryFrames.filter((handle) => handle !== frame);
-                focusRuntime();
-                scheduleFrameRefocus(remainingFrames - 1);
-            });
-            retryFrames.push(frame);
-        };
 
         focusRuntime();
-        scheduleFrameRefocus(30);
-        retryTimers = [0, 80, 200, 500, 1000].map((delay) => globalThis.setTimeout(focusRuntime, delay));
+        retryFrame = requestFrame(() => {
+            retryFrame = undefined;
+            focusRuntime();
+        });
 
         return () => {
-            retryFrames.forEach(cancelFrame);
-            retryFrames = [];
-            retryTimers.forEach((timer) => globalThis.clearTimeout(timer));
-            retryTimers = [];
+            if (retryFrame != null) {
+                cancelFrame(retryFrame);
+                retryFrame = undefined;
+            }
         };
-    }, [activationService, data?.embedId, data?.hostUnitId, embedModelService, interactionFlow, stage]);
+    }, [activationService, data?.embedId, data?.hostUnitId, embedModelService, focusCoordinator, interactionFlow, stage]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -940,7 +1147,10 @@ export function EmbedFloatDomRenderer(props: {
             data-embed-float-dom="true"
             data-embed-float-stage={stage}
             data-embed-id={data?.embedId}
+            data-embed-host-unit-id={data?.hostUnitId}
             data-embed-host-anchor-id={data?.hostAnchorId}
+            data-embed-child-unit-id={data?.childUnitId}
+            data-embed-interaction-flow={interactionFlow}
         >
             <div
                 className="univer-embed-float-dom__content"
@@ -1003,16 +1213,104 @@ export function EmbedFloatDomRenderer(props: {
 }
 
 function isPointInsideFloatBlock(container: HTMLElement, event: PointerEvent): boolean {
-    const hitRects = [
+    if (isDocsSheetLikeChrome(container)) {
+        return isPointInsideDocsSheetLikeFloatBlock(container, event);
+    }
+
+    const chromeTopExpansion = isDocsSheetLikeChrome(container) ? 0 : 40;
+    const contentRects = [
         container.getBoundingClientRect(),
         container.querySelector<HTMLElement>('.univer-embed-float-dom__content')?.getBoundingClientRect(),
+    ].filter((rect): rect is DOMRect => !!rect);
+    const chromeRects = [
         document.querySelector<HTMLElement>(`.univer-embed-float-dom__chrome[data-embed-id="${container.dataset.embedId}"]`)?.getBoundingClientRect(),
     ].filter((rect): rect is DOMRect => !!rect);
 
-    return hitRects.some((rect) => event.clientX >= rect.left &&
+    return contentRects.some((rect) => event.clientX >= rect.left &&
         event.clientX <= rect.right &&
-        event.clientY >= rect.top - 40 &&
-        event.clientY <= rect.bottom);
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom) ||
+        chromeRects.some((rect) => event.clientX >= rect.left &&
+            event.clientX <= rect.right &&
+            event.clientY >= rect.top - chromeTopExpansion &&
+            event.clientY <= rect.bottom);
+}
+
+function isPointInsideDocsSheetLikeFloatBlock(container: HTMLElement, event: PointerEvent): boolean {
+    const runtimeRects = [
+        container.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas')?.getBoundingClientRect(),
+        container.querySelector<HTMLElement>('.univer-embed-float-dom__live-content')?.getBoundingClientRect(),
+    ].filter((rect): rect is DOMRect => !!rect && rect.width > 0 && rect.height > 0);
+    const chrome = document.querySelector<HTMLElement>(`.univer-embed-float-dom__chrome[data-embed-id="${container.dataset.embedId}"]`);
+    const chromeControlRects = [
+        chrome?.querySelector<HTMLElement>('[data-embed-floating-menu="true"]')?.getBoundingClientRect(),
+        chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]')?.getBoundingClientRect(),
+        chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]')?.getBoundingClientRect(),
+    ].filter((rect): rect is DOMRect => !!rect && rect.width > 0 && rect.height > 0);
+
+    return [...runtimeRects, ...chromeControlRects].some((rect) =>
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+    );
+}
+
+function syncRuntimeInteractionVisibility(container: HTMLElement, chrome: HTMLElement | undefined, visible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
+    const pointerEvents = visible ? '' : 'none';
+    const popupPointerEvents = visible && stage === 'stage2' ? '' : 'none';
+    const contentRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__content');
+    const liveRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__live');
+    const liveCanvasRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas');
+    const liveContentRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__live-content');
+    const gate = container.querySelector<HTMLElement>('.univer-embed-float-dom__interaction-gate');
+    const popupRoot = chrome?.querySelector<HTMLElement>('[data-embed-popup-root]');
+    if (isDocsSheetLikeChrome(container)) {
+        contentRoot?.style.setProperty('pointer-events', 'none');
+        liveRoot?.style.setProperty('pointer-events', 'none');
+        liveCanvasRoot?.style.setProperty('pointer-events', visible ? 'auto' : 'none');
+        liveContentRoot?.style.setProperty('pointer-events', 'none');
+        gate?.style.setProperty('pointer-events', 'none');
+        popupRoot?.style.setProperty('pointer-events', popupPointerEvents);
+        return;
+    }
+
+    contentRoot?.style.removeProperty('pointer-events');
+    liveRoot?.style.setProperty('pointer-events', pointerEvents);
+    liveCanvasRoot?.style.removeProperty('pointer-events');
+    liveContentRoot?.style.removeProperty('pointer-events');
+    gate?.style.setProperty('pointer-events', pointerEvents);
+    popupRoot?.style.setProperty('pointer-events', popupPointerEvents);
+}
+
+function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
+    const visibility = visible ? '' : 'hidden';
+    const pointerEvents = visible ? '' : 'none';
+    const menuVisibility = visible && stage === 'stage2' ? '' : 'hidden';
+    const menuPointerEvents = visible && stage === 'stage2' ? '' : 'none';
+    const controls = [
+        chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]'),
+        chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]'),
+    ];
+    const menuLayers = [
+        chrome?.querySelector<HTMLElement>('[data-embed-overlay-root]'),
+        chrome?.querySelector<HTMLElement>('[data-embed-popup-root]'),
+    ];
+
+    controls.forEach((control) => {
+        control?.style.setProperty('visibility', visibility);
+        control?.style.setProperty('pointer-events', pointerEvents);
+    });
+    menuLayers.forEach((control) => {
+        control?.style.setProperty('visibility', menuVisibility);
+        control?.style.setProperty('pointer-events', menuPointerEvents);
+        if (stage !== 'stage2') {
+            control?.removeAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+            control?.querySelectorAll<HTMLElement>(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`).forEach((element) => {
+                element.removeAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+            });
+        }
+    });
 }
 
 function resolveChromeAnchorRect(container: HTMLElement): DOMRect {
@@ -1031,7 +1329,12 @@ function isDocsSheetLikeChrome(container: HTMLElement): boolean {
     return !!container.closest('[data-embed-docs-custom-block-sheet-like="true"]');
 }
 
+function isDocsCustomBlockChrome(container: HTMLElement): boolean {
+    return isDocsSheetLikeChrome(container) || !!container.closest('.univer-embed-docs-custom-block');
+}
+
 const MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT = 40;
+const MIN_DOCS_SHEET_LIKE_RUNTIME_INTERACTION_HEIGHT = 24;
 
 function intersectWithScrollPort(rect: DOMRect, container: HTMLElement): DOMRect {
     const clippingViewport = findNearestClippingViewport(container);
@@ -1132,6 +1435,17 @@ function shouldSyncChromeRectForGlobalEvent(
 
 function isEmbedForwardedWheelEvent(event: Event | undefined): boolean {
     return !!event && (event as { [EMBED_FORWARDED_WHEEL_EVENT]?: WheelEvent })[EMBED_FORWARDED_WHEEL_EVENT] instanceof WheelEvent;
+}
+
+function markHostVerticalWheelAttempted(event: WheelEvent): void {
+    Object.defineProperty(event, EMBED_HOST_VERTICAL_WHEEL_ATTEMPTED_EVENT, {
+        configurable: true,
+        value: true,
+    });
+}
+
+function isHostVerticalWheelAttempted(event: WheelEvent): boolean {
+    return Boolean((event as unknown as Record<symbol, boolean>)[EMBED_HOST_VERTICAL_WHEEL_ATTEMPTED_EVENT]);
 }
 
 function isWheelPointInsideAnyCachedFloatDom(event: WheelEvent): boolean {
@@ -1489,6 +1803,63 @@ function findRuntimeCanvas(roots: HTMLElement[], target?: EventTarget | null): H
     return null;
 }
 
+function shouldAutoFocusRuntimeCanvas(childType: UniverInstanceType | undefined): boolean {
+    return childType !== UniverInstanceType.UNIVER_SHEET &&
+        childType !== UniverInstanceType.UNIVER_DOC &&
+        childType !== UniverInstanceType.UNIVER_BASE;
+}
+
+function isChildEditorOrPopupRuntimeElement(target: EventTarget | null): boolean {
+    const role = getRuntimeFocusRole(target);
+
+    return role === 'child-editor' || role === 'child-popup' || role === 'floating-menu';
+}
+
+function getRuntimeFocusRole(target: EventTarget | null): EmbedRuntimeFocusRole | undefined {
+    if (!(target instanceof HTMLElement)) {
+        return undefined;
+    }
+
+    const role = target
+        .closest<HTMLElement>(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)
+        ?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) as EmbedRuntimeFocusRole | null;
+
+    return isRuntimeFocusRole(role) ? role : undefined;
+}
+
+function isRuntimeFocusRole(role: string | null | undefined): role is EmbedRuntimeFocusRole {
+    return role === 'runtime' ||
+        role === 'child-session' ||
+        role === 'child-editor' ||
+        role === 'child-popup' ||
+        role === 'floating-menu';
+}
+
+function isHostFocusSurface(target: HTMLElement): boolean {
+    return target.id === 'univer-doc-main-canvas' ||
+        target.id.startsWith('__editor_docs-') ||
+        target.id.startsWith('univer-doc-selection-container-docs-') ||
+        target.closest('#univer-doc-main-canvas, [id^="__editor_docs-"], [id^="univer-doc-selection-container-docs-"]') != null;
+}
+
+function blurRuntimeFocusIfOwnedByBlock(embedId: string | undefined, roots: HTMLElement[]): void {
+    if (!embedId || roots.length === 0) {
+        return;
+    }
+
+    const ownerDocument = roots[0].ownerDocument;
+    const activeElement = ownerDocument.activeElement;
+    if (!(activeElement instanceof HTMLElement)) {
+        return;
+    }
+
+    const isOwnedRuntimeFocus = roots.some((root) => root.contains(activeElement)) ||
+        activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) != null;
+    if (isOwnedRuntimeFocus) {
+        activeElement.blur();
+    }
+}
+
 function canScrollElement(element: HTMLElement, deltaX: number, deltaY: number): boolean {
     const canScrollX = deltaX !== 0 && element.scrollWidth > element.clientWidth && (
         deltaX < 0 ? element.scrollLeft > 0 : element.scrollLeft + element.clientWidth < element.scrollWidth
@@ -1575,7 +1946,9 @@ function ensureEmbedFloatDomStyles(): void {
     z-index: 10;
     background: transparent;
 }
-.univer-embed-float-dom[data-embed-float-stage="stage2"] .univer-embed-float-dom__interaction-gate {
+.univer-embed-float-dom[data-embed-float-stage="stage2"] .univer-embed-float-dom__interaction-gate,
+.univer-embed-float-dom[data-embed-interaction-flow="doc-block"] .univer-embed-float-dom__interaction-gate,
+.univer-embed-float-dom[data-embed-interaction-flow="doc-block"][data-embed-float-stage="stage2"] .univer-embed-float-dom__interaction-gate {
     pointer-events: none;
 }
 .univer-embed-float-dom__chrome {
@@ -1627,10 +2000,10 @@ function ensureEmbedFloatDomStyles(): void {
     width: 14px;
     height: 14px;
 }
-.univer-embed-float-dom[data-embed-float-stage="inactive"] [data-embed-content-root],
-.univer-embed-float-dom[data-embed-float-stage="inactive"] [data-embed-canvas-root],
-.univer-embed-float-dom[data-embed-float-stage="stage1"] [data-embed-content-root],
-.univer-embed-float-dom[data-embed-float-stage="stage1"] [data-embed-canvas-root] {
+.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="inactive"] [data-embed-content-root],
+.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="inactive"] [data-embed-canvas-root],
+.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="stage1"] [data-embed-content-root],
+.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="stage1"] [data-embed-canvas-root] {
     pointer-events: none;
 }
 .univer-embed-float-dom__drag-handle {

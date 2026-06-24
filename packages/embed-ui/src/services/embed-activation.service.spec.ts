@@ -72,7 +72,7 @@ describe('EmbedActivationService', () => {
         expect(mountService.activateSession).toHaveBeenCalledWith('float-doc');
     });
 
-    it('keeps the global current unit untouched when a floating embed enters stage2', () => {
+    it('focuses the child unit when a floating embed enters stage2', () => {
         const univerInstanceService = {
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
@@ -114,11 +114,11 @@ describe('EmbedActivationService', () => {
             embedId: 'float-sheet',
             childUnitId: 'child-sheet',
         }, 'stage2');
-        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
-        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
     });
 
-    it('refreshes floating runtime ownership and current child type without moving global focus', () => {
+    it('focuses the child unit when a floating runtime enters interactive stage2', () => {
         const univerInstanceService = {
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
@@ -169,7 +169,7 @@ describe('EmbedActivationService', () => {
             childUnitId: 'child-sheet',
         }, 'stage2');
         expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
-        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
     });
 
     it('clears floating activation and restores host focus', () => {

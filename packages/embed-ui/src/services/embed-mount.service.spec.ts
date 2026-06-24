@@ -28,8 +28,10 @@ import { EmbedChildViewRegistryService } from './embed-child-view-registry.servi
 import { EmbedFloatingActiveService } from './embed-floating-active.service';
 import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry.service';
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
 import { EmbedDuplicateChildUnitError, EmbedMountService } from './embed-mount.service';
 import { EmbedOverlayRootService } from './embed-overlay-root.service';
+import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
 
 describe('EmbedMountService', () => {
     it('mounts floating sessions, wires focus bridge, floating menu, and disposes in reverse order', () => {
@@ -128,7 +130,7 @@ describe('EmbedMountService', () => {
         expect(secondHost.dataset.embedRenderScopeActive).toBe('true');
     });
 
-    it('focuses the child unit in the scoped runtime when a floating child receives pointer focus', () => {
+    it('focuses the child unit in both the scoped and global runtime when a floating child receives pointer focus', () => {
         const hostElement = document.createElement('div');
         const childUnit = { getUnitId: () => 'child-sheet' };
         let childContext: IEmbedChildContainerContext | undefined;
@@ -167,8 +169,8 @@ describe('EmbedMountService', () => {
         expect(childContext?.runtimeScope.instanceService?.getFocusedUnit()?.getUnitId()).toBe('child-sheet');
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SHEET, true);
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, false);
-        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalledWith('child-sheet');
-        expect(instanceService.focusUnit).not.toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
         expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-sheet' });
     });
 
@@ -176,6 +178,8 @@ describe('EmbedMountService', () => {
         const firstHost = document.createElement('div');
         const secondHost = document.createElement('div');
         const hosts = [firstHost, secondHost];
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const interactionBoundaryService = new EmbedInteractionBoundaryService();
         const instanceService = {
             currentUnitId: 'other',
             setCurrentUnitForType: vi.fn((unitId: string) => {
@@ -192,6 +196,8 @@ describe('EmbedMountService', () => {
             injectorEntries: [
                 [IUniverInstanceService, instanceService],
                 [IContextService, contextService],
+                [EmbedRuntimeFocusCoordinator, focusCoordinator],
+                [EmbedInteractionBoundaryService, interactionBoundaryService],
             ],
         });
         const first = createDescriptor({
@@ -218,11 +224,24 @@ describe('EmbedMountService', () => {
 
         const firstSession = service.mount(first);
         const secondSession = service.mount(second);
+        const firstChildInput = document.createElement('input');
+        firstHost.appendChild(firstChildInput);
+        const popupPortal = document.createElement('section');
+        popupPortal.className = 'univer-popup';
+        document.body.appendChild(popupPortal);
 
         expect(firstHost.dataset.embedRenderScopeActive).toBe('false');
         expect(secondHost.dataset.embedRenderScopeActive).toBe('true');
+        expect(firstHost.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('tab-1');
+        expect(firstHost.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('runtime');
+        expect(interactionBoundaryService.contains('tab-1', firstChildInput)).toBe(true);
+        expect(focusCoordinator.isChildUnitRuntimeEvent('child-1', firstChildInput)).toBe(true);
+        expect(focusCoordinator.isChildUnitRuntimeEvent('host-1', firstChildInput)).toBe(false);
         expect(firstHost.getAttribute('aria-hidden')).toBe('true');
         expect(secondHost.getAttribute('aria-hidden')).toBeNull();
+        firstChildInput.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        expect(popupPortal.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('tab-1');
+        expect(popupPortal.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-popup');
         expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-2');
         firstHost.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_UNIT, true);
@@ -235,6 +254,11 @@ describe('EmbedMountService', () => {
         expect(service.deactivateTabSessions('tab-1')).toEqual([firstSession]);
         expect(firstHost.dataset.embedRenderScopeActive).toBe('false');
         expect(service.deactivateTabSessions()).toEqual([firstSession, secondSession]);
+        service.unmount('tab-1');
+        expect(focusCoordinator.isChildUnitRuntimeEvent('child-1', firstChildInput)).toBe(false);
+        expect(interactionBoundaryService.contains('tab-1', firstChildInput)).toBe(false);
+        expect(firstHost.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
+        expect(firstHost.hasAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe(false);
     });
 
     it('rejects unresolved, unregistered, duplicate, and host-container-less mounts', () => {

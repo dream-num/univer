@@ -17,19 +17,19 @@
 import type { Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, Injector, ThemeService } from '@univerjs/core';
+import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedFloatingGeometryService, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, resolveActiveEmbedRuntimeDomScope, resolveEmbedRuntimeDomScope } from '@univerjs/embed-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { EmbedFloatingGeometryService } from '@univerjs/embed-ui';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
-import { focusSheetCellEditorElement } from './focus-editor';
+import { focusSheetCellEditorElement, registerSheetCellEditorRuntimePortal } from './focus-editor';
 import { useKeyEventConfig } from './hooks';
 
 interface ICellIEditorProps { }
@@ -73,6 +73,43 @@ function isTransparentColor(color: string) {
     return normalizedColor === 'transparent' || normalizedColor === 'rgba(0,0,0,0)';
 }
 
+export function shouldRefocusCellEditorAfterPointerDown(options: {
+    root: HTMLElement | null | undefined;
+    target: EventTarget | null | undefined;
+    activeElement: Element | null | undefined;
+    isEditorFocusing: boolean | undefined;
+}): boolean {
+    const { root, target, activeElement, isEditorFocusing } = options;
+    if (!root || !(target instanceof HTMLElement) || !(activeElement instanceof HTMLElement)) {
+        return true;
+    }
+
+    const owner = root.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`);
+    const embedId = owner?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+    if (!embedId) {
+        return true;
+    }
+
+    const targetInOwner = target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) != null;
+    const activeOwnerElement = activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
+    if (targetInOwner && activeOwnerElement && isEmbedRuntimeInteractiveElement(activeElement)) {
+        return false;
+    }
+
+    if (!isEditorFocusing) {
+        return true;
+    }
+
+    return target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) == null ||
+        activeOwnerElement == null;
+}
+
+function isEmbedRuntimeInteractiveElement(element: HTMLElement): boolean {
+    const role = element.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+
+    return role === 'child-editor' || role === 'child-popup' || role === 'floating-menu';
+}
+
 /**
  * Cell editor container.
  * @returns the rendered cell editor container.
@@ -84,12 +121,16 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const injector = useDependency(Injector);
     const editorService = useDependency(IEditorService);
+    const instanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
     const themeService = useDependency(ThemeService);
     const componentManager = useDependency(ComponentManager);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const cellEditorResizeService = useDependency(SheetCellEditorResizeService);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const pointerRefocusTimerRef = useRef<number | undefined>(undefined);
     const visible = useObservable(editorBridgeService.visible$);
+    const [runtimeFocusRevision, setRuntimeFocusRevision] = useState(0);
     const commandService = useDependency(ICommandService);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
@@ -157,6 +198,18 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, [cellEditorResizeService, injector]);
 
     useEffect(() => {
+        if (!injector.has(EmbedRuntimeFocusCoordinator)) {
+            return undefined;
+        }
+
+        const subscription = injector.get(EmbedRuntimeFocusCoordinator).runtimeFocusChanged$.subscribe(() => {
+            setRuntimeFocusRevision((revision) => revision + 1);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [injector]);
+
+    useEffect(() => {
         if (!disableAutoFocus) {
             cellEditorManagerService.setFocus(true);
         }
@@ -167,10 +220,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             return;
         }
 
+        cellEditorResizeService.fitTextSize();
+
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
-        const focusRetryTimers: number[] = [];
-
         const focusEditor = () => {
             const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
@@ -187,16 +240,162 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             focusEditor();
             finalFocusRetryFrame = requestAnimationFrame(focusEditor);
         });
-        [0, 80, 200, 500, 1000].forEach((delay) => {
-            focusRetryTimers.push(window.setTimeout(focusEditor, delay));
-        });
 
         return () => {
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
-            focusRetryTimers.forEach((timer) => window.clearTimeout(timer));
         };
-    }, [editorService, visible?.visible]);
+    }, [cellEditorResizeService, editorService, visible?.visible]);
+
+    useEffect(() => {
+        if (!visible?.visible || !rootRef.current || !injector.has(EmbedRuntimeFocusCoordinator)) {
+            return undefined;
+        }
+
+        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
+        const focusedUnitId = instanceService.getFocusedUnit()?.getUnitId();
+        const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
+        const rootRuntimeScope = resolveEmbedRuntimeDomScope(rootRef.current);
+        const editorUnitRuntimeScope = [editState?.unitId, visible.unitId, focusedUnitId]
+            .map((unitId) => focusCoordinator.resolveRuntimeScopeByChildUnitId(unitId))
+            .find((resolvedScope) => resolvedScope != null);
+        const explicitRuntimeScope = rootRuntimeScope ?? editorUnitRuntimeScope;
+        if (activeSessionScope && explicitRuntimeScope && explicitRuntimeScope.embedId !== activeSessionScope.embedId) {
+            return undefined;
+        }
+
+        const scope = explicitRuntimeScope ??
+            activeSessionScope ??
+            resolveActiveEmbedRuntimeDomScope(rootRef.current.ownerDocument);
+        if (!scope) {
+            return undefined;
+        }
+
+        const collection = new DisposableCollection();
+        const interactionBoundaryService = injector.has(EmbedInteractionBoundaryService)
+            ? injector.get(EmbedInteractionBoundaryService)
+            : undefined;
+        const editorRoot = rootRef.current;
+        collection.add(focusCoordinator.acquireLease({
+            embedId: scope.embedId,
+            role: 'child-editor',
+            owner: 'sheet-cell-editor',
+            hostUnitId: scope.hostUnitId,
+            childUnitId: scope.childUnitId,
+            associatedChildUnitIds: [DOCS_NORMAL_EDITOR_UNIT_ID_KEY],
+        }));
+        if (interactionBoundaryService) {
+            collection.add(interactionBoundaryService.registerOwnedElement(scope.embedId, editorRoot));
+        }
+        collection.add(focusCoordinator.registerElement({
+            embedId: scope.embedId,
+            role: 'child-editor',
+            element: editorRoot,
+        }));
+        collection.add(registerSheetCellEditorRuntimePortal({
+            embedId: scope.embedId,
+            ownerDocument: rootRef.current.ownerDocument,
+            interactionBoundaryService,
+            focusCoordinator,
+        }));
+
+        return () => collection.dispose();
+    }, [editState?.unitId, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
+
+    useEffect(() => {
+        if (visible?.visible || !injector.has(EmbedRuntimeFocusCoordinator)) {
+            return undefined;
+        }
+
+        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
+        const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
+        const childUnitId = activeSessionScope?.childUnitId;
+        if (
+            !activeSessionScope ||
+            activeSessionScope.childType !== UniverInstanceType.UNIVER_SHEET ||
+            !childUnitId ||
+            !instanceService.getUnit(childUnitId, UniverInstanceType.UNIVER_SHEET)
+        ) {
+            return undefined;
+        }
+
+        const ownerDocument = rootRef.current?.ownerDocument ?? document;
+        const interactionBoundaryService = injector.has(EmbedInteractionBoundaryService)
+            ? injector.get(EmbedInteractionBoundaryService)
+            : undefined;
+        const portalRegistration = registerSheetCellEditorRuntimePortal({
+            embedId: activeSessionScope.embedId,
+            ownerDocument,
+            interactionBoundaryService,
+            focusCoordinator,
+        });
+        const focusHiddenEditor = () => {
+            const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
+            if (!docSelectionRenderService?.isFocusing) {
+                docSelectionRenderService?.focus();
+            }
+
+            focusSheetCellEditorElement(ownerDocument);
+        };
+        let retryFrame = 0;
+        let finalRetryFrame = 0;
+
+        focusHiddenEditor();
+        retryFrame = requestAnimationFrame(() => {
+            focusHiddenEditor();
+            finalRetryFrame = requestAnimationFrame(focusHiddenEditor);
+        });
+
+        return () => {
+            cancelAnimationFrame(retryFrame);
+            cancelAnimationFrame(finalRetryFrame);
+            portalRegistration.dispose();
+        };
+    }, [editorService, injector, instanceService, runtimeFocusRevision, visible?.visible]);
+
+    useEffect(() => {
+        return () => {
+            const ownerWindow = rootRef.current?.ownerDocument.defaultView;
+            if (ownerWindow && pointerRefocusTimerRef.current != null) {
+                ownerWindow.clearTimeout(pointerRefocusTimerRef.current);
+            }
+        };
+    }, []);
+
+    const refocusEditorAfterPointerDown = useEvent((event: React.PointerEvent<HTMLDivElement>) => {
+        if (!visible?.visible) {
+            return;
+        }
+
+        const ownerDocument = rootRef.current?.ownerDocument ?? document;
+        const ownerWindow = ownerDocument.defaultView ?? window;
+        const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
+        const pointerTarget = event.target;
+        const activeElementAtPointerDown = ownerDocument.activeElement;
+        if (!shouldRefocusCellEditorAfterPointerDown({
+            root: rootRef.current,
+            target: pointerTarget,
+            activeElement: activeElementAtPointerDown,
+            isEditorFocusing: docSelectionRenderService?.isFocusing,
+        })) {
+            return;
+        }
+
+        if (pointerRefocusTimerRef.current != null) {
+            ownerWindow.clearTimeout(pointerRefocusTimerRef.current);
+        }
+
+        pointerRefocusTimerRef.current = ownerWindow.setTimeout(() => {
+            pointerRefocusTimerRef.current = undefined;
+            if (!docSelectionRenderService?.isFocusing) {
+                docSelectionRenderService?.focus();
+            }
+
+            focusSheetCellEditorElement(ownerDocument);
+        }, 0);
+    });
 
     const handleClickSideBar = useEvent(() => {
         if (editorBridgeService.isVisible().visible) {
@@ -224,7 +423,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     return (
         <div
+            ref={rootRef}
+            data-u-comp="editor"
             className="univer-absolute univer-z-10 univer-flex"
+            onPointerDownCapture={refocusEditorAfterPointerDown}
             style={{
                 left: state.left,
                 top: state.top,
@@ -254,15 +456,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     resetSelectionOnBlur={false}
                     isSingle={false}
                     autoScrollbar={false}
-                    onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
-                        if (!isFocusing) return;
+                    onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         if (isSelecting) {
                             editorBridgeService.enableForceKeepVisible();
                         } else {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
-                    disableSelectionOnClick
                     disableContextMenu={false}
                     canvasStyle={{ backgroundColor: 'transparent' }}
                 />

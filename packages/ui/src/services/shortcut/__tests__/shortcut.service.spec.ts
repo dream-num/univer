@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { ICommandService, IContextService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ILayoutService } from '../../layout/layout.service';
@@ -249,6 +265,92 @@ describe('ShortcutService', () => {
 
         expect(executeCommand).toHaveBeenCalledWith('cmd.native', { from: 'test' });
         expect(event.defaultPrevented).toBe(true);
+        service.dispose();
+    });
+
+    it('lets embed-owned native text editors handle select-all without dispatching Univer shortcuts', () => {
+        const embedRoot = document.createElement('div');
+        embedRoot.setAttribute('data-embed-interaction-boundary-owner', 'embed-1');
+        const textEditor = document.createElement('div');
+        textEditor.contentEditable = 'true';
+        Object.defineProperty(textEditor, 'isContentEditable', {
+            configurable: true,
+            get: () => true,
+        });
+        embedRoot.appendChild(textEditor);
+        const { service, executeCommand } = createService();
+        service.registerShortcut({
+            id: 'cmd.select-all',
+            binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+        });
+
+        const event = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
+        Object.defineProperty(event, 'target', {
+            configurable: true,
+            get: () => textEditor,
+        });
+        const candidate = service.dispatch(event);
+
+        expect(candidate).toBeUndefined();
+        expect(executeCommand).not.toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(false);
+        service.dispose();
+    });
+
+    it('lets embed-owned Univer internal editors handle select-all without dispatching global shortcuts', () => {
+        const embedRoot = document.createElement('div');
+        embedRoot.setAttribute('data-embed-interaction-boundary-owner', 'embed-1');
+        const editorContainer = document.createElement('div');
+        editorContainer.id = 'univer-doc-selection-container-__INTERNAL_EDITOR__DOCS_NORMAL';
+        const textEditor = document.createElement('div');
+        textEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
+        textEditor.contentEditable = 'true';
+        Object.defineProperty(textEditor, 'isContentEditable', {
+            configurable: true,
+            get: () => true,
+        });
+        editorContainer.appendChild(textEditor);
+        embedRoot.appendChild(editorContainer);
+        const { service, executeCommand } = createService();
+        service.registerShortcut({
+            id: 'cmd.select-all',
+            binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+        });
+
+        const event = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
+        Object.defineProperty(event, 'target', {
+            configurable: true,
+            get: () => textEditor,
+        });
+        const candidate = service.dispatch(event);
+
+        expect(candidate).toBeUndefined();
+        expect(executeCommand).not.toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(false);
+        service.dispose();
+    });
+
+    it('still dispatches select-all for non-text embed targets', () => {
+        const embedRoot = document.createElement('div');
+        embedRoot.setAttribute('data-embed-interaction-boundary-owner', 'embed-1');
+        const canvas = document.createElement('canvas');
+        embedRoot.appendChild(canvas);
+        const { service, executeCommand } = createService();
+        service.registerShortcut({
+            id: 'cmd.select-all',
+            binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+        });
+
+        const event = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
+        Object.defineProperty(event, 'target', {
+            configurable: true,
+            get: () => canvas,
+        });
+        const candidate = service.dispatch(event);
+
+        expect(candidate?.id).toBe('cmd.select-all');
+        expect(executeCommand).not.toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(false);
         service.dispose();
     });
 });

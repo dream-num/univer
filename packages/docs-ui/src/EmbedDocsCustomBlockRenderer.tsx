@@ -26,6 +26,7 @@ import { VIEWPORT_KEY } from './basics/docs-view-key';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
+import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 
 const SHEET_LIKE_CUSTOM_BLOCK_DEFAULT_CONTENT_HEIGHT = 480;
 
@@ -208,6 +209,9 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             scene
         );
     }, [renderManagerService, resolvedHostUnitId]);
+    const handleRuntimeStageEnter = useCallback((stage: 'inactive' | 'stage1' | 'stage2') => {
+        blurHostDocSelectionWhenEmbedRuntimeEntersStage(renderManagerService, resolvedHostUnitId, stage);
+    }, [renderManagerService, resolvedHostUnitId]);
 
     useEffect(() => {
         const root = rootRef.current;
@@ -251,10 +255,25 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
                 {...props}
                 interactionFlow="doc-block"
                 onHostWheel={sheetLike ? handleHostWheel : undefined}
+                onRuntimeStageEnter={handleRuntimeStageEnter}
                 syncHostVerticalScroll={sheetLike}
             />
         </div>
     );
+}
+
+export function blurHostDocSelectionWhenEmbedRuntimeEntersStage(
+    renderManagerService: IRenderManagerService,
+    hostUnitId: string | undefined,
+    stage: 'inactive' | 'stage1' | 'stage2'
+): void {
+    if (stage !== 'stage2' || !hostUnitId) {
+        return;
+    }
+
+    renderManagerService.getRenderById(hostUnitId)
+        ?.with(DocSelectionRenderService)
+        ?.blur();
 }
 
 export function createDocsTableLikeCustomBlockWheelHandler(options: IDocsTableLikeCustomBlockWheelHandlerOptions): (event: WheelEvent) => void {

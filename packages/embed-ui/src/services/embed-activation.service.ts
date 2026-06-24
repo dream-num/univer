@@ -80,11 +80,14 @@ export class EmbedActivationService {
         } else {
             this._floatingActiveService?.activate(activation);
         }
+        if (stage === 'stage2') {
+            this._univerInstanceService.setCurrentUnitForType(descriptor.childUnitId!);
+            this._univerInstanceService.focusUnit(descriptor.childUnitId!);
+        }
     }
 
     focusFloatingRuntime(descriptor: IEmbedDescriptor): void {
         this.activateFloating(descriptor, 'stage2');
-        this._univerInstanceService.setCurrentUnitForType(descriptor.childUnitId!);
     }
 
     clearFloating(embedId?: string, hostUnitId?: string): void {

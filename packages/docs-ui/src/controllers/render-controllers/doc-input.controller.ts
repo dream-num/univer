@@ -18,8 +18,9 @@ import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import { Disposable, ICommandService, Inject, SHEET_EDITOR_UNITS } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
+import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -33,7 +34,9 @@ export class DocInputController extends Disposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocMenuStyleService) private readonly _docMenuStyleService: DocMenuStyleService
+        @Inject(DocMenuStyleService) private readonly _docMenuStyleService: DocMenuStyleService,
+        @Optional(EmbedInteractionBoundaryService) _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
+        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -62,6 +65,10 @@ export class DocInputController extends Disposable implements IRenderModule {
 
             const e = event as InputEvent;
             if (e.defaultPrevented) {
+                return;
+            }
+
+            if (!SHEET_EDITOR_UNITS.includes(unitId) && this._isEmbedChildInputActive(unitId, e)) {
                 return;
             }
 
@@ -121,5 +128,21 @@ export class DocInputController extends Disposable implements IRenderModule {
                 await this._commandService.executeCommand(AfterSpaceCommand.id);
             }
         });
+    }
+
+    private _isEmbedChildInputActive(unitId: string, event: Event): boolean {
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitRuntimeEvent(unitId, event.target, event)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(unitId)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId, event.target, event)) {
+            return true;
+        }
+
+        return false;
     }
 }

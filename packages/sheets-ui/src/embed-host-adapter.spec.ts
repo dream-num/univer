@@ -179,15 +179,9 @@ describe('sheets embed host adapter', () => {
     });
 
     it('restores sheet-tab anchors into the workbook snapshot without activating the worksheet', () => {
-        const snapshot = {
-            sheetOrder: ['host-sheet-1'],
-            sheets: {
-                'host-sheet-1': { id: 'host-sheet-1', name: 'Host Sheet' },
-            },
-        };
         const workbook = {
-            getSnapshot: vi.fn(() => snapshot),
-            getSheetBySheetId: vi.fn(),
+            addWorksheet: vi.fn(() => true),
+            getSheetBySheetId: vi.fn(() => undefined),
             setActiveSheet: vi.fn(),
         };
         const adapter = createSheetsSheetTabHostAdapterContribution(undefined, {
@@ -210,11 +204,10 @@ describe('sheets embed host adapter', () => {
             hostAnchorId: 'sheet-tab-1',
             kind: 'sheets-sheet-tab',
         });
-        expect(snapshot.sheetOrder).toEqual(['sheet-tab-1', 'host-sheet-1']);
-        expect(snapshot.sheets['sheet-tab-1']).toMatchObject({
+        expect(workbook.addWorksheet).toHaveBeenCalledWith('sheet-tab-1', 0, expect.objectContaining({
             id: 'sheet-tab-1',
             name: 'Embedded Doc',
-        });
+        }));
         expect(workbook.setActiveSheet).not.toHaveBeenCalled();
     });
 

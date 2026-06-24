@@ -19,7 +19,9 @@
             "skipChecks": true,
             "workspaces": [
                 "common/*",
-                "packages/*"
+                "packages/*",
+                "presets",
+                "presets/packages/*"
             ]
         }
     }

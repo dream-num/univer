@@ -20,7 +20,7 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
-import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/sheets';
+import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { DrawingApplyType, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
@@ -133,6 +133,7 @@ describe('sheets embed host adapter', () => {
     it('creates sheet-tab insert and remove plans and activates the matching worksheet', () => {
         const worksheet = { id: 'sheet-tab-1' };
         const workbook = {
+            getActiveSheet: vi.fn(() => ({ getSheetId: () => 'host-active-sheet' })),
             getSheetBySheetId: vi.fn(() => worksheet),
             setActiveSheet: vi.fn(),
         };
@@ -158,6 +159,10 @@ describe('sheets embed host adapter', () => {
                 }),
                 unitId: 'host-sheet',
             }),
+        });
+        expect(plan.redoMutations[1]).toEqual({
+            id: SetWorksheetActiveOperation.id,
+            params: { subUnitId: 'host-active-sheet', unitId: 'host-sheet' },
         });
         expect(plan.undoMutations[1]).toEqual({
             id: RemoveSheetMutation.id,

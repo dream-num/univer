@@ -158,10 +158,12 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             this._textSelectionManagerService.refreshSelection();
         }
 
-        if (isInternalEditorID(this._context.unitId)) {
-            return;
+        if (!isInternalEditorID(this._context.unitId)) {
+            docObject.scene.getTransformer()?.clearSelectedObjects();
         }
-        docObject.scene.getTransformer()?.clearSelectedObjects();
+
+        this._context.scene.makeDirty();
+        this._context.scene.render();
     }
 
     private _initZoomEventListener() {

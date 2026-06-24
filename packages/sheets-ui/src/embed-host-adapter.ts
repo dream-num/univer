@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService } from '@univerjs/core';
+import type { IDrawingSearch, IUniverInstanceService, IWorkbookData } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRecord, IEmbedHostAnchorRemoveMutationPlan, IEmbedHostContainerContribution } from '@univerjs/embed-ui';
 import type { ISheetDrawingPosition, ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { UniverInstanceType } from '@univerjs/core';
 import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
-import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/sheets';
 import { DrawingApplyType, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { createEmbedSheetsFloatingDrawing, EMBED_SHEETS_FLOATING_COMPONENT_KEY, resolveEmbedSheetsFloatingObjectSize } from './embed-floating-anchor';
 import { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot } from './embed-tab-anchor';
@@ -34,6 +34,10 @@ export function createSheetsFloatingObjectHostAdapterContribution(
         entry: 'sheets-floating-object',
         createAnchorPlan: (context) => requireAnchorPlan(
             createSheetsFloatingObjectAnchorPlan(context, getSheetDrawingService(sheetDrawingService)),
+            'EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE'
+        ),
+        restoreAnchor: (context) => requireAnchorRecord(
+            restoreSheetsFloatingObjectAnchor(context, getSheetDrawingService(sheetDrawingService)),
             'EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE'
         ),
         removeAnchorPlan: (context) => {
@@ -52,7 +56,11 @@ export function createSheetsSheetTabHostAdapterContribution(
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-sheet-tab',
-        createAnchorPlan: (context) => createSheetsSheetTabAnchorPlan(context, univerInstanceService),
+        createAnchorPlan: createSheetsSheetTabAnchorPlan,
+        restoreAnchor: (context) => requireAnchorRecord(
+            restoreSheetsSheetTabAnchor(context, univerInstanceService),
+            'EMBED_SHEETS_TAB_ANCHOR_UNAVAILABLE'
+        ),
         removeAnchorPlan: (context) => {
             const record = anchorModelService?.getAnchor(context.hostUnitId, context.hostAnchorId) ?? createSheetsSheetTabRecord(context);
             return createSheetsSheetTabRemoveAnchorPlan(context, record);
@@ -165,14 +173,10 @@ function createSheetsFloatingObjectRemoveAnchorPlan(
     };
 }
 
-function createSheetsSheetTabAnchorPlan(
-    context: IEmbedHostAnchorContext,
-    univerInstanceService?: IUniverInstanceService
-): IEmbedHostAnchorMutationPlan {
+function createSheetsSheetTabAnchorPlan(context: IEmbedHostAnchorContext): IEmbedHostAnchorMutationPlan {
     const record = createSheetsSheetTabRecord(context);
     const sheetIndex = getSheetIndex(record.hostContext);
     const sheetName = getSheetName(record.hostContext) ?? context.embedId;
-    const previousActiveSheetId = getActiveSheetId(univerInstanceService, record.hostUnitId);
     const sheet = createEmbedSheetsTabSnapshot({
         embedId: record.embedId,
         hostAnchorId: record.hostAnchorId,
@@ -183,9 +187,6 @@ function createSheetsSheetTabAnchorPlan(
         hostAnchorId: record.hostAnchorId,
         redoMutations: [
             { id: InsertSheetMutation.id, params: { unitId: record.hostUnitId, index: sheetIndex, sheet } },
-            ...(previousActiveSheetId && previousActiveSheetId !== record.hostAnchorId
-                ? [{ id: SetWorksheetActiveOperation.id, params: { unitId: record.hostUnitId, subUnitId: previousActiveSheetId } }]
-                : []),
             { id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record } },
         ],
         undoMutations: [
@@ -193,14 +194,6 @@ function createSheetsSheetTabAnchorPlan(
             { id: RemoveSheetMutation.id, params: { unitId: record.hostUnitId, subUnitId: record.hostAnchorId, subUnitName: sheet.name } },
         ],
     };
-}
-
-function getActiveSheetId(univerInstanceService: IUniverInstanceService | undefined, unitId: string): string | undefined {
-    const workbook = univerInstanceService?.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
-        getActiveSheet?: () => { getSheetId?: () => string; id?: string } | null | undefined;
-    } | undefined;
-    const activeSheet = workbook?.getActiveSheet?.();
-    return activeSheet?.getSheetId?.() ?? activeSheet?.id;
 }
 
 function createSheetsSheetTabRemoveAnchorPlan(
@@ -232,6 +225,81 @@ function createSheetsFloatingObjectRecord(context: IEmbedHostAnchorContext): IEm
         ...context,
         hostContext: normalizeSheetsFloatingObjectHostContext(context),
     }, 'sheets-floating-object', 'sheets-floating');
+}
+
+function restoreSheetsFloatingObjectAnchor(
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    sheetDrawingService?: ISheetDrawingService
+): IEmbedHostAnchorRecord | undefined {
+    const hostSubUnitId = getHostSubUnitId(context.hostContext);
+    if (!sheetDrawingService || !hostSubUnitId) {
+        return undefined;
+    }
+
+    const record = createSheetsFloatingObjectRecord({
+        ...context,
+        requestedAnchorId: context.hostAnchorId,
+    });
+    const drawing = createEmbedSheetsFloatingDrawing({
+        embedId: record.embedId,
+        hostUnitId: record.hostUnitId,
+        hostSubUnitId,
+        hostAnchorId: record.hostAnchorId,
+        componentKey: getString(record.hostContext, 'componentKey') ?? undefined,
+        left: getNumber(record.hostContext, 'left'),
+        top: getNumber(record.hostContext, 'top'),
+        width: getNumber(record.hostContext, 'width'),
+        height: getNumber(record.hostContext, 'height'),
+        sheetTransform: getSheetTransform(record.hostContext),
+        allowTransform: getBoolean(record.hostContext, 'allowTransform'),
+        resizeBehavior: getString(record.hostContext, 'resizeBehavior') === 'aspect-ratio' || context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE
+            ? 'aspect-ratio'
+            : undefined,
+        aspectRatio: getNumber(record.hostContext, 'aspectRatio') ?? (context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE ? 16 / 9 : undefined),
+    });
+    const drawingSearch = { unitId: record.hostUnitId, subUnitId: hostSubUnitId, drawingId: record.hostAnchorId };
+    const existing = sheetDrawingService.getDrawingData(record.hostUnitId, hostSubUnitId)?.[record.hostAnchorId];
+    if (!existing) {
+        const jsonOp = sheetDrawingService.getBatchAddOp([drawing]) as IDrawingJsonUndo1;
+        sheetDrawingService.applyJson1(record.hostUnitId, hostSubUnitId, jsonOp.redo);
+        sheetDrawingService.addNotification([drawingSearch] as IDrawingSearch[]);
+    }
+
+    return record;
+}
+
+function restoreSheetsSheetTabAnchor(
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    univerInstanceService?: IUniverInstanceService
+): IEmbedHostAnchorRecord | undefined {
+    const snapshot = getWorkbookSnapshot(univerInstanceService, context.hostUnitId);
+    if (!snapshot) {
+        return undefined;
+    }
+
+    const record = createSheetsSheetTabRecord({
+        ...context,
+        requestedAnchorId: context.hostAnchorId,
+    });
+    const sheetName = getSheetName(record.hostContext) ?? context.embedId;
+    const sheetIndex = getSheetIndex(record.hostContext);
+    if (!snapshot.sheets[record.hostAnchorId]) {
+        snapshot.sheets[record.hostAnchorId] = createEmbedSheetsTabSnapshot({
+            embedId: record.embedId,
+            hostAnchorId: record.hostAnchorId,
+            name: sheetName,
+        });
+        snapshot.sheetOrder = insertIdAtIndex(snapshot.sheetOrder ?? [], record.hostAnchorId, sheetIndex);
+    }
+
+    return {
+        ...record,
+        hostContext: {
+            ...record.hostContext,
+            sheetIndex,
+            sheetName,
+        },
+    };
 }
 
 function createSheetsSheetTabRecord(context: IEmbedHostAnchorContext): IEmbedHostAnchorRecord {
@@ -327,6 +395,27 @@ function requireAnchorPlan(plan: IEmbedHostAnchorMutationPlan | undefined, error
     }
 
     return plan;
+}
+
+function requireAnchorRecord(record: IEmbedHostAnchorRecord | undefined, errorCode: string): IEmbedHostAnchorRecord {
+    if (!record) {
+        throw new Error(errorCode);
+    }
+
+    return record;
+}
+
+function getWorkbookSnapshot(univerInstanceService: IUniverInstanceService | undefined, unitId: string): IWorkbookData | undefined {
+    const workbook = univerInstanceService?.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
+        getSnapshot?: () => IWorkbookData;
+    } | undefined;
+    return workbook?.getSnapshot?.();
+}
+
+function insertIdAtIndex(order: string[], id: string, index: number): string[] {
+    const next = order.filter((item) => item !== id);
+    next.splice(Math.max(0, Math.min(index, next.length)), 0, id);
+    return next;
 }
 
 function normalizeSheetsFloatingObjectHostContext(context: IEmbedHostAnchorContext): Record<string, unknown> | undefined {

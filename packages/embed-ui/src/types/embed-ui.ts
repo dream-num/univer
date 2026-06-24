@@ -18,6 +18,7 @@ import type { ICommandService, IDisposable, IMutationInfo, Injector, IUniverInst
 import type { EmbedHostEntry, EmbedLayout, EmbedMenuBehavior, IEmbedDescriptor, IEmbedLayoutPolicies } from '@univerjs/embed';
 import type { IMenuManagerService, IRibbonService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
+import type { IEmbedHostAnchorRecord } from './host-anchor';
 
 export interface IEmbedContainerContext {
     descriptor: IEmbedDescriptor;
@@ -133,6 +134,7 @@ interface IEmbedHostAdapterContributionBase {
     afterCreateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
     afterRemoveAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor?: IEmbedDescriptor }) => void;
     activateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
+    restoreAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => IEmbedHostAnchorRecord;
 }
 
 export type IEmbedHostAdapterContribution = IEmbedHostAdapterContributionBase & (

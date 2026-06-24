@@ -16,7 +16,9 @@
 
 import type {
     DocumentDataModel,
+    IColumnGroup,
     ICustomBlock,
+    ICustomColumnGroup,
     ICustomDecorationForInterceptor,
     ICustomRangeForInterceptor,
     ICustomTable,
@@ -83,9 +85,23 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
     const tableList: ITableCache[] = [];
     const tableRowList: DataStreamTreeNode[] = [];
     const tableCellList: DataStreamTreeNode[] = [];
+    const columnGroupList: DataStreamTreeNode[] = [];
+    const columnList: DataStreamTreeNode[] = [];
+    const columnParagraphList: DataStreamTreeNode[] = [];
+    const columnSectionList: DataStreamTreeNode[] = [];
     const currentBlocks: number[] = [];
 
-    const getParagraphList = () => tableCellList.length > 0 ? cellParagraphList : paragraphList;
+    const getParagraphList = () => {
+        if (tableCellList.length > 0) {
+            return cellParagraphList;
+        }
+
+        if (columnGroupList.length > 0) {
+            return columnParagraphList;
+        }
+
+        return paragraphList;
+    };
     const appendToPreviousParagraph = (char: string) => {
         const tempParagraphList = getParagraphList();
         const lastParagraph = tempParagraphList[tempParagraphList.length - 1];
@@ -128,12 +144,18 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
 
             if (tableCellList.length > 0) {
                 cellParagraphList.push(paragraphNode);
+            } else if (columnGroupList.length > 0) {
+                columnParagraphList.push(paragraphNode);
             } else {
                 paragraphList.push(paragraphNode);
             }
         } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
             const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
-            const tempParagraphList = tableCellList.length > 0 ? cellParagraphList : paragraphList;
+            const tempParagraphList = tableCellList.length > 0
+                ? cellParagraphList
+                : columnGroupList.length > 0
+                    ? columnParagraphList
+                    : paragraphList;
 
             if (tempParagraphList.length === 0) {
                 const emptyParagraph = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, '');
@@ -153,6 +175,8 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
                 const lastCell = tableCellList[tableCellList.length - 1];
 
                 batchParent(lastCell, [sectionNode], DataStreamTreeNodeType.TABLE_CELL);
+            } else if (columnGroupList.length > 0) {
+                columnSectionList.push(sectionNode);
             } else {
                 sectionList.push(sectionNode);
             }
@@ -188,6 +212,36 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
             const lastRow = tableRowList[tableRowList.length - 1];
 
             batchParent(lastRow, [cellNode!], DataStreamTreeNodeType.TABLE_ROW);
+        } else if (char === DataStreamTreeTokenType.COLUMN_GROUP_START) {
+            const columnGroupNode = DataStreamTreeNode.create(DataStreamTreeNodeType.COLUMN_GROUP);
+            columnGroupNode.setIndexRange(i, i);
+
+            columnGroupList.push(columnGroupNode);
+        } else if (char === DataStreamTreeTokenType.COLUMN_START) {
+            const columnNode = DataStreamTreeNode.create(DataStreamTreeNodeType.COLUMN);
+            columnNode.setIndexRange(i, i);
+
+            columnList.push(columnNode);
+        } else if (char === DataStreamTreeTokenType.COLUMN_END) {
+            const columnNode = columnList[columnList.length - 1];
+            const columnChildren = columnSectionList.length > 0 ? columnSectionList : columnParagraphList;
+            const columnStartIndex = columnNode.startIndex;
+
+            batchParent(columnNode, columnChildren, DataStreamTreeNodeType.COLUMN);
+            columnNode.setIndexRange(columnStartIndex, i);
+            columnParagraphList.length = 0;
+            columnSectionList.length = 0;
+        } else if (char === DataStreamTreeTokenType.COLUMN_GROUP_END) {
+            const columnGroupNode = columnGroupList.pop();
+            const columnGroupStartIndex = columnGroupNode!.startIndex;
+
+            batchParent(columnGroupNode!, columnList, DataStreamTreeNodeType.COLUMN_GROUP);
+            columnGroupNode!.setIndexRange(columnGroupStartIndex, i);
+            paragraphList.push(columnGroupNode!);
+            columnList.length = 0;
+            columnParagraphList.length = 0;
+            columnSectionList.length = 0;
+            content = '';
         } else if (char === DataStreamTreeTokenType.BLOCK_START) {
             content += char;
         } else if (char === DataStreamTreeTokenType.BLOCK_END) {
@@ -210,6 +264,11 @@ interface ITableCoupleCache {
     tableSource: ITable;
 }
 
+interface IColumnGroupCoupleCache {
+    columnGroup: ICustomColumnGroup;
+    columnGroupSource: IColumnGroup;
+}
+
 export class DocumentViewModel implements IDisposable {
     private _interceptor: Nullable<ICustomRangeInterceptor> = null;
 
@@ -224,6 +283,8 @@ export class DocumentViewModel implements IDisposable {
     private _customBlockCache: Map<number, ICustomBlock> = new Map();
 
     private _tableCache: Map<number, ITableCoupleCache> = new Map();
+
+    private _columnGroupCache: Map<number, IColumnGroupCoupleCache> = new Map();
 
     private _tableNodeCache: Map<string, ITableNodeCache> = new Map();
 
@@ -272,6 +333,7 @@ export class DocumentViewModel implements IDisposable {
         this._sectionBreakCache.clear();
         this._customBlockCache.clear();
         this._tableCache.clear();
+        this._columnGroupCache.clear();
         this._tableNodeCache.clear();
         // this._headerTreeMap.clear();
         // this._footerTreeMap.clear();
@@ -380,6 +442,10 @@ export class DocumentViewModel implements IDisposable {
         return this._tableCache.get(index);
     }
 
+    getColumnGroupByStartIndex(index: number) {
+        return this._columnGroupCache.get(index);
+    }
+
     findTableNodeById(id: string) {
         return this._tableNodeCache.get(id)?.table;
     }
@@ -434,6 +500,7 @@ export class DocumentViewModel implements IDisposable {
         this._buildSectionBreakCache();
         this._buildCustomBlockCache();
         this._buildTableCache();
+        this._buildColumnGroupCache();
     }
 
     private _buildParagraphCache() {
@@ -487,6 +554,27 @@ export class DocumentViewModel implements IDisposable {
             this._tableCache.set(startIndex, {
                 table,
                 tableSource,
+            });
+        }
+    }
+
+    private _buildColumnGroupCache() {
+        this._columnGroupCache.clear();
+
+        const columnGroups = this.getBody()?.columnGroups;
+        if (columnGroups == null) {
+            return;
+        }
+
+        for (const columnGroup of columnGroups) {
+            const { startIndex } = columnGroup;
+            if (!columnGroup.columns) {
+                continue;
+            }
+
+            this._columnGroupCache.set(startIndex, {
+                columnGroup,
+                columnGroupSource: columnGroup as IColumnGroup,
             });
         }
     }

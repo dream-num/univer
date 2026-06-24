@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BreakLineCommand } from '../break-line.command';
@@ -49,6 +49,37 @@ function getDocumentData(): IDocumentData {
     };
 }
 
+function getDocumentDataWithColumnGroup(): IDocumentData {
+    const T = DataStreamTreeTokenType;
+    const columnGroupStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}B${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}`;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: `Before${T.PARAGRAPH}${columnGroupStream}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            textRuns: [],
+            paragraphs: [
+                { paragraphId: 'before', startIndex: 6 },
+                { paragraphId: 'left', startIndex: 10 },
+                { paragraphId: 'right', startIndex: 14 },
+                { paragraphId: 'after', startIndex: 17 },
+            ],
+            sectionBreaks: [{ startIndex: 18 }],
+            columnGroups: [{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 16 }],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
 describe('break line command', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -57,6 +88,30 @@ describe('break line command', () => {
     function getParagraphs() {
         const univerInstanceService = get(IUniverInstanceService);
         return univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)?.getBody()?.paragraphs ?? [];
+    }
+
+    function getBody() {
+        const univerInstanceService = get(IUniverInstanceService);
+        return univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)?.getBody();
+    }
+
+    function setupWithColumnGroup() {
+        univer.dispose();
+        const testBed = createCommandTestBed(getDocumentDataWithColumnGroup());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(BreakLineCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+
+        return selectionManager;
     }
 
     beforeEach(() => {
@@ -88,5 +143,27 @@ describe('break line command', () => {
         expect(getParagraphs()[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_1);
         expect(getParagraphs()[1].paragraphStyle?.namedStyleType).toBeUndefined();
         expect(getParagraphs()[1].paragraphStyle?.headingId).toBeUndefined();
+    });
+
+    it('keeps column groups when breaking a blank paragraph below a column group', async () => {
+        const selectionManager = setupWithColumnGroup();
+        selectionManager.__TEST_ONLY_add([{ startOffset: 17, endOffset: 17, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+
+        await commandService.executeCommand(BreakLineCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.columnGroups).toEqual([{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 16 }]);
+        expect(getBody()?.dataStream).toContain(DataStreamTreeTokenType.COLUMN_GROUP_END);
+    });
+
+    it('keeps column groups wrapped when breaking at the closing column boundary', async () => {
+        const selectionManager = setupWithColumnGroup();
+        selectionManager.__TEST_ONLY_add([{ startOffset: 16, endOffset: 16, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+
+        await commandService.executeCommand(BreakLineCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.columnGroups).toEqual([{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 17 }]);
+        expect(getBody()?.dataStream[17]).toBe(DataStreamTreeTokenType.COLUMN_GROUP_END);
     });
 });

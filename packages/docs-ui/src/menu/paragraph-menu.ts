@@ -515,7 +515,7 @@ export function ParagraphMenuInsertBelowHeadingH1MenuItemFactory(accessor: IAcce
         icon: 'H1Icon',
         title: 'docs-ui.toolbar.heading.leading1',
         tooltip: 'docs-ui.toolbar.heading.leading1',
-        params: { commandId: H1HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        params: { commandId: H1HeadingCommand.id, paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -528,7 +528,7 @@ export function ParagraphMenuInsertBelowHeadingH2MenuItemFactory(accessor: IAcce
         icon: 'H2Icon',
         title: 'docs-ui.toolbar.heading.leading2',
         tooltip: 'docs-ui.toolbar.heading.leading2',
-        params: { commandId: H2HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        params: { commandId: H2HeadingCommand.id, paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -541,7 +541,7 @@ export function ParagraphMenuInsertBelowHeadingH3MenuItemFactory(accessor: IAcce
         icon: 'H3Icon',
         title: 'docs-ui.toolbar.heading.leading3',
         tooltip: 'docs-ui.toolbar.heading.leading3',
-        params: { commandId: H3HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        params: { commandId: H3HeadingCommand.id, paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -554,7 +554,7 @@ export function ParagraphMenuInsertBelowHeadingH4MenuItemFactory(accessor: IAcce
         icon: 'H4Icon',
         title: 'docs-ui.toolbar.heading.leading4',
         tooltip: 'docs-ui.toolbar.heading.leading4',
-        params: { commandId: H4HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        params: { commandId: H4HeadingCommand.id, paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -567,7 +567,7 @@ export function ParagraphMenuInsertBelowHeadingH5MenuItemFactory(accessor: IAcce
         icon: 'H5Icon',
         title: 'docs-ui.toolbar.heading.leading5',
         tooltip: 'docs-ui.toolbar.heading.leading5',
-        params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        params: { commandId: H5HeadingCommand.id, paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -580,7 +580,7 @@ export function ParagraphMenuInsertBelowTableMenuItemFactory(accessor: IAccessor
         icon: 'GridIcon',
         title: 'docs-ui.toolbar.table.insert',
         tooltip: 'docs-ui.toolbar.table.insert',
-        params: { rowCount: 3, colCount: 5, paragraphMenuPlacement: 'below' },
+        params: { rowCount: 3, colCount: 5 },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

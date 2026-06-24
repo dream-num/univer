@@ -384,10 +384,10 @@ describe('selection utils', () => {
                 .mockReturnValueOnce(endPosition)
                 .mockReturnValueOnce(startPosition)
                 .mockReturnValueOnce(endPosition),
-        } as never;
+        };
 
-        const textRange = getTextRangeFromCharIndex(1, 2, {} as never, createDocument(), skeleton, {} as never, '', -1);
-        const rectRange = getRectRangeFromCharIndex(1, 2, {} as never, createDocument(), skeleton, {} as never, '', -1);
+        const textRange = getTextRangeFromCharIndex(1, 2, {} as never, createDocument(), skeleton as never, {} as never, '', -1);
+        const rectRange = getRectRangeFromCharIndex(1, 2, {} as never, createDocument(), skeleton as never, {} as never, '', -1);
 
         expect(textRange).toBeInstanceOf(TextRange);
         expect(textRange?.anchorNodePosition).toEqual(startPosition);
@@ -400,12 +400,39 @@ describe('selection utils', () => {
     it('does not create ranges when a character boundary cannot be resolved', () => {
         const skeleton = {
             findNodePositionByCharIndex: vi.fn(() => undefined),
-        } as never;
+        };
         const document = createDocument();
 
-        expect(getTextRangeFromCharIndex(1, 2, {} as never, document, skeleton, {} as never, '', -1)).toBeUndefined();
-        expect(getRectRangeFromCharIndex(1, 2, {} as never, document, skeleton, {} as never, '', -1)).toBeUndefined();
-        expect(getRangeListFromCharIndex(1, 2, {} as never, document, skeleton, {} as never, '', -1)).toBeUndefined();
+        expect(getTextRangeFromCharIndex(1, 2, {} as never, document, skeleton as never, {} as never, '', -1)).toBeUndefined();
+        expect(getRectRangeFromCharIndex(1, 2, {} as never, document, skeleton as never, {} as never, '', -1)).toBeUndefined();
+        expect(getRangeListFromCharIndex(1, 2, {} as never, document, skeleton as never, {} as never, '', -1)).toBeUndefined();
+    });
+
+    it('resolves collapsed ranges from the backward character boundary', () => {
+        const position = createNodePosition(['pages', 0], 0);
+        const skeleton = {
+            findNodePositionByCharIndex: vi.fn(() => position),
+            findGlyphByPosition: vi.fn(() => null),
+            findCharIndexByPosition: vi.fn(() => 5),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [{
+                            children: [],
+                            endIndex: 8,
+                            startIndex: 1,
+                        }],
+                    }],
+                }),
+            }),
+        };
+        const document = createDocument();
+
+        const ranges = getRangeListFromCharIndex(5, 5, {} as never, document, skeleton as never, {} as never, '', -1);
+
+        expect(skeleton.findNodePositionByCharIndex).toHaveBeenNthCalledWith(1, 5, true, '', -1);
+        expect(ranges?.textRanges[0].anchorNodePosition).toBe(position);
+        expect(ranges?.textRanges[0].focusNodePosition).toBe(position);
     });
 
     it('routes same-cell and rect selections into the expected range buckets', () => {
@@ -760,6 +787,64 @@ describe('selection utils', () => {
         expect(missing).toBeUndefined();
     });
 
+    it('collapses a first-column input boundary instead of turning it into a cross-column selection', () => {
+        const anchor = createNodePosition(['pages', 0, 'skeColumnGroups', 'column-group-1', 'columns', 0, 'page'], 1);
+        const focus = createNodePosition(['pages', 0, 'skeColumnGroups', 'column-group-1', 'columns', 1, 'page']);
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(190)
+                .mockReturnValueOnce(189),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [],
+                }),
+            }),
+        };
+
+        const result = getRangeListFromSelection(
+            anchor,
+            focus,
+            {} as never,
+            createDocument(),
+            skeleton as never,
+            {} as never,
+            '',
+            -1
+        );
+
+        expect(result?.textRanges).toHaveLength(1);
+        expect(result?.rectRanges).toHaveLength(0);
+        expect(result?.textRanges[0].anchorNodePosition).toBe(anchor);
+        expect(result?.textRanges[0].focusNodePosition).toBe(anchor);
+    });
+
+    it('resolves both endpoints for collapsed text ranges instead of reusing the start node', () => {
+        const startNode = createNodePosition(['body', 'collapsed-start'], 10);
+        const endNode = createNodePosition(['body', 'collapsed-end'], 11);
+        const skeleton = {
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(startNode)
+                .mockReturnValueOnce(endNode),
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(5)
+                .mockReturnValueOnce(5),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{ children: [{ startIndex: 0, endIndex: 10, children: [] }] }],
+                }),
+            }),
+        };
+
+        const result = getRangeListFromCharIndex(5, 5, {} as never, createDocument(), skeleton as never, {} as never, '', -1);
+
+        expect(result?.textRanges).toHaveLength(1);
+        expect(skeleton.findNodePositionByCharIndex).toHaveBeenNthCalledWith(1, 5, true, '', -1);
+        expect(skeleton.findNodePositionByCharIndex).toHaveBeenNthCalledWith(2, 5, true, '', -1);
+    });
+
     it('falls back to original boundary positions when the first character index cannot be resolved back to a node', () => {
         const focusPosition = createNodePosition(['body'], 0);
         focusPosition.isBack = true;
@@ -784,14 +869,14 @@ describe('selection utils', () => {
                     getChildren: () => [{ children: [paragraph] }],
                 }),
             }),
-        } as never;
+        };
 
         const result = getRangeListFromSelection(
             anchorPosition,
             focusPosition,
             {} as never,
             createDocument(),
-            skeleton,
+            skeleton as never,
             {} as never,
             '',
             -1

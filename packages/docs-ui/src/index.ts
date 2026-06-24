@@ -181,6 +181,8 @@ export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
+export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
+export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
 export {
     DocEventManagerService,

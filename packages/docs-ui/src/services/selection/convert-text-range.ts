@@ -30,8 +30,10 @@ import type {
     IPoint,
 } from '@univerjs/engine-render';
 import {
+    compareDocumentSkeletonNestedPagePathOrder,
     DocumentSkeletonPageType,
     getDocsTableRenderViewport,
+    getDocumentSkeletonNestedPageOffset,
     getPageFromPath,
     getTableIdAndSliceIndex,
     GlyphType,
@@ -72,6 +74,11 @@ export const NodePositionMap = {
 };
 
 export function compareNodePositionLogic(pos1: INodePosition, pos2: INodePosition) {
+    const nestedPagePathOrder = compareDocumentSkeletonNestedPagePathOrder(pos1, pos2);
+    if (nestedPagePathOrder != null) {
+        return nestedPagePathOrder;
+    }
+
     if (pos1.page > pos2.page) {
         return false;
     }
@@ -585,9 +592,19 @@ export class NodePositionConvertToCursor {
                     break;
                 }
                 case DocumentSkeletonPageType.CELL: {
+                    const nestedPageOffset = getDocumentSkeletonNestedPageOffset(segmentPage);
+                    if (nestedPageOffset) {
+                        this._liquid.translatePagePadding(page);
+                        this._liquid.translate(nestedPageOffset.left, nestedPageOffset.top);
+                        this._liquid.translatePagePadding(segmentPage);
+                        break;
+                    }
+
                     this._liquid.translatePagePadding(page);
                     const rowSke = segmentPage.parent as IDocumentSkeletonRow;
                     const tableSke = rowSke.parent!;
+                    const tablePage = tableSke.parent as IDocumentSkeletonPage | undefined;
+                    const tablePageNestedOffset = tablePage ? getDocumentSkeletonNestedPageOffset(tablePage) : undefined;
                     const { left: cellLeft } = segmentPage;
                     const { top: tableTop, left: tableLeft } = tableSke;
                     const { top: rowTop } = rowSke;
@@ -595,6 +612,11 @@ export class NodePositionConvertToCursor {
                     const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
                     const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
                     const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+
+                    if (tablePageNestedOffset) {
+                        this._liquid.translate(tablePageNestedOffset.left, tablePageNestedOffset.top);
+                        this._liquid.translatePagePadding(tablePage!);
+                    }
 
                     if (hasHorizontalViewport) {
                         const visibleLeft = this._liquid.x + tableLeft - (viewport.leadingInsetLeft ?? 0);

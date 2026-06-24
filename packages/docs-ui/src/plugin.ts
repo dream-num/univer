@@ -117,6 +117,7 @@ import { DocRenderController } from './controllers/render-controllers/doc.render
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocUIController } from './controllers/ui.controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
+import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
@@ -364,6 +365,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocParagraphSettingController],
             [IEditorService, { useClass: EditorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
+            [DocHtmlExportService],
             [DocCanvasPopManagerService],
             [DocsRenderService],
             [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],

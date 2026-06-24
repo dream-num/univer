@@ -19,10 +19,11 @@ import {
     awaitTime,
     BlockType,
     CustomRangeType,
+    DataStreamTreeTokenType,
     DocumentBlockRangeType,
     ICommandService,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocBlockMoveValidatorService, RichTextEditingMutation } from '@univerjs/docs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildMoveDocBlockActions, MoveDocBlockCommand } from '../doc-block-move.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -177,6 +178,34 @@ describe('buildMoveDocBlockActions', () => {
         expect(collectStarts(nextDocumentData.body?.customDecorations)).toEqual([0, 6]);
         expect(collectTextRunStarts(nextDocumentData.body?.textRuns)).toEqual([0, 6]);
     });
+
+    it('remaps column group ranges when moving content before a column group', () => {
+        const T = DataStreamTreeTokenType;
+        const columnGroupStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}B${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}C${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}`;
+        const documentData = createDocument(`A${T.PARAGRAPH}${columnGroupStream}Z${T.PARAGRAPH}${T.SECTION_BREAK}`, {
+            paragraphs: [
+                { paragraphId: 'para_docs_ui_fixture_32', startIndex: 1 },
+                { paragraphId: 'para_docs_ui_fixture_33', startIndex: 5 },
+                { paragraphId: 'para_docs_ui_fixture_34', startIndex: 9 },
+                { paragraphId: 'para_docs_ui_fixture_35', startIndex: 12 },
+            ],
+            sectionBreaks: [{ startIndex: 13 }],
+            columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 12 }],
+        });
+
+        const { nextDocumentData } = buildMoveDocBlockActions({
+            documentData,
+            sourceRange: { startOffset: 0, endOffset: 2 },
+            targetOffset: 12,
+        });
+
+        expect(nextDocumentData.body?.dataStream).toBe(`${columnGroupStream}A${T.PARAGRAPH}Z${T.PARAGRAPH}${T.SECTION_BREAK}`);
+        expect(nextDocumentData.body?.columnGroups).toEqual([{
+            columnGroupId: 'column-group-1',
+            startIndex: 0,
+            endIndex: 10,
+        }]);
+    });
 });
 
 describe('MoveDocBlockCommand', () => {
@@ -205,6 +234,68 @@ describe('MoveDocBlockCommand', () => {
         await awaitTime(0);
         expect(testBed.doc.getSnapshot().body?.dataStream).toBe('B\rC\rA\r\n');
         expect(testBed.doc.getSnapshot().body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([1, 3, 5]);
+    });
+
+    it('writes remapped column group ranges through the real rich text mutation flow', async () => {
+        const T = DataStreamTreeTokenType;
+        const columnGroupStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}B${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}C${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}`;
+        testBed = createCommandTestBed(createDocument(`A${T.PARAGRAPH}${columnGroupStream}Z${T.PARAGRAPH}${T.SECTION_BREAK}`, {
+            paragraphs: [
+                { paragraphId: 'para_docs_ui_fixture_36', startIndex: 1 },
+                { paragraphId: 'para_docs_ui_fixture_37', startIndex: 5 },
+                { paragraphId: 'para_docs_ui_fixture_38', startIndex: 9 },
+                { paragraphId: 'para_docs_ui_fixture_39', startIndex: 12 },
+            ],
+            sectionBreaks: [{ startIndex: 13 }],
+            columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 12 }],
+        }));
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(MoveDocBlockCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        await expect(commandService.executeCommand(MoveDocBlockCommand.id, {
+            unitId: 'test-doc',
+            sourceRange: { startOffset: 0, endOffset: 2 },
+            targetOffset: 12,
+        })).resolves.toBe(true);
+
+        await awaitTime(0);
+        expect(testBed.doc.getSnapshot().body?.columnGroups).toEqual([{
+            columnGroupId: 'column-group-1',
+            startIndex: 0,
+            endIndex: 10,
+        }]);
+    });
+
+    it('applies registered block move transformers through the real rich text mutation flow', async () => {
+        testBed = createCommandTestBed(createDocument('A\rB\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_40', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_41', startIndex: 3 }],
+            sectionBreaks: [{ startIndex: 4 }],
+        }));
+        const commandService = testBed.get(ICommandService);
+        const moveValidatorService = testBed.get(DocBlockMoveValidatorService);
+        commandService.registerCommand(MoveDocBlockCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        moveValidatorService.registerTransformer((context) => ({
+            ...context.result,
+            nextDocumentData: {
+                ...context.result.nextDocumentData,
+                body: {
+                    ...context.result.nextDocumentData.body!,
+                    dataStream: `${context.result.nextDocumentData.body?.dataStream}!`,
+                },
+            },
+        }));
+
+        await expect(commandService.executeCommand(MoveDocBlockCommand.id, {
+            unitId: 'test-doc',
+            sourceRange: { startOffset: 0, endOffset: 2 },
+            targetOffset: 4,
+        })).resolves.toBe(true);
+
+        await awaitTime(0);
+        expect(testBed.doc.getSnapshot().body?.dataStream).toBe('B\rA\r\n!');
     });
 
     it('does not mutate when the target document is missing', async () => {

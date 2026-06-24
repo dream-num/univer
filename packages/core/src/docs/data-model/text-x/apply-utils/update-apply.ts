@@ -15,18 +15,20 @@
  */
 
 import type { Nullable } from '../../../../shared';
-import type { ICustomBlock, ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../../types/interfaces';
+import type { ICustomBlock, ICustomColumnGroup, ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { CustomDecorationType } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteBlockRanges,
+    deleteColumnGroups,
     deleteCustomBlocks,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
     deleteTextRuns,
     insertBlockRanges,
+    insertColumnGroups,
     insertCustomBlocks,
     insertParagraphs,
     insertSectionBreaks,
@@ -51,6 +53,7 @@ export function updateAttribute(
     const removeSectionBreaks = updateSectionBreaks(body, updateBody, textLength, currentIndex, coverType);
     const removeCustomBlocks = updateCustomBlocks(body, updateBody, textLength, currentIndex, coverType);
     const removeTables = updateTables(body, updateBody, textLength, currentIndex, coverType);
+    const removeColumnGroups = updateColumnGroups(body, updateBody, textLength, currentIndex, coverType);
     const removeBlockRanges = updateBlockRanges(body, updateBody, textLength, currentIndex, coverType);
     const removeCustomRanges = updateCustomRanges(body, updateBody, textLength, currentIndex, coverType);
     const removeCustomDecorations = updateCustomDecorations(body, updateBody, textLength, currentIndex, coverType);
@@ -62,6 +65,7 @@ export function updateAttribute(
         sectionBreaks: removeSectionBreaks,
         customBlocks: removeCustomBlocks,
         tables: removeTables,
+        columnGroups: removeColumnGroups,
         blockRanges: removeBlockRanges,
         customRanges: removeCustomRanges,
         customDecorations: removeCustomDecorations,
@@ -446,6 +450,54 @@ function updateTables(
     insertTables(body, updateBody, textLength, currentIndex);
 
     return removeTables;
+}
+
+function updateColumnGroups(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
+    const { columnGroups } = body;
+
+    const { columnGroups: updateDataColumnGroups } = updateBody;
+
+    if (columnGroups == null || updateDataColumnGroups == null) {
+        return;
+    }
+
+    const removeColumnGroups = deleteColumnGroups(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateColumnGroups: ICustomColumnGroup[] = [];
+        for (const updateColumnGroup of updateDataColumnGroups) {
+            const { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateColumnGroup;
+            let splitUpdateColumnGroups: ICustomColumnGroup[] = [];
+            for (const removeColumnGroup of removeColumnGroups) {
+                const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeColumnGroup;
+                if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
+                    if (coverType === UpdateDocsAttributeType.COVER) {
+                        splitUpdateColumnGroups.push({
+                            ...removeColumnGroup,
+                            ...updateColumnGroup,
+                        });
+                    } else {
+                        splitUpdateColumnGroups.push({
+                            ...updateColumnGroup,
+                            ...removeColumnGroup,
+                        });
+                    }
+                    break;
+                }
+            }
+            newUpdateColumnGroups.push(...splitUpdateColumnGroups);
+            splitUpdateColumnGroups = [];
+        }
+        updateBody.columnGroups = newUpdateColumnGroups;
+    }
+    insertColumnGroups(body, updateBody, textLength, currentIndex);
+
+    return removeColumnGroups;
 }
 
 function updateBlockRanges(

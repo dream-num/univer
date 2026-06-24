@@ -36,10 +36,13 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
     IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
@@ -69,9 +72,10 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
-import { GlyphType } from '../../../basics/i-document-skeleton-cached';
+import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
@@ -345,7 +349,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     let prePageStartIndex = start;
 
     for (const page of pages) {
-        const { sections, skeTables } = page;
+        const { sections, skeTables, skeColumnGroups = new Map() } = page;
         const pageStartIndex = prePageStartIndex;
         const pageEndIndex = pageStartIndex;
         let preSectionStartIndex = pageStartIndex;
@@ -378,6 +382,18 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             lineStartIndex = table.ed;
                         }
                     }
+
+                    if (line.type === LineType.BLOCK && divides.length === 0) {
+                        line.st = Math.max(line.st, lineStartIndex + 1);
+                        line.ed = Math.max(line.ed, line.st);
+                        line.width = 0;
+                        line.asc = 0;
+                        line.dsc = 0;
+                        columnHeight = top + lineHeight;
+                        preLineStartIndex = Math.max(preLineStartIndex, line.ed);
+                        continue;
+                    }
+
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
@@ -474,6 +490,12 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         // Some tables may across pages, so we need to calculate the page's end index by the tables.
         for (const table of skeTables.values()) {
             const { ed } = table;
+
+            preSectionStartIndex = Math.max(preSectionStartIndex, ed);
+        }
+
+        for (const columnGroup of skeColumnGroups.values()) {
+            const { ed } = columnGroup;
 
             preSectionStartIndex = Math.max(preSectionStartIndex, ed);
         }
@@ -582,6 +604,475 @@ export function lineIterator(
             }
         }
     }
+}
+
+export type DocumentSkeletonLineSource = 'page' | 'table-cell' | 'column';
+
+export interface IDocumentSkeletonLineIteratorOptions {
+    docsLeft?: number;
+    pageMarginTop?: number;
+    tableCellInsetX?: number;
+    unitId?: string;
+}
+
+export interface IDocumentSkeletonLineContext {
+    clipLeft?: number;
+    clipRight?: number;
+    column: IDocumentSkeletonColumn;
+    line: IDocumentSkeletonLine;
+    lineWidth: number;
+    page: IDocumentSkeletonPage;
+    pageIndex: number;
+    pageLeft: number;
+    section: IDocumentSkeletonSection;
+    sectionTop: number;
+    source: DocumentSkeletonLineSource;
+    visualLeft?: number;
+    visualWidth?: number;
+}
+
+export type DocumentSkeletonTableSource = 'page' | 'column';
+
+export interface IDocumentSkeletonTableCellGeometry {
+    cell: IDocumentSkeletonPage;
+    cellRect: IBoundRectNoAngle;
+    clipLeft: number;
+    clipRight: number;
+    columnIndex: number;
+    pageLeft: number;
+    pageTop: number;
+    row: IDocumentSkeletonRow;
+    rowIndex: number;
+    visualLeft: number;
+    visualWidth: number;
+}
+
+export interface IDocumentSkeletonTableContext {
+    cells: IDocumentSkeletonTableCellGeometry[];
+    page: IDocumentSkeletonPage;
+    pageIndex: number;
+    pageLeft: number;
+    pageTop: number;
+    rootPage: IDocumentSkeletonPage;
+    source: DocumentSkeletonTableSource;
+    table: IDocumentSkeletonTable;
+    tableId: string;
+    tableRect: IBoundRectNoAngle;
+}
+
+export interface IDocumentSkeletonTableIteratorOptions {
+    docsLeft?: number;
+    docsTop?: number;
+    pageMarginTop?: number;
+    resolveViewport?: boolean;
+    tableCellInsetX?: number;
+    unitId?: string;
+}
+
+export function documentSkeletonTableIterator(
+    pages: IDocumentSkeletonPage[],
+    options: IDocumentSkeletonTableIteratorOptions = {}
+): IDocumentSkeletonTableContext[] {
+    const {
+        docsLeft = 0,
+        docsTop = 0,
+        pageMarginTop = 0,
+        resolveViewport = true,
+        tableCellInsetX = 0,
+        unitId = '',
+    } = options;
+    const contexts: IDocumentSkeletonTableContext[] = [];
+
+    pages.forEach((rootPage, pageIndex) => {
+        const rootPageHeight = rootPage.pageHeight === Infinity ? 0 : rootPage.pageHeight;
+        const rootPageTop = (rootPageHeight + pageMarginTop) * pageIndex + rootPage.marginTop + docsTop;
+        const rootPageLeft = rootPage.marginLeft + docsLeft;
+
+        collectPageTables({
+            contexts,
+            docsLeft,
+            page: rootPage,
+            pageIndex,
+            pageLeft: rootPageLeft,
+            pageTop: rootPageTop,
+            rootPage,
+            source: 'page',
+            resolveViewport,
+            tableCellInsetX,
+            unitId,
+        });
+
+        rootPage.skeColumnGroups?.forEach((columnGroup) => {
+            columnGroup.columns.forEach((columnGroupColumn) => {
+                const nestedPage = columnGroupColumn.page;
+                const nestedPageLeft = rootPageLeft + columnGroup.left + columnGroupColumn.left + nestedPage.marginLeft;
+                const nestedPageTop = rootPageTop + columnGroup.top + columnGroupColumn.top + nestedPage.marginTop;
+
+                collectPageTables({
+                    contexts,
+                    docsLeft,
+                    page: nestedPage,
+                    pageIndex,
+                    pageLeft: nestedPageLeft,
+                    pageTop: nestedPageTop,
+                    rootPage,
+                    source: 'column',
+                    resolveViewport,
+                    tableCellInsetX,
+                    unitId,
+                });
+            });
+        });
+    });
+
+    return contexts;
+}
+
+export function documentSkeletonLineIterator(
+    pages: IDocumentSkeletonPage[],
+    options: IDocumentSkeletonLineIteratorOptions,
+    cb: (context: IDocumentSkeletonLineContext) => void
+) {
+    const {
+        docsLeft = 0,
+        pageMarginTop = 0,
+        tableCellInsetX = 0,
+        unitId = '',
+    } = options;
+
+    pages.forEach((page, pageIndex) => {
+        const pageHeight = page.pageHeight === Infinity ? 0 : page.pageHeight;
+        const pageTop = (pageHeight + pageMarginTop) * pageIndex + page.marginTop;
+        const pageLeft = page.marginLeft;
+
+        visitPageLines(page, {
+            pageIndex,
+            pageLeft,
+            pageTop,
+            source: 'page',
+            getBounds: (linePage, column, section) => getPageLineBounds(linePage, column, section.columns.length, pageLeft),
+        }, cb);
+
+        page.skeTables?.forEach((table) => {
+            const sourceTableId = getSourceTableId(table.tableId);
+            const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+            const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
+            const tableViewportLeft = getTableViewportLeft(pageLeft, table.left, viewport, docsLeft);
+            const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
+            const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+
+            table.rows.forEach((row) => {
+                row.cells.forEach((cell) => {
+                    const cellTop = pageTop + table.top + row.top + cell.marginTop;
+                    const cellLeft = pageLeft + table.left + cell.left - tableScrollLeft + cell.marginLeft;
+                    const cellContentRight = cellLeft + cell.pageWidth - cell.marginLeft - cell.marginRight;
+                    const visualLeft = cellLeft + tableCellInsetX;
+                    const visualRight = cellContentRight - tableCellInsetX;
+                    const visualWidth = Math.max(0, visualRight - visualLeft);
+                    const clipLeft = tableViewportLeft;
+                    const clipRight = Math.min(cellContentRight, tableViewportRight);
+
+                    if (visualWidth <= 0 || Math.min(visualRight, clipRight) <= Math.max(visualLeft, clipLeft)) {
+                        return;
+                    }
+
+                    visitPageLines(cell, {
+                        clipLeft,
+                        clipRight,
+                        pageIndex,
+                        pageLeft: cellLeft,
+                        pageTop: cellTop,
+                        source: 'table-cell',
+                        visualLeft,
+                        visualWidth,
+                    }, cb);
+                });
+            });
+        });
+
+        page.skeColumnGroups?.forEach((columnGroup) => {
+            columnGroup.columns.forEach((columnGroupColumn) => {
+                const nestedPage = columnGroupColumn.page;
+                const nestedPageLeft = pageLeft + columnGroup.left + columnGroupColumn.left + nestedPage.marginLeft;
+                const nestedPageTop = pageTop + columnGroup.top + columnGroupColumn.top + nestedPage.marginTop;
+                const visualWidth = Math.max(0, columnGroupColumn.width - nestedPage.marginLeft - nestedPage.marginRight);
+
+                visitPageLines(nestedPage, {
+                    pageIndex,
+                    pageLeft: nestedPageLeft,
+                    pageTop: nestedPageTop,
+                    source: 'column',
+                    getBounds: (_linePage, column) => ({
+                        lineWidth: Math.max(getFiniteWidth(column.width), visualWidth - column.left),
+                        visualLeft: nestedPageLeft + column.left,
+                        visualWidth: Math.max(getFiniteWidth(column.width), visualWidth - column.left),
+                    }),
+                }, cb);
+            });
+        });
+    });
+}
+
+export function getDocumentSkeletonNestedPageOffset(page: IDocumentSkeletonPage): { left: number; top: number } | undefined {
+    const parent = page.parent as {
+        left?: number;
+        page?: IDocumentSkeletonPage;
+        parent?: {
+            columnGroupId?: string;
+            columns?: unknown[];
+            left?: number;
+            top?: number;
+        };
+        top?: number;
+    } | undefined;
+
+    if (parent?.page === page && parent.parent?.columnGroupId && parent.parent.columns?.includes(parent)) {
+        return {
+            left: (parent.parent.left ?? 0) + (parent.left ?? 0),
+            top: (parent.parent.top ?? 0) + (parent.top ?? 0),
+        };
+    }
+}
+
+export interface IDocumentSkeletonColumnPagePathInfo {
+    columnGroupId: string;
+    columnIndex: number;
+    pageIndex: number;
+}
+
+export function getDocumentSkeletonColumnPagePathInfo(
+    position: { path?: (string | number)[] }
+): IDocumentSkeletonColumnPagePathInfo | undefined {
+    const { path } = position;
+    const pagesIndex = path?.indexOf('pages') ?? -1;
+    const columnGroupIndex = path?.indexOf('skeColumnGroups') ?? -1;
+    const columnsIndex = path?.indexOf('columns') ?? -1;
+
+    if (
+        pagesIndex === -1 ||
+        columnGroupIndex === -1 ||
+        columnsIndex === -1 ||
+        path?.[columnsIndex + 2] !== 'page'
+    ) {
+        return;
+    }
+
+    const pageIndex = path?.[pagesIndex + 1];
+    const columnGroupId = path?.[columnGroupIndex + 1];
+    const columnIndex = path?.[columnsIndex + 1];
+
+    if (typeof pageIndex !== 'number' || typeof columnGroupId !== 'string' || typeof columnIndex !== 'number') {
+        return;
+    }
+
+    return {
+        columnGroupId,
+        columnIndex,
+        pageIndex,
+    };
+}
+
+export function compareDocumentSkeletonNestedPagePathOrder(
+    pos1: { path?: (string | number)[] },
+    pos2: { path?: (string | number)[] }
+): boolean | undefined {
+    const columnGroupOrder1 = getDocumentSkeletonColumnPagePathInfo(pos1);
+    const columnGroupOrder2 = getDocumentSkeletonColumnPagePathInfo(pos2);
+
+    if (
+        columnGroupOrder1 &&
+        columnGroupOrder2 &&
+        columnGroupOrder1.pageIndex === columnGroupOrder2.pageIndex &&
+        columnGroupOrder1.columnGroupId === columnGroupOrder2.columnGroupId &&
+        columnGroupOrder1.columnIndex !== columnGroupOrder2.columnIndex
+    ) {
+        return columnGroupOrder1.columnIndex < columnGroupOrder2.columnIndex;
+    }
+}
+
+interface IVisitPageLineOptions {
+    clipLeft?: number;
+    clipRight?: number;
+    getBounds?: (
+        page: IDocumentSkeletonPage,
+        column: IDocumentSkeletonColumn,
+        section: IDocumentSkeletonSection
+    ) => Partial<Pick<IDocumentSkeletonLineContext, 'lineWidth' | 'visualLeft' | 'visualWidth'>> | undefined;
+    pageIndex: number;
+    pageLeft: number;
+    pageTop: number;
+    source: DocumentSkeletonLineSource;
+    visualLeft?: number;
+    visualWidth?: number;
+}
+
+function visitPageLines(
+    page: IDocumentSkeletonPage,
+    options: IVisitPageLineOptions,
+    cb: (context: IDocumentSkeletonLineContext) => void
+) {
+    page.sections.forEach((section) => {
+        section.columns.forEach((column) => {
+            column.lines.forEach((line) => {
+                const bounds = options.getBounds?.(page, column, section);
+
+                cb({
+                    clipLeft: options.clipLeft,
+                    clipRight: options.clipRight,
+                    column,
+                    line,
+                    lineWidth: bounds?.lineWidth ?? bounds?.visualWidth ?? getFiniteWidth(column.width),
+                    page,
+                    pageIndex: options.pageIndex,
+                    pageLeft: options.pageLeft,
+                    section,
+                    sectionTop: options.pageTop + section.top,
+                    source: options.source,
+                    visualLeft: bounds?.visualLeft ?? options.visualLeft,
+                    visualWidth: bounds?.visualWidth ?? options.visualWidth,
+                });
+            });
+        });
+    });
+}
+
+function getPageLineBounds(
+    page: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
+    columnCount: number,
+    pageLeft: number
+): Pick<IDocumentSkeletonLineContext, 'lineWidth' | 'visualLeft' | 'visualWidth'> | undefined {
+    if (columnCount !== 1 || !Number.isFinite(page.pageWidth)) {
+        return;
+    }
+
+    const visualLeft = pageLeft + column.left;
+    const visualRight = page.pageWidth - page.marginRight;
+    const visualWidth = Math.max(0, visualRight - visualLeft);
+    const lineWidth = Math.max(0, page.pageWidth - page.marginLeft - page.marginRight);
+    return visualWidth > 0 ? { lineWidth, visualLeft, visualWidth } : undefined;
+}
+
+interface ICollectPageTablesOptions {
+    contexts: IDocumentSkeletonTableContext[];
+    docsLeft: number;
+    page: IDocumentSkeletonPage;
+    pageIndex: number;
+    pageLeft: number;
+    pageTop: number;
+    rootPage: IDocumentSkeletonPage;
+    resolveViewport: boolean;
+    source: DocumentSkeletonTableSource;
+    tableCellInsetX: number;
+    unitId: string;
+}
+
+function collectPageTables(options: ICollectPageTablesOptions): void {
+    const {
+        contexts,
+        docsLeft,
+        page,
+        pageIndex,
+        pageLeft,
+        pageTop,
+        resolveViewport,
+        rootPage,
+        source,
+        tableCellInsetX,
+        unitId,
+    } = options;
+
+    page.skeTables?.forEach((table, tableId) => {
+        const effectiveTableId = table.tableId ?? tableId;
+        const tableLeft = pageLeft + table.left;
+        const tableTop = pageTop + table.top;
+        const sourceTableId = getSourceTableId(effectiveTableId);
+        const viewport = resolveViewport ? getDocsTableRenderViewport(unitId, sourceTableId) : null;
+        const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
+        const tableViewportLeft = getTableViewportLeft(pageLeft, table.left, viewport, docsLeft);
+        const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
+        const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+        const cells: IDocumentSkeletonTableCellGeometry[] = [];
+
+        table.rows.forEach((row, rowIndex) => {
+            row.cells.forEach((cell, columnIndex) => {
+                if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                    return;
+                }
+
+                const cellMarginLeft = cell.marginLeft ?? 0;
+                const cellMarginRight = cell.marginRight ?? 0;
+                const cellMarginTop = cell.marginTop ?? 0;
+                const cellMarginBottom = cell.marginBottom ?? 0;
+                const cellPageWidth = cell.pageWidth ?? 0;
+                const cellPageHeight = cell.pageHeight ?? 0;
+                const cellTop = tableTop + (row.top ?? 0) + cellMarginTop;
+                const cellLeft = tableLeft + (cell.left ?? 0) - tableScrollLeft + cellMarginLeft;
+                const cellContentRight = cellLeft + cellPageWidth - cellMarginLeft - cellMarginRight;
+                const visualLeft = cellLeft + tableCellInsetX;
+                const visualRight = cellContentRight - tableCellInsetX;
+                const visualWidth = Math.max(0, visualRight - visualLeft);
+                const clipLeft = tableViewportLeft;
+                const clipRight = Math.min(cellContentRight, tableViewportRight);
+
+                if (visualWidth <= 0 || Math.min(visualRight, clipRight) <= Math.max(visualLeft, clipLeft)) {
+                    return;
+                }
+
+                cells.push({
+                    cell,
+                    cellRect: {
+                        bottom: cellTop + cellPageHeight - cellMarginBottom - cellMarginTop,
+                        left: Math.max(cellLeft, tableViewportLeft),
+                        right: Math.min(cellContentRight, tableViewportRight),
+                        top: cellTop,
+                    },
+                    clipLeft,
+                    clipRight,
+                    columnIndex,
+                    pageLeft: cellLeft,
+                    pageTop: cellTop,
+                    row,
+                    rowIndex,
+                    visualLeft,
+                    visualWidth,
+                });
+            });
+        });
+
+        contexts.push({
+            cells,
+            page,
+            pageIndex,
+            pageLeft,
+            pageTop,
+            rootPage,
+            source,
+            table,
+            tableId: effectiveTableId,
+            tableRect: {
+                bottom: tableTop + table.height,
+                left: tableLeft,
+                right: tableLeft + table.width,
+                top: tableTop,
+            },
+        });
+    });
+}
+
+function getTableViewportLeft(pageLeft: number, tableLeft: number, viewport: unknown, docsLeft: number): number {
+    const viewportLeft = (viewport as Nullable<{ viewportLeft?: number }>)?.viewportLeft;
+    return viewportLeft != null
+        ? viewportLeft - docsLeft
+        : pageLeft + tableLeft;
+}
+
+function getSourceTableId(tableId: string): string {
+    return tableId.includes('#-#') ? tableId.split('#-#')[0] : tableId;
+}
+
+function getFiniteWidth(width: number | undefined): number {
+    return Number.isFinite(width) ? width! : 0;
 }
 
 export function columnIterator(
@@ -1222,6 +1713,13 @@ export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (st
             const cellIndex = pathCopy.shift() as number;
 
             page = page!.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
+        } else if (field === 'skeColumnGroups') {
+            const columnGroupId = pathCopy.shift() as string;
+            pathCopy.shift(); // columns
+            const columnIndex = pathCopy.shift() as number;
+            pathCopy.shift(); // page
+
+            page = page!.skeColumnGroups?.get(columnGroupId)?.columns[columnIndex]?.page;
         }
     }
 

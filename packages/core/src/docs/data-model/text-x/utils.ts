@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomBlock, ICustomColumnGroup, ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { DocumentDataModel } from '../../data-model';
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
@@ -126,6 +126,30 @@ export function getBlockRangeSlice(
     }
 
     return newBlockRanges;
+}
+
+export function getColumnGroupSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    const { columnGroups = [] } = body;
+    const newColumnGroups: ICustomColumnGroup[] = [];
+
+    for (const columnGroup of columnGroups) {
+        const clonedColumnGroup = Tools.deepClone(columnGroup);
+        const { startIndex, endIndex } = clonedColumnGroup;
+
+        if (startIndex >= startOffset && endIndex < endOffset) {
+            newColumnGroups.push({
+                ...clonedColumnGroup,
+                startIndex: startIndex - startOffset,
+                endIndex: endIndex - startOffset,
+            });
+        }
+    }
+
+    return newColumnGroups;
 }
 
 export function getParagraphsSlice(
@@ -250,6 +274,11 @@ export function getBodySlice(
         docBody.blockRanges = newBlockRanges;
     }
 
+    const newColumnGroups = getColumnGroupSlice(body, startOffset, endOffset);
+    if (newColumnGroups.length) {
+        docBody.columnGroups = newColumnGroups;
+    }
+
     docBody.paragraphs = getParagraphsSlice(body, startOffset, endOffset, type);
 
     if (type === SliceBodyType.cut) {
@@ -273,7 +302,7 @@ export function getBodySlice(
 }
 
 export function normalizeBody(body: IDocumentBody): IDocumentBody {
-    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables, blockRanges } = body;
+    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables, columnGroups, blockRanges } = body;
     let leftOffset = 0;
     let rightOffset = 0;
 
@@ -323,6 +352,11 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         table.endIndex += rightOffset;
     });
 
+    columnGroups?.forEach((columnGroup) => {
+        columnGroup.startIndex += leftOffset;
+        columnGroup.endIndex += rightOffset;
+    });
+
     return {
         ...body,
         dataStream: newData,
@@ -331,6 +365,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         customRanges,
         customDecorations,
         tables,
+        columnGroups,
         blockRanges,
     };
 }
@@ -467,6 +502,7 @@ export function composeBody(
         paragraphs: thisParagraphs = [],
         customRanges: thisCustomRanges,
         customDecorations: thisCustomDecorations = [],
+        columnGroups: thisColumnGroups = [],
         blockRanges: thisBlockRanges = [],
     } = thisBody;
     const {
@@ -474,6 +510,7 @@ export function composeBody(
         paragraphs: otherParagraphs = [],
         customRanges: otherCustomRanges,
         customDecorations: otherCustomDecorations = [],
+        columnGroups: otherColumnGroups = [],
         blockRanges: otherBlockRanges = [],
     } = otherBody;
 
@@ -528,6 +565,11 @@ export function composeBody(
         retBody.blockRanges = blockRanges;
     }
 
+    const columnGroups = composeColumnGroups(thisColumnGroups, otherColumnGroups);
+    if (columnGroups.length) {
+        retBody.columnGroups = columnGroups;
+    }
+
     return retBody;
 }
 
@@ -549,6 +591,24 @@ function composeDocumentBlockRanges(
     return Array.from(byId.values()).sort((left, right) => left.startIndex - right.startIndex);
 }
 
+function composeColumnGroups(
+    thisRanges: ICustomColumnGroup[],
+    otherRanges: ICustomColumnGroup[]
+): ICustomColumnGroup[] {
+    if (!thisRanges.length) {
+        return otherRanges;
+    }
+
+    if (!otherRanges.length) {
+        return thisRanges;
+    }
+
+    const byId = new Map(thisRanges.map((range) => [range.columnGroupId, Tools.deepClone(range)]));
+    otherRanges.forEach((range) => byId.set(range.columnGroupId, Tools.deepClone(range)));
+
+    return Array.from(byId.values()).sort((left, right) => left.startIndex - right.startIndex);
+}
+
 export function isUselessRetainAction(action: IRetainAction): boolean {
     const { body } = action;
 
@@ -556,9 +616,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables, blockRanges } = body;
+    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables, columnGroups, blockRanges } = body;
 
-    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null && blockRanges == null) {
+    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null && columnGroups == null && blockRanges == null) {
         return true;
     }
 

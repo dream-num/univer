@@ -17,6 +17,7 @@
 import type { Nullable } from '../../../../shared/types';
 import type {
     ICustomBlock,
+    ICustomColumnGroup,
     ICustomDecoration,
     ICustomRange,
     ICustomTable,
@@ -418,7 +419,7 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
         const table = tables[i];
         const { startIndex, endIndex } = table;
 
-        if (startIndex > currentIndex) {
+        if (startIndex >= currentIndex) {
             table.startIndex += textLength;
             table.endIndex += textLength;
         } else if (endIndex > currentIndex) {
@@ -436,6 +437,41 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
 
         tables.push(...insertTables);
         tables.sort(sortRulesFactory('startIndex'));
+    }
+}
+
+export function insertColumnGroups(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+    if (!body.columnGroups && !insertBody.columnGroups?.length) {
+        return;
+    }
+
+    if (!body.columnGroups) {
+        body.columnGroups = [];
+    }
+
+    const { columnGroups } = body;
+    for (let i = 0, len = columnGroups.length; i < len; i++) {
+        const columnGroup = columnGroups[i];
+        const { startIndex, endIndex } = columnGroup;
+
+        if (startIndex >= currentIndex) {
+            columnGroup.startIndex += textLength;
+            columnGroup.endIndex += textLength;
+        } else if (endIndex >= currentIndex) {
+            columnGroup.endIndex += textLength;
+        }
+    }
+
+    const insertColumnGroups = insertBody.columnGroups;
+    if (insertColumnGroups) {
+        for (let i = 0, len = insertColumnGroups.length; i < len; i++) {
+            const columnGroup = insertColumnGroups[i];
+            columnGroup.startIndex += currentIndex;
+            columnGroup.endIndex += currentIndex;
+        }
+
+        columnGroups.push(...insertColumnGroups);
+        columnGroups.sort(sortRulesFactory('startIndex'));
     }
 }
 
@@ -991,6 +1027,52 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
     }
 
     return removeTables;
+}
+
+export function deleteColumnGroups(body: IDocumentBody, textLength: number, currentIndex: number) {
+    const { columnGroups } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
+    const removeColumnGroups: ICustomColumnGroup[] = [];
+
+    if (columnGroups) {
+        const newColumnGroups = [];
+        for (let i = 0, len = columnGroups.length; i < len; i++) {
+            const columnGroup = columnGroups[i];
+            const { startIndex: st, endIndex: ed } = columnGroup;
+
+            if (startIndex <= st && endIndex >= ed) {
+                removeColumnGroups.push({
+                    ...columnGroup,
+                    startIndex: st - currentIndex,
+                    endIndex: ed - currentIndex,
+                });
+                continue;
+            } else if (st <= startIndex && ed >= endIndex) {
+                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
+                columnGroup.startIndex = segments[0];
+                columnGroup.endIndex = segments[1];
+
+                if (columnGroup.startIndex === columnGroup.endIndex) {
+                    continue;
+                }
+            } else if (endIndex < st) {
+                columnGroup.startIndex -= textLength;
+                columnGroup.endIndex -= textLength;
+            }
+            newColumnGroups.push(columnGroup);
+        }
+        body.columnGroups = newColumnGroups;
+    }
+
+    return removeColumnGroups;
 }
 
 export function deleteCustomRanges(body: IDocumentBody, textLength: number, currentIndex: number) {

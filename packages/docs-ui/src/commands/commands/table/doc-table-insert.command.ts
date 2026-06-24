@@ -316,15 +316,16 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
 
         const { marginLeft = 0, marginRight = 0 } = documentStyle;
 
-        const pageWidth = (documentStyle.pageSize?.width ?? 800) - marginLeft - marginRight;
-
         const tableColumns = snapshot?.tableSource?.[tableId]?.tableColumns;
 
         if (!tableColumns) {
             return false;
         }
 
-        const { newColWidth, widths } = getColumnWidths(pageWidth, tableColumns, columnIndex);
+        const pageWidth = (documentStyle.pageSize?.width ?? 800) - marginLeft - marginRight;
+        const tableWidth = tableColumns.reduce((sum, column) => sum + column.size.width.v, 0);
+        const targetWidth = tableWidth > 0 ? tableWidth : pageWidth;
+        const { newColWidth, widths } = getColumnWidths(targetWidth, tableColumns, columnIndex);
 
         // Update pre columns width.
         for (let i = 0; i < widths.length; i++) {

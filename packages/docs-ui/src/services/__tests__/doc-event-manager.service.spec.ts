@@ -16,8 +16,8 @@
 
 import { EventState, EventSubject, Injector, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { describe, expect, it } from 'vitest';
+import { setDocsTableRenderViewportProvider, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
     DocEventManagerService,
     getListMarkerFallbackBound,
@@ -57,6 +57,16 @@ class TestDocSkeletonManagerService {
                                 marginTop: 2,
                                 paddingTop: 3,
                                 contentHeight: 10,
+                                divides: [],
+                            }, {
+                                paragraphStart: true,
+                                paragraphIndex: 60,
+                                st: 40,
+                                top: 140,
+                                lineHeight: 72,
+                                marginTop: 0,
+                                paddingTop: 0,
+                                contentHeight: 72,
                                 divides: [],
                             }],
                         }],
@@ -101,6 +111,122 @@ class TestDocSkeletonManagerService {
                             }],
                         },
                     ]]),
+                    skeColumnGroups: new Map([[
+                        'column-group-1',
+                        {
+                            columnGroupId: 'column-group-1',
+                            left: 20,
+                            top: 140,
+                            width: 200,
+                            height: 72,
+                            columns: [{
+                                columnId: 'column-1',
+                                left: 0,
+                                top: 0,
+                                width: 94,
+                                height: 72,
+                                page: {
+                                    pageWidth: 94,
+                                    pageHeight: 72,
+                                    marginLeft: 0,
+                                    marginRight: 0,
+                                    marginTop: 0,
+                                    marginBottom: 0,
+                                    sections: [{
+                                        top: 0,
+                                        colCount: 1,
+                                        columns: [{
+                                            left: 0,
+                                            lines: [{
+                                                paragraphStart: true,
+                                                paragraphIndex: 44,
+                                                st: 40,
+                                                top: 4,
+                                                lineHeight: 16,
+                                                marginTop: 1,
+                                                paddingTop: 1,
+                                                contentHeight: 8,
+                                                divides: [],
+                                            }],
+                                        }],
+                                    }],
+                                },
+                            }, {
+                                columnId: 'column-2',
+                                left: 106,
+                                top: 0,
+                                width: 94,
+                                height: 72,
+                                page: {
+                                    pageWidth: 94,
+                                    pageHeight: 72,
+                                    marginLeft: 0,
+                                    marginRight: 0,
+                                    marginTop: 0,
+                                    marginBottom: 0,
+                                    sections: [{
+                                        top: 0,
+                                        colCount: 1,
+                                        columns: [{
+                                            left: 0,
+                                            lines: [{
+                                                paragraphStart: true,
+                                                paragraphIndex: 52,
+                                                st: 48,
+                                                top: 4,
+                                                lineHeight: 16,
+                                                marginTop: 1,
+                                                paddingTop: 1,
+                                                contentHeight: 8,
+                                                divides: [],
+                                            }],
+                                        }],
+                                    }],
+                                    skeTables: new Map([[
+                                        'table-in-column',
+                                        {
+                                            tableId: 'table-in-column',
+                                            left: 4,
+                                            top: 20,
+                                            width: 80,
+                                            height: 30,
+                                            rows: [{
+                                                index: 0,
+                                                top: 0,
+                                                cells: [{
+                                                    left: 0,
+                                                    marginTop: 2,
+                                                    marginLeft: 0,
+                                                    marginRight: 0,
+                                                    marginBottom: 2,
+                                                    pageWidth: 80,
+                                                    pageHeight: 30,
+                                                    sections: [{
+                                                        top: 0,
+                                                        colCount: 1,
+                                                        columns: [{
+                                                            left: 0,
+                                                            lines: [{
+                                                                paragraphStart: true,
+                                                                paragraphIndex: 70,
+                                                                st: 70,
+                                                                top: 4,
+                                                                lineHeight: 16,
+                                                                marginTop: 1,
+                                                                paddingTop: 1,
+                                                                contentHeight: 8,
+                                                                divides: [],
+                                                            }],
+                                                        }],
+                                                    }],
+                                                }],
+                                            }],
+                                        },
+                                    ]]),
+                                },
+                            }],
+                        },
+                    ]]),
                 }],
                 skeHeaders: new Map(),
                 skeFooters: new Map(),
@@ -134,6 +260,12 @@ function createDocEventManagerService() {
             },
         }, {
             startIndex: 30,
+        }, {
+            startIndex: 44,
+        }, {
+            startIndex: 52,
+        }, {
+            startIndex: 70,
         }],
         customRanges: [],
     };
@@ -177,6 +309,10 @@ function createDocEventManagerService() {
 }
 
 describe('DocEventManagerService list marker helpers', () => {
+    afterEach(() => {
+        setDocsTableRenderViewportProvider(null);
+    });
+
     it('detects list marker fallback hits without treating body text as marker', () => {
         const paragraph = {
             startIndex: 12,
@@ -285,6 +421,74 @@ describe('DocEventManagerService list marker helpers', () => {
         });
         expect(service.findParagraphBoundByIndex(30)?.startIndex).toBe(30);
         expect(service.findParagraphBoundsInRange(30, 30)[0].startIndex).toBe(30);
+
+        service.dispose();
+    });
+
+    it('finds paragraph bounds inside column group columns for paragraph menus', () => {
+        const { service } = createDocEventManagerService();
+
+        expect(service.paragraphBounds.get(44)?.rect).toEqual({
+            bottom: 222,
+            left: 20,
+            right: 114,
+            top: 154,
+        });
+        expect(service.paragraphBounds.get(52)?.rect).toEqual({
+            bottom: 222,
+            left: 126,
+            right: 220,
+            top: 154,
+        });
+        expect(service.findParagraphBoundByIndex(44)?.startIndex).toBe(44);
+        expect(service.findParagraphBoundsInRange(44, 44)[0].startIndex).toBe(44);
+
+        service.dispose();
+    });
+
+    it('finds table cell and paragraph bounds inside column group tables', () => {
+        const { service } = createDocEventManagerService();
+
+        expect(service.tableBounds.get('table-in-column')?.rect).toEqual({
+            bottom: 200,
+            left: 130,
+            right: 210,
+            top: 170,
+        });
+        expect(service.findTableCellBound('table-in-column', 0, 0)?.rect).toEqual({
+            bottom: 198,
+            left: 130,
+            right: 210,
+            top: 172,
+        });
+        expect(service.findParagraphBoundByIndex(70)?.rect).toEqual({
+            bottom: 192,
+            left: 130,
+            right: 210,
+            top: 176,
+        });
+
+        service.dispose();
+    });
+
+    it('rebuilds column nested table bounds when its horizontal viewport changes', () => {
+        const { service } = createDocEventManagerService();
+
+        expect(service.tableBounds.get('table-in-column')?.rect.right).toBe(210);
+
+        setDocsTableRenderViewportProvider((unitId, tableId) => {
+            if (unitId !== 'doc-event' || tableId !== 'table-in-column') {
+                return null;
+            }
+
+            return {
+                contentWidth: 160,
+                scrollLeft: 0,
+                viewportWidth: 40,
+            };
+        });
+
+        expect(service.tableBounds.get('table-in-column')?.rect.right).toBe(170);
 
         service.dispose();
     });
@@ -446,6 +650,55 @@ describe('DocEventManagerService list marker helpers', () => {
         distinctTableSub.unsubscribe();
         cellSub.unsubscribe();
         distinctCellSub.unsubscribe();
+        service.dispose();
+    });
+
+    it('publishes paragraph hover state from pointer movement inside a column group', async () => {
+        const { context, service } = createDocEventManagerService();
+        const hoveredParagraphs: Array<number | null> = [];
+        const hoveredLeftParagraphs: Array<number | null> = [];
+
+        const paragraphSub = service.hoverParagraphRealTime$.subscribe((bound) => {
+            hoveredParagraphs.push(bound?.startIndex ?? null);
+        });
+        const paragraphLeftSub = service.hoverParagraphLeftRealTime$.subscribe((bound) => {
+            hoveredLeftParagraphs.push(bound?.startIndex ?? null);
+        });
+
+        context.scene.onPointerMove$.emitEvent({
+            buttons: 0,
+            offsetX: 50,
+            offsetY: 160,
+        });
+
+        expect(service.paragraphBounds.get(60)?.rect).toEqual({
+            bottom: 222,
+            left: 20,
+            right: 260,
+            top: 150,
+        });
+        expect(hoveredParagraphs.at(-1)).toBe(44);
+
+        await new Promise((resolve) => setTimeout(resolve, 35));
+        context.scene.onPointerMove$.emitEvent({
+            buttons: 0,
+            offsetX: 50,
+            offsetY: 210,
+        });
+
+        expect(hoveredParagraphs.at(-1)).toBe(44);
+
+        await new Promise((resolve) => setTimeout(resolve, 35));
+        context.scene.onPointerMove$.emitEvent({
+            buttons: 0,
+            offsetX: 10,
+            offsetY: 210,
+        });
+
+        expect(hoveredLeftParagraphs.at(-1)).toBe(44);
+
+        paragraphSub.unsubscribe();
+        paragraphLeftSub.unsubscribe();
         service.dispose();
     });
 

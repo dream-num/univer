@@ -19,6 +19,7 @@ import type {
     ColumnSeparatorType,
     DataStreamTreeTokenType,
     IColorStyle,
+    IColumnGroup,
     IDocDrawingBase,
     IDocumentRenderConfig,
     INestingLevel,
@@ -105,6 +106,7 @@ export interface IDocumentSkeletonPage {
     ed: number; // endIndex
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
     skeTables: Map<string, IDocumentSkeletonTable>; // table skeletons in the page
+    skeColumnGroups: Map<string, IDocumentSkeletonColumnGroup>; // column group skeletons in the page
     segmentId: string; // header/footer id if header/footer, empty string if body page
     type: DocumentSkeletonPageType; // page type: header, footer, body, or cell
     renderConfig?: IDocumentRenderConfig;
@@ -147,6 +149,31 @@ export interface IDocumentSkeletonRow {
     rowSource: ITableRow;
     parent?: IDocumentSkeletonTable;
     isRepeatRow: boolean; // whether it is a repeated header row
+}
+
+export interface IDocumentSkeletonColumnGroup {
+    columns: IDocumentSkeletonColumnGroupColumn[];
+    width: number;
+    height: number;
+    top: number;
+    left: number;
+    st: number;
+    ed: number;
+    columnGroupId: string;
+    columnGroupSource: IColumnGroup;
+    parent?: IDocumentSkeletonPage;
+}
+
+export interface IDocumentSkeletonColumnGroupColumn {
+    columnId: string;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    st: number;
+    ed: number;
+    page: IDocumentSkeletonPage;
+    parent?: IDocumentSkeletonColumnGroup;
 }
 
 export interface IDocumentSkeletonColumn {

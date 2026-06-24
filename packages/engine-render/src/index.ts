@@ -28,13 +28,19 @@ export * from './components/docs/layout/doc-simple-skeleton';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleton';
 export {
+    compareDocumentSkeletonNestedPagePathOrder,
+    documentSkeletonLineIterator,
+    documentSkeletonTableIterator,
     getCharSpaceApply,
+    getDocumentSkeletonColumnPagePathInfo,
+    getDocumentSkeletonNestedPageOffset,
     getLastLine,
     getNumberUnitValue,
     getPageFromPath,
     glyphIterator,
     lineIterator,
 } from './components/docs/layout/tools';
+export type { IDocumentSkeletonColumnPagePathInfo, IDocumentSkeletonLineContext, IDocumentSkeletonLineIteratorOptions, IDocumentSkeletonTableCellGeometry, IDocumentSkeletonTableContext, IDocumentSkeletonTableIteratorOptions } from './components/docs/layout/tools';
 export { getLastColumn } from './components/docs/layout/tools';
 export { Liquid } from './components/docs/liquid';
 export type {

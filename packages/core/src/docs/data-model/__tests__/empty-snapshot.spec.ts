@@ -29,6 +29,7 @@ describe('getEmptySnapshot', () => {
     it('initializes optional body arrays for structured doc features', () => {
         expect(getEmptySnapshot().body).toMatchObject({
             blockRanges: [],
+            columnGroups: [],
             customBlocks: [],
             customDecorations: [],
             customRanges: [],

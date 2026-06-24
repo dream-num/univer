@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentBlockRange, IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
+import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IPopup, IValueOption, RectPopupDirection } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
@@ -32,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocBlockMoveValidatorService, DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ContextMenuPanel,
@@ -119,6 +120,13 @@ function getParagraphMenuTriggerClassName(visible: boolean) {
     `, {
         'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
     });
+}
+
+export function shouldExecuteParagraphMenuMove(
+    validatorService: Pick<DocBlockMoveValidatorService, 'canMoveBlock'>,
+    context: IDocBlockMoveValidationContext
+): boolean {
+    return validatorService.canMoveBlock(context);
 }
 
 function getParagraphMenuTriggerIconKey(namedStyleType?: NamedStyleType): string {
@@ -689,6 +697,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const docClipboardService = useDependency(IDocClipboardService);
     const docContentInsertService = useDependency(DocContentInsertService);
+    const docBlockMoveValidatorService = useDependency(DocBlockMoveValidatorService);
     const clipboardInterfaceService = useDependency(IClipboardInterfaceService);
     const layoutService = useDependency(ILayoutService);
     const iconManager = useDependency(IconManager);
@@ -1064,6 +1073,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 }}
                 onMouseLeave={() => {
                     isMouseOver.current = false;
+                    setParagraphMenuInteractionActive(docParagraphMenuService, false);
                     cancelOpenMenu();
                     scheduleHideMenu();
                 }}
@@ -1132,7 +1142,11 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                 docParagraphMenuService?.setBlockMenuDragging(false);
                                 setDropRect(null);
 
-                                if (shouldDrop && range && targetOffset != null) {
+                                if (shouldDrop && range && targetOffset != null && shouldExecuteParagraphMenuMove(docBlockMoveValidatorService, {
+                                    unitId: popup.unitId,
+                                    sourceRange: range,
+                                    targetOffset,
+                                })) {
                                     commandService.executeCommand(MoveDocBlockCommand.id, {
                                         unitId: popup.unitId,
                                         sourceRange: range,
@@ -1183,6 +1197,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     }}
                     onMouseLeave={() => {
                         isMouseOver.current = false;
+                        setParagraphMenuInteractionActive(docParagraphMenuService, false);
                         scheduleHideMenu();
                     }}
                 />
@@ -1202,6 +1217,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         }}
                         onMouseLeave={() => {
                             isMouseOver.current = false;
+                            setParagraphMenuInteractionActive(docParagraphMenuService, false);
                             scheduleHideMenu();
                         }}
                     >
@@ -1220,6 +1236,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                             }}
                             onMenuPointerLeave={() => {
                                 isMouseOver.current = false;
+                                setParagraphMenuInteractionActive(docParagraphMenuService, false);
                                 scheduleHideMenu();
                             }}
                             onCancel={() => {
@@ -1307,8 +1324,7 @@ export function shouldUseInsertBelowRange(commandId: string, params: IValueOptio
         return true;
     }
 
-    const rawParams = typeof params.params === 'function' ? params.params() : params.params;
-    if (rawParams && typeof rawParams === 'object' && 'paragraphMenuPlacement' in rawParams && rawParams.paragraphMenuPlacement === 'below') {
+    if (typeof params.id === 'string' && params.id.toLowerCase().includes('below')) {
         return true;
     }
 

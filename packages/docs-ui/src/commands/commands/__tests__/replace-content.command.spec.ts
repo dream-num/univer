@@ -159,6 +159,18 @@ describe('replace or cover content of document', () => {
                     tableColumns: [],
                 },
             };
+            const columnGroups = [{
+                startIndex: 0,
+                endIndex: 9,
+                columnGroupId: 'column_group_1',
+                columns: [
+                    { columnId: 'column_1', widthRatio: 1 },
+                    { columnId: 'column_2', widthRatio: 1 },
+                ],
+                gap: { v: 12 },
+                layout: 'fixed',
+                responsive: 'stack',
+            }];
             const nextSnapshot = {
                 ...getDocumentData(),
                 body: {
@@ -173,6 +185,7 @@ describe('replace or cover content of document', () => {
                     paragraphs: [{ paragraphId: 'para_replace_snapshot', startIndex: 8 }],
                     sectionBreaks: [{ startIndex: 9 }],
                     customBlocks: [],
+                    columnGroups,
                 },
                 documentStyle: {
                     pageSize: {
@@ -215,6 +228,7 @@ describe('replace or cover content of document', () => {
             expect(docsModel?.getBody()?.dataStream).toBe('Snapshot\r\n');
             expect(docsModel?.getDocumentStyle().pageSize).toEqual({ width: 500, height: 700 });
             expect(docsModel?.getSnapshot().tableSource).toEqual(tableSource);
+            expect(docsModel?.getBody()?.columnGroups).toEqual(columnGroups);
         });
 
         it('updates only the selection when the replacement snapshot body is unchanged', async () => {

@@ -44,6 +44,29 @@ describe('DocParagraphMenuService', () => {
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
     });
 
+    it('treats empty column paragraphs as empty paragraph menu targets', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const T = DataStreamTreeTokenType;
+        const service = createService({
+            attachPopupToRect,
+            dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
+            paragraphs: [{ startIndex: 2 }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 2,
+            paragraphEnd: 2,
+            startIndex: 2,
+        }));
+
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toMatchObject({
+            kind: 'paragraph',
+            key: 'paragraph:2',
+            emptyMode: true,
+        });
+    });
+
     it('keeps hiding the paragraph menu for image-only paragraphs', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
         const service = createService({

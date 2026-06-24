@@ -280,6 +280,131 @@ describe('DocMoveCursorController movement helpers', () => {
         expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(beforeGlyph, -1);
     });
 
+    it('enters the nearest docs table cell when moving vertically from a body line', () => {
+        const controller = createControllerHarness();
+        const bodyGlyph = createGlyph('A', 118);
+        const firstCellGlyph = createGlyph('L', 8);
+        const secondCellGlyph = createGlyph('R', 8);
+        const beforeLine = createLine([bodyGlyph], 10, 0);
+        const bodyColumn = createColumn([beforeLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const firstCell = createCellPage([createLine([firstCellGlyph], 20, 0)], 0, 80);
+        const secondCell = createCellPage([createLine([secondCellGlyph], 30, 0)], 100, 80);
+        createTable(bodyPage, [createTableRow([firstCell, secondCell], 0)], 12, 40);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === secondCellGlyph ? 'second' : 'other', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            bodyGlyph,
+            { segmentPage: -1 },
+            true
+        )).toEqual({ glyph: 'second', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(secondCellGlyph, -1);
+    });
+
+    it('leaves a docs table cell with the cell-local cursor mapped back to the body line', () => {
+        const controller = createControllerHarness();
+        const cellGlyph = createGlyph('C', 12);
+        const wrongBodyGlyph = createGlyph('W', 12);
+        const rightBodyGlyph = createGlyph('R', 112);
+        const afterLine = createLine([wrongBodyGlyph, rightBodyGlyph], 41, 0);
+        const bodyColumn = createColumn([afterLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const cell = createCellPage([createLine([cellGlyph], 20, 0)], 100, 80);
+        createTable(bodyPage, [createTableRow([cell], 0)], 12, 40);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === rightBodyGlyph ? 'right' : 'wrong', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            cellGlyph,
+            { segmentPage: -1 },
+            true
+        )).toEqual({ glyph: 'right', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(rightBodyGlyph, -1);
+    });
+
+    it('moves to the nearest docs table cell when crossing a row boundary', () => {
+        const controller = createControllerHarness();
+        const currentGlyph = createGlyph('C', 5);
+        const wrongCellGlyph = createGlyph('W', 8);
+        const rightCellGlyph = createGlyph('R', 8);
+        const bodyPage = createPage([createColumn([])], DocumentSkeletonPageType.BODY);
+        const currentCell = createCellPage([createLine([currentGlyph], 20, 0)], 80, 20);
+        const lowerLeftCell = createCellPage([createLine([wrongCellGlyph], 30, 0)], 0, 50);
+        const lowerRightCell = createCellPage([createLine([rightCellGlyph], 40, 0)], 100, 50);
+        createTable(bodyPage, [
+            createTableRow([currentCell], 0),
+            createTableRow([lowerLeftCell, lowerRightCell], 20),
+        ], 12, 60);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === rightCellGlyph ? 'right' : 'wrong', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            currentGlyph,
+            { segmentPage: -1 },
+            true
+        )).toEqual({ glyph: 'right', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(rightCellGlyph, -1);
+    });
+
+    it('enters the nearest docs table cell from below when moving upward', () => {
+        const controller = createControllerHarness();
+        const bodyGlyph = createGlyph('A', 118);
+        const firstCellGlyph = createGlyph('L', 8);
+        const secondCellGlyph = createGlyph('R', 8);
+        const afterLine = createLine([bodyGlyph], 41, 0);
+        const bodyColumn = createColumn([afterLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const firstCell = createCellPage([createLine([firstCellGlyph], 20, 0)], 0, 80);
+        const secondCell = createCellPage([createLine([secondCellGlyph], 30, 0)], 100, 80);
+        createTable(bodyPage, [createTableRow([firstCell, secondCell], 0)], 12, 40);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === secondCellGlyph ? 'second' : 'other', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            bodyGlyph,
+            { segmentPage: -1 },
+            false
+        )).toEqual({ glyph: 'second', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(secondCellGlyph, -1);
+    });
+
+    it('leaves a docs table cell upward with the cell-local cursor mapped back to the body line', () => {
+        const controller = createControllerHarness();
+        const cellGlyph = createGlyph('C', 12);
+        const wrongBodyGlyph = createGlyph('W', 12);
+        const rightBodyGlyph = createGlyph('R', 112);
+        const beforeLine = createLine([wrongBodyGlyph, rightBodyGlyph], 10, 0);
+        const bodyColumn = createColumn([beforeLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const cell = createCellPage([createLine([cellGlyph], 20, 0)], 100, 80);
+        createTable(bodyPage, [createTableRow([cell], 0)], 13, 40);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === rightBodyGlyph ? 'right' : 'wrong', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            cellGlyph,
+            { segmentPage: -1 },
+            false
+        )).toEqual({ glyph: 'right', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(rightBodyGlyph, -1);
+    });
+
     it('keeps column boundary tokens out of the default cursor skip list', () => {
         const controller = createControllerHarness();
 
@@ -406,6 +531,56 @@ function createPage(columns: unknown[], type: DocumentSkeletonPageType) {
     columns.forEach((column) => Object.assign(column as object, { parent: section }));
 
     return page;
+}
+
+function createCellPage(lines: unknown[], left: number, width: number) {
+    return Object.assign(createPage([createColumn(lines)], DocumentSkeletonPageType.CELL), {
+        left,
+        marginLeft: 0,
+        marginRight: 0,
+        pageWidth: width,
+    });
+}
+
+function createTableRow(cells: ReturnType<typeof createCellPage>[], top: number) {
+    const row = {
+        cells,
+        height: 20,
+        index: 0,
+        isRepeatRow: false,
+        parent: null as unknown,
+        rowSource: {},
+        st: 0,
+        ed: 0,
+        top,
+    };
+    cells.forEach((cell) => Object.assign(cell, { parent: row }));
+
+    return row;
+}
+
+function createTable(
+    page: ReturnType<typeof createPage>,
+    rows: ReturnType<typeof createTableRow>[],
+    st: number,
+    ed: number
+) {
+    const table = {
+        height: 40,
+        left: 0,
+        parent: page,
+        rows,
+        st,
+        ed,
+        tableId: 'table-1',
+        tableSource: {},
+        top: 0,
+        width: 180,
+    };
+    rows.forEach((row, index) => Object.assign(row, { index, parent: table }));
+    page.skeTables.set('table-1', table as never);
+
+    return table;
 }
 
 function createColumnGroup(columns: object[], bodyPage: ReturnType<typeof createPage>) {

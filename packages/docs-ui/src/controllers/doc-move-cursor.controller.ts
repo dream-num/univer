@@ -23,6 +23,7 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
     IDocumentSkeletonTable,
     INodePosition,
     INodeSearch,
@@ -42,15 +43,10 @@ import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs
 import { DocumentSkeletonPageType, IRenderManagerService, LineType } from '@univerjs/engine-render';
 import { getDocObject } from '../basics/component-tools';
 import {
-    findAboveCell,
-    findBellowCell,
-    findLineBeforeAndAfterTable,
     findTableAfterLine,
     findTableBeforeLine,
     firstLineInCell,
-    firstLineInTable,
     lastLineInCell,
-    lastLineInTable,
 } from '../basics/table';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
@@ -999,33 +995,27 @@ export class DocMoveCursorController extends Disposable {
 
         let newLine: IDocumentSkeletonLine;
 
-        if (page.type === DocumentSkeletonPageType.CELL && skipCellContent && !this._isColumnGroupContentPage(page)) {
-            const nLine = findAboveOrBellowCellLine(page, direction);
+        if (this._isTableCellContentPage(page) && skipCellContent) {
+            const tableCellTarget = this._getAdjacentTableCellLineTarget(page, direction, offsetLeft);
 
-            if (nLine) {
-                return { line: nLine, offsetLeft };
+            if (tableCellTarget != null) {
+                return tableCellTarget;
             }
         }
 
         if (direction === true) {
             newLine = column.lines[currentLineIndex + 1];
-            const tableAfterLine = findTableAfterLine(line, page);
+            const tableTarget = this._getTableLineTargetFromPageLine(line, page, direction, offsetLeft);
 
-            if (tableAfterLine) {
-                const firstLine = firstLineInTable(tableAfterLine);
-                if (firstLine) {
-                    newLine = firstLine;
-                }
+            if (tableTarget != null) {
+                return tableTarget;
             }
         } else {
             newLine = column.lines[currentLineIndex - 1];
-            // If the previous line is behind the table, find the last line of the table.
-            const tableBeforeLine = findTableBeforeLine(line, page);
-            if (tableBeforeLine) {
-                const lastLine = lastLineInTable(tableBeforeLine);
-                if (lastLine) {
-                    newLine = lastLine;
-                }
+            const tableTarget = this._getTableLineTargetFromPageLine(line, page, direction, offsetLeft);
+
+            if (tableTarget != null) {
+                return tableTarget;
             }
         }
 
@@ -1081,9 +1071,8 @@ export class DocMoveCursorController extends Disposable {
             }
         }
 
-        if (page.type === DocumentSkeletonPageType.CELL) {
-            const nLine = findAboveOrBellowCellLine(page, direction);
-            return nLine == null ? undefined : { line: nLine, offsetLeft };
+        if (this._isTableCellContentPage(page)) {
+            return this._getAdjacentTableCellLineTarget(page, direction, offsetLeft);
         }
 
         const skeleton: Nullable<IDocumentSkeletonCached> = page.parent as IDocumentSkeletonCached;
@@ -1114,6 +1103,203 @@ export class DocMoveCursorController extends Disposable {
         if (newLine != null) {
             return { line: newLine, offsetLeft };
         }
+    }
+
+    private _getTableLineTargetFromPageLine(
+        line: IDocumentSkeletonLine,
+        page: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const table = direction ? findTableAfterLine(line, page) : findTableBeforeLine(line, page);
+
+        if (table == null) {
+            return;
+        }
+
+        return this._getTableBoundaryLineTarget(table, direction, offsetLeft);
+    }
+
+    private _getTableBoundaryLineTarget(
+        table: IDocumentSkeletonTable,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const rows = direction ? table.rows : [...table.rows].reverse();
+
+        for (const row of rows) {
+            if (row.isRepeatRow) {
+                continue;
+            }
+
+            const target = this._getNearestTableCellLineTarget(row.cells, direction, offsetLeft);
+            if (target != null) {
+                return target;
+            }
+        }
+    }
+
+    private _getAdjacentTableCellLineTarget(
+        cell: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const row = cell.parent as Nullable<IDocumentSkeletonRow>;
+        const table = row?.parent;
+
+        if (row == null || table == null) {
+            return;
+        }
+
+        const hostOffsetLeft = this._getTableCellHostOffsetLeft(cell) + offsetLeft;
+        const adjacentRow = this._findAdjacentTableRow(table, row, direction);
+
+        if (adjacentRow != null) {
+            return this._getNearestTableCellLineTarget(adjacentRow.cells, direction, hostOffsetLeft);
+        }
+
+        const line = this._findLineAroundTable(table, direction);
+
+        if (line == null) {
+            return;
+        }
+
+        return { line, offsetLeft: hostOffsetLeft };
+    }
+
+    private _findAdjacentTableRow(
+        table: IDocumentSkeletonTable,
+        row: IDocumentSkeletonRow,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonRow> {
+        const currentRowIndex = table.rows.indexOf(row);
+        if (currentRowIndex === -1) {
+            return;
+        }
+
+        const step = direction ? 1 : -1;
+        let rowIndex = currentRowIndex + step;
+
+        while (rowIndex >= 0 && rowIndex < table.rows.length) {
+            const adjacentRow = table.rows[rowIndex];
+            if (!adjacentRow.isRepeatRow) {
+                return adjacentRow;
+            }
+
+            rowIndex += step;
+        }
+
+        return this._findAdjacentTableSliceRow(table, direction);
+    }
+
+    private _findAdjacentTableSliceRow(
+        table: IDocumentSkeletonTable,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonRow> {
+        if (!table.tableId.includes('#-#')) {
+            return;
+        }
+
+        const [sourceTableId, sliceIndexText] = table.tableId.split('#-#');
+        const sliceIndex = Number.parseInt(sliceIndexText);
+        const tablePage = table.parent;
+        const skeleton = tablePage?.parent as Nullable<IDocumentSkeletonCached>;
+
+        if (!Number.isFinite(sliceIndex) || skeleton?.pages == null) {
+            return;
+        }
+
+        const nextTableId = `${sourceTableId}#-#${sliceIndex + (direction ? 1 : -1)}`;
+        for (const page of skeleton.pages) {
+            const nextTable = page.skeTables?.get(nextTableId);
+            const rows = nextTable == null ? [] : direction ? nextTable.rows : [...nextTable.rows].reverse();
+            const row = rows.find((item) => !item.isRepeatRow);
+
+            if (row != null) {
+                return row;
+            }
+        }
+    }
+
+    private _getNearestTableCellLineTarget(
+        cells: IDocumentSkeletonPage[],
+        direction: boolean,
+        hostOffsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const candidates = cells
+            .filter((cell) => !(cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered)
+            .map((cell) => ({
+                cell,
+                distance: this._getDistanceToTableCell(cell, hostOffsetLeft),
+            }))
+            .sort((a, b) => a.distance - b.distance);
+
+        for (const candidate of candidates) {
+            const line = direction ? firstLineInCell(candidate.cell) : lastLineInCell(candidate.cell);
+            if (line != null) {
+                return {
+                    line,
+                    offsetLeft: hostOffsetLeft - this._getTableCellHostOffsetLeft(candidate.cell),
+                };
+            }
+        }
+    }
+
+    private _findLineAroundTable(
+        table: IDocumentSkeletonTable,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonLine> {
+        const tablePage = table.parent;
+
+        if (tablePage == null) {
+            return;
+        }
+
+        const pages = (tablePage.parent as Nullable<IDocumentSkeletonCached>)?.pages ?? [tablePage];
+        const lineMatcher = direction
+            ? (line: IDocumentSkeletonLine) => line.st === table.ed + 1
+            : (line: IDocumentSkeletonLine) => line.ed === table.st - 1;
+
+        for (const page of pages) {
+            for (const section of page.sections) {
+                for (const column of section.columns) {
+                    const lines = direction ? column.lines : [...column.lines].reverse();
+                    const line = lines.find(lineMatcher);
+                    if (line != null) {
+                        return line;
+                    }
+                }
+            }
+        }
+    }
+
+    private _getDistanceToTableCell(cell: IDocumentSkeletonPage, offsetLeft: number): number {
+        const left = this._getTableCellHostOffsetLeft(cell);
+        const right = left + this._getTableCellContentWidth(cell);
+
+        if (offsetLeft >= left && offsetLeft <= right) {
+            return 0;
+        }
+
+        return Math.min(Math.abs(offsetLeft - left), Math.abs(offsetLeft - right));
+    }
+
+    private _getTableCellHostOffsetLeft(cell: IDocumentSkeletonPage): number {
+        const row = cell.parent as Nullable<IDocumentSkeletonRow>;
+        const table = row?.parent;
+
+        return (table?.left ?? 0) + (cell.left ?? 0) + (cell.marginLeft ?? 0);
+    }
+
+    private _getTableCellContentWidth(cell: IDocumentSkeletonPage): number {
+        return Math.max(0, (cell.pageWidth ?? 0) - (cell.marginLeft ?? 0) - (cell.marginRight ?? 0));
+    }
+
+    private _isTableCellContentPage(page: IDocumentSkeletonPage): boolean {
+        const row = page.parent as Nullable<IDocumentSkeletonRow>;
+        const table = row?.parent;
+
+        return page.type === DocumentSkeletonPageType.CELL && row != null && table?.rows?.includes(row) === true && row.cells.includes(page);
     }
 
     private _getColumnGroupLineTargetFromBlockLine(
@@ -1295,38 +1481,4 @@ export class DocMoveCursorController extends Disposable {
     private _getDocObject() {
         return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
-}
-
-function findAboveOrBellowCellLine(
-    page: IDocumentSkeletonPage,
-    direction: boolean
-) {
-    let newLine = null;
-    if (direction === true) {
-        const bellowCell = findBellowCell(page);
-        if (bellowCell) {
-            newLine = firstLineInCell(bellowCell);
-        } else {
-            const table = page.parent?.parent as IDocumentSkeletonTable;
-            const { lineAfterTable } = findLineBeforeAndAfterTable(table);
-
-            if (lineAfterTable) {
-                newLine = lineAfterTable;
-            }
-        }
-    } else {
-        const aboveCell = findAboveCell(page);
-        if (aboveCell) {
-            newLine = lastLineInCell(aboveCell)!;
-        } else {
-            const table = page.parent?.parent as IDocumentSkeletonTable;
-            const { lineBeforeTable } = findLineBeforeAndAfterTable(table);
-
-            if (lineBeforeTable) {
-                newLine = lineBeforeTable;
-            }
-        }
-    }
-
-    return newLine;
 }

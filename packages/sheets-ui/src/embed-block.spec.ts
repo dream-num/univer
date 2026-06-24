@@ -17,13 +17,19 @@
 // @vitest-environment jsdom
 
 import type { IEmbedChildContainerContext } from '@univerjs/embed-ui';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('./views/editor-container/EditorContainer', () => ({
     EditorContainer: () => null,
 }));
 vi.mock('./views/auto-fill-popup-menu/AutoFillPopupMenu', () => ({
     AutoFillPopupMenu: () => null,
+}));
+vi.mock('./views/formula-bar/FormulaBar', () => ({
+    FormulaBar: () => null,
+}));
+vi.mock('./views/sheet-bar/SheetBar', () => ({
+    SheetBar: () => null,
 }));
 vi.mock('@univerjs/ui', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/ui')>();
@@ -57,6 +63,66 @@ vi.mock('@univerjs/embed-ui', async (importOriginal) => {
 });
 
 describe('createSheetsEmbedChildViewContribution', () => {
+    beforeEach(() => {
+        mountEmbedRenderChildUnit.mockClear();
+        reactRoot.render.mockClear();
+        disposeEmbedReactRoot.mockClear();
+    });
+
+    it('reserves space for tab-peer formula and sheet bars', async () => {
+        const { applyEmbeddedSheetChromeInset } = await import('./EmbedBlock');
+        const canvasRoot = document.createElement('div');
+
+        const disposable = applyEmbeddedSheetChromeInset(canvasRoot, {
+            formulaBar: true,
+            sheetBar: true,
+        });
+
+        expect(canvasRoot.style.top).toBe('28px');
+        expect(canvasRoot.style.bottom).toBe('36px');
+
+        disposable.dispose();
+        expect(canvasRoot.style.top).toBe('');
+        expect(canvasRoot.style.bottom).toBe('');
+    });
+
+    it('registers tab-peer sheet geometry against the embedded content root', async () => {
+        const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
+        const { EmbedFloatingGeometryService } = await import('@univerjs/embed-ui');
+        const geometryService = new EmbedFloatingGeometryService();
+        const register = vi.spyOn(geometryService, 'register');
+        const rootElement = document.createElement('div');
+        const canvasRoot = document.createElement('div');
+        const contentRoot = document.createElement('div');
+        const injector = {
+            has: (identifier: unknown) => identifier === EmbedFloatingGeometryService,
+            get: (identifier: unknown) => {
+                if (identifier === EmbedFloatingGeometryService) {
+                    return geometryService;
+                }
+                throw new Error('Unexpected dependency');
+            },
+        };
+        const contribution = createSheetsEmbedChildViewContribution();
+
+        const disposable = contribution.mount?.({
+            embedId: 'embed-1',
+            childUnitId: 'sheet-1',
+            injector,
+            runtimeScope: { injector: scopedInjector, roots: { root: rootElement, canvas: canvasRoot, content: contentRoot } },
+            renderScope: { mode: 'tab', rootElement, canvasRoot, contentRoot },
+        } as unknown as IEmbedChildContainerContext);
+
+        expect(register).toHaveBeenCalledWith(expect.objectContaining({
+            embedId: 'embed-1',
+            childUnitId: 'sheet-1',
+            root: rootElement,
+            contentRoot,
+        }));
+
+        disposable?.dispose();
+    });
+
     it('mounts the embedded render once without RAF remount loops', async () => {
         const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame');
         const cancelAnimationFrame = vi.spyOn(window, 'cancelAnimationFrame');

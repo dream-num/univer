@@ -162,8 +162,11 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             docObject.scene.getTransformer()?.clearSelectedObjects();
         }
 
-        this._context.scene.makeDirty();
-        this._context.scene.render();
+        const createOptions = this._univerInstanceService.getUnitCreateOptions(this._context.unitId);
+        if (createOptions?.embeddedRender === true || createOptions?.skipAutoRender === true) {
+            this._context.scene.makeDirty();
+            this._context.scene.render();
+        }
     }
 
     private _initZoomEventListener() {

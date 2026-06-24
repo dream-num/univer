@@ -6,17 +6,21 @@ on:
         types: [opened, synchronize, reopened, closed]
 
 permissions:
-    actions: write
+    contents: read
     pull-requests: read
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+env:
+    TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
     set-pr-info:
         name: set PR info
-        runs-on: ubuntu-latest
+        if: github.repository == 'dream-num/univer'
+        runs-on: minimum-runner
         steps:
             - name: Save PR info
               env:

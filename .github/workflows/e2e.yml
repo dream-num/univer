@@ -20,6 +20,7 @@ env:
 jobs:
     e2e-shard:
         name: e2e-test shard (${{ matrix.shard-index }}/${{ matrix.shard-total }})
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         strategy:
@@ -82,7 +83,7 @@ jobs:
         name: e2e-test
         runs-on: ubuntu-latest
         needs: e2e-shard
-        if: ${{ always() }}
+        if: ${{ always() && github.repository == 'dream-num/univer' }}
 
         steps:
             - name: Check shard results

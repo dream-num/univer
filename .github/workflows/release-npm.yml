@@ -20,20 +20,13 @@ env:
 
 jobs:
     prepare:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         outputs:
             release_type: ${{ steps.release-type.outputs.value }}
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v7
-              with:
-                  persist-credentials: false
-
-            - name: Setup Node.js
-              uses: ./.github/actions/setup-node
-
             - name: 🚚 Get release type
               id: release-type
               env:

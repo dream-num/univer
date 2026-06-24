@@ -181,9 +181,7 @@ export class EmbedMountService {
             context: childContext,
         };
         this._sessions.set(descriptor.embedId, { session, disposables, setActive });
-        if (layout === 'tab-peer') {
-            this.activateSession(descriptor.embedId);
-        } else {
+        if (layout !== 'tab-peer') {
             this._initializeFloatingSessionActiveState(descriptor, layout, setActive);
         }
         return session;

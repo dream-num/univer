@@ -174,7 +174,7 @@ describe('EmbedMountService', () => {
         expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-sheet' });
     });
 
-    it('activates tab sessions and updates host focus contexts', () => {
+    it('mounts tab sessions without activating them until the child receives focus', () => {
         const firstHost = document.createElement('div');
         const secondHost = document.createElement('div');
         const hosts = [firstHost, secondHost];
@@ -232,26 +232,22 @@ describe('EmbedMountService', () => {
         popupPortal.className = 'univer-popup';
         document.body.appendChild(popupPortal);
 
-        expect(firstHost.dataset.embedRenderScopeActive).toBe('false');
+        expect(firstHost.dataset.embedRenderScopeActive).toBe('true');
         expect(secondHost.dataset.embedRenderScopeActive).toBe('true');
         expect(firstHost.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('tab-1');
         expect(firstHost.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('runtime');
         expect(interactionBoundaryService.contains('tab-1', firstChildInput)).toBe(true);
         expect(focusCoordinator.isChildUnitRuntimeEvent('child-1', firstChildInput)).toBe(true);
         expect(focusCoordinator.isChildUnitRuntimeEvent('host-1', firstChildInput)).toBe(false);
-        expect(firstHost.getAttribute('aria-hidden')).toBe('true');
+        expect(firstHost.getAttribute('aria-hidden')).toBeNull();
         expect(secondHost.getAttribute('aria-hidden')).toBeNull();
-        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-2');
-        expect(instanceService.focusUnit).toHaveBeenCalledWith('child-2');
-        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_UNIT, true);
-        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SHEET, true);
-        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, false);
-        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SLIDE, false);
-        expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'tab-2', childUnitId: 'child-2' });
+        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(instanceService.focusUnit).not.toHaveBeenCalled();
+        expect(contextService.setContextValue).not.toHaveBeenCalled();
+        expect(focusOwnerService.getFocusOwner()).toBeNull();
         firstChildInput.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
         expect(popupPortal.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('tab-1');
         expect(popupPortal.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-popup');
-        firstHost.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_UNIT, true);
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, true);
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SHEET, false);

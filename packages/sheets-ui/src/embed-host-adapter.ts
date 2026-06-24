@@ -20,7 +20,7 @@ import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbed
 import type { ISheetDrawingPosition, ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { UniverInstanceType } from '@univerjs/core';
 import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
-import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/sheets';
+import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { DrawingApplyType, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { createEmbedSheetsFloatingDrawing, EMBED_SHEETS_FLOATING_COMPONENT_KEY, resolveEmbedSheetsFloatingObjectSize } from './embed-floating-anchor';
 import { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot } from './embed-tab-anchor';
@@ -52,7 +52,7 @@ export function createSheetsSheetTabHostAdapterContribution(
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-sheet-tab',
-        createAnchorPlan: createSheetsSheetTabAnchorPlan,
+        createAnchorPlan: (context) => createSheetsSheetTabAnchorPlan(context, univerInstanceService),
         removeAnchorPlan: (context) => {
             const record = anchorModelService?.getAnchor(context.hostUnitId, context.hostAnchorId) ?? createSheetsSheetTabRecord(context);
             return createSheetsSheetTabRemoveAnchorPlan(context, record);
@@ -165,10 +165,14 @@ function createSheetsFloatingObjectRemoveAnchorPlan(
     };
 }
 
-function createSheetsSheetTabAnchorPlan(context: IEmbedHostAnchorContext): IEmbedHostAnchorMutationPlan {
+function createSheetsSheetTabAnchorPlan(
+    context: IEmbedHostAnchorContext,
+    univerInstanceService?: IUniverInstanceService
+): IEmbedHostAnchorMutationPlan {
     const record = createSheetsSheetTabRecord(context);
     const sheetIndex = getSheetIndex(record.hostContext);
     const sheetName = getSheetName(record.hostContext) ?? context.embedId;
+    const previousActiveSheetId = getActiveSheetId(univerInstanceService, record.hostUnitId);
     const sheet = createEmbedSheetsTabSnapshot({
         embedId: record.embedId,
         hostAnchorId: record.hostAnchorId,
@@ -179,6 +183,9 @@ function createSheetsSheetTabAnchorPlan(context: IEmbedHostAnchorContext): IEmbe
         hostAnchorId: record.hostAnchorId,
         redoMutations: [
             { id: InsertSheetMutation.id, params: { unitId: record.hostUnitId, index: sheetIndex, sheet } },
+            ...(previousActiveSheetId && previousActiveSheetId !== record.hostAnchorId
+                ? [{ id: SetWorksheetActiveOperation.id, params: { unitId: record.hostUnitId, subUnitId: previousActiveSheetId } }]
+                : []),
             { id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record } },
         ],
         undoMutations: [
@@ -186,6 +193,14 @@ function createSheetsSheetTabAnchorPlan(context: IEmbedHostAnchorContext): IEmbe
             { id: RemoveSheetMutation.id, params: { unitId: record.hostUnitId, subUnitId: record.hostAnchorId, subUnitName: sheet.name } },
         ],
     };
+}
+
+function getActiveSheetId(univerInstanceService: IUniverInstanceService | undefined, unitId: string): string | undefined {
+    const workbook = univerInstanceService?.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
+        getActiveSheet?: () => { getSheetId?: () => string; id?: string } | null | undefined;
+    } | undefined;
+    const activeSheet = workbook?.getActiveSheet?.();
+    return activeSheet?.getSheetId?.() ?? activeSheet?.id;
 }
 
 function createSheetsSheetTabRemoveAnchorPlan(

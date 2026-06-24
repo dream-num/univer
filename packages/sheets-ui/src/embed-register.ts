@@ -136,7 +136,6 @@ export function createSheetsEmbedRuntimeService(params: {
             }
 
             params.mountService.mount(descriptor);
-            params.activationService.activateTab(descriptor);
 
             return toDisposable(() => {
                 params.mountService.unmount(embedId);

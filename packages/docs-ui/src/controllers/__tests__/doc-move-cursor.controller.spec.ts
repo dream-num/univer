@@ -22,6 +22,14 @@ function createControllerHarness() {
     return Object.create(DocMoveCursorController.prototype) as Record<string, (...args: unknown[]) => unknown>;
 }
 
+function createOffsetSkeleton(validOffsets: number[]) {
+    const validOffsetSet = new Set(validOffsets);
+
+    return {
+        findNodePositionByCharIndex: vi.fn((offset: number) => validOffsetSet.has(offset) ? { offset } : undefined),
+    };
+}
+
 describe('DocMoveCursorController movement helpers', () => {
     it('resolves Chinese word boundaries with the shared Segmenter behavior', () => {
         const controller = createControllerHarness();
@@ -154,5 +162,51 @@ describe('DocMoveCursorController movement helpers', () => {
 
         expect(controller._getCursorOffsetByGranularity({}, 8, Direction.UP, 'document', '', -1, 20)).toBe(0);
         expect(controller._getCursorOffsetByGranularity({}, 8, Direction.DOWN, 'document', '', -1, 20)).toBe(18);
+    });
+
+    it('resolves paragraph movement offsets from data-stream paragraph boundaries', () => {
+        const controller = createControllerHarness();
+        const dataStream = `Alpha${DataStreamTreeTokenType.PARAGRAPH}Beta${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+
+        expect(controller._getParagraphBoundaryOffset(dataStream, 3, Direction.UP)).toBe(0);
+        expect(controller._getParagraphBoundaryOffset(dataStream, 0, Direction.UP)).toBe(0);
+        expect(controller._getParagraphBoundaryOffset(dataStream, 6, Direction.UP)).toBe(0);
+        expect(controller._getParagraphBoundaryOffset(dataStream, 6, Direction.DOWN)).toBe(11);
+        expect(controller._getParagraphBoundaryOffset(dataStream, 11, Direction.DOWN)).toBe(11);
+    });
+
+    it('normalizes document boundaries to renderable cursor offsets', () => {
+        const controller = createControllerHarness();
+        const dataStream = `${DataStreamTreeTokenType.BLOCK_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const skeleton = createOffsetSkeleton([1]);
+
+        expect(controller._normalizeRenderableCursorOffset(skeleton, dataStream, [], 0, Direction.UP, '', -1)).toBe(1);
+        expect(controller._normalizeRenderableCursorOffset(skeleton, dataStream, [], dataStream.length - 2, Direction.DOWN, '', -1)).toBe(1);
+    });
+
+    it('keeps renderable cursor targets out of table and column structure tokens', () => {
+        const controller = createControllerHarness();
+        const tableStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const columnStream = `${DataStreamTreeTokenType.COLUMN_GROUP_START}${DataStreamTreeTokenType.COLUMN_START}B${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.COLUMN_END}${DataStreamTreeTokenType.COLUMN_GROUP_END}${DataStreamTreeTokenType.SECTION_BREAK}`;
+
+        expect(controller._normalizeRenderableCursorOffset(createOffsetSkeleton([3]), tableStream, [], 0, Direction.DOWN, '', -1)).toBe(3);
+        expect(controller._normalizeRenderableCursorOffset(createOffsetSkeleton([2]), columnStream, [], 0, Direction.DOWN, '', -1)).toBe(2);
+    });
+
+    it('moves whole-entity custom range targets to renderable range boundaries', () => {
+        const controller = createControllerHarness();
+        const dataStream = `ABCD${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const customRanges = [{ wholeEntity: true, startIndex: 1, endIndex: 2 }];
+        const skeleton = createOffsetSkeleton([0, 1, 3, 4]);
+
+        expect(controller._normalizeRenderableCursorOffset(skeleton, dataStream, customRanges, 2, Direction.UP, '', -1)).toBe(1);
+        expect(controller._normalizeRenderableCursorOffset(skeleton, dataStream, customRanges, 2, Direction.DOWN, '', -1)).toBe(3);
+    });
+
+    it('returns undefined when no renderable cursor target exists', () => {
+        const controller = createControllerHarness();
+        const dataStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_END}${DataStreamTreeTokenType.SECTION_BREAK}`;
+
+        expect(controller._normalizeRenderableCursorOffset(createOffsetSkeleton([]), dataStream, [], 0, Direction.DOWN, '', -1)).toBeUndefined();
     });
 });

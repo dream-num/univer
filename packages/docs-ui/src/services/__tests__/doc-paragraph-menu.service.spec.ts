@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutiPageParagraphBound } from '../doc-event-manager.service';
+import type { IMutiPageParagraphBound, ITableBound } from '../doc-event-manager.service';
 import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -1084,6 +1084,50 @@ describe('DocParagraphMenuService', () => {
         expect(attachPopupToRect).not.toHaveBeenCalled();
     });
 
+    it('hides a visible table menu as soon as text selection starts', () => {
+        const dispose = vi.fn();
+        const selectionStart$ = new Subject<unknown>();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            selectionStart$,
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+        });
+
+        service.showTableMenu({
+            pageIndex: 0,
+            rect: { bottom: 170, left: 100, right: 400, top: 80 },
+            tableId: 'table-1',
+        });
+        selectionStart$.next(null);
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('does not show table menus from hover events while pointer text selection is active', async () => {
+        const hoverTableRealTime$ = new BehaviorSubject<ITableBound | null>(null);
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            hoverTableRealTime$,
+            isOnPointerEvent: true,
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+        });
+
+        hoverTableRealTime$.next({
+            pageIndex: 0,
+            rect: { bottom: 170, left: 100, right: 400, top: 80 },
+            tableId: 'table-1',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+        expect(service.activeTarget).toBeNull();
+    });
+
     it('calculates paragraph drop targets before and after the nearest body block', () => {
         const paragraphBounds = new Map([
             [3, createParagraphBound({
@@ -1190,11 +1234,13 @@ function createService(options: {
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
     hoverParagraphLeft$?: BehaviorSubject<IMutiPageParagraphBound | null>;
     hoverParagraphRealTime$?: BehaviorSubject<IMutiPageParagraphBound | null>;
-    hoverTableRealTime$?: BehaviorSubject<null>;
+    hoverTableRealTime$?: BehaviorSubject<ITableBound | null>;
+    isOnPointerEvent?: boolean;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
+    selectionStart$?: Subject<unknown>;
     textSelection$?: Subject<unknown>;
     tableCellBounds?: Map<string, Array<{ colIndex: number; pageIndex: number; rect: { bottom: number; left: number; right: number; top: number }; rowIndex: number; tableId: string }>>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
@@ -1266,6 +1312,8 @@ function createService(options: {
         {
             onInputBefore$: options.inputBefore$ ?? new Subject(),
             onKeydown$: options.keydown$ ?? new Subject(),
+            onSelectionStart$: options.selectionStart$ ?? new Subject(),
+            isOnPointerEvent: options.isOnPointerEvent ?? false,
         } as never
     );
 }

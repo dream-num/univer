@@ -17,7 +17,7 @@
 import type { Direction, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-export type DocCursorMoveGranularity = 'character' | 'word' | 'line' | 'document';
+export type DocCursorMoveGranularity = 'character' | 'word' | 'line' | 'paragraph' | 'document';
 
 export interface IMoveCursorOperationParams {
     direction: Direction;

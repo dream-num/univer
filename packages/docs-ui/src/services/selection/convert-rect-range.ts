@@ -16,7 +16,6 @@
 
 import type { ITable, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocsTableRenderViewport, IDocumentOffsetConfig, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
-import { Tools } from '@univerjs/core';
 import { DocumentSkeletonPageType, documentSkeletonTableIterator, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
 
@@ -67,11 +66,27 @@ export function isInSameTableCell(anchorNodePosition: INodePosition, focusNodePo
         return false;
     }
 
-    if (anchorPath.length !== focusPath.length) {
+    const anchorTableIdIndex = anchorPath.indexOf('skeTables') + 1;
+    const anchorRowIndex = anchorPath.indexOf('rows') + 1;
+    const anchorCellIndex = anchorPath.indexOf('cells') + 1;
+    const focusTableIdIndex = focusPath.indexOf('skeTables') + 1;
+    const focusRowIndex = focusPath.indexOf('rows') + 1;
+    const focusCellIndex = focusPath.indexOf('cells') + 1;
+
+    if (
+        anchorTableIdIndex === 0 ||
+        anchorRowIndex === 0 ||
+        anchorCellIndex === 0 ||
+        focusTableIdIndex === 0 ||
+        focusRowIndex === 0 ||
+        focusCellIndex === 0
+    ) {
         return false;
     }
 
-    return Tools.diffValue(anchorPath, focusPath);
+    return anchorPath[anchorTableIdIndex] === focusPath[focusTableIdIndex] &&
+        anchorPath[anchorRowIndex] === focusPath[focusRowIndex] &&
+        anchorPath[anchorCellIndex] === focusPath[focusCellIndex];
 }
 
 // Determine whether the selection is in the same table cell support across pages.

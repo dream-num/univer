@@ -173,7 +173,14 @@ export class DocMoveCursorController extends Disposable {
             : rangeDirection === RANGE_DIRECTION.FORWARD
                 ? endOffset
                 : startOffset;
-        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody();
+
+        if (body == null) {
+            return;
+        }
+
+        const dataStreamLength = body.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const customRanges = docDataModel.getCustomRanges() ?? [];
 
         if (granularity !== 'character') {
             const nextOffset = this._getCursorOffsetByGranularity(
@@ -183,22 +190,37 @@ export class DocMoveCursorController extends Disposable {
                 granularity,
                 normalizedSegmentId,
                 normalizedSegmentPage,
-                dataStreamLength
+                dataStreamLength,
+                body.dataStream
             );
 
             if (nextOffset == null || nextOffset === focusOffset) {
                 return;
             }
 
+            const normalizedNextOffset = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                nextOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (normalizedNextOffset == null || normalizedNextOffset === focusOffset) {
+                return;
+            }
+
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: anchorOffset,
-                    endOffset: nextOffset,
+                    endOffset: normalizedNextOffset,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), nextOffset);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), normalizedNextOffset);
 
             return;
         }
@@ -230,9 +252,17 @@ export class DocMoveCursorController extends Disposable {
 
             if (newPos == null) {
                 // move selection
-                const newFocusOffset = direction === Direction.UP ? 0 : dataStreamLength - 2;
+                const newFocusOffset = this._normalizeRenderableCursorOffset(
+                    skeleton,
+                    body.dataStream,
+                    customRanges,
+                    direction === Direction.UP ? 0 : dataStreamLength - 2,
+                    direction,
+                    normalizedSegmentId,
+                    normalizedSegmentPage
+                );
 
-                if (newFocusOffset === focusOffset) {
+                if (newFocusOffset == null || newFocusOffset === focusOffset) {
                     return;
                 }
 
@@ -251,17 +281,30 @@ export class DocMoveCursorController extends Disposable {
                 newPos,
                 newPos
             ).cursorList[0];
+            const newFocusOffset = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                newActiveRange.endOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (newFocusOffset == null || newFocusOffset === focusOffset) {
+                return;
+            }
 
             // move selection
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: anchorOffset,
-                    endOffset: newActiveRange.endOffset,
+                    endOffset: newFocusOffset,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newActiveRange.endOffset);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newFocusOffset);
         }
     }
 
@@ -318,14 +361,27 @@ export class DocMoveCursorController extends Disposable {
                 granularity,
                 normalizedSegmentId,
                 normalizedSegmentPage,
-                dataStreamLength
+                dataStreamLength,
+                body.dataStream
             );
 
             if (cursor == null) {
                 return;
             }
 
-            cursor = this._normalizeCursorOffset(body.dataStream, customRanges, cursor, direction);
+            cursor = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                cursor,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (cursor == null) {
+                return;
+            }
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -378,17 +434,30 @@ export class DocMoveCursorController extends Disposable {
                 }
             }
 
-            cursor = this._normalizeWholeEntityRanges(customRanges, cursor, direction);
+            cursor = this._normalizeCursorOffset(body.dataStream, customRanges, cursor, direction);
+            const normalizedCursor = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                cursor,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (normalizedCursor == null) {
+                return;
+            }
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    startOffset: Math.max(0, cursor),
-                    endOffset: Math.max(0, cursor),
+                    startOffset: normalizedCursor,
+                    endOffset: normalizedCursor,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), normalizedCursor);
         } else {
             const startNode = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
             const endNode = skeleton.findNodeByCharIndex(endOffset, segmentId, segmentPage);
@@ -408,17 +477,37 @@ export class DocMoveCursorController extends Disposable {
                 if (collapsed) {
                     // Move cursor to the beginning place when arrow up at first line,
                     // and move cursor to the end place when arrow down at last line.
-                    cursor = direction === Direction.UP ? 0 : dataStreamLength - 2;
+                    cursor = this._normalizeRenderableCursorOffset(
+                        skeleton,
+                        body.dataStream,
+                        customRanges,
+                        direction === Direction.UP ? 0 : dataStreamLength - 2,
+                        direction,
+                        normalizedSegmentId,
+                        normalizedSegmentPage
+                    );
                 } else {
                     // Handle at the startOffset at first line when arrow up,
                     // and endOffset at the last line when arrow down.
-                    cursor = direction === Direction.UP ? startOffset : endOffset;
+                    cursor = this._normalizeRenderableCursorOffset(
+                        skeleton,
+                        body.dataStream,
+                        customRanges,
+                        direction === Direction.UP ? startOffset : endOffset,
+                        direction,
+                        normalizedSegmentId,
+                        normalizedSegmentPage
+                    );
+                }
+
+                if (cursor == null) {
+                    return;
                 }
 
                 this._textSelectionManagerService.replaceTextRanges([
                     {
-                        startOffset: Math.max(0, cursor),
-                        endOffset: Math.max(0, cursor),
+                        startOffset: cursor,
+                        endOffset: cursor,
                         style,
                     },
                 ], false);
@@ -430,16 +519,30 @@ export class DocMoveCursorController extends Disposable {
                 newPos,
                 newPos
             ).cursorList[0];
+            const cursor = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                newActiveRange.endOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (cursor == null) {
+                return;
+            }
 
             // move selection
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    ...newActiveRange,
+                    startOffset: cursor,
+                    endOffset: cursor,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newActiveRange.endOffset);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
         }
     }
 
@@ -450,11 +553,14 @@ export class DocMoveCursorController extends Disposable {
         granularity: DocCursorMoveGranularity,
         segmentId: string,
         segmentPage: number,
-        dataStreamLength: number
+        dataStreamLength: number,
+        dataStream = ''
     ): Nullable<number> {
         switch (granularity) {
             case 'document':
                 return direction === Direction.LEFT || direction === Direction.UP ? 0 : dataStreamLength - 2;
+            case 'paragraph':
+                return this._getParagraphBoundaryOffset(dataStream, focusOffset, direction);
             case 'line':
                 return this._getLineBoundaryOffset(skeleton, focusOffset, direction, segmentId, segmentPage, dataStreamLength);
             case 'word':
@@ -463,6 +569,46 @@ export class DocMoveCursorController extends Disposable {
             default:
                 return null;
         }
+    }
+
+    private _getParagraphBoundaryOffset(
+        dataStream: string,
+        focusOffset: number,
+        direction: Direction
+    ): Nullable<number> {
+        if (direction !== Direction.UP && direction !== Direction.DOWN) {
+            return;
+        }
+
+        if (dataStream.length === 0) {
+            return 0;
+        }
+
+        const cursor = Math.min(Math.max(0, focusOffset), dataStream.length - 1);
+
+        if (direction === Direction.UP) {
+            const currentParagraphStart = this._getCurrentParagraphStartOffset(dataStream, cursor);
+            if (cursor > currentParagraphStart) {
+                return currentParagraphStart;
+            }
+
+            return this._getCurrentParagraphStartOffset(dataStream, Math.max(0, currentParagraphStart - 1));
+        }
+
+        const nextParagraphEnd = dataStream.indexOf(DataStreamTreeTokenType.PARAGRAPH, cursor);
+
+        return nextParagraphEnd === -1 ? dataStream.length - 1 : nextParagraphEnd + 1;
+    }
+
+    private _getCurrentParagraphStartOffset(dataStream: string, cursor: number): number {
+        for (let index = Math.min(cursor - 1, dataStream.length - 1); index >= 0; index--) {
+            const token = dataStream[index];
+            if (token === DataStreamTreeTokenType.PARAGRAPH || token === DataStreamTreeTokenType.SECTION_BREAK) {
+                return index + 1;
+            }
+        }
+
+        return 0;
     }
 
     private _getWordBoundaryOffset(
@@ -592,6 +738,91 @@ export class DocMoveCursorController extends Disposable {
         return this._normalizeWholeEntityRanges(customRanges, cursor, direction);
     }
 
+    private _normalizeRenderableCursorOffset(
+        skeleton: DocumentSkeleton,
+        dataStream: string,
+        customRanges: IWholeEntityRange[],
+        cursor: number,
+        direction: Direction,
+        segmentId: string,
+        segmentPage: number
+    ): Nullable<number> {
+        const boundedCursor = Math.min(Math.max(0, cursor), Math.max(0, dataStream.length - 1));
+        const primaryCursor = this._findNearestRenderableCursorOffset(
+            skeleton,
+            dataStream,
+            customRanges,
+            boundedCursor,
+            direction,
+            segmentId,
+            segmentPage
+        );
+
+        if (primaryCursor != null) {
+            return primaryCursor;
+        }
+
+        const fallbackDirection = direction === Direction.LEFT || direction === Direction.UP ? Direction.DOWN : Direction.UP;
+
+        return this._findNearestRenderableCursorOffset(
+            skeleton,
+            dataStream,
+            customRanges,
+            boundedCursor,
+            fallbackDirection,
+            segmentId,
+            segmentPage
+        );
+    }
+
+    private _findNearestRenderableCursorOffset(
+        skeleton: DocumentSkeleton,
+        dataStream: string,
+        customRanges: IWholeEntityRange[],
+        cursor: number,
+        direction: Direction,
+        segmentId: string,
+        segmentPage: number
+    ): Nullable<number> {
+        const step = direction === Direction.LEFT || direction === Direction.UP ? -1 : 1;
+        let current = Math.min(Math.max(0, cursor), Math.max(0, dataStream.length - 1));
+        const visited = new Set<number>();
+
+        while (current >= 0 && current < dataStream.length && !visited.has(current)) {
+            visited.add(current);
+
+            const normalizedCursor = this._normalizeCursorOffset(dataStream, customRanges, current, direction);
+
+            if (normalizedCursor < 0 || normalizedCursor >= dataStream.length) {
+                return;
+            }
+
+            if (this._isRenderableCursorOffset(skeleton, dataStream, normalizedCursor, segmentId, segmentPage)) {
+                return normalizedCursor;
+            }
+
+            current = normalizedCursor + step;
+        }
+    }
+
+    private _isRenderableCursorOffset(
+        skeleton: DocumentSkeleton,
+        dataStream: string,
+        cursor: number,
+        segmentId: string,
+        segmentPage: number
+    ): boolean {
+        if (cursor < 0 || cursor >= dataStream.length) {
+            return false;
+        }
+
+        if (this._getNonRenderableCursorTokens().includes(dataStream[cursor])) {
+            return false;
+        }
+
+        return skeleton.findNodePositionByCharIndex(cursor, true, segmentId, segmentPage) != null;
+    }
+
     private _normalizeWholeEntityRanges(
         customRanges: IWholeEntityRange[],
         cursor: number,
@@ -627,6 +858,16 @@ export class DocMoveCursorController extends Disposable {
         }
 
         return tokens;
+    }
+
+    private _getNonRenderableCursorTokens(): string[] {
+        return [
+            ...this._getCursorSkipTokens(),
+            DataStreamTreeTokenType.COLUMN_GROUP_START,
+            DataStreamTreeTokenType.COLUMN_GROUP_END,
+            DataStreamTreeTokenType.COLUMN_START,
+            DataStreamTreeTokenType.COLUMN_END,
+        ];
     }
 
     private _getTopOrBottomPosition(

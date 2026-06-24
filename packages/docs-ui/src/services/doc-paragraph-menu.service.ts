@@ -251,6 +251,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 return;
             }
 
+            if (this._docSelectionRenderService.isOnPointerEvent) {
+                this.hideParagraphMenu(true);
+                return;
+            }
+
             const selectionState = this._getExpandedSelectionState(this._docSelectionManagerService.getDocRanges());
             if (selectionState.hasExpandedTextRange) {
                 this.hideParagraphMenu(true);
@@ -307,6 +312,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                     handleHoverTarget(paragraph, table);
                 })
         );
+
+        this.disposeWithMe(this._docSelectionRenderService.onSelectionStart$.subscribe(() => {
+            this.hideParagraphMenu(true);
+        }));
 
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe(({ textRanges, rectRanges }) => {
             const selectionState = this._getExpandedSelectionState([...textRanges, ...rectRanges]);

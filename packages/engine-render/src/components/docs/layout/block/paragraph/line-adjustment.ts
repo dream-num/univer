@@ -127,6 +127,27 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
     setGlyphGroupLeft(divide.glyphGroup);
 }
 
+function distributeGlyphsInDivide(divide: IDocumentSkeletonDivide, remaining: number): boolean {
+    if (remaining <= 0) {
+        return false;
+    }
+
+    const visibleGlyphs = divide.glyphGroup.filter((glyph) => glyph.content !== '' && glyph.width > 0);
+
+    if (visibleGlyphs.length < 2) {
+        return false;
+    }
+
+    const extraGap = remaining / (visibleGlyphs.length - 1);
+
+    for (let i = 0; i < visibleGlyphs.length - 1; i++) {
+        visibleGlyphs[i].width += extraGap;
+    }
+
+    setGlyphGroupLeft(divide.glyphGroup);
+    return true;
+}
+
 /**
  * When aligning text horizontally within a document,
  * it may be ineffective if the total line width is not initially calculated.
@@ -226,7 +247,13 @@ function horizontalAlignHandler(
 
         const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(divide) : null;
 
-        if (horizontalAlign === HorizontalAlign.CENTER && inkBounds) {
+        if (horizontalAlign === HorizontalAlign.DISTRIBUTED) {
+            if (distributeGlyphsInDivide(divide, width - glyphGroupWidth)) {
+                glyphGroupWidth = getGlyphGroupWidth(divide);
+                divide.glyphGroupWidth = glyphGroupWidth;
+            }
+            divide.paddingLeft = 0;
+        } else if (horizontalAlign === HorizontalAlign.CENTER && inkBounds) {
             divide.paddingLeft = width / 2 - (inkBounds.left + inkBounds.right) / 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT && inkBounds) {
             divide.paddingLeft = width - inkBounds.right;
@@ -343,7 +370,7 @@ export function lineAdjustment(
         restoreLastCJKGlyphWidth(line);
         // Add dash to the end of divide when divide is break by Hyphen.
         addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-        // Handle horizontal align: left\center\right\justified.
+        // Handle horizontal align: left\center\right\justified\distributed.
         horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig));
     });
 }

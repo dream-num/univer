@@ -152,6 +152,35 @@ describe('line-adjustment', () => {
         expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
     });
 
+    it('spreads glyphs across the line for horizontal align DISTRIBUTED', () => {
+        const text = '2038';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
+            body: {
+                dataStream: `${text}\r\n`,
+                textRuns: [{ st: 0, ed: 6, ts: {} }],
+                paragraphs: [{
+                    startIndex: text.length,
+                    paragraphStyle: {
+                        horizontalAlign: HorizontalAlign.DISTRIBUTED,
+                    },
+                }],
+                sectionBreaks: [{ startIndex: text.length + 1 }],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+        const divide = pages[0].sections[0].columns[0].lines[0].divides[0];
+        const visibleGlyphs = divide.glyphGroup.filter((glyph) => glyph.content !== '');
+        const lastVisibleGlyph = visibleGlyphs[visibleGlyphs.length - 1];
+        const initialLastGlyphLeft = lastVisibleGlyph.left;
+
+        lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(lastVisibleGlyph.left).toBeGreaterThan(initialLastGlyphLeft);
+        expect(lastVisibleGlyph.left + lastVisibleGlyph.width).toBeCloseTo(divide.width, 1);
+        expect(divide.paddingLeft).toBe(0);
+    });
+
     it('handles line with only paragraph break', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);

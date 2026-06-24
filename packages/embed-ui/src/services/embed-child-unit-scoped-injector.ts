@@ -17,9 +17,11 @@
 import type { IAccessor, IExecutionOptions, IUndoRedoItem, IUndoRedoService as IUndoRedoServiceType, UniverInstanceType } from '@univerjs/core';
 import type { IContextMenuService, ILayoutService, IMenuManagerService, MenuManagerService } from '@univerjs/ui';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
-import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { IContextMenuService as IContextMenuServiceIdentifier, ILayoutService as ILayoutServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
+import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
 export function createEmbedChildUnitScopedInjector(
@@ -94,26 +96,32 @@ export function createEmbedChildUnitScopedInjector(
             if (property === 'executeCommand') {
                 return async (...args: Parameters<ICommandService['executeCommand']>) => {
                     const previous = instanceService.getCurrentUnitOfType(context.childType);
+                    const previousFocusedUnitId = instanceService.getFocusedUnit()?.getUnitId() ?? null;
                     try {
                         instanceService.setCurrentUnitForType(context.childUnitId);
+                        instanceService.focusUnit(context.childUnitId);
                         return await target.executeCommand(args[0], args[1], withScopedExecutionInjector(args[2], scopedInjector));
                     } finally {
                         if (previous) {
                             instanceService.setCurrentUnitForType(previous.getUnitId());
                         }
+                        restoreFocusAfterScopedCommand(context, instanceService, previousFocusedUnitId);
                     }
                 };
             }
             if (property === 'syncExecuteCommand') {
                 return (...args: Parameters<ICommandService['syncExecuteCommand']>) => {
                     const previous = instanceService.getCurrentUnitOfType(context.childType);
+                    const previousFocusedUnitId = instanceService.getFocusedUnit()?.getUnitId() ?? null;
                     try {
                         instanceService.setCurrentUnitForType(context.childUnitId);
+                        instanceService.focusUnit(context.childUnitId);
                         return target.syncExecuteCommand(args[0], args[1], withScopedExecutionInjector(args[2], scopedInjector));
                     } finally {
                         if (previous) {
                             instanceService.setCurrentUnitForType(previous.getUnitId());
                         }
+                        restoreFocusAfterScopedCommand(context, instanceService, previousFocusedUnitId);
                     }
                 };
             }
@@ -394,6 +402,22 @@ export function createEmbedScopedInjector(
     return scopedInjector as Injector;
 }
 
+function restoreFocusAfterScopedCommand(
+    context: IEmbedChildContainerContext,
+    instanceService: IUniverInstanceService,
+    previousFocusedUnitId: string | null
+): void {
+    const runtimeFocusCoordinator = context.injector.has(EmbedRuntimeFocusCoordinator)
+        ? context.injector.get(EmbedRuntimeFocusCoordinator)
+        : undefined;
+
+    instanceService.focusUnit(
+        runtimeFocusCoordinator?.hasChildInteractionLease(context.embedId)
+            ? context.childUnitId
+            : previousFocusedUnitId
+    );
+}
+
 function getDependencyIdentifier(dependency: unknown): unknown {
     return Array.isArray(dependency) ? dependency[0] : dependency;
 }
@@ -562,23 +586,88 @@ function createScopedLayoutService(parentInjector: Injector, context: IEmbedChil
     }
 
     const layoutService = parentInjector.get(ILayoutServiceIdentifier);
-    const contentElement = context.renderScope.contentRoot ?? context.renderScope.rootElement;
-    const rootElement = context.renderScope.rootElement;
+    const interactionBoundaryService = parentInjector.has(EmbedInteractionBoundaryService)
+        ? parentInjector.get(EmbedInteractionBoundaryService)
+        : undefined;
+    const runtimeFocusCoordinator = parentInjector.has(EmbedRuntimeFocusCoordinator)
+        ? parentInjector.get(EmbedRuntimeFocusCoordinator)
+        : undefined;
+    const rootElement = context.runtimeScope?.roots?.root ?? context.renderScope.rootElement;
+    const contentElement = context.runtimeScope?.roots?.content ?? context.renderScope.contentRoot ?? rootElement;
+    const localContainers = new Set<HTMLElement>([rootElement, contentElement]);
+    const registerLocalContainer = (container: HTMLElement, options?: { registerChildInteraction?: boolean }) => {
+        localContainers.add(container);
+        const roleAttributeDisposable = options?.registerChildInteraction
+            ? markChildEditorRuntimeFocusTree(container)
+            : undefined;
+        const boundaryDisposable = options?.registerChildInteraction
+            ? interactionBoundaryService?.registerOwnedElement(context.embedId, container)
+            : undefined;
+        const focusDisposable = options?.registerChildInteraction
+            ? runtimeFocusCoordinator?.registerElement({
+                embedId: context.embedId,
+                role: 'child-editor',
+                element: container,
+            })
+            : undefined;
+
+        return toDisposable(() => {
+            focusDisposable?.dispose();
+            boundaryDisposable?.dispose();
+            roleAttributeDisposable?.dispose();
+            localContainers.delete(container);
+        });
+    };
+    const containsLocalContainer = (element: HTMLElement | null | undefined) => {
+        if (!element) {
+            return false;
+        }
+
+        return [...localContainers].some((container) => container === element || container.contains(element));
+    };
 
     return {
         get isFocused() {
             return layoutService.isFocused;
         },
         get rootContainerElement() {
-            return layoutService.rootContainerElement;
+            return rootElement;
         },
         focus: () => layoutService.focus(),
         registerFocusHandler: (type, handler) => layoutService.registerFocusHandler(type, handler),
-        registerRootContainerElement: (container) => layoutService.registerRootContainerElement(container),
-        registerContentElement: (container) => layoutService.registerContentElement(container),
-        registerContainerElement: (container) => layoutService.registerContainerElement(container),
+        registerRootContainerElement: registerLocalContainer,
+        registerContentElement: registerLocalContainer,
+        registerContainerElement: (container) => registerLocalContainer(container, { registerChildInteraction: true }),
         getContentElement: () => contentElement,
-        checkElementInCurrentContainers: (element) => rootElement.contains(element) || layoutService.checkElementInCurrentContainers(element),
-        checkContentIsFocused: () => contentElement.contains(contentElement.ownerDocument.activeElement) || layoutService.checkContentIsFocused(),
+        checkElementInCurrentContainers: (element) =>
+            containsLocalContainer(element) ||
+            interactionBoundaryService?.contains(context.embedId, element) ||
+            layoutService.checkElementInCurrentContainers(element),
+        checkContentIsFocused: () =>
+            containsLocalContainer(contentElement.ownerDocument.activeElement as HTMLElement | null) ||
+            runtimeFocusCoordinator?.hasChildInteractionLease(context.embedId) ||
+            layoutService.checkContentIsFocused(),
     };
+}
+
+function markChildEditorRuntimeFocusTree(container: HTMLElement) {
+    const previousValues = new Map<HTMLElement, string | null>();
+    const mark = (element: HTMLElement) => {
+        previousValues.set(element, element.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE));
+        element.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, 'child-editor');
+    };
+
+    mark(container);
+    container.querySelectorAll<HTMLElement>('*').forEach(mark);
+
+    return toDisposable(() => {
+        previousValues.forEach((previousValue, element) => {
+            if (previousValue == null) {
+                element.removeAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+                return;
+            }
+
+            element.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, previousValue);
+        });
+    });
 }

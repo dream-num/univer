@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @vitest-environment jsdom
+ */
+
 import { DocumentFlavor, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS } from '../../config/config';
@@ -109,6 +113,20 @@ describe('doc view scale helpers', () => {
 
         expect(service.getFitToWidthScale()).toBe(1.5);
         expect(service.getViewScale()).toBe(1.875);
+    });
+
+    it('falls back to default modern width and zoom while embedded doc units are not resolved', () => {
+        const service = new DocViewScaleService(
+            {
+                engine: { width: 960 },
+                unit: null,
+            } as never,
+            { getConfig: () => ({ fitToWidth: { mode: 'fit-width', paddingX: 0, minScale: 0 } }) } as never
+        );
+
+        expect(service.getBaseWidth()).toBe(MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM]);
+        expect(service.getUserZoomRatio()).toBe(1);
+        expect(service.getViewScale()).toBe(1);
     });
 
     it('uses configured container width for container-targeted fitting', () => {

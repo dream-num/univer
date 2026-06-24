@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import type { IDisposable, IDocumentData } from '@univerjs/core';
 import type { Mock } from 'vitest';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { GlyphType, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -266,6 +268,7 @@ class TestRenderEvent<T> {
 
 function createRealSelectionRenderService(options: {
     embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
+    embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator;
     mainComponent?: unknown;
     scene?: unknown;
 } = {}) {
@@ -276,6 +279,9 @@ function createRealSelectionRenderService(options: {
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     if (options.embedInteractionBoundaryService) {
         injector.add([EmbedInteractionBoundaryService, { useValue: options.embedInteractionBoundaryService as never }]);
+    }
+    if (options.embedRuntimeFocusCoordinator) {
+        injector.add([EmbedRuntimeFocusCoordinator, { useValue: options.embedRuntimeFocusCoordinator }]);
     }
     const documentData: IDocumentData = {
         id: 'selection-render-doc',
@@ -766,9 +772,42 @@ describe('DocSelectionRenderService', () => {
         const embedCanvas = document.createElement('canvas');
         embedCanvas.tabIndex = 0;
         document.body.appendChild(embedCanvas);
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
         const embedInteractionBoundaryService = {
             contains: vi.fn((_embedId: string | undefined, target: EventTarget | null | undefined) => target === embedCanvas),
             hasRecentInteraction: vi.fn(() => false),
+            hasRecentInteractionFor: vi.fn(() => false),
+        };
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService,
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        embedCanvas.focus();
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+            hostUnitId: 'selection-render-doc',
+        });
+        cleanup.push(() => lease.dispose());
+
+        service.sync();
+
+        expect(document.activeElement).toBe(embedCanvas);
+        expect(document.activeElement).not.toBe(input);
+        expect(embedInteractionBoundaryService.contains).not.toHaveBeenCalledWith(undefined, embedCanvas);
+    });
+
+    it('keeps normal host document selection focus when an unrelated embed boundary exists', () => {
+        const embedCanvas = document.createElement('canvas');
+        embedCanvas.tabIndex = 0;
+        document.body.appendChild(embedCanvas);
+        const embedInteractionBoundaryService = {
+            contains: vi.fn((_embedId: string | undefined, target: EventTarget | null | undefined) => target === embedCanvas),
+            hasRecentInteraction: vi.fn(() => true),
+            hasRecentInteractionFor: vi.fn(() => false),
         };
         const { input, renderUnit, service, univer } = createRealSelectionRenderService({ embedInteractionBoundaryService });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
@@ -776,9 +815,190 @@ describe('DocSelectionRenderService', () => {
         embedCanvas.focus();
         service.sync();
 
-        expect(document.activeElement).toBe(embedCanvas);
+        expect(document.activeElement).toBe(input);
+    });
+
+    it('does not steal focus from an embed-owned child element inside the Univer layout root', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const embedInteractionBoundaryService = {
+            contains: vi.fn(() => true),
+            hasRecentInteraction: vi.fn(() => false),
+            hasRecentInteractionFor: vi.fn(() => false),
+        };
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService,
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        const runtimeCanvas = document.createElement('canvas');
+        runtimeCanvas.tabIndex = 0;
+        TestLayoutService.root.appendChild(runtimeCanvas);
+
+        runtimeCanvas.focus();
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+            hostUnitId: 'selection-render-doc',
+        });
+        cleanup.push(() => lease.dispose());
+
+        service.sync();
+
+        expect(document.activeElement).toBe(runtimeCanvas);
         expect(document.activeElement).not.toBe(input);
-        expect(embedInteractionBoundaryService.contains).toHaveBeenCalledWith(undefined, embedCanvas);
+    });
+
+    it('does not steal focus back while an embedded child editor owns an interaction lease', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => false),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        TestLayoutService.root.tabIndex = 0;
+        TestLayoutService.root.focus();
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'sheet-cell-editor',
+        });
+        cleanup.push(() => lease.dispose());
+
+        service.sync();
+
+        expect(document.activeElement).toBe(TestLayoutService.root);
+        expect(document.activeElement).not.toBe(input);
+    });
+
+    it('keeps host document focus suspended during a plain stage2 child session', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => false),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+        });
+        cleanup.push(() => lease.dispose());
+
+        input.blur();
+        expect(document.activeElement).toBe(document.body);
+
+        service.sync();
+
+        expect(document.activeElement).toBe(document.body);
+        expect(document.activeElement).not.toBe(input);
+    });
+
+    it('does not force-focus the host hidden editor while a child session owns the host document', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => false),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+            hostUnitId: 'selection-render-doc',
+            childUnitId: 'child-sheet',
+        });
+        cleanup.push(() => lease.dispose());
+
+        input.blur();
+        expect(document.activeElement).toBe(document.body);
+
+        service.activate(12, 34, true);
+
+        expect(document.activeElement).toBe(document.body);
+        expect(document.activeElement).not.toBe(input);
+    });
+
+    it('does not treat its own embedded runtime as external focus while a child editor lease is active', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => true),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const runtimeCanvas = document.createElement('canvas');
+        runtimeCanvas.tabIndex = 0;
+        runtimeCanvas.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.parentElement?.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        TestLayoutService.root.appendChild(runtimeCanvas);
+        runtimeCanvas.focus();
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'sheet-cell-editor',
+        });
+        cleanup.push(() => lease.dispose());
+
+        expect(service.canFocusing).toBe(true);
+
+        service.sync();
+
+        expect(document.activeElement).toBe(input);
+    });
+
+    it('allows the internal sheet cell editor to refocus from an embed-owned canvas', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => true),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        const runtimeCanvas = document.createElement('canvas');
+        runtimeCanvas.tabIndex = 0;
+        runtimeCanvas.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.parentElement?.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        TestLayoutService.root.appendChild(runtimeCanvas);
+        runtimeCanvas.focus();
+        (service as unknown as { _context: { unitId: string } })._context.unitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'sheet-cell-editor',
+        });
+        cleanup.push(() => lease.dispose());
+
+        expect(input.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(runtimeCanvas.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect((service as unknown as { _containsCurrentEmbedRuntimeElement(element: HTMLElement): boolean })._containsCurrentEmbedRuntimeElement(runtimeCanvas)).toBe(true);
+        expect(service.canFocusing).toBe(true);
+
+        service.activate(12, 34);
+
+        expect(document.activeElement).toBe(input);
     });
 
     it('publishes hidden editor input, paste, focus, and blur events with the typed content', () => {
@@ -814,6 +1034,80 @@ describe('DocSelectionRenderService', () => {
             { type: 'blur', content: 'leaving editor' },
         ]);
         expect(input.textContent).toBe('');
+    });
+
+    it('does not publish host hidden editor events while a child session owns the host document', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => false),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const received: string[] = [];
+        const subscriptions = [
+            service.onInputBefore$.subscribe(() => received.push('before-input')),
+            service.onInput$.subscribe(() => received.push('input')),
+            service.onKeydown$.subscribe(() => received.push('keydown')),
+            service.onBlur$.subscribe(() => received.push('blur')),
+        ];
+        cleanup.push(() => {
+            for (const subscription of subscriptions) {
+                subscription.unsubscribe();
+            }
+        });
+
+        input.focus();
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'docs-custom-block-sheet',
+            role: 'child-session',
+            owner: 'doc-block-stage2-runtime',
+            hostUnitId: 'selection-render-doc',
+            childUnitId: 'child-sheet',
+        });
+        cleanup.push(() => lease.dispose());
+
+        input.textContent = '=';
+        input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: '=' }));
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: '=' }));
+        input.textContent = 'leaving host editor';
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+        expect(received).toEqual([]);
+        expect(input.textContent).toBe('leaving host editor');
+    });
+
+    it('blurs the host hidden editor when it is focused during a child session', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { input, renderUnit, univer } = createRealSelectionRenderService({
+            embedInteractionBoundaryService: {
+                contains: vi.fn(() => false),
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            embedRuntimeFocusCoordinator: focusCoordinator,
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        input.tabIndex = 0;
+        input.focus();
+        expect(document.activeElement).toBe(input);
+        input.blur();
+        expect(document.activeElement).not.toBe(input);
+
+        const lease = focusCoordinator.acquireLease({
+            embedId: 'docs-custom-block-sheet',
+            role: 'child-session',
+            owner: 'doc-block-stage2-runtime',
+            hostUnitId: 'selection-render-doc',
+            childUnitId: 'child-sheet',
+        });
+        cleanup.push(() => lease.dispose());
+
+        input.focus();
+
+        expect(document.activeElement).not.toBe(input);
     });
 
     it('suppresses normal keydown while IME composition is active, then resumes key events after composition ends', () => {
@@ -860,6 +1154,31 @@ describe('DocSelectionRenderService', () => {
             { type: 'compositionend', content: '拼' },
             { type: 'keydown', content: 'done' },
         ]);
+    });
+
+    it('keeps embed-owned select-all keydown inside the child editor without blocking editor input handling', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const documentKeydown = vi.fn();
+        const keydownEvents: Array<{ content?: string; defaultPrevented: boolean }> = [];
+        document.addEventListener('keydown', documentKeydown);
+        const subscription = service.onKeydown$.subscribe((config) => {
+            keydownEvents.push({
+                content: config.content,
+                defaultPrevented: config.event.defaultPrevented,
+            });
+        });
+        cleanup.push(
+            () => document.removeEventListener('keydown', documentKeydown),
+            () => subscription.unsubscribe()
+        );
+
+        input.textContent = 'cell text';
+        input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'a', metaKey: true }));
+
+        expect(keydownEvents).toEqual([{ content: 'cell text', defaultPrevented: false }]);
+        expect(documentKeydown).not.toHaveBeenCalled();
     });
 
     it('keeps segment state stable while the editor is reused by header, footer, and body selection flows', () => {

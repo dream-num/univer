@@ -62,8 +62,7 @@ export class SheetCellEditorResizeService extends Disposable {
     }
 
     private get _renderer() {
-        const currentUnitId = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-        return this._editingUnitId === currentUnitId ? this._editingRenderer : this._currentRenderer;
+        return this._editingRenderer ?? this._currentRenderer;
     }
 
     private get _sheetSkeletonManagerService() {

@@ -20,8 +20,9 @@ import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-re
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, Optional, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ClearSelectionFormatCommand,
@@ -49,12 +50,16 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IContextService private readonly _contextService: IContextService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
     ) {
         super();
 
         this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (workbook && workbook.getUnitId() === this._context.unitId) {
+                if (this._d) {
+                    return;
+                }
                 this._d = this._init();
             } else {
                 this._disposeCurrent();
@@ -110,6 +115,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                     isMergedMainCell: mergeInfo.isMergedMainCell,
                 }
                 : primary;
+            if (isSameEditCell(this._editorBridgeService.getEditLocation(), unitId, sheetId, newPrimary)) {
+                return;
+            }
             this._commandService.executeCommand<ICurrentEditCellParam>(SetActivateCellEditOperation.id, {
                 scene,
                 engine,
@@ -150,19 +158,19 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }));
 
         d.add(spreadsheet.onPointerDown$.subscribeEvent({
-            next: this._tryHideEditor.bind(this),
+            next: (payload) => this._tryHideEditor(resolvePointerEventPayload(payload)),
             priority: -1,
         }));
         d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent({
-            next: this._tryHideEditor.bind(this),
+            next: (payload) => this._tryHideEditor(resolvePointerEventPayload(payload)),
             priority: -1,
         }));
         d.add(spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent({
-            next: this._tryHideEditor.bind(this),
+            next: (payload) => this._tryHideEditor(resolvePointerEventPayload(payload)),
             priority: -1,
         }));
         d.add(spreadsheetRowHeader.onPointerDown$.subscribeEvent({
-            next: this._tryHideEditor.bind(this),
+            next: (payload) => this._tryHideEditor(resolvePointerEventPayload(payload)),
             priority: -1,
         }));
     }
@@ -181,7 +189,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                         return;
                     }
                     const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
-                    const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+                    const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET) ||
+                        this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId) === true;
                     const unitId = render.unitId;
                     if (this._editorBridgeService.isVisible().visible) return;
                     if (unitId && isFocusSheets && !isFocusFormulaEditor) {
@@ -248,14 +257,41 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         });
     }
 
-    private _tryHideEditor() {
+    private _tryHideEditor(evt?: Event | { target?: EventTarget | null; clientX?: number; clientY?: number; x?: number; y?: number }) {
         // In the activated state of formula editing,
         // prohibit closing the editor according to the state to facilitate generating selection reference text.
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
+        if (!evt && this._isEmbeddedFormulaEditorActive()) {
+            return;
+        }
+        if (this._isEmbeddedFormulaEditorActive() && this._isCurrentEmbedRuntimeEvent(evt)) {
+            return;
+        }
+        if (isEmbedCellEditorInteraction(evt)) {
+            return;
+        }
 
         this._hideEditor();
+    }
+
+    private _isEmbeddedFormulaEditorActive(): boolean {
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId) !== true) {
+            return false;
+        }
+
+        const dataStream = this._editorBridgeService.getEditCellState()?.documentLayoutObject.documentModel?.getSnapshot().body?.dataStream;
+
+        return typeof dataStream === 'string' && dataStream.startsWith('=');
+    }
+
+    private _isCurrentEmbedRuntimeEvent(evt?: PointerEventLike): boolean {
+        return this._embedRuntimeFocusCoordinator?.isChildUnitRuntimeEvent(
+            this._context.unitId,
+            evt?.target,
+            evt instanceof Event ? evt : evt as Event | undefined
+        ) === true;
     }
 
     private _hideEditor() {
@@ -279,4 +315,79 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _isCurrentSheetFocused(): boolean {
         return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
+}
+
+type PointerEventLike = Event | { target?: EventTarget | null; clientX?: number; clientY?: number; x?: number; y?: number };
+
+function resolvePointerEventPayload(payload: PointerEventLike | [PointerEventLike, unknown] | undefined): PointerEventLike | undefined {
+    return Array.isArray(payload) ? payload[0] : payload;
+}
+
+function isEmbedCellEditorInteraction(evt: PointerEventLike | undefined): boolean {
+    return isEmbedCellEditorInteractionTarget(evt?.target) || isEmbedCellEditorInteractionPoint(resolvePointerEventPoint(evt));
+}
+
+function isEmbedCellEditorInteractionTarget(target: EventTarget | null | undefined): boolean {
+    if (typeof HTMLElement === 'undefined' || !(target instanceof HTMLElement)) {
+        return false;
+    }
+
+    return target.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}="child-editor"]`) != null ||
+        target.closest('[data-u-comp="editor"]') != null ||
+        target.closest('[id^="__editor___INTERNAL_EDITOR__"]') != null ||
+        target.closest('[id^="univer-doc-selection-container-__INTERNAL_EDITOR__"]') != null;
+}
+
+function resolvePointerEventPoint(evt: PointerEventLike | undefined): { clientX?: number; clientY?: number; x?: number; y?: number } | undefined {
+    if (!evt) {
+        return undefined;
+    }
+
+    return {
+        clientX: 'clientX' in evt ? evt.clientX : undefined,
+        clientY: 'clientY' in evt ? evt.clientY : undefined,
+        x: 'x' in evt ? evt.x : undefined,
+        y: 'y' in evt ? evt.y : undefined,
+    };
+}
+
+function isEmbedCellEditorInteractionPoint(evt: { clientX?: number; clientY?: number; x?: number; y?: number } | undefined): boolean {
+    if (typeof document === 'undefined') {
+        return false;
+    }
+
+    const clientX = Number.isFinite(evt?.clientX) ? evt?.clientX : evt?.x;
+    const clientY = Number.isFinite(evt?.clientY) ? evt?.clientY : evt?.y;
+    if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) {
+        return false;
+    }
+
+    const editorRoots = document.querySelectorAll<HTMLElement>([
+        `[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}="child-editor"]`,
+        '[data-u-comp="editor"]',
+        '[id^="__editor___INTERNAL_EDITOR__"]',
+        '[id^="univer-doc-selection-container-__INTERNAL_EDITOR__"]',
+    ].join(','));
+
+    return [...editorRoots].some((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 &&
+            rect.height > 0 &&
+            clientX! >= rect.left &&
+            clientX! <= rect.right &&
+            clientY! >= rect.top &&
+            clientY! <= rect.bottom;
+    });
+}
+
+function isSameEditCell(
+    current: ReturnType<IEditorBridgeService['getEditLocation']>,
+    unitId: string,
+    sheetId: string,
+    primary: ISelectionCell
+): boolean {
+    return current?.unitId === unitId &&
+        current.sheetId === sheetId &&
+        current.row === primary.startRow &&
+        current.column === primary.startColumn;
 }

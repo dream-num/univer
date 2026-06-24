@@ -183,4 +183,25 @@ describe('DesktopLayoutService', () => {
         await Promise.resolve();
         expect(focused).toEqual(['slide-1']);
     });
+
+    it('does not give focus back to the host unit when an embed-owned render canvas receives focus', async () => {
+        const { service } = createService();
+        const focused: string[] = [];
+        const embedCanvas = {
+            dataset: { uComp: 'render-canvas' },
+            closest: vi.fn((selector: string) => selector === '[data-embed-interaction-boundary-owner]' ? {} : null),
+        } as unknown as HTMLElement;
+        const root = {
+            dataset: { uComp: 'app-layout' },
+            contains: vi.fn((target: unknown) => target === embedCanvas),
+        } as unknown as HTMLElement;
+
+        service.registerRootContainerElement(root);
+        service.registerFocusHandler(UniverInstanceType.UNIVER_SLIDE, (unitId) => focused.push(unitId));
+
+        dispatchFocusIn(embedCanvas);
+        await Promise.resolve();
+
+        expect(focused).toEqual([]);
+    });
 });

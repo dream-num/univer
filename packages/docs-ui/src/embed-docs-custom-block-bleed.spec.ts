@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import { describe, expect, it, vi } from 'vitest';
 import { resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 

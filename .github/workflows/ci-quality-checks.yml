@@ -28,7 +28,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
               with:
                   persist-credentials: false
 
@@ -48,15 +48,23 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
               with:
                   persist-credentials: false
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
 
+            - name: Restore ESLint cache
+              uses: actions/cache@v6
+              with:
+                  path: .eslintcache
+                  key: eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'eslint.config.ts') }}-${{ github.sha }}
+                  restore-keys: |
+                      eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'eslint.config.ts') }}-
+
             - name: 🌡️ Run ESLint
-              run: pnpm lint --quiet
+              run: pnpm lint --quiet --cache --cache-location .eslintcache
 
     typecheck:
         runs-on: ubuntu-latest
@@ -66,7 +74,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
               with:
                   persist-credentials: false
 

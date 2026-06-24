@@ -12,7 +12,9 @@
             "outputs": ["lib/**"]
         },
 
-        "build:e2e": {},
+        "build:e2e": {
+            "outputs": ["local/**"]
+        },
 
         "typecheck": {}
     }

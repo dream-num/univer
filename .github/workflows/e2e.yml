@@ -18,15 +18,22 @@ env:
     TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
-    e2e-test:
+    e2e-shard:
+        name: e2e-test shard (${{ matrix.shard-index }}/${{ matrix.shard-total }})
         runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                shard-index: [1, 2, 3, 4]
+                shard-total: [4]
 
         env:
             GH_TOKEN: ${{ github.token }}
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   persist-credentials: false
 
@@ -34,7 +41,7 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: Cache Playwright browsers
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ~/.cache/ms-playwright
                   key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
@@ -46,27 +53,43 @@ jobs:
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
-              run: pnpm exec playwright test
+              run: pnpm exec playwright test --shard=${{ matrix.shard-index }}/${{ matrix.shard-total }}
 
             - name: Write Playwright Report to PR Comment
-              uses: daun/playwright-report-summary@v3
+              uses: daun/playwright-report-summary@v4
               if: always()
               with:
                   report-file: playwright-report.json
                   custom-info: 'For more information, [see full report and artifacts](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})'
 
             - name: Upload Artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               if: ${{ !cancelled() }}
               with:
-                  name: playwright-report
+                  name: playwright-report-${{ matrix.shard-index }}-of-${{ matrix.shard-total }}
                   path: playwright-report/
                   retention-days: 30
 
             - name: Upload HeapSnapshots
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               if: ${{ failure() }}
               with:
-                  name: snapshots
+                  name: snapshots-${{ matrix.shard-index }}-of-${{ matrix.shard-total }}
                   path: test-results/*.heapsnapshot
                   retention-days: 3
+
+    e2e-test:
+        name: e2e-test
+        runs-on: ubuntu-latest
+        needs: e2e-shard
+        if: ${{ always() }}
+
+        steps:
+            - name: Check shard results
+              run: |
+                  if [ "${{ needs.e2e-shard.result }}" != "success" ]; then
+                      echo "One or more e2e shards failed: ${{ needs.e2e-shard.result }}"
+                      exit 1
+                  fi
+
+                  echo "All e2e shards passed"

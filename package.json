@@ -48,7 +48,7 @@
         "build:plugins": "turbo build --filter '!./common/*' --filter '!./presets/**'",
         "build:presets": "turbo build --filter './presets/**...' --filter '!./presets/**' && turbo build --filter './presets/**'",
         "build:demo": "pnpm --filter univer-examples build:demo",
-        "build:e2e": "pnpm --filter univer-examples build:e2e",
+        "build:e2e": "turbo build:e2e --filter univer-examples",
         "serve:e2e": "serve ./examples/local",
         "test:e2e": "playwright test",
         "lint": "eslint .",

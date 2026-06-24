@@ -31,25 +31,25 @@ jobs:
                   printf '%s\n' "$PR_STATE" > ./pr-state.txt
 
             - name: Upload PR number
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: pr-id
                   path: ./pr-id.txt
 
             - name: Upload PR ref
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: pr-ref
                   path: ./pr-ref.txt
 
             - name: Upload PR repo
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: pr-repo
                   path: ./pr-repo.txt
 
             - name: Upload PR state
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: pr-state
                   path: ./pr-state.txt

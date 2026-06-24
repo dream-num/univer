@@ -56,8 +56,16 @@ describe('DocZoomRenderController', () => {
     it('applies composed view scale while receiving user zoom', () => {
         const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
         const refreshSelection = vi.fn();
+        const makeDirty = vi.fn();
+        const render = vi.fn();
         Object.assign(controller, {
-            _context: { unitId: 'doc-unit' },
+            _context: {
+                unitId: 'doc-unit',
+                scene: {
+                    makeDirty,
+                    render,
+                },
+            },
             _docViewScaleService: {
                 getViewScale: vi.fn(() => 1.875),
             },
@@ -79,6 +87,8 @@ describe('DocZoomRenderController', () => {
 
         expect((controller as never as { _docViewScaleService: { getViewScale: ReturnType<typeof vi.fn> } })._docViewScaleService.getViewScale).toHaveBeenCalledWith(1.25);
         expect(mockSceneScale).toHaveBeenCalledWith(1.875, 1.875);
+        expect(makeDirty).toHaveBeenCalled();
+        expect(render).toHaveBeenCalled();
         expect(refreshSelection).toHaveBeenCalled();
     });
 
@@ -86,7 +96,13 @@ describe('DocZoomRenderController', () => {
         const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
         const refreshSelection = vi.fn();
         Object.assign(controller, {
-            _context: { unitId: 'doc-unit' },
+            _context: {
+                unitId: 'doc-unit',
+                scene: {
+                    makeDirty: vi.fn(),
+                    render: vi.fn(),
+                },
+            },
             _docViewScaleService: {
                 getViewScale: vi.fn(() => 1.875),
             },

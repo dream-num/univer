@@ -1022,7 +1022,7 @@ describe('DocParagraphMenuService', () => {
         const dispose = vi.fn();
         const hoverParagraphRealTime$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
         const hoverParagraphLeft$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
-        const hoverTableRealTime$ = new BehaviorSubject<null>(null);
+        const hoverTableRealTime$ = new BehaviorSubject<ITableBound | null>(null);
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
         const service = createService({
             attachPopupToRect,

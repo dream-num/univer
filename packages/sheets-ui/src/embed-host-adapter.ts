@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingSearch, IUniverInstanceService, IWorkbookData } from '@univerjs/core';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IDrawingManagerService } from '@univerjs/drawing';
 import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRecord, IEmbedHostAnchorRemoveMutationPlan, IEmbedHostContainerContribution } from '@univerjs/embed-ui';
 import type { ISheetDrawingPosition, ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { UniverInstanceType } from '@univerjs/core';
@@ -27,7 +27,8 @@ import { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot } from './
 
 export function createSheetsFloatingObjectHostAdapterContribution(
     anchorModelService?: EmbedHostAnchorModelService,
-    sheetDrawingService?: ISheetDrawingService | (() => ISheetDrawingService | undefined)
+    sheetDrawingService?: ISheetDrawingService | (() => ISheetDrawingService | undefined),
+    drawingManagerService?: IDrawingManagerService | (() => IDrawingManagerService | undefined)
 ): IEmbedHostAdapterContribution {
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
@@ -37,7 +38,11 @@ export function createSheetsFloatingObjectHostAdapterContribution(
             'EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE'
         ),
         restoreAnchor: (context) => requireAnchorRecord(
-            restoreSheetsFloatingObjectAnchor(context, getSheetDrawingService(sheetDrawingService)),
+            restoreSheetsFloatingObjectAnchor(
+                context,
+                getSheetDrawingService(sheetDrawingService),
+                getDrawingManagerService(drawingManagerService)
+            ),
             'EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE'
         ),
         removeAnchorPlan: (context) => {
@@ -229,10 +234,11 @@ function createSheetsFloatingObjectRecord(context: IEmbedHostAnchorContext): IEm
 
 function restoreSheetsFloatingObjectAnchor(
     context: IEmbedHostAnchorContext & { hostAnchorId: string },
-    sheetDrawingService?: ISheetDrawingService
+    sheetDrawingService?: ISheetDrawingService,
+    drawingManagerService?: IDrawingManagerService
 ): IEmbedHostAnchorRecord | undefined {
     const hostSubUnitId = getHostSubUnitId(context.hostContext);
-    if (!sheetDrawingService || !hostSubUnitId) {
+    if (!sheetDrawingService || !drawingManagerService || !hostSubUnitId) {
         return undefined;
     }
 
@@ -261,7 +267,9 @@ function restoreSheetsFloatingObjectAnchor(
     const existing = sheetDrawingService.getDrawingData(record.hostUnitId, hostSubUnitId)?.[record.hostAnchorId];
     if (!existing) {
         const jsonOp = sheetDrawingService.getBatchAddOp([drawing]) as IDrawingJsonUndo1;
+        drawingManagerService.applyJson1(record.hostUnitId, hostSubUnitId, jsonOp.redo);
         sheetDrawingService.applyJson1(record.hostUnitId, hostSubUnitId, jsonOp.redo);
+        drawingManagerService.addNotification([drawingSearch] as IDrawingSearch[]);
         sheetDrawingService.addNotification([drawingSearch] as IDrawingSearch[]);
     }
 
@@ -284,11 +292,15 @@ function restoreSheetsSheetTabAnchor(
     const sheetName = getSheetName(record.hostContext) ?? context.embedId;
     const sheetIndex = getSheetIndex(record.hostContext);
     if (!workbook.getSheetBySheetId?.(record.hostAnchorId)) {
+        const activeWorksheet = workbook.getActiveSheet?.(true);
         workbook.addWorksheet(record.hostAnchorId, sheetIndex, createEmbedSheetsTabSnapshot({
             embedId: record.embedId,
             hostAnchorId: record.hostAnchorId,
             name: sheetName,
         }));
+        if (activeWorksheet) {
+            workbook.setActiveSheet?.(activeWorksheet);
+        }
     }
 
     return {
@@ -388,6 +400,10 @@ function getSheetDrawingService(sheetDrawingService: ISheetDrawingService | (() 
     return typeof sheetDrawingService === 'function' ? sheetDrawingService() : sheetDrawingService;
 }
 
+function getDrawingManagerService(drawingManagerService: IDrawingManagerService | (() => IDrawingManagerService | undefined) | undefined): IDrawingManagerService | undefined {
+    return typeof drawingManagerService === 'function' ? drawingManagerService() : drawingManagerService;
+}
+
 function requireAnchorPlan(plan: IEmbedHostAnchorMutationPlan | undefined, errorCode: string): IEmbedHostAnchorMutationPlan {
     if (!plan) {
         throw new Error(errorCode);
@@ -406,11 +422,15 @@ function requireAnchorRecord(record: IEmbedHostAnchorRecord | undefined, errorCo
 
 function getWorkbook(univerInstanceService: IUniverInstanceService | undefined, unitId: string): {
     addWorksheet: (id: string, index: number, worksheetSnapshot: Partial<IWorkbookData['sheets'][string]>) => boolean;
+    getActiveSheet?: (allowNull?: true) => unknown;
     getSheetBySheetId?: (sheetId: string) => unknown;
+    setActiveSheet?: (worksheet: unknown) => void;
 } | undefined {
     return univerInstanceService?.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
         addWorksheet: (id: string, index: number, worksheetSnapshot: Partial<IWorkbookData['sheets'][string]>) => boolean;
+        getActiveSheet?: (allowNull?: true) => unknown;
         getSheetBySheetId?: (sheetId: string) => unknown;
+        setActiveSheet?: (worksheet: unknown) => void;
     } | undefined;
 }
 

@@ -17,6 +17,7 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import { IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { EmbedModelService } from '@univerjs/embed';
 import { createEmbedRenderCanvasPreviewProvider, EmbedActivationService, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatDomRenderer, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedHostMenuOverrideService, EmbedMountService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -69,7 +70,8 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
     [
         createSheetsFloatingObjectHostAdapterContribution(
             anchorModelService,
-            () => injector.has(ISheetDrawingService) ? injector.get(ISheetDrawingService) : undefined
+            () => injector.has(ISheetDrawingService) ? injector.get(ISheetDrawingService) : undefined,
+            () => injector.has(IDrawingManagerService) ? injector.get(IDrawingManagerService) : undefined
         ),
         createSheetsSheetTabHostAdapterContribution(anchorModelService, univerInstanceService),
     ].forEach((adapter) => {

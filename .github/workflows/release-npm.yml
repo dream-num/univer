@@ -62,12 +62,12 @@ jobs:
                   persist-credentials: false
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
               with:
                   run_install: false
 
             - name: Install Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 24.3.0
                   registry-url: https://registry.npmjs.org

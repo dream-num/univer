@@ -33,7 +33,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   persist-credentials: false
 
@@ -63,7 +63,7 @@ jobs:
                   custom-info: 'For more information, [see full report and artifacts](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})'
 
             - name: Upload Artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               if: ${{ !cancelled() }}
               with:
                   name: playwright-report-${{ matrix.shard-index }}-of-${{ matrix.shard-total }}
@@ -71,7 +71,7 @@ jobs:
                   retention-days: 30
 
             - name: Upload HeapSnapshots
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               if: ${{ failure() }}
               with:
                   name: snapshots-${{ matrix.shard-index }}-of-${{ matrix.shard-total }}

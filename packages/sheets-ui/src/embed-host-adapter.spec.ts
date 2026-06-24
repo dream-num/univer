@@ -178,9 +178,11 @@ describe('sheets embed host adapter', () => {
         expect(workbook.setActiveSheet).toHaveBeenCalledWith(worksheet);
     });
 
-    it('restores sheet-tab anchors into the workbook snapshot without activating the worksheet', () => {
+    it('restores sheet-tab anchors and refreshes the current sheet without switching to the block tab', () => {
+        const activeWorksheet = { id: 'active-sheet' };
         const workbook = {
             addWorksheet: vi.fn(() => true),
+            getActiveSheet: vi.fn(() => activeWorksheet),
             getSheetBySheetId: vi.fn(() => undefined),
             setActiveSheet: vi.fn(),
         };
@@ -208,12 +210,17 @@ describe('sheets embed host adapter', () => {
             id: 'sheet-tab-1',
             name: 'Embedded Doc',
         }));
-        expect(workbook.setActiveSheet).not.toHaveBeenCalled();
+        expect(workbook.setActiveSheet).toHaveBeenCalledWith(activeWorksheet);
     });
 
-    it('restores floating anchors through the drawing service without mutations', () => {
-        const drawingService = createDrawingService();
-        const adapter = createSheetsFloatingObjectHostAdapterContribution(undefined, drawingService as never);
+    it('restores floating anchors through both drawing stores without mutations', () => {
+        const sheetDrawingService = createDrawingService();
+        const drawingManagerService = createDrawingService();
+        const adapter = createSheetsFloatingObjectHostAdapterContribution(
+            undefined,
+            sheetDrawingService as never,
+            drawingManagerService as never
+        );
         const record = adapter.restoreAnchor?.({
             ...createFloatingContext({
                 hostContext: {
@@ -226,14 +233,15 @@ describe('sheets embed host adapter', () => {
             hostAnchorId: 'float-1',
         } as never);
 
+        const drawingSearch = { drawingId: 'float-1', subUnitId: 'sheet-1', unitId: 'host-sheet' };
         expect(record).toMatchObject({
             hostAnchorId: 'float-1',
             kind: 'sheets-floating-object',
         });
-        expect(drawingService.applyJson1).toHaveBeenCalledWith('host-sheet', 'sheet-1', { add: true });
-        expect(drawingService.addNotification).toHaveBeenCalledWith([
-            { drawingId: 'float-1', subUnitId: 'sheet-1', unitId: 'host-sheet' },
-        ]);
+        expect(sheetDrawingService.applyJson1).toHaveBeenCalledWith('host-sheet', 'sheet-1', { add: true });
+        expect(drawingManagerService.applyJson1).toHaveBeenCalledWith('host-sheet', 'sheet-1', { add: true });
+        expect(sheetDrawingService.addNotification).toHaveBeenCalledWith([drawingSearch]);
+        expect(drawingManagerService.addNotification).toHaveBeenCalledWith([drawingSearch]);
     });
 
     it('declares floating and tab containers and resolves tab host elements', () => {

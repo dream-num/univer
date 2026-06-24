@@ -45,7 +45,7 @@ describe('sheets embed register', () => {
         });
 
         expect(mount).toHaveBeenCalledWith(descriptor);
-        expect(activateTab).toHaveBeenCalledWith(descriptor);
+        expect(activateTab).not.toHaveBeenCalled();
 
         disposable?.dispose();
 

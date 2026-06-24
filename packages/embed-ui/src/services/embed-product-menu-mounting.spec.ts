@@ -127,7 +127,6 @@ describe('embed product menu mounting', () => {
             childType: UniverInstanceType.UNIVER_SHEET,
             childUnitId: 'child-sheet',
             menuSchema: { [MenuManagerPosition.RIBBON]: { start: { title: 'Start' } } },
-            menuTitlePrefix: 'Sheets',
             activeRibbonTab: 'start',
             toolbarOnly: true,
         });
@@ -156,7 +155,6 @@ describe('embed product menu mounting', () => {
                     insert: {},
                 },
             },
-            menuTitlePrefix: 'Sheets',
             activeRibbonTab: 'insert',
         });
 
@@ -183,7 +181,7 @@ describe('embed product menu mounting', () => {
 
         const ribbonTitles: string[][] = [];
         ribbonService.ribbon$.subscribe((groups) => ribbonTitles.push(groups.map((group) => group.title ?? '')));
-        expect(ribbonTitles[0]).toEqual(['Sheets - translated(Start)', 'Sheets - translated(insert)']);
+        expect(ribbonTitles[0]).toEqual(['Start', '']);
         ribbonService.setCollapsedIds(['a']);
         ribbonService.setFakeToolbarVisible(true);
         ribbonService.showContextualTab('ctx', { activate: true });

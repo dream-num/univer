@@ -167,7 +167,6 @@ describe('Embed fullscreen workbench', () => {
             container: menuContainer,
             childType: UniverInstanceType.UNIVER_SHEET,
             childUnitId: 'child-1',
-            menuTitlePrefix: 'Sheets',
             surface: 'ribbon',
         }));
         expect(floatingRegistry.get).not.toHaveBeenCalled();

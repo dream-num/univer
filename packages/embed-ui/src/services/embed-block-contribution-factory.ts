@@ -53,7 +53,6 @@ export function createEmbedRibbonBlockContribution(options: ICreateEmbedRibbonBl
                 childType,
                 childUnitId,
                 menuSchema: resolveEmbedProductRibbonMenuSchema(injector, childType, options.menuSchema),
-                menuTitlePrefix: productName,
             });
 
             return {

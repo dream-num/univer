@@ -42,6 +42,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
+    SetStyleCommand,
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -205,11 +206,13 @@ export class FormatPainterController extends Disposable {
         const clearStyleMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
+            trigger: SetStyleCommand.id,
             cellValue: clearCellValue.getMatrix(),
         };
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
+            trigger: SetStyleCommand.id,
             cellValue: cellValue.getMatrix(),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = this._injector.invoke(

@@ -702,6 +702,28 @@ describe('UpdateFormulaController', () => {
         });
 
         expect(executeCommandSpy.mock.calls.filter(([id]) => id === SetFormulaDataMutation.id)).toHaveLength(formulaSyncCallCount);
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                6: {
+                    0: { s: { bg: { rgb: '#ff0000' } } },
+                },
+            },
+        });
+
+        const cellFormula = testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 0, 6, 0)
+            .getValue()
+            ?.f;
+
+        expect(formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[0]).toMatchObject({ f: '=A1' });
+        expect(cellFormula).toBe('=A1');
+        expect(executeCommandSpy.mock.calls.filter(([id]) => id === SetFormulaDataMutation.id)).toHaveLength(formulaSyncCallCount);
     });
 
     it('should sync array formula data when editing a spill cell without formula data changes', async () => {

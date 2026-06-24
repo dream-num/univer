@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import type { IEmbedBlockContribution, IEmbedChildViewContribution } from '@univerjs/embed-ui';
 import type { Injector } from '@univerjs/core';
+import type { IEmbedBlockContribution, IEmbedChildContainerContext, IEmbedChildViewContribution } from '@univerjs/embed-ui';
 import type { IUniverSheetsUIConfig } from './config/config';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
-import { ComponentManager, useConfigValue, useDependency } from '@univerjs/ui';
-import { createEmbedReactRoot, createEmbedRibbonBlockContribution, disposeEmbedReactRoot, EmbedRuntimeProviders, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
+import { createEmbedReactRoot, createEmbedRibbonBlockContribution, disposeEmbedReactRoot, EmbedFloatingGeometryService, EmbedRuntimeProviders, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { ComponentManager, useConfigValue, useDependency } from '@univerjs/ui';
+import { useEffect } from 'react';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from './views/editor-container/EditorContainer';
+import { FormulaBar } from './views/formula-bar/FormulaBar';
+import { SheetBar } from './views/sheet-bar/SheetBar';
+import { SHEET_FOOTER_BAR_HEIGHT } from './views/sheet-container/SheetContainer';
+
+const EMBED_SHEET_FORMULA_BAR_HEIGHT = 28;
 
 export function createSheetsEmbedBlockContribution(): IEmbedBlockContribution {
     return createEmbedRibbonBlockContribution({
@@ -52,14 +58,19 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
             contentRoot.dataset.embedChildRenderMode = 'sheet-overlay';
 
             const renderDisposable = mountEmbedRenderChildUnit(context, IRenderManagerService, rootElement, { scopedRenderInjector: true }) ?? toDisposable(() => {});
+            const geometryDisposable = registerEmbeddedSheetGeometry(context, contentRoot);
             const overlayRoot = createEmbedReactRoot(contentRoot);
             overlayRoot.render(
                 <EmbedRuntimeProviders injector={scopedInjector as Injector} mountContainer={context.runtimeScope.roots.popup} embedId={context.embedId}>
-                    <SheetEmbedChildOverlay />
+                    <SheetEmbedChildOverlay
+                        canvasRoot={rootElement}
+                        showChrome={context.renderScope.mode === 'tab'}
+                    />
                 </EmbedRuntimeProviders>
             );
 
             return toDisposable(() => {
+                geometryDisposable.dispose();
                 renderDisposable.dispose();
                 disposeEmbedReactRoot(overlayRoot);
                 if (rootElement.isConnected) {
@@ -75,16 +86,70 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
     };
 }
 
-function SheetEmbedChildOverlay() {
+export function applyEmbeddedSheetChromeInset(canvasRoot: HTMLElement, chrome: { formulaBar: boolean; sheetBar: boolean }) {
+    const previousTop = canvasRoot.style.top;
+    const previousBottom = canvasRoot.style.bottom;
+
+    canvasRoot.style.top = chrome.formulaBar ? `${EMBED_SHEET_FORMULA_BAR_HEIGHT}px` : '';
+    canvasRoot.style.bottom = chrome.sheetBar ? `${SHEET_FOOTER_BAR_HEIGHT}px` : '';
+
+    return toDisposable(() => {
+        canvasRoot.style.top = previousTop;
+        canvasRoot.style.bottom = previousBottom;
+    });
+}
+
+function registerEmbeddedSheetGeometry(context: IEmbedChildContainerContext, contentRoot: HTMLElement) {
+    if (!context.injector?.has?.(EmbedFloatingGeometryService)) {
+        return toDisposable(() => {});
+    }
+
+    return context.injector.get(EmbedFloatingGeometryService).register({
+        embedId: context.embedId,
+        childUnitId: context.childUnitId,
+        root: context.renderScope.rootElement,
+        contentRoot,
+    });
+}
+
+function SheetEmbedChildOverlay(props: { canvasRoot: HTMLElement; showChrome: boolean }) {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const componentManager = useDependency(ComponentManager);
     const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
+    const showFormulaBar = props.showChrome && config?.formulaBar !== false;
+    const footerConfig = config?.footer;
+    const showSheetBar = props.showChrome && footerConfig !== false && (typeof footerConfig !== 'object' || footerConfig.sheetBar !== false);
+
+    useEffect(() => {
+        const disposable = applyEmbeddedSheetChromeInset(props.canvasRoot, {
+            formulaBar: showFormulaBar,
+            sheetBar: showSheetBar,
+        });
+
+        return () => disposable.dispose();
+    }, [props.canvasRoot, showFormulaBar, showSheetBar]);
 
     return (
         <>
+            {showFormulaBar && (
+                <div
+                    className="univer-absolute univer-inset-x-0 univer-top-0 univer-z-10"
+                    style={{ height: EMBED_SHEET_FORMULA_BAR_HEIGHT }}
+                >
+                    <FormulaBar />
+                </div>
+            )}
             {ShapeTextEditorContainer && <ShapeTextEditorContainer />}
             {!config?.disableEdit && <EditorContainer />}
             <AutoFillPopupMenu />
+            {showSheetBar && (
+                <div
+                    className="univer-absolute univer-inset-x-0 univer-bottom-0 univer-z-10"
+                    style={{ height: SHEET_FOOTER_BAR_HEIGHT }}
+                >
+                    <SheetBar />
+                </div>
+            )}
         </>
     );
 }

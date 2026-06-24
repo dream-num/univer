@@ -21,6 +21,7 @@ env:
 
 jobs:
     test:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -44,6 +45,7 @@ jobs:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     eslint:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         steps:
@@ -67,6 +69,7 @@ jobs:
               run: pnpm lint --quiet --cache --cache-location .eslintcache
 
     typecheck:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}

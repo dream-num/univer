@@ -19,6 +19,7 @@ permissions:
 
 jobs:
     deploy:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         steps:

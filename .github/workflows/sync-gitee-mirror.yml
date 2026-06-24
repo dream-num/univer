@@ -9,10 +9,10 @@ on:
 jobs:
     sync:
         if: github.repository == 'dream-num/univer'
-        runs-on: ubuntu-latest
+        runs-on: minimum-runner
         steps:
             - name: Sync Gitee
-              uses: jikkai/sync-gitee@main
+              uses: jikkai/sync-gitee@v1
               with:
                   repository: dream-num/univer
                   username: ${{ secrets.GITEE_USERNAME }}

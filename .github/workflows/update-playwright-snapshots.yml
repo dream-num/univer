@@ -9,6 +9,7 @@ permissions:
 
 jobs:
     update-snapshots:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
         env:
             GH_TOKEN: ${{ github.token }}

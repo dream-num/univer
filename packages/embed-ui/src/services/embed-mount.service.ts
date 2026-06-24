@@ -244,9 +244,7 @@ export class EmbedMountService {
             return;
         }
 
-        if (this._injector.has(IUniverInstanceService)) {
-            this._injector.get(IUniverInstanceService).setCurrentUnitForType(current.session.childUnitId);
-        }
+        this._focusTabPeerSession(current.session);
         this._sessions.forEach((entry) => {
             if (entry.session.layout !== 'tab-peer' || entry.session.hostUnitId !== current.session.hostUnitId) {
                 return;
@@ -493,11 +491,20 @@ export class EmbedMountService {
                 const getCurrentUnitOfType = (instanceService as unknown as {
                     getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
                 }).getCurrentUnitOfType;
+                const getFocusedUnit = (instanceService as unknown as {
+                    getFocusedUnit?: () => { getUnitId: () => string } | null | undefined;
+                }).getFocusedUnit;
                 if (
                     typeof getCurrentUnitOfType !== 'function' ||
                     getCurrentUnitOfType.call(instanceService, descriptor.childType)?.getUnitId() !== descriptor.childUnitId
                 ) {
                     instanceService.setCurrentUnitForType(descriptor.childUnitId);
+                }
+                if (
+                    typeof getFocusedUnit !== 'function' ||
+                    getFocusedUnit.call(instanceService)?.getUnitId() !== descriptor.childUnitId
+                ) {
+                    instanceService.focusUnit(descriptor.childUnitId);
                 }
             }
             if ((mode === 'tab' || mode === 'float') && this._injector.has(IContextService)) {
@@ -537,6 +544,30 @@ export class EmbedMountService {
             rootElement.removeEventListener('pointerdown', focusChild, { capture: true });
             rootElement.removeEventListener('focusin', focusChild);
         });
+    }
+
+    private _focusTabPeerSession(session: IEmbedMountSession): void {
+        if (this._injector.has(IUniverInstanceService)) {
+            const instanceService = this._injector.get(IUniverInstanceService);
+            instanceService.setCurrentUnitForType(session.childUnitId);
+            instanceService.focusUnit(session.childUnitId);
+        }
+        if (this._injector.has(IContextService)) {
+            const contextService = this._injector.get(IContextService);
+            contextService.setContextValue(FOCUSING_UNIT, true);
+            contextService.setContextValue(FOCUSING_DOC, session.childType === UniverInstanceType.UNIVER_DOC);
+            contextService.setContextValue(FOCUSING_SHEET, session.childType === UniverInstanceType.UNIVER_SHEET);
+            contextService.setContextValue(FOCUSING_SLIDE, session.childType === UniverInstanceType.UNIVER_SLIDE);
+        }
+        if (this._injector.has(EmbedFocusOwnerService)) {
+            this._injector.get(EmbedFocusOwnerService).setFocusOwner({
+                hostUnitId: session.hostUnitId,
+                embedId: session.embedId,
+                childUnitId: session.childUnitId,
+                childType: session.childType,
+                reason: 'keyboard',
+            });
+        }
     }
 
     private _createMountFocusRestorer(descriptor: IEmbedDescriptor): IDisposable {

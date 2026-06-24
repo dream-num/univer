@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-sheets-thread-comment",
-    "version": "0.25.0",
+    "version": "1.0.0-alpha.0",
     "private": false,
     "description": "Preset for thread comments in Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

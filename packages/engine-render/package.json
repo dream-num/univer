@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "0.25.0",
+    "version": "1.0.0-alpha.0",
     "private": false,
     "description": "Canvas rendering engine for Univer documents, sheets, and slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

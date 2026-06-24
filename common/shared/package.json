@@ -1,7 +1,7 @@
 {
     "name": "@univerjs-infra/shared",
     "type": "module",
-    "version": "0.25.0",
+    "version": "1.0.0-alpha.0",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",

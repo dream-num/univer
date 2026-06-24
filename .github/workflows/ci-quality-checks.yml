@@ -55,8 +55,16 @@ jobs:
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
 
+            - name: Restore ESLint cache
+              uses: actions/cache@v6
+              with:
+                  path: .eslintcache
+                  key: eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'eslint.config.ts') }}-${{ github.sha }}
+                  restore-keys: |
+                      eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'eslint.config.ts') }}-
+
             - name: 🌡️ Run ESLint
-              run: pnpm lint --quiet
+              run: pnpm lint --quiet --cache --cache-location .eslintcache
 
     typecheck:
         runs-on: ubuntu-latest

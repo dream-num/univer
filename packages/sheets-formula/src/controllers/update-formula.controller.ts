@@ -18,6 +18,7 @@ import type {
     ICellData,
     ICommandInfo,
     IExecutionOptions,
+    IObjectMatrixPrimitiveType,
     IUnitRange,
     Nullable,
     Workbook,
@@ -112,17 +113,10 @@ export class UpdateFormulaController extends Disposable {
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
-                    if (
-                        (options && options.onlyLocal === true) ||
-                        (options && options.syncOnly === true) ||
-                        (options && options.fromChangeset === true) ||
-                        params.trigger === SetStyleCommand.id ||
-                        params.trigger === SetBorderCommand.id ||
-                        params.trigger === ClearSelectionFormatCommand.id ||
-                        params.trigger === SetRangeCustomMetadataCommand.id
-                    ) {
+                    if (shouldSkipFormulaUpdateForSetRangeValues(params, options)) {
                         return;
                     }
+
                     this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams);
                 }
             })
@@ -684,6 +678,63 @@ export class UpdateFormulaController extends Disposable {
 
         return { newFormulaData };
     }
+}
+
+/**
+ * Whether to skip the formula update when the setRangeValues mutation is executed.
+ * The style-only cell value does not affect the formula calculation, so it can be skipped.
+ */
+function shouldSkipFormulaUpdateForSetRangeValues(params: ISetRangeValuesMutationParams, options?: IExecutionOptions): boolean {
+    if (
+        options &&
+        (options.onlyLocal === true || options.syncOnly === true || options.fromChangeset === true)
+    ) {
+        return true;
+    }
+
+    const { cellValue, trigger } = params;
+
+    if (
+        trigger &&
+        [
+            SetStyleCommand.id,
+            SetBorderCommand.id,
+            ClearSelectionFormatCommand.id,
+            SetRangeCustomMetadataCommand.id,
+        ].includes(trigger)
+    ) {
+        return true;
+    }
+
+    if (!cellValue) {
+        return true;
+    }
+
+    return isStyleOnlyCellValue(cellValue);
+}
+
+function isStyleOnlyCellValue(cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>): boolean {
+    const matrix = new ObjectMatrix(cellValue);
+
+    let hasCell = false;
+    let styleOnly = true;
+
+    matrix.forValue((_row, _col, cell) => {
+        hasCell = true;
+
+        if (!cell) {
+            styleOnly = false;
+            return false;
+        }
+
+        const keys = Object.keys(cell);
+        if (keys.length !== 1 || keys[0] !== 's') {
+            styleOnly = false;
+            return false;
+        }
+    });
+
+    return hasCell && styleOnly;
 }
 
 function tableReferenceContainsColumn(columnStruct: string, columnNames: string[] | undefined): boolean {

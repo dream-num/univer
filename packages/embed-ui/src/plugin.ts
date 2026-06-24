@@ -42,6 +42,7 @@ import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.
 import { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
 import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
 import { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
+import { EmbedHostRestoreService } from './services/embed-host-restore.service';
 import { EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
 import { EmbedMountService } from './services/embed-mount.service';
 import { EmbedOverlayRootService } from './services/embed-overlay-root.service';
@@ -89,6 +90,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedHostAdapterRegistryService],
             [EmbedHostAnchorModelService],
             [EmbedHostLifecycleService],
+            [EmbedHostRestoreService],
             [EmbedActivationService],
             [EmbedChildViewRegistryService],
             [EmbedBlockRegistryService],
@@ -188,6 +190,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedHostAdapterRegistryService],
             [EmbedHostAnchorModelService],
             [EmbedHostLifecycleService],
+            [EmbedHostRestoreService],
             [EmbedActivationService],
             [EmbedChildViewRegistryService],
             [EmbedBlockRegistryService],

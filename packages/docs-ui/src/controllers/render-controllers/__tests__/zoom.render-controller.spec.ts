@@ -53,7 +53,7 @@ describe('DocZoomRenderController', () => {
         expect(shouldHandleDocWheelZoom({ ctrlKey: true, metaKey: false }, false, DocumentFlavor.TRADITIONAL)).toBe(false);
     });
 
-    it('applies composed view scale while receiving user zoom', () => {
+    it('applies composed view scale and immediately renders embedded docs while receiving user zoom', () => {
         const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
         const refreshSelection = vi.fn();
         const makeDirty = vi.fn();
@@ -81,6 +81,9 @@ describe('DocZoomRenderController', () => {
             _embedInteractionBoundaryService: {
                 hasRecentInteraction: vi.fn(() => false),
             },
+            _univerInstanceService: {
+                getUnitCreateOptions: vi.fn(() => ({ embeddedRender: true, skipAutoRender: true })),
+            },
         });
 
         controller.updateViewZoom(1.25);
@@ -90,6 +93,45 @@ describe('DocZoomRenderController', () => {
         expect(makeDirty).toHaveBeenCalled();
         expect(render).toHaveBeenCalled();
         expect(refreshSelection).toHaveBeenCalled();
+    });
+
+    it('does not force an immediate render for standalone docs', () => {
+        const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
+        const makeDirty = vi.fn();
+        const render = vi.fn();
+        Object.assign(controller, {
+            _context: {
+                unitId: 'doc-unit',
+                scene: {
+                    makeDirty,
+                    render,
+                },
+            },
+            _docViewScaleService: {
+                getViewScale: vi.fn(() => 1.875),
+            },
+            _editorService: {
+                isEditor: vi.fn(() => false),
+            },
+            _docPageLayoutService: {
+                calculatePagePosition: vi.fn(),
+            },
+            _textSelectionManagerService: {
+                refreshSelection: vi.fn(),
+            },
+            _embedInteractionBoundaryService: {
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            _univerInstanceService: {
+                getUnitCreateOptions: vi.fn(() => undefined),
+            },
+        });
+
+        controller.updateViewZoom(1.25);
+
+        expect(mockSceneScale).toHaveBeenCalledWith(1.875, 1.875);
+        expect(makeDirty).not.toHaveBeenCalled();
+        expect(render).not.toHaveBeenCalled();
     });
 
     it('does not refresh host document selection while embed interaction is active', () => {
@@ -117,6 +159,9 @@ describe('DocZoomRenderController', () => {
             },
             _embedInteractionBoundaryService: {
                 hasRecentInteraction: vi.fn(() => true),
+            },
+            _univerInstanceService: {
+                getUnitCreateOptions: vi.fn(() => ({ embeddedRender: true })),
             },
         });
 

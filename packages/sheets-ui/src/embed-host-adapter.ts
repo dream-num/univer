@@ -272,8 +272,8 @@ function restoreSheetsSheetTabAnchor(
     context: IEmbedHostAnchorContext & { hostAnchorId: string },
     univerInstanceService?: IUniverInstanceService
 ): IEmbedHostAnchorRecord | undefined {
-    const snapshot = getWorkbookSnapshot(univerInstanceService, context.hostUnitId);
-    if (!snapshot) {
+    const workbook = getWorkbook(univerInstanceService, context.hostUnitId);
+    if (!workbook) {
         return undefined;
     }
 
@@ -283,13 +283,12 @@ function restoreSheetsSheetTabAnchor(
     });
     const sheetName = getSheetName(record.hostContext) ?? context.embedId;
     const sheetIndex = getSheetIndex(record.hostContext);
-    if (!snapshot.sheets[record.hostAnchorId]) {
-        snapshot.sheets[record.hostAnchorId] = createEmbedSheetsTabSnapshot({
+    if (!workbook.getSheetBySheetId?.(record.hostAnchorId)) {
+        workbook.addWorksheet(record.hostAnchorId, sheetIndex, createEmbedSheetsTabSnapshot({
             embedId: record.embedId,
             hostAnchorId: record.hostAnchorId,
             name: sheetName,
-        });
-        snapshot.sheetOrder = insertIdAtIndex(snapshot.sheetOrder ?? [], record.hostAnchorId, sheetIndex);
+        }));
     }
 
     return {
@@ -405,17 +404,14 @@ function requireAnchorRecord(record: IEmbedHostAnchorRecord | undefined, errorCo
     return record;
 }
 
-function getWorkbookSnapshot(univerInstanceService: IUniverInstanceService | undefined, unitId: string): IWorkbookData | undefined {
-    const workbook = univerInstanceService?.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
-        getSnapshot?: () => IWorkbookData;
+function getWorkbook(univerInstanceService: IUniverInstanceService | undefined, unitId: string): {
+    addWorksheet: (id: string, index: number, worksheetSnapshot: Partial<IWorkbookData['sheets'][string]>) => boolean;
+    getSheetBySheetId?: (sheetId: string) => unknown;
+} | undefined {
+    return univerInstanceService?.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
+        addWorksheet: (id: string, index: number, worksheetSnapshot: Partial<IWorkbookData['sheets'][string]>) => boolean;
+        getSheetBySheetId?: (sheetId: string) => unknown;
     } | undefined;
-    return workbook?.getSnapshot?.();
-}
-
-function insertIdAtIndex(order: string[], id: string, index: number): string[] {
-    const next = order.filter((item) => item !== id);
-    next.splice(Math.max(0, Math.min(index, next.length)), 0, id);
-    return next;
 }
 
 function normalizeSheetsFloatingObjectHostContext(context: IEmbedHostAnchorContext): Record<string, unknown> | undefined {

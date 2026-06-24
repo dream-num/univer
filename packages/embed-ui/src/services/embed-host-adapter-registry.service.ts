@@ -17,6 +17,7 @@
 import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedHostAdapterContribution, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../types/embed-ui';
+import type { IEmbedHostAnchorRecord } from '../types/host-anchor';
 import { CREATE_EMBED_HOST_ANCHOR_MUTATION_ID, REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID } from '../common/const';
 
 export class EmbedHostAdapterRegistryService {
@@ -140,6 +141,26 @@ export class EmbedHostAdapterRegistryService {
         descriptor: IEmbedDescriptor;
     }): void {
         this.get(params.hostType, params.entry)?.activateAnchor?.(params);
+    }
+
+    restoreAnchor(params: {
+        embedId: string;
+        hostUnitId: string;
+        hostType: UniverInstanceType;
+        entry: EmbedHostEntry;
+        hostAnchorId: string;
+        hostContext?: Record<string, unknown>;
+        descriptor: IEmbedDescriptor;
+    }): IEmbedHostAnchorRecord {
+        const contribution = this.get(params.hostType, params.entry);
+        if (!contribution) {
+            throw new Error(`EMBED_HOST_ADAPTER_NOT_REGISTERED:${params.hostType}:${params.entry}`);
+        }
+        if (!contribution.restoreAnchor) {
+            throw new Error(`EMBED_HOST_ADAPTER_RESTORE_ANCHOR_NOT_IMPLEMENTED:${params.hostType}:${params.entry}`);
+        }
+
+        return contribution.restoreAnchor(params);
     }
 
     removeAnchorPlan(params: {

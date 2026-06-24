@@ -1,0 +1,128 @@
+name: 🌐 Deploy to GitHub Pages
+
+on:
+    push:
+        branches: [dev]
+        tags:
+            - 'v*.*.*'
+            - 'v*.*.*-alpha.*'
+            - 'v*.*.*-beta.*'
+            - 'v*.*.*-rc.*'
+
+concurrency:
+    group: github-pages
+    cancel-in-progress: false
+
+permissions:
+    contents: write
+    pull-requests: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+              with:
+                  persist-credentials: false
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            # ================= Deploy Demo =================
+            - name: 📦 Build demo
+              run: pnpm build:demo
+
+            - name: Copy demo to workspace
+              run: |
+                  mkdir -p dist
+                  cp -r ./examples/local/* dist
+
+            - name: 📦 Build react16 demo
+              run: |
+                  pnpm use:react16
+                  pnpm build:demo
+
+            - name: Copy react16 demo
+              run: |
+                  mkdir -p dist/react16
+                  cp -r ./examples/local/* dist/react16
+
+            # ================= Deploy Storybook =================
+            - name: 📦 Build storybook
+              run: pnpm storybook:build
+
+            - name: Copy storybook
+              run: |
+                  mkdir -p dist/storybook
+                  cp -r ./common/storybook/storybook-static/* dist/storybook
+
+            - name: Checkout existing Pages branch
+              uses: actions/checkout@v7
+              continue-on-error: true
+              with:
+                  ref: gh-pages
+                  path: gh-pages-current
+                  persist-credentials: false
+
+            - name: Preserve recent PR previews
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  if [ ! -d gh-pages-current/pr-preview ]; then
+                      exit 0
+                  fi
+
+                  mkdir -p dist/pr-preview
+                  cutoff_epoch=$(date -u -d '30 days ago' +%s)
+                  shopt -s nullglob
+
+                  for preview_dir in gh-pages-current/pr-preview/pr-*; do
+                      pr_number="${preview_dir##*/pr-}"
+                      if [[ ! "$pr_number" =~ ^[0-9]+$ ]]; then
+                          echo "Prune unexpected preview directory: ${preview_dir}"
+                          continue
+                      fi
+
+                      if ! pr_info=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${pr_number}" --jq '[.state, (.closed_at // "")] | @tsv' 2>/dev/null); then
+                          echo "Prune preview for missing PR #${pr_number}"
+                          continue
+                      fi
+
+                      IFS=$'\t' read -r state closed_at <<< "$pr_info"
+                      if [ "$state" = "open" ]; then
+                          echo "Keep preview for open PR #${pr_number}"
+                          cp -a "$preview_dir" "dist/pr-preview/"
+                          continue
+                      fi
+
+                      if [ -n "$closed_at" ]; then
+                          closed_epoch=$(date -u -d "$closed_at" +%s)
+                          if [ "$closed_epoch" -ge "$cutoff_epoch" ]; then
+                              echo "Keep preview for recently closed PR #${pr_number}"
+                              cp -a "$preview_dir" "dist/pr-preview/"
+                              continue
+                          fi
+                      fi
+
+                      echo "Prune preview for PR #${pr_number}"
+                  done
+
+            - name: Check Pages publish size
+              run: |
+                  size_kb=$(du -sk dist | awk '{print $1}')
+                  max_kb=950000
+                  echo "Pages publish directory size: ${size_kb} KB"
+                  if [ "$size_kb" -gt "$max_kb" ]; then
+                      echo "Pages publish directory exceeds ${max_kb} KB. Largest entries:"
+                      du -h -d 2 dist | sort -hr | head -50
+                      exit 1
+                  fi
+
+            # ================= Deploy to GitHub Pages =================
+            - name: 🚀 Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist

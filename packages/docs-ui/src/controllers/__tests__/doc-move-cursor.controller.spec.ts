@@ -15,6 +15,7 @@
  */
 
 import { DataStreamTreeTokenType, Direction } from '@univerjs/core';
+import { DocumentSkeletonPageType, LineType } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { DocMoveCursorController } from '../doc-move-cursor.controller';
 
@@ -146,6 +147,139 @@ describe('DocMoveCursorController movement helpers', () => {
         expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(paragraphGlyph, -1);
     });
 
+    it('enters the nearest column group column when moving vertically onto the block line', () => {
+        const controller = createControllerHarness();
+        const bodyGlyph = createGlyph('A', 118);
+        const firstColumnGlyph = createGlyph('L', 0);
+        const secondColumnGlyph = createGlyph('R', 16);
+        const beforeLine = createLine([bodyGlyph], 10, 0);
+        const blockLine = createBlockLine(11, 40);
+        const bodyColumn = createColumn([beforeLine, blockLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const firstColumnPage = createPage([createColumn([createLine([firstColumnGlyph], 20, 0)])], DocumentSkeletonPageType.CELL);
+        const secondColumnPage = createPage([createColumn([createLine([secondColumnGlyph], 30, 0)])], DocumentSkeletonPageType.CELL);
+        const columnGroupColumnA = { columnId: 'a', left: 0, top: 0, width: 80, height: 20, st: 20, ed: 25, page: firstColumnPage };
+        const columnGroupColumnB = { columnId: 'b', left: 100, top: 0, width: 80, height: 20, st: 30, ed: 35, page: secondColumnPage };
+        const columnGroup = {
+            columnGroupId: 'cg-1',
+            columns: [columnGroupColumnA, columnGroupColumnB],
+            ed: 40,
+            height: 20,
+            left: 0,
+            st: 11,
+            top: 10,
+            width: 180,
+        };
+        Object.assign(columnGroupColumnA, { parent: columnGroup });
+        Object.assign(columnGroupColumnB, { parent: columnGroup });
+        Object.assign(firstColumnPage, { parent: columnGroupColumnA });
+        Object.assign(secondColumnPage, { parent: columnGroupColumnB });
+        Object.assign(columnGroup, { parent: bodyPage });
+        bodyPage.skeColumnGroups.set('cg-1', columnGroup as never);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === secondColumnGlyph ? 'second' : 'other', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            bodyGlyph,
+            { segmentPage: -1 },
+            true
+        )).toEqual({ glyph: 'second', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(secondColumnGlyph, -1);
+    });
+
+    it('leaves a column group column for the following body line when moving past its end', () => {
+        const controller = createControllerHarness();
+        const columnGlyph = createGlyph('C', 12);
+        const afterGlyph = createGlyph('Z', 112);
+        const blockLine = createBlockLine(11, 40);
+        const afterLine = createLine([afterGlyph], 41, 0);
+        const bodyColumn = createColumn([blockLine, afterLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const columnPage = createPage([createColumn([createLine([columnGlyph], 30, 0)])], DocumentSkeletonPageType.CELL);
+        const columnGroupColumn = { columnId: 'b', left: 100, top: 0, width: 80, height: 20, st: 30, ed: 35, page: columnPage };
+        const columnGroup = {
+            columnGroupId: 'cg-1',
+            columns: [columnGroupColumn],
+            ed: 40,
+            height: 20,
+            left: 0,
+            st: 11,
+            top: 10,
+            width: 180,
+        };
+        Object.assign(columnGroupColumn, { parent: columnGroup });
+        Object.assign(columnPage, { parent: columnGroupColumn });
+        Object.assign(columnGroup, { parent: bodyPage });
+        bodyPage.skeColumnGroups.set('cg-1', columnGroup as never);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === afterGlyph ? 'after' : 'other', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            columnGlyph,
+            { segmentPage: -1 },
+            true
+        )).toEqual({ glyph: 'after', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(afterGlyph, -1);
+    });
+
+    it('enters the nearest column group column from below when moving upward', () => {
+        const controller = createControllerHarness();
+        const afterGlyph = createGlyph('Z', 112);
+        const columnGlyph = createGlyph('C', 12);
+        const blockLine = createBlockLine(11, 40);
+        const afterLine = createLine([afterGlyph], 41, 0);
+        const bodyColumn = createColumn([blockLine, afterLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const columnPage = createPage([createColumn([createLine([columnGlyph], 30, 0)])], DocumentSkeletonPageType.CELL);
+        const columnGroupColumn = { columnId: 'b', left: 100, top: 0, width: 80, height: 20, st: 30, ed: 35, page: columnPage };
+        const columnGroup = createColumnGroup([columnGroupColumn], bodyPage);
+        bodyPage.skeColumnGroups.set('cg-1', columnGroup as never);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === columnGlyph ? 'column' : 'other', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            afterGlyph,
+            { segmentPage: -1 },
+            false
+        )).toEqual({ glyph: 'column', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(columnGlyph, -1);
+    });
+
+    it('leaves a column group column for the previous body line when moving above its start', () => {
+        const controller = createControllerHarness();
+        const beforeGlyph = createGlyph('A', 112);
+        const columnGlyph = createGlyph('C', 12);
+        const beforeLine = createLine([beforeGlyph], 10, 0);
+        const blockLine = createBlockLine(11, 40);
+        const bodyColumn = createColumn([beforeLine, blockLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const columnPage = createPage([createColumn([createLine([columnGlyph], 30, 0)])], DocumentSkeletonPageType.CELL);
+        const columnGroupColumn = { columnId: 'b', left: 100, top: 0, width: 80, height: 20, st: 30, ed: 35, page: columnPage };
+        const columnGroup = createColumnGroup([columnGroupColumn], bodyPage);
+        bodyPage.skeColumnGroups.set('cg-1', columnGroup as never);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === beforeGlyph ? 'before' : 'other', segmentPage: -1 })),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            columnGlyph,
+            { segmentPage: -1 },
+            false
+        )).toEqual({ glyph: 'before', isBack: true, segmentPage: -1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(beforeGlyph, -1);
+    });
+
     it('keeps column boundary tokens out of the default cursor skip list', () => {
         const controller = createControllerHarness();
 
@@ -210,3 +344,87 @@ describe('DocMoveCursorController movement helpers', () => {
         expect(controller._normalizeRenderableCursorOffset(createOffsetSkeleton([]), dataStream, [], 0, Direction.DOWN, '', -1)).toBeUndefined();
     });
 });
+
+function createGlyph(content: string, left: number) {
+    return {
+        content,
+        count: 1,
+        left,
+        streamType: DataStreamTreeTokenType.LETTER,
+    };
+}
+
+function createLine(glyphs: unknown[], st: number, top: number) {
+    const line = {
+        divides: [] as unknown[],
+        ed: st + glyphs.length,
+        parent: null as unknown,
+        st,
+        top,
+        type: LineType.PARAGRAPH,
+    };
+    const divide = { glyphGroup: glyphs, left: 0, parent: line };
+    line.divides = [divide];
+    glyphs.forEach((glyph) => Object.assign(glyph as object, { parent: divide }));
+
+    return line;
+}
+
+function createBlockLine(st: number, ed: number) {
+    return {
+        divides: [],
+        ed,
+        parent: null as unknown,
+        paragraphIndex: ed,
+        st,
+        type: LineType.BLOCK,
+    };
+}
+
+function createColumn(lines: unknown[]) {
+    const column = {
+        lines,
+        parent: null as unknown,
+    };
+    lines.forEach((line) => Object.assign(line as object, { parent: column }));
+
+    return column;
+}
+
+function createPage(columns: unknown[], type: DocumentSkeletonPageType) {
+    const section = {
+        columns,
+        parent: null as unknown,
+    };
+    const page = {
+        sections: [section],
+        skeColumnGroups: new Map(),
+        skeTables: new Map(),
+        type,
+    };
+    Object.assign(section, { parent: page });
+    columns.forEach((column) => Object.assign(column as object, { parent: section }));
+
+    return page;
+}
+
+function createColumnGroup(columns: object[], bodyPage: ReturnType<typeof createPage>) {
+    const columnGroup = {
+        columnGroupId: 'cg-1',
+        columns,
+        ed: 40,
+        height: 20,
+        left: 0,
+        st: 11,
+        top: 10,
+        width: 180,
+    };
+    columns.forEach((column) => {
+        const columnGroupColumn = column as { page: object; parent?: unknown };
+        columnGroupColumn.parent = columnGroup;
+        Object.assign(columnGroupColumn.page, { parent: columnGroupColumn });
+    });
+    Object.assign(columnGroup, { parent: bodyPage });
+
+    return columnGroup;
+}

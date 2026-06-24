@@ -18,6 +18,8 @@ import type { ICommandInfo, Nullable } from '@univerjs/core';
 import type {
     DocumentSkeleton,
     IDocumentSkeletonCached,
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
@@ -37,7 +39,7 @@ import {
     RANGE_DIRECTION,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, IRenderManagerService, LineType } from '@univerjs/engine-render';
 import { getDocObject } from '../basics/component-tools';
 import {
     findAboveCell,
@@ -60,6 +62,11 @@ interface IWholeEntityRange {
     wholeEntity?: boolean;
     startIndex: number;
     endIndex: number;
+}
+
+interface ILineSearchTarget {
+    line: IDocumentSkeletonLine;
+    offsetLeft: number;
 }
 
 export class DocMoveCursorController extends Disposable {
@@ -883,13 +890,13 @@ export class DocMoveCursorController extends Disposable {
 
         const offsetLeft = this._getGlyphLeftOffsetInLine(glyph);
 
-        const line = this._getNextOrPrevLine(glyph, direction, skipCellContent);
+        const target = this._getNextOrPrevLineTarget(glyph, direction, offsetLeft, skipCellContent);
 
-        if (line == null) {
+        if (target == null) {
             return;
         }
 
-        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, line, offsetLeft, nodePosition);
+        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, target.line, target.offsetLeft, nodePosition);
 
         if (position == null) {
             return;
@@ -968,7 +975,12 @@ export class DocMoveCursorController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean, skipCellContent = false) {
+    private _getNextOrPrevLineTarget(
+        glyph: IDocumentSkeletonGlyph,
+        direction: boolean,
+        offsetLeft: number,
+        skipCellContent = false
+    ): Nullable<ILineSearchTarget> {
         const divide = glyph.parent;
         const line = divide?.parent;
         const column = line?.parent;
@@ -987,11 +999,11 @@ export class DocMoveCursorController extends Disposable {
 
         let newLine: IDocumentSkeletonLine;
 
-        if (page.type === DocumentSkeletonPageType.CELL && skipCellContent) {
+        if (page.type === DocumentSkeletonPageType.CELL && skipCellContent && !this._isColumnGroupContentPage(page)) {
             const nLine = findAboveOrBellowCellLine(page, direction);
 
             if (nLine) {
-                return nLine;
+                return { line: nLine, offsetLeft };
             }
         }
 
@@ -1017,8 +1029,13 @@ export class DocMoveCursorController extends Disposable {
             }
         }
 
+        const columnGroupTarget = this._getColumnGroupLineTargetFromBlockLine(newLine, page, direction, offsetLeft);
+        if (columnGroupTarget != null) {
+            return columnGroupTarget;
+        }
+
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
 
         const currentColumnIndex = section.columns.indexOf(column);
@@ -1035,7 +1052,7 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
 
         const currentSectionIndex = page.sections.indexOf(section);
@@ -1054,11 +1071,19 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
+        }
+
+        if (this._isColumnGroupContentPage(page)) {
+            const exitTarget = this._getColumnGroupExitLineTarget(page, direction, offsetLeft);
+            if (exitTarget != null) {
+                return exitTarget;
+            }
         }
 
         if (page.type === DocumentSkeletonPageType.CELL) {
-            return findAboveOrBellowCellLine(page, direction);
+            const nLine = findAboveOrBellowCellLine(page, direction);
+            return nLine == null ? undefined : { line: nLine, offsetLeft };
         }
 
         const skeleton: Nullable<IDocumentSkeletonCached> = page.parent as IDocumentSkeletonCached;
@@ -1087,8 +1112,170 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
+    }
+
+    private _getColumnGroupLineTargetFromBlockLine(
+        line: Nullable<IDocumentSkeletonLine>,
+        page: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        if (line == null || line.type !== LineType.BLOCK) {
+            return;
+        }
+
+        const columnGroup = this._findColumnGroupByBlockLine(page, line);
+        if (columnGroup == null) {
+            return;
+        }
+
+        return this._getColumnGroupContentLineTarget(columnGroup, direction, offsetLeft);
+    }
+
+    private _getColumnGroupContentLineTarget(
+        columnGroup: IDocumentSkeletonColumnGroup,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const candidates = columnGroup.columns
+            .map((column) => ({
+                column,
+                distance: this._getDistanceToColumnGroupColumn(column, offsetLeft),
+            }))
+            .sort((a, b) => a.distance - b.distance);
+
+        for (const candidate of candidates) {
+            const line = this._getColumnGroupColumnBoundaryLine(candidate.column, direction);
+            if (line != null) {
+                return {
+                    line,
+                    offsetLeft: offsetLeft - candidate.column.left,
+                };
+            }
+        }
+    }
+
+    private _getColumnGroupExitLineTarget(
+        page: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const columnGroupColumn = page.parent as Nullable<IDocumentSkeletonColumnGroupColumn>;
+        const columnGroup = columnGroupColumn?.parent;
+        const hostPage = columnGroup?.parent;
+
+        if (columnGroupColumn == null || columnGroup == null || hostPage == null) {
+            return;
+        }
+
+        const blockLine = this._findColumnGroupBlockLine(columnGroup);
+        const line = blockLine == null ? undefined : this._getAdjacentLineAroundBlockLine(blockLine, direction);
+
+        if (line == null) {
+            return;
+        }
+
+        return {
+            line,
+            offsetLeft: columnGroupColumn.left + offsetLeft,
+        };
+    }
+
+    private _findColumnGroupByBlockLine(
+        page: IDocumentSkeletonPage,
+        line: IDocumentSkeletonLine
+    ): Nullable<IDocumentSkeletonColumnGroup> {
+        for (const columnGroup of page.skeColumnGroups?.values() ?? []) {
+            if (line.paragraphIndex === columnGroup.ed || (line.st <= columnGroup.ed && line.ed >= columnGroup.st)) {
+                return columnGroup;
+            }
+        }
+    }
+
+    private _findColumnGroupBlockLine(columnGroup: IDocumentSkeletonColumnGroup): Nullable<IDocumentSkeletonLine> {
+        const page = columnGroup.parent;
+        if (page == null) {
+            return;
+        }
+
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    if (line.type === LineType.BLOCK && this._findColumnGroupByBlockLine(page, line) === columnGroup) {
+                        return line;
+                    }
+                }
+            }
+        }
+    }
+
+    private _getAdjacentLineAroundBlockLine(
+        line: IDocumentSkeletonLine,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonLine> {
+        const column = line.parent;
+        const section = column?.parent;
+        const page = section?.parent;
+
+        if (column == null || section == null || page == null) {
+            return;
+        }
+
+        const lineIndex = column.lines.indexOf(line);
+        if (lineIndex === -1) {
+            return;
+        }
+
+        const sameColumnLine = column.lines[direction ? lineIndex + 1 : lineIndex - 1];
+        if (sameColumnLine != null) {
+            return sameColumnLine;
+        }
+
+        const columnIndex = section.columns.indexOf(column);
+        if (columnIndex === -1) {
+            return;
+        }
+
+        if (direction) {
+            return section.columns[columnIndex + 1]?.lines[0];
+        }
+
+        const prevColumnLines = section.columns[columnIndex - 1]?.lines;
+        return prevColumnLines?.[prevColumnLines.length - 1];
+    }
+
+    private _getColumnGroupColumnBoundaryLine(
+        column: IDocumentSkeletonColumnGroupColumn,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonLine> {
+        const sections = direction ? column.page.sections : [...column.page.sections].reverse();
+
+        for (const section of sections) {
+            const columns = direction ? section.columns : [...section.columns].reverse();
+            for (const skeletonColumn of columns) {
+                const lines = direction ? skeletonColumn.lines : [...skeletonColumn.lines].reverse();
+                const line = lines.find((item) => item.type !== LineType.BLOCK);
+                if (line != null) {
+                    return line;
+                }
+            }
+        }
+    }
+
+    private _getDistanceToColumnGroupColumn(column: IDocumentSkeletonColumnGroupColumn, offsetLeft: number): number {
+        if (offsetLeft >= column.left && offsetLeft <= column.left + column.width) {
+            return 0;
+        }
+
+        return Math.min(Math.abs(offsetLeft - column.left), Math.abs(offsetLeft - column.left - column.width));
+    }
+
+    private _isColumnGroupContentPage(page: IDocumentSkeletonPage): boolean {
+        const parent = page.parent as Nullable<IDocumentSkeletonColumnGroupColumn>;
+
+        return parent?.page === page && parent.parent?.columns?.includes(parent) === true;
     }
 
     private _scrollToFocusNodePosition(unitId: string, offset: number) {

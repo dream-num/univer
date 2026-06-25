@@ -17,14 +17,17 @@
 import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
 import type { IResourceRef } from './resource-ref';
 
-export type EmbedHostEntry =
-    | 'docs-custom-block'
-    | 'sheets-floating-object'
-    | 'sheets-sheet-tab'
-    | 'bases-table-list-block'
-    | 'slides-floating-object'
-    | 'slides-page-list-block'
-    | 'boards-floating-object';
+export const EmbedHostEntryEnum = {
+    DocsCustomBlock: 'docs-custom-block',
+    SheetsFloatingObject: 'sheets-floating-object',
+    SheetsSheetTab: 'sheets-sheet-tab',
+    BasesTableListBlock: 'bases-table-list-block',
+    SlidesFloatingObject: 'slides-floating-object',
+    SlidesPageListBlock: 'slides-page-list-block',
+    BoardsFloatingObject: 'boards-floating-object',
+} as const;
+
+export type EmbedHostEntry = typeof EmbedHostEntryEnum[keyof typeof EmbedHostEntryEnum];
 
 export type EmbedMode = 'float' | 'tab';
 export type EmbedMenuBehavior = 'floating' | 'host-override' | 'none';

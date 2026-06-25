@@ -88,7 +88,7 @@ export function createSheetsFloatingObjectHostContainerContribution(): IEmbedHos
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-floating-object',
         layout: 'doc-width-scale',
-        supportedLayouts: ['doc-width-scale', 'aspect-fit'],
+        supportedLayouts: ['doc-width-scale', 'aspect-fit', 'scroll-contained'],
         menuBehavior: 'floating',
     };
 }

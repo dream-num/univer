@@ -1324,9 +1324,20 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 }
 
 function getFontStyleAtCursor(accessor: IAccessor) {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textSelectionService = accessor.get(DocSelectionManagerService);
-    const docMenuStyleService = accessor.get(DocMenuStyleService);
+    let univerInstanceService: IUniverInstanceService;
+    let textSelectionService: DocSelectionManagerService;
+    let docMenuStyleService: DocMenuStyleService;
+    try {
+        univerInstanceService = accessor.get(IUniverInstanceService);
+        textSelectionService = accessor.get(DocSelectionManagerService);
+        docMenuStyleService = accessor.get(DocMenuStyleService);
+    } catch (error) {
+        if (isInjectorDisposedError(error)) {
+            return;
+        }
+
+        throw error;
+    }
 
     const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     const docRanges = textSelectionService.getDocRanges();
@@ -1372,8 +1383,18 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 }
 
 export function getParagraphStyleAtCursor(accessor: IAccessor) {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textSelectionService = accessor.get(DocSelectionManagerService);
+    let univerInstanceService: IUniverInstanceService;
+    let textSelectionService: DocSelectionManagerService;
+    try {
+        univerInstanceService = accessor.get(IUniverInstanceService);
+        textSelectionService = accessor.get(DocSelectionManagerService);
+    } catch (error) {
+        if (isInjectorDisposedError(error)) {
+            return;
+        }
+
+        throw error;
+    }
 
     const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
@@ -1404,6 +1425,15 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     }
 
     return null;
+}
+
+function isInjectorDisposedError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+        return false;
+    }
+
+    return error.name === 'InjectorAlreadyDisposedError' ||
+        error.message.includes('Injector cannot be accessed after it was disposed');
 }
 
 export function PageSettingMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {

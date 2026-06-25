@@ -19,7 +19,7 @@ import type { IFunctionParam } from '@univerjs/engine-formula';
 import type { LocaleKey } from '../../../locale/types';
 import { LocaleService, noop } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { CloseIcon, MoreIcon } from '@univerjs/icons';
+import { CloseIcon, MoreRightIcon } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
@@ -160,7 +160,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                     style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
                                     onClick={() => setContentVisible(!contentVisible)}
                                 >
-                                    <MoreIcon />
+                                    <MoreRightIcon />
                                 </div>
                                 <div
                                     className={`

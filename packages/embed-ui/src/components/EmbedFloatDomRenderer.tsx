@@ -39,6 +39,7 @@ import { EmbedFloatFullscreenButton } from './EmbedFloatFullscreenButton';
 const CLICK_DISTANCE_THRESHOLD = 4;
 const CLICK_DURATION_THRESHOLD = 500;
 const EMBED_CHILD_POINTER_INTERACTION_GRACE_MS = 650;
+const EMBED_EXTERNAL_HOST_INTERACTION_GRACE_MS = 650;
 export const EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT = 'univer:embed-float-drag-handle:pointerdown';
 const EMBED_FORWARDED_WHEEL_EVENT = Symbol('univer.embed.forwarded-wheel-event');
 const EMBED_HOST_VERTICAL_WHEEL_ATTEMPTED_EVENT = Symbol('univer.embed.host-vertical-wheel-attempted-event');
@@ -84,10 +85,11 @@ export function EmbedFloatDomRenderer(props: {
     onRuntimeStageExit?: () => void;
     syncHostVerticalScroll?: boolean;
     enableStage1BodyDrag?: boolean;
+    isExternalHostInteraction?: (event: PointerEvent) => boolean;
 }) {
     ensureEmbedFloatDomStyles();
 
-    const { initialStage, interactionFlow = 'floating-stage', onRuntimeStageEnter, onRuntimeStageExit } = props;
+    const { initialStage, interactionFlow = 'floating-stage', isExternalHostInteraction, onRuntimeStageEnter, onRuntimeStageExit } = props;
     const containerRef = useRef<HTMLDivElement>(null);
     const gateRef = useRef<HTMLDivElement>(null);
     const liveRootRef = useRef<HTMLDivElement>(null);
@@ -111,6 +113,7 @@ export function EmbedFloatDomRenderer(props: {
     const [mountVersion, setMountVersion] = useState(0);
     const [stage, setStage] = useState<EmbedFloatingStage>(() => initialStage ?? (data?.embedId ? floatingActiveService.getStage(data.embedId) : 'inactive'));
     const previousStageRef = useRef<EmbedFloatingStage>(stage);
+    const notifiedInitialStageRef = useRef(false);
     const clickIntentRef = useRef<ClickIntentState | undefined>(undefined);
     const childContextRef = useRef<IEmbedChildContainerContext | undefined>(undefined);
     const stageSessionLeaseRef = useRef<IDisposable | undefined>(undefined);
@@ -118,6 +121,7 @@ export function EmbedFloatDomRenderer(props: {
     const fullscreenRemountFrameRef = useRef<FrameHandle | undefined>(undefined);
     const fullscreenRemountTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined);
     const hostScrollSyncOffsetRef = useRef(0);
+    const externalHostInteractionUntilRef = useRef(0);
     const geometryInvalidationFramesRef = useRef<FrameHandle[]>([]);
     const releaseStage2SessionLease = useCallback(() => {
         stageSessionLeaseRef.current?.dispose();
@@ -163,7 +167,10 @@ export function EmbedFloatDomRenderer(props: {
     useEffect(() => {
         const previousStage = previousStageRef.current;
         previousStageRef.current = stage;
-        if (previousStage !== stage) {
+        const shouldNotifyStageEnter = previousStage !== stage ||
+            (!notifiedInitialStageRef.current && stage !== 'inactive');
+        notifiedInitialStageRef.current = true;
+        if (shouldNotifyStageEnter) {
             onRuntimeStageEnter?.(stage);
             geometryService.invalidate({ embedId: data?.embedId, reason: 'stage-change' });
         }
@@ -242,11 +249,17 @@ export function EmbedFloatDomRenderer(props: {
         }
 
         const embedId = data.embedId;
-        const roots: Array<{ element: HTMLElement; role: EmbedRuntimeFocusRole }> = [
-            { element: liveRootRef.current, role: 'runtime' },
-            { element: liveContentRootRef.current, role: 'runtime' },
-            { element: liveCanvasRootRef.current, role: 'runtime' },
-        ].filter((root): root is { element: HTMLElement; role: EmbedRuntimeFocusRole } => !!root.element);
+        const roots: Array<{ element: HTMLElement; role: EmbedRuntimeFocusRole }> = [];
+        [
+            { element: liveRootRef.current, role: 'runtime' as const },
+            { element: liveContentRootRef.current, role: 'runtime' as const },
+            { element: liveCanvasRootRef.current, role: 'runtime' as const },
+        ].forEach((root) => {
+            const element = root.element;
+            if (element) {
+                roots.push({ element, role: root.role });
+            }
+        });
         if (stage === 'stage2') {
             [
                 { element: chromeRef.current, role: 'floating-menu' },
@@ -518,6 +531,11 @@ export function EmbedFloatDomRenderer(props: {
             const container = containerRef.current;
             const chrome = chromeRef.current;
             const target = event.target as HTMLElement | null;
+            const externalHostInteraction = isExternalHostInteraction?.(event) ?? false;
+            if (externalHostInteraction) {
+                externalHostInteractionUntilRef.current = Date.now() + EMBED_EXTERNAL_HOST_INTERACTION_GRACE_MS;
+            }
+
             if (
                 !container ||
                 !target ||
@@ -526,6 +544,7 @@ export function EmbedFloatDomRenderer(props: {
                 target.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]') ||
                 focusCoordinator.containsElement(data.embedId, target, event) ||
                 interactionBoundaryService.contains(data.embedId, target, event) ||
+                externalHostInteraction ||
                 isPointInsideFloatBlock(container, event)
             ) {
                 return;
@@ -545,6 +564,7 @@ export function EmbedFloatDomRenderer(props: {
                 !container ||
                 !target ||
                 hasActiveChildEditorOrPopup ||
+                Date.now() < externalHostInteractionUntilRef.current ||
                 interactionBoundaryService.hasRecentInteractionFor(data.embedId, ownerDocument) ||
                 !isHostFocusSurface(target) ||
                 container.contains(target) ||
@@ -565,7 +585,7 @@ export function EmbedFloatDomRenderer(props: {
             document.removeEventListener('pointerdown', clearWhenPointerLeavesBlock, true);
             document.removeEventListener('focusin', clearWhenFocusLeavesBlock, true);
         };
-    }, [activationService, data?.embedId, data?.hostUnitId, focusCoordinator, interactionBoundaryService]);
+    }, [activationService, data?.embedId, data?.hostUnitId, focusCoordinator, interactionBoundaryService, isExternalHostInteraction]);
 
     useEffect(() => {
         if (stage === 'stage2') {

@@ -25,9 +25,15 @@ env:
     TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
-    test:
+    test-shard:
+        name: test shard (${{ matrix.shard-index }}/${{ matrix.shard-total }})
         if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                shard-index: [1, 2, 3, 4]
+                shard-total: [4]
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
             TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -42,12 +48,30 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: 🩺 Run test
-              run: pnpm coverage
+              run: node --experimental-strip-types ./scripts/coverage-shard.mts --shard-index=${{ matrix.shard-index }} --shard-total=${{ matrix.shard-total }} --concurrency=2
 
             - name: 🧬 Report coverage
               uses: codecov/codecov-action@v7
+              with:
+                  flags: unit-${{ matrix.shard-index }}
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    test:
+        name: test
+        if: always() && github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+        runs-on: ubuntu-latest
+        needs: test-shard
+
+        steps:
+            - name: Check test shard results
+              run: |
+                  if [ "${{ needs.test-shard.result }}" != "success" ]; then
+                      echo "One or more test shards failed: ${{ needs.test-shard.result }}"
+                      exit 1
+                  fi
+
+                  echo "All test shards passed"
 
     eslint:
         if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)

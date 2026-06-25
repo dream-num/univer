@@ -1,8 +1,10 @@
 import { createRequire } from 'node:module';
+import process from 'node:process';
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 const require = createRequire(import.meta.url);
 const coverageProviderModule = require.resolve('@vitest/coverage-istanbul');
+const isCI = process.env.CI === 'true';
 
 export default function createConfig(options?: any) {
     return defineConfig(mergeConfig({
@@ -16,7 +18,7 @@ export default function createConfig(options?: any) {
             },
             environment: 'happy-dom',
             coverage: {
-                reporter: ['html', 'json'],
+                reporter: isCI ? ['json', 'lcovonly'] : ['html'],
                 provider: 'custom',
                 // `customProviderModule` expects a file path. Using a bare
                 // package name makes Vitest resolve it as a relative path from

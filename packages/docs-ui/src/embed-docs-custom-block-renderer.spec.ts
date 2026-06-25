@@ -22,6 +22,8 @@ import { describe, expect, it, vi } from 'vitest';
 import {
     blurHostDocSelectionWhenEmbedRuntimeEntersStage,
     createDocsTableLikeCustomBlockWheelHandler,
+    EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT,
+    resolveDocsCustomBlockRuntimeOuterHeight,
     resolveDocsCustomBlockRuntimeViewportHeight,
     resolveDocsTableLikeCustomBlockRuntimeContentHeight,
     resolveDocsTableLikeCustomBlockRuntimeContentWidth,
@@ -90,6 +92,42 @@ describe('resolveDocsCustomBlockRuntimeViewportHeight', () => {
             sheetLike: false,
             viewportHeight: 405,
         })).toBe(405);
+    });
+});
+
+describe('resolveDocsCustomBlockRuntimeOuterHeight', () => {
+    it('reserves vertical space for the floating menu above sheet-like docs custom blocks', () => {
+        expect(resolveDocsCustomBlockRuntimeOuterHeight({
+            contentHeight: 480,
+            menuInsetTop: 52,
+            sheetLike: true,
+        })).toBe(532);
+    });
+
+    it('keeps fixed-size non-sheet-like docs custom blocks at their existing outer height', () => {
+        expect(resolveDocsCustomBlockRuntimeOuterHeight({
+            contentHeight: 405,
+            menuInsetTop: 52,
+            sheetLike: false,
+        })).toBe(405);
+    });
+});
+
+describe('EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT', () => {
+    it('centers every product floating menu above docs custom block containers', () => {
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-docs-embed-floating-menu');
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-sheet-embed-floating-menu');
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-base-embed-floating-menu');
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-slide-embed-floating-menu');
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('left: 50%');
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('transform: translateX(-50%)');
+    });
+
+    it('removes the embed content border only for sheet-like docs custom blocks', () => {
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain(
+            '.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content::after'
+        );
+        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('border: 0');
     });
 });
 

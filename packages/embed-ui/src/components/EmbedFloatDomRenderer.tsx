@@ -58,8 +58,10 @@ interface ClickIntentState {
     pointerId: number;
     startX: number;
     startY: number;
+    button: number;
     startedAt: number;
     moved: boolean;
+    dragStarted: boolean;
 }
 
 type FrameHandle = number | ReturnType<typeof globalThis.setTimeout>;
@@ -81,6 +83,7 @@ export function EmbedFloatDomRenderer(props: {
     onRuntimeStageEnter?: (stage: EmbedFloatingStage) => void;
     onRuntimeStageExit?: () => void;
     syncHostVerticalScroll?: boolean;
+    enableStage1BodyDrag?: boolean;
 }) {
     ensureEmbedFloatDomStyles();
 
@@ -356,9 +359,26 @@ export function EmbedFloatDomRenderer(props: {
         let lastHeight: number | undefined;
         let lastChromeVisible: boolean | undefined;
         let lastChromeControlsVisible: boolean | undefined;
+        let lockedNonDocsChromeTop: number | undefined;
         const syncChromeRect = () => {
             const docsSheetLikeChrome = isDocsSheetLikeChrome(container);
-            const rect = resolveChromeAnchorRect(container);
+            const rawRect = resolveChromeAnchorRect(container);
+            const shouldKeepNonDocsChromeTop =
+                !isDocsCustomBlockChrome(container) &&
+                lockedNonDocsChromeTop != null &&
+                lastLeft === rawRect.left &&
+                lastWidth === rawRect.width &&
+                lastHeight === rawRect.height;
+            if (
+                !isDocsCustomBlockChrome(container) &&
+                lockedNonDocsChromeTop != null &&
+                !shouldKeepNonDocsChromeTop
+            ) {
+                lockedNonDocsChromeTop = undefined;
+            }
+            const rect = shouldKeepNonDocsChromeTop
+                ? new DOMRect(rawRect.left, lockedNonDocsChromeTop, rawRect.width, rawRect.height)
+                : rawRect;
             const chromeVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_RUNTIME_INTERACTION_HEIGHT;
             const chromeControlsVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT;
             syncRuntimeInteractionVisibility(container, chrome, chromeVisible, stage);
@@ -413,6 +433,9 @@ export function EmbedFloatDomRenderer(props: {
             scheduledFrameId = window.requestAnimationFrame(syncScheduledChromeRect);
         };
         const scheduleChromeRectSync = (event?: Event) => {
+            if (!isDocsCustomBlockChrome(container) && isVerticalWheelOrScrollEvent(event) && lastTop != null) {
+                lockedNonDocsChromeTop = lastTop;
+            }
             if (!shouldSyncChromeRectForGlobalEvent(container, event, {
                 left: lastLeft,
                 top: lastTop,
@@ -440,8 +463,12 @@ export function EmbedFloatDomRenderer(props: {
         syncChromeRect();
         document.body.appendChild(chrome);
 
+        const clearNonDocsChromeTopLock = () => {
+            lockedNonDocsChromeTop = undefined;
+        };
         const resizeObserver = new ResizeObserver(syncChromeRect);
         resizeObserver.observe(container);
+        window.addEventListener('pointerdown', clearNonDocsChromeTopLock, true);
         window.addEventListener('scroll', scheduleChromeRectSync, true);
         window.addEventListener('wheel', scheduleChromeRectSync, true);
         window.addEventListener('resize', scheduleChromeRectSync);
@@ -458,6 +485,7 @@ export function EmbedFloatDomRenderer(props: {
                 window.cancelAnimationFrame(scheduledFrameId);
             }
             resizeObserver.disconnect();
+            window.removeEventListener('pointerdown', clearNonDocsChromeTopLock, true);
             window.removeEventListener('scroll', scheduleChromeRectSync, true);
             window.removeEventListener('wheel', scheduleChromeRectSync, true);
             window.removeEventListener('resize', scheduleChromeRectSync);
@@ -587,8 +615,10 @@ export function EmbedFloatDomRenderer(props: {
                 pointerId: event.pointerId,
                 startX: event.clientX,
                 startY: event.clientY,
+                button: event.button ?? 0,
                 startedAt: Date.now(),
                 moved: false,
+                dragStarted: false,
             };
         };
 
@@ -601,6 +631,20 @@ export function EmbedFloatDomRenderer(props: {
             const distance = Math.hypot(event.clientX - intent.startX, event.clientY - intent.startY);
             if (distance > CLICK_DISTANCE_THRESHOLD) {
                 intent.moved = true;
+                if (props.enableStage1BodyDrag && !intent.dragStarted && floatingActiveService.getStage(data.embedId) === 'stage1') {
+                    intent.dragStarted = true;
+                    document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, {
+                        detail: {
+                            embedId: data.embedId,
+                            hostUnitId: data.hostUnitId,
+                            hostAnchorId: data.hostAnchorId,
+                            pointerId: intent.pointerId,
+                            clientX: intent.startX,
+                            clientY: intent.startY,
+                            button: intent.button,
+                        },
+                    }));
+                }
             }
         };
 
@@ -643,7 +687,7 @@ export function EmbedFloatDomRenderer(props: {
             gate.removeEventListener('pointerup', finishIntent, true);
             gate.removeEventListener('pointercancel', clearIntent, true);
         };
-    }, [acquireStage2SessionLease, activationService, data?.embedId, data?.hostUnitId, embedModelService, floatingActiveService, interactionFlow, releaseStage2SessionLeaseIfActivationDoesNotStick]);
+    }, [acquireStage2SessionLease, activationService, data?.embedId, data?.hostAnchorId, data?.hostUnitId, embedModelService, floatingActiveService, interactionFlow, props.enableStage1BodyDrag, releaseStage2SessionLeaseIfActivationDoesNotStick]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -1431,6 +1475,14 @@ function shouldSyncChromeRectForGlobalEvent(
     }
 
     return true;
+}
+
+function isVerticalWheelOrScrollEvent(event: Event | undefined): boolean {
+    if (event instanceof WheelEvent) {
+        return Math.abs(event.deltaY) >= Math.abs(event.deltaX);
+    }
+
+    return event?.type === 'scroll';
 }
 
 function isEmbedForwardedWheelEvent(event: Event | undefined): boolean {

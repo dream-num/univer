@@ -111,8 +111,8 @@ function ensureEmbedFloatFullscreenButtonStyles(): void {
     style.textContent = `
 .univer-embed-float-fullscreen-button {
     position: absolute;
-    top: 6px;
-    right: 16px;
+    top: 8px;
+    right: 8px;
     z-index: 10;
     display: inline-flex;
     align-items: center;

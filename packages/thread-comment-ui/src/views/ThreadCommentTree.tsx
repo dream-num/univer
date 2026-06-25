@@ -21,7 +21,7 @@ import type { LocaleKey } from '../locale/types';
 import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
-import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, ResolvedIcon, SolveIcon } from '@univerjs/icons';
+import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, SuccessIcon, SuccessOutlineIcon } from '@univerjs/icons';
 import {
     AddCommentCommand,
     DeleteCommentCommand,
@@ -444,7 +444,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             })}
                             onClick={handleResolve}
                         >
-                            {resolved ? <ResolvedIcon /> : <SolveIcon />}
+                            {resolved ? <SuccessIcon /> : <SuccessOutlineIcon />}
                         </div>
                         {currentUser?.userID === comments.root.personId
                             ? (

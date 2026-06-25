@@ -17,7 +17,15 @@
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, HoverCard } from '@univerjs/design';
-import { DatabaseIcon, EyeIcon, FunctionIcon, HomeIcon, InsertIcon, MoreDownIcon, MoreFunctionIcon } from '@univerjs/icons';
+import {
+    DatabaseIcon,
+    EyeIcon,
+    FunctionIcon,
+    HomeIcon,
+    InsertIcon,
+    MoreDownIcon,
+    MoreVerticalIcon,
+} from '@univerjs/icons';
 import { useState } from 'react';
 import { RibbonPosition } from '../../../../services/menu/types';
 import { useDependency } from '../../../../utils/di';
@@ -28,7 +36,7 @@ const iconMap = {
     [RibbonPosition.FORMULAS]: FunctionIcon,
     [RibbonPosition.DATA]: DatabaseIcon,
     [RibbonPosition.VIEW]: EyeIcon,
-    [RibbonPosition.OTHERS]: MoreFunctionIcon,
+    [RibbonPosition.OTHERS]: MoreVerticalIcon,
 };
 
 export function DefaultMenu({
@@ -58,7 +66,7 @@ export function DefaultMenu({
             overlay={(
                 <div className="univer-grid univer-gap-1 univer-px-2 univer-py-1">
                     {ribbon.map((group) => {
-                        const Icon = iconMap[group.key as RibbonPosition] ?? MoreFunctionIcon;
+                        const Icon = iconMap[group.key as RibbonPosition] ?? MoreVerticalIcon;
 
                         return (
                             <a

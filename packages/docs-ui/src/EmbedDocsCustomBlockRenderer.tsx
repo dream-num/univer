@@ -29,6 +29,64 @@ import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-sc
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 
 const SHEET_LIKE_CUSTOM_BLOCK_DEFAULT_CONTENT_HEIGHT = 480;
+const DOCS_CUSTOM_BLOCK_FLOATING_MENU_INSET_TOP = 52;
+export const EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT = `
+.univer-embed-docs-custom-block {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: visible;
+}
+.univer-embed-docs-custom-block .univer-embed-float-dom__content {
+    top: var(--univer-embed-docs-block-floating-menu-inset-top, 52px);
+    height: calc(100% - var(--univer-embed-docs-block-floating-menu-inset-top, 52px));
+}
+.univer-embed-docs-custom-block .univer-docs-embed-floating-menu,
+.univer-embed-docs-custom-block .univer-sheet-embed-floating-menu,
+.univer-embed-docs-custom-block .univer-base-embed-floating-menu,
+.univer-embed-docs-custom-block .univer-slide-embed-floating-menu {
+    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
+    left: 50%;
+    transform: translateX(-50%);
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] {
+    contain: layout style;
+    height: var(--univer-embed-docs-block-outer-height, 100%);
+    min-height: var(--univer-embed-docs-block-outer-height, 100%);
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content {
+    left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
+    width: var(--univer-embed-docs-block-bleed-width, 100%);
+    height: var(--univer-embed-docs-block-viewport-height, 100%);
+    overflow: hidden;
+    transform: translateY(var(--univer-embed-docs-scroll-offset, 0px));
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content::after {
+    border: 0;
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live::before {
+    display: none;
+    width: var(--univer-embed-docs-block-virtual-width, 100%);
+    height: var(--univer-embed-docs-block-content-height, 1px);
+    pointer-events: none;
+    content: '';
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-canvas,
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-content {
+    left: var(--univer-embed-docs-block-bleed-left, 0px);
+    width: var(--univer-embed-docs-block-bleed-width, 100%);
+    height: var(--univer-embed-docs-block-viewport-height, 100%);
+    min-height: var(--univer-embed-docs-block-viewport-height, 100%);
+}
+`;
 
 export interface IEmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
@@ -173,6 +231,11 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
     const contentHeight = sheetLike
         ? resolveDocsTableLikeCustomBlockRuntimeContentHeight(props.customBlockRenderViewport?.contentHeight)
         : resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1);
+    const outerHeight = resolveDocsCustomBlockRuntimeOuterHeight({
+        contentHeight,
+        menuInsetTop: DOCS_CUSTOM_BLOCK_FLOATING_MENU_INSET_TOP,
+        sheetLike,
+    });
     const viewportHeight = resolveDocsCustomBlockRuntimeViewportHeight({
         contentHeight,
         sheetLike,
@@ -184,10 +247,14 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             '--univer-embed-docs-block-bleed-width': `${viewport.bleedWidth}px`,
             '--univer-embed-docs-block-content-height': `${contentHeight}px`,
             '--univer-embed-docs-block-content-width': `${viewport.contentWidth}px`,
+            '--univer-embed-docs-block-floating-menu-inset-top': `${DOCS_CUSTOM_BLOCK_FLOATING_MENU_INSET_TOP}px`,
+            '--univer-embed-docs-block-outer-height': `${outerHeight}px`,
             '--univer-embed-docs-block-viewport-height': `${viewportHeight}px`,
             '--univer-embed-docs-block-virtual-width': `${viewport.virtualWidth}px`,
         } as CSSProperties & Record<string, string>)
-        : undefined;
+        : ({
+            '--univer-embed-docs-block-floating-menu-inset-top': `${DOCS_CUSTOM_BLOCK_FLOATING_MENU_INSET_TOP}px`,
+        } as CSSProperties & Record<string, string>);
     const handleHostWheel = useCallback((event: WheelEvent, context: IEmbedChildContainerContext) => {
         const scene = renderManagerService.getRenderById(context.hostUnitId)?.scene;
         return scrollSceneViewportPassive(
@@ -302,6 +369,14 @@ export function resolveDocsCustomBlockRuntimeViewportHeight(params: {
     return resolveDocsTableLikeCustomBlockContentHeight(params.viewportHeight, params.contentHeight);
 }
 
+export function resolveDocsCustomBlockRuntimeOuterHeight(params: {
+    contentHeight: number;
+    menuInsetTop: number;
+    sheetLike: boolean;
+}): number {
+    return params.sheetLike ? params.contentHeight + params.menuInsetTop : params.contentHeight;
+}
+
 export function resolveDocsTableLikeCustomBlockRuntimeContentWidth(
     authoritativeContentWidth: number | undefined,
     measureFallback: () => number
@@ -387,47 +462,6 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 
     const style = document.createElement('style');
     style.id = 'univer-embed-docs-custom-block-styles';
-    style.textContent = `
-.univer-embed-docs-custom-block {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: visible;
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] {
-    contain: layout style;
-    height: var(--univer-embed-docs-block-content-height, 100%);
-    min-height: var(--univer-embed-docs-block-content-height, 100%);
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content {
-    left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
-    width: var(--univer-embed-docs-block-bleed-width, 100%);
-    height: var(--univer-embed-docs-block-viewport-height, 100%);
-    overflow: hidden;
-    transform: translateY(var(--univer-embed-docs-scroll-offset, 0px));
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live::before {
-    display: none;
-    width: var(--univer-embed-docs-block-virtual-width, 100%);
-    height: var(--univer-embed-docs-block-content-height, 1px);
-    pointer-events: none;
-    content: '';
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-canvas,
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-content {
-    left: var(--univer-embed-docs-block-bleed-left, 0px);
-    width: var(--univer-embed-docs-block-bleed-width, 100%);
-    height: var(--univer-embed-docs-block-viewport-height, 100%);
-    min-height: var(--univer-embed-docs-block-viewport-height, 100%);
-}
-`;
+    style.textContent = EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT;
     document.head.appendChild(style);
 }

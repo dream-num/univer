@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/embed",
-    "version": "0.25.0",
+    "version": "1.0.0-alpha.0",
     "private": false,
     "description": "Cross-unit embed model and runtime foundation for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

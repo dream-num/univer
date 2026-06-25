@@ -374,10 +374,12 @@ export function EmbedFloatDomRenderer(props: {
         let lastHeight: number | undefined;
         let lastChromeVisible: boolean | undefined;
         let lastChromeControlsVisible: boolean | undefined;
+        let lastDragHandleVisible: boolean | undefined;
         let lockedNonDocsChromeTop: number | undefined;
         const syncChromeRect = () => {
             const docsSheetLikeChrome = isDocsSheetLikeChrome(container);
             const rawRect = resolveChromeAnchorRect(container);
+            const rawContainerRect = container.getBoundingClientRect();
             const shouldKeepNonDocsChromeTop =
                 !isDocsCustomBlockChrome(container) &&
                 lockedNonDocsChromeTop != null &&
@@ -396,8 +398,9 @@ export function EmbedFloatDomRenderer(props: {
                 : rawRect;
             const chromeVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_RUNTIME_INTERACTION_HEIGHT;
             const chromeControlsVisible = rect.height >= MIN_EMBED_FLOATING_CHROME_CONTROLS_HEIGHT;
+            const dragHandleVisible = chromeControlsVisible && rawContainerRect.top >= rect.top;
             syncRuntimeInteractionVisibility(container, chrome, chromeVisible, stage);
-            syncChromeControlsVisibility(chrome, chromeControlsVisible, stage);
+            syncChromeControlsVisibility(chrome, chromeControlsVisible, dragHandleVisible, stage);
             if (docsSheetLikeChrome) {
                 chrome.style.setProperty('--univer-embed-floating-menu-top', '8px');
             } else {
@@ -411,7 +414,8 @@ export function EmbedFloatDomRenderer(props: {
                 rect.width === lastWidth &&
                 rect.height === lastHeight &&
                 chromeVisible === lastChromeVisible &&
-                chromeControlsVisible === lastChromeControlsVisible
+                chromeControlsVisible === lastChromeControlsVisible &&
+                dragHandleVisible === lastDragHandleVisible
             ) {
                 return;
             }
@@ -422,6 +426,7 @@ export function EmbedFloatDomRenderer(props: {
             lastHeight = rect.height;
             lastChromeVisible = chromeVisible;
             lastChromeControlsVisible = chromeControlsVisible;
+            lastDragHandleVisible = dragHandleVisible;
             EMBED_FLOAT_DOM_RECT_CACHE.set(container, {
                 left: rect.left,
                 top: rect.top,
@@ -523,7 +528,7 @@ export function EmbedFloatDomRenderer(props: {
             EMBED_FLOAT_DOM_RECT_CACHE.delete(container);
             chrome.removeAttribute('style');
             syncRuntimeInteractionVisibility(container, chrome, true, 'stage2');
-            syncChromeControlsVisibility(chrome, true, 'stage2');
+            syncChromeControlsVisibility(chrome, true, true, 'stage2');
             if (originalParent?.isConnected) {
                 originalParent.insertBefore(chrome, originalNextSibling);
             } else {
@@ -1365,24 +1370,24 @@ function syncRuntimeInteractionVisibility(container: HTMLElement, chrome: HTMLEl
     popupRoot?.style.setProperty('pointer-events', popupPointerEvents);
 }
 
-function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
+function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, dragHandleVisible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
     const visibility = visible ? '' : 'hidden';
     const pointerEvents = visible ? '' : 'none';
+    const dragHandleVisibility = dragHandleVisible ? '' : 'hidden';
+    const dragHandlePointerEvents = dragHandleVisible ? '' : 'none';
     const menuVisibility = visible && stage === 'stage2' ? '' : 'hidden';
     const menuPointerEvents = visible && stage === 'stage2' ? '' : 'none';
-    const controls = [
-        chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]'),
-        chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]'),
-    ];
+    const fullscreenButton = chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
+    const dragHandle = chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]');
     const menuLayers = [
         chrome?.querySelector<HTMLElement>('[data-embed-overlay-root]'),
         chrome?.querySelector<HTMLElement>('[data-embed-popup-root]'),
     ];
 
-    controls.forEach((control) => {
-        control?.style.setProperty('visibility', visibility);
-        control?.style.setProperty('pointer-events', pointerEvents);
-    });
+    fullscreenButton?.style.setProperty('visibility', visibility);
+    fullscreenButton?.style.setProperty('pointer-events', pointerEvents);
+    dragHandle?.style.setProperty('visibility', dragHandleVisibility);
+    dragHandle?.style.setProperty('pointer-events', dragHandlePointerEvents);
     menuLayers.forEach((control) => {
         control?.style.setProperty('visibility', menuVisibility);
         control?.style.setProperty('pointer-events', menuPointerEvents);
@@ -2111,8 +2116,8 @@ function ensureEmbedFloatDomStyles(): void {
 }
 .univer-embed-float-dom__drag-handle {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: -24px;
+    left: 0;
     z-index: 2;
     display: none;
     align-items: center;

@@ -286,6 +286,7 @@ function mountSheetsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
 
     const root = resolveEmbedFloatingMenuRoot(context);
     const menu = document.createElement('div');
+    menu.setAttribute('data-embed-floating-menu-entry', context.descriptor.entry);
     root.appendChild(menu);
 
     const reactRoot = createEmbedReactRoot(menu);
@@ -1071,12 +1072,18 @@ function ensureSheetFloatingMenuStyles(): void {
 .univer-sheet-embed-floating-menu::-webkit-scrollbar {
     display: none;
 }
+[data-embed-floating-menu-entry="docs-custom-block"] .univer-sheet-embed-floating-menu {
+    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
+    left: 50%;
+    transform: translateX(-50%);
+}
 .univer-sheet-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
     display: none;
 }
 [data-embed-fullscreen-menu-slot="true"] .univer-sheet-embed-floating-menu {
     position: static;
     margin: 6px auto;
+    transform: none;
 }
 `;
     document.head.appendChild(style);

@@ -22,6 +22,27 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { createElement, useEffect, useRef } from 'react';
 
 const DOCS_FLOATING_MENU_STYLE_ID = 'univer-docs-embed-floating-menu-styles';
+export const DOCS_FLOATING_MENU_STYLE_TEXT = `
+.univer-docs-embed-floating-menu {
+    position: absolute;
+    top: -36px;
+    left: 34px;
+    z-index: 30;
+}
+[data-embed-floating-menu-entry="docs-custom-block"] .univer-docs-embed-floating-menu {
+    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
+    left: 50%;
+    transform: translateX(-50%);
+}
+.univer-docs-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
+    display: none;
+}
+[data-embed-fullscreen-menu-slot="true"] .univer-docs-embed-floating-menu {
+    position: static;
+    margin: 6px auto;
+    transform: none;
+}
+`;
 
 export function createDocsFloatingMenuContributions(): IEmbedFloatingMenuContribution[] {
     return createEmbedProductFloatingMenuContributions({
@@ -35,6 +56,7 @@ function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
 
     const root = resolveEmbedFloatingMenuRoot(context);
     const menu = document.createElement('div');
+    menu.setAttribute('data-embed-floating-menu-entry', context.descriptor.entry);
     root.appendChild(menu);
 
     const reactRoot = createEmbedReactRoot(menu);
@@ -152,20 +174,6 @@ function ensureDocsFloatingMenuStyles(): void {
 
     const style = document.createElement('style');
     style.id = DOCS_FLOATING_MENU_STYLE_ID;
-    style.textContent = `
-.univer-docs-embed-floating-menu {
-    position: absolute;
-    top: -36px;
-    left: 34px;
-    z-index: 30;
-}
-.univer-docs-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
-    display: none;
-}
-[data-embed-fullscreen-menu-slot="true"] .univer-docs-embed-floating-menu {
-    position: static;
-    margin: 6px auto;
-}
-`;
+    style.textContent = DOCS_FLOATING_MENU_STYLE_TEXT;
     document.head.appendChild(style);
 }

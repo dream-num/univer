@@ -306,7 +306,7 @@ importers:
         specifier: ^0.22.3
         version: 0.22.3(jiti@2.7.0)(postcss-modules@6.0.1(postcss@8.5.15))(postcss@8.5.15)(sass@1.87.0)(tsdown@0.22.3)(tsx@4.22.4)(yaml@2.9.0)
       '@typescript-eslint/parser':
-        specifier: ^8.61.1
+        specifier: ^8.59.2
         version: 8.61.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3)
       '@vitest/coverage-istanbul':
         specifier: ^4.1.9
@@ -361,8 +361,8 @@ importers:
         specifier: 1.13.0
         version: 1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/icons-svg':
-        specifier: ^1.12.0
-        version: 1.12.0
+        specifier: ^1.13.0
+        version: 1.13.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1614,8 +1614,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/icons-svg':
-        specifier: ^1.12.0
-        version: 1.12.0
+        specifier: ^1.13.0
+        version: 1.13.0
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
@@ -6862,8 +6862,8 @@ packages:
     resolution: {integrity: sha512-6fJ9MHWtK14C1DSkiMlHUSOmrVebL7150xZJBlJiL62jjhIA4JmOq6flwBgDxIdBKKdoiZRel+dfPD5MLfny3w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@univerjs/icons-svg@1.12.0':
-    resolution: {integrity: sha512-m2RSIsGaC1y66vIqU2FEUvDQ+3CBKBFwa28PUUpg9Rn93AoFs6LXok/FQxE6pibMbMomTjySyVtxgK4ZexCaaQ==}
+  '@univerjs/icons-svg@1.13.0':
+    resolution: {integrity: sha512-zY427LrbyxeYhTjJ3vxS/qwtAy0rlacnhnbRgrs1dIRHI49MqRHKXKKsMjJqXoUrFHBP9dn3m7A9KImA8CDwpg==}
 
   '@univerjs/icons@1.13.0':
     resolution: {integrity: sha512-K1wBl7I+TZa+B8SvQHwojO9c/cYdk+Pkfd7hVB8wd0yMg4neuH4JeOdra2zxoG7qTcBEXSBPZbKLMxuA8/GNZQ==}
@@ -14281,8 +14281,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.56.1(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.61.1(typescript@6.0.3)
-      '@typescript-eslint/types': 8.61.1
+      '@typescript-eslint/tsconfig-utils': 8.56.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.56.1
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -14510,7 +14510,7 @@ snapshots:
       '@typescript-eslint/types': 8.61.1
       eslint-visitor-keys: 5.0.1
 
-  '@univerjs/icons-svg@1.12.0': {}
+  '@univerjs/icons-svg@1.13.0': {}
 
   '@univerjs/icons@1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:

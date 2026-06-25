@@ -16,8 +16,14 @@
 
 import type { ComponentType } from 'react';
 import { LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, borderRightClassName, clsx, resetButtonClassName } from '@univerjs/design';
-import { MoreIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
+import {
+    borderBottomClassName,
+    borderClassName,
+    borderRightClassName,
+    clsx,
+    resetButtonClassName,
+} from '@univerjs/design';
+import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
@@ -152,7 +158,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                         aria-label="Previous"
                         onClick={() => selectTab(activeIndex - 1)}
                     >
-                        <MoreIcon className="univer-rotate-180 univer-text-sm" />
+                        <MoreLeftIcon className="univer-rotate-180 univer-text-sm" />
                     </button>
                 </div>
 
@@ -214,7 +220,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                         aria-label="Next"
                         onClick={() => selectTab(activeIndex + 1)}
                     >
-                        <MoreIcon className="univer-text-sm" />
+                        <MoreRightIcon className="univer-text-sm" />
                     </button>
 
                     {hasHeaderMenu && (

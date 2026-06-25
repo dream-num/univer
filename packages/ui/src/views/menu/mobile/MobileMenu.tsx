@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import type { IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
+import type {
+    IDisplayMenuItem,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemDefaultValueType,
+} from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { IBaseMenuProps } from '../types';
 import { LocaleService } from '@univerjs/core';
 import { borderBottomClassName, clsx } from '@univerjs/design';
-import { CheckMarkIcon, MoreIcon, MoreLeftIcon } from '@univerjs/icons';
+import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
 import { scan, startWith } from 'rxjs/operators';
@@ -273,7 +280,7 @@ function MobileSchemaRow(props: {
                     {currentValueText}
                 </span>
             )}
-            {hasSubmenu && <MoreIcon className="univer-shrink-0 univer-text-base univer-text-gray-400" />}
+            {hasSubmenu && <MoreRightIcon className="univer-shrink-0 univer-text-base univer-text-gray-400" />}
         </button>
     );
 }

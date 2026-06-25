@@ -23,7 +23,7 @@ import {
     IPermissionService,
     throttle,
 } from '@univerjs/core';
-import { IncreaseIcon, MoreIcon } from '@univerjs/icons';
+import { IncreaseIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
 import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -120,10 +120,10 @@ export const SheetBar = () => {
                     `}
                 >
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
-                        <MoreIcon className="univer-rotate-180" />
+                        <MoreLeftIcon />
                     </SheetBarButton>
                     <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
-                        <MoreIcon />
+                        <MoreRightIcon />
                     </SheetBarButton>
                 </div>
             )}

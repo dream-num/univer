@@ -5,7 +5,8 @@
         },
 
         "coverage": {
-            "outputs": ["coverage/**"]
+            "outputs": ["coverage/**"],
+            "env": ["CI"]
         },
 
         "build": {

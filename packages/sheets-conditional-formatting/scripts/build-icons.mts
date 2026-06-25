@@ -53,9 +53,9 @@ const feedback = [
 ];
 
 const feedback2 = [
-    ['mistake2', '@univerjs/icons-svg/single/mistake-icon.svg', { black: '#FE4B4B' }],
-    ['warn2', '@univerjs/icons-svg/single/warn-icon.svg', { black: '#FFBD37' }],
-    ['correct2', '@univerjs/icons-svg/single/correct-icon.svg', { black: '#59D01E' }],
+    ['mistake2', '@univerjs/icons-svg/single/close-icon.svg', { black: '#FE4B4B' }],
+    ['warn2', '@univerjs/icons-svg/single/exclamation-icon.svg', { black: '#FFBD37' }],
+    ['correct2', '@univerjs/icons-svg/single/check-mark-icon.svg', { black: '#59D01E' }],
 ];
 
 const arrow = [

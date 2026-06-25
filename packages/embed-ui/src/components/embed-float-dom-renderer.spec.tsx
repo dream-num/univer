@@ -1492,6 +1492,42 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.clearFloating).toHaveBeenCalledWith('embed-1', 'host-1');
     });
 
+    it('keeps stage active when the host marks an external pointer as its own interaction', async () => {
+        const isExternalHostInteraction = vi.fn(() => true);
+        await renderFloatBlock({ isExternalHostInteraction });
+
+        await act(async () => {
+            document.body.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                clientX: 120,
+                clientY: 120,
+            }));
+        });
+
+        expect(isExternalHostInteraction).toHaveBeenCalledWith(expect.any(PointerEvent));
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+    });
+
+    it('keeps stage active when host focus follows an external host pointer interaction', async () => {
+        const isExternalHostInteraction = vi.fn(() => true);
+        await renderFloatBlock({ isExternalHostInteraction });
+        const hostEditor = document.createElement('div');
+        hostEditor.id = '__editor_slides-embed-host';
+        document.body.appendChild(hostEditor);
+
+        await act(async () => {
+            document.body.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                clientX: 120,
+                clientY: 120,
+            }));
+            hostEditor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        });
+
+        hostEditor.remove();
+        expect(activationService.clearFloating).not.toHaveBeenCalled();
+    });
+
     it('clears stage2 when a child editor lease is active but the pointer moves to the host', async () => {
         stage = 'stage2';
         await renderFloatBlock({ initialStage: 'stage2' });
@@ -1946,6 +1982,15 @@ describe('EmbedFloatDomRenderer', () => {
         });
 
         expect(onRuntimeStageEnter).toHaveBeenCalledWith('stage2');
+    });
+
+    it('notifies the host when the floating block mounts into an already active stage', async () => {
+        const onRuntimeStageEnter = vi.fn();
+        stage = 'stage1';
+
+        await renderFloatBlock({ initialStage: 'stage1', onRuntimeStageEnter });
+
+        expect(onRuntimeStageEnter).toHaveBeenCalledWith('stage1');
     });
 
     it('promotes stage1 to stage2 only after a click-intent pointerup', async () => {
@@ -3385,7 +3430,7 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
-    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
+    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; isExternalHostInteraction?: (event: PointerEvent) => boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
         const childType = props?.childType ?? UniverInstanceType.UNIVER_SHEET;
         descriptor = createFloatDescriptor({ childType });
         const renderer = (
@@ -3397,6 +3442,7 @@ describe('EmbedFloatDomRenderer', () => {
                 onRuntimeStageExit={props?.onRuntimeStageExit}
                 onRuntimeStageEnter={props?.onRuntimeStageEnter}
                 enableStage1BodyDrag={props?.enableStage1BodyDrag}
+                isExternalHostInteraction={props?.isExternalHostInteraction}
                 data={{
                     version: 1,
                     embedId: 'embed-1',

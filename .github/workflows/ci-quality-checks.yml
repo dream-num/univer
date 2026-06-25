@@ -53,7 +53,7 @@ jobs:
             - name: 🧬 Report coverage
               uses: codecov/codecov-action@v7
               with:
-                  flags: unit-${{ matrix.shard-index }}
+                  name: unit-${{ matrix.shard-index }}
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 

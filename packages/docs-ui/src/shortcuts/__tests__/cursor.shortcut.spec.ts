@@ -23,12 +23,16 @@ import {
     MoveCursorDocumentStartShortcut,
     MoveCursorLineEndShortcut,
     MoveCursorLineStartShortcut,
+    MoveCursorParagraphDownShortcut,
+    MoveCursorParagraphUpShortcut,
     MoveCursorWordLeftShortcut,
     MoveCursorWordRightShortcut,
     MoveSelectionDocumentEndShortcut,
     MoveSelectionDocumentStartShortcut,
     MoveSelectionLineEndShortcut,
     MoveSelectionLineStartShortcut,
+    MoveSelectionParagraphDownShortcut,
+    MoveSelectionParagraphUpShortcut,
     MoveSelectionWordLeftShortcut,
     MoveSelectionWordRightShortcut,
 } from '../cursor.shortcut';
@@ -112,6 +116,33 @@ describe('docs cursor shortcuts', () => {
             binding: KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
             mac: KeyCode.ARROW_RIGHT | MetaKeys.ALT | MetaKeys.SHIFT,
             staticParameters: { direction: Direction.RIGHT, granularity: 'word' },
+        });
+    });
+
+    it('registers paragraph movement shortcuts with Option on macOS and Ctrl elsewhere', () => {
+        expect(MoveCursorParagraphUpShortcut).toMatchObject({
+            id: MoveCursorOperation.id,
+            binding: KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND,
+            mac: KeyCode.ARROW_UP | MetaKeys.ALT,
+            staticParameters: { direction: Direction.UP, granularity: 'paragraph' },
+        });
+        expect(MoveCursorParagraphDownShortcut).toMatchObject({
+            id: MoveCursorOperation.id,
+            binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
+            mac: KeyCode.ARROW_DOWN | MetaKeys.ALT,
+            staticParameters: { direction: Direction.DOWN, granularity: 'paragraph' },
+        });
+        expect(MoveSelectionParagraphUpShortcut).toMatchObject({
+            id: MoveSelectionOperation.id,
+            binding: KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+            mac: KeyCode.ARROW_UP | MetaKeys.ALT | MetaKeys.SHIFT,
+            staticParameters: { direction: Direction.UP, granularity: 'paragraph' },
+        });
+        expect(MoveSelectionParagraphDownShortcut).toMatchObject({
+            id: MoveSelectionOperation.id,
+            binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+            mac: KeyCode.ARROW_DOWN | MetaKeys.ALT | MetaKeys.SHIFT,
+            staticParameters: { direction: Direction.DOWN, granularity: 'paragraph' },
         });
     });
 });

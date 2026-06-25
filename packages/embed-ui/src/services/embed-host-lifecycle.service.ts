@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
-import type { IEmbedCreateContext, IEmbedDescriptor } from '@univerjs/embed';
-import { ICommandService, Inject, IUndoRedoService, sequenceExecute } from '@univerjs/core';
-import { EmbedCreationService, EmbedModelService, SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from '@univerjs/embed';
+import type { ICreateUnitOptions, IMutationInfo, IUniverInstanceService } from '@univerjs/core';
+import type { IEmbedCreateContext, IEmbedDescriptor, IInsertEmbedBySnapshotCommandParams } from '@univerjs/embed';
+import { generateRandomId, ICommandService, Inject, IUndoRedoService, IUniverInstanceService as IUniverInstanceServiceToken, Optional, PluginService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { createDefaultEmbedSourceMeta, EMBED_CHILD_CREATE_OPTIONS, EmbedCapabilityRegistryService, EmbedCreationService, EmbedModelService, SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation, toResourceRefUnitType } from '@univerjs/embed';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 
 export interface IEmbedHostCreateContext extends Omit<IEmbedCreateContext, 'hostAnchorId'> {
@@ -44,6 +44,12 @@ export class EmbedHostLifecycleService {
         private readonly _creationService: EmbedCreationService,
         @Inject(EmbedModelService)
         private readonly _modelService: EmbedModelService,
+        @Inject(EmbedCapabilityRegistryService)
+        private readonly _capabilityRegistry: EmbedCapabilityRegistryService,
+        @IUniverInstanceServiceToken
+        private readonly _univerInstanceService: IUniverInstanceService,
+        @Optional(PluginService)
+        private readonly _pluginService: PluginService | undefined,
         @Inject(EmbedHostAdapterRegistryService)
         private readonly _hostAdapterRegistry: EmbedHostAdapterRegistryService,
         @ICommandService
@@ -52,6 +58,84 @@ export class EmbedHostLifecycleService {
         private readonly _undoRedoService: IUndoRedoService
     ) {
         // noop
+    }
+
+    createEmbedBySnapshot<TSnapshot>(context: IInsertEmbedBySnapshotCommandParams<TSnapshot>): IEmbedDescriptor {
+        const embedId = context.embedId ?? `embed_${generateRandomId(10)}`;
+        const hostContext = this._normalizeHostContext(context);
+        const initialHostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
+            embedId,
+            hostUnitId: context.hostUnitId,
+            hostType: context.hostType,
+            entry: context.entry,
+            requestedAnchorId: context.hostAnchorId,
+            hostContext,
+        });
+        const capability = this._capabilityRegistry.getCapability({
+            hostType: context.hostType,
+            childType: context.childType,
+            entry: context.entry,
+        });
+        if (!capability) {
+            throw new Error('EMBED_CAPABILITY_NOT_SUPPORTED');
+        }
+
+        const childSnapshot = normalizeChildSnapshot(context.unitSnapshot, context.childUnitId);
+        this._pluginService?.startPluginsForType(context.childType);
+        const childUnit = this._univerInstanceService.createUnit(
+            context.childType,
+            childSnapshot as Partial<unknown>,
+            {
+                ...EMBED_CHILD_CREATE_OPTIONS,
+                ...context.createUnitOptions,
+            } as ICreateUnitOptions
+        );
+        const childUnitId = childUnit.getUnitId();
+        const descriptor: IEmbedDescriptor = {
+            embedId,
+            hostUnitId: context.hostUnitId,
+            hostType: context.hostType,
+            hostAnchorId: initialHostAnchorPlan.hostAnchorId,
+            entry: context.entry,
+            source: {
+                kind: 'ref',
+                ref: {
+                    file: { kind: 'self' },
+                    unit: {
+                        selector: childUnitId,
+                        type: toResourceRefUnitType(context.childType),
+                    },
+                },
+            },
+            childUnitId,
+            childType: context.childType,
+            mode: 'interactive',
+            sourceMeta: context.sourceMeta ?? createDefaultEmbedSourceMeta(capability),
+        };
+        this._assertChildUnitAvailable(context.hostUnitId, descriptor);
+
+        const hostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
+            embedId,
+            hostUnitId: context.hostUnitId,
+            hostType: context.hostType,
+            entry: context.entry,
+            requestedAnchorId: descriptor.hostAnchorId,
+            hostContext,
+            descriptor,
+        });
+        const redoMutations: IMutationInfo[] = [
+            ...hostAnchorPlan.redoMutations,
+            this._toSetDescriptorMutation(descriptor),
+        ];
+        const undoMutations: IMutationInfo[] = [
+            this._toSoftDeleteDescriptorMutation(descriptor),
+            ...hostAnchorPlan.undoMutations,
+        ];
+
+        this._executeAndPushUndoRedo(descriptor.hostUnitId, redoMutations, undoMutations);
+        const created = this._getDescriptor(descriptor.hostUnitId, descriptor.embedId);
+        this._afterCreateAnchor(created, hostContext);
+        return created;
     }
 
     async createEmbed(context: IEmbedHostCreateContext): Promise<IEmbedDescriptor> {
@@ -189,6 +273,43 @@ export class EmbedHostLifecycleService {
         return descriptor;
     }
 
+    private _assertChildUnitAvailable(hostUnitId: string, descriptor: IEmbedDescriptor): void {
+        if (!descriptor.childUnitId) {
+            return;
+        }
+
+        const duplicated = this._modelService.getActiveDescriptorsByChildUnit(descriptor.childUnitId).find((item) =>
+            item.hostUnitId !== hostUnitId || item.embedId !== descriptor.embedId
+        );
+        if (duplicated) {
+            throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        }
+    }
+
+    private _normalizeHostContext(context: IInsertEmbedBySnapshotCommandParams): Record<string, unknown> | undefined {
+        const hostContext = normalizeSheetHostContext(context.hostContext);
+
+        if (context.hostType === UniverInstanceType.UNIVER_SHEET && context.entry === 'sheets-floating-object') {
+            if (typeof hostContext?.subUnitId === 'string') {
+                return hostContext;
+            }
+
+            const subUnitId = getActiveSheetId(this._univerInstanceService, context.hostUnitId);
+            return subUnitId ? { ...(hostContext ?? {}), subUnitId } : hostContext;
+        }
+
+        if (context.hostType === UniverInstanceType.UNIVER_SLIDE && context.entry === 'slides-floating-object') {
+            if (typeof hostContext?.subUnitId === 'string') {
+                return hostContext;
+            }
+
+            const subUnitId = getActiveSlidePageId(this._univerInstanceService, context.hostUnitId);
+            return subUnitId ? { ...(hostContext ?? {}), subUnitId } : hostContext;
+        }
+
+        return hostContext;
+    }
+
     private _toSetDescriptorMutation(descriptor: IEmbedDescriptor): IMutationInfo {
         return {
             id: SetEmbedDescriptorMutation.id,
@@ -239,4 +360,110 @@ export class EmbedHostLifecycleService {
             // Render refresh hooks must not invalidate the committed data mutation.
         }
     }
+}
+
+function normalizeChildSnapshot<TSnapshot>(snapshot: TSnapshot, childUnitId?: string): TSnapshot {
+    if (!childUnitId || typeof snapshot !== 'object' || snapshot === null || Array.isArray(snapshot)) {
+        return snapshot;
+    }
+
+    return {
+        ...snapshot,
+        id: childUnitId,
+    };
+}
+
+function normalizeSheetHostContext(hostContext?: Record<string, unknown>): Record<string, unknown> | undefined {
+    if (!hostContext) {
+        return undefined;
+    }
+
+    const next = { ...hostContext };
+    if (typeof next.sheetIndex !== 'number' && typeof next.tabIndex === 'number') {
+        next.sheetIndex = next.tabIndex;
+    }
+    if (typeof next.sheetName !== 'string' && typeof next.name === 'string') {
+        next.sheetName = next.name;
+    }
+    const rect = getRecord(next.rect);
+    if (rect) {
+        if (typeof next.left !== 'number' && typeof rect.x === 'number') {
+            next.left = rect.x;
+        }
+        if (typeof next.top !== 'number' && typeof rect.y === 'number') {
+            next.top = rect.y;
+        }
+        if (typeof next.width !== 'number' && typeof rect.width === 'number') {
+            next.width = rect.width;
+        }
+        if (typeof next.height !== 'number' && typeof rect.height === 'number') {
+            next.height = rect.height;
+        }
+    }
+
+    return next;
+}
+
+function getActiveSheetId(univerInstanceService: IUniverInstanceService, unitId: string): string | undefined {
+    const workbook = univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_SHEET) as {
+        getActiveSheet?: () => unknown;
+    } | undefined;
+    const activeSheet = workbook?.getActiveSheet?.() as {
+        getSheetId?: () => string;
+        getSheetID?: () => string;
+        getConfig?: () => { id?: string };
+    } | undefined;
+
+    return activeSheet?.getSheetId?.() ?? activeSheet?.getSheetID?.() ?? activeSheet?.getConfig?.().id;
+}
+
+function getActiveSlidePageId(univerInstanceService: IUniverInstanceService, unitId: string): string | undefined {
+    const slide = univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_SLIDE) as {
+        pageManager?: {
+            getActiveSlide?: () => unknown;
+            getSlides?: () => unknown[];
+        };
+        getActivePage?: () => unknown;
+        getSnapshot?: () => Record<string, unknown>;
+    } | undefined;
+    const activePage = slide?.pageManager?.getActiveSlide?.() ?? slide?.getActivePage?.();
+    const activePageId = getIdFromSlidePage(activePage);
+    if (activePageId) {
+        return activePageId;
+    }
+
+    const snapshot = slide?.getSnapshot?.();
+    const activeSlideId = typeof snapshot?.activeSlideId === 'string' ? snapshot.activeSlideId : undefined;
+    if (activeSlideId) {
+        return activeSlideId;
+    }
+
+    const firstOrderedId = getFirstString(snapshot?.slideOrder) ?? getFirstString(getRecord(snapshot?.body)?.pageOrder);
+    if (firstOrderedId) {
+        return firstOrderedId;
+    }
+
+    return slide?.pageManager?.getSlides?.()
+        ?.map((item) => getIdFromSlidePage(item))
+        .find((item): item is string => typeof item === 'string');
+}
+
+function getFirstString(value: unknown): string | undefined {
+    return Array.isArray(value) ? value.find((item): item is string => typeof item === 'string') : undefined;
+}
+
+function getIdFromSlidePage(page: unknown): string | undefined {
+    const pageRecord = getRecord(page);
+    if (typeof pageRecord?.id === 'string') {
+        return pageRecord.id;
+    }
+    const getId = typeof pageRecord?.getId === 'function' ? pageRecord.getId : undefined;
+    const id = getId?.call(page);
+    return typeof id === 'string' ? id : undefined;
+}
+
+function getRecord(value: unknown): Record<string, unknown> | undefined {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : undefined;
 }

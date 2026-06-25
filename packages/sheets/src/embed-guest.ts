@@ -44,6 +44,16 @@ const SHEETS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
     {
         hostType: UniverInstanceType.UNIVER_SHEET,
         childType: UniverInstanceType.UNIVER_BASE,
+        entry: 'sheets-floating-object',
+        mode: 'float',
+        renderHost: 'sheets-drawing-dom',
+        layout: 'scroll-contained',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_BASE,
         entry: 'sheets-sheet-tab',
         mode: 'tab',
         layout: 'tab-peer',

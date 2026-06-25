@@ -24,6 +24,7 @@
     ],
     "exports": {
         ".": "./src/index.ts",
+        "./facade": "./src/facade/index.ts",
         "./*": "./src/*"
     },
     "main": "./src/index.ts",
@@ -37,6 +38,11 @@
                 "import": "./lib/es/index.js",
                 "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./facade": {
+                "import": "./lib/es/facade/index.js",
+                "require": "./lib/cjs/facade/index.js",
+                "types": "./lib/types/facade/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",

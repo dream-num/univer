@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-export {
-    CopyEmbedCommand,
-    CreateEmbedCommand,
-    type ICopyEmbedCommandParams,
-    type ICreateEmbedCommandParams,
-    type IRemoveEmbedCommandParams,
-    RemoveEmbedCommand,
-} from './commands/commands/embed.command';
-export {
-    type ISetEmbedDescriptorMutationParams,
-    type ISoftDeleteEmbedDescriptorMutationParams,
-    SetEmbedDescriptorMutation,
-    SoftDeleteEmbedDescriptorMutation,
-} from './commands/mutations/embed-descriptor.mutation';
+export { CopyEmbedCommand, CreateEmbedCommand, InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
+export type { ICopyEmbedCommandParams, ICreateEmbedCommandParams, IInsertEmbedBySnapshotCommandParams, IRemoveEmbedCommandParams } from './commands/commands/embed.command';
+export { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
+export type { ISetEmbedDescriptorMutationParams, ISoftDeleteEmbedDescriptorMutationParams } from './commands/mutations/embed-descriptor.mutation';
 export { EMBED_PLUGIN_NAME, EMBED_RESOURCE_PLUGIN_NAME } from './common/const';
 export {
     cloneEmbedResource,
@@ -40,16 +30,19 @@ export {
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
 export { EmbedResourceController } from './controllers/embed-resource.controller';
-export { type IUniverEmbedPluginConfig, UniverEmbedPlugin } from './plugin';
+export { UniverEmbedPlugin } from './plugin';
+export type { IUniverEmbedPluginConfig } from './plugin';
 export { createDefaultEmbedCapabilities, createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService, flushPendingEmbedCapabilities, registerEmbedCapabilities } from './services/embed-capability-registry.service';
-export { EmbedChildRetentionService, type IEmbedChildRetentionState } from './services/embed-child-retention.service';
+export { EmbedChildRetentionService } from './services/embed-child-retention.service';
+export type { IEmbedChildRetentionState } from './services/embed-child-retention.service';
 export { EmbedCreationService } from './services/embed-creation.service';
 export { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 export { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
-export { EmbedResourceRefProviderRegistryService, type IEmbedResourceRefProvider, type IEmbedResourceRefResolveResult } from './services/embed-resource-ref-provider-registry.service';
-export { EmbedSourceResolverService } from './services/embed-source-resolver.service';
+export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
+export type { IEmbedResourceRefProvider, IEmbedResourceRefResolveResult } from './services/embed-resource-ref-provider-registry.service';
+export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
     EmbedHostEntry,
     EmbedLayout,
@@ -76,6 +69,7 @@ export {
     DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY,
     DEFAULT_EMBED_FLOAT_LAYOUT_POLICY,
     DEFAULT_EMBED_TAB_LAYOUT_POLICY,
+    EmbedHostEntryEnum,
 } from './types/embed';
 export type {
     IResourceRef,

@@ -19,7 +19,7 @@ import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
-import { MoreFunctionIcon } from '@univerjs/icons';
+import { MoreVerticalIcon } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
@@ -357,7 +357,7 @@ export function Ribbon(props: IRibbonProps) {
                                             aria-label={localeService.t('ui.ribbon.more')}
                                             aria-haspopup="true"
                                         >
-                                            <MoreFunctionIcon />
+                                            <MoreVerticalIcon />
                                         </button>
                                     </Dropdown>
                                 </div>

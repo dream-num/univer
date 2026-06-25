@@ -16,7 +16,7 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createDocsFloatingMenuContributions, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';
+import { createDocsFloatingMenuContributions, DOCS_FLOATING_MENU_STYLE_TEXT, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';
 
 describe('createDocsFloatingMenuContributions', () => {
     it('registers docs floating menus for doc, sheet, and slide hosts', () => {
@@ -92,5 +92,14 @@ describe('createDocsFloatingMenuContributions', () => {
             renderScopeActive: false,
             usesDomFloatingStage: true,
         })).toBe('inactive');
+    });
+});
+
+describe('DOCS_FLOATING_MENU_STYLE_TEXT', () => {
+    it('centers the docs block floating menu above the embed container without changing fullscreen layout', () => {
+        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('left: 50%');
+        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('transform: translateX(-50%)');
+        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('[data-embed-fullscreen-menu-slot="true"] .univer-docs-embed-floating-menu');
+        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('position: static');
     });
 });

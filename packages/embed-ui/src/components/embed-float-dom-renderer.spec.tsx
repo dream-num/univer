@@ -677,7 +677,7 @@ describe('EmbedFloatDomRenderer', () => {
         }
     });
 
-    it('keeps inactive body-level chrome aligned after host viewport wheel updates', async () => {
+    it('keeps non-doc body-level chrome fixed during host viewport vertical wheel updates', async () => {
         let rect = {
             left: 100,
             top: 200,
@@ -719,8 +719,61 @@ describe('EmbedFloatDomRenderer', () => {
                 callbacks.forEach((callback) => callback(16));
             });
 
-            expect(chrome!.style.top).toBe('520px');
+            expect(chrome!.style.top).toBe('200px');
             expect(chrome!.style.left).toBe('100px');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+        }
+    });
+
+    it('realigns non-doc body-level chrome after pointer interaction clears the host scroll lock', async () => {
+        let rect = {
+            left: 100,
+            top: 200,
+            width: 320,
+            height: 180,
+            right: 420,
+            bottom: 380,
+            x: 100,
+            y: 200,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return rect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ initialStage: 'stage1' });
+
+            const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+            expect(chrome).not.toBeNull();
+            expect(chrome!.style.top).toBe('200px');
+
+            rect = {
+                ...rect,
+                top: 520,
+                bottom: 700,
+                y: 520,
+            } as DOMRect;
+
+            await act(async () => {
+                window.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 120 }));
+                flushQueuedAnimationFrames(16);
+            });
+
+            expect(chrome!.style.top).toBe('200px');
+
+            await act(async () => {
+                window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+                flushQueuedAnimationFrames(16);
+            });
+
+            expect(chrome!.style.top).toBe('520px');
         } finally {
             HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
         }
@@ -2317,6 +2370,56 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
+    it('notifies the host when an enabled stage1 body drag starts', async () => {
+        await renderFloatBlock({ initialStage: 'stage1', enableStage1BodyDrag: true });
+        stage = 'stage1';
+        await act(async () => {
+            active$.next({});
+        });
+
+        const listener = vi.fn();
+        document.addEventListener(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, listener);
+        const gate = document.querySelector('[data-embed-float-interaction-gate]');
+        expect(gate).not.toBeNull();
+
+        await act(async () => {
+            gate!.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                pointerId: 7,
+                clientX: 120,
+                clientY: 80,
+                button: 0,
+            }));
+            gate!.dispatchEvent(new PointerEvent('pointermove', {
+                bubbles: true,
+                pointerId: 7,
+                clientX: 150,
+                clientY: 96,
+                button: 0,
+            }));
+            gate!.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                pointerId: 7,
+                clientX: 150,
+                clientY: 96,
+                button: 0,
+            }));
+        });
+
+        document.removeEventListener(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, listener);
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect((listener.mock.calls[0][0] as CustomEvent).detail).toEqual(expect.objectContaining({
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            hostAnchorId: 'anchor-1',
+            pointerId: 7,
+            clientX: 120,
+            clientY: 80,
+            button: 0,
+        }));
+        expect(activationService.activateFloating).not.toHaveBeenCalledWith(createFloatDescriptor(), 'stage2');
+    });
+
     it('does not route wheel events to readonly preview providers in the real-unit path', async () => {
         await renderFloatBlock();
 
@@ -3282,7 +3385,7 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
-    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
+    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
         const childType = props?.childType ?? UniverInstanceType.UNIVER_SHEET;
         descriptor = createFloatDescriptor({ childType });
         const renderer = (
@@ -3293,6 +3396,7 @@ describe('EmbedFloatDomRenderer', () => {
                 syncHostVerticalScroll={props?.syncHostVerticalScroll}
                 onRuntimeStageExit={props?.onRuntimeStageExit}
                 onRuntimeStageEnter={props?.onRuntimeStageEnter}
+                enableStage1BodyDrag={props?.enableStage1BodyDrag}
                 data={{
                     version: 1,
                     embedId: 'embed-1',

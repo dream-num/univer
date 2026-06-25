@@ -4,6 +4,11 @@ on:
     pull_request:
         branches:
             - dev
+        types:
+            - opened
+            - synchronize
+            - reopened
+            - ready_for_review
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +25,7 @@ env:
 jobs:
     e2e-shard:
         name: e2e-test shard (${{ matrix.shard-index }}/${{ matrix.shard-total }})
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
 
         strategy:
@@ -83,7 +88,7 @@ jobs:
         name: e2e-test
         runs-on: ubuntu-latest
         needs: e2e-shard
-        if: ${{ always() && github.repository == 'dream-num/univer' }}
+        if: ${{ always() && github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft) }}
 
         steps:
             - name: Check shard results

@@ -2,7 +2,8 @@ name: 🌐 Deploy to GitHub Pages
 
 on:
     push:
-        branches: [dev]
+        branches:
+            - dev
         tags:
             - 'v*.*.*'
             - 'v*.*.*-alpha.*'

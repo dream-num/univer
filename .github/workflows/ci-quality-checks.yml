@@ -7,6 +7,11 @@ on:
     pull_request:
         branches:
             - dev
+        types:
+            - opened
+            - synchronize
+            - reopened
+            - ready_for_review
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +26,7 @@ env:
 
 jobs:
     test:
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -45,7 +50,7 @@ jobs:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     eslint:
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
 
         steps:
@@ -69,7 +74,7 @@ jobs:
               run: pnpm lint --quiet --cache --cache-location .eslintcache
 
     typecheck:
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}

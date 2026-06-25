@@ -23,7 +23,7 @@ import type { IEmbedDescriptor } from '@univerjs/embed';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { CopyHostEmbedCommand, CreateHostEmbedCommand, RemoveHostEmbedCommand } from '../commands/commands/embed-host-lifecycle.command';
+import { CopyHostEmbedCommand, CreateHostEmbedCommand, InsertHostEmbedBySnapshotCommand, RemoveHostEmbedCommand } from '../commands/commands/embed-host-lifecycle.command';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from '../commands/mutations/embed-host-anchor-record.mutation';
 import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from '../commands/mutations/embed-host-anchor.mutation';
 import { CREATE_EMBED_HOST_ANCHOR_MUTATION_ID, REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID, REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '../common/const';
@@ -299,6 +299,7 @@ describe('embed-ui registries and commands', () => {
         const descriptor = createDescriptor();
         const lifecycle = {
             createEmbed: vi.fn(async () => descriptor),
+            createEmbedBySnapshot: vi.fn(() => descriptor),
             copyEmbed: vi.fn(() => ({ ...descriptor, embedId: 'copy' })),
             removeEmbed: vi.fn(() => true),
         };
@@ -317,9 +318,11 @@ describe('embed-ui registries and commands', () => {
         ]);
 
         await expect(CreateHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).resolves.toBe(descriptor);
+        expect(InsertHostEmbedBySnapshotCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(descriptor);
         expect(CopyHostEmbedCommand.handler(accessor, { sourceEmbedId: 'embed-1' } as never)).toMatchObject({ embedId: 'copy' });
         expect(RemoveHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(true);
         await expect(CreateHostEmbedCommand.handler(accessor, undefined)).resolves.toBe(false);
+        expect(InsertHostEmbedBySnapshotCommand.handler(accessor, undefined)).toBe(false);
         expect(CopyHostEmbedCommand.handler(accessor, undefined)).toBe(false);
         expect(RemoveHostEmbedCommand.handler(accessor, undefined)).toBe(false);
 
@@ -404,6 +407,9 @@ describe('embed-ui registries and commands', () => {
         const service = new EmbedHostLifecycleService(
             creationService as never,
             modelService as never,
+            {} as never,
+            {} as never,
+            undefined as never,
             adapter as never,
             commandService as never,
             undoRedoService as never

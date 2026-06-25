@@ -44,6 +44,12 @@ export class EmbedModelService {
             .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
     }
 
+    getAllActiveDescriptors(): IEmbedDescriptor[] {
+        return [...this._resources.values()]
+            .flatMap((resource) => Object.values(resource.embeds))
+            .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
+    }
+
     getActiveDescriptorsByChildUnit(childUnitId: string): IEmbedDescriptor[] {
         return [...this._resources.values()]
             .flatMap((resource) => Object.values(resource.embeds))

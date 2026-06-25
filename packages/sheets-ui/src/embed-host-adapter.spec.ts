@@ -249,7 +249,7 @@ describe('sheets embed host adapter', () => {
             entry: 'sheets-floating-object',
             layout: 'doc-width-scale',
             menuBehavior: 'floating',
-            supportedLayouts: ['doc-width-scale', 'aspect-fit'],
+            supportedLayouts: ['doc-width-scale', 'aspect-fit', 'scroll-contained'],
         });
 
         const hostElement = document.createElement('div');

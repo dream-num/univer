@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { CopyHostEmbedCommand, CreateHostEmbedCommand, RemoveHostEmbedCommand } from './commands/commands/embed-host-lifecycle.command';
-export type { ICopyHostEmbedCommandParams, ICreateHostEmbedCommandParams, IRemoveHostEmbedCommandParams } from './commands/commands/embed-host-lifecycle.command';
+export { CopyHostEmbedCommand, CreateHostEmbedCommand, InsertHostEmbedBySnapshotCommand, RemoveHostEmbedCommand } from './commands/commands/embed-host-lifecycle.command';
+export type { ICopyHostEmbedCommandParams, ICreateHostEmbedCommandParams, IInsertHostEmbedBySnapshotCommandParams, IRemoveHostEmbedCommandParams } from './commands/commands/embed-host-lifecycle.command';
 export { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
 export type { IRemoveEmbedHostAnchorMutationParams, ISetEmbedHostAnchorMutationParams } from './commands/mutations/embed-host-anchor-record.mutation';
 export { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';

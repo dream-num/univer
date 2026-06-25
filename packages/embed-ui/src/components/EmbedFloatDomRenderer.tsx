@@ -395,7 +395,7 @@ export function EmbedFloatDomRenderer(props: {
                 ? new DOMRect(rawRect.left, lockedNonDocsChromeTop, rawRect.width, rawRect.height)
                 : rawRect;
             const chromeVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_RUNTIME_INTERACTION_HEIGHT;
-            const chromeControlsVisible = !docsSheetLikeChrome || rect.height >= MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT;
+            const chromeControlsVisible = rect.height >= MIN_EMBED_FLOATING_CHROME_CONTROLS_HEIGHT;
             syncRuntimeInteractionVisibility(container, chrome, chromeVisible, stage);
             syncChromeControlsVisibility(chrome, chromeControlsVisible, stage);
             if (docsSheetLikeChrome) {
@@ -1404,7 +1404,7 @@ function resolveChromeAnchorRect(container: HTMLElement): DOMRect {
         return intersectWithScrollPort(contentRect, container);
     }
 
-    return container.getBoundingClientRect();
+    return intersectWithScrollPort(container.getBoundingClientRect(), container);
 }
 
 function isDocsSheetLikeChrome(container: HTMLElement): boolean {
@@ -1417,9 +1417,10 @@ function isDocsCustomBlockChrome(container: HTMLElement): boolean {
 
 const MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT = 40;
 const MIN_DOCS_SHEET_LIKE_RUNTIME_INTERACTION_HEIGHT = 24;
+const MIN_EMBED_FLOATING_CHROME_CONTROLS_HEIGHT = MIN_DOCS_SHEET_LIKE_CHROME_HEIGHT;
 
 function intersectWithScrollPort(rect: DOMRect, container: HTMLElement): DOMRect {
-    const clippingViewport = findNearestClippingViewport(container);
+    const clippingViewport = findNearestClippingViewport(container, rect);
     if (!clippingViewport && rect.top >= 0 && rect.left >= 0) {
         return rect;
     }
@@ -1436,16 +1437,28 @@ function intersectWithScrollPort(rect: DOMRect, container: HTMLElement): DOMRect
     return new DOMRect(left, top, right - left, bottom - top);
 }
 
-function findNearestClippingViewport(element: HTMLElement): HTMLElement | null {
+function findNearestClippingViewport(element: HTMLElement, targetRect: DOMRect): HTMLElement | null {
     let current = element.parentElement;
     while (current && current !== document.body && current !== document.documentElement) {
-        if (clipsOverflow(current)) {
+        if (clipsOverflow(current) && !isOwnFloatDomClippingWrapper(current, targetRect)) {
             return current;
         }
         current = current.parentElement;
     }
 
     return null;
+}
+
+function isOwnFloatDomClippingWrapper(element: HTMLElement, targetRect: DOMRect): boolean {
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+        return true;
+    }
+
+    return Math.abs(rect.left - targetRect.left) < 1 &&
+        Math.abs(rect.top - targetRect.top) < 1 &&
+        Math.abs(rect.width - targetRect.width) < 1 &&
+        Math.abs(rect.height - targetRect.height) < 1;
 }
 
 function requestFrame(callback: () => void): FrameHandle {
@@ -2063,8 +2076,8 @@ function ensureEmbedFloatDomStyles(): void {
 }
 .univer-embed-float-dom__fullscreen-button {
     position: absolute;
-    top: 6px;
-    right: 16px;
+    top: 8px;
+    right: 8px;
     z-index: 4;
     display: inline-flex;
     align-items: center;
@@ -2098,8 +2111,8 @@ function ensureEmbedFloatDomStyles(): void {
 }
 .univer-embed-float-dom__drag-handle {
     position: absolute;
-    top: -24px;
-    left: 0;
+    top: 8px;
+    left: 8px;
     z-index: 2;
     display: none;
     align-items: center;

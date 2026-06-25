@@ -726,6 +726,132 @@ describe('EmbedFloatDomRenderer', () => {
         }
     });
 
+    it('clips non-doc floating chrome to the visible host viewport', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 480 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 1200 });
+        container.style.overflow = 'hidden';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 900,
+            height: 480,
+            right: 900,
+            bottom: 556,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const outerRect = {
+            left: 100,
+            top: -40,
+            width: 320,
+            height: 260,
+            right: 420,
+            bottom: 220,
+            x: 100,
+            y: -40,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return outerRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ initialStage: 'stage2' });
+
+            const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+            expect(chrome).not.toBeNull();
+            expect(chrome!.style.top).toBe('76px');
+            expect(chrome!.style.left).toBe('100px');
+            expect(chrome!.style.width).toBe('320px');
+            expect(chrome!.style.height).toBe('144px');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
+    });
+
+    it('skips the float dom wrapper when clipping chrome to the host viewport', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 480 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 1200 });
+        container.style.overflow = 'hidden';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 900,
+            height: 480,
+            right: 900,
+            bottom: 556,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const outerRect = {
+            left: 100,
+            top: -40,
+            width: 320,
+            height: 260,
+            right: 420,
+            bottom: 220,
+            x: 100,
+            y: -40,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (
+                this.getAttribute('data-embed-float-dom') === 'true' ||
+                this.getAttribute('data-test-float-wrapper') === 'true'
+            ) {
+                return outerRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ initialStage: 'stage2', ownClippingWrapper: true });
+
+            const chrome = document.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+            expect(chrome).not.toBeNull();
+            expect(chrome!.style.top).toBe('76px');
+            expect(chrome!.style.height).toBe('144px');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
+    });
+
+    it('keeps built-in floating controls inside the chrome bounds', async () => {
+        await renderFloatBlock({ initialStage: 'stage2' });
+
+        const fullscreenButton = document.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
+        const dragHandle = document.querySelector<HTMLElement>('[data-embed-float-drag-handle]');
+        expect(fullscreenButton).not.toBeNull();
+        expect(dragHandle).not.toBeNull();
+        expect(getComputedStyle(fullscreenButton!).top).toBe('8px');
+        expect(getComputedStyle(fullscreenButton!).right).toBe('8px');
+        expect(getComputedStyle(dragHandle!).top).toBe('8px');
+        expect(getComputedStyle(dragHandle!).left).toBe('8px');
+    });
+
     it('realigns non-doc body-level chrome after pointer interaction clears the host scroll lock', async () => {
         let rect = {
             left: 100,
@@ -3479,7 +3605,7 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
-    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; hostFloatDomLayout$?: Subject<unknown>; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; isExternalHostInteraction?: (event: PointerEvent) => boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
+    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; ownClippingWrapper?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; hostFloatDomLayout$?: Subject<unknown>; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; isExternalHostInteraction?: (event: PointerEvent) => boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
         const childType = props?.childType ?? UniverInstanceType.UNIVER_SHEET;
         descriptor = createFloatDescriptor({ childType });
         const renderer = (
@@ -3504,12 +3630,20 @@ describe('EmbedFloatDomRenderer', () => {
             />
         );
 
+        const wrappedRenderer = props?.ownClippingWrapper
+            ? (
+                <div data-test-float-wrapper="true" style={{ overflow: 'hidden' }}>
+                    {renderer}
+                </div>
+            )
+            : renderer;
+
         await act(async () => {
             root.render(props?.docsSheetLike
                 ? <div data-embed-docs-custom-block-sheet-like="true">{renderer}</div>
                 : props?.docsCustomBlock
                     ? <div className="univer-embed-docs-custom-block">{renderer}</div>
-                    : renderer);
+                    : wrappedRenderer);
         });
     }
 });

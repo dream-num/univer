@@ -28,7 +28,7 @@ import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.se
 import { RediProvider } from '../../../utils/di';
 import { FloatDom, FloatDomSingle } from './FloatDom';
 
-function TestFloatDomContent() {
+function TestFloatDomContent(_props: { hostFloatDomLayout$?: IFloatDom['position$'] }) {
     return <div>float content</div>;
 }
 
@@ -86,6 +86,23 @@ describe('FloatDomSingle', () => {
 
         await waitFor(() => expect(screen.getByText('float content')).not.toBeNull());
         expect(document.getElementById('dom-1')).not.toBeNull();
+    });
+
+    it('passes the host layout observable to float dom components', async () => {
+        let receivedLayout$: IFloatDom['position$'] | undefined;
+        function InspectFloatDomContent(props: { hostFloatDomLayout$?: IFloatDom['position$'] }) {
+            receivedLayout$ = props.hostFloatDomLayout$;
+            return <div>float content</div>;
+        }
+        const layer = {
+            ...createFloatDom(),
+            componentKey: InspectFloatDomContent,
+        };
+
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        await waitFor(() => expect(screen.getByText('float content')).not.toBeNull());
+        expect(receivedLayout$).toBe(layer.position$);
     });
 });
 

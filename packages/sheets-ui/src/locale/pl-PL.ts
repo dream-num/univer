@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Anuluj scalenie',
             overlappingError: 'Nie można scalić nakładających się obszarów',
             partiallyError: 'Nie można wykonać tej operacji na częściowo scalonych komórkach',
+            confirm: {
+                warning: 'Ostrzeżenie',
+                dismantleMergeCellWarning: 'Ta operacja rozłączy scalone komórki. Kontynuować?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Nie można wykonać tej operacji',
+                notAllowedToInsertRange: 'Ta operacja jest niedozwolona, ponieważ zakres zawiera filtrowane wiersze.',
+            },
         },
         textWrap: {
             overflow: 'Przepełnienie',

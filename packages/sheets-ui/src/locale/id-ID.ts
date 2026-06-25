@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Batalkan penggabungan',
             overlappingError: 'Tidak dapat menggabungkan area yang tumpang tindih',
             partiallyError: 'Tidak dapat melakukan operasi ini pada sel yang digabungkan sebagian',
+            confirm: {
+                warning: 'Peringatan',
+                dismantleMergeCellWarning: 'Operasi ini akan membatalkan penggabungan sel. Lanjutkan?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Tidak dapat melakukan operasi ini',
+                notAllowedToInsertRange: 'Operasi ini tidak diizinkan karena rentang berisi baris yang difilter.',
+            },
         },
         textWrap: {
             overflow: 'Meluap',

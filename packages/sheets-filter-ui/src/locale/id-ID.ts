@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'Aktifkan/Nonaktifkan Filter',
         },
+        permission: {
+            filterErr: 'Anda tidak memiliki izin untuk menggunakan filter.',
+        },
         panel: {
             'clear-filter': 'Hapus Filter',
             cancel: 'Batal',

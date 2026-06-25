@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Berhasil mengganti {0} kecocokan',
+            'partial-success': 'Berhasil mengganti {0} kecocokan, gagal mengganti {1}',
             'all-failure': 'Penggantian gagal',
             confirm: {
                 title: 'Apakah Anda yakin ingin mengganti semua kecocokan?',

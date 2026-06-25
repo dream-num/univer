@@ -19,6 +19,9 @@ const locale = {
         panel: {
             title: 'Comment Management',
         },
+        permission: {
+            commentErr: 'You do not have permission to use comments.',
+        },
         menu: {
             addComment: 'Add Comment',
             commentManagement: 'Comment Management',

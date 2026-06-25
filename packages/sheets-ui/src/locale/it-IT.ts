@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Annulla unione',
             overlappingError: 'Impossibile unire aree sovrapposte',
             partiallyError: 'Impossibile eseguire questa operazione su celle parzialmente unite',
+            confirm: {
+                warning: 'Avviso',
+                dismantleMergeCellWarning: 'Questa operazione annullerà l’unione delle celle unite. Continuare?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Impossibile eseguire questa operazione',
+                notAllowedToInsertRange: 'Questa operazione non è consentita perché l’intervallo contiene righe filtrate.',
+            },
         },
         textWrap: {
             overflow: 'Trabocca',

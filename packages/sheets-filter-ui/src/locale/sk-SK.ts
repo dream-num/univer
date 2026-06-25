@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'Prepnúť filter',
         },
+        permission: {
+            filterErr: 'Nemáte povolenie používať filter.',
+        },
         panel: {
             'clear-filter': 'Vymazať filter',
             cancel: 'Zrušiť',

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { IFontConfig } from '../../services/font.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
@@ -72,7 +73,7 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
                         {localeService.t(font.label)}
 
                         {!fontService.isFontSupported(font.value) && (
-                            <Tooltip title={localeService.t('ui.fontFamily.not-supported')}>
+                            <Tooltip title={localeService.t<LocaleKey>('ui.fontFamily.not-supported')}>
                                 <InfoIcon
                                     className={`
                                       univer-text-gray-300

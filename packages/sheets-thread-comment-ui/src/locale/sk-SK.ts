@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: 'Správa komentárov',
         },
+        permission: {
+            commentErr: 'Nemáte povolenie používať komentáre.',
+        },
         menu: {
             addComment: 'Pridať komentár',
             commentManagement: 'Správa komentárov',

@@ -56,6 +56,7 @@ const locale = {
         },
         replace: {
             'all-success': 'Replaced all {0} matches',
+            'partial-success': 'Replaced {0} matches, failed to replace {1}',
             'all-failure': 'Replace failed',
             confirm: {
                 title: 'Are you sure to replace all matches?',

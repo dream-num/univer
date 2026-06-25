@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Sisipkan Tautan',
         },
+        permission: {
+            hyperLinkErr: 'Anda tidak memiliki izin untuk menyisipkan tautan.',
+        },
         message: {
             noSheet: 'Lembar target telah dihapus',
             refError: 'Rentang Tidak Valid',

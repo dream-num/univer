@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: '링크 삽입',
         },
+        permission: {
+            hyperLinkErr: '링크를 삽입할 권한이 없습니다.',
+        },
         message: {
             noSheet: '대상 워크시트가 삭제되었습니다',
             refError: '잘못된 범위입니다',

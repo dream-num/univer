@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': '已取代全部 {0} 個相符項目',
+            'partial-success': '已取代 {0} 個相符項目，{1} 個取代失敗',
             'all-failure': '取代失敗',
             confirm: {
                 title: '確定要取代所有相符項目嗎？',

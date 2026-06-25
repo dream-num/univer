@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Вставить ссылку',
         },
+        permission: {
+            hyperLinkErr: 'У вас нет разрешения на вставку ссылки.',
+        },
         message: {
             noSheet: 'Целевой лист был удален',
             refError: 'Недопустимый диапазон',

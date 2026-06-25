@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Заменены все совпадения: {0}',
+            'partial-success': 'Заменено совпадений: {0}, не удалось заменить: {1}',
             'all-failure': 'Ошибка замены',
             confirm: {
                 title: 'Вы уверены, что хотите заменить все совпадения?',

@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Insereix enllaç',
         },
+        permission: {
+            hyperLinkErr: 'No teniu permís per inserir un enllaç.',
+        },
         message: {
             noSheet: 'El full de destinació ha estat eliminat',
             refError: 'Interval no vàlid',

@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Všetkých {0} zhôd bolo nahradených',
+            'partial-success': 'Nahradených {0} zhôd, {1} sa nepodarilo nahradiť',
             'all-failure': 'Nahradenie zlyhalo',
             confirm: {
                 title: 'Ste si istí, že chcete nahradiť všetky zhody?',

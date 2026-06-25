@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Zastąpiono wszystkie dopasowania: {0}',
+            'partial-success': 'Zastąpiono dopasowania: {0}, nie udało się zastąpić: {1}',
             'all-failure': 'Zastępowanie nie powiodło się',
             confirm: {
                 title: 'Czy na pewno chcesz zastąpić wszystkie dopasowania?',

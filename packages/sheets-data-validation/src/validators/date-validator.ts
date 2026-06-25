@@ -17,6 +17,7 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
 import { DataValidationOperator, DataValidationType, dateKit, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
@@ -106,7 +107,7 @@ export class DateValidator extends BaseSheetValidator {
         }
 
         const formula1Success = this._validatorSingleFormula(rule.formula1);
-        const errorMsg = this.localeService.t('sheets-data-validation.validFail.date');
+        const errorMsg = this.localeService.t<LocaleKey>('sheets-data-validation.validFail.date');
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
         if (isTwoFormula) {
             const formula2Success = this._validatorSingleFormula(rule.formula2);

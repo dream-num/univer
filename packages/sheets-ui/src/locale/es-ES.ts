@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Separar celdas',
             overlappingError: 'No se pueden combinar áreas superpuestas',
             partiallyError: 'No se puede realizar esta operación en celdas parcialmente combinadas',
+            confirm: {
+                warning: 'Advertencia',
+                dismantleMergeCellWarning: 'Esta operación separará las celdas combinadas. ¿Desea continuar?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'No se puede realizar esta operación',
+                notAllowedToInsertRange: 'Esta operación no está permitida porque el rango contiene filas filtradas.',
+            },
         },
         textWrap: {
             overflow: 'Desbordamiento',

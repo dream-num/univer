@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'تم استبدال {0} تطابقات',
+            'partial-success': 'تم استبدال {0} تطابقات، وتعذر استبدال {1}',
             'all-failure': 'فشل الاستبدال',
             confirm: {
                 title: 'هل أنت متأكد من استبدال جميع التطابقات؟',

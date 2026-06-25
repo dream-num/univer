@@ -16,6 +16,7 @@
 
 import type { ComponentType } from 'react';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
+import type { LocaleKey } from '../../../locale/types';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
@@ -313,7 +314,7 @@ export function Ribbon(props: IRibbonProps) {
                                 <button
                                     type="button"
                                     className={toolbarButtonClassName}
-                                    aria-label={localeService.t('ui.ribbon.more')}
+                                    aria-label={localeService.t<LocaleKey>('ui.ribbon.more')}
                                     aria-haspopup="true"
                                 >
                                     <MoreVerticalIcon />

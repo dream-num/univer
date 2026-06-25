@@ -15,6 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, IConfirmService, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
@@ -41,9 +42,9 @@ export const ReplaceAllMatchesCommand: ICommand = {
 
         if (!await confirmService.confirm({
             id: CONFIRM_REPLACE_ALL_ID,
-            title: { title: localeService.t('find-replace.replace.confirm.title') },
-            cancelText: localeService.t('find-replace.button.cancel'),
-            confirmText: localeService.t('find-replace.button.confirm'),
+            title: { title: localeService.t<LocaleKey>('find-replace.replace.confirm.title') },
+            cancelText: localeService.t<LocaleKey>('find-replace.button.cancel'),
+            confirmText: localeService.t<LocaleKey>('find-replace.button.confirm'),
         })) {
             return false;
         }
@@ -56,12 +57,12 @@ export const ReplaceAllMatchesCommand: ICommand = {
             if (success === 0) {
                 messageService.show({
                     type: MessageType.Error,
-                    content: localeService.t('find-replace.replace.all-failure'),
+                    content: localeService.t<LocaleKey>('find-replace.replace.all-failure'),
                 });
             } else {
                 messageService.show({
                     type: MessageType.Warning,
-                    content: localeService.t('find-replace.replace.partial-success', `${success}`, `${failure}`),
+                    content: localeService.t<LocaleKey>('find-replace.replace.partial-success', `${success}`, `${failure}`),
                 });
             }
 
@@ -70,7 +71,7 @@ export const ReplaceAllMatchesCommand: ICommand = {
 
         messageService.show({
             type: MessageType.Success,
-            content: localeService.t('find-replace.replace.all-success', `${success}`),
+            content: localeService.t<LocaleKey>('find-replace.replace.all-success', `${success}`),
         });
 
         return true;

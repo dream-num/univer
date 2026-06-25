@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Inserisci collegamento',
         },
+        permission: {
+            hyperLinkErr: 'Non hai l’autorizzazione per inserire un collegamento.',
+        },
         message: {
             noSheet: 'Il foglio di destinazione è stato eliminato',
             refError: 'Intervallo non valido',

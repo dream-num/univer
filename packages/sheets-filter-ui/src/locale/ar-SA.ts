@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'تبديل التصفية',
         },
+        permission: {
+            filterErr: 'ليس لديك إذن لاستخدام التصفية.',
+        },
         panel: {
             'clear-filter': 'مسح التصفية',
             cancel: 'إلغاء',

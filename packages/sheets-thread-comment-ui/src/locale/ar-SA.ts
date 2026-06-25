@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: 'إدارة التعليقات',
         },
+        permission: {
+            commentErr: 'ليس لديك إذن لاستخدام التعليقات.',
+        },
         menu: {
             addComment: 'إضافة تعليق',
             commentManagement: 'إدارة التعليقات',

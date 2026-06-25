@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': '一致項目 {0} 件すべてを置換しました',
+            'partial-success': '{0} 件の一致項目を置換しました。{1} 件の置換に失敗しました',
             'all-failure': '置換に失敗しました',
             confirm: {
                 title: 'すべての一致項目を置換してもよろしいですか？',

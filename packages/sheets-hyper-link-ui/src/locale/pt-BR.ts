@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Inserir Link',
         },
+        permission: {
+            hyperLinkErr: 'Você não tem permissão para inserir um link.',
+        },
         message: {
             noSheet: 'A planilha de destino foi excluída',
             refError: 'Intervalo Inválido',

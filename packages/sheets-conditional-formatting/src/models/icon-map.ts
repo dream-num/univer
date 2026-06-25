@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../locale/types';
 import { ICON_MAP } from '../assets/icon-map';
 
 export enum IIconSetType {
@@ -41,7 +42,7 @@ export enum IIconSetType {
     empty = 'EMPTY_ICON_TYPE',
 }
 
-export const iconGroup: { title: string; group: { name: IIconSetType; list: string[] }[] }[] = [
+export const iconGroup: { title: LocaleKey; group: { name: IIconSetType; list: string[] }[] }[] = [
     {
         title: 'sheets-conditional-formatting.iconSet.direction',
         group: [

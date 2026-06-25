@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'Filter ein-/ausschalten',
         },
+        permission: {
+            filterErr: 'Sie haben keine Berechtigung, den Filter zu verwenden.',
+        },
         panel: {
             'clear-filter': 'Filter löschen',
             cancel: 'Abbrechen',

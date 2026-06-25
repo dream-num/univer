@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': '切換篩選',
         },
+        permission: {
+            filterErr: '你沒有權限使用篩選。',
+        },
         panel: {
             'clear-filter': '清除篩選',
             cancel: '取消',

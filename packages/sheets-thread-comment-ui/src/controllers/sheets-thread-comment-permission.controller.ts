@@ -15,12 +15,30 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IDeleteCommentTreeCommandParams, IResolveCommentCommandParams, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type {
+    IAddCommentCommandParams,
+    IDeleteCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
+    IResolveCommentCommandParams,
+    IUpdateCommentCommandParams,
+} from '@univerjs/thread-comment';
+import type { LocaleKey } from '../locale/types';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
-import { RangeProtectionPermissionViewPoint, SheetPermissionCheckController, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionViewPoint,
+    SheetPermissionCheckController,
+    WorkbookCommentPermission,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+import {
+    AddCommentCommand,
+    DeleteCommentCommand,
+    DeleteCommentTreeCommand,
+    ResolveCommentCommand,
+    UpdateCommentCommand,
+} from '@univerjs/thread-comment';
 import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
 
 export class SheetsThreadCommentPermissionController extends Disposable {
@@ -46,7 +64,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                         worksheetTypes: [WorksheetViewPermission],
                     });
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-thread-comment-ui.permission.commentErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-thread-comment-ui.permission.commentErr'));
                     }
                 } else if (id === AddCommentCommand.id) {
                     const params = command.params as IAddCommentCommandParams;
@@ -60,7 +78,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                         rangeTypes: [RangeProtectionPermissionViewPoint],
                     }, [{ startRow: row, startColumn: column, endRow: row, endColumn: column }], unitId, subUnitId);
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-thread-comment-ui.permission.commentErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-thread-comment-ui.permission.commentErr'));
                     }
                 } else if (id === UpdateCommentCommand.id) {
                     const params = command.params as IUpdateCommentCommandParams;
@@ -78,7 +96,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                         }, [{ startRow: row, startColumn: column, endRow: row, endColumn: column }], unitId, subUnitId);
                         if (!permission) {
-                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-thread-comment-ui.permission.commentErr'));
+                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-thread-comment-ui.permission.commentErr'));
                         }
                     }
                 } else if (id === ResolveCommentCommand.id || id === DeleteCommentCommand.id || id === DeleteCommentTreeCommand.id) {
@@ -96,7 +114,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                         }, [{ startRow: row, startColumn: column, endRow: row, endColumn: column }], unitId, subUnitId);
                         if (!permission) {
-                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-thread-comment-ui.permission.commentErr'));
+                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-thread-comment-ui.permission.commentErr'));
                         }
                     }
                 }

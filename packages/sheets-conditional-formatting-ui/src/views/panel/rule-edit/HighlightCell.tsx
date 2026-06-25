@@ -21,6 +21,7 @@ import type {
     ITextHighlightCell,
     ITimePeriodHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
+import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { LocaleService } from '@univerjs/core';
 import { Input, InputNumber, Select } from '@univerjs/design';
@@ -39,7 +40,10 @@ import { Preview } from '../../Preview';
 import { WrapperError } from '../../wrapper-error/WrapperError';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheets-conditional-formatting-ui.operator.${text}`), value: text });
+const createOptionItem = (text: string, localeService: LocaleService) => ({
+    label: localeService.t(`sheets-conditional-formatting-ui.operator.${text}`),
+    value: text,
+});
 type IValue = number | string | [number, number];
 type IResult = (Pick<ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell, 'operator' | 'subType'>) & { value?: IValue };
 
@@ -92,7 +96,7 @@ function HighlightCellInput(props: {
                     case CFSubRuleType.text: {
                         if ([CFTextOperator.beginsWith, CFTextOperator.containsText, CFTextOperator.endsWith, CFTextOperator.notEqual, CFTextOperator.notContainsText, CFTextOperator.equal].includes(operator as any)) {
                             if (!inputTextValue) {
-                                setTextError(localeService.t('sheets-conditional-formatting-ui.errorMessage.notBlank'));
+                                setTextError(localeService.t<LocaleKey>('sheets-conditional-formatting-ui.errorMessage.notBlank'));
                                 return false;
                             }
                             return next(v);
@@ -245,19 +249,19 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const typeOptions = [{
         value: CFSubRuleType.text,
-        label: localeService.t('sheets-conditional-formatting-ui.subRuleType.text'),
+        label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.text'),
     }, {
         value: CFSubRuleType.number,
-        label: localeService.t('sheets-conditional-formatting-ui.subRuleType.number'),
+        label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.number'),
     }, {
         value: CFSubRuleType.timePeriod,
-        label: localeService.t('sheets-conditional-formatting-ui.subRuleType.timePeriod'),
+        label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.timePeriod'),
     }, {
         value: CFSubRuleType.duplicateValues,
-        label: localeService.t('sheets-conditional-formatting-ui.subRuleType.duplicateValues'),
+        label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.duplicateValues'),
     }, {
         value: CFSubRuleType.uniqueValues,
-        label: localeService.t('sheets-conditional-formatting-ui.subRuleType.uniqueValues'),
+        label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.uniqueValues'),
     }];
 
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
@@ -373,7 +377,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-conditional-formatting-ui.panel.styleRule')}
+                {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-flex univer-justify-between univer-gap-4">
                 <Select

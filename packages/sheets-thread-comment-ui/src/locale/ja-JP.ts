@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: 'コメント管理',
         },
+        permission: {
+            commentErr: 'コメントを使用する権限がありません。',
+        },
         menu: {
             addComment: 'コメントを追加',
             commentManagement: 'コメント管理',

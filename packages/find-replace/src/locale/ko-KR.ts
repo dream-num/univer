@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': '일치 항목 {0}개를 모두 바꿨습니다.',
+            'partial-success': '일치 항목 {0}개를 바꾸고 {1}개는 바꾸지 못했습니다.',
             'all-failure': '바꾸기 실패',
             confirm: {
                 title: '모든 일치 항목을 바꾸시겠습니까?',

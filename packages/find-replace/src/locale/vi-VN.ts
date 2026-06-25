@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Đã thay thế tất cả {0} kết quả phù hợp',
+            'partial-success': 'Đã thay thế {0} kết quả phù hợp, không thể thay thế {1}',
             'all-failure': 'Thay thế thất bại',
             confirm: {
                 title: 'Bạn có chắc chắn muốn thay thế tất cả các kết quả phù hợp không?',

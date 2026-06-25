@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': '已全部替换 {0} 个匹配项',
+            'partial-success': '已替换 {0} 个匹配项，{1} 个替换失败',
             'all-failure': '替换失败',
             confirm: {
                 title: '确定要替换所有的匹配项吗？',

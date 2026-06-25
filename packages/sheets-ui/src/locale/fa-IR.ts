@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'لغو ادغام',
             overlappingError: 'نمی‌توان نواحی هم‌پوشان را ادغام کرد',
             partiallyError: 'نمی‌توان این عملیات را روی سلول‌های ادغام‌شده جزئی انجام داد',
+            confirm: {
+                warning: 'هشدار',
+                dismantleMergeCellWarning: 'این عملیات سلول‌های ادغام‌شده را از حالت ادغام خارج می‌کند. ادامه می‌دهید؟',
+            },
         },
         filter: {
+            confirm: {
+                error: 'نمی‌توان این عملیات را انجام داد',
+                notAllowedToInsertRange: 'این عملیات مجاز نیست زیرا محدوده شامل ردیف‌های فیلترشده است.',
+            },
         },
         textWrap: {
             overflow: 'سرریز',

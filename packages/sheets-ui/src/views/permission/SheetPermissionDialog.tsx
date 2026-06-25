@@ -16,6 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
+import type { LocaleKey } from '../../locale/types';
 import {
     IAuthzIoService,
     ICommandService,
@@ -225,7 +226,7 @@ export const SheetPermissionDialog = () => {
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
                         }}
                     >
-                        {localeService.t('sheets-ui.permission.button.cancel')}
+                        {localeService.t<LocaleKey>('sheets-ui.permission.button.cancel')}
                     </Button>
                     <Button
                         variant="primary"
@@ -234,7 +235,7 @@ export const SheetPermissionDialog = () => {
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
                         }}
                     >
-                        {localeService.t('sheets-ui.permission.button.confirm')}
+                        {localeService.t<LocaleKey>('sheets-ui.permission.button.confirm')}
                     </Button>
                 </div>
             </div>

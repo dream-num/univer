@@ -36,6 +36,9 @@ const locale = {
         menu: {
             add: 'Insert Link',
         },
+        permission: {
+            hyperLinkErr: 'You do not have permission to insert a link.',
+        },
         message: {
             noSheet: 'Target sheet has been delete',
             refError: 'Invalid Range',

@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: 'Manajemen Komentar',
         },
+        permission: {
+            commentErr: 'Anda tidak memiliki izin untuk menggunakan komentar.',
+        },
         menu: {
             addComment: 'Tambah Komentar',
             commentManagement: 'Manajemen Komentar',

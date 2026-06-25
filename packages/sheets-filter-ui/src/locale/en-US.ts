@@ -24,6 +24,9 @@ const locale = {
         shortcut: {
             'smart-toggle-filter': 'Toggle Filter',
         },
+        permission: {
+            filterErr: 'You do not have permission to use the filter.',
+        },
         panel: {
             'clear-filter': 'Clear Filter',
             cancel: 'Cancel',

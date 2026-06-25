@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'Inverser le filtre',
         },
+        permission: {
+            filterErr: 'Vous n’avez pas l’autorisation d’utiliser le filtre.',
+        },
         panel: {
             'clear-filter': 'Effacer le filtre',
             cancel: 'Annuler',

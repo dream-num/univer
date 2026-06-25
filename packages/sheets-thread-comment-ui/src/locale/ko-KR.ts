@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: '댓글 관리',
         },
+        permission: {
+            commentErr: '댓글을 사용할 권한이 없습니다.',
+        },
         menu: {
             addComment: '댓글 추가',
             commentManagement: '댓글 관리',

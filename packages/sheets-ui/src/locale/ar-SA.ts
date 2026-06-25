@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'إلغاء الدمج',
             overlappingError: 'لا يمكن دمج المناطق المتداخلة',
             partiallyError: 'لا يمكن إجراء هذه العملية على خلايا مدموجة جزئياً',
+            confirm: {
+                warning: 'تحذير',
+                dismantleMergeCellWarning: 'ستؤدي هذه العملية إلى إلغاء دمج الخلايا المدمجة. هل تريد المتابعة؟',
+            },
         },
         filter: {
+            confirm: {
+                error: 'لا يمكن تنفيذ هذه العملية',
+                notAllowedToInsertRange: 'هذه العملية غير مسموح بها لأن النطاق يحتوي على صفوف تمت تصفيتها.',
+            },
         },
         textWrap: {
             overflow: 'تجاوز',

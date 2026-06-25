@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Vložiť odkaz',
         },
+        permission: {
+            hyperLinkErr: 'Nemáte povolenie vložiť odkaz.',
+        },
         message: {
             noSheet: 'Cieľový hárok bol odstránený',
             refError: 'Neplatný rozsah',

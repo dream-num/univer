@@ -26,6 +26,7 @@ import type {
 } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
 import type { IRangeSelectorInstance } from '@univerjs/sheets-formula-ui';
+import type { LocaleKey } from '../../locale/types';
 import {
     debounce,
     ICommandService,
@@ -311,8 +312,8 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
     return (
         <div data-u-comp="data-validation-detail" className="univer-py-2">
             <FormLayout
-                label={localeService.t('sheets-data-validation-ui.panel.range')}
-                error={(!localRule.ranges.length || isRangeError) ? localeService.t('sheets-data-validation-ui.panel.rangeError') : ''}
+                label={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.range')}
+                error={(!localRule.ranges.length || isRangeError) ? localeService.t<LocaleKey>('sheets-data-validation-ui.panel.rangeError') : ''}
             >
                 <RangeSelector
                     selectorRef={rangeSelectorInstance}
@@ -333,7 +334,7 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
                     onVerify={(isValid) => setIsRangeError(!isValid)}
                 />
             </FormLayout>
-            <FormLayout label={localeService.t('sheets-data-validation-ui.panel.type')}>
+            <FormLayout label={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.type')}>
                 <Select
                     className="univer-w-full"
                     value={localRule.type}
@@ -346,14 +347,14 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
             </FormLayout>
             {operators?.length
                 ? (
-                    <FormLayout label={localeService.t('sheets-data-validation-ui.panel.operator')}>
+                    <FormLayout label={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.operator')}>
                         <Select
                             className="univer-w-full"
                             value={`${localRule.operator}`}
                             options={[
                                 {
                                     value: '',
-                                    label: localeService.t('sheets-data-validation-ui.operators.legal'),
+                                    label: localeService.t<LocaleKey>('sheets-data-validation-ui.operators.legal'),
                                 },
                                 ...operators.map((op, i) => ({
                                     value: `${op}`,
@@ -401,16 +402,16 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
                         allowBlank: !(localRule.allowBlank ?? true),
                     })}
                 >
-                    {localeService.t('sheets-data-validation-ui.panel.allowBlank')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.allowBlank')}
                 </Checkbox>
             </FormLayout>
             <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
             <div className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
                 <Button className="univer-ml-3" onClick={handleDelete}>
-                    {localeService.t('sheets-data-validation-ui.panel.removeRule')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.removeRule')}
                 </Button>
                 <Button className="univer-ml-3" variant="primary" onClick={handleOk}>
-                    {localeService.t('sheets-data-validation-ui.panel.done')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.done')}
                 </Button>
             </div>
         </div>

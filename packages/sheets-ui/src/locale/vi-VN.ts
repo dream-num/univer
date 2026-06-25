@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Hủy hợp nhất',
             overlappingError: 'Không thể hợp nhất vùng chồng chéo',
             partiallyError: 'Không thể thực hiện thao tác này trên ô đã hợp nhất',
+            confirm: {
+                warning: 'Cảnh báo',
+                dismantleMergeCellWarning: 'Thao tác này sẽ bỏ hợp nhất các ô đã hợp nhất. Tiếp tục?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Không thể thực hiện thao tác này',
+                notAllowedToInsertRange: 'Thao tác này không được phép vì phạm vi chứa các hàng đã lọc.',
+            },
         },
         textWrap: {
             overflow: 'Tràn',

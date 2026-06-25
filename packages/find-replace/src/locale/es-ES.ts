@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Se reemplazaron todas las {0} coincidencias',
+            'partial-success': 'Se reemplazaron {0} coincidencias; no se pudieron reemplazar {1}',
             'all-failure': 'Error al reemplazar',
             confirm: {
                 title: '¿Está seguro de que desea reemplazar todas las coincidencias?',

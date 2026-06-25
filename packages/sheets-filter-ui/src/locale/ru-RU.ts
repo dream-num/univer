@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'Переключить фильтр',
         },
+        permission: {
+            filterErr: 'У вас нет разрешения на использование фильтра.',
+        },
         panel: {
             'clear-filter': 'Очистить фильтр',
             cancel: 'Отмена',

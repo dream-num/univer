@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: '取消合并',
             overlappingError: '不能合并重叠区域',
             partiallyError: '无法对部分合并单元格执行此操作',
+            confirm: {
+                warning: '警告',
+                dismantleMergeCellWarning: '此操作将取消合并单元格，是否继续？',
+            },
         },
         filter: {
+            confirm: {
+                error: '无法执行此操作',
+                notAllowedToInsertRange: '该范围包含筛选行，无法执行此操作。',
+            },
         },
         textWrap: {
             overflow: '溢出',

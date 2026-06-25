@@ -17,6 +17,7 @@
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
 import type { ISortOption } from '@univerjs/sheets-sort';
+import type { LocaleKey } from '../locale/types';
 import {
     Disposable,
     ICommandService,
@@ -157,13 +158,13 @@ export class SheetsSortUIService extends Disposable {
         return await this._confirmService.confirm({
             id: 'sort-range-check-error',
             title: {
-                title: this._localeService.t('sheets-sort-ui.info.tooltip'),
+                title: this._localeService.t<LocaleKey>('sheets-sort-ui.info.tooltip'),
             },
             children: {
                 title: createSortCheckError(this._localeService.t(content)),
             },
-            cancelText: this._localeService.t('sheets-sort-ui.dialog.cancel'),
-            confirmText: this._localeService.t('sheets-sort-ui.dialog.confirm'),
+            cancelText: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.cancel'),
+            confirmText: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.confirm'),
         });
     }
 
@@ -172,7 +173,7 @@ export class SheetsSortUIService extends Disposable {
         const confirm = await this._confirmService.confirm({
             id: 'extend-sort-range-dialog',
             title: {
-                title: this._localeService.t('sheets-sort-ui.dialog.sort-reminder'),
+                title: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.sort-reminder'),
             },
             children: {
                 title: createExtendConfirm((value: string) => {
@@ -180,8 +181,8 @@ export class SheetsSortUIService extends Disposable {
                 }),
             },
             width: 400,
-            cancelText: this._localeService.t('sheets-sort-ui.dialog.cancel'),
-            confirmText: this._localeService.t('sheets-sort-ui.dialog.confirm'),
+            cancelText: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.cancel'),
+            confirmText: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.confirm'),
         });
         if (confirm) {
             return shouldExtend ? EXTEND_TYPE.EXTEND : EXTEND_TYPE.KEEP;

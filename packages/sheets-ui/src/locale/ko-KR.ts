@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: '병합 해제',
             overlappingError: '겹치는 영역은 병합할 수 없습니다',
             partiallyError: '부분 병합된 셀에서는 작업할 수 없습니다',
+            confirm: {
+                warning: '경고',
+                dismantleMergeCellWarning: '이 작업은 병합된 셀을 해제합니다. 계속하시겠습니까?',
+            },
         },
         filter: {
+            confirm: {
+                error: '이 작업을 수행할 수 없습니다',
+                notAllowedToInsertRange: '범위에 필터링된 행이 포함되어 있어 이 작업을 수행할 수 없습니다.',
+            },
         },
         textWrap: {
             overflow: '넘침',

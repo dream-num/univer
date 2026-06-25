@@ -16,6 +16,7 @@
 
 import type { IRange, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { FilterColumn } from '@univerjs/sheets-filter';
+import type { LocaleKey } from '../locale/types';
 import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
 import {
     createIdentifier,
@@ -145,7 +146,7 @@ export function getFilterByValueItems(
     const initialBlankChecked = filters ? blankChecked : true;
     if (emptyCount > 0) {
         const item: IFilterByValueItem = {
-            value: localeService.t('sheets-filter-ui.panel.empty'),
+            value: localeService.t<LocaleKey>('sheets-filter-ui.panel.empty'),
             checked: initialBlankChecked,
             count: emptyCount,
             index,
@@ -304,7 +305,7 @@ export function getFilterTreeByValueItems(
             : true;
     if (emptyCount > 0) {
         const item: IFilterByValueWithTreeItem = {
-            title: localeService.t('sheets-filter-ui.panel.empty'),
+            title: localeService.t<LocaleKey>('sheets-filter-ui.panel.empty'),
             count: emptyCount,
             leaf: true,
             checked: initialBlankChecked,

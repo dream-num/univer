@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Link einfügen',
         },
+        permission: {
+            hyperLinkErr: 'Sie haben keine Berechtigung, einen Link einzufügen.',
+        },
         message: {
             noSheet: 'Zielblatt wurde gelöscht',
             refError: 'Ungültiger Bereich',

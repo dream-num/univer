@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'درج لینک',
         },
+        permission: {
+            hyperLinkErr: 'شما مجوز درج لینک را ندارید.',
+        },
         message: {
             noSheet: 'برگ هدف حذف شده است',
             refError: 'محدوده نامعتبر',

@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Descombinar cel·les',
             overlappingError: 'No es poden combinar àrees superposades',
             partiallyError: 'No es pot realitzar aquesta operació en cel·les parcialment combinades',
+            confirm: {
+                warning: 'Avís',
+                dismantleMergeCellWarning: 'Aquesta operació descombinarà les cel·les combinades. Voleu continuar?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'No es pot realitzar aquesta operació',
+                notAllowedToInsertRange: 'Aquesta operació no està permesa perquè l’interval conté files filtrades.',
+            },
         },
         textWrap: {
             overflow: 'Desbordament',

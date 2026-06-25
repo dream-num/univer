@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Insertar enlace',
         },
+        permission: {
+            hyperLinkErr: 'No tiene permiso para insertar un enlace.',
+        },
         message: {
             noSheet: 'La hoja de destino ha sido eliminada',
             refError: 'Rango no válido',

@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
+import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
@@ -125,7 +126,9 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
             {iconGroup.map((group, index) => {
                 return (
                     <div key={index} className="univer-mb-3">
-                        <div className="univer-mb-1 univer-text-sm">{localeService.t(group.title)}</div>
+                        <div className="univer-mb-1 univer-text-sm">
+                            {localeService.t(group.title)}
+                        </div>
                         <div className="univer-flex univer-flex-wrap">
                             {group.group.map((groupItem) => {
                                 return (
@@ -226,12 +229,30 @@ const IconSetRuleEdit = (props: {
     const { onChange, configList, errorMap = {} } = props;
     const localeService = useDependency(LocaleService);
 
-    const options = [{ label: localeService.t(`sheets-conditional-formatting-ui.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan }, { label: localeService.t(`sheets-conditional-formatting-ui.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
+    const options = [{
+        label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.symbol.${CFNumberOperator.greaterThan}`),
+        value: CFNumberOperator.greaterThan,
+    }, {
+        label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.symbol.${CFNumberOperator.greaterThanOrEqual}`),
+        value: CFNumberOperator.greaterThanOrEqual,
+    }];
     const valueTypeOptions = [
-        { label: localeService.t(`sheets-conditional-formatting-ui.valueType.${CFValueType.num}`), value: CFValueType.num },
-        { label: localeService.t(`sheets-conditional-formatting-ui.valueType.${CFValueType.percent}`), value: CFValueType.percent },
-        { label: localeService.t(`sheets-conditional-formatting-ui.valueType.${CFValueType.percentile}`), value: CFValueType.percentile },
-        { label: localeService.t(`sheets-conditional-formatting-ui.valueType.${CFValueType.formula}`), value: CFValueType.formula },
+        {
+            label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.valueType.${CFValueType.num}`),
+            value: CFValueType.num,
+        },
+        {
+            label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.valueType.${CFValueType.percent}`),
+            value: CFValueType.percent,
+        },
+        {
+            label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.valueType.${CFValueType.percentile}`),
+            value: CFValueType.percentile,
+        },
+        {
+            label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.valueType.${CFValueType.formula}`),
+            value: CFValueType.formula,
+        },
     ];
     const handleValueValueChange = (v: number | string, index: number) => {
         onChange([String(index), 'value', 'value'], v);
@@ -256,7 +277,7 @@ const IconSetRuleEdit = (props: {
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
             const preItem = configList[index - 1];
-            const lessThanText = preItem?.value.type === CFValueType.formula ? localeService.t('sheets-conditional-formatting-ui.valueType.formula') : preItem?.value.value;
+            const lessThanText = preItem?.value.type === CFValueType.formula ? localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.formula') : preItem?.value.value;
 
             const handleIconClick = (iconType: IIconSetType, iconId: string) => {
                 const value = { ...item, iconId, iconType } as typeof item;
@@ -277,13 +298,13 @@ const IconSetRuleEdit = (props: {
                         <div
                             className="univer-w-[45%]"
                         >
-                            {localeService.t('sheets-conditional-formatting-ui.iconSet.icon')}
+                            {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.icon')}
                             {index + 1}
                         </div>
 
                         <div className="univer-w-[45%]">
                             <>
-                                {!isFirst && !isEnd && localeService.t('sheets-conditional-formatting-ui.iconSet.rule')}
+                                {!isFirst && !isEnd && localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.rule')}
                                 {!isFirst && !isEnd && (
                                     <span
                                         className={`
@@ -291,10 +312,10 @@ const IconSetRuleEdit = (props: {
                                           dark:!univer-text-gray-200
                                         `}
                                     >
-                                        {localeService.t('sheets-conditional-formatting-ui.iconSet.when')}
+                                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.when')}
                                         {localeService.t(`sheets-conditional-formatting-ui.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
-                                        {isEnd ? '' : ` ${localeService.t('sheets-conditional-formatting-ui.iconSet.and')} `}
+                                        {isEnd ? '' : ` ${localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.and')} `}
                                     </span>
                                 )}
 
@@ -341,12 +362,12 @@ const IconSetRuleEdit = (props: {
                                       dark:!univer-text-gray-200
                                     `}
                                 >
-                                    {localeService.t('sheets-conditional-formatting-ui.iconSet.rule')}
+                                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.rule')}
                                     <span className="univer-font-medium">
-                                        {localeService.t('sheets-conditional-formatting-ui.iconSet.when')}
+                                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.when')}
                                         {localeService.t(`sheets-conditional-formatting-ui.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
-                                        {isEnd ? '' : ` ${localeService.t('sheets-conditional-formatting-ui.iconSet.and')} `}
+                                        {isEnd ? '' : ` ${localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.and')} `}
                                     </span>
                                 </div>
                             )}
@@ -361,8 +382,8 @@ const IconSetRuleEdit = (props: {
                                       dark:!univer-text-gray-200
                                     `}
                                 >
-                                    <div>{localeService.t('sheets-conditional-formatting-ui.iconSet.type')}</div>
-                                    <div>{localeService.t('sheets-conditional-formatting-ui.iconSet.value')}</div>
+                                    <div>{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.type')}</div>
+                                    <div>{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.value')}</div>
                                 </div>
                                 <div
                                     className="univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4"
@@ -556,7 +577,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     return (
         <div>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
-                {localeService.t('sheets-conditional-formatting-ui.panel.styleRule')}
+                {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
                 <Dropdown
@@ -588,11 +609,11 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             <div className="univer-mt-3 univer-flex univer-items-center univer-text-xs">
                 <div className="univer-flex univer-items-center univer-text-xs">
                     <Checkbox onChange={reverseIcon} />
-                    {localeService.t('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
+                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
                 </div>
                 <div className="univer-ml-6 univer-flex univer-items-center univer-text-xs">
                     <Checkbox checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }} />
-                    {localeService.t('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
+                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
                 </div>
             </div>
             <IconSetRuleEdit errorMap={errorMap} onChange={handleChange} configList={configList} />

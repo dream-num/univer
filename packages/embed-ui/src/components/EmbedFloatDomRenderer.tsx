@@ -17,6 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { Observable } from 'rxjs';
 import type { EmbedRuntimeFocusRole } from '../services/embed-runtime-focus-coordinator.service';
 import type { EmbedFloatingStage, EmbedInteractionFlow, IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
@@ -80,6 +81,7 @@ export function EmbedFloatDomRenderer(props: {
     data?: IEmbedFloatDomData;
     initialStage?: EmbedFloatingStage;
     interactionFlow?: EmbedInteractionFlow;
+    hostFloatDomLayout$?: Observable<unknown>;
     onHostWheel?: (event: WheelEvent, context: IEmbedChildContainerContext) => boolean | void;
     onRuntimeStageEnter?: (stage: EmbedFloatingStage) => void;
     onRuntimeStageExit?: () => void;
@@ -472,6 +474,20 @@ export function EmbedFloatDomRenderer(props: {
 
             scheduledFrameId = window.requestAnimationFrame(syncScheduledChromeRect);
         };
+        const syncChromeRectForHostLayoutChange = () => {
+            lockedNonDocsChromeTop = undefined;
+            if (typeof window.requestAnimationFrame !== 'function') {
+                syncChromeRect();
+                geometryService.invalidate({ embedId: data?.embedId, reason: 'host-scroll' });
+                return;
+            }
+
+            geometryService.invalidate({ embedId: data?.embedId, reason: 'host-scroll' });
+            scheduledFramesRemaining = Math.max(scheduledFramesRemaining, 2);
+            if (scheduledFrameId == null) {
+                scheduledFrameId = window.requestAnimationFrame(syncScheduledChromeRect);
+            }
+        };
 
         syncChromeRect();
         document.body.appendChild(chrome);
@@ -481,6 +497,7 @@ export function EmbedFloatDomRenderer(props: {
         };
         const resizeObserver = new ResizeObserver(syncChromeRect);
         resizeObserver.observe(container);
+        const hostFloatDomLayoutSubscription = props.hostFloatDomLayout$?.subscribe(syncChromeRectForHostLayoutChange);
         window.addEventListener('pointerdown', clearNonDocsChromeTopLock, true);
         window.addEventListener('scroll', scheduleChromeRectSync, true);
         window.addEventListener('wheel', scheduleChromeRectSync, true);
@@ -497,6 +514,7 @@ export function EmbedFloatDomRenderer(props: {
             if (scheduledFrameId != null) {
                 window.cancelAnimationFrame(scheduledFrameId);
             }
+            hostFloatDomLayoutSubscription?.unsubscribe();
             resizeObserver.disconnect();
             window.removeEventListener('pointerdown', clearNonDocsChromeTopLock, true);
             window.removeEventListener('scroll', scheduleChromeRectSync, true);
@@ -512,7 +530,7 @@ export function EmbedFloatDomRenderer(props: {
                 chrome.remove();
             }
         };
-    }, [data?.embedId, geometryService, stage]);
+    }, [data?.embedId, geometryService, props.hostFloatDomLayout$, stage]);
 
     useEffect(() => {
         const subscription = floatingActiveService.active$.subscribe(() => {

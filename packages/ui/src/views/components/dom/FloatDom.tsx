@@ -48,7 +48,8 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
     const layerProps: any = useMemo(() => ({
         data: layer.data,
         ...layer.props,
-    }), [layer.data, layer.props]);
+        hostFloatDomLayout$: layer.position$,
+    }), [layer.data, layer.position$, layer.props]);
     const floatDomOverflow = resolveFloatDomOverflow(layerProps);
 
     useEffect(() => {

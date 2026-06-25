@@ -3321,6 +3321,55 @@ describe('EmbedFloatDomRenderer', () => {
         }));
     });
 
+    it('reanchors inactive floating chrome when the host float dom layout changes', async () => {
+        const hostFloatDomLayout$ = new Subject<unknown>();
+
+        await renderFloatBlock({ hostFloatDomLayout$ });
+        const floatDom = document.body.querySelector<HTMLElement>('.univer-embed-float-dom');
+        const chrome = document.body.querySelector<HTMLElement>('.univer-embed-float-dom__chrome');
+        expect(floatDom).not.toBeNull();
+        expect(chrome).not.toBeNull();
+
+        floatDom!.getBoundingClientRect = () => ({
+            bottom: 320,
+            height: 200,
+            left: 100,
+            right: 400,
+            top: 120,
+            width: 300,
+            x: 100,
+            y: 120,
+            toJSON: () => ({}),
+        } as DOMRect);
+        await act(async () => {
+            resizeCallbacks.forEach((callback) => callback());
+        });
+        expect(chrome!.style.left).toBe('100px');
+        expect(chrome!.style.top).toBe('120px');
+
+        floatDom!.getBoundingClientRect = () => ({
+            bottom: 260,
+            height: 200,
+            left: 80,
+            right: 380,
+            top: 60,
+            width: 300,
+            x: 80,
+            y: 60,
+            toJSON: () => ({}),
+        } as DOMRect);
+        geometryService.invalidate.mockClear();
+
+        await act(async () => {
+            hostFloatDomLayout$.next({});
+            flushQueuedAnimationFrames(16);
+        });
+
+        expect(chrome!.style.left).toBe('80px');
+        expect(chrome!.style.top).toBe('60px');
+        expect(geometryService.invalidate).toHaveBeenCalledWith({ embedId: 'embed-1', reason: 'host-scroll' });
+    });
+
     it('invalidates geometry after live runtime scroll settles', async () => {
         mountIntoHostElement.mockReturnValue({ context: createChildContext() });
 
@@ -3430,13 +3479,14 @@ describe('EmbedFloatDomRenderer', () => {
         expect(activationService.activateFloating).not.toHaveBeenCalled();
     });
 
-    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; isExternalHostInteraction?: (event: PointerEvent) => boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
+    async function renderFloatBlock(props?: { childType?: UniverInstanceType; docsCustomBlock?: boolean; docsSheetLike?: boolean; initialStage?: 'inactive' | 'stage1' | 'stage2'; interactionFlow?: 'floating-stage' | 'doc-block'; hostFloatDomLayout$?: Subject<unknown>; onHostWheel?: (event: WheelEvent, context: any) => boolean | void; syncHostVerticalScroll?: boolean; enableStage1BodyDrag?: boolean; isExternalHostInteraction?: (event: PointerEvent) => boolean; onRuntimeStageExit?: () => void; onRuntimeStageEnter?: (stage: 'inactive' | 'stage1' | 'stage2') => void }) {
         const childType = props?.childType ?? UniverInstanceType.UNIVER_SHEET;
         descriptor = createFloatDescriptor({ childType });
         const renderer = (
             <EmbedFloatDomRenderer
                 initialStage={props?.initialStage}
                 interactionFlow={props?.interactionFlow}
+                hostFloatDomLayout$={props?.hostFloatDomLayout$ as never}
                 onHostWheel={props?.onHostWheel}
                 syncHostVerticalScroll={props?.syncHostVerticalScroll}
                 onRuntimeStageExit={props?.onRuntimeStageExit}

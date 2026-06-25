@@ -19,7 +19,7 @@ import type { IEmbedResourceRefProvider } from './services/embed-resource-ref-pr
 import type { IEmbedCapability, IEmbedGuestContribution } from './types/embed';
 import { ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
-import { CopyEmbedCommand, CreateEmbedCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
+import { CopyEmbedCommand, CreateEmbedCommand, InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
 import { EMBED_PLUGIN_NAME } from './common/const';
 import { EmbedResourceController } from './controllers/embed-resource.controller';
@@ -95,6 +95,7 @@ export class UniverEmbedPlugin extends Plugin {
             SetEmbedDescriptorMutation,
             SoftDeleteEmbedDescriptorMutation,
             CreateEmbedCommand,
+            InsertEmbedBySnapshotCommand,
             CopyEmbedCommand,
             RemoveEmbedCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

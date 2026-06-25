@@ -20,7 +20,7 @@ import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependenci
 import { UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
-import { CopyHostEmbedCommand, CreateHostEmbedCommand, RemoveHostEmbedCommand } from './commands/commands/embed-host-lifecycle.command';
+import { CopyHostEmbedCommand, CreateHostEmbedCommand, InsertHostEmbedBySnapshotCommand, RemoveHostEmbedCommand } from './commands/commands/embed-host-lifecycle.command';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
 import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
@@ -214,6 +214,7 @@ export class UniverEmbedUIPlugin extends Plugin {
 
         [
             CreateHostEmbedCommand,
+            InsertHostEmbedBySnapshotCommand,
             CopyHostEmbedCommand,
             RemoveHostEmbedCommand,
             CreateEmbedHostAnchorMutation,

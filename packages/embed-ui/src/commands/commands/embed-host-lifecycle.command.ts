@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor, IInsertEmbedBySnapshotCommandParams } from '@univerjs/embed';
 import type { IEmbedHostCopyContext, IEmbedHostCreateContext, IEmbedHostRemoveContext } from '../../services/embed-host-lifecycle.service';
 import { CommandType } from '@univerjs/core';
 import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.service';
@@ -23,6 +23,7 @@ import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.s
 export type ICreateHostEmbedCommandParams = IEmbedHostCreateContext;
 export type ICopyHostEmbedCommandParams = IEmbedHostCopyContext;
 export type IRemoveHostEmbedCommandParams = IEmbedHostRemoveContext;
+export type IInsertHostEmbedBySnapshotCommandParams = IInsertEmbedBySnapshotCommandParams;
 
 export const CreateHostEmbedCommand: ICommand<ICreateHostEmbedCommandParams, IEmbedDescriptor | false> = {
     id: 'embed-ui.command.create-host-embed',
@@ -33,6 +34,18 @@ export const CreateHostEmbedCommand: ICommand<ICreateHostEmbedCommandParams, IEm
         }
 
         return accessor.get(EmbedHostLifecycleService).createEmbed(params);
+    },
+};
+
+export const InsertHostEmbedBySnapshotCommand: ICommand<IInsertHostEmbedBySnapshotCommandParams, IEmbedDescriptor | false> = {
+    id: 'embed-ui.command.insert-host-embed-by-snapshot',
+    type: CommandType.COMMAND,
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        return accessor.get(EmbedHostLifecycleService).createEmbedBySnapshot(params);
     },
 };
 

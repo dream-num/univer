@@ -1,0 +1,20 @@
+[version]
+root_package = "package.json"
+
+[workspaces]
+patterns = [
+    "common/*",
+    "packages/*",
+    "presets",
+    "presets/packages/*",
+]
+include_root = true
+
+[changelog]
+infile = "CHANGELOG.md"
+preset = "angular"
+
+[git]
+commit_message = "chore(release): release v${version}"
+tag_name = "v${version}"
+push = "follow-tags"

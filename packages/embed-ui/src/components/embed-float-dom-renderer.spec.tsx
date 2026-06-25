@@ -839,7 +839,7 @@ describe('EmbedFloatDomRenderer', () => {
         }
     });
 
-    it('keeps built-in floating controls inside the chrome bounds', async () => {
+    it('keeps fullscreen inside the chrome and drag handle above it', async () => {
         await renderFloatBlock({ initialStage: 'stage2' });
 
         const fullscreenButton = document.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
@@ -848,8 +848,65 @@ describe('EmbedFloatDomRenderer', () => {
         expect(dragHandle).not.toBeNull();
         expect(getComputedStyle(fullscreenButton!).top).toBe('8px');
         expect(getComputedStyle(fullscreenButton!).right).toBe('8px');
-        expect(getComputedStyle(dragHandle!).top).toBe('8px');
-        expect(getComputedStyle(dragHandle!).left).toBe('8px');
+        expect(getComputedStyle(dragHandle!).top).toBe('-24px');
+        expect(getComputedStyle(dragHandle!).left).toBe('0px');
+    });
+
+    it('hides the above-container drag handle when the host top is clipped', async () => {
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 480 });
+        Object.defineProperty(container, 'scrollHeight', { configurable: true, value: 1200 });
+        container.style.overflow = 'hidden';
+
+        const scrollPortRect = {
+            left: 0,
+            top: 76,
+            width: 900,
+            height: 480,
+            right: 900,
+            bottom: 556,
+            x: 0,
+            y: 76,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const outerRect = {
+            left: 100,
+            top: -40,
+            width: 320,
+            height: 260,
+            right: 420,
+            bottom: 220,
+            x: 100,
+            y: -40,
+            toJSON: () => ({}),
+        } as DOMRect;
+        const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+            if (this === container) {
+                return scrollPortRect;
+            }
+            if (this.getAttribute('data-embed-float-dom') === 'true') {
+                return outerRect;
+            }
+
+            return originalGetBoundingClientRect.call(this);
+        };
+
+        try {
+            await renderFloatBlock({ initialStage: 'stage2' });
+
+            const fullscreenButton = document.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
+            const dragHandle = document.querySelector<HTMLElement>('[data-embed-float-drag-handle]');
+            expect(fullscreenButton).not.toBeNull();
+            expect(dragHandle).not.toBeNull();
+            expect(getComputedStyle(fullscreenButton!).visibility).toBe('visible');
+            expect(getComputedStyle(dragHandle!).visibility).toBe('hidden');
+            expect(getComputedStyle(dragHandle!).pointerEvents).toBe('none');
+        } finally {
+            HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+            delete (container as { clientHeight?: number }).clientHeight;
+            delete (container as { scrollHeight?: number }).scrollHeight;
+            container.style.overflow = '';
+        }
     });
 
     it('realigns non-doc body-level chrome after pointer interaction clears the host scroll lock', async () => {

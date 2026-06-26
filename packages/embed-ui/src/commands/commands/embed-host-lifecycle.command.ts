@@ -16,7 +16,11 @@
 
 import type { ICommand } from '@univerjs/core';
 import type { IEmbedDescriptor, IInsertEmbedBySnapshotCommandParams } from '@univerjs/embed';
-import type { IEmbedHostCopyContext, IEmbedHostCreateContext, IEmbedHostRemoveContext } from '../../services/embed-host-lifecycle.service';
+import type {
+    IEmbedHostCopyContext,
+    IEmbedHostCreateContext,
+    IEmbedHostRemoveContext,
+} from '../../services/embed-host-lifecycle.service';
 import { CommandType } from '@univerjs/core';
 import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.service';
 

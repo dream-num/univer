@@ -16,7 +16,11 @@
 
 import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
-import type { IEmbedHostAdapterContribution, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../types/embed-ui';
+import type {
+    IEmbedHostAdapterContribution,
+    IEmbedHostAnchorMutationPlan,
+    IEmbedHostAnchorRemoveMutationPlan,
+} from '../types/embed-ui';
 import type { IEmbedHostAnchorRecord } from '../types/host-anchor';
 import { CREATE_EMBED_HOST_ANCHOR_MUTATION_ID, REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID } from '../common/const';
 

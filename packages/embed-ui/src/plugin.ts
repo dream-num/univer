@@ -15,20 +15,49 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IEmbedBlockContribution, IEmbedChildViewContribution, IEmbedContentSizeProvider, IEmbedFloatingMenuContribution, IEmbedFloatPreviewProvider, IEmbedHostAdapterContribution, IEmbedHostContainerContribution, IEmbedPassiveViewportProvider, IEmbedProductMenuContribution, IEmbedReadonlyPreviewProvider } from './types/embed-ui';
-import { DependentOn, ICommandService, Inject, Injector, LocaleService, LocaleType, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import type {
+    IEmbedBlockContribution,
+    IEmbedChildViewContribution,
+    IEmbedContentSizeProvider,
+    IEmbedFloatingMenuContribution,
+    IEmbedFloatPreviewProvider,
+    IEmbedHostAdapterContribution,
+    IEmbedHostContainerContribution,
+    IEmbedPassiveViewportProvider,
+    IEmbedProductMenuContribution,
+    IEmbedReadonlyPreviewProvider,
+} from './types/embed-ui';
+import {
+    DependentOn,
+    ICommandService,
+    Inject,
+    Injector,
+    LocaleService,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
-import { CopyHostEmbedCommand, CreateHostEmbedCommand, InsertHostEmbedBySnapshotCommand, RemoveHostEmbedCommand } from './commands/commands/embed-host-lifecycle.command';
-import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
-import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';
+import {
+    CopyHostEmbedCommand,
+    CreateHostEmbedCommand,
+    InsertHostEmbedBySnapshotCommand,
+    RemoveHostEmbedCommand,
+} from './commands/commands/embed-host-lifecycle.command';
+import {
+    RemoveEmbedHostAnchorRecordMutation,
+    SetEmbedHostAnchorRecordMutation,
+} from './commands/mutations/embed-host-anchor-record.mutation';
+import {
+    CreateEmbedHostAnchorMutation,
+    RemoveEmbedHostAnchorMutation,
+} from './commands/mutations/embed-host-anchor.mutation';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
 import { EmbedHostToolbarMenu } from './components/EmbedHostToolbarMenu';
 import { EmbedHostAnchorCleanupController } from './controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribbon-override.controller';
-import enUS from './locale/en-US';
-import zhCN from './locale/zh-CN';
 import { EmbedActivationService } from './services/embed-activation.service';
 import { EmbedBlockRegistryService } from './services/embed-block-registry.service';
 import { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
@@ -87,12 +116,7 @@ export class UniverEmbedUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(): void {
-        this._localeService.load({
-            [LocaleType.EN_US]: enUS,
-            [LocaleType.ZH_CN]: zhCN,
-        });
-
+    override onStarting() {
         ([
             [EmbedHostContainerRegistryService],
             [EmbedHostAdapterRegistryService],

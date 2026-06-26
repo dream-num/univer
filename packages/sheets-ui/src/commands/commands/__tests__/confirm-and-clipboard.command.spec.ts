@@ -280,8 +280,13 @@ describe('clipboard command branches', () => {
         ]);
         expect(await SheetPasteCommand.handler(accessorNoData, { value: 'none' })).toBe(false);
 
-        expect(await SheetPasteShortKeyCommand.handler(accessor, { htmlContent: '<b>x</b>', textContent: 'x', files: [] })).toBe(true);
-        expect(legacyPaste).toHaveBeenCalledWith('<b>x</b>', 'x', []);
+        expect(await SheetPasteShortKeyCommand.handler(accessor, {
+            htmlContent: '<b>x</b>',
+            textContent: 'x',
+            files: [],
+            formulaClipboardPayload: '{"formulas":[]}',
+        })).toBe(true);
+        expect(legacyPaste).toHaveBeenCalledWith('<b>x</b>', 'x', [], '{"formulas":[]}');
 
         expect(await SheetOptionalPasteCommand.handler(accessor, { type: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE })).toBe(true);
         expect(rePasteWithPasteType).toHaveBeenCalledWith(PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE);

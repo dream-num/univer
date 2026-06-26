@@ -17,7 +17,7 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IEmbedDescriptor, IEmbedGuestContribution } from '../types/embed';
 import type { IResourceRef } from '../types/resource-ref';
-import { IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { CopyEmbedCommand, CreateEmbedCommand, InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from '../commands/commands/embed.command';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from '../commands/mutations/embed-descriptor.mutation';
@@ -134,6 +134,31 @@ describe('EmbedModelService', () => {
         expect(model.getDescriptors('host-1')).toEqual([]);
     });
 
+    it('stores external resource refs with distinct runtime child units', () => {
+        const model = new EmbedModelService();
+        const descriptor = createDescriptor({
+            source: {
+                kind: 'ref',
+                ref: {
+                    file: { kind: 'uri', uri: 'univer://workspace/file-1' },
+                    unit: { selector: 'remote-sheet', type: 'sheet' },
+                },
+            },
+            childUnitId: 'runtime-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        model.addDescriptor('host-1', descriptor);
+
+        expect(model.getDescriptor('host-1', 'embed-1')).toMatchObject({
+            source: descriptor.source,
+            childUnitId: 'runtime-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+        expect(model.countReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(1);
+        expect(model.getActiveDescriptorsByChildUnit('runtime-sheet')).toHaveLength(1);
+    });
+
     it('rejects non-canonical sources, mismatches, and duplicate active child units', () => {
         const model = new EmbedModelService();
 
@@ -186,15 +211,50 @@ describe('embed guest contributions and providers', () => {
         expect(() => registry.register(contribution)).toThrow('already registered');
     });
 
-    it('registers resource ref providers by file kind', () => {
+    it('registers resource ref providers by deterministic ResourceRef match', () => {
         const registry = new EmbedResourceRefProviderRegistryService();
-        const provider = { fileKind: 'uri' as const, resolve: vi.fn() };
+        const provider = { ensure: vi.fn() };
+        const registration = {
+            registrationId: 'univer-uri-sheet',
+            match: {
+                fileKinds: ['uri' as const],
+                uriSchemes: ['univer'],
+                unitTypes: ['sheet' as const],
+            },
+            provider,
+        };
 
-        registry.register(provider);
+        const disposable = registry.register(registration);
 
-        expect(registry.get('uri')).toBe(provider);
-        expect(registry.list()).toEqual([provider]);
-        expect(() => registry.register(provider)).toThrow('already registered');
+        expect(registry.get({
+            file: { kind: 'uri', uri: 'univer://workspace/file-1' },
+            unit: { selector: 'sheet-1', type: 'sheet' },
+        })).toBe(registration);
+        expect(registry.get({
+            file: { kind: 'uri', uri: 'https://example.com/file' },
+            unit: { selector: 'sheet-1', type: 'sheet' },
+        })).toBeUndefined();
+        expect(registry.list()).toEqual([registration]);
+        expect(() => registry.register(registration)).toThrow('already registered');
+
+        disposable.dispose();
+        expect(registry.get({
+            file: { kind: 'uri', uri: 'univer://workspace/file-1' },
+            unit: { selector: 'sheet-1', type: 'sheet' },
+        })).toBeUndefined();
+        registry.register(registration);
+
+        registry.register({
+            registrationId: 'all-uri',
+            match: {
+                fileKinds: ['uri'],
+            },
+            provider: { ensure: vi.fn() },
+        });
+        expect(() => registry.get({
+            file: { kind: 'uri', uri: 'univer://workspace/file-1' },
+            unit: { selector: 'sheet-1', type: 'sheet' },
+        })).toThrow('PROVIDER_CONFLICT');
     });
 });
 
@@ -207,6 +267,7 @@ describe('retention and focus services', () => {
         expect(retention.getRetentionState('host-1', ref)).toMatchObject({
             totalReferences: 0,
             activeReferences: 0,
+            childUnitIds: [],
             eligibleForCleanup: false,
         });
 
@@ -215,6 +276,7 @@ describe('retention and focus services', () => {
             totalReferences: 1,
             activeReferences: 0,
             softDeletedReferences: 1,
+            childUnitIds: ['child-sheet'],
             shouldDisposeNow: false,
             eligibleForCleanup: true,
         });
@@ -248,14 +310,21 @@ describe('embed commands and mutations', () => {
     it('creates, copies, removes, and records undo redo mutations', async () => {
         const descriptor = createDescriptor();
         const creationService = {
-            createEmbed: vi.fn(async () => ({ descriptor })),
-            copyEmbed: vi.fn(() => createDescriptor({ embedId: 'embed-copy', hostAnchorId: 'anchor-copy' })),
-            removeEmbed: vi.fn(),
+            prepareCreateEmbed: vi.fn(async () => ({ descriptor })),
+            prepareCopyEmbed: vi.fn(() => createDescriptor({ embedId: 'embed-copy', hostAnchorId: 'anchor-copy' })),
         };
+        const descriptors = new Map<string, IEmbedDescriptor>([[descriptor.embedId, descriptor]]);
         const modelService = {
-            getDescriptor: vi.fn((): IEmbedDescriptor | undefined => descriptor),
-            addDescriptor: vi.fn(),
-            softDeleteDescriptor: vi.fn(),
+            getDescriptor: vi.fn((_hostUnitId: string, embedId: string): IEmbedDescriptor | undefined => descriptors.get(embedId)),
+            addDescriptor: vi.fn((_hostUnitId: string, nextDescriptor: IEmbedDescriptor) => {
+                descriptors.set(nextDescriptor.embedId, nextDescriptor);
+            }),
+            softDeleteDescriptor: vi.fn((_hostUnitId: string, embedId: string) => {
+                const current = descriptors.get(embedId);
+                if (current) {
+                    descriptors.set(embedId, { ...current, lifecycle: 'soft-deleted' });
+                }
+            }),
         };
         const undoRedoService = { pushUndoRedo: vi.fn() };
         const accessor = createCommandAccessor(creationService, modelService, undoRedoService);
@@ -270,8 +339,8 @@ describe('embed commands and mutations', () => {
         })).resolves.toBe(descriptor);
         expect(undoRedoService.pushUndoRedo).toHaveBeenLastCalledWith(expect.objectContaining({
             unitID: 'host-1',
-            undoMutations: [{ id: SoftDeleteEmbedDescriptorMutation.id, params: { hostUnitId: 'host-1', embedId: 'embed-1' } }],
-            redoMutations: [{ id: SetEmbedDescriptorMutation.id, params: { hostUnitId: 'host-1', descriptor } }],
+            undoMutations: [{ id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-1', embedId: 'embed-1' } }],
+            redoMutations: [{ id: SetEmbedDescriptorMutation.id, params: { unitId: 'host-1', descriptor } }],
         }));
 
         expect(CopyEmbedCommand.handler(accessor, {
@@ -281,7 +350,7 @@ describe('embed commands and mutations', () => {
             nextHostAnchorId: 'anchor-copy',
         })).toMatchObject({ embedId: 'embed-copy' });
         expect(RemoveEmbedCommand.handler(accessor, { hostUnitId: 'host-1', embedId: 'embed-1' })).toBe(true);
-        expect(creationService.removeEmbed).toHaveBeenCalledWith({ hostUnitId: 'host-1', embedId: 'embed-1' });
+        expect(modelService.softDeleteDescriptor).toHaveBeenCalledWith('host-1', 'embed-1');
 
         expect(await CreateEmbedCommand.handler(accessor, undefined)).toBe(false);
         expect(CopyEmbedCommand.handler(accessor, undefined)).toBe(false);
@@ -298,9 +367,9 @@ describe('embed commands and mutations', () => {
         const accessor = createCommandAccessor({}, modelService, {});
         const descriptor = createDescriptor();
 
-        expect(SetEmbedDescriptorMutation.handler(accessor, { hostUnitId: 'host-1', descriptor })).toBe(true);
+        expect(SetEmbedDescriptorMutation.handler(accessor, { unitId: 'host-1', descriptor })).toBe(true);
         expect(modelService.addDescriptor).toHaveBeenCalledWith('host-1', descriptor);
-        expect(SoftDeleteEmbedDescriptorMutation.handler(accessor, { hostUnitId: 'host-1', embedId: 'embed-1' })).toBe(true);
+        expect(SoftDeleteEmbedDescriptorMutation.handler(accessor, { unitId: 'host-1', embedId: 'embed-1' })).toBe(true);
         expect(modelService.softDeleteDescriptor).toHaveBeenCalledWith('host-1', 'embed-1');
         expect(SetEmbedDescriptorMutation.handler(accessor, undefined as never)).toBe(false);
         expect(SoftDeleteEmbedDescriptorMutation.handler(accessor, undefined as never)).toBe(false);
@@ -359,7 +428,7 @@ describe('embed commands and mutations', () => {
         expect(modelService.addDescriptor).toHaveBeenCalledWith('host-sheet', expect.objectContaining({ embedId: 'embed-doc' }));
         expect(undoRedoService.pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
             unitID: 'host-sheet',
-            undoMutations: [{ id: SoftDeleteEmbedDescriptorMutation.id, params: { hostUnitId: 'host-sheet', embedId: 'embed-doc' } }],
+            undoMutations: [{ id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-sheet', embedId: 'embed-doc' } }],
         }));
         expect(InsertEmbedBySnapshotCommand.handler(accessor, undefined)).toBe(false);
     });
@@ -423,10 +492,27 @@ function createCommandAccessor(
     instanceService?: unknown,
     capabilityRegistry?: unknown
 ): IAccessor {
-    return {
+    let accessor: IAccessor;
+    const commandService = {
+        syncExecuteCommand: vi.fn((id: string, params?: object) => {
+            if (id === SetEmbedDescriptorMutation.id) {
+                return SetEmbedDescriptorMutation.handler(accessor, params as never);
+            }
+            if (id === SoftDeleteEmbedDescriptorMutation.id) {
+                return SoftDeleteEmbedDescriptorMutation.handler(accessor, params as never);
+            }
+
+            throw new Error('unexpected command');
+        }),
+    };
+
+    accessor = {
         get: vi.fn((token: unknown) => {
             if (token === EmbedCreationService) {
                 return creationService;
+            }
+            if (token === ICommandService) {
+                return commandService;
             }
             if (token === EmbedModelService) {
                 return modelService;
@@ -444,6 +530,8 @@ function createCommandAccessor(
             throw new Error('unexpected token');
         }),
     } as never;
+
+    return accessor;
 }
 
 function getDescriptorRef(descriptor: IEmbedDescriptor): IResourceRef {

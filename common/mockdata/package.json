@@ -40,6 +40,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
+        "@univerjs/embed-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/sheets": "workspace:*",

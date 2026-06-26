@@ -16,8 +16,8 @@
 
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
-import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -28,8 +28,8 @@ describe('Dropdown', () => {
                 <button type="button">Trigger</button>
             </Dropdown>
         );
-        expect(getByText('Trigger')).toBeInTheDocument();
-        expect(queryByText('Overlay Content')).not.toBeInTheDocument();
+        expect(getByText('Trigger')).toBeTruthy();
+        expect(queryByText('Overlay Content')).toBeNull();
     });
 
     it('should show overlay when open is true', () => {
@@ -38,7 +38,23 @@ describe('Dropdown', () => {
                 <button type="button">Trigger</button>
             </Dropdown>
         );
-        expect(getByText('Overlay Content')).toBeInTheDocument();
+        expect(getByText('Overlay Content')).toBeTruthy();
+    });
+
+    it('should mount overlay into the configured container', () => {
+        const mountContainer = document.createElement('div');
+        document.body.appendChild(mountContainer);
+
+        render(
+            <ConfigProvider mountContainer={mountContainer}>
+                <Dropdown overlay={<div>Overlay Content</div>} open>
+                    <button type="button">Trigger</button>
+                </Dropdown>
+            </ConfigProvider>
+        );
+
+        expect(mountContainer.textContent).toContain('Overlay Content');
+        mountContainer.remove();
     });
 
     it('should call onOpenChange when trigger is clicked', () => {

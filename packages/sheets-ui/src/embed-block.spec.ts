@@ -86,6 +86,20 @@ describe('createSheetsEmbedChildViewContribution', () => {
         expect(canvasRoot.style.bottom).toBe('');
     });
 
+    it('shows sheet chrome for tab peers and fullscreen floating sheets only', async () => {
+        const { shouldShowEmbeddedSheetChrome } = await import('./EmbedBlock');
+
+        expect(shouldShowEmbeddedSheetChrome({
+            renderScope: { mode: 'tab', fullscreen: false },
+        } as unknown as IEmbedChildContainerContext)).toBe(true);
+        expect(shouldShowEmbeddedSheetChrome({
+            renderScope: { mode: 'float', fullscreen: true },
+        } as unknown as IEmbedChildContainerContext)).toBe(true);
+        expect(shouldShowEmbeddedSheetChrome({
+            renderScope: { mode: 'float', fullscreen: false },
+        } as unknown as IEmbedChildContainerContext)).toBe(false);
+    });
+
     it('registers tab-peer sheet geometry against the embedded content root', async () => {
         const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
         const { EmbedFloatingGeometryService } = await import('@univerjs/embed-ui');

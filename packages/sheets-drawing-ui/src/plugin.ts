@@ -48,9 +48,9 @@ import { SheetDrawingPrintingController } from './controllers/sheet-drawing-prin
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/ui.controller';
+import { registerSheetsDrawingFloatingHostCapability } from './embed/floating-host';
 import { DrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
-import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 @DependentOn(UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
@@ -80,9 +80,10 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        registerSheetsDrawingFloatingHostCapability(this._injector);
+
         registerDependencies(this._injector, [
             [ComponentsController],
-            [SheetCanvasFloatDomManagerService],
             [SheetDrawingUIController],
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
@@ -96,9 +97,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [DrawingContextMenuController],
         ]);
 
-        touchDependencies(this._injector, [
-            [SheetCanvasFloatDomManagerService],
-        ]);
         this._injector.get(ComponentsController);
     }
 

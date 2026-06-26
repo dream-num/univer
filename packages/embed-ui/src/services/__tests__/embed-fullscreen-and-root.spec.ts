@@ -45,6 +45,7 @@ describe('embed fullscreen helpers and react roots', () => {
     it('creates render scopes from explicit fullscreen slots', () => {
         const viewport = document.createElement('div');
         const menuSlot = document.createElement('div');
+        const popupSlot = document.createElement('div');
         const footerSlot = document.createElement('div');
         const contentRoot = appendSlot(viewport, EMBED_CONTENT_ROOT_ATTRIBUTE);
         const canvasRoot = appendSlot(viewport, EMBED_CANVAS_ROOT_ATTRIBUTE);
@@ -56,6 +57,7 @@ describe('embed fullscreen helpers and react roots', () => {
         const scope = createFullscreenRenderScope(createDescriptor() as never, 'fixed-ratio' as never, {
             viewport,
             menuSlot,
+            popupSlot,
             footerSlot,
         });
 
@@ -73,8 +75,23 @@ describe('embed fullscreen helpers and react roots', () => {
         expect(scope.contentRoot).toBe(contentRoot);
         expect(scope.canvasRoot).toBe(canvasRoot);
         expect(scope.overlayRoot).toBe(overlayRoot);
-        expect(scope.popupRoot).toBe(popupRoot);
+        expect(scope.popupRoot).toBe(popupSlot);
         expect(scope.menuOutlet?.container).toBe(menuSlot);
+    });
+
+    it('falls back to viewport popup slots when no fullscreen popup slot is provided', () => {
+        const viewport = document.createElement('div');
+        const menuSlot = document.createElement('div');
+        const footerSlot = document.createElement('div');
+        const popupRoot = appendSlot(viewport, EMBED_POPUP_ROOT_ATTRIBUTE);
+
+        const scope = createFullscreenRenderScope(createDescriptor() as never, 'fixed-ratio' as never, {
+            viewport,
+            menuSlot,
+            footerSlot,
+        });
+
+        expect(scope.popupRoot).toBe(popupRoot);
     });
 
     it('prefers registered fullscreen ribbon menus and disposes them', () => {
@@ -103,6 +120,7 @@ describe('embed fullscreen helpers and react roots', () => {
         expect(productMenus.mountMenu).toHaveBeenCalledWith(expect.objectContaining({
             childType: UniverInstanceType.UNIVER_SHEET,
             childUnitId: 'child-1',
+            portalContainer: expect.any(HTMLElement),
             surface: 'ribbon',
         }));
         disposable?.dispose();
@@ -205,12 +223,19 @@ function createDescriptor() {
 }
 
 function createChildContext() {
+    const popup = document.createElement('div');
+
     return {
         descriptor: createDescriptor(),
         hostUnitId: 'host-1',
         embedId: 'embed-1',
         childUnitId: 'child-1',
         childType: UniverInstanceType.UNIVER_SHEET,
+        runtimeScope: {
+            roots: {
+                popup,
+            },
+        },
     };
 }
 

@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ICustomFilters, IFilterColumn } from '@univerjs/sheets-filter';
+import type { LocaleKey } from '../locale/types';
 import { BooleanNumber } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
 import { ExtendCustomFilterOperator, OperatorOrder } from './extended-operators';
@@ -42,7 +43,7 @@ export interface IFilterConditionItem {
     /**
      * Name of the filter condition. Should be an i18n key.
      */
-    label: string;
+    label: LocaleKey;
 
     and?: true;
 

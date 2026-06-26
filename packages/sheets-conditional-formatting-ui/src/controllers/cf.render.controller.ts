@@ -20,7 +20,9 @@ import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, Univ
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { merge } from 'rxjs';
 import { bufferTime, filter } from 'rxjs/operators';
 
@@ -29,8 +31,20 @@ export class SheetsCfRenderController extends Disposable {
      * When a set operation is triggered multiple times over a short period of time, it may result in some callbacks not being disposed,and caused a render cache exception.
      * The solution here is to store all the asynchronous tasks and focus on processing after the last callback
      */
-    private _ruleChangeCacheMap: Map<string, Array<{ oldRule: IConditionFormattingRule; rule: IConditionFormattingRule; dispose: () => boolean }>> = new Map();
-    constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService, @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService, @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService, @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService, @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel, @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel) {
+    private _ruleChangeCacheMap: Map<string, Array<{
+        oldRule: IConditionFormattingRule;
+        rule: IConditionFormattingRule;
+        dispose: () => boolean;
+    }>> = new Map();
+
+    constructor(
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
+        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
+    ) {
         super();
 
         this._initViewModelInterceptor();
@@ -58,7 +72,7 @@ export class SheetsCfRenderController extends Disposable {
                     const worksheet = workbook.getActiveSheet();
                     if (!worksheet) return false;
 
-                    return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
+                    return v.some((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId());
                 })
             ).subscribe(() => this._markDirtySkeleton()));
     }

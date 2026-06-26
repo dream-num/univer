@@ -44,14 +44,18 @@ export const mergeNumfmtMutations = (list: IMutationInfo[]) => {
         result.push({ id: RemoveNumfmtMutation.id, params });
     }
     const findKeyFromObj = (obj: Record<string, any>, item: any) => {
-        const keys = Object.keys(obj);
-        const index = keys.findIndex((key) => {
+        for (const key in obj) {
+            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+                continue;
+            }
             const value = obj[key];
-            return Tools.diffValue(value, item);
-        });
-        return keys[index];
+            if (Tools.diffValue(value, item)) {
+                return key;
+            }
+        }
     };
     if (setMutation[0]) {
+        let nextIndex = 1;
         const params = setMutation.reduce(
             (res, cur) => {
                 Object.keys(cur.values).forEach((key) => {
@@ -61,7 +65,7 @@ export const mergeNumfmtMutations = (list: IMutationInfo[]) => {
                     if (index) {
                         res.values[index].ranges.push(...curValue.ranges);
                     } else {
-                        const newIndex = Math.max(...Object.keys(res.refMap).map(Number), 0) + 1;
+                        const newIndex = nextIndex++;
                         res.values[newIndex] = {
                             ranges: curValue.ranges,
                         };

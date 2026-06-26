@@ -177,9 +177,14 @@ function _withMinSpacing(style: IParagraphStyle, key: 'spaceAbove' | 'spaceBelow
 }
 
 function _getNextAdjacentBlockRange(blockRanges: IDocumentBody['blockRanges'], blockRange: NonNullable<IDocumentBody['blockRanges']>[number]) {
-    return blockRanges
-        ?.filter((range) => range.startIndex > blockRange.endIndex)
-        .sort((left, right) => left.startIndex - right.startIndex)[0];
+    let nextBlockRange: NonNullable<IDocumentBody['blockRanges']>[number] | undefined;
+    for (const range of blockRanges ?? []) {
+        if (range.startIndex > blockRange.endIndex && (!nextBlockRange || range.startIndex < nextBlockRange.startIndex)) {
+            nextBlockRange = range;
+        }
+    }
+
+    return nextBlockRange;
 }
 
 function _hasNextAdjacentLayoutBlockRange(blockRanges: IDocumentBody['blockRanges'], blockRange: NonNullable<IDocumentBody['blockRanges']>[number]): boolean {

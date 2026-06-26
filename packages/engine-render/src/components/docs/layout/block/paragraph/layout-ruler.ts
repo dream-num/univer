@@ -1151,7 +1151,7 @@ function __getZeroWidthNonFlowFloatingAnchorDrawings(
             return [];
         }
 
-        if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.WRAP_NONE) {
             return [];
         }
 

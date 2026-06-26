@@ -20,12 +20,12 @@ import { CommandType } from '@univerjs/core';
 import { EmbedModelService } from '../../services/embed-model.service';
 
 export interface ISetEmbedDescriptorMutationParams {
-    hostUnitId: string;
+    unitId: string;
     descriptor: IEmbedDescriptor;
 }
 
 export interface ISoftDeleteEmbedDescriptorMutationParams {
-    hostUnitId: string;
+    unitId: string;
     embedId: string;
 }
 
@@ -37,7 +37,7 @@ export const SetEmbedDescriptorMutation: ICommand<ISetEmbedDescriptorMutationPar
             return false;
         }
 
-        accessor.get(EmbedModelService).addDescriptor(params.hostUnitId, params.descriptor);
+        accessor.get(EmbedModelService).addDescriptor(params.unitId, params.descriptor);
         return true;
     },
 };
@@ -50,7 +50,7 @@ export const SoftDeleteEmbedDescriptorMutation: ICommand<ISoftDeleteEmbedDescrip
             return false;
         }
 
-        accessor.get(EmbedModelService).softDeleteDescriptor(params.hostUnitId, params.embedId);
+        accessor.get(EmbedModelService).softDeleteDescriptor(params.unitId, params.embedId);
         return true;
     },
 };

@@ -15,14 +15,12 @@
  */
 
 import './f-univer';
+import './f-enum';
 
-export { DocElementRegistry, DocElementStaleError, type FDocElementType } from './doc-element-registry';
-export { FDocBlockRange } from './f-doc-block-range';
-export { FDocBody, type IFDocElementHandle, type IFDocResolvedParagraph, type IFDocRichTextLike, type IFDocTextRange } from './f-doc-body';
-export { FDocCustomBlock } from './f-doc-custom-block';
-export { FDocElement } from './f-doc-element';
-export { FDocParagraph } from './f-doc-paragraph';
-export { FDocTable } from './f-doc-table';
 export { FDocument } from './f-document';
-
-export type * from './f-univer';
+export { FDocumentBlockRange } from './f-document-block-range';
+export { FDocumentBody, type IFDocumentTextRange } from './f-document-body';
+export { FDocumentCustomBlock } from './f-document-custom-block';
+export { FDocumentElement } from './f-document-element';
+export { FDocumentParagraph } from './f-document-paragraph';
+export { FDocumentTable } from './f-document-table';

@@ -542,17 +542,17 @@ function deleteBodyText(body: IDocumentBody, startOffset: number, endOffset: num
     body.blockRanges = shiftIndexRangesAfterDelete(body.blockRanges, startOffset, length);
 }
 
-function stripBlockParagraphStyle(style: IParagraph['paragraphStyle'], blockType: string): IParagraph['paragraphStyle'] {
+function stripBlockParagraphStyle(style: IParagraph['paragraphStyle'], blockType: DocumentBlockRangeType): IParagraph['paragraphStyle'] {
     const nextStyle = { ...style };
 
-    if (blockType === 'quote') {
+    if (blockType === DocumentBlockRangeType.QUOTE) {
         delete nextStyle.indentStart;
         delete nextStyle.spaceAbove;
         delete nextStyle.spaceBelow;
         return nextStyle;
     }
 
-    if (blockType === 'code') {
+    if (blockType === DocumentBlockRangeType.CODE) {
         delete nextStyle.indentStart;
         delete nextStyle.indentEnd;
         delete nextStyle.spaceAbove;
@@ -563,7 +563,7 @@ function stripBlockParagraphStyle(style: IParagraph['paragraphStyle'], blockType
         return nextStyle;
     }
 
-    if (blockType === 'callout') {
+    if (blockType === DocumentBlockRangeType.CALLOUT) {
         delete nextStyle.indentStart;
         delete nextStyle.indentEnd;
         delete nextStyle.spaceAbove;
@@ -574,7 +574,7 @@ function stripBlockParagraphStyle(style: IParagraph['paragraphStyle'], blockType
     return nextStyle;
 }
 
-function unwrapBlockRangeBody(documentBody: IDocumentBody, blockRange: IDocumentBlockRange) {
+export function unwrapBlockRangeBody(documentBody: IDocumentBody, blockRange: IDocumentBlockRange) {
     const body = Tools.deepClone(documentBody);
     const endTokenOffset = getEndTokenOffset(body, blockRange);
 

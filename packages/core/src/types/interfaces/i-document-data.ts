@@ -151,6 +151,18 @@ export interface IDocumentBody {
     payloads?: Record<string, string>;
 }
 
+/**
+ * The top-level block types in a document body.
+ * These block types are used to represent the structure of the document and can be used to identify different sections or elements within the document.
+ */
+export enum DocumentBlockType {
+    PARAGRAPH = 'paragraph',
+    BLOCK_RANGE = 'blockRange',
+    TABLE = 'table',
+    CUSTOM_BLOCK = 'customBlock',
+    COLUMN_GROUP = 'columnGroup',
+}
+
 export interface IDocStyle {
     name: string;
     basedOn: string;

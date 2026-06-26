@@ -33,8 +33,10 @@ import {
     Trigger,
 } from '@radix-ui/react-dropdown-menu';
 import { CheckMarkIcon, MoreRightIcon } from '@univerjs/icons';
+import { useContext } from 'react';
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 function DropdownMenuPrimitive({
     ...props
@@ -43,10 +45,13 @@ function DropdownMenuPrimitive({
 }
 
 function DropdownMenuPortal({
+    container,
     ...props
 }: ComponentProps<typeof Portal>) {
+    const { mountContainer } = useContext(ConfigContext);
+
     return (
-        <Portal data-slot="dropdown-menu-portal" {...props} />
+        <Portal data-slot="dropdown-menu-portal" container={container ?? mountContainer ?? undefined} {...props} />
     );
 }
 
@@ -155,7 +160,7 @@ function DropdownMenuContent({
     ...props
 }: ComponentProps<typeof Content>) {
     return (
-        <Portal>
+        <DropdownMenuPortal>
             <Content
                 data-slot="dropdown-menu-content"
                 sideOffset={sideOffset}
@@ -180,7 +185,7 @@ function DropdownMenuContent({
                 )}
                 {...props}
             />
-        </Portal>
+        </DropdownMenuPortal>
     );
 }
 

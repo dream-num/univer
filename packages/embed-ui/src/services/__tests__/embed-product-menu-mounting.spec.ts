@@ -62,6 +62,7 @@ describe('embed product menu mounting', () => {
     it('mounts and disposes a ribbon menu with a scoped injector', () => {
         const injector = createInjector();
         const container = document.createElement('div');
+        const portalContainer = document.createElement('div');
 
         expect(mountEmbedProductRibbonMenu({
             container,
@@ -78,11 +79,18 @@ describe('embed product menu mounting', () => {
             menuSchema: { [MenuManagerPosition.RIBBON]: { start: { title: 'Start' } } },
             activeRibbonTab: 'start',
             toolbarOnly: true,
+            portalContainer,
         });
 
         expect(disposable).toBeDefined();
         expect(mocks.createEmbedReactRoot).toHaveBeenCalledWith(container);
         expect(mocks.render).toHaveBeenCalledTimes(1);
+        expect(mocks.render.mock.calls[0][0].props.mountContainer).toBe(portalContainer);
+        const ribbonService = mocks.render.mock.calls[0][0].props.injector.get(IRibbonService) as IRibbonService;
+        const activatedTabs: string[] = [];
+        const subscription = ribbonService.activatedTab$.subscribe((tab) => activatedTabs.push(tab));
+        expect(activatedTabs[0]).toBe('start');
+        subscription.unsubscribe();
 
         disposable?.dispose();
 

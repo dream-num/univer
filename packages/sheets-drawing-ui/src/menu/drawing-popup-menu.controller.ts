@@ -26,7 +26,6 @@ import {
     IContextService,
     IImageIoService,
     Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     RxDisposable,
@@ -51,7 +50,6 @@ export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(
-        @Inject(Injector) private _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,

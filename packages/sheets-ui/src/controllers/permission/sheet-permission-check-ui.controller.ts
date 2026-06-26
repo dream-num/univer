@@ -38,7 +38,6 @@ import {
     getSheetCommandTarget,
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
-    RangeProtectionRuleModel,
     SheetPermissionCheckController,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
@@ -72,10 +71,8 @@ export class SheetPermissionCheckUIController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
-
         @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
     ) {
         super();

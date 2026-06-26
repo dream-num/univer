@@ -32,7 +32,6 @@ function createController() {
     const skeleton = { worksheet };
 
     const controller = new FormulaEditorShowController(
-        { unitId: 'unit-1' } as never,
         {
             writeCellInterceptor: {
                 intercept: vi.fn((point, config) => {

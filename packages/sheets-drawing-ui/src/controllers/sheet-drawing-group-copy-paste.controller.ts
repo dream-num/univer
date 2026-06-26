@@ -20,9 +20,14 @@ import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, DrawingTypeEnum, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    DrawingApplyType,
+    ISheetDrawingService,
+    SetDrawingApplyMutation,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 import { cloneGroupParams } from '../commands/commands/utils';
 
@@ -61,7 +66,6 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
 
     constructor(
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService

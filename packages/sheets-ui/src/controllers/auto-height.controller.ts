@@ -73,16 +73,18 @@ export class AutoHeightController extends Disposable {
         return redoUndoItem;
     }
 
-    getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
-        const { _univerInstanceService: univerInstanceService } = this;
-        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): {
+        redos: IMutationInfo[];
+        undos: IMutationInfo[];
+    } {
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
         // Better NOT use `getActiveWorksheet` method, because users may manipulate another worksheet in active sheet.
         const unitId = workbook.getUnitId();
         let worksheet = workbook.getActiveSheet();
         let subUnitId = worksheet.getSheetId();
         if (subUnitIdParam) {
-            const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId: subUnitIdParam });
+            const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId: subUnitIdParam });
             if (target) {
                 worksheet = target.worksheet;
                 subUnitId = worksheet.getSheetId();
@@ -145,7 +147,14 @@ export class AutoHeightController extends Disposable {
     private _initialize() {
         this.disposeWithMe(this._sheetInterceptorService.interceptAutoHeight({
             getMutations: (info) => {
-                const { unitId, subUnitId, ranges, autoHeightRanges, lazyAutoHeightRanges, cellHeights } = info;
+                const {
+                    unitId,
+                    subUnitId,
+                    ranges,
+                    autoHeightRanges,
+                    lazyAutoHeightRanges,
+                    cellHeights,
+                } = info;
 
                 const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(autoHeightRanges ?? ranges, subUnitId, cellHeights);
                 return this._processLazyAutoHeight(undoRedoItem, unitId, subUnitId, lazyAutoHeightRanges);

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderModule } from '@univerjs/engine-render';
 import {
     Disposable,
     Inject,
@@ -27,7 +26,6 @@ import { SheetClipboardController } from '../clipboard/clipboard.controller';
 
 export class ClipboardRenderController extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @Inject(SheetClipboardController) private readonly _sheetClipboardController: SheetClipboardController

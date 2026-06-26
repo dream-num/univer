@@ -90,7 +90,6 @@ function createController(options?: { openFiles?: unknown[] }) {
             scene: { width: 400, height: 300 },
         } as never,
         commandService as never,
-        { interceptAfterCommand: vi.fn(() => ({ dispose: vi.fn() })) } as never,
         { getCellWithCoordByOffset: vi.fn() } as never,
         { saveImage: vi.fn(), addImageSourceCache: vi.fn() } as never,
         { openFile: vi.fn(async () => options?.openFiles ?? []) } as never,

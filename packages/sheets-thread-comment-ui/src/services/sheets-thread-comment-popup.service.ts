@@ -17,7 +17,7 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
-import { CellPopupManagerService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { CellPopupManagerService } from '@univerjs/sheets-ui';
 import { BehaviorSubject } from 'rxjs';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 
@@ -40,7 +40,6 @@ export class SheetsThreadCommentPopupService extends Disposable {
     }
 
     constructor(
-        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
         @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {
         super();

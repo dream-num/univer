@@ -19,7 +19,6 @@ import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationPar
 import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import {
     Disposable,
-    ICommandService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -29,7 +28,6 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -51,10 +49,8 @@ import { FormatPainterStatus, IFormatPainterService } from '../../services/forma
 
 export class FormatPainterController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector

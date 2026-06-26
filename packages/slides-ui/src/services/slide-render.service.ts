@@ -16,12 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { SlideDataModel } from '@univerjs/slides';
-import {
-    IContextService,
-    IUniverInstanceService,
-    RxDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 
@@ -32,7 +27,6 @@ export class SlideRenderService extends RxDisposable {
     // private _skeletonChangeMutations = new Set<string>();
 
     constructor(
-        @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {

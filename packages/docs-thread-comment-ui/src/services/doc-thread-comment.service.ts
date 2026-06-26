@@ -16,9 +16,7 @@
 
 import type { ITextRange, Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { Disposable, Inject } from '@univerjs/core';
-import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { ISidebarService } from '@univerjs/ui';
+import { Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class DocThreadCommentService extends Disposable {
@@ -29,10 +27,7 @@ export class DocThreadCommentService extends Disposable {
         return this._addingComment$.getValue();
     }
 
-    constructor(
-        @ISidebarService private readonly _sidebarService: ISidebarService,
-        @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService
-    ) {
+    constructor() {
         super();
 
         this.disposeWithMe(() => {

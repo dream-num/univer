@@ -16,10 +16,25 @@
 
 import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    HorizontalAlign,
+    IUniverInstanceService,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
-import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
+import {
+    convertTextRotation,
+    fixLineWidthByScale,
+    getCurrentTypeOfRenderer,
+    IRenderManagerService,
+    Rect,
+    ScrollBar,
+} from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IEditorBridgeService } from '../editor-bridge.service';
@@ -41,8 +56,7 @@ export class SheetCellEditorResizeService extends Disposable {
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IConfigService private readonly _configService: IConfigService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }

@@ -68,7 +68,6 @@ describe('shortcut-display controllers', () => {
 
         const controller = new ShortcutPanelController(
             shortcutService as any,
-            {} as any,
             commandService as any
         );
 

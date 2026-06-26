@@ -76,8 +76,6 @@ describe('ImageUpdateController', () => {
                 })),
             } as never,
             drawingManagerService as never,
-            {} as never,
-            {} as never,
             { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
             { renderImages: vi.fn() } as never
         );
@@ -126,8 +124,6 @@ describe('ImageUpdateController', () => {
                 })),
             } as never,
             drawingManagerService as never,
-            {} as never,
-            {} as never,
             { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
             { renderImages } as never
         );
@@ -191,8 +187,6 @@ describe('ImageUpdateController', () => {
                 getRenderById: vi.fn(() => ({ scene })),
             } as never,
             drawingManagerService as never,
-            {} as never,
-            {} as never,
             { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
             { renderImages: vi.fn() } as never
         );

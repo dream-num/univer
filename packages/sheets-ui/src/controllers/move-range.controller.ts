@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRange } from '@univerjs/core';
+import type { IRenderModule } from '@univerjs/engine-render';
 import type { IMoveRangeCommandParams } from '@univerjs/sheets';
 import {
     Disposable,
@@ -31,7 +31,6 @@ import { ISheetSelectionRenderService } from '../services/selection/base-selecti
 export class MoveRangeRenderController extends Disposable implements IRenderModule {
     private _disposableCollection: DisposableCollection = new DisposableCollection();
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(ICommandService) private readonly _commandService: ICommandService

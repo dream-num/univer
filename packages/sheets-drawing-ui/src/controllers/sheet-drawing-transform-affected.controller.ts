@@ -95,7 +95,6 @@ import {
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 
 enum RangeMoveUndoType {
     deleteLeft,
@@ -145,7 +144,6 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,

@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type {
+    ICellDataForSheetInterceptor,
+    ICommandInfo,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IRowAutoHeightInfo,
+    Nullable,
+    Worksheet,
+} from '@univerjs/core';
+import type { IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import {
     ColorKit,
@@ -34,7 +42,13 @@ import {
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    attachSelectionWithCoord,
+    BEFORE_CELL_EDIT,
+    SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
 import {
     SELECTION_SHAPE_DEPTH,
     SelectionControl,
@@ -49,7 +63,6 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     private _skeleton: SpreadsheetSkeleton;
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,

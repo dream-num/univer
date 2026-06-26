@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderModule } from '@univerjs/engine-render';
 import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, RxDisposable } from '@univerjs/core';
 import { NullValueObject } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
@@ -26,7 +25,6 @@ export class SheetPermissionInterceptorFormulaRenderController extends RxDisposa
     disposableCollection = new DisposableCollection();
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(StatusBarController) private readonly _statusBarController: StatusBarController,

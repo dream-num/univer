@@ -16,7 +16,16 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { createIdentifier, Disposable, DisposableCollection, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    DisposableCollection,
+    IContextService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    toDisposable,
+} from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, debounceTime, Subject, throttleTime } from 'rxjs';
 import { FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
@@ -219,8 +228,7 @@ export class FindReplaceModel extends Disposable {
     constructor(
         private readonly _state: FindReplaceState,
         private readonly _providers: Set<IFindReplaceProvider>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 

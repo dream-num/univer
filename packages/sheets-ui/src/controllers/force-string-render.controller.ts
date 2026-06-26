@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../config/config';
-import { CellValueType, getNumfmtParseValueFilter, IConfigService, Inject, InterceptorEffectEnum, isRealNum, isTextFormat, RxDisposable } from '@univerjs/core';
+import {
+    CellValueType,
+    getNumfmtParseValueFilter,
+    IConfigService,
+    Inject,
+    InterceptorEffectEnum,
+    isRealNum,
+    isTextFormat,
+    RxDisposable,
+} from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export class ForceStringRenderController extends RxDisposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @IConfigService private readonly _configService: IConfigService

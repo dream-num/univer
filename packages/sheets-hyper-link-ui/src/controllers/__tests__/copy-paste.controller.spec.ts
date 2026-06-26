@@ -54,9 +54,7 @@ describe('SheetsHyperLinkCopyPasteController', () => {
             invoke: vi.fn(() => ({ rows: [0], cols: [0] })),
         } as any;
 
-        const resolverService = {} as any;
-
-        const controller = new SheetsHyperLinkCopyPasteController(sheetClipboardService, hyperLinkModel, injector, resolverService);
+        const controller = new SheetsHyperLinkCopyPasteController(sheetClipboardService, hyperLinkModel, injector);
         expect(addClipboardHook).toHaveBeenCalledTimes(1);
 
         // Simulate copy stage
@@ -84,9 +82,7 @@ describe('SheetsHyperLinkCopyPasteController', () => {
         } as any;
         const hyperLinkModel = { getHyperLinkByLocation: vi.fn(), getHyperLink: vi.fn() } as any;
         const injector = { invoke: vi.fn(() => ({ rows: [0], cols: [0] })) } as any;
-        const resolverService = {} as any;
-
-        const controller = new SheetsHyperLinkCopyPasteController(sheetClipboardService, hyperLinkModel, injector, resolverService);
+        const controller = new SheetsHyperLinkCopyPasteController(sheetClipboardService, hyperLinkModel, injector);
         hook.onBeforeCopy('u1', 's1', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
 
         const res = hook.onPasteCells(

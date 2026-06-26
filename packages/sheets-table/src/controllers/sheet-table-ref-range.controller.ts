@@ -27,7 +27,6 @@ import {
     Disposable,
     ICommandService,
     Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     Rectangle,
@@ -38,7 +37,6 @@ import {
     InsertColMutation,
     InsertRowCommand,
     InsertRowMutation,
-    RefRangeService,
     RemoveColCommand,
     RemoveColMutation,
     RemoveRowCommand,
@@ -58,9 +56,7 @@ const DELETE_SHEET_TABLE_COMMAND_ID = 'sheet.command.delete-table';
 export class SheetTableRefRangeController extends Disposable {
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(LocaleService) private _localeService: LocaleService

@@ -83,7 +83,6 @@ describe('ForceStringRenderController', () => {
     it('marks numeric-looking string cells unless disabled or formatted as text', () => {
         let interceptor: any;
         const controller = new ForceStringRenderController(
-            { unitId: 'unit-1' } as never,
             { getCurrentParam: vi.fn(() => ({ skeleton: {} })) } as never,
             {
                 intercept: vi.fn((point, config) => {

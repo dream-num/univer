@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { Disposable } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './schema';
 
 export class NumfmtMenuController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();

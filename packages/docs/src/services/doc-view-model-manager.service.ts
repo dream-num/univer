@@ -15,8 +15,13 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IRenderModule } from '@univerjs/engine-render';
+import {
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IUniverInstanceService,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 
@@ -41,7 +46,6 @@ export class DocViewModelManagerService extends RxDisposable implements IRenderM
     readonly docViewModelAdd$ = this._docViewModelAdd$.asObservable();
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();

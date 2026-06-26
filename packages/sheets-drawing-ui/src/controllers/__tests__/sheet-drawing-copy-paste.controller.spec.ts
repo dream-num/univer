@@ -85,7 +85,6 @@ function createController(options?: { focusedDrawings?: any[]; drawingData?: Rec
 
     const controller = new SheetsDrawingCopyPasteController(
         sheetClipboardService as never,
-        {} as never,
         { getSkeleton: vi.fn(() => skeleton) } as never,
         drawingService as never,
         { writeText: vi.fn() } as never,

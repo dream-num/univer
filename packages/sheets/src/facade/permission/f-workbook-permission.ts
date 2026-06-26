@@ -16,7 +16,7 @@
 
 import type { ICollaborator as IProtocolCollaborator } from '@univerjs/protocol';
 import type { ICollaborator, ICollaboratorUser, WorkbookMode, WorkbookPermissionSnapshot } from './permission-types';
-import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
+import { IAuthzIoService, IPermissionService } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { UnitObject } from '@univerjs/protocol';
 import { WORKBOOK_PERMISSION_POINT_MAP } from './permission-point-map';
@@ -31,7 +31,6 @@ import { UnitRole, WorkbookPermissionPoint } from './permission-types';
 export class FWorkbookPermission extends FBase {
     constructor(
         private readonly _unitId: string,
-        @Inject(Injector) private readonly _injector: Injector,
         @IPermissionService protected readonly _permissionService: IPermissionService,
         @IAuthzIoService private readonly _authzIoService: IAuthzIoService
     ) {

@@ -15,7 +15,6 @@
  */
 
 import type { BaseFunction } from '../../functions/base-function';
-
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
@@ -26,7 +25,7 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { Inject, Injector } from '@univerjs/core';
+import { Inject } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
@@ -428,7 +427,6 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();

@@ -20,7 +20,7 @@ import { DocIMEInputManagerService } from '../doc-ime-input-manager.service';
 
 function createService(): DocIMEInputManagerService {
     const injector = new Injector();
-    return injector.createInstance(DocIMEInputManagerService, { unitId: 'doc-1' } as never);
+    return injector.createInstance(DocIMEInputManagerService);
 }
 
 describe('DocIMEInputManagerService', () => {

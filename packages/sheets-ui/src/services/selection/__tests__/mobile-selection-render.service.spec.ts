@@ -20,14 +20,14 @@ import { SetSelectionsOperation } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { SHEET_VIEW_KEY } from '../../../common/keys';
 import {
     createFakeScene,
     createFakeSkeleton,
     createFakeViewport,
     createRenderTestBed,
     createTestEvent,
-} from '../../../controllers/render-controllers/__tests__/render-test-bed';
+} from '../../../__tests__/create-render-test-bed';
+import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { SheetScrollManagerService } from '../../scroll-manager.service';
 import { MobileSheetsSelectionRenderService, shouldKeepCurrentSelectionOnMobileLongPress } from '../mobile-selection-render.service';
 import { MobileSelectionControl } from '../mobile-selection-shape';

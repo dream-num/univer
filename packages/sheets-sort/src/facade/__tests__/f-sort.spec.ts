@@ -20,7 +20,7 @@ import { FUniver } from '@univerjs/core/facade';
 import { DefinedNamesService, IDefinedNamesService } from '@univerjs/engine-formula';
 import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
+import { createCommandTestBed } from '../../__tests__/create-command-test-bed';
 import '@univerjs/sheets/facade';
 import '@univerjs/sheets-sort/facade';
 

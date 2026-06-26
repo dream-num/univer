@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } fro
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import {
     CoverContentCommand,
     ReplaceContentCommand,
@@ -25,7 +26,6 @@ import {
     ReplaceSnapshotCommand,
     ReplaceTextRunsCommand,
 } from '../replace-content.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData() {
     const TEST_DOCUMENT_DATA_EN: IDocumentData = {

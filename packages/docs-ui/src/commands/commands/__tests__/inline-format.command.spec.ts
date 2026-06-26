@@ -27,6 +27,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import {
     ResetInlineFormatTextBackgroundColorCommand,
     ResetInlineFormatTextColorCommand,
@@ -43,7 +44,6 @@ import {
     SetInlineFormatTextFillCommand,
     SetInlineFormatUnderlineCommand,
 } from '../inline-format.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test inline format commands', () => {
     let univer: Univer;

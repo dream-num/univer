@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import type { ISheetData } from '../../basics/common';
+import type { ISheetData } from '../basics/common';
 import {
     CellValueType,
     ILogService,
@@ -31,31 +29,34 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Lexer } from '../../engine/analysis/lexer';
-import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
-import { AstTreeBuilder } from '../../engine/analysis/parser';
-import { AstRootNodeFactory } from '../../engine/ast-node/ast-root-node';
-import { FunctionNodeFactory } from '../../engine/ast-node/function-node';
-import { LambdaNodeFactory } from '../../engine/ast-node/lambda-node';
-import { LambdaParameterNodeFactory } from '../../engine/ast-node/lambda-parameter-node';
-import { OperatorNodeFactory } from '../../engine/ast-node/operator-node';
-import { PrefixNodeFactory } from '../../engine/ast-node/prefix-node';
-import { ReferenceNodeFactory } from '../../engine/ast-node/reference-node';
-import { SuffixNodeFactory } from '../../engine/ast-node/suffix-node';
-import { UnionNodeFactory } from '../../engine/ast-node/union-node';
-import { ValueNodeFactory } from '../../engine/ast-node/value-node';
-import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
-import { Interpreter } from '../../engine/interpreter/interpreter';
-import { FormulaDataModel } from '../../models/formula-data.model';
-import { CalculateFormulaService, ICalculateFormulaService } from '../../services/calculate-formula.service';
-import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
-import { FunctionService, IFunctionService } from '../../services/function.service';
-import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
-import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
-import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
-import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
-import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
+import { Lexer } from '../engine/analysis/lexer';
+import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+import { AstTreeBuilder } from '../engine/analysis/parser';
+import { AstRootNodeFactory } from '../engine/ast-node/ast-root-node';
+import { FunctionNodeFactory } from '../engine/ast-node/function-node';
+import { LambdaNodeFactory } from '../engine/ast-node/lambda-node';
+import { LambdaParameterNodeFactory } from '../engine/ast-node/lambda-parameter-node';
+import { OperatorNodeFactory } from '../engine/ast-node/operator-node';
+import { PrefixNodeFactory } from '../engine/ast-node/prefix-node';
+import { ReferenceNodeFactory } from '../engine/ast-node/reference-node';
+import { SuffixNodeFactory } from '../engine/ast-node/suffix-node';
+import { UnionNodeFactory } from '../engine/ast-node/union-node';
+import { ValueNodeFactory } from '../engine/ast-node/value-node';
+import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
+import { Interpreter } from '../engine/interpreter/interpreter';
+import { FormulaDataModel } from '../models/formula-data.model';
+import { CalculateFormulaService, ICalculateFormulaService } from '../services/calculate-formula.service';
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../services/current-data.service';
+import { DefinedNamesService, IDefinedNamesService } from '../services/defined-names.service';
+import { FunctionService, IFunctionService } from '../services/function.service';
+import {
+    HyperlinkEngineFormulaService,
+    IHyperlinkEngineFormulaService,
+} from '../services/hyperlink-engine-formula.service';
+import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../services/other-formula-manager.service';
+import { FormulaRuntimeService, IFormulaRuntimeService } from '../services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from '../services/sheet-row-filtered.service';
+import { ISuperTableService, SuperTableService } from '../services/super-table.service';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {

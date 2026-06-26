@@ -19,9 +19,9 @@ import { SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/
 import { SetFrozenCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { HeaderFreezeRenderController } from '../freeze.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 describe('HeaderFreezeRenderController', () => {
     it('refreshes viewports when switching sheets and freeze is enabled', () => {

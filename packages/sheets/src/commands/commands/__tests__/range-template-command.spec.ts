@@ -22,12 +22,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetRangeThemeModel } from '../../../models/range-theme-model';
 import { SetWorksheetRangeThemeStyleMutation } from '../../mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../../mutations/delete-worksheet-range-theme.mutation';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetWorksheetRangeThemeStyleCommand } from '../add-worksheet-range-theme.command';
 import { DeleteWorksheetRangeThemeStyleCommand } from '../delete-worksheet-range-theme.command';
 import { SetStyleCommand } from '../set-style.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-// eslint-disable-next-line max-lines-per-function
 describe('Test set worksheet default style commands', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -35,7 +35,7 @@ describe('Test set worksheet default style commands', () => {
     let defaultTheme: RangeThemeStyle;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(undefined, [[SheetRangeThemeModel]]);
         univer = testBed.univer;
         get = testBed.get;
 
@@ -45,6 +45,7 @@ describe('Test set worksheet default style commands', () => {
         commandService.registerCommand(SetWorksheetRangeThemeStyleCommand);
         commandService.registerCommand(DeleteWorksheetRangeThemeStyleCommand);
         commandService.registerCommand(SetStyleCommand);
+        commandService.registerCommand(SetRangeValuesMutation);
 
         const sheetRangeThemeModel = get(SheetRangeThemeModel);
         defaultTheme = sheetRangeThemeModel.getDefaultRangeThemeStyle('default');
@@ -75,11 +76,11 @@ describe('Test set worksheet default style commands', () => {
                 })
             ).toBeTruthy();
 
-            expect(worksheet?.getCell(0, 0)).toEqual(defaultTheme.getHeaderRowStyle());
-            expect(worksheet?.getCell(0, 1)).toEqual(defaultTheme.getHeaderRowStyle());
+            expect(worksheet?.getCell(0, 0)?.themeStyle).toEqual(defaultTheme.getHeaderRowStyle());
+            expect(worksheet?.getCell(0, 1)?.themeStyle).toEqual(defaultTheme.getHeaderRowStyle());
 
-            expect(worksheet?.getCell(1, 0)).toEqual(defaultTheme.getFirstRowStyle());
-            expect(worksheet?.getCell(2, 0)).toEqual(defaultTheme.getSecondRowStyle());
+            expect(worksheet?.getCell(1, 0)?.themeStyle).toEqual(defaultTheme.getFirstRowStyle());
+            expect(worksheet?.getCell(2, 0)?.themeStyle).toEqual(defaultTheme.getSecondRowStyle() ?? {});
 
             // undo;
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -106,6 +107,10 @@ describe('Test set worksheet default style commands', () => {
                 },
             } as ISetStyleCommandParams<IColorStyle>);
 
+            const worksheet = workbook.getSheetBySheetId('sheet1');
+            const explicitStyleId = worksheet?.getCell(0, 0)?.s;
+            expect(explicitStyleId).toBeTruthy();
+
             expect(
                 await commandService.executeCommand(SetWorksheetRangeThemeStyleCommand.id, {
                     unitId: 'test',
@@ -121,15 +126,10 @@ describe('Test set worksheet default style commands', () => {
                 })
             ).toBeTruthy();
 
-            const worksheet = workbook.getSheetBySheetId('sheet1');
+            expect(worksheet?.getCell(0, 0)?.s).toBe(explicitStyleId);
+            expect(worksheet?.getCell(0, 0)?.themeStyle).toEqual(defaultTheme.getHeaderRowStyle());
 
-            expect(worksheet?.getCell(0, 0)).toEqual({
-                bg: {
-                    rgb: 'red',
-                },
-            });
-
-            expect(worksheet?.getCell(0, 1)).toEqual(defaultTheme.getHeaderRowStyle());
+            expect(worksheet?.getCell(0, 1)?.themeStyle).toEqual(defaultTheme.getHeaderRowStyle());
         });
     });
 });

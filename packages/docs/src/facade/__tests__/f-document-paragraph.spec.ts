@@ -24,7 +24,7 @@ import {
     createSimpleDocument,
     createTaskDocument,
     createTestBed,
-} from './create-test-bed';
+} from '../../__tests__/create-test-bed';
 
 describe('FDocumentParagraph', () => {
     let univer: Univer | null = null;

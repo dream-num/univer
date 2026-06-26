@@ -15,16 +15,16 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import type { IDocumentSkeletonPage } from '../../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../../view-model/data-stream-tree-node';
-import type { ILayoutContext } from '../../../tools';
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { ILayoutContext } from '../../tools';
 import { DocumentDataModel, LocaleService, PRESET_LIST_TYPE, Univer } from '@univerjs/core';
-import { DocumentViewModel } from '../../../../view-model/document-view-model';
-import { Hyphen } from '../../../hyphenation/hyphen';
-import { LanguageDetector } from '../../../hyphenation/language-detector';
-import { createSkeletonPage } from '../../../model/page';
-import { getNullSkeleton, prepareSectionBreakConfig } from '../../../tools';
+import { DocumentViewModel } from '../../../view-model/document-view-model';
+import { Hyphen } from '../../hyphenation/hyphen';
+import { LanguageDetector } from '../../hyphenation/language-detector';
+import { createSkeletonPage } from '../../model/page';
+import { getNullSkeleton, prepareSectionBreakConfig } from '../../tools';
 
 export interface IParagraphLayoutTestBed {
     dataModel: DocumentDataModel;

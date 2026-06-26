@@ -42,7 +42,7 @@ const testWorkbookDataFactory: () => IWorkbookData = () => ({
     styles: {},
 });
 
-export function createCoreTestBed(workbookData?: IWorkbookData) {
+export function createTestBed(workbookData?: IWorkbookData) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);

@@ -25,7 +25,7 @@ import {
 } from '@univerjs/data-validation';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../../__tests__/create-test-bed';
 import { SheetDataValidationModel } from '../../../models/sheet-data-validation-model';
 import {
     AddSheetDataValidationCommand,

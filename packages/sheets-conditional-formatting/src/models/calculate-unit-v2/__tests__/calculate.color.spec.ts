@@ -17,7 +17,7 @@
 import type { IColorScale, IConditionFormattingRule } from '../../type';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CFRuleType, CFValueType } from '../../../base/const';
-import { createTestBed } from './test.util';
+import { createTestBed } from './create-test-bed';
 
 describe('Test colorScale', () => {
     let testBed: ReturnType<typeof createTestBed>;

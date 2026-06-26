@@ -22,7 +22,7 @@ import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, DesktopSidebarService, ISidebarService } from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createTestBed } from '../../../controllers/__tests__/test.util';
+import { createTestBed } from '../../../__tests__/create-test-bed';
 import { SheetNumfmtUIController } from '../../../controllers/ui.controller';
 import { CloseNumfmtPanelOperator } from '../close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../open.numfmt.panel.operation';

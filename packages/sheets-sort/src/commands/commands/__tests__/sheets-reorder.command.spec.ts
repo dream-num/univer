@@ -19,8 +19,8 @@ import type { ISortRangeCommandParams } from '../sheets-sort.command';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { SortRangeCommand } from '../sheets-sort.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test "Sort Range Commands"', () => {
     let univer: Univer;

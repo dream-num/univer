@@ -29,8 +29,8 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
-import { clipboardTestBed } from './clipboard-test-bed';
 import { fontSampleByExcel, fontSampleByGoogle, fontSampleByUniver } from './constant';
+import { clipboardTestBed } from './create-clipboard-test-bed';
 
 describe('Test clipboard', () => {
     let univer: Univer;

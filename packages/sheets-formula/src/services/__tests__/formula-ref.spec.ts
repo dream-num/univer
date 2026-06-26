@@ -15,12 +15,12 @@
  */
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
-import type { ITestBed } from './util';
+import type { ITestBed } from './create-test-bed';
 import { Direction, ICommandService, LocaleType } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
-import { createCommandTestBed } from './util';
+import { createCommandTestBed } from './create-test-bed';
 
 const MoveRangeCommandId = 'sheet.command.move-range';
 

@@ -31,8 +31,8 @@ import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createTestBed } from '../../__tests__/create-test-bed';
 import { NumfmtEditorController } from '../numfmt.editor.controller';
-import { createTestBed } from './test.util';
 
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
 const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');

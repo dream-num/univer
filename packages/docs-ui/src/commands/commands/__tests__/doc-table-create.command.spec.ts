@@ -23,6 +23,7 @@ import {
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import { afterEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import {
     buildDocTableInsertBody,
     CreateDocTableCommand,
@@ -63,7 +64,6 @@ import {
     INSERT_COLUMN_POSITION,
     INSERT_ROW_POSITION,
 } from '../table/table';
-import { createCommandTestBed } from './create-command-test-bed';
 
 const TABLE_ID = 'table-1';
 const TABLE_PREFIX = '';

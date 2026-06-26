@@ -42,10 +42,10 @@ import {
 } from '@univerjs/docs';
 import { DocumentViewModel, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-import { DocHtmlExportService } from '../../../services/clipboard/udm-to-html/doc-html-export.service';
-import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
-import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
-import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
+import { DocHtmlExportService } from '../services/clipboard/udm-to-html/doc-html-export.service';
+import { DocIMEInputManagerService } from '../services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from '../services/doc-menu-style.service';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'test-doc',

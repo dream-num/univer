@@ -23,6 +23,7 @@ import {
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import {
     H1HeadingCommand,
     H2HeadingCommand,
@@ -35,7 +36,6 @@ import {
     SubtitleHeadingCommand,
     TitleHeadingCommand,
 } from '../set-heading.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 function getHeadingDocumentData(): IDocumentData {
     return {

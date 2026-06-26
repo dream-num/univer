@@ -20,7 +20,7 @@ import { ErrorType, IDefinedNamesService, SetDefinedNameMutation } from '@univer
 import { MoveRangeCommand, RemoveDefinedNameCommand, RemoveSheetCommand, SetDefinedNameCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { UpdateDefinedNameController } from '../update-defined-name.controller';
 
 function createWorkbookData(): IWorkbookData {

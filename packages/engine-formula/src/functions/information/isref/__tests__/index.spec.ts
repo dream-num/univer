@@ -21,6 +21,7 @@ import type { ArrayValueObject } from '../../../../engine/value-object/array-val
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createFunctionTestBed } from '../../../../__tests__/create-function-test-bed';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
@@ -28,7 +29,6 @@ import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-to
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { Isref } from '../index';
 

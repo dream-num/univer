@@ -40,8 +40,8 @@ import {
 import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
 import { FormulaCalculationSessionController } from '../formula-calculation-session.controller';
 import { TriggerCalculationController } from '../trigger-calculation.controller';

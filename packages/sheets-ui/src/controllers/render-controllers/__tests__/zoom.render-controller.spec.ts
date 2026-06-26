@@ -16,9 +16,9 @@
 
 import { FOCUSING_SHEET, ICommandService } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
 import { SheetsZoomRenderController } from '../zoom.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 describe('SheetsZoomRenderController', () => {
     it('executes zoom command only when ctrl+wheels and sheet is focused', () => {

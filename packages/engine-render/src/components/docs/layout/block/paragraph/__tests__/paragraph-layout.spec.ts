@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { createParagraphLayoutTestBed } from '../../__tests__/create-paragraph-layout-test-bed';
 import { dealWidthParagraph } from '../paragraph-layout';
-import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('paragraph-layout', () => {
     it('lays out a normal text paragraph', () => {

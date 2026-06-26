@@ -21,7 +21,7 @@ import { SetRangeValuesMutation, SetSelectionsOperation } from '@univerjs/sheets
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetCopyCommand } from '../../../commands/commands/clipboard.command';
 import { ISheetClipboardService } from '../clipboard.service';
-import { clipboardTestBed } from './clipboard-test-bed';
+import { clipboardTestBed } from './create-clipboard-test-bed';
 
 describe('Test clipboard', () => {
     let univer: Univer;

@@ -16,7 +16,6 @@
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import type { IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
@@ -28,10 +28,10 @@ import {
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
+import { createParagraphLayoutTestBed } from '../../__tests__/create-paragraph-layout-test-bed';
 import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
-import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('layout-ruler', () => {
     beforeEach(() => {

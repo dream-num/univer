@@ -15,11 +15,18 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import {
+    awaitTime,
+    DataStreamTreeTokenType,
+    ICommandService,
+    IUniverInstanceService,
+    NamedStyleType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { BreakLineCommand } from '../break-line.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
     return {

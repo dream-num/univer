@@ -55,6 +55,7 @@ import { DocumentEditArea, GlyphType, IRenderManagerService } from '@univerjs/en
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { HeaderFooterType } from '../../../controllers/doc-header-footer.controller';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
@@ -102,7 +103,6 @@ import { CreateDocTableCommand } from '../table/doc-table-create.command';
 import { DocTableInsertRowCommand } from '../table/doc-table-insert.command';
 import { DocTableTabCommand } from '../table/doc-table-tab.command';
 import { genEmptyTable, genTableSource } from '../table/table';
-import { createCommandTestBed } from './create-command-test-bed';
 
 class TestSidebarService extends Disposable implements ISidebarService {
     readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();

@@ -27,8 +27,8 @@ import {
 } from '@univerjs/engine-formula';
 import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { UpdateFormulaController } from '../update-formula.controller';
 
 function createWorkbookData(): IWorkbookData {

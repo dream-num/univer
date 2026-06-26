@@ -20,7 +20,7 @@ import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AutoFillService, IAutoFillService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 
 function createControllerTestBed() {

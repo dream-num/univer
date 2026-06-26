@@ -28,7 +28,7 @@ import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsO
 import { ImageSourceType } from '@univerjs/drawing';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
-import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
 import { DocClipboardService, getTableClipboardBodySlice, IDocClipboardService } from '../clipboard.service';
 import {

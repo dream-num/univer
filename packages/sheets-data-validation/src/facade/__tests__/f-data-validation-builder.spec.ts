@@ -19,7 +19,7 @@ import { DataValidationErrorStyle, DataValidationOperator, DataValidationType } 
 import { deserializeListOptions } from '@univerjs/sheets';
 import { FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade/f-data-validation-builder.js';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from './create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test FDataValidationBuilder', () => {
     let univerAPI: FUniver;

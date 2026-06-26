@@ -29,8 +29,8 @@ import {
 import { FUniver as FUniverCtor } from '@univerjs/core/facade';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
-import { UniverDocsPlugin } from '../../plugin';
-import '../index';
+import { UniverDocsPlugin } from '../plugin';
+import '../facade';
 
 export const DOCUMENT_STYLE: IDocumentData['documentStyle'] = {
     pageSize: {

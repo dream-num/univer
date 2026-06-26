@@ -16,8 +16,12 @@
 
 import { MessageType } from '@univerjs/design';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../replay.command';
-import { APPLY_CELL_VALUE_COMMAND_ID, createCommandTestBed, TestState } from './command-test-bed';
+import {
+    ReplayLocalRecordCommand,
+    ReplayLocalRecordOnActiveCommand,
+    ReplayLocalRecordOnNamesakeCommand,
+} from '../replay.command';
+import { APPLY_CELL_VALUE_COMMAND_ID, createCommandTestBed, TestState } from './create-command-test-bed';
 
 describe('replay.command', () => {
     beforeEach(() => {

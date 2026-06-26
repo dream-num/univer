@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { expandToContinuousRange } from '../expand-range';
-import { createCoreTestBed } from './create-core-test-bed';
+import { createTestBed } from './create-test-bed';
 import { snapshot } from './expand.data';
 
 // the work book can be get 'unit=YSvbxFMCTxugbku-IWNyxQ&type=2&subunit=U_wr1DEF84N_mbesFNmxR' in pro
@@ -31,7 +31,7 @@ describe('Test expandToContinuousRange', () => {
     };
 
     beforeEach(() => {
-        const testBed = createCoreTestBed(snapshot);
+        const testBed = createTestBed(snapshot);
         workbook = testBed.sheet;
     });
     it('Test expandToContinuousRange all', () => {

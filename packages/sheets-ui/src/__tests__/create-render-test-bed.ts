@@ -17,14 +17,28 @@
 import type { Dependency, IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext, Vector2 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import { ICommandService, IContextService, ILogService, Inject, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IContextService,
+    ILogService,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    Tools,
+    Univer,
+    Injector as UniverInjector,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { SHEET_VIEW_KEY } from '../../../common/keys';
-import enUS from '../../../locale/en-US';
-import { HeaderUnhideRangeService } from '../../../services/header-unhide-range.service';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { SHEET_VIEW_KEY } from '../common/keys';
+import enUS from '../locale/en-US';
+import { HeaderUnhideRangeService } from '../services/header-unhide-range.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export interface ITestEvent<TEvent, TState = { stopPropagation: () => void }> {
     subscribeEvent(handler: (evt: TEvent, state: TState) => void): IDisposable;

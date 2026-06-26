@@ -30,6 +30,7 @@ import {
 } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { FormulaCalculationSessionController } from '../../controllers/formula-calculation-session.controller';
 import {
     CalculationMode,
@@ -40,7 +41,6 @@ import {
     RegisterFunctionService,
 } from '../../index';
 import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
-import { createFacadeTestBed } from './create-test-bed';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets/facade';
 import '../../facade';

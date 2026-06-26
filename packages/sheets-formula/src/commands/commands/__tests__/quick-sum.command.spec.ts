@@ -18,7 +18,7 @@ import type { IAccessor, IWorkbookData } from '@univerjs/core';
 import { CellValueType, ICommandService, IUniverInstanceService, LocaleType } from '@univerjs/core';
 import { SetRangeValuesCommand, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../../__tests__/create-test-bed';
 import { QuickSumCommand } from '../quick-sum.command';
 
 function createWorkbookData(): IWorkbookData {

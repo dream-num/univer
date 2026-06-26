@@ -25,6 +25,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { InsertBulletBelowCommand } from '../insert-below/insert-bullet-below.command';
 import {
     BulletListCommand,
@@ -42,7 +43,6 @@ import {
     QuickListCommand,
     ToggleCheckListCommand,
 } from '../list.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
     return {

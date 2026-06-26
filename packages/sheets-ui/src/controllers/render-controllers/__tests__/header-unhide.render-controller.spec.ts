@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { HeaderUnhideRangeAxis, HeaderUnhideRangeService } from '../../../services/header-unhide-range.service';
 import { HeaderUnhideRenderController } from '../header-unhide.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 describe('HeaderUnhideRenderController', () => {
     it('filters hidden row ranges and keeps hidden column icons at the bottom of expanded column headers', () => {

@@ -15,6 +15,7 @@
  */
 
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { IRender } from '@univerjs/engine-render';
 import {
     ILogService,
     Inject,
@@ -30,49 +31,31 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import {
-    ActiveDirtyManagerService,
     DefinedNamesService,
     FormulaDataModel,
     FunctionService,
-    IActiveDirtyManagerService,
     IDefinedNamesService,
     IFunctionService,
-    ISheetRowFilteredService,
-    ISuperTableService,
     LexerTreeBuilder,
-    RegisterOtherFormulaService,
-    SheetRowFilteredService,
-    SuperTableService,
 } from '@univerjs/engine-formula';
+import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
+    RangeProtectionRuleModel,
     RefRangeService,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import {
-    DataValidationCacheService,
-    DataValidationCustomFormulaService,
-    DataValidationFormulaService,
-    DataValidationListCacheService,
-    SheetDataValidationModel,
-    SheetsDataValidationValidatorService,
-} from '@univerjs/sheets-data-validation';
-import {
-    DescriptionService,
-    FormulaCalculationSessionController,
-    FormulaCalculationSessionService,
-    IDescriptionService,
-    IRegisterFunctionService,
-    RegisterFunctionService,
-} from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
-import { DataValidationController } from '../../controllers/dv.controller';
 import '@univerjs/sheets/facade';
-import '@univerjs/sheets-data-validation/facade';
+import '../facade/f-workbook';
+import '../facade/f-range';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {
@@ -129,6 +112,13 @@ export interface ITestBed {
     injector: Injector;
 }
 
+class RenderManagerServiceTestBed extends RenderManagerService {
+    override createRender(unitId: string): IRender {
+        const renderer = this._createRender(unitId, new Engine('', { elementHeight: 100, elementWidth: 100 }));
+        return renderer;
+    }
+}
+
 export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -148,40 +138,26 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
+
+            injector.add([IFunctionService, { useClass: FunctionService }]);
+            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([RangeProtectionRuleModel]);
+            injector.add([WorksheetProtectionRuleModel]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-            injector.add([ISuperTableService, { useClass: SuperTableService }]);
-            injector.add([IDescriptionService, { useClass: DescriptionService }]);
-            injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            injector.add([FormulaCalculationSessionService]);
-            injector.add([FormulaCalculationSessionController]);
-
-            // register feature modules
-            ([
-                // data validation
-                [DataValidationCacheService],
-                [DataValidationListCacheService],
-                [DataValidationFormulaService],
-                [DataValidationCustomFormulaService],
-                [RegisterOtherFormulaService],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
-                [SheetsDataValidationValidatorService],
-                [SheetDataValidationModel],
-                [DataValidationController],
-            ] as Dependency[]).forEach((d) => {
-                injector.add(d);
-            });
 
             dependencies?.forEach((d) => injector.add(d));
 
             this._injector.get(SheetInterceptorService);
-            this._injector.get(FormulaCalculationSessionController);
-            this._injector.get(DataValidationController);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
         }
 
         override onReady(): void {
@@ -200,7 +176,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
 
     // register builtin plugins
     // note that UI plugins are not registered here, because the unit test environment does not have a UI
-    univer.registerPlugin(UniverDataValidationPlugin);
     univer.registerPlugin(TestPlugin);
 
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());

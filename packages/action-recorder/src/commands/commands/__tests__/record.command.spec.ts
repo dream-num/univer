@@ -16,8 +16,12 @@
 
 import { CommandType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../record.command';
-import { APPLY_CELL_VALUE_COMMAND_ID, createCommandTestBed, TestState } from './command-test-bed';
+import {
+    CompleteRecordingActionCommand,
+    StartRecordingActionCommand,
+    StopRecordingActionCommand,
+} from '../record.command';
+import { APPLY_CELL_VALUE_COMMAND_ID, createCommandTestBed, TestState } from './create-command-test-bed';
 
 describe('record.command', () => {
     beforeEach(() => {

@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/fr-FR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: 'Rechercher',
+            random: 'Emoji aléatoire',
+            recents: 'Récents',
+            emojis: 'Emojis',
+            animals: 'Animaux',
+            food: 'Nourriture',
+            activities: 'Activités',
+            places: 'Lieux',
+            objects: 'Objets',
+            symbols: 'Symboles',
+            searchResults: 'Résultats de recherche',
+            noResults: 'Aucun emoji trouvé',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'Normal',

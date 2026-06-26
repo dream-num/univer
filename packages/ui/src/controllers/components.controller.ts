@@ -22,6 +22,7 @@ import { ComponentManager, IconManager } from '../common';
 import { COLOR_PICKER_COMPONENT } from '../views/color-picker/interface';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../views/CommonLabel';
 import { ShortcutPanel } from '../views/components/shortcut-panel/ShortcutPanel';
+import { EMOJI_PICKER_COMPONENT, EmojiPicker } from '../views/emoji-picker/index';
 import { FontFamily, FontFamilyItem } from '../views/font-family/index';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../views/font-family/interface';
 import { FontSize } from '../views/font-size/FontSize';
@@ -58,6 +59,7 @@ export class ComponentsController extends Disposable {
             [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],
             [FONT_SIZE_COMPONENT, FontSize],
             [COLOR_PICKER_COMPONENT, ColorPicker],
+            [EMOJI_PICKER_COMPONENT, EmojiPicker],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)

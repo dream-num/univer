@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/ru-RU.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: 'Поиск',
+            random: 'Случайный эмодзи',
+            recents: 'Недавние',
+            emojis: 'Эмодзи',
+            animals: 'Животные',
+            food: 'Еда',
+            activities: 'Активности',
+            places: 'Места',
+            objects: 'Объекты',
+            symbols: 'Символы',
+            searchResults: 'Результаты поиска',
+            noResults: 'Эмодзи не найден',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'Обычный текст',

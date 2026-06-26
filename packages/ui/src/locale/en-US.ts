@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
+import emojiLocale from './emoji-locale/en-US.generated';
+
 const locale = {
     ui: {
+        emojiPicker: {
+            search: 'Search',
+            random: 'Random emoji',
+            recents: 'Recents',
+            emojis: 'Emojis',
+            animals: 'Animals',
+            food: 'Food',
+            activities: 'Activities',
+            places: 'Places',
+            objects: 'Objects',
+            symbols: 'Symbols',
+            searchResults: 'Search results',
+            noResults: 'No emoji found',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'Normal',

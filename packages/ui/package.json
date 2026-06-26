@@ -72,6 +72,7 @@
         "lib"
     ],
     "scripts": {
+        "prepare": "node --experimental-strip-types ./scripts/generate-emojis.mts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",

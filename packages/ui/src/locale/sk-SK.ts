@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/sk-SK.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: 'Hľadať',
+            random: 'Náhodné emoji',
+            recents: 'Nedávne',
+            emojis: 'Emoji',
+            animals: 'Zvieratá',
+            food: 'Jedlo',
+            activities: 'Aktivity',
+            places: 'Miesta',
+            objects: 'Objekty',
+            symbols: 'Symboly',
+            searchResults: 'Výsledky vyhľadávania',
+            noResults: 'Nenašli sa žiadne emoji',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'Normálne',

@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-export * from './CommonLabel';
-export * from './custom-label/index';
-export * from './emoji-picker/index';
-export * from './HeadingItem';
-
-export { useScrollYOverContainer } from './hooks/layout';
-
-export { type ISliderProps, Slider } from './slider/index';
+export {
+    EMOJI_CATEGORIES,
+    EMOJI_RECENT_LIMIT,
+    getAllEmojis,
+    getDefaultRecentEmojis,
+    getEmojiLocaleData,
+    getLocalizedEmojiTitle,
+    getRandomEmoji,
+    parseStoredRecentEmojis,
+    promoteRecentEmoji,
+    searchEmojis,
+} from './emoji-picker-utils';
+export type { EmojiCategory, IEmojiItem, IEmojiLocaleData } from './emoji-picker-utils';
+export { EMOJI_PICKER_COMPONENT, EmojiPicker } from './EmojiPicker';
+export type { IEmojiPickerPopupProps } from './EmojiPicker';

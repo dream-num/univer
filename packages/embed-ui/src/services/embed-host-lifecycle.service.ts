@@ -314,7 +314,7 @@ export class EmbedHostLifecycleService {
         return {
             id: SetEmbedDescriptorMutation.id,
             params: {
-                hostUnitId: descriptor.hostUnitId,
+                unitId: descriptor.hostUnitId,
                 descriptor,
             },
         };
@@ -324,7 +324,7 @@ export class EmbedHostLifecycleService {
         return {
             id: SoftDeleteEmbedDescriptorMutation.id,
             params: {
-                hostUnitId: descriptor.hostUnitId,
+                unitId: descriptor.hostUnitId,
                 embedId: descriptor.embedId,
             },
         };

@@ -363,13 +363,13 @@ describe('embed-ui registries and commands', () => {
     it('coordinates host lifecycle mutations and undo redo as one transaction', async () => {
         const descriptor = createDescriptor();
         const copiedDescriptor = createDescriptor({ embedId: 'copy', hostAnchorId: 'copy-anchor' });
-        const store = new Map<string, IEmbedDescriptor>([[descriptor.embedId, descriptor]]);
+        const store = new Map<string, IEmbedDescriptor>([[`${descriptor.hostUnitId}:${descriptor.embedId}`, descriptor]]);
         const creationService = {
             prepareCreateEmbed: vi.fn(async () => ({ descriptor })),
             prepareCopyEmbed: vi.fn(() => copiedDescriptor),
         };
         const modelService = {
-            getDescriptor: vi.fn((_hostUnitId: string, embedId: string) => store.get(embedId)),
+            getDescriptor: vi.fn((hostUnitId: string, embedId: string) => store.get(`${hostUnitId}:${embedId}`)),
         };
         const adapter = {
             createAnchorPlan: vi.fn((context: { requestedAnchorId?: string; embedId: string }) => ({
@@ -389,14 +389,23 @@ describe('embed-ui registries and commands', () => {
             }),
         };
         const commandService = {
-            syncExecuteCommand: vi.fn((id: string, params: { descriptor?: IEmbedDescriptor; embedId?: string }) => {
-                if (params?.descriptor) {
-                    store.set(params.descriptor.embedId, params.descriptor);
+            syncExecuteCommand: vi.fn((id: string, params: { unitId?: string; descriptor?: IEmbedDescriptor; embedId?: string }) => {
+                if (id === 'embed.mutation.set-descriptor') {
+                    if (!params?.unitId || !params.descriptor) {
+                        return false;
+                    }
+
+                    store.set(`${params.unitId}:${params.descriptor.embedId}`, params.descriptor);
                 }
-                if (id.includes('soft-delete') && params?.embedId) {
-                    const current = store.get(params.embedId);
+
+                if (id === 'embed.mutation.soft-delete-descriptor') {
+                    if (!params?.unitId || !params.embedId) {
+                        return false;
+                    }
+
+                    const current = store.get(`${params.unitId}:${params.embedId}`);
                     if (current) {
-                        store.set(params.embedId, { ...current, lifecycle: 'soft-deleted' });
+                        store.set(`${params.unitId}:${params.embedId}`, { ...current, lifecycle: 'soft-deleted' });
                     }
                 }
 
@@ -429,10 +438,16 @@ describe('embed-ui registries and commands', () => {
             unitID: 'host-1',
             redoMutations: expect.arrayContaining([
                 expect.objectContaining({ id: 'create-anchor:embed-1' }),
-                expect.objectContaining({ id: 'embed.mutation.set-descriptor' }),
+                expect.objectContaining({
+                    id: 'embed.mutation.set-descriptor',
+                    params: expect.objectContaining({ unitId: 'host-1', descriptor }),
+                }),
             ]),
             undoMutations: expect.arrayContaining([
-                expect.objectContaining({ id: 'embed.mutation.soft-delete-descriptor' }),
+                expect.objectContaining({
+                    id: 'embed.mutation.soft-delete-descriptor',
+                    params: expect.objectContaining({ unitId: 'host-1', embedId: 'embed-1' }),
+                }),
                 expect.objectContaining({ id: 'remove-anchor:embed-1' }),
             ]),
         }));
@@ -445,6 +460,21 @@ describe('embed-ui registries and commands', () => {
             requestedHostAnchorId: 'copy-anchor',
         })).toBe(copiedDescriptor);
         expect(service.removeEmbed({ hostUnitId: 'host-1', embedId: 'copy' })).toBe(true);
+        expect(undoRedoService.pushUndoRedo).toHaveBeenLastCalledWith(expect.objectContaining({
+            unitID: 'host-1',
+            redoMutations: expect.arrayContaining([
+                expect.objectContaining({
+                    id: 'embed.mutation.soft-delete-descriptor',
+                    params: expect.objectContaining({ unitId: 'host-1', embedId: 'copy' }),
+                }),
+            ]),
+            undoMutations: expect.arrayContaining([
+                expect.objectContaining({
+                    id: 'embed.mutation.set-descriptor',
+                    params: expect.objectContaining({ unitId: 'host-1' }),
+                }),
+            ]),
+        }));
         expect(adapter.afterRemoveAnchor).toHaveBeenCalled();
         expect(service.removeEmbed({ hostUnitId: 'host-1', embedId: 'missing' })).toBe(false);
 

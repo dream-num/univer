@@ -1405,8 +1405,8 @@ importers:
         specifier: workspace:*
         version: link:../embed
       '@univerjs/icons':
-        specifier: 1.12.0
-        version: 1.12.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.13.0
+        version: 1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

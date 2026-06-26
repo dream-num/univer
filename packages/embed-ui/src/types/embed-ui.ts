@@ -191,6 +191,7 @@ export interface IEmbedProductMenuMountContext {
     menuSchema: unknown;
     menuTitlePrefix?: string;
     activeRibbonTab?: string;
+    headerMenu?: boolean;
     toolbarOnly?: boolean;
 }
 

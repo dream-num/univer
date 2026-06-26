@@ -104,13 +104,16 @@ jobs:
                   body: |
                       ## View Deployment
 
-                      [#${{ github.run_id }}](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})
+                      ```txt
+                      status  : provisioning preview
+                      target  : pr-${{ needs.setup.outputs.id }}
+                      ref     : ${{ needs.setup.outputs.ref }}
+                      run     : #${{ github.run_id }}
+                      ```
 
-                      <p align="center">
-                        🥐 🍔 🥓 🥗 🥘 🌯 🍚 🍛 🍖 🍭 🍧 🍝 🥪 🥖 🍪 <br />
-                        Still cooking, please come back later <br />
-                        🥙 🥮 🥨 🌭 🍦 🍙 🍕 🍰 🍮 🍜 🍡 🍱 🍿 🍕 🥟
-                      </p>
+                      Preview assets are building. This comment will update with deployment links when the preview is ready.
+
+                      [Open workflow run](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})
                   edit-mode: replace
 
     build-and-deploy:
@@ -181,6 +184,7 @@ jobs:
 
             # ================= Deploy PR Preview =================
             - name: 🚀 Deploy to GitHub Pages (preview)
+              id: preview_deploy
               uses: rossjrw/pr-preview-action@v1
               with:
                   source-dir: ./dist
@@ -189,3 +193,30 @@ jobs:
                   pr-number: ${{ needs.setup.outputs.id }}
                   comment: false
                   action: ${{ needs.setup.outputs.state == 'closed' && 'remove' || 'deploy' }}
+
+            - name: 🧽 Find deployment comment
+              uses: peter-evans/find-comment@v4
+              if: ${{ needs.setup.outputs.state != 'closed' && steps.preview_deploy.outputs['deployment-action'] == 'deploy' }}
+              id: preview-comment
+              with:
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: View Deployment
+
+            - name: 📝 Update deployment comment
+              uses: peter-evans/create-or-update-comment@v5
+              if: ${{ needs.setup.outputs.state != 'closed' && steps.preview_deploy.outputs['deployment-action'] == 'deploy' }}
+              with:
+                  comment-id: ${{ steps.preview-comment.outputs.comment-id }}
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  body: |
+                      ## View Deployment
+
+                      [Preview](${{ steps.preview_deploy.outputs['preview-url'] }}) · [#${{ github.run_id }}](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})
+
+                      | Entry | Link |
+                      | --- | --- |
+                      | Demo | ${{ steps.preview_deploy.outputs['preview-url'] }} |
+                      | React 16 Demo | ${{ steps.preview_deploy.outputs['preview-url'] }}react16/ |
+                      | Storybook | ${{ steps.preview_deploy.outputs['preview-url'] }}storybook/ |
+                  edit-mode: replace

@@ -50,7 +50,7 @@ function getDefinedNameFieldName(unitId: string, localeService: LocaleService, d
     if (definedNameMap == null) {
         return localeService.t('sheets.definedName.defaultName') + 1;
     }
-    const definedNames = Array.from(Object.values(definedNameMap));
+    const definedNames = Object.values(definedNameMap);
     const count = definedNames.length + 1;
     const name = localeService.t('sheets.definedName.defaultName') + count;
     if (definedNamesService.getValueByName(unitId, name) == null) {

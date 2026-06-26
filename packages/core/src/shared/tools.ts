@@ -61,12 +61,11 @@ function diffArrays(oneArray: any[], twoArray: any[]) {
 
 function diffObject(oneObject: Record<string, any>, twoObject: Record<string, any>) {
     const oneKeys = Object.keys(oneObject);
-    const twoKeys = Object.keys(twoObject);
-    if (oneKeys.length !== twoKeys.length) {
+    if (oneKeys.length !== Object.keys(twoObject).length) {
         return false;
     }
     for (const key of oneKeys) {
-        if (!twoKeys.includes(key)) {
+        if (!Object.prototype.propertyIsEnumerable.call(twoObject, key)) {
             return false;
         }
         const oneValue = oneObject[key];
@@ -271,11 +270,13 @@ export class Tools {
             return clone as T;
         }
         if (this.isObject(value)) {
+            const source = value as Record<string, any>;
             const clone: Record<string, any> = {};
-            Object.keys(value as Record<string, any>).forEach((key) => {
-                const item = (value as Record<string, any>)[key];
-                clone[key] = Tools.deepClone(item);
-            });
+            for (const key in source) {
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    clone[key] = Tools.deepClone(source[key]);
+                }
+            }
             Object.setPrototypeOf(clone, Object.getPrototypeOf(value));
             return clone as T;
         }

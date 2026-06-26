@@ -24,8 +24,17 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FunctionType, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { getSheetCommandTarget, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import {
+    FunctionType,
+    IDefinedNamesService,
+    RemoveDefinedNameMutation,
+    SetDefinedNameMutation,
+} from '@univerjs/engine-formula';
+import {
+    getSheetCommandTarget,
+    SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
+    SetWorksheetActiveOperation,
+} from '@univerjs/sheets';
 import { IDescriptionService } from '../services/description.service';
 
 /**
@@ -177,7 +186,7 @@ export class DefinedNameController extends Disposable {
         }
 
         const functionList: string[] = [];
-        Array.from(Object.values(definedNames)).forEach((value) => {
+        Object.values(definedNames).forEach((value) => {
             const { name } = value;
             functionList.push(name);
         });
@@ -202,7 +211,7 @@ export class DefinedNameController extends Disposable {
 
         this._preUnitId = _unitId;
 
-        Array.from(Object.values(definedNames)).forEach((value) => {
+        Object.values(definedNames).forEach((value) => {
             const { name, comment, formulaOrRefString, localSheetId } = value;
 
             if (this._descriptionService.hasDescription(name)) {
@@ -231,7 +240,7 @@ export class DefinedNameController extends Disposable {
 
         const functionList: string[] = [];
 
-        Array.from(Object.values(definedNames)).forEach((value) => {
+        Object.values(definedNames).forEach((value) => {
             const { name, localSheetId } = value;
             if (localSheetId !== SCOPE_WORKBOOK_VALUE_DEFINED_NAME && localSheetId !== subUnitId) {
                 functionList.push(name);

@@ -72,7 +72,7 @@ export class RefAlias<T extends Record<string, unknown>, K extends keyof T = key
     setValue(key: string, attr: keyof T, value: unknown) {
         const item = this.getValue(key);
         if (item) {
-            if (Object.keys(item).includes(attr as string)) {
+            if (Object.prototype.hasOwnProperty.call(item, attr)) {
                 item[attr] = value as T[keyof T];
             }
         }

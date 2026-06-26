@@ -16,7 +16,11 @@
 
 import type { IRange, LocaleType, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
-import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type {
+    BaseReferenceObject,
+    FunctionVariantType,
+    NodeValueType,
+} from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
@@ -134,9 +138,9 @@ export class BaseFunction {
         if (nameMap == null) {
             return null;
         }
-        return Array.from(Object.values(nameMap)).filter((value) => {
+        return Object.values(nameMap).find((value) => {
             return value.name === name;
-        })?.[0];
+        });
     }
 
     setDefinedNames(definedNames: IDefinedNameMapItem) {

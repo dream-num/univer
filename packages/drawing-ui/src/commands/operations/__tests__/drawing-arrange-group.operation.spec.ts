@@ -60,6 +60,13 @@ function createDrawing(drawingId: string, left: number): IDrawingParam {
     };
 }
 
+function createChartDrawing(drawingId: string, left: number): IDrawingParam {
+    return {
+        ...createDrawing(drawingId, left),
+        drawingType: DrawingTypeEnum.DRAWING_CHART,
+    };
+}
+
 describe('drawing arrange and group operations', () => {
     let univer: Univer;
     let commandService: ICommandService;
@@ -204,6 +211,23 @@ describe('drawing arrange and group operations', () => {
             expect(child.groupId).toBe(groupUpdates[0][0].parent.drawingId);
         }
         expect(childIds).toEqual(['image-1', 'image-2']);
+    });
+
+    it('groups chart drawings with regular drawings', async () => {
+        const groupUpdates: IDrawingGroupUpdateParam[][] = [];
+        drawingManagerService.featurePluginGroupUpdate$.subscribe((update) => groupUpdates.push(update));
+
+        const result = await commandService.executeCommand(SetDrawingGroupOperation.id, {
+            drawings: [createChartDrawing('chart-1', 0), createDrawing('image-1', 30)],
+        });
+
+        expect(result).toBe(true);
+        expect(groupUpdates).toHaveLength(1);
+        expect(groupUpdates[0][0].children.map((child) => child.drawingId)).toEqual(['chart-1', 'image-1']);
+        expect(groupUpdates[0][0].children[0]).toMatchObject({
+            drawingId: 'chart-1',
+            groupId: groupUpdates[0][0].parent.drawingId,
+        });
     });
 
     it('does not create a drawing group from a single selected drawing', async () => {

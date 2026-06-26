@@ -21,16 +21,18 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 /**
- * Now only support grouping images, shapes, and groups.
+ * Now only support grouping images, shapes, charts, and groups.
  */
-export const DRAWING_GROUP_TYPES = [DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_GROUP];
+export const DRAWING_GROUP_TYPES = [DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_CHART, DrawingTypeEnum.DRAWING_GROUP];
 
 export interface IDrawingGroupOperationParams {
     drawings?: IDrawingParam[];
 }
 
 /**
- * Group the selected drawings into a new group. The selected drawings must be of type image, shape, or group, and there must be at least 2 drawings selected.
+ * Group the selected drawings into a new group. The selected drawings must be
+ * of type image, shape, chart, or group, and there must be at least 2 drawings
+ * selected.
  */
 export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> = {
     id: 'drawing.operation.set-drawing-group',

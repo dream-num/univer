@@ -17,8 +17,8 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
-import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX } from '@univerjs/engine-render';
+import { getDrawingShapeKeyByDrawingSearch, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import { DRAWING_OBJECT_LAYER_INDEX, Rect } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
@@ -82,13 +82,13 @@ function createHarness() {
             if (key.includes('drawing-transform')) return transformShape;
             return null;
         }),
-        getObjectIncludeInGroup: vi.fn(() => null),
+        getObjectIncludeInGroup: vi.fn((_key: string): any => null),
         fuzzyMathObjects: vi.fn((key: string) => {
             if (key.includes('drawing-z')) return [zIndexShape];
             if (key.includes('drawing-remove')) return [disposeShape];
             return [];
         }),
-        addObject: vi.fn(() => ({ attachTransformerTo: vi.fn() })),
+        addObject: vi.fn((_object: any, _layerIndex?: number) => ({ attachTransformerTo: vi.fn() })),
         addObjects: vi.fn(),
         removeObject: vi.fn(),
         makeDirty: vi.fn(),
@@ -101,6 +101,7 @@ function createHarness() {
     const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; behindText?: boolean; hidden?: boolean; transform: { left: number; top: number; width: number; height: number; angle: number; clipBounds?: { left: number; top: number; width: number; height: number } } }>([
         ['drawing-a', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-a', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 } }],
         ['drawing-b', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 20, top: 0, width: 10, height: 10, angle: 0 } }],
+        ['chart-1', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'chart-1', drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 40, top: 0, width: 20, height: 10, angle: 0 } }],
         ['drawing-transform', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform', drawingType: DrawingTypeEnum.DRAWING_IMAGE, behindText: true, hidden: true, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
         ['drawing-transform-refresh-hidden', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform-refresh-hidden', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
         ['drawing-refresh-missing', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 4, top: 5, width: 6, height: 7, angle: 0 } }],
@@ -156,6 +157,7 @@ function createHarness() {
         changeEnd$,
         commandExecuted: () => commandExecuted,
         drawingManagerService,
+        group$,
         order$,
         refreshTransform$,
         remove$,
@@ -250,6 +252,64 @@ describe('DrawingUpdateController', () => {
         expect(harness.drawingManagerService.addNotification).toHaveBeenCalledWith([
             { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing' },
         ]);
+
+        harness.controller.dispose();
+    });
+
+    it('groups existing chart render objects from the scene', () => {
+        const harness = createHarness();
+        const unitId = 'unit-1';
+        const subUnitId = 'sheet-1';
+        const imageKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: 'drawing-a' });
+        const chartKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: 'chart-1' });
+        const groupKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: 'group-1' });
+        const imageRect = new Rect(imageKey, { left: 0, top: 0, width: 10, height: 10 });
+        const chartRect = new Rect(chartKey, { left: 40, top: 0, width: 20, height: 10 });
+        const imageTransformSpy = vi.spyOn(imageRect, 'transformByState');
+        const chartTransformSpy = vi.spyOn(chartRect, 'transformByState');
+        let createdGroup: { oKey: string; getObjects: () => unknown[] } | undefined;
+
+        harness.scene.getObjectIncludeInGroup.mockImplementation((key: string) => {
+            if (key === imageKey) {
+                return imageRect;
+            }
+            if (key === chartKey) {
+                return chartRect;
+            }
+            return null;
+        });
+        harness.scene.addObject.mockImplementation((object: { oKey: string; getObjects?: () => unknown[] }) => {
+            if (object.oKey === groupKey && object.getObjects) {
+                createdGroup = object as { oKey: string; getObjects: () => unknown[] };
+            }
+            return { attachTransformerTo: vi.fn() };
+        });
+
+        harness.group$.next([{
+            parent: {
+                unitId,
+                subUnitId,
+                drawingId: 'group-1',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                transform: { left: 0, top: 0, width: 60, height: 10, angle: 0 },
+                groupBaseBound: { left: 0, top: 0, width: 60, height: 10 },
+            },
+            children: [
+                { unitId, subUnitId, drawingId: 'drawing-a', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 }, groupId: 'group-1' },
+                { unitId, subUnitId, drawingId: 'chart-1', drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 40, top: 0, width: 20, height: 10, angle: 0 }, groupId: 'group-1' },
+            ],
+        }]);
+
+        expect(createdGroup?.oKey).toBe(groupKey);
+        expect(createdGroup?.getObjects()).toEqual([imageRect, chartRect]);
+        expect(imageRect.isInGroup).toBe(true);
+        expect(chartRect.isInGroup).toBe(true);
+        expect(imageRect.groupKey).toBe(groupKey);
+        expect(chartRect.groupKey).toBe(groupKey);
+        expect(imageTransformSpy).toHaveBeenCalledWith({ left: 0, top: 0, width: 10, height: 10, angle: 0 });
+        expect(chartTransformSpy).toHaveBeenCalledWith({ left: 40, top: 0, width: 20, height: 10, angle: 0 });
+        expect(harness.transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
+        expect(harness.transformer.setSelectedControl).toHaveBeenCalledWith(createdGroup);
 
         harness.controller.dispose();
     });

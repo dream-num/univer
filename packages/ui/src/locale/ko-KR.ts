@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/ko-KR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: '검색',
+            random: '무작위 이모지',
+            recents: '최근 항목',
+            emojis: '이모지',
+            animals: '동물',
+            food: '음식',
+            activities: '활동',
+            places: '장소',
+            objects: '사물',
+            symbols: '기호',
+            searchResults: '검색 결과',
+            noResults: '이모지를 찾을 수 없음',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: '일반',

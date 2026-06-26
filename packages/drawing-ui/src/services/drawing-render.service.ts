@@ -22,6 +22,7 @@ import {
     DrawingTypeEnum,
     Inject,
     IUniverInstanceService,
+    PositionedObjectLayoutType,
     IURLImageService,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -44,6 +45,7 @@ interface IDrawingTransformStateWithClipBounds {
 
 type IDrawingParamWithBehindText = (Partial<IDrawingParam> | Partial<IImageData>) & {
     behindText?: boolean | BooleanNumber;
+    docxHeaderFooterDrawing?: boolean;
 };
 
 export const DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX = 1;
@@ -96,6 +98,7 @@ export class DrawingRenderService {
             adjustValues,
             hidden,
         } = imageParam;
+        const { docxHeaderFooterDrawing } = imageParam as IImageData & { docxHeaderFooterDrawing?: boolean };
 
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return;
@@ -162,7 +165,9 @@ export class DrawingRenderService {
                 }
             }
 
-            if (hidden) {
+            const shouldWaitForInlineTransform =
+                docxHeaderFooterDrawing === true && imageParam.layoutType === PositionedObjectLayoutType.INLINE;
+            if (hidden || shouldWaitForInlineTransform) {
                 imageConfig.visible = false;
             }
 

@@ -114,20 +114,22 @@ export function createSkeletonLine(
     ));
     const wrapTypeTables = new Map(Array.from(pageSkeTables).filter(([_, table]) => table.tableSource.textWrap === TableTextWrapType.WRAP));
 
-    lineSke.divides = _calculateDividesByDrawings(
-        lineHeight,
-        lineTop,
-        columnWidth,
-        paddingLeft,
-        paddingRight,
-        page,
-        headerPage,
-        footerPage,
-        affectSkeDrawings,
-        headersDrawings,
-        footersDrawings,
-        wrapTypeTables
-    );
+    lineSke.divides = lineHeight <= 0.01
+        ? [__getDivideSKe(0, columnWidth)]
+        : _calculateDividesByDrawings(
+            lineHeight,
+            lineTop,
+            columnWidth,
+            paddingLeft,
+            paddingRight,
+            page,
+            headerPage,
+            footerPage,
+            affectSkeDrawings,
+            headersDrawings,
+            footersDrawings,
+            wrapTypeTables
+        );
 
     for (const divide of lineSke.divides) {
         divide.parent = lineSke;
@@ -623,6 +625,18 @@ function ___getWrapTextRuler(wrapText: WrapTextType, resultLeft: number, resultW
 }
 
 function _calculateDivideByDrawings(columnWidth: number, drawingSplit: IDrawingsSplit[]): IDocumentSkeletonDivide[] {
+    if (!Number.isFinite(columnWidth) || columnWidth <= 0) {
+        return [__getDivideSKe(0, Math.max(1, columnWidth || 1))];
+    }
+
+    drawingSplit = drawingSplit.filter(({ left, width }) =>
+        Number.isFinite(left) &&
+        Number.isFinite(width) &&
+        width > 0 &&
+        left < columnWidth &&
+        left + width > 0
+    );
+
     drawingSplit.sort((pre, next) => {
         if (pre.left > next.left) {
             return 1;

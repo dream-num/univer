@@ -241,8 +241,12 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
         }
         if (spanCount === 1) {
             const lastSpan = line.divides[i].glyphGroup[0];
-            const { glyphType } = lastSpan;
-            if (glyphType !== GlyphType.TAB && glyphType !== GlyphType.LIST) {
+            const { glyphType, raw, streamType, width } = lastSpan;
+            const isZeroWidthColumnBreak =
+                width === 0 &&
+                (raw === DataStreamTreeTokenType.COLUMN_BREAK ||
+                    streamType === DataStreamTreeTokenType.COLUMN_BREAK);
+            if (glyphType !== GlyphType.TAB && glyphType !== GlyphType.LIST && !isZeroWidthColumnBreak) {
                 return false;
             }
         }
@@ -357,6 +361,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         let contentHeight = 0;
 
         for (const section of sections) {
+            collapseRedundantColumnBreakOverflow(section);
             const { columns } = section;
             const sectionStartIndex = preSectionStartIndex;
             const sectionEndIndex = pageStartIndex;
@@ -469,8 +474,11 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
-                column.width = maxColumnWidth;
-                sectionWidth += maxColumnWidth;
+                const measuredColumnWidth = Number.isFinite(column.width) && column.width > 0
+                    ? column.width
+                    : maxColumnWidth;
+                column.width = measuredColumnWidth;
+                sectionWidth += measuredColumnWidth;
 
                 maxSectionHeight = Math.max(maxSectionHeight, column.height);
 
@@ -507,6 +515,37 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
         prePageStartIndex = page.ed;
     }
+}
+
+function collapseRedundantColumnBreakOverflow(section: IDocumentSkeletonSection) {
+    const expectedColumnCount = section.colCount || section.columns.length;
+    if (expectedColumnCount <= 0 || section.columns.length <= expectedColumnCount) {
+        return;
+    }
+
+    const targetColumn = section.columns[expectedColumnCount - 1];
+    if (!targetColumn) {
+        return;
+    }
+
+    const overflowColumns = section.columns.slice(expectedColumnCount);
+    if (!overflowColumns.some((column) => column.lines.length > 0)) {
+        return;
+    }
+
+    const targetHeight = targetColumn.height;
+    const overflowLines = overflowColumns.flatMap((column) => column.lines);
+    overflowLines.forEach((line) => {
+        line.top += targetHeight;
+        line.parent = targetColumn;
+    });
+    targetColumn.lines.push(...overflowLines);
+    targetColumn.height = Math.max(
+        ...overflowColumns.map((column) => targetHeight + column.height),
+        targetHeight
+    );
+    targetColumn.isFull = overflowColumns.some((column) => column.isFull);
+    section.columns.splice(expectedColumnCount);
 }
 
 export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
@@ -1126,7 +1165,15 @@ export function getPositionHorizon(
             if (relativeFrom === ObjectRelativeFromH.LEFT_MARGIN) {
                 // TODO
             } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
-                // TODO
+                const { pageWidth, marginLeft, marginRight } = page;
+                const marginWidth = pageWidth - marginLeft - marginRight;
+                let absoluteLeft = marginLeft;
+                if (align === AlignTypeH.RIGHT) {
+                    absoluteLeft = marginLeft + marginWidth - objectWidth;
+                } else if (align === AlignTypeH.CENTER) {
+                    absoluteLeft = marginLeft + marginWidth / 2 - objectWidth / 2;
+                }
+                return absoluteLeft;
             } else if (relativeFrom === ObjectRelativeFromH.RIGHT_MARGIN) {
                 // TODO
             } else if (relativeFrom === ObjectRelativeFromH.INSIDE_MARGIN) {

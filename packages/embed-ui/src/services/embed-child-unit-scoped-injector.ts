@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IExecutionOptions, IUndoRedoItem, IUndoRedoService as IUndoRedoServiceType, UniverInstanceType } from '@univerjs/core';
-import type { IContextMenuService, ILayoutService, IMenuManagerService, MenuManagerService } from '@univerjs/ui';
+import type { IAccessor, IExecutionOptions, IUndoRedoItem, UniverInstanceType } from '@univerjs/core';
+import type { MenuManagerService } from '@univerjs/ui';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
-import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService, toDisposable } from '@univerjs/core';
-import { IContextMenuService as IContextMenuServiceIdentifier, ILayoutService as ILayoutServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
+import {
+    COMMAND_EXECUTION_INJECTOR_KEY,
+    ICommandService,
+    Injector,
+    IUndoRedoService,
+    IUniverInstanceService,
+    toDisposable,
+} from '@univerjs/core';
+import { IContextMenuService, ILayoutService, IMenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
-import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
+import {
+    EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+    EmbedRuntimeFocusCoordinator,
+} from './embed-runtime-focus-coordinator.service';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
 export function createEmbedChildUnitScopedInjector(
@@ -141,15 +151,15 @@ export function createEmbedChildUnitScopedInjector(
     scopedInjector = createEmbedScopedInjector(context.injector, scopedOverrides);
     const scopedMenuManagerService = createScopedMenuManagerService(context.injector, scopedInjector);
     if (scopedMenuManagerService) {
-        scopedInjector.add([IMenuManagerServiceIdentifier, { useValue: scopedMenuManagerService }]);
+        scopedInjector.add([IMenuManagerService, { useValue: scopedMenuManagerService }]);
     }
     const scopedContextMenuService = createScopedContextMenuService(context.injector, scopedInjector);
     if (scopedContextMenuService) {
-        scopedInjector.add([IContextMenuServiceIdentifier, { useValue: scopedContextMenuService }]);
+        scopedInjector.add([IContextMenuService, { useValue: scopedContextMenuService }]);
     }
     const scopedLayoutService = createScopedLayoutService(context.injector, context);
     if (scopedLayoutService) {
-        scopedInjector.add([ILayoutServiceIdentifier, { useValue: scopedLayoutService }]);
+        scopedInjector.add([ILayoutService, { useValue: scopedLayoutService }]);
     }
 
     return scopedInjector;
@@ -164,7 +174,7 @@ function withScopedExecutionInjector(
     return scopedOptions;
 }
 
-function createScopedUndoRedoService(parentInjector: Injector, childUnitId: string): IUndoRedoServiceType | undefined {
+function createScopedUndoRedoService(parentInjector: Injector, childUnitId: string): IUndoRedoService | undefined {
     if (!parentInjector.has(IUndoRedoService)) {
         return undefined;
     }
@@ -246,6 +256,7 @@ export function createEmbedScopedInjector(
     const localFactories = new Map<unknown, () => unknown>();
     const localDependencyIdentifiers = new Set<unknown>();
     let childInjector: Injector | undefined;
+    let scopedInjector: Injector;
     const getLocal = (identifier: unknown) => {
         if (localOverrides.has(identifier)) {
             return localOverrides.get(identifier);
@@ -280,7 +291,7 @@ export function createEmbedScopedInjector(
         return childInjector;
     };
 
-    const scopedInjector = {
+    scopedInjector = {
         has: (identifier: Parameters<Injector['get']>[0]) => {
             if (identifier === Injector) {
                 return true;
@@ -395,11 +406,11 @@ export function createEmbedScopedInjector(
             localDependencyIdentifiers.clear();
             localFactories.clear();
         },
-    };
+    } as unknown as Injector;
 
     (scopedInjector as { __embedSharedRootInjector?: Injector }).__embedSharedRootInjector = resolvedSharedRootInjector;
 
-    return scopedInjector as Injector;
+    return scopedInjector;
 }
 
 function restoreFocusAfterScopedCommand(
@@ -541,11 +552,11 @@ function parseLocalDependency(dependency: unknown): { kind: 'factory'; identifie
 }
 
 function createScopedMenuManagerService(parentInjector: Injector, scopedInjector: Injector): IMenuManagerService | undefined {
-    if (!parentInjector.has(IMenuManagerServiceIdentifier)) {
+    if (!parentInjector.has(IMenuManagerService)) {
         return undefined;
     }
 
-    const menuManagerService = parentInjector.get(IMenuManagerServiceIdentifier);
+    const menuManagerService = parentInjector.get(IMenuManagerService);
     const createScoped = (menuManagerService as MenuManagerService).createScoped;
 
     return typeof createScoped === 'function'
@@ -554,11 +565,18 @@ function createScopedMenuManagerService(parentInjector: Injector, scopedInjector
 }
 
 function createScopedContextMenuService(parentInjector: Injector, scopedInjector: Injector): IContextMenuService | undefined {
-    if (!parentInjector.has(IContextMenuServiceIdentifier)) {
+    if (!parentInjector.has(IContextMenuService)) {
         return undefined;
     }
 
-    const contextMenuService = parentInjector.get(IContextMenuServiceIdentifier);
+    const contextMenuService = parentInjector.get(IContextMenuService);
+    const triggerContextMenu: IContextMenuService['triggerContextMenu'] = (event, menuType, context) => {
+        contextMenuService.triggerContextMenu(event, menuType, {
+            ...context,
+            injector: context?.injector ?? scopedInjector,
+        });
+    };
+
     return {
         get disabled() {
             return contextMenuService.disabled;
@@ -571,21 +589,18 @@ function createScopedContextMenuService(parentInjector: Injector, scopedInjector
         },
         enable: () => contextMenuService.enable(),
         disable: () => contextMenuService.disable(),
-        triggerContextMenu: (event, menuType, context) => contextMenuService.triggerContextMenu(event, menuType, {
-            ...context,
-            injector: context?.injector ?? scopedInjector,
-        }),
+        triggerContextMenu,
         hideContextMenu: () => contextMenuService.hideContextMenu(),
         registerContextMenuHandler: (handler) => contextMenuService.registerContextMenuHandler(handler),
     };
 }
 
 function createScopedLayoutService(parentInjector: Injector, context: IEmbedChildContainerContext): ILayoutService | undefined {
-    if (!parentInjector.has(ILayoutServiceIdentifier)) {
+    if (!parentInjector.has(ILayoutService)) {
         return undefined;
     }
 
-    const layoutService = parentInjector.get(ILayoutServiceIdentifier);
+    const layoutService = parentInjector.get(ILayoutService);
     const interactionBoundaryService = parentInjector.has(EmbedInteractionBoundaryService)
         ? parentInjector.get(EmbedInteractionBoundaryService)
         : undefined;

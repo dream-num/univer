@@ -16,10 +16,10 @@
 
 import type { Injector } from '@univerjs/core';
 import type { ReactNode } from 'react';
-import { LocaleService } from '@univerjs/core';
-import { ConfigProvider } from '@univerjs/design';
+import { LocaleService, ThemeService } from '@univerjs/core';
+import { clsx, ConfigProvider } from '@univerjs/design';
 import { RediProvider, useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../services/embed-interaction-boundary.service';
 
 export interface IEmbedRuntimeProvidersProps {
@@ -34,18 +34,20 @@ export function EmbedRuntimeProviders(props: IEmbedRuntimeProvidersProps) {
 
     return (
         <RediProvider value={{ injector }}>
-            <EmbedDesignRuntimeProvider mountContainer={mountContainer} embedId={embedId}>
+            <EmbedDesignRuntimeProvider injector={injector} mountContainer={mountContainer} embedId={embedId}>
                 {children}
             </EmbedDesignRuntimeProvider>
         </RediProvider>
     );
 }
 
-function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'children' | 'mountContainer' | 'embedId'>) {
-    const { children, mountContainer, embedId } = props;
+function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'injector' | 'children' | 'mountContainer' | 'embedId'>) {
+    const { injector, children, mountContainer, embedId } = props;
     const localeService = useDependency(LocaleService);
+    const themeService = useMemo(() => injector.has(ThemeService) ? injector.get(ThemeService) : undefined, [injector]);
     const [locale, setLocale] = useState(localeService.getLocales());
     const [direction, setDirection] = useState(localeService.getDirection());
+    const darkMode = useThemeDarkMode(themeService);
     const ownedPortalContainer = useMemo<HTMLElement | null>(() => {
         if (mountContainer !== undefined || typeof document === 'undefined') {
             return null;
@@ -82,32 +84,56 @@ function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'ch
     }, [localeService]);
 
     useEffect(() => {
-        if (resolvedMountContainer) {
-            resolvedMountContainer.dir = direction;
+        const container = resolvedMountContainer;
+        if (container) {
+            container.setAttribute('dir', direction);
         }
     }, [direction, resolvedMountContainer]);
 
     useEffect(() => {
-        if (!resolvedMountContainer || !embedId) {
+        const container = resolvedMountContainer;
+        if (!container || !embedId) {
             return;
         }
 
-        const previousOwner = resolvedMountContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
-        resolvedMountContainer.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, embedId);
+        const previousOwner = container.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+        container.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, embedId);
 
         return () => {
             if (previousOwner == null) {
-                resolvedMountContainer.removeAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+                container.removeAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
                 return;
             }
 
-            resolvedMountContainer.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, previousOwner);
+            container.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, previousOwner);
         };
     }, [embedId, resolvedMountContainer]);
 
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={resolvedMountContainer}>
-            {children}
+            <div
+                className={clsx('univer-contents', {
+                    'univer-dark': darkMode,
+                })}
+                data-embed-runtime-provider="true"
+            >
+                {children}
+            </div>
         </ConfigProvider>
+    );
+}
+
+function useThemeDarkMode(themeService: ThemeService | undefined): boolean {
+    return useSyncExternalStore(
+        (onStoreChange) => {
+            if (!themeService) {
+                return () => {};
+            }
+
+            const subscription = themeService.darkMode$.subscribe(() => onStoreChange());
+            return () => subscription.unsubscribe();
+        },
+        () => themeService?.darkMode ?? false,
+        () => false
     );
 }

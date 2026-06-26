@@ -23,7 +23,6 @@ function writeJsonFileSync(filePath: string, value: unknown) {
  */
 async function generateLocales() {
     const packageNames: string[] = [];
-    const packageLocaleDirs = new Map<string, string>();
 
     const pkgJsonFile = readJsonFileSync<MockdataPackageJson>(path.resolve(__dirname, '../package.json'));
 
@@ -46,7 +45,6 @@ async function generateLocales() {
             }
             const pkgJson = readJsonFileSync<{ name: string }>(pkgJsonPath);
             packageNames.push(pkgJson.name);
-            packageLocaleDirs.set(pkgJson.name, localePath);
             pkgJsonFile.dependencies[pkgJson.name] = 'workspace:*';
         }
     }
@@ -55,12 +53,8 @@ async function generateLocales() {
 
     discoverUniverUiLocales({ rootDir: root }).forEach((locale) => {
         let statements = '/* eslint-disable */\n';
-        const localePackageNames = packageNames.filter((pkg) => {
-            const localePath = packageLocaleDirs.get(pkg);
-            return localePath && fs.existsSync(path.join(localePath, `${locale}.ts`));
-        });
 
-        localePackageNames.forEach((pkg) => {
+        packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');
             statements += `import ${pkgName}Locale from '${pkg}/locale/${locale}';\n`;
         });
@@ -68,7 +62,7 @@ async function generateLocales() {
         statements += '\nexport default Object.assign(\n';
         statements += '    {},\n';
 
-        localePackageNames.forEach((pkg) => {
+        packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');
             statements += `    ${pkgName}Locale,\n`;
         });

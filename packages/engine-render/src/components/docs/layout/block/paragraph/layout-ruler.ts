@@ -495,8 +495,9 @@ function _divideOperator(
                         paragraphAnchorLeft
                     );
                     __updateDrawingPosition(currentLine.parent, drawings);
-                    glyphGroup.length = 0;
+                    addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
                     updateDivideInfo(divide, { breakType: breakPointType });
+                    glyphGroup.length = 0;
                     return;
                 }
             }

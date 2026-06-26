@@ -22,8 +22,8 @@ import {
     DrawingTypeEnum,
     Inject,
     IUniverInstanceService,
-    PositionedObjectLayoutType,
     IURLImageService,
+    PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
 import {

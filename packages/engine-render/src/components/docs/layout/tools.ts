@@ -533,7 +533,7 @@ function collapseRedundantColumnBreakOverflow(section: IDocumentSkeletonSection)
         return;
     }
 
-    const targetHeight = targetColumn.height;
+    const targetHeight = targetColumn.height ?? 0;
     const overflowLines = overflowColumns.flatMap((column) => column.lines);
     overflowLines.forEach((line) => {
         line.top += targetHeight;
@@ -541,7 +541,7 @@ function collapseRedundantColumnBreakOverflow(section: IDocumentSkeletonSection)
     });
     targetColumn.lines.push(...overflowLines);
     targetColumn.height = Math.max(
-        ...overflowColumns.map((column) => targetHeight + column.height),
+        ...overflowColumns.map((column) => targetHeight + (column.height ?? 0)),
         targetHeight
     );
     targetColumn.isFull = overflowColumns.some((column) => column.isFull);

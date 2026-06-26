@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import type { IEmbedCapability, IEmbedCreateContext, IEmbedDescriptor } from '../../types/embed';
 import type { IEmbedResourceRefEnsureResult } from '../embed-resource-ref-provider-registry.service';
 import { UniverInstanceType } from '@univerjs/core';
@@ -510,7 +511,7 @@ function createCapability(overrides: Partial<IEmbedCapability> = {}): IEmbedCapa
     };
 }
 
-function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key: object = {}): Pick<import('@univerjs/core').Injector, 'get' | 'has'> {
+function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key: object = {}): Pick<Injector, 'get' | 'has'> {
     return Object.assign(key, {
         has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedCapabilityRegistryService),
         get: vi.fn((token: unknown) => {
@@ -520,7 +521,7 @@ function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key
 
             return registry;
         }),
-    }) as unknown as Pick<import('@univerjs/core').Injector, 'get' | 'has'>;
+    }) as unknown as Pick<Injector, 'get' | 'has'>;
 }
 
 function createInstanceService() {

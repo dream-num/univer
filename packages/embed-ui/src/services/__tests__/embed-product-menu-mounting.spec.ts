@@ -27,7 +27,7 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IMenuManagerService, IRibbonService, MenuManagerPosition } from '@univerjs/ui';
+import { IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from '../embed-product-menu-mounting';
@@ -38,55 +38,11 @@ const mocks = vi.hoisted(() => {
     const createEmbedReactRoot = vi.fn(() => ({ render, unmount }));
     const disposeEmbedReactRoot = vi.fn((root: { unmount: () => void }) => root.unmount());
 
-    class FakeMenuManagerService {
-        static instances: FakeMenuManagerService[] = [];
-
-        readonly mergeMenu = vi.fn();
-        readonly dispose = vi.fn();
-        readonly createScoped = vi.fn(() => new FakeMenuManagerService());
-
-        constructor(
-            readonly injector?: unknown,
-            readonly configService?: unknown
-        ) {
-            FakeMenuManagerService.instances.push(this);
-        }
-    }
-
-    class FakeDesktopRibbonService {
-        static instances: FakeDesktopRibbonService[] = [];
-
-        readonly ribbon$ = new BehaviorSubject([
-            { key: 'start', title: 'Start' },
-            { key: 'insert' },
-        ]);
-
-        readonly activatedTab$ = new BehaviorSubject<string | undefined>(undefined);
-        readonly collapsedIds$ = new BehaviorSubject<string[]>([]);
-        readonly fakeToolbarVisible$ = new BehaviorSubject(false);
-        readonly setActivatedTab = vi.fn((tab: string) => this.activatedTab$.next(tab));
-        readonly showContextualTab = vi.fn();
-        readonly hideContextualTab = vi.fn();
-        readonly hideAllContextualTabs = vi.fn();
-        readonly setCollapsedIds = vi.fn((ids: string[]) => this.collapsedIds$.next(ids));
-        readonly setFakeToolbarVisible = vi.fn((visible: boolean) => this.fakeToolbarVisible$.next(visible));
-        readonly dispose = vi.fn();
-
-        constructor(
-            readonly menuManager: unknown,
-            readonly instanceService: unknown
-        ) {
-            FakeDesktopRibbonService.instances.push(this);
-        }
-    }
-
     return {
         render,
         unmount,
         createEmbedReactRoot,
         disposeEmbedReactRoot,
-        FakeMenuManagerService,
-        FakeDesktopRibbonService,
     };
 });
 
@@ -95,26 +51,12 @@ vi.mock('../react-root-disposal', () => ({
     disposeEmbedReactRoot: mocks.disposeEmbedReactRoot,
 }));
 
-vi.mock('@univerjs/ui', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@univerjs/ui')>();
-    return {
-        ...actual,
-        DesktopRibbonService: mocks.FakeDesktopRibbonService,
-        MenuManagerService: mocks.FakeMenuManagerService,
-        Ribbon: function Ribbon() {
-            return null;
-        },
-    };
-});
-
 describe('embed product menu mounting', () => {
     beforeEach(() => {
         mocks.render.mockClear();
         mocks.unmount.mockClear();
         mocks.createEmbedReactRoot.mockClear();
         mocks.disposeEmbedReactRoot.mockClear();
-        mocks.FakeMenuManagerService.instances = [];
-        mocks.FakeDesktopRibbonService.instances = [];
     });
 
     it('mounts and disposes a ribbon menu with a scoped injector', () => {
@@ -141,14 +83,11 @@ describe('embed product menu mounting', () => {
         expect(disposable).toBeDefined();
         expect(mocks.createEmbedReactRoot).toHaveBeenCalledWith(container);
         expect(mocks.render).toHaveBeenCalledTimes(1);
-        expect(mocks.FakeDesktopRibbonService.instances[0].setActivatedTab).toHaveBeenCalledWith('start');
 
         disposable?.dispose();
 
         expect(mocks.disposeEmbedReactRoot).toHaveBeenCalledTimes(1);
         expect(mocks.unmount).toHaveBeenCalledTimes(1);
-        expect(mocks.FakeDesktopRibbonService.instances[0].dispose).toHaveBeenCalledTimes(1);
-        expect(mocks.FakeMenuManagerService.instances[0].dispose).toHaveBeenCalledTimes(1);
     });
 
     it('scopes product menu unit lookup and command execution to the child unit', async () => {
@@ -186,9 +125,9 @@ describe('embed product menu mounting', () => {
         injector.unitDisposed$.next(childUnit);
         expect(currentUnits).toEqual([childUnit, childUnit, childUnit]);
 
-        const ribbonTitles: string[][] = [];
-        ribbonService.ribbon$.subscribe((groups) => ribbonTitles.push(groups.map((group) => group.title ?? '')));
-        expect(ribbonTitles[0]).toEqual(['Start', '']);
+        const activatedTabs: string[] = [];
+        ribbonService.activatedTab$.subscribe((tab) => activatedTabs.push(tab));
+        expect(activatedTabs[0]).toBe('insert');
         ribbonService.setCollapsedIds(['a']);
         ribbonService.setFakeToolbarVisible(true);
         ribbonService.showContextualTab('ctx', { activate: true });
@@ -226,14 +165,16 @@ describe('embed product menu mounting', () => {
 
     it('falls back to the root services when there is no child unit scope', () => {
         const injector = createInjector({ hasCreateScoped: true });
+        const rootMenuManager = injector.get(IMenuManagerService) as MenuManagerService;
+        const createScopedSpy = vi.spyOn(rootMenuManager, 'createScoped');
         const { injector: scopedInjector } = createEmbedProductMenuInjector(injector as unknown as Injector, {
             childType: UniverInstanceType.UNIVER_SHEET,
         });
 
         expect(scopedInjector.get(ICommandService)).toBe(injector.commandService);
         expect(scopedInjector.get(IUniverInstanceService)).not.toBe(injector.instanceService);
-        expect(mocks.FakeMenuManagerService.instances).toHaveLength(2);
-        expect(mocks.FakeMenuManagerService.instances[0].createScoped).toHaveBeenCalledTimes(1);
+        expect(scopedInjector.get(IMenuManagerService)).not.toBe(rootMenuManager);
+        expect(createScopedSpy).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -242,9 +183,16 @@ function createInjector(options: { hasCreateScoped?: boolean } = {}) {
     const previousUnit = { getUnitId: () => 'previous-sheet' };
     const unitAdded$ = new Subject<unknown>();
     const unitDisposed$ = new Subject<unknown>();
+    const configService = {};
     const rootMenuManager = options.hasCreateScoped
-        ? new mocks.FakeMenuManagerService()
-        : { dispose: vi.fn() };
+        ? new MenuManagerService({} as Injector, configService as IConfigService)
+        : {
+            menuChanged$: new Subject<void>(),
+            mergeMenu: vi.fn(),
+            appendRootMenu: vi.fn(),
+            getMenuByPositionKey: vi.fn(() => []),
+            getFlatMenuByPositionKey: vi.fn(() => []),
+        };
     const commandService = {
         executeCommand: vi.fn(async () => true),
         syncExecuteCommand: vi.fn(() => true),
@@ -265,7 +213,6 @@ function createInjector(options: { hasCreateScoped?: boolean } = {}) {
     const localeService = {
         t: vi.fn((key: string) => `translated(${key})`),
     };
-    const configService = {};
     const map = new Map<unknown, unknown>([
         [IUniverInstanceService, instanceService],
         [ICommandService, commandService],

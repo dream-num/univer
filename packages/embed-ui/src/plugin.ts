@@ -32,7 +32,6 @@ import {
     ICommandService,
     Inject,
     Injector,
-    LocaleService,
     Plugin,
     touchDependencies,
     UniverInstanceType,
@@ -110,8 +109,7 @@ export class UniverEmbedUIPlugin extends Plugin {
     constructor(
         private readonly _config: IUniverEmbedUIPluginConfig = {},
         @Inject(Injector) protected override readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
     }

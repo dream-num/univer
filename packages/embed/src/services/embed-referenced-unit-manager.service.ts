@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICreateUnitOptions } from '@univerjs/core';
 import type { IResourceRef } from '../types/resource-ref';
-import { Inject, IUniverInstanceService as IUniverInstanceServiceToken, Optional, UniverInstanceType as UniverInstanceTypeEnum } from '@univerjs/core';
+import { IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
 import { getResourceRefKey, normalizeResourceRef } from '../common/resource-ref';
 import { fromResourceRefUnitType } from '../common/unit-type';
 import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
@@ -58,7 +58,7 @@ export class EmbedReferencedUnitManagerService {
     private readonly _records = new Map<string, IEmbedReferencedUnitStoredRecord>();
 
     constructor(
-        @IUniverInstanceServiceToken private readonly _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Optional(EmbedResourceRefProviderRegistryService) private readonly _resourceRefProviderRegistry?: EmbedResourceRefProviderRegistryService
     ) {
         // noop
@@ -197,7 +197,7 @@ export class EmbedReferencedUnitManagerService {
 
     private _ensureSelfRef(ref: IResourceRef, expectedType: UniverInstanceType): IEmbedReferencedUnitEnsureResult {
         const actualType = this._univerInstanceService.getUnitType(ref.unit.selector);
-        if (actualType === UniverInstanceTypeEnum.UNRECOGNIZED) {
+        if (actualType === UniverInstanceType.UNRECOGNIZED) {
             throw new Error('UNIT_NOT_FOUND');
         }
 

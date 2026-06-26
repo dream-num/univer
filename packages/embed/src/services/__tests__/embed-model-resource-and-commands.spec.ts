@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { IAccessor, Injector } from '@univerjs/core';
 import type { IEmbedDescriptor, IEmbedGuestContribution } from '../../types/embed';
 import type { IResourceRef } from '../../types/resource-ref';
 import { ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
@@ -484,7 +484,7 @@ function createGuestContribution(childType: UniverInstanceType): IEmbedGuestCont
     };
 }
 
-function createInjector(registry?: EmbedGuestContributionRegistryService, key: object = {}): Pick<import('@univerjs/core').Injector, 'get' | 'has'> {
+function createInjector(registry?: EmbedGuestContributionRegistryService, key: object = {}): Pick<Injector, 'get' | 'has'> {
     return Object.assign(key, {
         has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedGuestContributionRegistryService),
         get: vi.fn((token: unknown) => {
@@ -494,7 +494,7 @@ function createInjector(registry?: EmbedGuestContributionRegistryService, key: o
 
             return registry;
         }),
-    }) as unknown as Pick<import('@univerjs/core').Injector, 'get' | 'has'>;
+    }) as unknown as Pick<Injector, 'get' | 'has'>;
 }
 
 function createCommandAccessor(

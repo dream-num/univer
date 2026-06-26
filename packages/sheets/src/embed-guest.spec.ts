@@ -53,6 +53,7 @@ describe('sheets embed guest', () => {
         ]) as never);
 
         expect(capabilityRegistry.list().map(({ childType, entry, layout, mode }) => ({ childType, entry, layout, mode }))).toEqual([
+            { childType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-floating-object', layout: 'scroll-contained', mode: 'float' },
             { childType: UniverInstanceType.UNIVER_DOC, entry: 'sheets-floating-object', layout: 'doc-width-scale', mode: 'float' },
             { childType: UniverInstanceType.UNIVER_SLIDE, entry: 'sheets-floating-object', layout: 'aspect-fit', mode: 'float' },
             { childType: UniverInstanceType.UNIVER_BASE, entry: 'sheets-floating-object', layout: 'scroll-contained', mode: 'float' },

@@ -40,8 +40,23 @@ export { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 export { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
-export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
-export type { IEmbedResourceRefProvider, IEmbedResourceRefResolveResult } from './services/embed-resource-ref-provider-registry.service';
+export {
+    EmbedReferencedUnitManagerService,
+    type IEmbedReferencedUnitEnsureInput,
+    type IEmbedReferencedUnitEnsureResult,
+    type IEmbedReferencedUnitListFilter,
+    type IEmbedReferencedUnitRecord,
+    type IEmbedReferencedUnitUsageOwner,
+} from './services/embed-referenced-unit-manager.service';
+export {
+    type EmbedResourceRefMaterializationProfile,
+    EmbedResourceRefProviderRegistryService,
+    type IEmbedResourceRefEnsureInput,
+    type IEmbedResourceRefEnsureResult,
+    type IEmbedResourceRefProvider,
+    type IEmbedResourceRefProviderMatch,
+    type IEmbedResourceRefProviderRegistration,
+} from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
     EmbedHostEntry,

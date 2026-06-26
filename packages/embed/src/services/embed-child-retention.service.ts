@@ -23,7 +23,7 @@ import { EmbedModelService } from './embed-model.service';
 export interface IEmbedChildRetentionState {
     hostUnitId: string;
     ref: IResourceRef;
-    childUnitId: string;
+    childUnitIds: readonly string[];
     totalReferences: number;
     activeReferences: number;
     softDeletedReferences: number;
@@ -64,10 +64,15 @@ export class EmbedChildRetentionService {
 
     private _toState(hostUnitId: string, ref: IResourceRef, descriptors: IEmbedDescriptor[]): IEmbedChildRetentionState {
         const activeReferences = descriptors.filter((descriptor) => descriptor.lifecycle !== 'soft-deleted').length;
+        const childUnitIds = [...new Set(
+            descriptors
+                .map((descriptor) => descriptor.childUnitId)
+                .filter((childUnitId): childUnitId is string => typeof childUnitId === 'string')
+        )];
         return {
             hostUnitId,
             ref,
-            childUnitId: ref.unit.selector,
+            childUnitIds,
             totalReferences: descriptors.length,
             activeReferences,
             softDeletedReferences: descriptors.length - activeReferences,

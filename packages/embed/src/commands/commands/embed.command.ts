@@ -16,7 +16,7 @@
 
 import type { ICommand, ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry, IEmbedCreateContext, IEmbedDescriptor, IEmbedSourceMeta } from '../../types/embed';
-import { CommandType, generateRandomId, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { toResourceRefUnitType } from '../../common/unit-type';
 import { createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService } from '../../services/embed-capability-registry.service';
 import { EmbedCreationService } from '../../services/embed-creation.service';
@@ -60,26 +60,34 @@ export const CreateEmbedCommand: ICommand<ICreateEmbedCommandParams, IEmbedDescr
             return false;
         }
 
-        const result = await accessor.get(EmbedCreationService).createEmbed(params);
+        const result = await accessor.get(EmbedCreationService).prepareCreateEmbed(params);
+        const undoMutations = [{
+            id: SoftDeleteEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                embedId: params.embedId,
+            },
+        }];
+        const redoMutations = [{
+            id: SetEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                descriptor: result.descriptor,
+            },
+        }];
+
+        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
+        if (!executeResult.result) {
+            return false;
+        }
+
         accessor.get(IUndoRedoService).pushUndoRedo({
             unitID: params.hostUnitId,
-            undoMutations: [{
-                id: SoftDeleteEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    embedId: params.embedId,
-                },
-            }],
-            redoMutations: [{
-                id: SetEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    descriptor: result.descriptor,
-                },
-            }],
+            undoMutations,
+            redoMutations,
         });
 
-        return result.descriptor;
+        return accessor.get(EmbedModelService).getDescriptor(params.hostUnitId, params.embedId) ?? result.descriptor;
     },
 };
 
@@ -134,23 +142,29 @@ export const InsertEmbedBySnapshotCommand: ICommand<IInsertEmbedBySnapshotComman
             sourceMeta: params.sourceMeta ?? createDefaultEmbedSourceMeta(capability),
         };
 
-        accessor.get(EmbedModelService).addDescriptor(params.hostUnitId, descriptor);
+        const undoMutations = [{
+            id: SoftDeleteEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                embedId,
+            },
+        }];
+        const redoMutations = [{
+            id: SetEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                descriptor,
+            },
+        }];
+        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
+        if (!executeResult.result) {
+            return false;
+        }
+
         accessor.get(IUndoRedoService).pushUndoRedo({
             unitID: params.hostUnitId,
-            undoMutations: [{
-                id: SoftDeleteEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    embedId,
-                },
-            }],
-            redoMutations: [{
-                id: SetEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    descriptor,
-                },
-            }],
+            undoMutations,
+            redoMutations,
         });
 
         return accessor.get(EmbedModelService).getDescriptor(params.hostUnitId, embedId) ?? false;
@@ -165,26 +179,33 @@ export const CopyEmbedCommand: ICommand<ICopyEmbedCommandParams, IEmbedDescripto
             return false;
         }
 
-        const descriptor = accessor.get(EmbedCreationService).copyEmbed(params);
+        const descriptor = accessor.get(EmbedCreationService).prepareCopyEmbed(params);
+        const undoMutations = [{
+            id: SoftDeleteEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                embedId: params.nextEmbedId,
+            },
+        }];
+        const redoMutations = [{
+            id: SetEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                descriptor,
+            },
+        }];
+        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
+        if (!executeResult.result) {
+            return false;
+        }
+
         accessor.get(IUndoRedoService).pushUndoRedo({
             unitID: params.hostUnitId,
-            undoMutations: [{
-                id: SoftDeleteEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    embedId: params.nextEmbedId,
-                },
-            }],
-            redoMutations: [{
-                id: SetEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    descriptor,
-                },
-            }],
+            undoMutations,
+            redoMutations,
         });
 
-        return descriptor;
+        return accessor.get(EmbedModelService).getDescriptor(params.hostUnitId, params.nextEmbedId) ?? descriptor;
     },
 };
 
@@ -213,26 +234,32 @@ export const RemoveEmbedCommand: ICommand<IRemoveEmbedCommandParams> = {
             return false;
         }
 
-        accessor.get(EmbedCreationService).removeEmbed(params);
+        const undoMutations = [{
+            id: SetEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                descriptor: {
+                    ...descriptor,
+                    lifecycle: 'active',
+                },
+            },
+        }];
+        const redoMutations = [{
+            id: SoftDeleteEmbedDescriptorMutation.id,
+            params: {
+                unitId: params.hostUnitId,
+                embedId: params.embedId,
+            },
+        }];
+        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
+        if (!executeResult.result) {
+            return false;
+        }
+
         accessor.get(IUndoRedoService).pushUndoRedo({
             unitID: params.hostUnitId,
-            undoMutations: [{
-                id: SetEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    descriptor: {
-                        ...descriptor,
-                        lifecycle: 'active',
-                    },
-                },
-            }],
-            redoMutations: [{
-                id: SoftDeleteEmbedDescriptorMutation.id,
-                params: {
-                    hostUnitId: params.hostUnitId,
-                    embedId: params.embedId,
-                },
-            }],
+            undoMutations,
+            redoMutations,
         });
 
         return true;

@@ -17,7 +17,7 @@ Univer は、プラグインアーキテクチャ、Canvas ベースのレンダ
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
-[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build-packages.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build-packages.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat-square)](https://www.codefactor.io/repository/github/dream-num/univer/overview/dev)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 
@@ -154,6 +154,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render'
 import { UniverSheetsPlugin } from '@univerjs/sheets'
 import SheetsEnUS from '@univerjs/sheets/locale/en-US'
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula'
+import SheetsFormulaEnUS from '@univerjs/sheets-formula/locale/en-US'
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui'
 import SheetsFormulaUIEnUS from '@univerjs/sheets-formula-ui/locale/en-US'
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt'
@@ -187,6 +188,7 @@ const univer = new Univer({
       DocsUIEnUS,
       SheetsEnUS,
       SheetsUIEnUS,
+      SheetsFormulaEnUS,
       SheetsFormulaUIEnUS,
       SheetsNumfmtUIEnUS,
     ),
@@ -239,23 +241,29 @@ univerAPI.createWorkbook({})
 
 ## 🛠️ 構築できるもの
 
-| 領域 | オープンソースの機能 |
-| --- | --- |
-| **Sheets** | ワークブック、ワークシート、範囲、選択、数式、数値書式、フィルター、ソート、データ検証、条件付き書式、ハイパーリンク、コメント、検索と置換、ノート、テーブル、描画連携、拡張可能な UI プラグイン。 |
-| **Docs** | リッチドキュメントモデル、編集 UI、リスト、ハイパーリンク、描画連携、コメント、クイック挿入、共有ドキュメントアーキテクチャ。 |
-| **Slides** | プレゼンテーションデータモデルと UI パッケージ。現在も活発に開発中です。 |
-| **Runtime** | ブラウザアプリ、Node.js ヘッドレス利用、Web Worker/RPC パターン、複数インスタンス、サーバー向け自動化。 |
-| **Integrations** | React、Vue、Web Components、フレームワークテンプレート、テーマ、ローカライズ、カスタムプラグイン。 |
+| 領域 | オープンソースの機能 | Univer Pro 拡張 |
+| --- | --- | --- |
+| **Sheets** | ワークブック、ワークシート、範囲、選択、数式、数値書式、フィルター、ソート、データ検証、条件付き書式、ハイパーリンク、コメント、検索と置換、ノート、テーブル、描画連携、拡張可能な UI プラグイン。 | リアルタイム共同編集、編集履歴、インポート/エクスポート、印刷、チャート、ピボットテーブル、スパークライン、アウトライン、図形、セル内グラフィックス、データコネクタ、サーバーサイド計算、強化された数式機能。 |
+| **Docs** | リッチドキュメントモデル、編集 UI、リスト、ハイパーリンク、描画連携、コメント、クイック挿入、共有ドキュメントアーキテクチャ。 | 共同編集、インポート/エクスポート、印刷、強化されたテーブルとリスト、段組み、コールアウト、コードブロック、引用ブロック、図形、リモートコメントリソース。 |
+| **Slides** | プレゼンテーションデータモデルと UI パッケージ。現在も活発に開発中です。 | Pro スライドモデルと UI、スライドのインポート/エクスポート、チャートとテーブルのモデル/UI プラグイン、共有の図形編集基盤。 |
+| **Bases** | Univer のプラグイン、コマンド、モデルのアーキテクチャ上に、カスタムの構造化データ体験を構築できます。 | Base データベースモデル、コマンド、数式連携、ワークベンチ UI、フィールドエディタ、レンダリングエンジンビュー。 |
+| **Runtime** | ブラウザアプリ、Node.js ヘッドレス利用、Web Worker/RPC パターン、複数インスタンス、サーバー向け自動化。 | 共同編集クライアント/サーバーパッケージ、Node.js 共同編集クライアント、Pro サーバーサービス、SSR、計算委譲、サーバーサイド計算、changeset replay ツール。 |
+| **Integrations** | React、Vue、Web Components、フレームワークテンプレート、テーマ、ローカライズ、カスタムプラグイン。 | Pro presets とエンタープライズデプロイパッケージ。 |
 
 現在もっとも成熟しているプロダクト面は Sheets です。Docs と Slides も Univer のアーキテクチャを共有し、同じ SDK の中で継続的に進化しています。
 
 ## 🔓 Open Source と Pro
 
-このリポジトリには Univer のオープンソースコアと first-party OSS プラグインが含まれています。一部のエンタープライズ機能は Univer Pro パッケージとして開発されており、別途統合が必要です。
+このリポジトリには Univer のオープンソースコアと first-party OSS プラグインが含まれています。Univer Pro は、高度なプロダクトサーフェス、共同編集、サーバー機能、エンタープライズ連携のための商用拡張レイヤーとして別途開発されています。
 
-| Open source | Univer Pro / commercial |
-| --- | --- |
-| Core SDK、プラグインシステム、レンダリングエンジン、数式エンジン、Facade API、Sheets/Docs/Slides パッケージ、テーマ、i18n、多くの first-party プラグイン。 | リアルタイム共同編集、インポート/エクスポート、印刷、チャート、ピボットテーブル、スパークライン、高度な数式機能、編集履歴、Pro サーバーコンポーネント、ライセンス管理。 |
+| カテゴリ | Open source | Univer Pro / commercial |
+| --- | --- | --- |
+| **Foundation** | Core SDK、プラグインシステム、レンダリングエンジン、数式エンジン、Facade API、テーマ、i18n、フレームワークアダプタ。 | Pro presets とエンタープライズデプロイパッケージ。 |
+| **Sheets** | コアのスプレッドシート編集、数式、数値書式、フィルター/ソート、データ検証、条件付き書式、ノート、テーブル、ハイパーリンク、コメント、描画、検索と置換。 | 共同編集、編集履歴、インポート/エクスポート、印刷、チャート、ピボットテーブル、スパークライン、アウトライン、図形、セル内グラフィックス、データコネクタ、範囲の前処理、強化された数式エンジン機能。 |
+| **Docs** | ドキュメントモデルと編集 UI、リスト、ハイパーリンク、コメント、クイック挿入、描画連携。 | 共同編集、インポート/エクスポート、印刷、強化されたテーブル/リスト、段組み、コールアウト、コードブロック、引用ブロック、図形、リモートスレッドコメントリソース。 |
+| **Slides** | OSS のプレゼンテーションモデルと UI パッケージ。 | Pro スライドモデル/UI パッケージ、スライドのインポート/エクスポート、チャート、テーブル、再利用可能な図形エディタ UI。 |
+| **Bases** | カスタムのデータ中心プロダクト向けの拡張可能なプラグインアーキテクチャ。 | Base データベースコアモデル、コマンド、ミューテーション、数式連携、ワークベンチ UI、フィールドエディタ、レンダリングエンジン連携。 |
+| **Server and runtime** | Node.js ヘッドレスランタイム、RPC/Web Worker パターン、サーバー向け自動化のプリミティブ。 | 共同編集サーバー、Node.js 共同編集クライアント、SSR サービス、計算委譲、サーバーサイド計算、共同編集 changeset replay ツール。 |
 
 Pro 機能は [Univer Pro guide](https://docs.univer.ai/guides/pro) に記載されています。ここでは OSS パッケージの範囲を明確にするため、意図的に分けて説明しています。
 

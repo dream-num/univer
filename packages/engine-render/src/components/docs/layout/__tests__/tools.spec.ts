@@ -29,6 +29,7 @@ import {
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import {
     clearFontCreateConfigCache,
     columnIterator,
@@ -254,6 +255,33 @@ describe('docs layout tools extra', () => {
         const columns: any[] = [];
         columnIterator([page] as any, (col) => columns.push(col));
         expect(columns.length).toBe(1);
+    });
+
+    it('uses content width for unspecified editor documents when updating block indexes', () => {
+        const { page, column } = createPageSkeleton();
+
+        updateBlockIndex([page] as any, -1, getDocumentCompatibilityPolicy(DocumentFlavor.UNSPECIFIED));
+
+        expect(column.width).toBe(13);
+        expect(page.width).toBe(13);
+    });
+
+    it('keeps layout column width when updating block indexes without a policy', () => {
+        const { page, column } = createPageSkeleton();
+
+        updateBlockIndex([page] as any, -1);
+
+        expect(column.width).toBe(200);
+        expect(page.width).toBe(200);
+    });
+
+    it('keeps layout column width for traditional documents when updating block indexes', () => {
+        const { page, column } = createPageSkeleton();
+
+        updateBlockIndex([page] as any, -1, getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL));
+
+        expect(column.width).toBe(200);
+        expect(page.width).toBe(200);
     });
 
     it('copies paragraph background color to the rendered line', () => {

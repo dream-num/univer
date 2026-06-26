@@ -196,6 +196,9 @@ importers:
       '@univerjs/drawing-ui':
         specifier: workspace:*
         version: link:../../packages/drawing-ui
+      '@univerjs/embed-ui':
+        specifier: workspace:*
+        version: link:../../packages/embed-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
@@ -1384,14 +1387,14 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: 7.8.2
+        specifier: ^7.8.2
         version: 7.8.2
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.9(@types/node@25.9.3)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.1)(jsdom@29.1.1)(vite@8.0.11(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/embed-ui:
     dependencies:
@@ -1421,14 +1424,14 @@ importers:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
       rxjs:
-        specifier: 7.8.2
+        specifier: ^7.8.2
         version: 7.8.2
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.9(@types/node@25.9.3)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.1)(jsdom@29.1.1)(vite@8.0.11(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/engine-formula:
     dependencies:

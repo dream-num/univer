@@ -16,6 +16,7 @@
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
+import type { LocaleKey } from '../locale/types';
 import type { IEmbedChildContainerContext, IEmbedFullscreenSession, IEmbedRenderScope } from '../types/embed-ui';
 import { Injector, LocaleService, toDisposable } from '@univerjs/core';
 import { Button } from '@univerjs/design';
@@ -25,7 +26,16 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { of } from 'rxjs';
-import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_FOOTER_SLOT_ATTRIBUTE, EMBED_MENU_SLOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE, ensureEmbedDefaultRuntimeSlots, findEmbedRuntimeSlot } from '../common/embed-runtime-slots';
+import {
+    EMBED_CANVAS_ROOT_ATTRIBUTE,
+    EMBED_CONTENT_ROOT_ATTRIBUTE,
+    EMBED_FOOTER_SLOT_ATTRIBUTE,
+    EMBED_MENU_SLOT_ATTRIBUTE,
+    EMBED_OVERLAY_ROOT_ATTRIBUTE,
+    EMBED_POPUP_ROOT_ATTRIBUTE,
+    ensureEmbedDefaultRuntimeSlots,
+    findEmbedRuntimeSlot,
+} from '../common/embed-runtime-slots';
 import { EmbedBlockRegistryService } from '../services/embed-block-registry.service';
 import { createEmbedChildRuntimeScope } from '../services/embed-child-runtime-scope';
 import { EmbedChildViewRegistryService } from '../services/embed-child-view-registry.service';
@@ -35,15 +45,11 @@ import { mountEmbedProductRibbonMenu } from '../services/embed-product-menu-moun
 import { EmbedProductMenuRegistryService } from '../services/embed-product-menu-registry.service';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 
-const EMBED_HOST_TOOLBAR_STYLE_ID = 'univer-embed-host-toolbar-menu-styles';
-
 export function EmbedHostToolbarMenu() {
     return <EmbedFullscreenSurface />;
 }
 
 function EmbedFullscreenSurface() {
-    ensureEmbedHostToolbarMenuStyles();
-
     const injector = useDependency(Injector);
     const localeService = useDependency(LocaleService);
     const fullscreenService = useDependency(EmbedFullscreenService);
@@ -143,24 +149,51 @@ function EmbedFullscreenSurface() {
     const exitFullscreen = () => {
         fullscreenService.exit(session.embedId);
     };
-    const exitLabel = localeService.t('embed-ui.fullscreen.exit');
+    const exitLabel = localeService.t<LocaleKey>('embed-ui.fullscreen.exit');
 
     return createPortal(
-        <div className="univer-embed-fullscreen-shell" data-embed-fullscreen-shell="true">
+        <div
+            className="
+              univer-fixed univer-inset-0 univer-z-[9999] univer-grid univer-grid-rows-[auto_minmax(0,1fr)_auto]
+              univer-bg-white univer-text-gray-900
+              dark:!univer-bg-gray-800 dark:!univer-text-white
+            "
+            data-embed-fullscreen-shell="true"
+        >
             <div
                 ref={menuRef}
-                className="univer-embed-fullscreen-menu"
+                className="
+                  univer-relative univer-z-[3] univer-min-w-0 univer-bg-white
+                  empty:univer-hidden
+                  dark:!univer-bg-gray-800
+                "
                 data-embed-fullscreen-menu="true"
             >
-                <div className="univer-embed-fullscreen-header-chrome" data-embed-fullscreen-header="true">
-                    <span className="univer-embed-fullscreen-title">
+                <div
+                    className="
+                      univer-pointer-events-none univer-absolute univer-left-3.5 univer-right-3 univer-top-0
+                      univer-z-[4] univer-flex univer-h-9 univer-min-w-0 univer-items-center univer-justify-between
+                      univer-gap-4
+                    "
+                    data-embed-fullscreen-header="true"
+                >
+                    <span
+                        className="
+                          univer-min-w-0 univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap
+                          univer-text-sm univer-font-semibold univer-text-gray-700
+                          dark:!univer-text-gray-200
+                        "
+                    >
                         {getChildProductLabel(injector, session.childType)}
                     </span>
                     <Button
                         type="button"
                         size="small"
                         variant="ghost"
-                        className="univer-embed-fullscreen-close"
+                        className="
+                          univer-pointer-events-auto univer-gap-1.5
+                          [&_svg]:!univer-size-3.5
+                        "
                         data-embed-fullscreen-close="true"
                         aria-label={exitLabel}
                         title={exitLabel}
@@ -172,26 +205,42 @@ function EmbedFullscreenSurface() {
                 </div>
                 <div
                     ref={menuContentRef}
-                    className="univer-embed-fullscreen-menu-content"
+                    className="
+                      univer-min-w-0
+                      [&_[data-u-comp=ribbon-header-menu]]:univer-box-border
+                      [&_[data-u-comp=ribbon-header-menu]]:univer-px-24
+                    "
                     data-embed-fullscreen-menu-slot="true"
                     {...{ [EMBED_MENU_SLOT_ATTRIBUTE]: 'true' }}
                 />
             </div>
-            <div className="univer-embed-fullscreen-body" data-embed-fullscreen-body="true">
+            <div className="univer-flex univer-min-h-0 univer-min-w-0 univer-overflow-hidden" data-embed-fullscreen-body="true">
                 <div
-                    className="univer-embed-fullscreen-sidebar"
+                    className="
+                      univer-relative univer-z-[2] univer-min-h-0 univer-flex-none univer-bg-white
+                      empty:univer-hidden
+                      dark:!univer-bg-gray-800
+                      [&_[data-u-comp=base-left-panel]]:univer-h-full
+                    "
                     data-embed-fullscreen-sidebar-slot="true"
                     data-embed-id={session.embedId}
                 />
                 <div
                     ref={viewportRef}
-                    className="univer-embed-fullscreen-viewport"
+                    className="
+                      univer-relative univer-min-h-0 univer-min-w-0 univer-flex-1 univer-overflow-hidden
+                      dark:!univer-bg-gray-900
+                    "
                     data-embed-fullscreen-viewport="true"
                 />
             </div>
             <div
                 ref={footerRef}
-                className="univer-embed-fullscreen-footer"
+                className="
+                  univer-relative univer-z-[2] univer-min-w-0 univer-bg-white
+                  empty:univer-hidden
+                  dark:!univer-bg-gray-800
+                "
                 data-embed-fullscreen-footer-slot="true"
                 {...{ [EMBED_FOOTER_SLOT_ATTRIBUTE]: 'true' }}
             />
@@ -233,7 +282,7 @@ export function createFullscreenRenderScope(
         footerSlot: HTMLElement;
     }
 ): IEmbedRenderScope {
-    const { viewport, menuSlot, footerSlot } = roots;
+    const { viewport, menuSlot } = roots;
     return {
         hostUnitId: descriptor.hostUnitId,
         hostAnchorId: descriptor.hostAnchorId,
@@ -329,108 +378,4 @@ function mountFullscreenFloatingMenu(params: {
     });
 
     return disposable ? toDisposable(() => disposable.dispose()) : undefined;
-}
-
-function ensureEmbedHostToolbarMenuStyles(): void {
-    if (typeof document === 'undefined' || document.getElementById(EMBED_HOST_TOOLBAR_STYLE_ID)) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = EMBED_HOST_TOOLBAR_STYLE_ID;
-    style.textContent = `
-.univer-embed-fullscreen-close {
-    pointer-events: auto;
-    gap: 6px;
-}
-.univer-embed-fullscreen-close svg {
-    width: 14px !important;
-    height: 14px !important;
-}
-.univer-embed-fullscreen-shell {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    background: #ffffff;
-    color: #0f172a;
-}
-.univer-embed-fullscreen-menu {
-    position: relative;
-    z-index: 3;
-    min-width: 0;
-    background: #ffffff;
-}
-.univer-embed-fullscreen-menu:empty {
-    display: none;
-}
-.univer-embed-fullscreen-header-chrome {
-    pointer-events: none;
-    position: absolute;
-    left: 14px;
-    right: 12px;
-    top: 0;
-    z-index: 4;
-    display: flex;
-    height: 36px;
-    align-items: center;
-    justify-content: space-between;
-    min-width: 0;
-    gap: 16px;
-}
-.univer-embed-fullscreen-title {
-    min-width: 0;
-    overflow: hidden;
-    color: #334155;
-    font-size: 14px;
-    font-weight: 600;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.univer-embed-fullscreen-menu-content {
-    min-width: 0;
-}
-.univer-embed-fullscreen-menu-content [data-u-comp="ribbon-header-menu"] {
-    box-sizing: border-box;
-    padding-left: 96px;
-    padding-right: 96px;
-}
-.univer-embed-fullscreen-body {
-    display: flex;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-}
-.univer-embed-fullscreen-sidebar {
-    position: relative;
-    z-index: 2;
-    flex: 0 0 auto;
-    min-height: 0;
-    background: #ffffff;
-}
-.univer-embed-fullscreen-sidebar:empty {
-    display: none;
-}
-.univer-embed-fullscreen-sidebar [data-u-comp="base-left-panel"] {
-    height: 100%;
-}
-.univer-embed-fullscreen-viewport {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-}
-.univer-embed-fullscreen-footer:empty {
-    display: none;
-}
-.univer-embed-fullscreen-footer {
-    position: relative;
-    z-index: 2;
-    min-width: 0;
-    background: #ffffff;
-}
-`;
-    document.head.appendChild(style);
 }

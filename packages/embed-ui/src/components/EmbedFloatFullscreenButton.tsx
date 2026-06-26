@@ -21,8 +21,6 @@ import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef } from 'react';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
 
-const EMBED_FLOAT_FULLSCREEN_BUTTON_STYLE_ID = 'univer-embed-float-fullscreen-button-styles';
-
 export interface IEmbedFloatFullscreenButtonProps {
     hostUnitId?: string;
     embedId?: string;
@@ -31,8 +29,6 @@ export interface IEmbedFloatFullscreenButtonProps {
 }
 
 export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonProps) {
-    ensureEmbedFloatFullscreenButtonStyles();
-
     const { hostUnitId, embedId, className, title = 'Fullscreen' } = props;
     const buttonRef = useRef<HTMLButtonElement>(null);
     const embedModelService = useDependency(EmbedModelService);
@@ -76,12 +72,21 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
         <button
             ref={buttonRef}
             type="button"
-            className={['univer-embed-float-fullscreen-button', className].filter(Boolean).join(' ')}
+            className={[
+                `univer-absolute univer-right-2 univer-top-2 univer-z-10 univer-inline-flex univer-size-6
+                univer-cursor-pointer univer-appearance-none univer-items-center univer-justify-center
+                univer-rounded-md univer-border-0 univer-bg-gray-900/30 univer-p-0 univer-text-white
+                univer-opacity-70 univer-shadow-sm univer-transition univer-duration-150
+                hover:univer-bg-gray-900/60 hover:univer-opacity-95 hover:univer-shadow-md
+                dark:!univer-bg-gray-100/20 dark:!univer-text-white dark:!univer-shadow-none
+                dark:hover:!univer-bg-gray-100/30`,
+                className,
+            ].filter(Boolean).join(' ')}
             data-embed-float-fullscreen-button="true"
             aria-label="Fullscreen embed block"
             title={title}
         >
-            <FullscreenIcon />
+            <FullscreenIcon className="univer-size-3.5" />
         </button>
     );
 }
@@ -99,46 +104,4 @@ export function enterEmbedFullscreen(params: {
 
     params.fullscreenService.enter(descriptor);
     return true;
-}
-
-function ensureEmbedFloatFullscreenButtonStyles(): void {
-    if (typeof document === 'undefined' || document.getElementById(EMBED_FLOAT_FULLSCREEN_BUTTON_STYLE_ID)) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = EMBED_FLOAT_FULLSCREEN_BUTTON_STYLE_ID;
-    style.textContent = `
-.univer-embed-float-fullscreen-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 10;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: 0;
-    border-radius: 6px;
-    background: rgba(15, 23, 42, 0.30);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
-    color: #ffffff;
-    cursor: pointer;
-    opacity: 0.70;
-    padding: 0;
-    appearance: none;
-    transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-.univer-embed-float-fullscreen-button:hover {
-    background: rgba(15, 23, 42, 0.60);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
-    opacity: 0.95;
-}
-.univer-embed-float-fullscreen-button svg {
-    width: 14px;
-    height: 14px;
-}
-`;
-    document.head.appendChild(style);
 }

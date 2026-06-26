@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUndoRedoItem, IUndoRedoService } from '@univerjs/core';
-import { Inject, IUndoRedoService as IUndoRedoServiceToken } from '@univerjs/core';
+import type { IUndoRedoItem } from '@univerjs/core';
+import { Inject, IUndoRedoService } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 
 export interface IEmbedUndoBridgeResult {
@@ -27,7 +27,7 @@ export class EmbedUndoBridgeService {
     constructor(
         @Inject(EmbedFocusOwnerService)
         private readonly _focusOwnerService: EmbedFocusOwnerService,
-        @IUndoRedoServiceToken
+        @IUndoRedoService
         private readonly _undoRedoService: IUndoRedoService
     ) {
         // noop

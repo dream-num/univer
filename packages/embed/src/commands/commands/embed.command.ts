@@ -18,7 +18,10 @@ import type { ICommand, ICreateUnitOptions, UniverInstanceType } from '@univerjs
 import type { EmbedHostEntry, IEmbedCreateContext, IEmbedDescriptor, IEmbedSourceMeta } from '../../types/embed';
 import { CommandType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { toResourceRefUnitType } from '../../common/unit-type';
-import { createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService } from '../../services/embed-capability-registry.service';
+import {
+    createDefaultEmbedSourceMeta,
+    EmbedCapabilityRegistryService,
+} from '../../services/embed-capability-registry.service';
 import { EmbedCreationService } from '../../services/embed-creation.service';
 import { EmbedModelService } from '../../services/embed-model.service';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';

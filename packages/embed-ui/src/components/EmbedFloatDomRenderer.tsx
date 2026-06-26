@@ -24,17 +24,28 @@ import { UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE } from '../common/embed-runtime-slots';
+import {
+    EMBED_CANVAS_ROOT_ATTRIBUTE,
+    EMBED_CONTENT_ROOT_ATTRIBUTE,
+    EMBED_OVERLAY_ROOT_ATTRIBUTE,
+    EMBED_POPUP_ROOT_ATTRIBUTE,
+} from '../common/embed-runtime-slots';
 import { EmbedActivationService } from '../services/embed-activation.service';
 import { shouldPassDocsStickyVerticalWheelToHost } from '../services/embed-docs-sticky-wheel';
 import { EmbedFloatPreviewService } from '../services/embed-float-preview.service';
 import { EmbedFloatingActiveService } from '../services/embed-floating-active.service';
 import { EmbedFloatingGeometryService } from '../services/embed-floating-geometry.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '../services/embed-interaction-boundary.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EmbedInteractionBoundaryService,
+} from '../services/embed-interaction-boundary.service';
 import { EmbedMountService } from '../services/embed-mount.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
-import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../services/embed-runtime-focus-coordinator.service';
+import {
+    EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+    EmbedRuntimeFocusCoordinator,
+} from '../services/embed-runtime-focus-coordinator.service';
 import { EmbedFloatFullscreenButton } from './EmbedFloatFullscreenButton';
 
 const CLICK_DISTANCE_THRESHOLD = 4;
@@ -56,7 +67,7 @@ interface IEmbedFloatDomRectCache {
     height: number;
 }
 
-interface ClickIntentState {
+interface IClickIntentState {
     pointerId: number;
     startX: number;
     startY: number;
@@ -89,8 +100,6 @@ export function EmbedFloatDomRenderer(props: {
     enableStage1BodyDrag?: boolean;
     isExternalHostInteraction?: (event: PointerEvent) => boolean;
 }) {
-    ensureEmbedFloatDomStyles();
-
     const { initialStage, interactionFlow = 'floating-stage', isExternalHostInteraction, onRuntimeStageEnter, onRuntimeStageExit } = props;
     const containerRef = useRef<HTMLDivElement>(null);
     const gateRef = useRef<HTMLDivElement>(null);
@@ -116,7 +125,7 @@ export function EmbedFloatDomRenderer(props: {
     const [stage, setStage] = useState<EmbedFloatingStage>(() => initialStage ?? (data?.embedId ? floatingActiveService.getStage(data.embedId) : 'inactive'));
     const previousStageRef = useRef<EmbedFloatingStage>(stage);
     const notifiedInitialStageRef = useRef(false);
-    const clickIntentRef = useRef<ClickIntentState | undefined>(undefined);
+    const clickIntentRef = useRef<IClickIntentState | undefined>(undefined);
     const childContextRef = useRef<IEmbedChildContainerContext | undefined>(undefined);
     const stageSessionLeaseRef = useRef<IDisposable | undefined>(undefined);
     const pointerInteractionLeaseRef = useRef<IDisposable | undefined>(undefined);
@@ -730,7 +739,18 @@ export function EmbedFloatDomRenderer(props: {
             gate.removeEventListener('pointerup', finishIntent, true);
             gate.removeEventListener('pointercancel', clearIntent, true);
         };
-    }, [acquireStage2SessionLease, activationService, data?.embedId, data?.hostAnchorId, data?.hostUnitId, embedModelService, floatingActiveService, interactionFlow, props.enableStage1BodyDrag, releaseStage2SessionLeaseIfActivationDoesNotStick]);
+    }, [
+        acquireStage2SessionLease,
+        activationService,
+        data?.embedId,
+        data?.hostAnchorId,
+        data?.hostUnitId,
+        embedModelService,
+        floatingActiveService,
+        interactionFlow,
+        props.enableStage1BodyDrag,
+        releaseStage2SessionLeaseIfActivationDoesNotStick,
+    ]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -1227,10 +1247,17 @@ export function EmbedFloatDomRenderer(props: {
         return () => dragHandle.removeEventListener('pointerdown', keepStageForDragHandle);
     }, [keepStageForDragHandle]);
 
+    const disableLiveHostPointerEvents = interactionFlow !== 'doc-block' && (stage === 'inactive' || stage === 'stage1');
+    const passThroughInteractionGate = interactionFlow === 'doc-block' || stage === 'stage2';
+    const showDragHandle = stage === 'stage1' || stage === 'stage2';
+
     return (
         <div
             ref={containerRef}
-            className="univer-embed-float-dom"
+            className="
+              univer-embed-float-dom univer-relative univer-size-full univer-min-h-0 univer-min-w-0
+              univer-overflow-visible univer-bg-transparent
+            "
             data-embed-float-dom="true"
             data-embed-float-stage={stage}
             data-embed-id={data?.embedId}
@@ -1240,59 +1267,105 @@ export function EmbedFloatDomRenderer(props: {
             data-embed-interaction-flow={interactionFlow}
         >
             <div
-                className="univer-embed-float-dom__content"
+                className="
+                  univer-embed-float-dom__content univer-absolute univer-inset-0 univer-box-border univer-min-h-0
+                  univer-min-w-0 univer-overflow-hidden univer-rounded-md
+                  after:univer-pointer-events-none after:univer-absolute after:univer-inset-0 after:univer-z-20
+                  after:univer-box-border after:univer-rounded-[inherit] after:univer-border after:univer-border-solid
+                  after:univer-border-gray-200 after:univer-content-['']
+                  dark:after:!univer-border-gray-600
+                "
             >
                 <div
                     ref={liveRootRef}
-                    className="univer-embed-float-dom__live"
+                    className="
+                      univer-embed-float-dom__live univer-absolute univer-inset-0 univer-size-full univer-min-h-0
+                      univer-min-w-0 univer-overflow-hidden univer-bg-transparent
+                    "
                     data-embed-float-live="true"
                 >
                     <div
                         ref={liveCanvasRootRef}
-                        className="univer-embed-float-dom__live-canvas"
+                        className={[
+                            'univer-embed-float-dom__live-canvas univer-absolute univer-inset-0 univer-z-0 univer-size-full univer-min-h-0 univer-min-w-0 univer-overflow-hidden',
+                            disableLiveHostPointerEvents && 'univer-pointer-events-none',
+                        ].filter(Boolean).join(' ')}
                         {...{ [EMBED_CANVAS_ROOT_ATTRIBUTE]: 'true' }}
                     />
                     <div
                         ref={liveContentRootRef}
-                        className="univer-embed-float-dom__live-content"
+                        className={[
+                            'univer-embed-float-dom__live-content univer-absolute univer-inset-0 univer-z-[1] univer-size-full univer-min-h-0 univer-min-w-0 univer-overflow-hidden univer-pointer-events-none [&>*]:univer-pointer-events-auto',
+                            disableLiveHostPointerEvents && 'univer-pointer-events-none',
+                        ].filter(Boolean).join(' ')}
                         {...{ [EMBED_CONTENT_ROOT_ATTRIBUTE]: 'true' }}
                     />
                 </div>
                 <div
                     ref={gateRef}
-                    className="univer-embed-float-dom__interaction-gate"
+                    className={[
+                        'univer-embed-float-dom__interaction-gate univer-absolute univer-inset-0 univer-z-10 univer-bg-transparent',
+                        passThroughInteractionGate && 'univer-pointer-events-none',
+                    ].filter(Boolean).join(' ')}
                     data-embed-float-interaction-gate="true"
                 />
             </div>
             <div
                 ref={chromeRef}
-                className="univer-embed-float-dom__chrome"
+                className="
+                  univer-embed-float-dom__chrome univer-pointer-events-none univer-fixed univer-z-[1000]
+                  univer-overflow-visible
+                  [&>*]:univer-pointer-events-auto
+                "
                 data-embed-float-stage={stage}
                 data-embed-id={data?.embedId}
             >
                 <div
                     ref={overlayRootRef}
-                    className="univer-embed-float-dom__overlay"
+                    className="
+                      univer-embed-float-dom__overlay univer-pointer-events-none univer-absolute univer-inset-0
+                      univer-overflow-visible
+                      [&>*]:univer-pointer-events-auto
+                    "
                     {...{ [EMBED_OVERLAY_ROOT_ATTRIBUTE]: 'true' }}
                 />
                 <div
                     ref={popupRootRef}
-                    className="univer-embed-float-dom__popup"
+                    className="
+                      univer-embed-float-dom__popup univer-pointer-events-none univer-absolute univer-inset-0
+                      univer-overflow-visible
+                      [&>*]:univer-pointer-events-auto
+                    "
                     {...{ [EMBED_POPUP_ROOT_ATTRIBUTE]: 'true' }}
                 />
                 <EmbedFloatFullscreenButton
                     hostUnitId={data?.hostUnitId}
                     embedId={data?.embedId}
-                    className="univer-embed-float-dom__fullscreen-button"
                 />
                 <button
                     ref={dragHandleRef}
                     type="button"
-                    className="univer-embed-float-dom__drag-handle"
+                    className={[
+                        'univer-embed-float-dom__drag-handle univer-absolute -univer-top-6 univer-left-0 univer-z-[2] univer-h-3 univer-w-[18px] univer-appearance-none univer-items-center univer-justify-center univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-500 univer-shadow-none dark:!univer-text-gray-300',
+                        showDragHandle ? 'univer-inline-flex univer-cursor-move' : 'univer-hidden',
+                    ].filter(Boolean).join(' ')}
                     data-embed-float-drag-handle="true"
                     aria-label="Move embed block"
                 >
-                    <span aria-hidden="true" />
+                    <span
+                        aria-hidden="true"
+                        className="
+                          univer-grid univer-h-[18px] univer-w-3 univer-rotate-90 univer-grid-cols-2 univer-grid-rows-3
+                          univer-gap-[3px]
+                        "
+                    >
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <span
+                                key={index}
+                                className="univer-block univer-size-1 univer-rounded-full univer-bg-current"
+                            />
+                        ))}
+                    </span>
                 </button>
             </div>
         </div>
@@ -1977,178 +2050,4 @@ function canScrollElement(element: HTMLElement, deltaX: number, deltaY: number):
     );
 
     return canScrollX || canScrollY;
-}
-
-function ensureEmbedFloatDomStyles(): void {
-    if (typeof document === 'undefined' || document.getElementById('univer-embed-float-dom-styles')) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = 'univer-embed-float-dom-styles';
-    style.textContent = `
-.univer-embed-float-dom {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: visible;
-    background: transparent;
-}
-.univer-embed-float-dom__content {
-    position: absolute;
-    inset: 0;
-    box-sizing: border-box;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-    border-radius: 6px;
-}
-.univer-embed-float-dom__content::after {
-    position: absolute;
-    inset: 0;
-    z-index: 20;
-    box-sizing: border-box;
-    pointer-events: none;
-    border: 1px solid #e5e7eb;
-    border-radius: inherit;
-    content: '';
-}
-.dark .univer-embed-float-dom__content::after {
-    border-color: #4b5563;
-}
-.univer-embed-float-dom__live {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-    background: transparent;
-}
-.univer-embed-float-dom__live-content,
-.univer-embed-float-dom__live-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-}
-.univer-embed-float-dom__live-canvas {
-    z-index: 0;
-}
-.univer-embed-float-dom__live-content {
-    z-index: 1;
-    pointer-events: none;
-}
-.univer-embed-float-dom__live-content > * {
-    pointer-events: auto;
-}
-.univer-embed-float-dom__interaction-gate {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    background: transparent;
-}
-.univer-embed-float-dom[data-embed-float-stage="stage2"] .univer-embed-float-dom__interaction-gate,
-.univer-embed-float-dom[data-embed-interaction-flow="doc-block"] .univer-embed-float-dom__interaction-gate,
-.univer-embed-float-dom[data-embed-interaction-flow="doc-block"][data-embed-float-stage="stage2"] .univer-embed-float-dom__interaction-gate {
-    pointer-events: none;
-}
-.univer-embed-float-dom__chrome {
-    position: fixed;
-    z-index: 1000;
-    overflow: visible;
-    pointer-events: none;
-}
-.univer-embed-float-dom__chrome > * {
-    pointer-events: auto;
-}
-.univer-embed-float-dom__overlay,
-.univer-embed-float-dom__popup {
-    position: absolute;
-    inset: 0;
-    overflow: visible;
-    pointer-events: none;
-}
-.univer-embed-float-dom__overlay > *,
-.univer-embed-float-dom__popup > * {
-    pointer-events: auto;
-}
-.univer-embed-float-dom__fullscreen-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 4;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: 0;
-    border-radius: 6px;
-    background: rgba(15, 23, 42, 0.32);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
-    color: #ffffff;
-    cursor: pointer;
-    opacity: 0.72;
-    padding: 0;
-    appearance: none;
-}
-.univer-embed-float-dom__fullscreen-button:hover {
-    background: rgba(15, 23, 42, 0.64);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
-    opacity: 0.96;
-}
-.univer-embed-float-dom__fullscreen-button svg {
-    width: 14px;
-    height: 14px;
-}
-.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="inactive"] [data-embed-content-root],
-.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="inactive"] [data-embed-canvas-root],
-.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="stage1"] [data-embed-content-root],
-.univer-embed-float-dom:not([data-embed-interaction-flow="doc-block"])[data-embed-float-stage="stage1"] [data-embed-canvas-root] {
-    pointer-events: none;
-}
-.univer-embed-float-dom__drag-handle {
-    position: absolute;
-    top: -24px;
-    left: 0;
-    z-index: 2;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 12px;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-    color: #64748b;
-    cursor: move;
-    padding: 0;
-    appearance: none;
-}
-.univer-embed-float-dom__chrome[data-embed-float-stage="stage1"] .univer-embed-float-dom__drag-handle,
-.univer-embed-float-dom__chrome[data-embed-float-stage="stage2"] .univer-embed-float-dom__drag-handle {
-    display: inline-flex;
-}
-.univer-embed-float-dom__drag-handle span {
-    display: block;
-    width: 12px;
-    height: 18px;
-    transform: rotate(90deg);
-    background:
-        radial-gradient(circle 2px at 2px 2px, currentColor 99%, transparent 100%),
-        radial-gradient(circle 2px at 10px 2px, currentColor 99%, transparent 100%),
-        radial-gradient(circle 2px at 2px 9px, currentColor 99%, transparent 100%),
-        radial-gradient(circle 2px at 10px 9px, currentColor 99%, transparent 100%),
-        radial-gradient(circle 2px at 2px 16px, currentColor 99%, transparent 100%),
-        radial-gradient(circle 2px at 10px 16px, currentColor 99%, transparent 100%);
-}
-`;
-    document.head.appendChild(style);
 }

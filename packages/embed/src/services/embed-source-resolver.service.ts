@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IUniverInstanceService } from '@univerjs/core';
+import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
 import type { EmbedSource, IEmbedResolvedSource } from '../types/embed';
-import { generateRandomId, IUniverInstanceService as IUniverInstanceServiceToken, Inject, Optional, PluginService, UniverInstanceType } from '@univerjs/core';
+import { generateRandomId, Inject, IUniverInstanceService, Optional, PluginService } from '@univerjs/core';
 import { toResourceRefUnitType } from '../common/unit-type';
-import { EmbedReferencedUnitManagerService } from './embed-referenced-unit-manager.service';
 import { EmbedGuestContributionRegistryService } from './embed-guest-contribution-registry.service';
+import { EmbedReferencedUnitManagerService } from './embed-referenced-unit-manager.service';
 
 export const EMBED_CHILD_CREATE_OPTIONS: ICreateUnitOptions = {
     makeCurrent: false,
@@ -35,7 +35,7 @@ export interface IEmbedSourceResolveContext {
 
 export class EmbedSourceResolverService {
     constructor(
-        @IUniverInstanceServiceToken private readonly _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Optional(EmbedGuestContributionRegistryService) private readonly _guestContributionRegistry?: EmbedGuestContributionRegistryService,
         @Inject(EmbedReferencedUnitManagerService) private readonly _referencedUnitManager?: EmbedReferencedUnitManagerService,
         @Optional(PluginService) private readonly _pluginService?: PluginService

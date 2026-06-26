@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-export { CopyEmbedCommand, CreateEmbedCommand, InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
+export {
+    CopyEmbedCommand,
+    CreateEmbedCommand,
+    InsertEmbedBySnapshotCommand,
+    RemoveEmbedCommand,
+} from './commands/commands/embed.command';
 export type { ICopyEmbedCommandParams, ICreateEmbedCommandParams, IInsertEmbedBySnapshotCommandParams, IRemoveEmbedCommandParams } from './commands/commands/embed.command';
 export { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
 export type { ISetEmbedDescriptorMutationParams, ISoftDeleteEmbedDescriptorMutationParams } from './commands/mutations/embed-descriptor.mutation';

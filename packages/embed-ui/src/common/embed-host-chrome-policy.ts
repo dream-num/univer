@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry } from '@univerjs/embed';
-import { UniverInstanceType as UniverType } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
 
 export interface IEmbedHostChromePolicyInput {
     entry?: EmbedHostEntry | string;
@@ -39,13 +38,13 @@ export interface IEmbedHostChromePolicy {
 export function getEmbedHostChromePolicy(input: IEmbedHostChromePolicyInput): IEmbedHostChromePolicy {
     const hasActiveEntry = Boolean(input.entry);
     const childType = input.childType;
-    const activeBaseChild = childType === UniverType.UNIVER_BASE;
-    const activeSlideChild = childType === UniverType.UNIVER_SLIDE;
+    const activeBaseChild = childType === UniverInstanceType.UNIVER_BASE;
+    const activeSlideChild = childType === UniverInstanceType.UNIVER_SLIDE;
 
     return {
         hideHostHeaderChrome: hasActiveEntry,
         hideHostFormulaBar: input.entry === 'sheets-sheet-tab',
-        hideSheetFooterControls: input.entry === 'sheets-sheet-tab' && childType === UniverType.UNIVER_SHEET,
+        hideSheetFooterControls: input.entry === 'sheets-sheet-tab' && childType === UniverInstanceType.UNIVER_SHEET,
         hideSlideInsertToolbar: Boolean(
             hasActiveEntry ||
             activeSlideChild ||

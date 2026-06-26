@@ -16,8 +16,8 @@
 
 import type { IBaseSnapshot, IDocumentData, IWorkbookData } from '@univerjs/core';
 import type { IEmbedDescriptor, IInsertEmbedBySnapshotCommandParams } from '@univerjs/embed';
-import { generateRandomId, UniverInstanceType as UniverType } from '@univerjs/core';
-import { FUniver as FUniverClass } from '@univerjs/core/facade';
+import { generateRandomId, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { EmbedHostEntryEnum, EmbedModelService, InsertEmbedBySnapshotCommand } from '@univerjs/embed';
 import { FEmbed } from './f-embed';
 
@@ -548,13 +548,13 @@ export interface IFUniverEmbedMixin {
  * The embed facade mixin on `FUniver`.
  * @ignore
  */
-export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixin {
+export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
     override insertSheetIntoDoc(params: IInsertSheetIntoDocParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostDocUnitId,
-            hostType: UniverType.UNIVER_DOC,
+            hostType: UniverInstanceType.UNIVER_DOC,
             entry: EmbedHostEntryEnum.DocsCustomBlock,
-            childType: UniverType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
             unitSnapshot: params.sheetSnapshot,
             hostContext: omitUndefined({ index: params.index }),
         });
@@ -563,9 +563,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertBaseIntoDoc(params: IInsertBaseIntoDocParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostDocUnitId,
-            hostType: UniverType.UNIVER_DOC,
+            hostType: UniverInstanceType.UNIVER_DOC,
             entry: EmbedHostEntryEnum.DocsCustomBlock,
-            childType: UniverType.UNIVER_BASE,
+            childType: UniverInstanceType.UNIVER_BASE,
             unitSnapshot: params.baseSnapshot,
             hostContext: omitUndefined({ index: params.index }),
         });
@@ -574,9 +574,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSlideIntoDoc<TSlideSnapshot = unknown>(params: IInsertSlideIntoDocParams<TSlideSnapshot>): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostDocUnitId,
-            hostType: UniverType.UNIVER_DOC,
+            hostType: UniverInstanceType.UNIVER_DOC,
             entry: EmbedHostEntryEnum.DocsCustomBlock,
-            childType: UniverType.UNIVER_SLIDE,
+            childType: UniverInstanceType.UNIVER_SLIDE,
             unitSnapshot: resolveSlideSnapshot(params.slideSnapshot),
             hostContext: omitUndefined({ index: params.index }),
         });
@@ -585,9 +585,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertDocAsSheetTab(params: IInsertDocAsSheetTabParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostWorkbookUnitId,
-            hostType: UniverType.UNIVER_SHEET,
+            hostType: UniverInstanceType.UNIVER_SHEET,
             entry: EmbedHostEntryEnum.SheetsSheetTab,
-            childType: UniverType.UNIVER_DOC,
+            childType: UniverInstanceType.UNIVER_DOC,
             unitSnapshot: params.docSnapshot,
             hostContext: omitUndefined({ sheetIndex: params.tabIndex, sheetName: params.name }),
         });
@@ -596,9 +596,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSlideAsSheetTab<TSlideSnapshot = unknown>(params: IInsertSlideAsSheetTabParams<TSlideSnapshot>): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostWorkbookUnitId,
-            hostType: UniverType.UNIVER_SHEET,
+            hostType: UniverInstanceType.UNIVER_SHEET,
             entry: EmbedHostEntryEnum.SheetsSheetTab,
-            childType: UniverType.UNIVER_SLIDE,
+            childType: UniverInstanceType.UNIVER_SLIDE,
             unitSnapshot: resolveSlideSnapshot(params.slideSnapshot, params.name),
             hostContext: omitUndefined({ sheetIndex: params.tabIndex, sheetName: params.name }),
         });
@@ -607,9 +607,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertBaseAsSheetTab(params: IInsertBaseAsSheetTabParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostWorkbookUnitId,
-            hostType: UniverType.UNIVER_SHEET,
+            hostType: UniverInstanceType.UNIVER_SHEET,
             entry: EmbedHostEntryEnum.SheetsSheetTab,
-            childType: UniverType.UNIVER_BASE,
+            childType: UniverInstanceType.UNIVER_BASE,
             unitSnapshot: params.baseSnapshot,
             hostContext: omitUndefined({ sheetIndex: params.tabIndex, sheetName: params.name }),
         });
@@ -618,9 +618,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertDocAsSheetFloating(params: IInsertDocAsSheetFloatingParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostWorkbookUnitId,
-            hostType: UniverType.UNIVER_SHEET,
+            hostType: UniverInstanceType.UNIVER_SHEET,
             entry: EmbedHostEntryEnum.SheetsFloatingObject,
-            childType: UniverType.UNIVER_DOC,
+            childType: UniverInstanceType.UNIVER_DOC,
             unitSnapshot: params.docSnapshot,
             hostContext: rectToHostContext(params.rect),
         });
@@ -629,9 +629,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSlideAsSheetFloating<TSlideSnapshot = unknown>(params: IInsertSlideAsSheetFloatingParams<TSlideSnapshot>): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostWorkbookUnitId,
-            hostType: UniverType.UNIVER_SHEET,
+            hostType: UniverInstanceType.UNIVER_SHEET,
             entry: EmbedHostEntryEnum.SheetsFloatingObject,
-            childType: UniverType.UNIVER_SLIDE,
+            childType: UniverInstanceType.UNIVER_SLIDE,
             unitSnapshot: resolveSlideSnapshot(params.slideSnapshot),
             hostContext: rectToHostContext(params.rect),
         });
@@ -640,9 +640,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertBaseAsSheetFloating(params: IInsertBaseAsSheetFloatingParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostWorkbookUnitId,
-            hostType: UniverType.UNIVER_SHEET,
+            hostType: UniverInstanceType.UNIVER_SHEET,
             entry: EmbedHostEntryEnum.SheetsFloatingObject,
-            childType: UniverType.UNIVER_BASE,
+            childType: UniverInstanceType.UNIVER_BASE,
             unitSnapshot: params.baseSnapshot,
             hostContext: rectToHostContext(params.rect),
         });
@@ -651,9 +651,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSheetAsBaseTable(params: IInsertSheetAsBaseTableParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostBaseUnitId,
-            hostType: UniverType.UNIVER_BASE,
+            hostType: UniverInstanceType.UNIVER_BASE,
             entry: EmbedHostEntryEnum.BasesTableListBlock,
-            childType: UniverType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
             unitSnapshot: params.sheetSnapshot,
             hostContext: omitUndefined({ tableIndex: params.tableIndex, tableName: params.name }),
         });
@@ -662,9 +662,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertDocAsBaseTable(params: IInsertDocAsBaseTableParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostBaseUnitId,
-            hostType: UniverType.UNIVER_BASE,
+            hostType: UniverInstanceType.UNIVER_BASE,
             entry: EmbedHostEntryEnum.BasesTableListBlock,
-            childType: UniverType.UNIVER_DOC,
+            childType: UniverInstanceType.UNIVER_DOC,
             unitSnapshot: params.docSnapshot,
             hostContext: omitUndefined({ tableIndex: params.tableIndex, tableName: params.name }),
         });
@@ -673,9 +673,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSlideAsBaseTable<TSlideSnapshot = unknown>(params: IInsertSlideAsBaseTableParams<TSlideSnapshot>): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostBaseUnitId,
-            hostType: UniverType.UNIVER_BASE,
+            hostType: UniverInstanceType.UNIVER_BASE,
             entry: EmbedHostEntryEnum.BasesTableListBlock,
-            childType: UniverType.UNIVER_SLIDE,
+            childType: UniverInstanceType.UNIVER_SLIDE,
             unitSnapshot: resolveSlideSnapshot(params.slideSnapshot, params.name),
             hostContext: omitUndefined({ tableIndex: params.tableIndex, tableName: params.name }),
         });
@@ -684,9 +684,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSheetAsSlidePage(params: IInsertSheetAsSlidePageParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostSlideUnitId,
-            hostType: UniverType.UNIVER_SLIDE,
+            hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: EmbedHostEntryEnum.SlidesPageListBlock,
-            childType: UniverType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
             unitSnapshot: params.sheetSnapshot,
             hostContext: omitUndefined({ pageIndex: params.pageIndex, pageName: params.name }),
         });
@@ -695,9 +695,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertBaseAsSlidePage(params: IInsertBaseAsSlidePageParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostSlideUnitId,
-            hostType: UniverType.UNIVER_SLIDE,
+            hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: EmbedHostEntryEnum.SlidesPageListBlock,
-            childType: UniverType.UNIVER_BASE,
+            childType: UniverInstanceType.UNIVER_BASE,
             unitSnapshot: params.baseSnapshot,
             hostContext: omitUndefined({ pageIndex: params.pageIndex, pageName: params.name }),
         });
@@ -706,9 +706,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertDocAsSlidePage(params: IInsertDocAsSlidePageParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostSlideUnitId,
-            hostType: UniverType.UNIVER_SLIDE,
+            hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: EmbedHostEntryEnum.SlidesPageListBlock,
-            childType: UniverType.UNIVER_DOC,
+            childType: UniverInstanceType.UNIVER_DOC,
             unitSnapshot: params.docSnapshot,
             hostContext: omitUndefined({ pageIndex: params.pageIndex, pageName: params.name }),
         });
@@ -717,9 +717,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertSheetAsSlideFloating(params: IInsertSheetAsSlideFloatingParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostSlideUnitId,
-            hostType: UniverType.UNIVER_SLIDE,
+            hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: EmbedHostEntryEnum.SlidesFloatingObject,
-            childType: UniverType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
             unitSnapshot: params.sheetSnapshot,
             hostContext: rectToHostContext(params.rect),
         });
@@ -728,9 +728,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertBaseAsSlideFloating(params: IInsertBaseAsSlideFloatingParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostSlideUnitId,
-            hostType: UniverType.UNIVER_SLIDE,
+            hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: EmbedHostEntryEnum.SlidesFloatingObject,
-            childType: UniverType.UNIVER_BASE,
+            childType: UniverInstanceType.UNIVER_BASE,
             unitSnapshot: params.baseSnapshot,
             hostContext: rectToHostContext(params.rect),
         });
@@ -739,9 +739,9 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     override insertDocAsSlideFloating(params: IInsertDocAsSlideFloatingParams): FEmbed {
         return this._insertEmbedBySnapshot({
             hostUnitId: params.hostSlideUnitId,
-            hostType: UniverType.UNIVER_SLIDE,
+            hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: EmbedHostEntryEnum.SlidesFloatingObject,
-            childType: UniverType.UNIVER_DOC,
+            childType: UniverInstanceType.UNIVER_DOC,
             unitSnapshot: params.docSnapshot,
             hostContext: rectToHostContext(params.rect),
         });
@@ -785,7 +785,7 @@ export class FUniverEmbedMixin extends FUniverClass implements IFUniverEmbedMixi
     }
 }
 
-FUniverClass.extend(FUniverEmbedMixin);
+FUniver.extend(FUniverEmbedMixin);
 
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention

@@ -184,6 +184,7 @@ export {
 export type { IDropdownParam } from './services/cell-dropdown-manager.service';
 export { CellPopupManagerService } from './services/cell-popup-manager.service';
 export {
+    FORMULA_CLIPBOARD_MIME_TYPE,
     getMatrixPlainText,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME,

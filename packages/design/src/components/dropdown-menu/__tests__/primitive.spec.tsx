@@ -16,6 +16,7 @@
 
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
@@ -32,7 +33,6 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '../DropdownMenuPrimitive';
-import '@testing-library/jest-dom/vitest';
 
 describe('DropdownMenuPrimitive', () => {
     it('should render primitive wrappers and variants', () => {
@@ -64,6 +64,25 @@ describe('DropdownMenuPrimitive', () => {
             </DropdownMenuPrimitive>
         );
 
-        expect(container).toBeInTheDocument();
+        expect(container).toBeTruthy();
+    });
+
+    it('should mount content into the configured container', () => {
+        const mountContainer = document.createElement('div');
+        document.body.appendChild(mountContainer);
+
+        render(
+            <ConfigProvider mountContainer={mountContainer}>
+                <DropdownMenuPrimitive open>
+                    <DropdownMenuTrigger>Trigger</DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>Mounted Item</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenuPrimitive>
+            </ConfigProvider>
+        );
+
+        expect(mountContainer.textContent).toContain('Mounted Item');
+        mountContainer.remove();
     });
 });

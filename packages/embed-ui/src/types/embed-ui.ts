@@ -183,6 +183,7 @@ export type EmbedProductMenuSurface =
 
 export interface IEmbedProductMenuMountContext {
     container: HTMLElement;
+    portalContainer?: HTMLElement | null;
     childType: UniverInstanceType;
     surface?: EmbedProductMenuSurface;
     childUnitId?: string;

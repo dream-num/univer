@@ -437,6 +437,7 @@ describe('Test cut command with formulas', () => {
     beforeEach(() => {
         const testBed = clipboardTestBed(createFormulaClipboardWorkbookData(), [
             [UpdateFormulaController],
+            [FormulaClipboardController],
         ]);
 
         univer = testBed.univer;
@@ -452,6 +453,7 @@ describe('Test cut command with formulas', () => {
         sheetClipboardService = get(ISheetClipboardService);
 
         get(UpdateFormulaController);
+        get(FormulaClipboardController);
 
         getValues = (
             startRow: number,
@@ -469,6 +471,39 @@ describe('Test cut command with formulas', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('pastes cross-page formula payload with relative reference offsets', async () => {
+        get(SheetsSelectionsService).addSelections([
+            {
+                range: { startRow: 4, startColumn: 3, endRow: 4, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        const formulaItem = {
+            types: ['web application/x-univer-sheets-formula'],
+            getType: async () => new Blob([JSON.stringify({
+                rowCount: 1,
+                columnCount: 1,
+                origin: {
+                    row: 1,
+                    column: 1,
+                },
+                formulas: [
+                    {
+                        row: 0,
+                        column: 0,
+                        f: '=C2',
+                    },
+                ],
+            })], { type: 'web application/x-univer-sheets-formula' }),
+        } as unknown as ClipboardItem;
+
+        await sheetClipboardService.paste(formulaItem);
+
+        expect(getValues(4, 3, 4, 3)?.[0][0]?.f).toBe('=E5');
     });
 
     async function cutPaste(

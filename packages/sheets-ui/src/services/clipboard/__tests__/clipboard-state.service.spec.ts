@@ -36,7 +36,7 @@ import {
     Workbook,
 } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     IClipboardInterfaceService,
     INotificationService,
@@ -61,7 +61,7 @@ class NoopNotificationService {
 }
 
 class TestClipboardInterfaceService {
-    readonly writes: Array<{ text: string; html: string }> = [];
+    readonly writes: Array<{ text: string; html: string; customData?: Record<string, string> }> = [];
 
     get supportClipboard(): boolean {
         return true;
@@ -71,8 +71,8 @@ class TestClipboardInterfaceService {
         this.writes.push({ text, html: '' });
     }
 
-    async write(text: string, html: string): Promise<void> {
-        this.writes.push({ text, html });
+    async write(text: string, html: string, customData?: Record<string, string>): Promise<void> {
+        this.writes.push({ text, html, customData });
     }
 
     async readText(): Promise<string> {
@@ -86,6 +86,7 @@ class TestClipboardInterfaceService {
 
 interface ITestCell {
     v?: string;
+    f?: string;
     s?: unknown;
     rowSpan?: number;
     colSpan?: number;
@@ -157,6 +158,9 @@ function createTestContext() {
     injector.add([LocaleService]);
     injector.add([ErrorService]);
     injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(SetSelectionsOperation);
+    commandService.registerCommand(SetWorksheetActiveOperation);
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     const workbook = injector.createInstance(Workbook, {
         id: 'unit-1',
@@ -267,6 +271,59 @@ describe('SheetClipboardService', () => {
         expect(copyId && service.copyContentCache().get(copyId)?.copyType).toBe(COPY_TYPE.COPY);
     });
 
+    it('writes formula clipboard payload for copyable formula cells', async () => {
+        const { injector, service } = createTestContext();
+        selectRange(injector, 1, 2, 2, 3);
+
+        service.addClipboardHook({
+            id: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY,
+            onCopyCellContent(row: number, column: number) {
+                return row === 2 && column === 3 ? '=A1+B1' : '';
+            },
+        } as never);
+
+        expect(await service.copy()).toBe(true);
+
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        const formulaPayload = clipboard.writes[0].customData?.['web application/x-univer-sheets-formula'];
+
+        expect(formulaPayload).toBe(JSON.stringify({
+            rowCount: 2,
+            columnCount: 2,
+            origin: {
+                row: 1,
+                column: 2,
+            },
+            formulas: [
+                {
+                    row: 1,
+                    column: 1,
+                    f: '=A1+B1',
+                },
+            ],
+        }));
+    });
+
+    it('does not write formula clipboard payload when filtered rows are skipped', async () => {
+        const { injector, service } = createTestContext();
+        selectRange(injector, 1, 2, 2, 3);
+
+        service.addClipboardHook({
+            id: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY,
+            getFilteredOutRows() {
+                return [1];
+            },
+            onCopyCellContent(row: number, column: number) {
+                return row === 2 && column === 3 ? '=A1+B1' : '';
+            },
+        } as never);
+
+        expect(await service.copy()).toBe(true);
+
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        expect(clipboard.writes[0].customData?.['web application/x-univer-sheets-formula']).toBeUndefined();
+    });
+
     it('records cut selections as cut copy cache entries', async () => {
         const { injector, service } = createTestContext();
         selectCell(injector);
@@ -304,6 +361,73 @@ describe('SheetClipboardService', () => {
         expect(await service.paste(imageItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT)).toBe(true);
         expect(pastedTexts).toEqual([{ text: 'North\tSouth', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE }]);
         expect(pastedFiles).toEqual([{ name: 'clipboard-image.png', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT }]);
+    });
+
+    it('routes formula clipboard payload to structured paste before html fallback', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector, 5, 6);
+        const pasted: Array<{ pasteFrom: ITestDiscreteRange | undefined; formula: string | undefined }> = [];
+
+        service.addClipboardHook({
+            id: 'formula-payload-paste',
+            onPasteCells(pasteFrom: { range: ITestDiscreteRange } | null, _pasteTo: unknown, data: ObjectMatrix<ITestCell>) {
+                pasted.push({
+                    pasteFrom: pasteFrom?.range,
+                    formula: data.getValue(0, 0)?.f,
+                });
+                return { redos: [], undos: [] };
+            },
+        } as never);
+
+        const formulaItem = new MockClipboardItem({
+            'web application/x-univer-sheets-formula': JSON.stringify({
+                rowCount: 1,
+                columnCount: 1,
+                origin: {
+                    row: 1,
+                    column: 2,
+                },
+                formulas: [
+                    {
+                        row: 0,
+                        column: 0,
+                        f: '=A1+B1',
+                    },
+                ],
+            }),
+            'text/html': '<table><tbody><tr><td>html fallback</td></tr></tbody></table>',
+        });
+
+        expect(await service.paste(formulaItem as unknown as ClipboardItem)).toBe(true);
+        expect(pasted).toEqual([{
+            pasteFrom: {
+                rows: [1],
+                cols: [2],
+            },
+            formula: '=A1+B1',
+        }]);
+    });
+
+    it('falls back to html paste when formula clipboard payload is invalid', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+        const pastedHtml: string[] = [];
+
+        service.addClipboardHook({
+            id: 'html-fallback-paste',
+            onPasteCells() {
+                pastedHtml.push('html');
+                return { redos: [], undos: [] };
+            },
+        } as never);
+
+        const formulaItem = new MockClipboardItem({
+            'web application/x-univer-sheets-formula': '{invalid',
+            'text/html': '<table><tbody><tr><td>html fallback</td></tr></tbody></table>',
+        });
+
+        expect(await service.paste(formulaItem as unknown as ClipboardItem)).toBe(true);
+        expect(pastedHtml).toEqual(['html']);
     });
 
     it('returns false when a clipboard item has no usable sheet content', async () => {

@@ -64,7 +64,7 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
                 <EmbedRuntimeProviders injector={scopedInjector as Injector} mountContainer={context.runtimeScope.roots.popup} embedId={context.embedId}>
                     <SheetEmbedChildOverlay
                         canvasRoot={rootElement}
-                        showChrome={context.renderScope.mode === 'tab'}
+                        showChrome={shouldShowEmbeddedSheetChrome(context)}
                     />
                 </EmbedRuntimeProviders>
             );
@@ -84,6 +84,10 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
             });
         },
     };
+}
+
+export function shouldShowEmbeddedSheetChrome(context: Pick<IEmbedChildContainerContext, 'renderScope'>): boolean {
+    return context.renderScope.mode === 'tab' || Boolean(context.renderScope.fullscreen);
 }
 
 export function applyEmbeddedSheetChromeInset(canvasRoot: HTMLElement, chrome: { formulaBar: boolean; sheetBar: boolean }) {

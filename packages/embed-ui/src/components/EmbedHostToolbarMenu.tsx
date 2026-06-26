@@ -56,6 +56,7 @@ function EmbedFullscreenSurface() {
     const menuRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
+    const popupRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
     const [session, setSession] = useState<IEmbedFullscreenSession | null>(() => fullscreenService.getSession());
 
@@ -67,8 +68,9 @@ function EmbedFullscreenSurface() {
     useEffect(() => {
         const viewport = viewportRef.current;
         const menuSlot = menuContentRef.current;
+        const popupSlot = popupRef.current;
         const footerSlot = footerRef.current;
-        if (!session || !viewport || !menuSlot || !footerSlot) {
+        if (!session || !viewport || !menuSlot || !popupSlot || !footerSlot) {
             return undefined;
         }
 
@@ -96,6 +98,7 @@ function EmbedFullscreenSurface() {
         const renderScope = createFullscreenRenderScope(descriptor, session.layout, {
             viewport,
             menuSlot,
+            popupSlot,
             footerSlot,
         });
         const childContextBase: Omit<IEmbedChildContainerContext, 'runtimeScope'> = {
@@ -244,6 +247,15 @@ function EmbedFullscreenSurface() {
                 data-embed-fullscreen-footer-slot="true"
                 {...{ [EMBED_FOOTER_SLOT_ATTRIBUTE]: 'true' }}
             />
+            <div
+                ref={popupRef}
+                className="
+                  univer-pointer-events-none univer-fixed univer-inset-0 univer-z-20
+                  [&>*]:univer-pointer-events-auto
+                "
+                data-embed-fullscreen-popup-root="true"
+                {...{ [EMBED_POPUP_ROOT_ATTRIBUTE]: 'true' }}
+            />
         </div>,
         document.body
     );
@@ -279,10 +291,11 @@ export function createFullscreenRenderScope(
     roots: {
         viewport: HTMLElement;
         menuSlot: HTMLElement;
+        popupSlot?: HTMLElement;
         footerSlot: HTMLElement;
     }
 ): IEmbedRenderScope {
-    const { viewport, menuSlot } = roots;
+    const { viewport, menuSlot, popupSlot } = roots;
     return {
         hostUnitId: descriptor.hostUnitId,
         hostAnchorId: descriptor.hostAnchorId,
@@ -295,7 +308,7 @@ export function createFullscreenRenderScope(
         contentRoot: findEmbedRuntimeSlot(viewport, EMBED_CONTENT_ROOT_ATTRIBUTE) ?? viewport,
         canvasRoot: findEmbedRuntimeSlot(viewport, EMBED_CANVAS_ROOT_ATTRIBUTE) ?? viewport,
         overlayRoot: findEmbedRuntimeSlot(viewport, EMBED_OVERLAY_ROOT_ATTRIBUTE) ?? viewport,
-        popupRoot: findEmbedRuntimeSlot(viewport, EMBED_POPUP_ROOT_ATTRIBUTE) ?? viewport,
+        popupRoot: popupSlot ?? findEmbedRuntimeSlot(viewport, EMBED_POPUP_ROOT_ATTRIBUTE) ?? viewport,
         menuOutlet: { container: menuSlot },
         active$: of(true),
         fullscreen: true,
@@ -319,6 +332,7 @@ export function mountFullscreenWorkbenchMenus(params: {
 function mountFullscreenProductRibbon(params: {
     injector: Injector;
     descriptor: IEmbedDescriptor;
+    childContext: IEmbedChildContainerContext;
     menuContainer: HTMLElement;
 }): IDisposable | undefined {
     if (!params.injector.has(EmbedBlockRegistryService) || params.descriptor.childType == null) {
@@ -333,6 +347,7 @@ function mountFullscreenProductRibbon(params: {
     if (params.injector.has(EmbedProductMenuRegistryService)) {
         const productMenuDisposable = params.injector.get(EmbedProductMenuRegistryService).mountMenu({
             container: params.menuContainer,
+            portalContainer: params.childContext.runtimeScope.roots.popup,
             injector: params.injector,
             childType: params.descriptor.childType,
             childUnitId: params.descriptor.childUnitId,
@@ -347,6 +362,7 @@ function mountFullscreenProductRibbon(params: {
 
     return mountEmbedProductRibbonMenu({
         container: params.menuContainer,
+        portalContainer: params.childContext.runtimeScope.roots.popup,
         injector: params.injector,
         childType: params.descriptor.childType,
         childUnitId: params.descriptor.childUnitId,

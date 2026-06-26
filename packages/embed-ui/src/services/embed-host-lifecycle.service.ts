@@ -14,10 +14,29 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IMutationInfo, IUniverInstanceService } from '@univerjs/core';
+import type { ICreateUnitOptions, IMutationInfo } from '@univerjs/core';
 import type { IEmbedCreateContext, IEmbedDescriptor, IInsertEmbedBySnapshotCommandParams } from '@univerjs/embed';
-import { generateRandomId, ICommandService, Inject, IUndoRedoService, IUniverInstanceService as IUniverInstanceServiceToken, Optional, PluginService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
-import { createDefaultEmbedSourceMeta, EMBED_CHILD_CREATE_OPTIONS, EmbedCapabilityRegistryService, EmbedCreationService, EmbedModelService, SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation, toResourceRefUnitType } from '@univerjs/embed';
+import {
+    generateRandomId,
+    ICommandService,
+    Inject,
+    IUndoRedoService,
+    IUniverInstanceService,
+    Optional,
+    PluginService,
+    sequenceExecute,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    createDefaultEmbedSourceMeta,
+    EMBED_CHILD_CREATE_OPTIONS,
+    EmbedCapabilityRegistryService,
+    EmbedCreationService,
+    EmbedModelService,
+    SetEmbedDescriptorMutation,
+    SoftDeleteEmbedDescriptorMutation,
+    toResourceRefUnitType,
+} from '@univerjs/embed';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 
 export interface IEmbedHostCreateContext extends Omit<IEmbedCreateContext, 'hostAnchorId'> {
@@ -46,7 +65,7 @@ export class EmbedHostLifecycleService {
         private readonly _modelService: EmbedModelService,
         @Inject(EmbedCapabilityRegistryService)
         private readonly _capabilityRegistry: EmbedCapabilityRegistryService,
-        @IUniverInstanceServiceToken
+        @IUniverInstanceService
         private readonly _univerInstanceService: IUniverInstanceService,
         @Optional(PluginService)
         private readonly _pluginService: PluginService | undefined,

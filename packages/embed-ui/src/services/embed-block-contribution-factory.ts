@@ -17,7 +17,11 @@
 import type { Injector, UniverInstanceType } from '@univerjs/core';
 import type { IRibbonService } from '@univerjs/ui';
 import type { IEmbedBlockContribution } from '../types/embed-ui';
-import { DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY, DEFAULT_EMBED_FLOAT_LAYOUT_POLICY, DEFAULT_EMBED_TAB_LAYOUT_POLICY } from '@univerjs/embed';
+import {
+    DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY,
+    DEFAULT_EMBED_FLOAT_LAYOUT_POLICY,
+    DEFAULT_EMBED_TAB_LAYOUT_POLICY,
+} from '@univerjs/embed';
 import { of } from 'rxjs';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 import { createEmbedProductMenuInjector } from './embed-product-menu-mounting';

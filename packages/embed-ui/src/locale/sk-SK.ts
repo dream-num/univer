@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import enUS from './en-US';
+import type enUS from './en-US';
 
-const locale: typeof enUS = enUS;
+const locale: typeof enUS = {
+    'embed-ui': {
+        fullscreen: {
+            exit: 'Ukončiť',
+        },
+    },
+};
 
 export default locale;

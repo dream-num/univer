@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IDisposable, Injector, IUniverInstanceService } from '@univerjs/core';
-import type { IMenuManagerService } from '@univerjs/ui';
+import type { IDisposable, Injector } from '@univerjs/core';
 import type { IEmbedChildContainerContext, IEmbedChildRuntimeScope } from '../types/embed-ui';
-import { ICommandService as ICommandServiceIdentifier, IUniverInstanceService as IUniverInstanceServiceIdentifier, toDisposable } from '@univerjs/core';
-import { IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
-import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_FOOTER_SLOT_ATTRIBUTE, EMBED_MENU_SLOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE, findEmbedRuntimeSlot } from '../common/embed-runtime-slots';
+import { ICommandService, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
+import {
+    EMBED_CANVAS_ROOT_ATTRIBUTE,
+    EMBED_CONTENT_ROOT_ATTRIBUTE,
+    EMBED_FOOTER_SLOT_ATTRIBUTE,
+    EMBED_MENU_SLOT_ATTRIBUTE,
+    EMBED_OVERLAY_ROOT_ATTRIBUTE,
+    EMBED_POPUP_ROOT_ATTRIBUTE,
+    findEmbedRuntimeSlot,
+} from '../common/embed-runtime-slots';
 import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 
 export type EmbedChildRuntimeScopeCreateContext = Omit<IEmbedChildContainerContext, 'runtimeScope'>;
@@ -45,9 +52,9 @@ export function createEmbedChildRuntimeScope(
             type: context.childType,
         },
         injector: scopedInjector,
-        instanceService: getOptional<IUniverInstanceService>(scopedInjector, IUniverInstanceServiceIdentifier),
-        commandService: getOptional<ICommandService>(scopedInjector, ICommandServiceIdentifier),
-        menuManagerService: getOptional<IMenuManagerService>(scopedInjector, IMenuManagerServiceIdentifier),
+        instanceService: getOptional<IUniverInstanceService>(scopedInjector, IUniverInstanceService),
+        commandService: getOptional<ICommandService>(scopedInjector, ICommandService),
+        menuManagerService: getOptional<IMenuManagerService>(scopedInjector, IMenuManagerService),
         roots,
         activate: () => setActive(true),
         deactivate: () => setActive(false),
@@ -91,7 +98,7 @@ function resolveRuntimeRoots(context: EmbedChildRuntimeScopeCreateContext): IEmb
 }
 
 function createScopedChildInjectorIfPossible(context: EmbedChildRuntimeScopeCreateContext): Injector | undefined {
-    if (!context.injector.has(IUniverInstanceServiceIdentifier) || !context.injector.has(ICommandServiceIdentifier)) {
+    if (!context.injector.has(IUniverInstanceService) || !context.injector.has(ICommandService)) {
         return undefined;
     }
 

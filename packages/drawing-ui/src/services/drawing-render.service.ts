@@ -98,7 +98,10 @@ export class DrawingRenderService {
             adjustValues,
             hidden,
         } = imageParam;
-        const { docxHeaderFooterDrawing } = imageParam as IImageData & { docxHeaderFooterDrawing?: boolean };
+        const { docxHeaderFooterDrawing, layoutType } = imageParam as IImageData & {
+            docxHeaderFooterDrawing?: boolean;
+            layoutType?: PositionedObjectLayoutType;
+        };
 
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return;
@@ -166,7 +169,7 @@ export class DrawingRenderService {
             }
 
             const shouldWaitForInlineTransform =
-                docxHeaderFooterDrawing === true && imageParam.layoutType === PositionedObjectLayoutType.INLINE;
+                docxHeaderFooterDrawing === true && layoutType === PositionedObjectLayoutType.INLINE;
             if (hidden || shouldWaitForInlineTransform) {
                 imageConfig.visible = false;
             }

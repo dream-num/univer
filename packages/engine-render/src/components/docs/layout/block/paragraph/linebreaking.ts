@@ -25,6 +25,7 @@ import type {
 } from '@univerjs/core';
 import type {
     IDocumentSkeletonBullet,
+    IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonPage,
@@ -45,11 +46,11 @@ import {
     PositionedObjectLayoutType,
     Tools,
 } from '@univerjs/core';
-import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
+import { BreakType, GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { getLastNotFullColumnInfo } from '../../tools';
+import { getLastNotFullColumnInfo, getLastSection, isBlankColumn } from '../../tools';
 import { dealWithBullet } from './bullet';
 import { layoutParagraph } from './layout-ruler';
 
@@ -72,6 +73,25 @@ function _isMarkedDocxColumnBreak(viewModel: DocumentViewModel, absoluteIndex: n
 
 function _glyphCount(glyphs: IDocumentSkeletonGlyph[]): number {
     return glyphs.reduce((count, glyph) => count + glyph.count, 0);
+}
+
+function _isDocxColumnBreakVisuallyBlankColumn(column: IDocumentSkeletonColumn): boolean {
+    return column.lines.every((line) =>
+        line.divides.every((divide) =>
+            divide.glyphGroup.every((glyph) => {
+                const { glyphType, raw, streamType, width } = glyph;
+                const isParagraphMark =
+                    raw === DataStreamTreeTokenType.PARAGRAPH ||
+                    streamType === DataStreamTreeTokenType.PARAGRAPH;
+                const isColumnBreak =
+                    width === 0 &&
+                    (raw === DataStreamTreeTokenType.COLUMN_BREAK ||
+                        streamType === DataStreamTreeTokenType.COLUMN_BREAK);
+
+                return glyphType === GlyphType.TAB || glyphType === GlyphType.LIST || isParagraphMark || isColumnBreak;
+            })
+        )
+    );
 }
 
 function _hasOnlyCustomBlockGlyphs(glyphs: IDocumentSkeletonGlyph[]): boolean {
@@ -535,6 +555,28 @@ export function lineBreaking(
 
             if (columnInfo && !columnInfo.isLast) {
                 setColumnFullState(columnInfo.column, true);
+            } else if (
+                columnInfo &&
+                columnInfo.isLast &&
+                isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
+                (isBlankColumn(columnInfo.column) || _isDocxColumnBreakVisuallyBlankColumn(columnInfo.column))
+            ) {
+                // Word treats a DOCX column break at the start of the final column as redundant.
+            } else if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+                const lastColumn = getLastSection(lastPage)?.columns.at(-1);
+                if (lastColumn && (isBlankColumn(lastColumn) || _isDocxColumnBreakVisuallyBlankColumn(lastColumn))) {
+                    setColumnFullState(lastColumn, false);
+                } else {
+                    allPages.push(
+                        createSkeletonPage(
+                            ctx,
+                            sectionBreakConfig,
+                            skeletonResourceReference,
+                            _getNextPageNumber(lastPage),
+                            BreakType.COLUMN
+                        )
+                    );
+                }
             } else {
                 allPages.push(
                     createSkeletonPage(

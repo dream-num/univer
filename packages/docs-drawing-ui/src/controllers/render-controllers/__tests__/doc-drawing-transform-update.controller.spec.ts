@@ -205,7 +205,11 @@ describe('DocDrawingTransformUpdateController', () => {
             drawingId: 'inline-drawing',
             drawingOrigin: {
                 layoutType: PositionedObjectLayoutType.INLINE,
-                docTransform: defaultDocTransform,
+                behindDoc: BooleanNumber.FALSE,
+                docTransform: {
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 99 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 88 },
+                },
             },
         };
         const multiDrawingOnPage = {

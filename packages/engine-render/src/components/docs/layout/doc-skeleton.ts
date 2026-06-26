@@ -72,6 +72,42 @@ function removeDupPages(ctx: ILayoutContext) {
     });
 }
 
+function mergeContinuousDuplicatePages(pages: IDocumentSkeletonPage[]) {
+    for (let index = 1; index < pages.length;) {
+        const previousPage = pages[index - 1];
+        const page = pages[index];
+
+        if (previousPage.pageNumber !== page.pageNumber) {
+            index++;
+            continue;
+        }
+
+        const topOffset = previousPage.height;
+
+        for (const section of page.sections) {
+            section.top += topOffset;
+            section.parent = previousPage;
+            previousPage.sections.push(section);
+        }
+
+        page.skeDrawings?.forEach((drawing, drawingId) => {
+            drawing.aTop += topOffset;
+            previousPage.skeDrawings.set(drawingId, drawing);
+        });
+
+        page.skeTables?.forEach((table, tableId) => {
+            table.top += topOffset;
+            table.parent = previousPage;
+            previousPage.skeTables.set(tableId, table);
+        });
+
+        previousPage.height += page.height;
+        previousPage.width = Math.max(previousPage.width, page.width);
+        previousPage.ed = Math.max(previousPage.ed, page.ed);
+        pages.splice(index, 1);
+    }
+}
+
 interface IDistance {
     coordInPage: boolean;
     distance: number;
@@ -1320,7 +1356,10 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             if (isContinuous) {
-                pages.splice(0, 1);
+                const continuousFirstPage = pages.shift();
+                if (continuousFirstPage && allSkeletonPages.length > 0) {
+                    allSkeletonPages[allSkeletonPages.length - 1] = continuousFirstPage;
+                }
             }
 
             allSkeletonPages.push(...pages);
@@ -1341,6 +1380,7 @@ export class DocumentSkeleton extends Skeleton {
             this._iteratorCount = 0;
             removeDupPages(ctx);
             updateBlockIndex(skeleton.pages);
+            mergeContinuousDuplicatePages(skeleton.pages);
             // Calculate inline drawing position and update.
             updateInlineDrawingCoordsAndBorder(ctx, skeleton.pages);
             for (const hSkeMap of skeleton.skeHeaders.values()) {

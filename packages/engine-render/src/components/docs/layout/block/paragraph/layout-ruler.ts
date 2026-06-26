@@ -68,6 +68,7 @@ import {
     getNumberUnitValue,
     getPositionHorizon,
     getPositionVertical,
+    isBlankColumn,
     isColumnFull,
     lineIterator,
 } from '../../tools';
@@ -250,6 +251,16 @@ function _divideOperator(
         const preOffsetLeft = lastWidth + lastLeft;
         const { hyphenationZone } = sectionBreakConfig;
         if (isBeyondDivideWidth(preOffsetLeft + width, divide.width)) {
+            if (
+                divide?.glyphGroup.length === 0 &&
+                glyphGroup.length > 0 &&
+                glyphGroup[0].streamType === DataStreamTreeTokenType.CUSTOM_BLOCK
+            ) {
+                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+                updateDivideInfo(divide, { breakType: breakPointType });
+                return;
+            }
+
             if (shouldKeepOverflowingTextOnLine(sectionBreakConfig)) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
                 updateDivideInfo(divide, { breakType: breakPointType });
@@ -286,20 +297,8 @@ function _divideOperator(
                 glyphGroup[0].streamType === DataStreamTreeTokenType.CUSTOM_BLOCK &&
                 glyphGroup[0].width > divide.width
             ) {
-                updateDivideInfo(divide, {
-                    isFull: true,
-                });
-                _divideOperator(
-                    ctx,
-                    glyphGroup,
-                    pages,
-                    sectionBreakConfig,
-                    paragraphConfig,
-                    isParagraphFirstShapedText,
-
-                    breakPointType,
-                    defaultSpanLineHeight
-                );
+                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+                updateDivideInfo(divide, { breakType: breakPointType });
             } else if (divide?.glyphGroup.length === 0) {
                 const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
 
@@ -496,6 +495,10 @@ function _divideOperator(
                         paragraphAnchorLeft
                     );
                     __updateDrawingPosition(currentLine.parent, drawings);
+                    addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+                    updateDivideInfo(divide, { breakType: breakPointType });
+                    glyphGroup.length = 0;
+                    return;
                 }
             }
 
@@ -519,6 +522,19 @@ function _lineOperator(
 ) {
     let lastPage = getLastPage(pages);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
+    if (!columnInfo || !columnInfo.column) {
+        const lastSection = getLastSection(lastPage);
+        const lastColumnIndex = lastSection.columns.length - 1;
+        const lastColumn = lastSection.columns[lastColumnIndex];
+        if (lastColumn && isBlankColumn(lastColumn)) {
+            setColumnFullState(lastColumn, false);
+            columnInfo = {
+                column: lastColumn,
+                index: lastColumnIndex,
+                isLast: true,
+            };
+        }
+    }
     if (!columnInfo || !columnInfo.column) {
         // If the column does not exist, use a fallback strategy and add a new page.
         _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, true, breakPointType);
@@ -584,6 +600,20 @@ function _lineOperator(
     );
 
     const hasInlineCustomBlock = glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0);
+    const positionedCustomBlockOnly = glyphGroup.length > 0 &&
+        paragraphNonInlineSkeDrawings != null &&
+        paragraphNonInlineSkeDrawings.size > 0 &&
+        glyphGroup.every((glyph) => {
+            if (!glyph) {
+                return false;
+            }
+
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                return [...paragraphNonInlineSkeDrawings.values()].some((drawing) => drawing.drawingId === glyph.drawingId);
+            }
+
+            return glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.raw === DataStreamTreeTokenType.PARAGRAPH;
+        });
     const glyphGroupCustomBlockIds = new Set(glyphGroup
         .filter((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.drawingId != null)
         .map((glyph) => glyph.drawingId!));
@@ -599,6 +629,13 @@ function _lineOperator(
         !hasInlineCustomBlock
     );
 
+    if (positionedCustomBlockOnly) {
+        paddingTop = 0;
+        paddingBottom = 0;
+        contentHeight = 0.01;
+        lineSpacingApply = 0.01;
+    }
+
     let { marginTop, spaceBelowApply } = __getParagraphSpace(
         ctx,
         lineSpacingApply,
@@ -607,6 +644,10 @@ function _lineOperator(
         isParagraphFirstShapedText,
         preLine
     );
+
+    if (positionedCustomBlockOnly) {
+        spaceBelowApply = 0;
+    }
 
     if (isZeroWidthNonFlowFloatingAnchorLine) {
         paddingTop = 0;
@@ -674,13 +715,15 @@ function _lineOperator(
         needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
-    const newLineTop = calculateLineTopByDrawings(
-        lineHeight,
-        lineTop,
-        lastPage,
-        headerPage,
-        footerPage
-    ); // WRAP_TOP_AND_BOTTOM drawing and WRAP NONE table will change the starting top of the line
+    const newLineTop = positionedCustomBlockOnly
+        ? lineTop
+        : calculateLineTopByDrawings(
+            lineHeight,
+            lineTop,
+            lastPage,
+            headerPage,
+            footerPage
+        ); // WRAP_TOP_AND_BOTTOM drawing and WRAP NONE table will change the starting top of the line
 
     const lineOverflowsSection = lineHeight + newLineTop - section.height > LINE_LAYOUT_OVERFLOW_TOLERANCE;
 

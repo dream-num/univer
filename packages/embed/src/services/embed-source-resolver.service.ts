@@ -16,11 +16,10 @@
 
 import type { ICreateUnitOptions, IUniverInstanceService } from '@univerjs/core';
 import type { EmbedSource, IEmbedResolvedSource } from '../types/embed';
-import { generateRandomId, IUniverInstanceService as IUniverInstanceServiceToken, Optional, PluginService, UniverInstanceType } from '@univerjs/core';
-import { normalizeResourceRef } from '../common/resource-ref';
-import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
+import { generateRandomId, IUniverInstanceService as IUniverInstanceServiceToken, Inject, Optional, PluginService, UniverInstanceType } from '@univerjs/core';
+import { toResourceRefUnitType } from '../common/unit-type';
+import { EmbedReferencedUnitManagerService } from './embed-referenced-unit-manager.service';
 import { EmbedGuestContributionRegistryService } from './embed-guest-contribution-registry.service';
-import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
 
 export const EMBED_CHILD_CREATE_OPTIONS: ICreateUnitOptions = {
     makeCurrent: false,
@@ -28,27 +27,34 @@ export const EMBED_CHILD_CREATE_OPTIONS: ICreateUnitOptions = {
     embeddedRender: true,
 };
 
+export interface IEmbedSourceResolveContext {
+    hostUnitId?: string;
+    embedId?: string;
+    createOptions?: ICreateUnitOptions;
+}
+
 export class EmbedSourceResolverService {
     constructor(
         @IUniverInstanceServiceToken private readonly _univerInstanceService: IUniverInstanceService,
         @Optional(EmbedGuestContributionRegistryService) private readonly _guestContributionRegistry?: EmbedGuestContributionRegistryService,
-        @Optional(EmbedResourceRefProviderRegistryService) private readonly _resourceRefProviderRegistry?: EmbedResourceRefProviderRegistryService,
+        @Inject(EmbedReferencedUnitManagerService) private readonly _referencedUnitManager?: EmbedReferencedUnitManagerService,
         @Optional(PluginService) private readonly _pluginService?: PluginService
     ) {
         // noop
     }
 
-    async resolve(source: EmbedSource): Promise<IEmbedResolvedSource> {
+    async resolve(source: EmbedSource, context: IEmbedSourceResolveContext = {}): Promise<IEmbedResolvedSource> {
         if (source.kind === 'ref') {
-            return this._resolveResourceRef(source);
+            return this._resolveResourceRef(source, context);
         }
 
+        const createOptions = context.createOptions ?? EMBED_CHILD_CREATE_OPTIONS;
         const creationConfig = this._normalizeEmptyCreationConfig(source.creationConfig);
         const guestContribution = this._getGuestContribution(source.unitType);
-        const created = guestContribution?.createEmptyUnit?.(creationConfig, EMBED_CHILD_CREATE_OPTIONS);
+        const created = guestContribution?.createEmptyUnit?.(creationConfig, createOptions);
         const child = created
             ? null
-            : this._univerInstanceService.createUnit(source.unitType, creationConfig, EMBED_CHILD_CREATE_OPTIONS);
+            : this._univerInstanceService.createUnit(source.unitType, creationConfig, createOptions);
         const childUnitId = created?.unitId ?? child!.getUnitId();
         const childType = created?.unitType ?? source.unitType;
         if (childType !== source.unitType) {
@@ -81,50 +87,24 @@ export class EmbedSourceResolverService {
         return guestContribution;
     }
 
-    private async _resolveResourceRef(source: Extract<EmbedSource, { kind: 'ref' }>): Promise<IEmbedResolvedSource> {
-        const ref = normalizeResourceRef(source.ref);
-        const expectedType = fromResourceRefUnitType(ref.unit.type);
-        if (ref.file.kind !== 'self') {
-            const provider = this._resourceRefProviderRegistry?.get(ref.file.kind);
-            if (!provider) {
-                throw new Error('PROVIDER_UNSUPPORTED');
-            }
-
-            const resolved = await provider.resolve(ref);
-            if (resolved.unitType !== expectedType) {
-                throw new Error('UNIT_TYPE_MISMATCH');
-            }
-
-            return {
-                childUnitId: resolved.unitId,
-                childType: resolved.unitType,
-                source: {
-                    kind: 'ref',
-                    ref: normalizeResourceRef(resolved.ref ?? ref),
-                },
-            };
+    private async _resolveResourceRef(source: Extract<EmbedSource, { kind: 'ref' }>, context: IEmbedSourceResolveContext): Promise<IEmbedResolvedSource> {
+        if (!this._referencedUnitManager) {
+            throw new Error('REFERENCED_UNIT_MANAGER_UNAVAILABLE');
         }
 
-        const actualType = this._univerInstanceService.getUnitType(ref.unit.selector);
-        if (actualType === UniverInstanceType.UNRECOGNIZED) {
-            throw new Error('UNIT_NOT_FOUND');
-        }
-
-        if (actualType !== expectedType) {
-            throw new Error('UNIT_TYPE_MISMATCH');
-        }
-
-        const unit = this._univerInstanceService.getUnit(ref.unit.selector, expectedType);
-        if (!unit) {
-            throw new Error('UNIT_NOT_FOUND');
-        }
+        const resolved = await this._referencedUnitManager.ensure({
+            ref: source.ref,
+            hostUnitId: context.hostUnitId,
+            embedId: context.embedId,
+            createOptions: context.createOptions ?? EMBED_CHILD_CREATE_OPTIONS,
+        });
 
         return {
-            childUnitId: ref.unit.selector,
-            childType: expectedType,
+            childUnitId: resolved.unitId,
+            childType: resolved.unitType,
             source: {
                 kind: 'ref',
-                ref,
+                ref: resolved.ref,
             },
         };
     }

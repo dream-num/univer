@@ -159,7 +159,7 @@ export class EmbedModelService {
         delete persistableDescriptor.hostContext;
 
         const ref = normalizeResourceRef(descriptor.source.ref);
-        if (descriptor.childUnitId && descriptor.childUnitId !== ref.unit.selector) {
+        if (ref.file.kind === 'self' && descriptor.childUnitId && descriptor.childUnitId !== ref.unit.selector) {
             throw new Error('EMBED_DESCRIPTOR_CHILD_REF_MISMATCH');
         }
 
@@ -175,7 +175,7 @@ export class EmbedModelService {
                 kind: 'ref',
                 ref,
             },
-            childUnitId: descriptor.childUnitId ?? ref.unit.selector,
+            childUnitId: descriptor.childUnitId ?? (ref.file.kind === 'self' ? ref.unit.selector : undefined),
             childType: descriptor.childType ?? refUnitType,
             lifecycle: descriptor.lifecycle ?? 'active',
         };

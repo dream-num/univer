@@ -14,36 +14,96 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
-import type { IResourceRef, ResourceRefFile } from '../types/resource-ref';
+import type { ICreateUnitOptions, IDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IResourceRef, ResourceRefFile, ResourceRefUnitType } from '../types/resource-ref';
+import { toDisposable } from '@univerjs/core';
 
-export interface IEmbedResourceRefResolveResult {
+export type EmbedResourceRefMaterializationProfile = 'embed-child';
+
+export interface IEmbedResourceRefEnsureInput {
+    ref: IResourceRef;
+    hostUnitId?: string;
+    embedId?: string;
+    expectedType: UniverInstanceType;
+    profile: EmbedResourceRefMaterializationProfile;
+    createOptions: ICreateUnitOptions;
+}
+
+export interface IEmbedResourceRefEnsureResult {
     unitId: string;
     unitType: UniverInstanceType;
-    ref?: IResourceRef;
 }
 
 export interface IEmbedResourceRefProvider {
-    fileKind: ResourceRefFile['kind'];
-    resolve: (ref: IResourceRef) => IEmbedResourceRefResolveResult | Promise<IEmbedResourceRefResolveResult>;
+    ensure: (input: IEmbedResourceRefEnsureInput) => IEmbedResourceRefEnsureResult | Promise<IEmbedResourceRefEnsureResult>;
+}
+
+export interface IEmbedResourceRefProviderMatch {
+    fileKinds?: readonly ResourceRefFile['kind'][];
+    uriSchemes?: readonly string[];
+    unitTypes?: readonly ResourceRefUnitType[];
+}
+
+export interface IEmbedResourceRefProviderRegistration {
+    registrationId: string;
+    match: IEmbedResourceRefProviderMatch;
+    provider: IEmbedResourceRefProvider;
 }
 
 export class EmbedResourceRefProviderRegistryService {
-    private readonly _providers = new Map<ResourceRefFile['kind'], IEmbedResourceRefProvider>();
+    private readonly _registrations: IEmbedResourceRefProviderRegistration[] = [];
 
-    register(provider: IEmbedResourceRefProvider): void {
-        if (this._providers.has(provider.fileKind)) {
-            throw new Error(`Embed IResourceRef provider already registered: ${provider.fileKind}`);
+    register(registration: IEmbedResourceRefProviderRegistration): IDisposable {
+        if (this._registrations.some((item) => item.registrationId === registration.registrationId)) {
+            throw new Error(`Embed IResourceRef provider already registered: ${registration.registrationId}`);
         }
 
-        this._providers.set(provider.fileKind, provider);
+        this._registrations.push(registration);
+        return toDisposable(() => {
+            const index = this._registrations.indexOf(registration);
+            if (index >= 0) {
+                this._registrations.splice(index, 1);
+            }
+        });
     }
 
-    get(fileKind: ResourceRefFile['kind']): IEmbedResourceRefProvider | undefined {
-        return this._providers.get(fileKind);
+    get(ref: IResourceRef): IEmbedResourceRefProviderRegistration | undefined {
+        const matches = this._registrations.filter((registration) => this._matches(registration.match, ref));
+        if (matches.length > 1) {
+            throw new Error('PROVIDER_CONFLICT');
+        }
+
+        return matches[0];
     }
 
-    list(): IEmbedResourceRefProvider[] {
-        return [...this._providers.values()];
+    list(): IEmbedResourceRefProviderRegistration[] {
+        return [...this._registrations];
     }
+
+    private _matches(match: IEmbedResourceRefProviderMatch, ref: IResourceRef): boolean {
+        if (match.fileKinds && !match.fileKinds.includes(ref.file.kind)) {
+            return false;
+        }
+
+        if (match.uriSchemes) {
+            if (ref.file.kind !== 'uri') {
+                return false;
+            }
+
+            const scheme = getUriScheme(ref.file.uri);
+            if (!scheme || !match.uriSchemes.some((item) => item.toLowerCase() === scheme)) {
+                return false;
+            }
+        }
+
+        if (match.unitTypes && !match.unitTypes.includes(ref.unit.type)) {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+function getUriScheme(uri: string): string | undefined {
+    return /^([a-z][a-z0-9+.-]*):/i.exec(uri)?.[1]?.toLowerCase();
 }

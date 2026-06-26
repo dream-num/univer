@@ -23,6 +23,16 @@ import pkg from '../package.json';
 const SHEETS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
     {
         hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_SHEET,
+        entry: 'sheets-floating-object',
+        mode: 'float',
+        renderHost: 'sheets-drawing-dom',
+        layout: 'scroll-contained',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
         childType: UniverInstanceType.UNIVER_DOC,
         entry: 'sheets-floating-object',
         mode: 'float',

@@ -70,10 +70,6 @@ export class EmbedCapabilityRegistryService {
     private readonly _capabilities = new Map<string, IEmbedCapability>();
 
     register(capability: IEmbedCapability): void {
-        if (capability.hostType === capability.childType) {
-            throw new Error('Cannot register same product embed capability');
-        }
-
         const key = this._key(capability.hostType, capability.childType, capability.entry);
         if (this._capabilities.has(key)) {
             throw new Error(`Embed capability already registered: ${key}`);

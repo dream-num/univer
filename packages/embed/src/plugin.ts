@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IEmbedResourceRefProvider } from './services/embed-resource-ref-provider-registry.service';
+import type { IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
 import type { IEmbedCapability, IEmbedGuestContribution } from './types/embed';
 import { ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
@@ -30,6 +30,7 @@ import { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 import { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
 import { EmbedModelService } from './services/embed-model.service';
 import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
+import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 import { EmbedSourceResolverService } from './services/embed-source-resolver.service';
 
@@ -37,7 +38,7 @@ export interface IUniverEmbedPluginConfig {
     useDefaultCapabilities?: boolean;
     capabilities?: readonly IEmbedCapability[];
     guestContributions?: readonly IEmbedGuestContribution[];
-    resourceRefProviders?: readonly IEmbedResourceRefProvider[];
+    resourceRefProviderRegistrations?: readonly IEmbedResourceRefProviderRegistration[];
 }
 
 export class UniverEmbedPlugin extends Plugin {
@@ -62,6 +63,7 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedFocusOwnerService],
             [EmbedGuestContributionRegistryService],
             [EmbedResourceRefProviderRegistryService],
+            [EmbedReferencedUnitManagerService],
             [EmbedSourceResolverService],
             [EmbedNestedGuardService],
             [EmbedCreationService],
@@ -79,13 +81,14 @@ export class UniverEmbedPlugin extends Plugin {
         (this._config.guestContributions ?? []).forEach((contribution) => registerEmbedGuestContribution(this._injector, contribution));
 
         const resourceRefProviderRegistry = this._injector.get(EmbedResourceRefProviderRegistryService);
-        (this._config.resourceRefProviders ?? []).forEach((provider) => resourceRefProviderRegistry.register(provider));
+        (this._config.resourceRefProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.register(registration)));
 
         touchDependencies(this._injector, [
             [EmbedModelService],
             [EmbedChildRetentionService],
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
+            [EmbedReferencedUnitManagerService],
             [EmbedSourceResolverService],
             [EmbedCreationService],
             [EmbedResourceController],

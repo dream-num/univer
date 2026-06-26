@@ -186,7 +186,7 @@ export interface ISheetClipboardService {
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>; // get content from a ClipboardItem and paste it.
     pasteByCopyId(copyId: string, pasteType?: string): Promise<boolean>; // paste content by internal copyId.
-    legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean>; // paste a HTML string or plain text directly.
+    legacyPaste(html?: string, text?: string, files?: File[], formulaClipboardPayload?: string): Promise<boolean>; // paste a HTML string or plain text directly.
 
     rePasteWithPasteType(type: IPasteHookKeyType): boolean;
     disposePasteOptionsCache(): void;
@@ -413,13 +413,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._pasteInternal(copyId, pasteType);
     }
 
-    async legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
+    async legacyPaste(html?: string, text?: string, files?: File[], formulaClipboardPayload?: string): Promise<boolean> {
         const isFromExcel = htmlIsFromExcel(html ?? '');
 
         if (files && !isFromExcel) {
             return this._pasteFiles(files, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
         } else if (html) {
-            return this._pasteHTML(html, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+            return this._pasteHTML(html, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, formulaClipboardPayload);
         } else if (text) {
             // Converts text with tabs and newlines into an HTML table
             if (/[\n\t]/.test(text)) {

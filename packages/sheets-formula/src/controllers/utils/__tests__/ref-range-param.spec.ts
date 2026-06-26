@@ -35,7 +35,7 @@ import {
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../../__tests__/create-test-bed';
 import { FormulaReferenceMoveType } from '../ref-range-formula';
 import { getReferenceMoveParams } from '../ref-range-param';
 

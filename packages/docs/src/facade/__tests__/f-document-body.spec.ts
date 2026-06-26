@@ -18,7 +18,7 @@ import type { Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
 import { DocumentBlockType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createSimpleDocument, createTestBed } from './create-test-bed';
+import { createSimpleDocument, createTestBed } from '../../__tests__/create-test-bed';
 
 describe('FDocumentBody', () => {
     let univer: Univer;

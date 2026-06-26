@@ -71,7 +71,6 @@ export class DocQuickInsertTriggerController extends Disposable {
         this.disposeWithMe(
             // eslint-disable-next-line complexity, max-lines-per-function
             this._commandService.onCommandExecuted((commandInfo) => {
-                const { _docQuickInsertPopupService, _textSelectionManagerService, _commandService } = this;
                 const documentDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                 if (documentDataModel?.getDisabled()) {
                     return;
@@ -79,20 +78,20 @@ export class DocQuickInsertTriggerController extends Disposable {
 
                 if (commandInfo.id === InsertTextCommand.id) {
                     const params = commandInfo.params as IInsertTextCommandParams;
-                    if (_docQuickInsertPopupService.editPopup) {
-                        _docQuickInsertPopupService.setInputOffset({
-                            start: _docQuickInsertPopupService.inputOffset.start,
+                    if (this._docQuickInsertPopupService.editPopup) {
+                        this._docQuickInsertPopupService.setInputOffset({
+                            start: this._docQuickInsertPopupService.inputOffset.start,
                             end: params.range.endOffset + 1,
                         });
                         return;
                     }
 
-                    const activeRange = _textSelectionManagerService.getActiveTextRange();
+                    const activeRange = this._textSelectionManagerService.getActiveTextRange();
                     if (!activeRange) {
                         return;
                     }
 
-                    const popup = _docQuickInsertPopupService.resolvePopup(params.body.dataStream);
+                    const popup = this._docQuickInsertPopupService.resolvePopup(params.body.dataStream);
                     if (!popup) {
                         return;
                     }
@@ -102,10 +101,10 @@ export class DocQuickInsertTriggerController extends Disposable {
                         return;
                     }
 
-                    _docQuickInsertPopupService.setInputOffset({ start: activeRange.startOffset - 1, end: activeRange.startOffset });
+                    this._docQuickInsertPopupService.setInputOffset({ start: activeRange.startOffset - 1, end: activeRange.startOffset });
 
                     setTimeout(() => {
-                        _commandService.executeCommand(ShowQuickInsertPopupOperation.id, {
+                        this._commandService.executeCommand(ShowQuickInsertPopupOperation.id, {
                             index: activeRange.startOffset - 1,
                             unitId: params.unitId,
                             popup,
@@ -115,12 +114,12 @@ export class DocQuickInsertTriggerController extends Disposable {
 
                 if (commandInfo.id === IMEInputCommand.id) {
                     const params = commandInfo.params as IIMEInputCommandParams;
-                    if (!_docQuickInsertPopupService.isComposing && params.isCompositionStart) {
-                        _docQuickInsertPopupService.setIsComposing(true);
+                    if (!this._docQuickInsertPopupService.isComposing && params.isCompositionStart) {
+                        this._docQuickInsertPopupService.setIsComposing(true);
                     }
 
-                    if (_docQuickInsertPopupService.isComposing && params.isCompositionEnd) {
-                        _docQuickInsertPopupService.setIsComposing(false);
+                    if (this._docQuickInsertPopupService.isComposing && params.isCompositionEnd) {
+                        this._docQuickInsertPopupService.setIsComposing(false);
                     }
                 }
 
@@ -129,16 +128,16 @@ export class DocQuickInsertTriggerController extends Disposable {
                     if (params.isCompositionEnd) {
                         const endOffset = params.textRanges?.[0]?.endOffset;
                         if (endOffset) {
-                            _docQuickInsertPopupService.setInputOffset({ start: _docQuickInsertPopupService.inputOffset.start, end: endOffset });
+                            this._docQuickInsertPopupService.setInputOffset({ start: this._docQuickInsertPopupService.inputOffset.start, end: endOffset });
                         }
                     }
                 }
 
                 if (commandInfo.id === DeleteTextCommand.id) {
                     const params = commandInfo.params as IDeleteTextCommandParams;
-                    if (_docQuickInsertPopupService.editPopup && params.direction === DeleteDirection.LEFT) {
+                    if (this._docQuickInsertPopupService.editPopup && params.direction === DeleteDirection.LEFT) {
                         const len = params.len ?? 0;
-                        _docQuickInsertPopupService.setInputOffset({ start: _docQuickInsertPopupService.inputOffset.start, end: params.range.endOffset - len });
+                        this._docQuickInsertPopupService.setInputOffset({ start: this._docQuickInsertPopupService.inputOffset.start, end: params.range.endOffset - len });
                     }
                 }
 
@@ -146,18 +145,18 @@ export class DocQuickInsertTriggerController extends Disposable {
                     const params = commandInfo.params as IMoveCursorOperationParams;
 
                     if (params.direction === Direction.LEFT || params.direction === Direction.RIGHT) {
-                        _docQuickInsertPopupService.editPopup && _commandService.executeCommand(CloseQuickInsertPopupOperation.id);
+                        this._docQuickInsertPopupService.editPopup && this._commandService.executeCommand(CloseQuickInsertPopupOperation.id);
                     }
                 }
 
                 if (commandInfo.id === DeleteLeftCommand.id) {
-                    const activeRange = _textSelectionManagerService.getActiveTextRange();
-                    if (!_docQuickInsertPopupService.editPopup || !activeRange) {
+                    const activeRange = this._textSelectionManagerService.getActiveTextRange();
+                    if (!this._docQuickInsertPopupService.editPopup || !activeRange) {
                         return;
                     }
 
-                    if (activeRange.endOffset <= _docQuickInsertPopupService.editPopup.anchor) {
-                        _commandService.executeCommand(CloseQuickInsertPopupOperation.id);
+                    if (activeRange.endOffset <= this._docQuickInsertPopupService.editPopup.anchor) {
+                        this._commandService.executeCommand(CloseQuickInsertPopupOperation.id);
                     }
                 }
             })

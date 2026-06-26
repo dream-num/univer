@@ -18,14 +18,12 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DragManagerService } from '../services/drag-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export class DragRenderController extends Disposable implements IRenderModule, IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(DragManagerService) private _dragManagerService: DragManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {

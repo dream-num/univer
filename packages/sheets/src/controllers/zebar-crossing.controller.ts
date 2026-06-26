@@ -17,7 +17,7 @@
 import type { IInsertRowMutationParams, IRemoveRowsMutationParams } from '../basics';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../commands/mutations/set-row-visible.mutation';
 import type { ISetWorksheetRowHeightMutationParams } from '../commands/mutations/set-worksheet-row-height.mutation';
-import { Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
@@ -33,8 +33,7 @@ export class ZebraCrossingCacheController extends Disposable {
 
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(SheetRangeThemeModel) private readonly _sheetRangeThemeModel: SheetRangeThemeModel,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(SheetRangeThemeModel) private readonly _sheetRangeThemeModel: SheetRangeThemeModel
     ) {
         super();
         this._init();

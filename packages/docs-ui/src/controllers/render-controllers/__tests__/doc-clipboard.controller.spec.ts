@@ -47,7 +47,6 @@ function createController(options?: { focusingDoc?: boolean; editorActivated?: b
     const legacyPaste = vi.fn();
     const controller = new DocClipboardController(
         { unitId: 'doc-1' } as never,
-        {} as never,
         { legacyPaste } as never,
         { onPaste$ } as never,
         {

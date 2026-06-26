@@ -39,8 +39,8 @@ import {
     UpdateTextCommand,
 } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { DeleteLeftCommand, DeleteRightCommand, isDeleteOffsetInsideBlockRange } from '../doc-delete.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
     return {

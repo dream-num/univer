@@ -33,7 +33,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
-import { clipboardTestBed } from './clipboard-test-bed';
+import { clipboardTestBed } from './create-clipboard-test-bed';
 import { MockClipboard } from './mock-clipboard';
 
 const EXPECTED_EXTERNAL_PASTE_STYLE = {

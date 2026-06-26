@@ -16,7 +16,7 @@
 
 import { DeleteDirection, ICommandService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createTestBed } from '../../../facade/__tests__/create-test-bed';
+import { createTestBed } from '../../../__tests__/create-test-bed';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from '../core-editing.command';
 
 describe('core editing commands', () => {

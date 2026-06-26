@@ -27,7 +27,7 @@ import {
 } from '@univerjs/network';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MockHTTPImplementation } from '../../services/http/__tests__/http-testing-utils';
+import { MockHTTPImplementation } from '../../__tests__/create-http-test-bed';
 import '@univerjs/network/facade';
 
 class FakeWebSocket {

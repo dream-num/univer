@@ -18,7 +18,7 @@ import type { Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
 import { DocumentBlockRangeType, DocumentBlockType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createBlockRangeDocument, createTestBed } from './create-test-bed';
+import { createBlockRangeDocument, createTestBed } from '../../__tests__/create-test-bed';
 
 describe('FDocumentBlockRange', () => {
     let univer: Univer | null = null;

@@ -18,7 +18,9 @@ import { NullValueObject } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { WorksheetViewPermission } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
-import { SheetPermissionInterceptorFormulaRenderController } from '../sheet-permission-interceptor-formula-render.controller';
+import {
+    SheetPermissionInterceptorFormulaRenderController,
+} from '../sheet-permission-interceptor-formula-render.controller';
 
 function createFormulaValue(values: unknown[][], row = 3, col = 4) {
     return {
@@ -49,7 +51,6 @@ function createController(options?: { sheetViewable?: boolean; protectedCell?: {
         },
     };
     const controller = new SheetPermissionInterceptorFormulaRenderController(
-        {} as any,
         univerInstanceService as any,
         {
             getPermissionPoint: vi.fn((id: string) => ({

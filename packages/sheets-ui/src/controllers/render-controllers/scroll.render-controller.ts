@@ -15,11 +15,25 @@
  */
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
-import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type {
+    IRenderContext,
+    IRenderModule,
+    IScrollObserverParam,
+    IWheelEvent,
+    Viewport,
+} from '@univerjs/engine-render';
+import type {
+    IScrollToCellOperationParams,
+    ISetSelectionsOperationParams,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
+import type {
+    IScrollState,
+    IScrollStateSearchParam,
+    IViewportScrollState,
+} from '../../services/scroll-manager.service';
 import {
     Direction,
     Disposable,
@@ -32,7 +46,7 @@ import {
     toDisposable,
     Tools,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand } from '../../commands/commands/set-selection.command';
@@ -52,7 +66,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
     ) {
         super();

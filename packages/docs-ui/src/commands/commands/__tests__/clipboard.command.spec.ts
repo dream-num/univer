@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDisposable, IDocumentData, Injector, IStyleBase, Univer } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommand,
+    IDisposable,
+    IDocumentData,
+    Injector,
+    IStyleBase,
+    Univer,
+} from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocClipboardHook } from '../../../services/clipboard/clipboard.service';
 import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
@@ -35,6 +43,7 @@ import {
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { IDocClipboardService } from '../../../services/clipboard/clipboard.service';
 import {
     DocCopyCommand,
@@ -47,7 +56,6 @@ import {
 } from '../clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from '../clipboard.inner.command';
 import { genEmptyTable, genTableSource } from '../table/table';
-import { createCommandTestBed } from './create-command-test-bed';
 
 class TestDocClipboardService {
     readonly copies: Array<{ sliceType?: SliceBodyType; ranges?: ITextRangeWithStyle[] }> = [];

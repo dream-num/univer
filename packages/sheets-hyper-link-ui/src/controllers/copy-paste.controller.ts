@@ -20,9 +20,14 @@ import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs
 import { Disposable, generateRandomId, Inject, Injector, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { rangeToDiscreteRange } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import {
+    COPY_TYPE,
+    getRepeatRange,
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME_PASTE,
+    virtualizeDiscreteRanges,
+} from '@univerjs/sheets-ui';
 import { isLegalLink } from '../common/util';
-import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 
 export class SheetsHyperLinkCopyPasteController extends Disposable {
@@ -50,8 +55,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
         @Inject(HyperLinkModel) private _hyperLinkModel: HyperLinkModel,
-        @Inject(Injector) private _injector: Injector,
-        @Inject(SheetsHyperLinkResolverService) private _resolverService: SheetsHyperLinkResolverService
+        @Inject(Injector) private _injector: Injector
     ) {
         super();
         this._initCopyPaste();

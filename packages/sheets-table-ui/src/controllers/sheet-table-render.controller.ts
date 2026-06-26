@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject, Injector, RxDisposable } from '@univerjs/core';
+import { Inject, RxDisposable } from '@univerjs/core';
 import { TableManager } from '@univerjs/sheets-table';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { merge } from 'rxjs';
@@ -28,7 +28,6 @@ import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 export class SheetsTableRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController

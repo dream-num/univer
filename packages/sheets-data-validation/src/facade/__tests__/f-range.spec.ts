@@ -39,7 +39,7 @@ import {
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createFacadeTestBed } from './create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import '@univerjs/sheets-formula/facade';
 
 describe('Test FRange', () => {

@@ -29,7 +29,6 @@ import {
     ICommandService,
     IContextService,
     Inject,
-    IUndoRedoService,
     IUniverInstanceService,
     RxDisposable,
 } from '@univerjs/core';
@@ -56,7 +55,6 @@ export class FormulaEditorController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
-        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService
     ) {

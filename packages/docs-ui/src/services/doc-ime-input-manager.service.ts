@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
+import type { JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { JSONX, RxDisposable } from '@univerjs/core';
 
 interface ICacheParams {
@@ -34,7 +34,6 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
     private _redoMutationParamsCache: IRichTextEditingMutationParams[] = [];
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>
     ) {
         super();
     }

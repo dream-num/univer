@@ -18,10 +18,10 @@ import { FOCUSING_SHEET, ICommandService } from '@univerjs/core';
 import { RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SheetsScrollRenderController } from '../scroll.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 function createScrollManagerServiceMock() {
     const rawScrollInfo$ = new Subject<any>();

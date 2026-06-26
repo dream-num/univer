@@ -21,9 +21,15 @@ import type { IDeleteDrawingCommandParams, ISheetDrawing, ISheetImage } from '@u
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, DrawingTypeEnum, generateRandomId, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService, ImageSourceType } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SheetDrawingAnchorType, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    DrawingApplyType,
+    RemoveSheetDrawingCommand,
+    SetDrawingApplyMutation,
+    SheetDrawingAnchorType,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
 import {
     COPY_TYPE,
     ISheetClipboardService,
@@ -97,7 +103,6 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @IDrawingManagerService private readonly _drawingService: IDrawingManagerService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,

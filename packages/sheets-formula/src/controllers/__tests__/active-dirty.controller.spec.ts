@@ -17,7 +17,7 @@
 import type { Dependency, ICommandInfo, IWorkbookData } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IInsertSheetMutationParams, IRemoveRowsMutationParams } from '@univerjs/sheets';
-import type { ITestBed } from '../../facade/__tests__/create-test-bed';
+import type { ITestBed } from '../../__tests__/create-test-bed';
 import { LocaleType } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
@@ -40,7 +40,7 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { ActiveDirtyController } from '../active-dirty.controller';
 
 function createWorkbookData(): IWorkbookData {

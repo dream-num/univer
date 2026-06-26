@@ -16,7 +16,6 @@
 
 import type { IDisposable, ISelection, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
-import { Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 
 export interface IShortcutExperienceSearch {
     unitId: string;
@@ -39,10 +38,7 @@ export class ShortcutExperienceService implements IDisposable {
 
     private _shortcutParam: IShortcutExperienceParam[] = [];
 
-    constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {
+    constructor() {
         // empty
     }
 

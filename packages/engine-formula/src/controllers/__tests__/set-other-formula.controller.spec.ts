@@ -16,7 +16,10 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../../commands/mutations/set-other-formula.mutation';
+import {
+    RemoveOtherFormulaMutation,
+    SetOtherFormulaMutation,
+} from '../../commands/mutations/set-other-formula.mutation';
 import { SetOtherFormulaController } from '../set-other-formula.controller';
 
 interface ICommandServiceMock {
@@ -50,8 +53,7 @@ describe('SetOtherFormulaController', () => {
         // eslint-disable-next-line no-new
         new SetOtherFormulaController(
             commandService as never,
-            otherFormulaManagerService as never,
-            {} as never
+            otherFormulaManagerService as never
         );
 
         const formulaMap = {
@@ -97,8 +99,7 @@ describe('SetOtherFormulaController', () => {
         // eslint-disable-next-line no-new
         new SetOtherFormulaController(
             commandService as never,
-            otherFormulaManagerService as never,
-            {} as never
+            otherFormulaManagerService as never
         );
 
         commandService.emit(SetOtherFormulaMutation.id, null);

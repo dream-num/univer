@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, IWorkbookData } from '@univerjs/core';
-import type { ITestBed } from '../../facade/__tests__/create-test-bed';
+import type { ITestBed } from '../../__tests__/create-test-bed';
 import { ICommandService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import {
     FunctionType,
@@ -25,7 +25,7 @@ import {
 } from '@univerjs/engine-formula';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { DescriptionService, IDescriptionService } from '../../services/description.service';
 import { DefinedNameController } from '../defined-name.controller';
 

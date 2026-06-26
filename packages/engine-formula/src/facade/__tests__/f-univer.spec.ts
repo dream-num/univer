@@ -16,7 +16,7 @@
 
 import { FUniver } from '@univerjs/core/facade';
 import { describe, expect, it } from 'vitest';
-import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
+import { createFunctionTestBed } from '../../__tests__/create-function-test-bed';
 import '../f-univer';
 
 describe('FUniverEngineFormulaMixin', () => {

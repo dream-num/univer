@@ -15,12 +15,10 @@
  */
 
 import type { UnitAction } from '@univerjs/protocol';
-
 import type { IObjectModel } from '../../../models/range-protection-rule.model';
-import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
-
 import { RangeProtectionCache } from '../../../models/range-protection.cache';
 import { baseProtectionActions, getAllRangePermissionPoint } from './util';
 
@@ -31,8 +29,7 @@ export class RangeProtectionService extends Disposable {
         @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(RangeProtectionCache) private _selectionProtectionCache: RangeProtectionCache,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(RangeProtectionCache) private _selectionProtectionCache: RangeProtectionCache
 
     ) {
         super();

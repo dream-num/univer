@@ -18,9 +18,9 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { ICommandService, RANGE_TYPE } from '@univerjs/core';
 import { MoveRowsCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { HeaderMoveRenderController } from '../header-move.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 describe('HeaderMoveRenderController', () => {
     it('moves selected rows by dragging row header and triggers command', () => {

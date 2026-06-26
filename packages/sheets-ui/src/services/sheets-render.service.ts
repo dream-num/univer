@@ -17,10 +17,8 @@
 import type { ICreateUnitOptions, IDisposable, Workbook } from '@univerjs/core';
 import {
     IContextService,
-    Inject,
     IUniverInstanceService,
     RxDisposable,
-    ThemeService,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -38,8 +36,7 @@ export class SheetsRenderService extends RxDisposable {
     constructor(
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 

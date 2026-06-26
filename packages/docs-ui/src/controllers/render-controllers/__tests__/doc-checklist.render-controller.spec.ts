@@ -25,7 +25,6 @@ describe('DocChecklistRenderController', () => {
         const clickBullets$ = new Subject<any>();
         const controller = new DocChecklistRenderController(
             { mainComponent: { setCursor: vi.fn() } } as never,
-            {} as never,
             { executeCommand: vi.fn() } as never,
             { clickBullets$, hoverBullet$: new Subject() } as never,
             { getTextRanges: vi.fn(() => [{ startOffset: 3, endOffset: 5 }]) } as never
@@ -50,7 +49,6 @@ describe('DocChecklistRenderController', () => {
         const setCursor = vi.fn();
         const controller = new DocChecklistRenderController(
             { mainComponent: { setCursor } } as never,
-            {} as never,
             { executeCommand: vi.fn() } as never,
             { clickBullets$: new Subject(), hoverBullet$ } as never,
             { getTextRanges: vi.fn(() => []) } as never

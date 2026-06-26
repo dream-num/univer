@@ -30,8 +30,8 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
-import { clipboardTestBed } from './clipboard-test-bed';
 import { excelSample, excelSample2, excelSample3, excelSample4, excelSample5, excelSample6, excelSample7 } from './constant';
+import { clipboardTestBed } from './create-clipboard-test-bed';
 
 describe('Test clipboard', () => {
     let univer: Univer;

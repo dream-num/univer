@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject } from '@univerjs/core';
 import { filter } from 'rxjs';
 import { CellPopupManagerService } from '../services/cell-popup-manager.service';
@@ -27,7 +26,6 @@ import { IEditorBridgeService } from '../services/editor-bridge.service';
  */
 export class CellPopupEditorController extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {

@@ -41,8 +41,6 @@ describe('SheetTableRefRangeController', () => {
                 }),
             } as any,
             {} as any,
-            {} as any,
-            {} as any,
             {
                 interceptCommand: vi.fn((config: any) => {
                     interceptCommandConfig = config;
@@ -108,9 +106,7 @@ describe('SheetTableRefRangeController', () => {
 
         const controller = new SheetTableRefRangeController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })) } as any,
-            {} as any,
             { getCurrentUnitOfType: () => workbook } as any,
-            {} as any,
             {
                 interceptCommand: vi.fn((config: any) => {
                     interceptCommandConfig = config;

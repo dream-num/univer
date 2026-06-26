@@ -403,10 +403,10 @@ describe('docs integration', () => {
             univerInstanceService
         );
 
-        const viewModelManager = new DocViewModelManagerService(context, univerInstanceService);
+        const viewModelManager = new DocViewModelManagerService(univerInstanceService);
         expect(viewModelManager.getViewModel(doc.getUnitId())).toBeDefined();
 
-        const interceptorService = new DocInterceptorService(context, skeletonManager);
+        const interceptorService = new DocInterceptorService(skeletonManager);
         interceptorService.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE, {
             priority: 10,
             handler: (range, ctx, next) => {

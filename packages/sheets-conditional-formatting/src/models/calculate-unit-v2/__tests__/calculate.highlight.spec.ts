@@ -17,7 +17,7 @@
 import type { IAverageHighlightCell, IConditionFormattingRule, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../type';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator } from '../../../base/const';
-import { createTestBed } from './test.util';
+import { createTestBed } from './create-test-bed';
 
 describe('Test conditional formatting highlight', () => {
     let testBed: ReturnType<typeof createTestBed>;

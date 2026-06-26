@@ -36,7 +36,6 @@ describe('SheetsTableRenderController', () => {
             {
                 mainComponent: { makeDirty },
             } as any,
-            {} as any,
             {
                 getCurrentParam: () => ({ unitId: 'u1', subUnitId: 's1' }),
                 reCalculate,

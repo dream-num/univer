@@ -19,8 +19,8 @@ import { BooleanNumber, ColumnLayoutType, ColumnResponsiveType, DataStreamTreeNo
 import { describe, expect, it } from 'vitest';
 import { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import { updateBlockIndex } from '../../tools';
-import { createSectionLayoutTestBed } from '../paragraph/__tests__/create-paragraph-layout-test-bed';
 import { dealWithSection } from '../section';
+import { createSectionLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];

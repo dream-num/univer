@@ -20,7 +20,7 @@ import { ICommandService, LocaleType } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from './create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 function getTestWorkbookDataWithFormulas(): IWorkbookData {
     return {

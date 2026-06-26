@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 
 const paragraphSettingIndexKey = 'doc_ui_paragraph-setting-panel';
@@ -23,7 +23,6 @@ export class DocParagraphSettingController extends Disposable {
     private _id: 'DocParagraphSetting';
 
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
         @Inject(ISidebarService) private _sidebarService: ISidebarService
 
     ) {

@@ -16,7 +16,18 @@
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    IDocsTableRenderViewport,
+    IDocumentSkeletonHeaderFooter,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+    Image,
+    IRenderContext,
+    IRenderModule,
+} from '@univerjs/engine-render';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -25,7 +36,6 @@ import {
     fromEventSubject,
     ICommandService,
     Inject,
-    IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
     ObjectRelativeFromH,
@@ -35,7 +45,12 @@ import {
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { getDocsTableRenderViewport, getTableIdAndSliceIndex, Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import {
+    getDocsTableRenderViewport,
+    getTableIdAndSliceIndex,
+    Liquid,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from '@univerjs/engine-render';
 import { debounceTime, filter } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
@@ -231,7 +246,6 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         @IEditorService private readonly _editorService: IEditorService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(LifecycleService) private _lifecycleService: LifecycleService
     ) {
         super();

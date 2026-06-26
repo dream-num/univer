@@ -16,11 +16,10 @@
 
 import { Disposable, Inject } from '@univerjs/core';
 import { RecordIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager } from '@univerjs/ui';
+import { IconManager } from '@univerjs/ui';
 
 export class ComponentsController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();

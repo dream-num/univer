@@ -24,7 +24,7 @@ import {
     createSimpleDocument,
     createTableDocument,
     createTestBed,
-} from './create-test-bed';
+} from '../../__tests__/create-test-bed';
 
 describe('FDocumentElement', () => {
     let univer: Univer | null = null;

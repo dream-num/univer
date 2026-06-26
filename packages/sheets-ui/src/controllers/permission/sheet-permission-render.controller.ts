@@ -17,33 +17,22 @@
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import { Disposable, IConfigService, Inject, Injector, IPermissionService } from '@univerjs/core';
+import { Disposable, IConfigService, Inject, IPermissionService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager, IconManager } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
 import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
-
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
+import {
+    RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY,
+    RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY,
+    RangeProtectionCanNotViewRenderExtension,
+    RangeProtectionCanViewRenderExtension,
+} from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
-}
-
-export class SheetPermissionRenderManagerController extends Disposable {
-    constructor(
-        @Inject(Injector) private _injector: Injector,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IconManager) private _iconManager: IconManager
-    ) {
-        super();
-        this._init();
-    }
-
-    private _init(): void {
-    }
 }
 
 export class SheetPermissionRenderController extends Disposable implements IRenderModule {

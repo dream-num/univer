@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { Dependency, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IDisposable, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IMessageProps } from '@univerjs/design';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
-import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { MarkDirtyFilterChangeMutation, RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { IMessageService } from '@univerjs/ui';
-import { MockMessageService } from '@univerjs/ui/services/message/__tests__/mock-message.service.js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 function testWorkbookDataFactory(): IWorkbookData {
@@ -75,6 +75,20 @@ function testWorkbookDataFactory(): IWorkbookData {
     };
 };
 
+class TestMessageService implements IMessageService {
+    show(_options: IMessageProps): IDisposable {
+        return toDisposable(() => {});
+    }
+
+    remove(_id: string): void {
+        // no message container in command tests
+    }
+
+    removeAll(): void {
+        // no message container in command tests
+    }
+}
+
 function createFilterCommandTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -99,7 +113,7 @@ function createFilterCommandTestBed() {
                 [IAuthzIoService, { useClass: AuthzIoLocalService }],
                 [WorksheetProtectionRuleModel],
                 [RangeProtectionRuleModel],
-                [IMessageService, { useClass: MockMessageService }],
+                [IMessageService, { useClass: TestMessageService }],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
                 [SheetRangeThemeModel],

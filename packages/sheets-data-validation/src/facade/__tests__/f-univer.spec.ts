@@ -26,7 +26,7 @@ import {
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from './create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('FUniver sheets data validation events', () => {
     let testBed: ReturnType<typeof createFacadeTestBed>;

@@ -126,7 +126,6 @@ describe('MoveRangeRenderController', () => {
         const controlMoveEnd$ = new Subject<any>();
         const commandService = { executeCommand: vi.fn() };
         const controller = new MoveRangeRenderController(
-            {} as never,
             {
                 getSelectionControls: vi.fn(() => [{
                     model: {

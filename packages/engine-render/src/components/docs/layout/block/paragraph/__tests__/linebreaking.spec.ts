@@ -27,9 +27,9 @@ import {
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { updateInlineDrawingCoordsAndBorder } from '../../../tools';
+import { createParagraphLayoutTestBed, createSectionLayoutTestBed } from '../../__tests__/create-paragraph-layout-test-bed';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
-import { createParagraphLayoutTestBed, createSectionLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 function createContext() {
     return {

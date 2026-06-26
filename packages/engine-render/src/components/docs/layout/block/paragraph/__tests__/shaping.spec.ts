@@ -20,8 +20,8 @@ import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
 import { fontLibrary } from '../../../shaping-engine/font-library';
 import * as textShapingModule from '../../../shaping-engine/text-shaping';
+import { createParagraphLayoutTestBed } from '../../__tests__/create-paragraph-layout-test-bed';
 import { shaping } from '../shaping';
-import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
     it('shapes plain English text', () => {

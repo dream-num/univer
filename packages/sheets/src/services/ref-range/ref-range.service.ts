@@ -43,7 +43,6 @@ import {
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
-import { SheetsSelectionsService } from '../selections/selection.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { EffectRefRangId } from './type';
 import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';
@@ -121,8 +120,7 @@ export class RefRangeService extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._onRefRangeChange();

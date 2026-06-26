@@ -15,15 +15,15 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { MockHTTPImplementation } from './http-testing-utils';
+import type { MockHTTPImplementation } from '../../../__tests__/create-http-test-bed';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createHTTPTestBed } from '../../../__tests__/create-http-test-bed';
 import { HTTPHeaders } from '../headers';
 import { HTTPService } from '../http.service';
 import { IHTTPImplementation } from '../implementations/implementation';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../request';
 import { HTTPProgress, HTTPResponse } from '../response';
-import { createHTTPTestBed } from './http-testing-utils';
 
 describe('test "HTTPService"', () => {
     let httpService: HTTPService;

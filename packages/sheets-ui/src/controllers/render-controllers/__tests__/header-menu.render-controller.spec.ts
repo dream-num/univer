@@ -16,9 +16,9 @@
 
 import { IContextMenuService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed, createTestEvent } from '../../../__tests__/create-render-test-bed';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { HeaderMenuRenderController } from '../header-menu.render-controller';
-import { createRenderTestBed, createTestEvent } from './render-test-bed';
 
 describe('HeaderMenuRenderController', () => {
     it('positions the column menu arrow in the base column header area when outline uses margins', () => {

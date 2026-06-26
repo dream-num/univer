@@ -33,7 +33,7 @@ describe('DocIMEStateChangeInterceptorService', () => {
     let injector: Injector;
 
     function createImeInputManager(unitId: string, withHistory = true) {
-        const imeInputManagerService = injector.createInstance(DocIMEInputManagerService, { unitId } as never);
+        const imeInputManagerService = injector.createInstance(DocIMEInputManagerService);
 
         if (withHistory) {
             const jsonX = JSONX.getInstance();

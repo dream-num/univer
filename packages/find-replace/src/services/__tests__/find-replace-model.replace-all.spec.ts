@@ -16,7 +16,6 @@
 
 import type { FindModel, IFindMatch } from '../find-replace.service';
 import { Subject } from 'rxjs';
-
 import { describe, expect, it, vi } from 'vitest';
 import { FindReplaceModel, FindReplaceState } from '../find-replace.service';
 
@@ -26,7 +25,6 @@ describe('FindReplaceModel', () => {
         state.changeState({ findString: 'a', replaceString: 'b', revealed: true });
 
         const univerInstanceService = { getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'u1' })) };
-        const commandService = { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })) };
 
         const matchesUpdate$ = new Subject<IFindMatch[]>();
         const activelyChangingMatch$ = new Subject<IFindMatch>();
@@ -51,7 +49,7 @@ describe('FindReplaceModel', () => {
         };
 
         const providers = new Set([provider as any]);
-        const findReplaceModel = new FindReplaceModel(state, providers, univerInstanceService as any, commandService as any);
+        const findReplaceModel = new FindReplaceModel(state, providers, univerInstanceService as any);
 
         await findReplaceModel.start();
         const res = await findReplaceModel.replaceAll();

@@ -16,8 +16,8 @@
 
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { SheetSkeletonRenderController } from '../skeleton.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 describe('SheetSkeletonRenderController', () => {
     it('syncs scene size and main viewport margins from skeleton margins', () => {

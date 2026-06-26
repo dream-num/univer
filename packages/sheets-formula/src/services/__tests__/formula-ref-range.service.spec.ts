@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ITestBed } from './util';
+import type { ITestBed } from './create-test-bed';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
-import { createCommandTestBed } from './util';
+import { createCommandTestBed } from './create-test-bed';
 
 describe('FormulaRefRangeService service coverage', () => {
     let testBed: ITestBed;

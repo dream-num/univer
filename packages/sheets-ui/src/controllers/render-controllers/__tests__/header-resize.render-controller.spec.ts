@@ -17,9 +17,9 @@
 import { ICommandService } from '@univerjs/core';
 import { DeltaRowHeightCommand } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { HeaderResizeRenderController } from '../header-resize.render-controller';
-import { createRenderTestBed } from './render-test-bed';
 
 describe('HeaderResizeRenderController', () => {
     it('resizes row by dragging the resize handle and triggers DeltaRowHeightCommand', () => {

@@ -17,9 +17,9 @@
 import { ICommandService } from '@univerjs/core';
 import { OtherFormulaMarkDirty } from '@univerjs/engine-formula';
 import { afterEach, describe, expect, it } from 'vitest';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { InsertFunctionCommand } from '../../commands/commands/insert-function.command';
 import { QuickSumCommand } from '../../commands/commands/quick-sum.command';
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { FormulaController } from '../formula.controller';
 
 describe('FormulaController', () => {

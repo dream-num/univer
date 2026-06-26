@@ -37,7 +37,7 @@ import {
     createFakeScene,
     createFakeSkeleton,
     createFakeViewport,
-} from '../../../controllers/render-controllers/__tests__/render-test-bed';
+} from '../../../__tests__/create-render-test-bed';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService } from '../base-selection-render.service';
 import { SelectionLayer } from '../selection-layer';

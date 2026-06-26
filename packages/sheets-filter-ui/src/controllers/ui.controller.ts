@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
@@ -39,7 +39,6 @@ import { SheetsFilterUIMobileController } from './ui-mobile.controller';
  */
 export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,

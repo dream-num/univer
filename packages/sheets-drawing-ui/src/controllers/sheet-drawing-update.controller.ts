@@ -64,7 +64,6 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     attachRangeWithCoord,
     SetRangeValuesCommand,
-    SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -143,7 +142,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ILocalFileService private readonly _fileOpenerService: ILocalFileService,

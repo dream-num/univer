@@ -20,7 +20,7 @@ import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@un
 import { SetNumfmtMutation } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt/controllers/numfmt-cell-content.controller.js';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createTestBed } from './test.util';
+import { createTestBed } from '../../__tests__/create-test-bed';
 
 describe('test cell-content', () => {
     let unitId: string = '';

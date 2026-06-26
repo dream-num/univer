@@ -15,13 +15,11 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
+import { IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './schema';
 
 export class SheetTableMenuController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IconManager) private _iconManager: IconManager,
         @Inject(IMenuManagerService) private _menuManagerService: IMenuManagerService
     ) {
         super();

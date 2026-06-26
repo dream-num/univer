@@ -16,10 +16,10 @@
 
 import { HorizontalAlign } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { createParagraphLayoutTestBed } from '../../__tests__/create-paragraph-layout-test-bed';
 import { lineAdjustment } from '../line-adjustment';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
-import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('line-adjustment', () => {
     function createGlyph(content: string, width: number, overrides: Record<string, unknown> = {}) {

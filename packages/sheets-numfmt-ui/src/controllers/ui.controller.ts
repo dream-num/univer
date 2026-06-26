@@ -43,9 +43,14 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { getPatternPreviewIgnoreGeneral, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import {
+    getPatternPreviewIgnoreGeneral,
+    getPatternType,
+    SetNumfmtCommand,
+    SheetsNumfmtCellContentController,
+} from '@univerjs/sheets-numfmt';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { ComponentManager, ISidebarService } from '@univerjs/ui';
+import { ISidebarService } from '@univerjs/ui';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
@@ -69,7 +74,6 @@ export class SheetNumfmtUIController extends Disposable {
         @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @INumfmtService private _numfmtService: INumfmtService,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ISidebarService private _sidebarService: ISidebarService,
         @Inject(LocaleService) private _localeService: LocaleService,
         @Inject(SheetsNumfmtCellContentController) private _sheetsNumfmtCellContentController: SheetsNumfmtCellContentController

@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICustomRange, IDocumentData, IHyperLinkCustomRange, Injector, IWorkbookData, Nullable } from '@univerjs/core';
+import type {
+    ICellData,
+    ICustomRange,
+    IDocumentData,
+    IHyperLinkCustomRange,
+    Injector,
+    IWorkbookData,
+    Nullable,
+} from '@univerjs/core';
 import type { LexerNode } from '../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { CellValueType, CustomRangeType, LocaleType, RichTextValue } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createFunctionTestBed } from '../../__tests__/create-function-test-bed';
 import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
@@ -63,7 +72,6 @@ import { Len } from '../text/len';
 import { T } from '../text/t';
 import { Text } from '../text/text';
 import { getObjectValue } from '../util';
-import { createFunctionTestBed } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
     return {

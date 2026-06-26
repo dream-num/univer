@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { Engine, IRenderContext, Scene } from '@univerjs/engine-render';
-import { Injector, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -35,28 +32,6 @@ class TestSheetSkeletonManagerService {
     }
 }
 
-function createRenderContext(unitId: string): IRenderContext<Workbook> {
-    const activated$ = new BehaviorSubject(true);
-    const unit = {
-        getUnitId: () => unitId,
-        type: UniverInstanceType.UNIVER_SHEET,
-    } as unknown as Workbook;
-
-    return {
-        unit,
-        unitId,
-        type: UniverInstanceType.UNIVER_SHEET,
-        engine: {} as unknown as Engine,
-        scene: {} as unknown as Scene,
-        mainComponent: null,
-        components: new Map(),
-        isMainScene: true,
-        activated$,
-        activate: () => activated$.next(true),
-        deactivate: () => activated$.next(false),
-    };
-}
-
 describe('SheetScrollManagerService', () => {
     function createService(skeleton: any = null, skeletons: Record<string, any> = {}) {
         TestSheetSkeletonManagerService.currentSkeleton = skeleton;
@@ -64,7 +39,7 @@ describe('SheetScrollManagerService', () => {
 
         const injector = new Injector();
         injector.add([SheetSkeletonManagerService, { useClass: TestSheetSkeletonManagerService as never }]);
-        injector.add([SheetScrollManagerService, { useFactory: () => injector.createInstance(SheetScrollManagerService, createRenderContext('u-1')) }]);
+        injector.add([SheetScrollManagerService, { useFactory: () => injector.createInstance(SheetScrollManagerService) }]);
         return injector.get(SheetScrollManagerService);
     }
 

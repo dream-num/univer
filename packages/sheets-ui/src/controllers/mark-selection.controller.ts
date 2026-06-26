@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ICommandInfo } from '@univerjs/core';
+import type { IRenderModule } from '@univerjs/engine-render';
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
@@ -24,7 +24,6 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 
 export class MarkSelectionRenderController extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @Inject(IMarkSelectionService) private _markSelectionService: IMarkSelectionService,
         @ICommandService private _commandService: ICommandService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService

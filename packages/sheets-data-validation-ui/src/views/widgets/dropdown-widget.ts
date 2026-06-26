@@ -16,11 +16,36 @@
 
 import type { ICellRenderContext, IPaddingData } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
-import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    SpreadsheetSkeleton,
+    UniverRenderingContext,
+    UniverRenderingContext2D,
+} from '@univerjs/engine-render';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
-import { DataValidationRenderMode, DataValidationType, DEFAULT_STYLES, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { CURSOR_TYPE, DocSimpleSkeleton, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
+import {
+    DataValidationRenderMode,
+    DataValidationType,
+    DEFAULT_STYLES,
+    HorizontalAlign,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import {
+    CURSOR_TYPE,
+    DocSimpleSkeleton,
+    getCurrentTypeOfRenderer,
+    getFontStyleString,
+    IRenderManagerService,
+    Rect,
+    Text,
+} from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
@@ -91,7 +116,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel

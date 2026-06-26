@@ -16,10 +16,7 @@
 
 import type { IShortcutItem } from '../../services/shortcut/shortcut.service';
 import { Disposable, ICommandService } from '@univerjs/core';
-import {
-    ToggleShortcutPanelOperation,
-} from '../../commands/operations/toggle-shortcut-panel.operation';
-import { IMenuManagerService } from '../../services/menu/menu-manager.service';
+import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { IShortcutService } from '../../services/shortcut/shortcut.service';
 
@@ -37,7 +34,6 @@ const ToggleShortcutPanelShortcut: IShortcutItem = {
 export class ShortcutPanelController extends Disposable {
     constructor(
         @IShortcutService shortcutService: IShortcutService,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService commandService: ICommandService
     ) {
         super();

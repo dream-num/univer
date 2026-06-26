@@ -20,7 +20,7 @@ import { awaitTime, CellValueType, ICommandService, InterceptorEffectEnum, Local
 import { ErrorType, FormulaDataModel, SetImageFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { ImageFormulaCellInterceptorController } from '../image-formula-cell-interceptor.controller';
 
 function createWorkbookData(): IWorkbookData {

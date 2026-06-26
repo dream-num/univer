@@ -17,7 +17,6 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
-import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { getRangeReferenceObjectFromCache } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -90,7 +89,7 @@ export class UnionNode extends BaseAstNode {
 }
 
 export class UnionNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+    constructor() {
         super();
     }
 

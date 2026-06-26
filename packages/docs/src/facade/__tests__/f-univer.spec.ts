@@ -16,7 +16,7 @@
 
 import type { Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createTestBed, DOCUMENT_STYLE } from './create-test-bed';
+import { createTestBed, DOCUMENT_STYLE } from '../../__tests__/create-test-bed';
 
 describe('FUniver docs facade', () => {
     let univer: Univer;

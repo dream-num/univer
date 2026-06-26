@@ -18,10 +18,10 @@ import { ICommandService, RANGE_TYPE } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../../../__tests__/create-render-test-bed';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../../commands/commands/set-scroll.command';
 import { SetZoomRatioCommand } from '../../../../commands/commands/set-zoom-ratio.command';
 import { SheetScrollManagerService } from '../../../../services/scroll-manager.service';
-import { createRenderTestBed } from '../../__tests__/render-test-bed';
 import { MobileSheetsScrollRenderController } from '../mobile-scroll.render-controller';
 
 function createController() {

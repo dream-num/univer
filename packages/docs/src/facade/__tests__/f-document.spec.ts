@@ -18,7 +18,7 @@ import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
 import { IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
+import { createDocumentData, createSimpleDocument, createTestBed } from '../../__tests__/create-test-bed';
 
 describe('FDocument', () => {
     let univer: Univer;

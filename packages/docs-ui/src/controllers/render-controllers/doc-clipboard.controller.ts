@@ -16,17 +16,8 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import {
-    ICommandService,
-    IContextService,
-    Inject,
-    RxDisposable,
-} from '@univerjs/core';
-import {
-    HTML_CLIPBOARD_MIME_TYPE,
-    imageMimeTypeSet,
-    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
-} from '@univerjs/ui';
+import { IContextService, Inject, RxDisposable } from '@univerjs/core';
+import { HTML_CLIPBOARD_MIME_TYPE, imageMimeTypeSet, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { whenDocOrEditor } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
@@ -37,7 +28,6 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 export class DocClipboardController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @ICommandService private readonly _commandService: ICommandService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @IContextService private readonly _contextService: IContextService,

@@ -25,7 +25,6 @@ import { FormulaController } from './controllers/formula.controller';
 import { SetDependencyController } from './controllers/set-dependency.controller';
 import { SetFeatureCalculationController } from './controllers/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controllers/set-other-formula.controller';
-// import { SetSuperTableController } from './controllers/set-super-table.controller';
 import { Lexer } from './engine/analysis/lexer';
 import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from './engine/analysis/parser';
@@ -92,7 +91,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
-            // [SetSuperTableController],
         ]);
 
         if (!this._config?.notExecuteFormula) {
@@ -131,7 +129,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [FormulaDataModel],
             //Controllers
             [FormulaController],
-            // [SetSuperTableController],
             [ComputingStatusReporterController],
         ];
 

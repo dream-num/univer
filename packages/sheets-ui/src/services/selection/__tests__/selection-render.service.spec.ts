@@ -20,8 +20,8 @@ import { RANGE_TYPE } from '@univerjs/core';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
+import { createRenderTestBed } from '../../../__tests__/create-render-test-bed';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
-import { createRenderTestBed } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { SheetSelectionRenderService } from '../selection-render.service';
 
 class TestShortcutService {

@@ -26,9 +26,12 @@ import {
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
-import { IDialogService } from '@univerjs/ui';
 import { bufferTime, filter, map } from 'rxjs';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { DrawingRenderService, ensureDrawingRenderLayer } from '../services/drawing-render.service';
@@ -39,8 +42,6 @@ export class ImageUpdateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IDialogService private readonly _dialogService: IDialogService,
-        @IImageIoService private readonly _imageIoService: IImageIoService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService
     ) {

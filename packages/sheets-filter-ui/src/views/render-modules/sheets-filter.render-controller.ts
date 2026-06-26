@@ -19,10 +19,20 @@ import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univer
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
-import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService, VerticalAlign } from '@univerjs/core';
+import {
+    CommandType,
+    fromCallback,
+    ICommandService,
+    Inject,
+    Injector,
+    InterceptorEffectEnum,
+    RxDisposable,
+    ThemeService,
+    VerticalAlign,
+} from '@univerjs/core';
 import { attachSelectionWithCoord, INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getCoordByCell, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
@@ -71,8 +81,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 

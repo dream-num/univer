@@ -15,11 +15,31 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import {
+    DisposableCollection,
+    Inject,
+    IPermissionService,
+    IUniverInstanceService,
+    Optional,
+    RANGE_TYPE,
+    Rectangle,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
-
-import { getSheetCommandTarget, RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import {
+    getSheetCommandTarget,
+    RangeProtectionCache,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+    WorksheetSetCellValuePermission,
+    WorksheetSetColumnStylePermission,
+    WorksheetSetRowStylePermission,
+} from '@univerjs/sheets';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
@@ -32,7 +52,6 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
     disposableCollection = new DisposableCollection();
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,

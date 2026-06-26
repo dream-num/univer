@@ -22,7 +22,7 @@ import type {
     ISetOtherFormulaMutationParams,
 } from '../commands/mutations/set-other-formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
-import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, generateRandomId, ICommandService, ObjectMatrix } from '@univerjs/core';
 import { BehaviorSubject, bufferWhen, filter, skip, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -53,8 +53,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
+        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
         this._initFormulaRegister();

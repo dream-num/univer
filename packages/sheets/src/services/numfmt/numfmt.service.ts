@@ -19,17 +19,13 @@ import type { INumfmtService } from './type';
 
 import {
     Disposable,
-    ILogService,
-    IResourceManagerService,
     IUniverInstanceService,
     Range,
 } from '@univerjs/core';
 
 export class NumfmtService extends Disposable implements INumfmtService {
     constructor(
-        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @ILogService private _logService: ILogService
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }

@@ -25,13 +25,22 @@ import {
 } from '@univerjs/core';
 import { DocBlockMoveValidatorService, RichTextEditingMutation } from '@univerjs/docs';
 import { afterEach, describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { buildMoveDocBlockActions, MoveDocBlockCommand } from '../doc-block-move.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 describe('buildMoveDocBlockActions', () => {
     it('moves a paragraph and remaps paragraph indexes', () => {
         const documentData = createDocument('A\rB\rC\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_9', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_10', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_11', startIndex: 5 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_9',
+                startIndex: 1,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_10',
+                startIndex: 3,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_11',
+                startIndex: 5,
+            }],
             sectionBreaks: [{ startIndex: 6 }],
         });
 
@@ -48,7 +57,16 @@ describe('buildMoveDocBlockActions', () => {
 
     it('moves a block range as one unit', () => {
         const documentData = createDocument('aa\rBB\rcc\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_12', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_13', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_14', startIndex: 8 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_12',
+                startIndex: 2,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_13',
+                startIndex: 5,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_14',
+                startIndex: 8,
+            }],
             sectionBreaks: [{ startIndex: 9 }],
             blockRanges: [{ blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }],
         });
@@ -67,7 +85,16 @@ describe('buildMoveDocBlockActions', () => {
 
     it('moves a table range and remaps custom ranges and text runs', () => {
         const documentData = createDocument('aa\rTT\rcc\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_15', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_16', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_17', startIndex: 8 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_15',
+                startIndex: 2,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_16',
+                startIndex: 5,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_17',
+                startIndex: 8,
+            }],
             sectionBreaks: [{ startIndex: 9 }],
             tables: [{ tableId: 'table-1', startIndex: 3, endIndex: 6 }],
             customRanges: [{ rangeId: 'comment-1', rangeType: CustomRangeType.COMMENT, startIndex: 6, endIndex: 7 }],
@@ -88,7 +115,10 @@ describe('buildMoveDocBlockActions', () => {
 
     it('moves a custom block paragraph and keeps the custom block attached', () => {
         const documentData = createDocument('\b\raa\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_18', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_19', startIndex: 4 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_18',
+                startIndex: 1,
+            }, { paragraphId: 'para_docs_ui_fixture_19', startIndex: 4 }],
             sectionBreaks: [{ startIndex: 5 }],
             customBlocks: [{ blockId: 'custom-1', blockType: BlockType.CUSTOM, startIndex: 0 }],
         });
@@ -119,7 +149,10 @@ describe('buildMoveDocBlockActions', () => {
         });
 
         const documentData = createDocument('A\rB\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_20', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_21', startIndex: 3 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_20',
+                startIndex: 1,
+            }, { paragraphId: 'para_docs_ui_fixture_21', startIndex: 3 }],
             sectionBreaks: [{ startIndex: 4 }],
         });
 
@@ -135,7 +168,16 @@ describe('buildMoveDocBlockActions', () => {
 
     it('remaps custom decorations that move with their paragraph', () => {
         const documentData = createDocument('aa\rDD\rcc\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_22', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_23', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_24', startIndex: 8 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_22',
+                startIndex: 2,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_23',
+                startIndex: 5,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_24',
+                startIndex: 8,
+            }],
             sectionBreaks: [{ startIndex: 9 }],
             customDecorations: [{ id: 'decoration-1', startIndex: 3, endIndex: 5 } as never],
         });
@@ -153,13 +195,48 @@ describe('buildMoveDocBlockActions', () => {
 
     it('keeps every document metadata collection ordered after moving content upward', () => {
         const documentData = createDocument('aa\rMM\rzz\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_29', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_30', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_31', startIndex: 8 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_29',
+                startIndex: 2,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_30',
+                startIndex: 5,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_31',
+                startIndex: 8,
+            }],
             sectionBreaks: [{ startIndex: 6 }, { startIndex: 9 }],
-            customBlocks: [{ blockId: 'custom-2', blockType: BlockType.CUSTOM, startIndex: 3 }, { blockId: 'custom-3', blockType: BlockType.CUSTOM, startIndex: 6 }],
-            tables: [{ tableId: 'table-2', startIndex: 3, endIndex: 5 }, { tableId: 'table-3', startIndex: 6, endIndex: 8 }],
-            blockRanges: [{ blockId: 'quote-2', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }, { blockId: 'quote-3', blockType: DocumentBlockRangeType.QUOTE, startIndex: 6, endIndex: 8 }],
-            customRanges: [{ rangeId: 'comment-2', rangeType: CustomRangeType.COMMENT, startIndex: 3, endIndex: 5 }, { rangeId: 'comment-3', rangeType: CustomRangeType.COMMENT, startIndex: 6, endIndex: 8 }],
-            customDecorations: [{ id: 'decoration-2', startIndex: 3, endIndex: 5 }, { id: 'decoration-3', startIndex: 6, endIndex: 8 }] as never,
+            customBlocks: [{
+                blockId: 'custom-2',
+                blockType: BlockType.CUSTOM,
+                startIndex: 3,
+            }, {
+                blockId: 'custom-3',
+                blockType: BlockType.CUSTOM,
+                startIndex: 6,
+            }],
+            tables: [{
+                tableId: 'table-2',
+                startIndex: 3,
+                endIndex: 5,
+            }, { tableId: 'table-3', startIndex: 6, endIndex: 8 }],
+            blockRanges: [{
+                blockId: 'quote-2',
+                blockType: DocumentBlockRangeType.QUOTE,
+                startIndex: 3,
+                endIndex: 5,
+            }, { blockId: 'quote-3', blockType: DocumentBlockRangeType.QUOTE, startIndex: 6, endIndex: 8 }],
+            customRanges: [{
+                rangeId: 'comment-2',
+                rangeType: CustomRangeType.COMMENT,
+                startIndex: 3,
+                endIndex: 5,
+            }, { rangeId: 'comment-3', rangeType: CustomRangeType.COMMENT, startIndex: 6, endIndex: 8 }],
+            customDecorations: [{
+                id: 'decoration-2',
+                startIndex: 3,
+                endIndex: 5,
+            }, { id: 'decoration-3', startIndex: 6, endIndex: 8 }] as never,
             textRuns: [{ st: 3, ed: 5, ts: {} }, { st: 6, ed: 8, ts: {} }],
         });
 
@@ -218,7 +295,16 @@ describe('MoveDocBlockCommand', () => {
 
     it('moves a block through the real rich text mutation flow', async () => {
         testBed = createCommandTestBed(createDocument('A\rB\rC\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_25', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_26', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_27', startIndex: 5 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_25',
+                startIndex: 1,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_26',
+                startIndex: 3,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_27',
+                startIndex: 5,
+            }],
             sectionBreaks: [{ startIndex: 6 }],
         }));
         const commandService = testBed.get(ICommandService);
@@ -269,7 +355,13 @@ describe('MoveDocBlockCommand', () => {
 
     it('applies registered block move transformers through the real rich text mutation flow', async () => {
         testBed = createCommandTestBed(createDocument('A\rB\r\n', {
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_40', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_41', startIndex: 3 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_40',
+                startIndex: 1,
+            }, {
+                paragraphId: 'para_docs_ui_fixture_41',
+                startIndex: 3,
+            }],
             sectionBreaks: [{ startIndex: 4 }],
         }));
         const commandService = testBed.get(ICommandService);

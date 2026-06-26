@@ -25,7 +25,7 @@ import { EmbedRuntimeProviders } from '../components/EmbedRuntimeProviders';
 import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
 export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountContext): IDisposable | undefined {
-    const { container, injector, childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, toolbarOnly } = context;
+    const { container, injector, childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, headerMenu = false, toolbarOnly } = context;
     if (menuSchema != null && typeof menuSchema !== 'object') {
         return undefined;
     }
@@ -41,7 +41,7 @@ export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountConte
     root.render(createElement(
         EmbedRuntimeProviders,
         { injector: scoped.injector as Injector, mountContainer: container, embedId },
-        createElement(Ribbon, { ribbonType: 'classic', headerMenu: false, toolbarOnly })
+        createElement(Ribbon, { ribbonType: 'classic', headerMenu, toolbarOnly })
     ));
 
     return toDisposable(() => {

@@ -17,8 +17,10 @@
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedChildContainerContext, IEmbedFullscreenSession, IEmbedRenderScope } from '../types/embed-ui';
-import { Injector, toDisposable } from '@univerjs/core';
+import { Injector, LocaleService, toDisposable } from '@univerjs/core';
+import { Button } from '@univerjs/design';
 import { EmbedModelService } from '@univerjs/embed';
+import { FullscreenIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -43,8 +45,10 @@ function EmbedFullscreenSurface() {
     ensureEmbedHostToolbarMenuStyles();
 
     const injector = useDependency(Injector);
+    const localeService = useDependency(LocaleService);
     const fullscreenService = useDependency(EmbedFullscreenService);
     const menuRef = useRef<HTMLDivElement>(null);
+    const menuContentRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
     const [session, setSession] = useState<IEmbedFullscreenSession | null>(() => fullscreenService.getSession());
@@ -56,7 +60,7 @@ function EmbedFullscreenSurface() {
 
     useEffect(() => {
         const viewport = viewportRef.current;
-        const menuSlot = menuRef.current;
+        const menuSlot = menuContentRef.current;
         const footerSlot = footerRef.current;
         if (!session || !viewport || !menuSlot || !footerSlot) {
             return undefined;
@@ -139,33 +143,52 @@ function EmbedFullscreenSurface() {
     const exitFullscreen = () => {
         fullscreenService.exit(session.embedId);
     };
+    const exitLabel = localeService.t('embed-ui.fullscreen.exit');
 
     return createPortal(
         <div className="univer-embed-fullscreen-shell" data-embed-fullscreen-shell="true">
-            <div className="univer-embed-fullscreen-bar" data-embed-fullscreen-bar="true">
-                <span className="univer-embed-fullscreen-title">
-                    {getChildProductLabel(injector, session.childType)}
-                </span>
-                <button
-                    type="button"
-                    className="univer-embed-fullscreen-close"
-                    data-embed-fullscreen-close="true"
-                    onClick={exitFullscreen}
-                >
-                    Close
-                </button>
-            </div>
             <div
                 ref={menuRef}
                 className="univer-embed-fullscreen-menu"
-                data-embed-fullscreen-menu-slot="true"
-                {...{ [EMBED_MENU_SLOT_ATTRIBUTE]: 'true' }}
-            />
-            <div
-                ref={viewportRef}
-                className="univer-embed-fullscreen-viewport"
-                data-embed-fullscreen-viewport="true"
-            />
+                data-embed-fullscreen-menu="true"
+            >
+                <div className="univer-embed-fullscreen-header-chrome" data-embed-fullscreen-header="true">
+                    <span className="univer-embed-fullscreen-title">
+                        {getChildProductLabel(injector, session.childType)}
+                    </span>
+                    <Button
+                        type="button"
+                        size="small"
+                        variant="ghost"
+                        className="univer-embed-fullscreen-close"
+                        data-embed-fullscreen-close="true"
+                        aria-label={exitLabel}
+                        title={exitLabel}
+                        onClick={exitFullscreen}
+                    >
+                        <FullscreenIcon />
+                        <span>{exitLabel}</span>
+                    </Button>
+                </div>
+                <div
+                    ref={menuContentRef}
+                    className="univer-embed-fullscreen-menu-content"
+                    data-embed-fullscreen-menu-slot="true"
+                    {...{ [EMBED_MENU_SLOT_ATTRIBUTE]: 'true' }}
+                />
+            </div>
+            <div className="univer-embed-fullscreen-body" data-embed-fullscreen-body="true">
+                <div
+                    className="univer-embed-fullscreen-sidebar"
+                    data-embed-fullscreen-sidebar-slot="true"
+                    data-embed-id={session.embedId}
+                />
+                <div
+                    ref={viewportRef}
+                    className="univer-embed-fullscreen-viewport"
+                    data-embed-fullscreen-viewport="true"
+                />
+            </div>
             <div
                 ref={footerRef}
                 className="univer-embed-fullscreen-footer"
@@ -266,6 +289,7 @@ function mountFullscreenProductRibbon(params: {
             childUnitId: params.descriptor.childUnitId,
             embedId: params.descriptor.embedId,
             surface: 'ribbon',
+            headerMenu: true,
         });
         if (productMenuDisposable) {
             return productMenuDisposable;
@@ -279,6 +303,7 @@ function mountFullscreenProductRibbon(params: {
         childUnitId: params.descriptor.childUnitId,
         embedId: params.descriptor.embedId,
         menuSchema: undefined,
+        headerMenu: true,
     });
 }
 
@@ -315,42 +340,47 @@ function ensureEmbedHostToolbarMenuStyles(): void {
     style.id = EMBED_HOST_TOOLBAR_STYLE_ID;
     style.textContent = `
 .univer-embed-fullscreen-close {
-    box-sizing: border-box;
-    height: 28px;
-    align-self: start;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    background: #ffffff;
-    color: #334155;
-    cursor: pointer;
-    font: inherit;
-    font-size: 12px;
-    line-height: 1;
-    margin: 8px 12px 0 8px;
-    padding: 0 10px;
+    pointer-events: auto;
+    gap: 6px;
 }
-.univer-embed-fullscreen-close:hover {
-    background: #f8fafc;
-    color: #0f172a;
+.univer-embed-fullscreen-close svg {
+    width: 14px !important;
+    height: 14px !important;
 }
 .univer-embed-fullscreen-shell {
     position: fixed;
     inset: 0;
     z-index: 9999;
     display: grid;
-    grid-template-rows: 44px auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     background: #ffffff;
     color: #0f172a;
 }
-.univer-embed-fullscreen-bar {
+.univer-embed-fullscreen-menu {
+    position: relative;
+    z-index: 3;
+    min-width: 0;
+    background: #ffffff;
+}
+.univer-embed-fullscreen-menu:empty {
+    display: none;
+}
+.univer-embed-fullscreen-header-chrome {
+    pointer-events: none;
+    position: absolute;
+    left: 14px;
+    right: 12px;
+    top: 0;
+    z-index: 4;
     display: flex;
+    height: 36px;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
-    padding: 0 12px 0 16px;
+    min-width: 0;
+    gap: 16px;
 }
 .univer-embed-fullscreen-title {
+    min-width: 0;
     overflow: hidden;
     color: #334155;
     font-size: 14px;
@@ -358,20 +388,43 @@ function ensureEmbedHostToolbarMenuStyles(): void {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.univer-embed-fullscreen-close {
-    margin: 0;
+.univer-embed-fullscreen-menu-content {
+    min-width: 0;
 }
-.univer-embed-fullscreen-viewport {
-    position: relative;
+.univer-embed-fullscreen-menu-content [data-u-comp="ribbon-header-menu"] {
+    box-sizing: border-box;
+    padding-left: 96px;
+    padding-right: 96px;
+}
+.univer-embed-fullscreen-body {
+    display: flex;
     min-width: 0;
     min-height: 0;
     overflow: hidden;
 }
-.univer-embed-fullscreen-menu:empty,
+.univer-embed-fullscreen-sidebar {
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+    min-height: 0;
+    background: #ffffff;
+}
+.univer-embed-fullscreen-sidebar:empty {
+    display: none;
+}
+.univer-embed-fullscreen-sidebar [data-u-comp="base-left-panel"] {
+    height: 100%;
+}
+.univer-embed-fullscreen-viewport {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
 .univer-embed-fullscreen-footer:empty {
     display: none;
 }
-.univer-embed-fullscreen-menu,
 .univer-embed-fullscreen-footer {
     position: relative;
     z-index: 2;

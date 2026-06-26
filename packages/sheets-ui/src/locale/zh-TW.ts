@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: '取消合併',
             overlappingError: '不能合併重疊區域',
             partiallyError: '無法對部分合併儲存格執行此操作',
+            confirm: {
+                warning: '警告',
+                dismantleMergeCellWarning: '此操作將取消合併儲存格，是否繼續？',
+            },
         },
         filter: {
+            confirm: {
+                error: '無法執行此操作',
+                notAllowedToInsertRange: '該範圍包含篩選列，無法執行此操作。',
+            },
         },
         textWrap: {
             overflow: '溢出',

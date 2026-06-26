@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': '필터 토글',
         },
+        permission: {
+            filterErr: '필터를 사용할 권한이 없습니다.',
+        },
         panel: {
             'clear-filter': '필터 지우기',
             cancel: '취소',

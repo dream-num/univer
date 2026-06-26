@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Thêm liên kết',
         },
+        permission: {
+            hyperLinkErr: 'Bạn không có quyền chèn liên kết.',
+        },
         message: {
             noSheet: 'Bảng con này đã bị xóa',
             refError: 'Tham chiếu lỗi',

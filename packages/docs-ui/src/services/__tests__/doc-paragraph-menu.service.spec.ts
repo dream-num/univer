@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutiPageParagraphBound } from '../doc-event-manager.service';
-import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
+import type { IMutiPageParagraphBound, ITableBound } from '../doc-event-manager.service';
+import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, DocumentBlockType, PresetListType } from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -61,8 +61,8 @@ describe('DocParagraphMenuService', () => {
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
         expect(service.activeTarget).toMatchObject({
-            kind: 'paragraph',
-            key: 'paragraph:2',
+            kind: DocumentBlockType.PARAGRAPH,
+            key: `${DocumentBlockType.PARAGRAPH}:2`,
             emptyMode: true,
         });
     });
@@ -210,7 +210,7 @@ describe('DocParagraphMenuService', () => {
         }));
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(service.activeTarget?.draggable).toBe(true);
         expect(service.activeTarget?.cellRange).toEqual({ startOffset: 2, endOffset: 8 });
 
@@ -248,8 +248,8 @@ describe('DocParagraphMenuService', () => {
         }));
         service.showTableMenu(tableBound);
 
-        expect(service.activeTarget?.kind).toBe('paragraph');
-        expect(service.activeTarget?.key).toBe('paragraph:7');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
+        expect(service.activeTarget?.key).toBe(`${DocumentBlockType.PARAGRAPH}:7`);
         expect(disposeCellMenu).not.toHaveBeenCalled();
         expect(attachPopupToRect).toHaveBeenCalledTimes(2);
     });
@@ -411,7 +411,7 @@ describe('DocParagraphMenuService', () => {
         }));
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
     });
 
     it('hides an already visible paragraph menu when a table rect selection becomes active', () => {
@@ -469,7 +469,7 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('table');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.TABLE);
     });
 
     it('keeps an already visible table menu when a table rect selection becomes active', () => {
@@ -504,7 +504,7 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(dispose).not.toHaveBeenCalled();
-        expect(service.activeTarget?.kind).toBe('table');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.TABLE);
     });
 
     it('uses list icons for list paragraph menus', () => {
@@ -549,7 +549,7 @@ describe('DocParagraphMenuService', () => {
         }));
 
         expect(service.activeTarget).toMatchObject({
-            kind: 'paragraph',
+            kind: DocumentBlockType.PARAGRAPH,
             icon: 'ReduceIcon',
             emptyMode: false,
             draggable: true,
@@ -576,8 +576,8 @@ describe('DocParagraphMenuService', () => {
         }));
 
         expect(service.activeTarget).toMatchObject({
-            kind: 'customBlock',
-            key: 'customBlock:custom-1',
+            kind: DocumentBlockType.CUSTOM_BLOCK,
+            key: `${DocumentBlockType.CUSTOM_BLOCK}:custom-1`,
             icon: 'TextTypeIcon',
             menuRange: {
                 startOffset: 0,
@@ -674,7 +674,7 @@ describe('DocParagraphMenuService', () => {
         service.hideParagraphMenu(true);
 
         expect(dispose).not.toHaveBeenCalled();
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
 
         service.setBlockMenuDragging(false);
         service.hideParagraphMenu(true);
@@ -738,7 +738,7 @@ describe('DocParagraphMenuService', () => {
         expect(preventDefault).toHaveBeenCalledTimes(1);
         expect(stopPropagation).toHaveBeenCalledTimes(1);
         expect(dispose).not.toHaveBeenCalled();
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(slashRequests).toHaveLength(1);
         expect(slashRequests[0]).toMatchObject({
             anchorRect: paragraph.firstLine,
@@ -773,7 +773,7 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(slashRequests).toHaveLength(1);
     });
 
@@ -805,7 +805,7 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(service.activeTarget?.emptyMode).toBe(false);
         expect(slashRequests).toHaveLength(1);
     });
@@ -842,7 +842,7 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(service.activeTarget?.icon).toBe('UnorderIcon');
         expect(slashRequests).toHaveLength(1);
     });
@@ -880,7 +880,7 @@ describe('DocParagraphMenuService', () => {
         expect(preventDefault).toHaveBeenCalledTimes(1);
         expect(stopPropagation).toHaveBeenCalledTimes(1);
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(slashRequests).toHaveLength(1);
     });
 
@@ -1022,7 +1022,7 @@ describe('DocParagraphMenuService', () => {
         const dispose = vi.fn();
         const hoverParagraphRealTime$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
         const hoverParagraphLeft$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
-        const hoverTableRealTime$ = new BehaviorSubject<null>(null);
+        const hoverTableRealTime$ = new BehaviorSubject<ITableBound | null>(null);
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
         const service = createService({
             attachPopupToRect,
@@ -1082,6 +1082,50 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(attachPopupToRect).not.toHaveBeenCalled();
+    });
+
+    it('hides a visible table menu as soon as text selection starts', () => {
+        const dispose = vi.fn();
+        const selectionStart$ = new Subject<unknown>();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            selectionStart$,
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+        });
+
+        service.showTableMenu({
+            pageIndex: 0,
+            rect: { bottom: 170, left: 100, right: 400, top: 80 },
+            tableId: 'table-1',
+        });
+        selectionStart$.next(null);
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('does not show table menus from hover events while pointer text selection is active', async () => {
+        const hoverTableRealTime$ = new BehaviorSubject<ITableBound | null>(null);
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            hoverTableRealTime$,
+            isOnPointerEvent: true,
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+        });
+
+        hoverTableRealTime$.next({
+            pageIndex: 0,
+            rect: { bottom: 170, left: 100, right: 400, top: 80 },
+            tableId: 'table-1',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+        expect(service.activeTarget).toBeNull();
     });
 
     it('calculates paragraph drop targets before and after the nearest body block', () => {
@@ -1190,11 +1234,13 @@ function createService(options: {
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
     hoverParagraphLeft$?: BehaviorSubject<IMutiPageParagraphBound | null>;
     hoverParagraphRealTime$?: BehaviorSubject<IMutiPageParagraphBound | null>;
-    hoverTableRealTime$?: BehaviorSubject<null>;
+    hoverTableRealTime$?: BehaviorSubject<ITableBound | null>;
+    isOnPointerEvent?: boolean;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
+    selectionStart$?: Subject<unknown>;
     textSelection$?: Subject<unknown>;
     tableCellBounds?: Map<string, Array<{ colIndex: number; pageIndex: number; rect: { bottom: number; left: number; right: number; top: number }; rowIndex: number; tableId: string }>>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
@@ -1266,6 +1312,8 @@ function createService(options: {
         {
             onInputBefore$: options.inputBefore$ ?? new Subject(),
             onKeydown$: options.keydown$ ?? new Subject(),
+            onSelectionStart$: options.selectionStart$ ?? new Subject(),
+            isOnPointerEvent: options.isOnPointerEvent ?? false,
         } as never
     );
 }

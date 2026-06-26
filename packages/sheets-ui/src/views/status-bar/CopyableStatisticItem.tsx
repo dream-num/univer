@@ -16,6 +16,7 @@
 
 import type { IFunctionNames } from '@univerjs/engine-formula';
 import type { FC } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService, numfmt } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT } from '@univerjs/engine-formula';
@@ -61,11 +62,11 @@ export const CopyableStatisticItem: FC<IStatisticItem> = (item: IStatisticItem) 
         await clipboardService.writeText(item.value.toString());
         messageService.show({
             type: MessageType.Success,
-            content: localeService.t('sheets-ui.statusbar.copied'),
+            content: localeService.t<LocaleKey>('sheets-ui.statusbar.copied'),
         });
     };
     return (
-        <Tooltip title={localeService.t('sheets-ui.statusbar.clickToCopy')} placement="top">
+        <Tooltip title={localeService.t<LocaleKey>('sheets-ui.statusbar.clickToCopy')} placement="top">
             <div
                 key={item.name}
                 className={`

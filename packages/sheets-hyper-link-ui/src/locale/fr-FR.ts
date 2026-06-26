@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Insérer un lien',
         },
+        permission: {
+            hyperLinkErr: 'Vous n’avez pas l’autorisation d’insérer un lien.',
+        },
         message: {
             noSheet: 'La feuille cible a été supprimée',
             refError: 'Plage invalide',

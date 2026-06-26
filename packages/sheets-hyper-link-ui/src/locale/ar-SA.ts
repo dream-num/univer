@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'إدراج ارتباط تشعبي',
         },
+        permission: {
+            hyperLinkErr: 'ليس لديك إذن لإدراج رابط.',
+        },
         message: {
             noSheet: 'تم حذف الورقة المستهدفة',
             refError: 'نطاق غير صالح',

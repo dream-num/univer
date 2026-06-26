@@ -37,7 +37,6 @@ export function ClassicMenu({
               dark:!univer-bg-gray-900
             `}
             role="tablist"
-            aria-label={localeService.t('ui.ribbon.menu')}
         >
             {ribbon.map((group) => {
                 const isActive = activatedTab === group.key;

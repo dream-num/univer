@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: '添加链接',
         },
+        permission: {
+            hyperLinkErr: '你没有权限插入链接。',
+        },
         message: {
             noSheet: '该子表已被删除',
             refError: '错误的引用',

@@ -7,6 +7,11 @@ on:
     pull_request:
         branches:
             - dev
+        types:
+            - opened
+            - synchronize
+            - reopened
+            - ready_for_review
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +25,7 @@ env:
 
 jobs:
     build:
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
 
         env:

@@ -58,6 +58,7 @@ const locale: typeof enUS = {
         },
         replace: {
             'all-success': 'Toutes les {0} correspondances ont été remplacées',
+            'partial-success': '{0} correspondances ont été remplacées, {1} ont échoué',
             'all-failure': 'Échec du remplacement',
             confirm: {
                 title: 'Êtes-vous sûr de vouloir remplacer toutes les correspondances ?',

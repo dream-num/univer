@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Zrušiť zlúčenie',
             overlappingError: 'Nedá sa zlúčiť prekrývajúce sa oblasti',
             partiallyError: 'Túto operáciu nemožno vykonať na čiastočne zlúčených bunkách',
+            confirm: {
+                warning: 'Upozornenie',
+                dismantleMergeCellWarning: 'Táto operácia zruší zlúčenie buniek. Pokračovať?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Túto operáciu nemožno vykonať',
+                notAllowedToInsertRange: 'Táto operácia nie je povolená, pretože rozsah obsahuje filtrované riadky.',
+            },
         },
         textWrap: {
             overflow: 'Pretečenie',

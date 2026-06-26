@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Annuler la fusion',
             overlappingError: 'Impossible de fusionner des zones qui se chevauchent',
             partiallyError: 'Impossible d\'effectuer cette opération sur des cellules partiellement fusionnées',
+            confirm: {
+                warning: 'Avertissement',
+                dismantleMergeCellWarning: 'Cette opération annulera la fusion des cellules fusionnées. Continuer ?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Impossible d’effectuer cette opération',
+                notAllowedToInsertRange: 'Cette opération n’est pas autorisée, car la plage contient des lignes filtrées.',
+            },
         },
         textWrap: {
             overflow: 'Débordement',

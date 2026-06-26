@@ -2,7 +2,8 @@ name: 🌐 Deploy to GitHub Pages
 
 on:
     push:
-        branches: [dev]
+        branches:
+            - dev
         tags:
             - 'v*.*.*'
             - 'v*.*.*-alpha.*'
@@ -109,17 +110,6 @@ jobs:
 
                       echo "Prune preview for PR #${pr_number}"
                   done
-
-            - name: Check Pages publish size
-              run: |
-                  size_kb=$(du -sk dist | awk '{print $1}')
-                  max_kb=950000
-                  echo "Pages publish directory size: ${size_kb} KB"
-                  if [ "$size_kb" -gt "$max_kb" ]; then
-                      echo "Pages publish directory exceeds ${max_kb} KB. Largest entries:"
-                      du -h -d 2 dist | sort -hr | head -50
-                      exit 1
-                  fi
 
             # ================= Deploy to GitHub Pages =================
             - name: 🚀 Deploy to GitHub Pages

@@ -488,6 +488,33 @@ describe('selection utils', () => {
         expect(rectRange?.rectRanges[0]).toBeInstanceOf(RectRange);
     });
 
+    it('keeps text selection inside one table cell even when glyph paths differ', () => {
+        const anchor = createNodePosition(['pages', 0, 'skeTables', 'table-1#-#0', 'rows', 0, 'cells', 0, 'sections', 0, 'columns', 0, 'lines', 0, 'divides', 0, 'glyphs', 0]);
+        const focus = createNodePosition(['pages', 0, 'skeTables', 'table-1#-#0', 'rows', 0, 'cells', 0, 'sections', 0, 'columns', 0, 'lines', 1, 'divides', 0, 'glyphs', 3], 3);
+        const cellPage = {} as { parent?: unknown };
+        const row = { index: 0, cells: [cellPage] };
+        cellPage.parent = row;
+        const skeleton = {
+            findGlyphByPosition: vi
+                .fn()
+                .mockReturnValueOnce(createGlyphInCell(cellPage))
+                .mockReturnValueOnce(createGlyphInCell(cellPage)),
+        } as never;
+
+        vi.spyOn(NodePositionConvertToRectRange.prototype, 'getNodePositionGroup').mockReturnValue([
+            {
+                anchor,
+                focus,
+            },
+        ] as never);
+
+        const result = getRangeListFromSelection(anchor, focus, {} as never, createDocument(), skeleton, {} as never, '', -1);
+
+        expect(result?.textRanges).toHaveLength(1);
+        expect(result?.rectRanges).toHaveLength(0);
+        expect(result?.textRanges[0]).toBeInstanceOf(TextRange);
+    });
+
     it('expands core rect selection records to cover intersecting merged cells', () => {
         const { anchor, focus, skeleton } = createRectRangeConvertorHarness();
         const convertor = new NodePositionConvertToRectRange({

@@ -23,7 +23,7 @@ import { whenDocAndEditorFocused } from './utils';
 
 function moveCursorShortcut(
     direction: Direction,
-    granularity: 'word' | 'line' | 'document',
+    granularity: 'word' | 'line' | 'paragraph' | 'document',
     binding: number,
     mac: number = binding,
     win: number = binding,
@@ -45,7 +45,7 @@ function moveCursorShortcut(
 
 function moveSelectionShortcut(
     direction: Direction,
-    granularity: 'word' | 'line' | 'document',
+    granularity: 'word' | 'line' | 'paragraph' | 'document',
     binding: number,
     mac: number = binding,
     win: number = binding,
@@ -219,6 +219,34 @@ export const MoveSelectionWordRightShortcut = moveSelectionShortcut(
     'word',
     KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
     KeyCode.ARROW_RIGHT | MetaKeys.ALT | MetaKeys.SHIFT
+);
+
+export const MoveCursorParagraphUpShortcut = moveCursorShortcut(
+    Direction.UP,
+    'paragraph',
+    KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND,
+    KeyCode.ARROW_UP | MetaKeys.ALT
+);
+
+export const MoveCursorParagraphDownShortcut = moveCursorShortcut(
+    Direction.DOWN,
+    'paragraph',
+    KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
+    KeyCode.ARROW_DOWN | MetaKeys.ALT
+);
+
+export const MoveSelectionParagraphUpShortcut = moveSelectionShortcut(
+    Direction.UP,
+    'paragraph',
+    KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    KeyCode.ARROW_UP | MetaKeys.ALT | MetaKeys.SHIFT
+);
+
+export const MoveSelectionParagraphDownShortcut = moveSelectionShortcut(
+    Direction.DOWN,
+    'paragraph',
+    KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    KeyCode.ARROW_DOWN | MetaKeys.ALT | MetaKeys.SHIFT
 );
 
 export const SelectAllShortcut: IShortcutItem = {

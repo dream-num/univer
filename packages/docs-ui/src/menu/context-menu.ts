@@ -75,6 +75,12 @@ function notInTableSubscriber(subscriber: Subscriber<boolean>, docSelectionManag
 
     if (activeRange && (rectRanges == null || rectRanges.length === 0)) {
         const { segmentId, startOffset, endOffset } = activeRange;
+        const isCollapsed = activeRange.collapsed === true || startOffset === endOffset;
+        if (!isCollapsed) {
+            subscriber.next(true);
+            return;
+        }
+
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
 

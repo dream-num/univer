@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/zh-TW.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: '搜尋',
+            random: '隨機表情',
+            recents: '最近使用',
+            emojis: '表情',
+            animals: '動物',
+            food: '食物',
+            activities: '活動',
+            places: '地點',
+            objects: '物品',
+            symbols: '符號',
+            searchResults: '搜尋結果',
+            noResults: '找不到表情',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: '正文',

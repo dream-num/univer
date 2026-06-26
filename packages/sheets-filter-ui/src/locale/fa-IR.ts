@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'تغییر حالت فیلتر',
         },
+        permission: {
+            filterErr: 'شما مجوز استفاده از فیلتر را ندارید.',
+        },
         panel: {
             'clear-filter': 'پاک کردن فیلتر',
             cancel: 'انصراف',

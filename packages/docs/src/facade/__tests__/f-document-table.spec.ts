@@ -16,10 +16,11 @@
 
 import type { Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
+import { DocumentBlockType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTableDocument, createTestBed } from './create-test-bed';
 
-describe('FDocTable', () => {
+describe('FDocumentTable', () => {
     let univer: Univer;
     let document: FDocument;
 
@@ -38,20 +39,19 @@ describe('FDocTable', () => {
         univer.dispose();
     });
 
-    it('should expose table identity and remove the table from document body', () => {
+    it('exposes table identity and removes the table from document body', () => {
         const body = document.getBody();
-        const table = body.getChild(0).asTable();
+        const table = body.getElement(0)!.asTable();
 
-        expect(table.getType()).toBe('table');
+        expect(table.getType()).toBe(DocumentBlockType.TABLE);
         expect(table.getKey()).toBe('table-1');
         expect(table.getParent()).toBe(body);
-        expect(table.getTableId()).toBe('table-1');
-        expect(body.getTable(table.getTableId()).tableId).toBe('table-1');
-        expect(table.removeFromParent()).toBe(true);
+        expect(table.getTable().tableId).toBe('table-1');
+        expect(body.removeTable(table)).toBe(true);
         expect(document.save().body?.tables).toEqual([]);
 
         createDocumentFacade();
-        expect(document.getBody().removeTable('table-1')).toBe(true);
+        expect(document.getBody().getElement(0)!.asTable().remove()).toBe(true);
         expect(document.save().body?.dataStream).toBe('aa\r\n');
     });
 });

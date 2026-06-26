@@ -26,6 +26,9 @@ const locale: typeof enUS = {
         shortcut: {
             'smart-toggle-filter': 'Chuyển đổi lọc',
         },
+        permission: {
+            filterErr: 'Bạn không có quyền sử dụng bộ lọc.',
+        },
         panel: {
             'clear-filter': 'Xóa lọc',
             cancel: 'Hủy bỏ',

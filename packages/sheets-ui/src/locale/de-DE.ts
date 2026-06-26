@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Verbindung aufheben',
             overlappingError: 'Überlappende Bereiche können nicht verbunden werden',
             partiallyError: 'Dieser Vorgang kann nicht für teilweise verbundene Zellen ausgeführt werden',
+            confirm: {
+                warning: 'Warnung',
+                dismantleMergeCellWarning: 'Dieser Vorgang hebt verbundene Zellen auf. Fortfahren?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Dieser Vorgang kann nicht ausgeführt werden',
+                notAllowedToInsertRange: 'Dieser Vorgang ist nicht erlaubt, da der Bereich gefilterte Zeilen enthält.',
+            },
         },
         textWrap: {
             overflow: 'Überlauf',

@@ -17,7 +17,18 @@
 import type { DocumentDataModel, ISize, PaperType } from '@univerjs/core';
 import type { IConfirmChildrenProps } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import { DocumentFlavor, IUniverInstanceService, LocaleService, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    DocumentFlavor,
+    IUniverInstanceService,
+    LocaleService,
+    MODERN_DOCUMENT_WIDTH,
+    ModernDocumentWidthMode,
+    PAGE_SIZE,
+    PageOrientType,
+    PAPER_TYPES,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { clsx, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -172,7 +183,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         })}
                         onClick={() => handleModeChange(mode)}
                     >
-                        {localeService.t(mode === DocumentFlavor.MODERN ? 'docs-ui.page-settings.modern-mode' : 'docs-ui.page-settings.classic-mode')}
+                        {localeService.t<LocaleKey>(mode === DocumentFlavor.MODERN ? 'docs-ui.page-settings.modern-mode' : 'docs-ui.page-settings.classic-mode')}
                     </button>
                 ))}
             </div>
@@ -180,7 +191,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
             {settings.mode === DocumentFlavor.MODERN
                 ? (
                     <div className="univer-flex univer-flex-col univer-gap-2.5">
-                        <SettingsLabel>{localeService.t('docs-ui.page-settings.modern-width')}</SettingsLabel>
+                        <SettingsLabel>{localeService.t<LocaleKey>('docs-ui.page-settings.modern-width')}</SettingsLabel>
                         <div className="univer-grid univer-grid-cols-3 univer-gap-2">
                             {MODERN_WIDTH_OPTIONS.map((option) => (
                                 <button
@@ -211,7 +222,9 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 : (
                     <>
                         <div className="univer-flex univer-flex-col univer-gap-2">
-                            <SettingsLabel>{localeService.t('docs-ui.page-settings.paper-size')}</SettingsLabel>
+                            <SettingsLabel>
+                                {localeService.t<LocaleKey>('docs-ui.page-settings.paper-size')}
+                            </SettingsLabel>
                             <Select
                                 value={settings.paperSize}
                                 onChange={handlePaperSizeChange}
@@ -223,11 +236,13 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         </div>
 
                         <div className="univer-flex univer-flex-col univer-gap-2">
-                            <SettingsLabel>{localeService.t('docs-ui.page-settings.custom-paper-size')}</SettingsLabel>
+                            <SettingsLabel>{localeService.t<LocaleKey>('docs-ui.page-settings.custom-paper-size')}</SettingsLabel>
                             <div className="univer-flex univer-flex-col univer-gap-2.5">
                                 <div className="univer-flex univer-gap-2.5">
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.top')}</SettingsLabel>
+                                        <SettingsLabel muted>
+                                            {localeService.t<LocaleKey>('docs-ui.page-settings.top')}
+                                        </SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}
@@ -237,7 +252,9 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         />
                                     </div>
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.bottom')}</SettingsLabel>
+                                        <SettingsLabel muted>
+                                            {localeService.t<LocaleKey>('docs-ui.page-settings.bottom')}
+                                        </SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}
@@ -249,7 +266,9 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 </div>
                                 <div className="univer-flex univer-gap-2.5">
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.left')}</SettingsLabel>
+                                        <SettingsLabel muted>
+                                            {localeService.t<LocaleKey>('docs-ui.page-settings.left')}
+                                        </SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}
@@ -259,7 +278,9 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         />
                                     </div>
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.right')}</SettingsLabel>
+                                        <SettingsLabel muted>
+                                            {localeService.t<LocaleKey>('docs-ui.page-settings.right')}
+                                        </SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}

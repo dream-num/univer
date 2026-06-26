@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'リンクの挿入',
         },
+        permission: {
+            hyperLinkErr: 'リンクを挿入する権限がありません。',
+        },
         message: {
             noSheet: '対象のワークシートが削除されました',
             refError: '無効な範囲です',

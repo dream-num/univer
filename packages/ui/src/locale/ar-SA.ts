@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/ar-SA.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: 'بحث',
+            random: 'رمز تعبيري عشوائي',
+            recents: 'الأخيرة',
+            emojis: 'الرموز التعبيرية',
+            animals: 'الحيوانات',
+            food: 'الطعام',
+            activities: 'الأنشطة',
+            places: 'الأماكن',
+            objects: 'العناصر',
+            symbols: 'الرموز',
+            searchResults: 'نتائج البحث',
+            noResults: 'لم يتم العثور على رمز تعبيري',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'عادي',

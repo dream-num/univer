@@ -12,7 +12,7 @@ jobs:
         runs-on: minimum-runner
         steps:
             - name: Sync Gitee
-              uses: jikkai/sync-gitee@v1
+              uses: jikkai/sync-gitee@main
               with:
                   repository: dream-num/univer
                   username: ${{ secrets.GITEE_USERNAME }}

@@ -81,7 +81,7 @@
         "@radix-ui/react-popover": "^1.1.16",
         "@radix-ui/react-separator": "^1.1.9",
         "@radix-ui/react-slot": "^1.2.5",
-        "@univerjs/icons": "1.12.0",
+        "@univerjs/icons": "1.14.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "react-transition-group": "^4.4.5",

@@ -16,10 +16,11 @@
 
 import type { Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
+import { DocumentBlockType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCustomBlockDocument, createTestBed } from './create-test-bed';
 
-describe('FDocCustomBlock', () => {
+describe('FDocumentCustomBlock', () => {
     let univer: Univer;
     let document: FDocument;
 
@@ -38,20 +39,19 @@ describe('FDocCustomBlock', () => {
         univer.dispose();
     });
 
-    it('should expose custom block identity and remove the block from document body', () => {
+    it('exposes custom block identity and removes the block from document body', () => {
         const body = document.getBody();
-        const customBlock = body.getChild(0).asCustomBlock();
+        const customBlock = body.getElement(0)!.asCustomBlock();
 
-        expect(customBlock.getType()).toBe('customBlock');
+        expect(customBlock.getType()).toBe(DocumentBlockType.CUSTOM_BLOCK);
         expect(customBlock.getKey()).toBe('custom-1');
         expect(customBlock.getParent()).toBe(body);
-        expect(customBlock.getBlockId()).toBe('custom-1');
-        expect(body.getCustomBlock(customBlock.getBlockId()).blockId).toBe('custom-1');
-        expect(customBlock.removeFromParent()).toBe(true);
+        expect(customBlock.getCustomBlock().blockId).toBe('custom-1');
+        expect(body.removeCustomBlock(customBlock)).toBe(true);
         expect(document.save().body?.customBlocks).toEqual([]);
 
         createDocumentFacade();
-        expect(document.getBody().removeCustomBlock('custom-1')).toBe(true);
+        expect(document.getBody().getElement(0)!.asCustomBlock().remove()).toBe(true);
         expect(document.save().body?.dataStream).toBe('\raa\r\n');
     });
 });

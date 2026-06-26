@@ -17,6 +17,7 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
@@ -62,7 +63,7 @@ export class TextLengthValidator extends BaseSheetValidator {
         const formula1Success = Tools.isDefine(rule.formula1) && this._isFormulaOrInt(rule.formula1);
         const formula2Success = Tools.isDefine(rule.formula2) && this._isFormulaOrInt(rule.formula2);
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
-        const errorMsg = this.localeService.t('sheets-data-validation.validFail.number');
+        const errorMsg = this.localeService.t<LocaleKey>('sheets-data-validation.validFail.number');
         if (isTwoFormula) {
             return {
                 success: formula1Success && formula2Success,

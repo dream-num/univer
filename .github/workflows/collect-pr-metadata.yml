@@ -2,8 +2,14 @@ name: 🎬 Setup
 
 on:
     pull_request:
-        branches: [dev]
-        types: [opened, synchronize, reopened, closed]
+        branches:
+            - dev
+        types:
+            - opened
+            - synchronize
+            - reopened
+            - closed
+            - ready_for_review
 
 permissions:
     contents: read
@@ -19,7 +25,7 @@ env:
 jobs:
     set-pr-info:
         name: set PR info
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && !github.event.pull_request.draft
         runs-on: minimum-runner
         steps:
             - name: Save PR info

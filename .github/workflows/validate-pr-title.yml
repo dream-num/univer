@@ -6,6 +6,7 @@ on:
             - opened
             - edited
             - synchronize
+            - ready_for_review
 
 permissions:
     pull-requests: read
@@ -13,7 +14,7 @@ permissions:
 jobs:
     validate:
         name: validate PR title
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && !github.event.pull_request.draft
         runs-on: minimum-runner
 
         steps:

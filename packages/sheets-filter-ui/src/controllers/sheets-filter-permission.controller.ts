@@ -17,6 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import type { IOpenFilterPanelOperationParams } from '../commands/operations/sheets-filter.operation';
+import type { LocaleKey } from '../locale/types';
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetPermissionCheckController, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
@@ -80,7 +81,7 @@ export class SheetsFilterPermissionController extends Disposable {
                     }
 
                     if (!permission) {
-                        this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t('sheets-filter-ui.permission.filterErr'));
+                        this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-filter-ui.permission.filterErr'));
                     }
                 }
                 if (command.id === OpenFilterPanelOperation.id) {
@@ -96,7 +97,7 @@ export class SheetsFilterPermissionController extends Disposable {
                             worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
                         }, [colRange], unitId, subUnitId);
                         if (!permission) {
-                            this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t('sheets-filter-ui.permission.filterErr'));
+                            this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-filter-ui.permission.filterErr'));
                         }
                     }
                 }

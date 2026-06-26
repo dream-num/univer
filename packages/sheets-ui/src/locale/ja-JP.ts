@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: '結合解除',
             overlappingError: '重なっている範囲は結合できません',
             partiallyError: '部分的に結合されたセルには操作できません',
+            confirm: {
+                warning: '警告',
+                dismantleMergeCellWarning: 'この操作により結合セルが解除されます。続行しますか？',
+            },
         },
         filter: {
+            confirm: {
+                error: 'この操作は実行できません',
+                notAllowedToInsertRange: '範囲にフィルターされた行が含まれているため、この操作は許可されていません。',
+            },
         },
         textWrap: {
             overflow: 'オーバーフロー',

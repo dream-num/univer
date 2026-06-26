@@ -18,9 +18,12 @@ import type { ICommandInfo, Nullable } from '@univerjs/core';
 import type {
     DocumentSkeleton,
     IDocumentSkeletonCached,
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
     IDocumentSkeletonTable,
     INodePosition,
     INodeSearch,
@@ -37,18 +40,13 @@ import {
     RANGE_DIRECTION,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, IRenderManagerService, LineType } from '@univerjs/engine-render';
 import { getDocObject } from '../basics/component-tools';
 import {
-    findAboveCell,
-    findBellowCell,
-    findLineBeforeAndAfterTable,
     findTableAfterLine,
     findTableBeforeLine,
     firstLineInCell,
-    firstLineInTable,
     lastLineInCell,
-    lastLineInTable,
 } from '../basics/table';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
@@ -60,6 +58,11 @@ interface IWholeEntityRange {
     wholeEntity?: boolean;
     startIndex: number;
     endIndex: number;
+}
+
+interface ILineSearchTarget {
+    line: IDocumentSkeletonLine;
+    offsetLeft: number;
 }
 
 export class DocMoveCursorController extends Disposable {
@@ -173,7 +176,14 @@ export class DocMoveCursorController extends Disposable {
             : rangeDirection === RANGE_DIRECTION.FORWARD
                 ? endOffset
                 : startOffset;
-        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody();
+
+        if (body == null) {
+            return;
+        }
+
+        const dataStreamLength = body.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const customRanges = docDataModel.getCustomRanges() ?? [];
 
         if (granularity !== 'character') {
             const nextOffset = this._getCursorOffsetByGranularity(
@@ -183,22 +193,37 @@ export class DocMoveCursorController extends Disposable {
                 granularity,
                 normalizedSegmentId,
                 normalizedSegmentPage,
-                dataStreamLength
+                dataStreamLength,
+                body.dataStream
             );
 
             if (nextOffset == null || nextOffset === focusOffset) {
                 return;
             }
 
+            const normalizedNextOffset = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                nextOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (normalizedNextOffset == null || normalizedNextOffset === focusOffset) {
+                return;
+            }
+
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: anchorOffset,
-                    endOffset: nextOffset,
+                    endOffset: normalizedNextOffset,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), nextOffset);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), normalizedNextOffset);
 
             return;
         }
@@ -230,9 +255,17 @@ export class DocMoveCursorController extends Disposable {
 
             if (newPos == null) {
                 // move selection
-                const newFocusOffset = direction === Direction.UP ? 0 : dataStreamLength - 2;
+                const newFocusOffset = this._normalizeRenderableCursorOffset(
+                    skeleton,
+                    body.dataStream,
+                    customRanges,
+                    direction === Direction.UP ? 0 : dataStreamLength - 2,
+                    direction,
+                    normalizedSegmentId,
+                    normalizedSegmentPage
+                );
 
-                if (newFocusOffset === focusOffset) {
+                if (newFocusOffset == null || newFocusOffset === focusOffset) {
                     return;
                 }
 
@@ -251,17 +284,30 @@ export class DocMoveCursorController extends Disposable {
                 newPos,
                 newPos
             ).cursorList[0];
+            const newFocusOffset = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                newActiveRange.endOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (newFocusOffset == null || newFocusOffset === focusOffset) {
+                return;
+            }
 
             // move selection
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: anchorOffset,
-                    endOffset: newActiveRange.endOffset,
+                    endOffset: newFocusOffset,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newActiveRange.endOffset);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newFocusOffset);
         }
     }
 
@@ -318,14 +364,27 @@ export class DocMoveCursorController extends Disposable {
                 granularity,
                 normalizedSegmentId,
                 normalizedSegmentPage,
-                dataStreamLength
+                dataStreamLength,
+                body.dataStream
             );
 
             if (cursor == null) {
                 return;
             }
 
-            cursor = this._normalizeCursorOffset(body.dataStream, customRanges, cursor, direction);
+            cursor = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                cursor,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (cursor == null) {
+                return;
+            }
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -378,17 +437,30 @@ export class DocMoveCursorController extends Disposable {
                 }
             }
 
-            cursor = this._normalizeWholeEntityRanges(customRanges, cursor, direction);
+            cursor = this._normalizeCursorOffset(body.dataStream, customRanges, cursor, direction);
+            const normalizedCursor = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                cursor,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (normalizedCursor == null) {
+                return;
+            }
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    startOffset: Math.max(0, cursor),
-                    endOffset: Math.max(0, cursor),
+                    startOffset: normalizedCursor,
+                    endOffset: normalizedCursor,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), normalizedCursor);
         } else {
             const startNode = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
             const endNode = skeleton.findNodeByCharIndex(endOffset, segmentId, segmentPage);
@@ -408,17 +480,37 @@ export class DocMoveCursorController extends Disposable {
                 if (collapsed) {
                     // Move cursor to the beginning place when arrow up at first line,
                     // and move cursor to the end place when arrow down at last line.
-                    cursor = direction === Direction.UP ? 0 : dataStreamLength - 2;
+                    cursor = this._normalizeRenderableCursorOffset(
+                        skeleton,
+                        body.dataStream,
+                        customRanges,
+                        direction === Direction.UP ? 0 : dataStreamLength - 2,
+                        direction,
+                        normalizedSegmentId,
+                        normalizedSegmentPage
+                    );
                 } else {
                     // Handle at the startOffset at first line when arrow up,
                     // and endOffset at the last line when arrow down.
-                    cursor = direction === Direction.UP ? startOffset : endOffset;
+                    cursor = this._normalizeRenderableCursorOffset(
+                        skeleton,
+                        body.dataStream,
+                        customRanges,
+                        direction === Direction.UP ? startOffset : endOffset,
+                        direction,
+                        normalizedSegmentId,
+                        normalizedSegmentPage
+                    );
+                }
+
+                if (cursor == null) {
+                    return;
                 }
 
                 this._textSelectionManagerService.replaceTextRanges([
                     {
-                        startOffset: Math.max(0, cursor),
-                        endOffset: Math.max(0, cursor),
+                        startOffset: cursor,
+                        endOffset: cursor,
                         style,
                     },
                 ], false);
@@ -430,16 +522,30 @@ export class DocMoveCursorController extends Disposable {
                 newPos,
                 newPos
             ).cursorList[0];
+            const cursor = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                newActiveRange.endOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+
+            if (cursor == null) {
+                return;
+            }
 
             // move selection
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    ...newActiveRange,
+                    startOffset: cursor,
+                    endOffset: cursor,
                     style,
                 },
             ], false);
 
-            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newActiveRange.endOffset);
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
         }
     }
 
@@ -450,11 +556,14 @@ export class DocMoveCursorController extends Disposable {
         granularity: DocCursorMoveGranularity,
         segmentId: string,
         segmentPage: number,
-        dataStreamLength: number
+        dataStreamLength: number,
+        dataStream = ''
     ): Nullable<number> {
         switch (granularity) {
             case 'document':
                 return direction === Direction.LEFT || direction === Direction.UP ? 0 : dataStreamLength - 2;
+            case 'paragraph':
+                return this._getParagraphBoundaryOffset(dataStream, focusOffset, direction);
             case 'line':
                 return this._getLineBoundaryOffset(skeleton, focusOffset, direction, segmentId, segmentPage, dataStreamLength);
             case 'word':
@@ -463,6 +572,46 @@ export class DocMoveCursorController extends Disposable {
             default:
                 return null;
         }
+    }
+
+    private _getParagraphBoundaryOffset(
+        dataStream: string,
+        focusOffset: number,
+        direction: Direction
+    ): Nullable<number> {
+        if (direction !== Direction.UP && direction !== Direction.DOWN) {
+            return;
+        }
+
+        if (dataStream.length === 0) {
+            return 0;
+        }
+
+        const cursor = Math.min(Math.max(0, focusOffset), dataStream.length - 1);
+
+        if (direction === Direction.UP) {
+            const currentParagraphStart = this._getCurrentParagraphStartOffset(dataStream, cursor);
+            if (cursor > currentParagraphStart) {
+                return currentParagraphStart;
+            }
+
+            return this._getCurrentParagraphStartOffset(dataStream, Math.max(0, currentParagraphStart - 1));
+        }
+
+        const nextParagraphEnd = dataStream.indexOf(DataStreamTreeTokenType.PARAGRAPH, cursor);
+
+        return nextParagraphEnd === -1 ? dataStream.length - 1 : nextParagraphEnd + 1;
+    }
+
+    private _getCurrentParagraphStartOffset(dataStream: string, cursor: number): number {
+        for (let index = Math.min(cursor - 1, dataStream.length - 1); index >= 0; index--) {
+            const token = dataStream[index];
+            if (token === DataStreamTreeTokenType.PARAGRAPH || token === DataStreamTreeTokenType.SECTION_BREAK) {
+                return index + 1;
+            }
+        }
+
+        return 0;
     }
 
     private _getWordBoundaryOffset(
@@ -592,6 +741,91 @@ export class DocMoveCursorController extends Disposable {
         return this._normalizeWholeEntityRanges(customRanges, cursor, direction);
     }
 
+    private _normalizeRenderableCursorOffset(
+        skeleton: DocumentSkeleton,
+        dataStream: string,
+        customRanges: IWholeEntityRange[],
+        cursor: number,
+        direction: Direction,
+        segmentId: string,
+        segmentPage: number
+    ): Nullable<number> {
+        const boundedCursor = Math.min(Math.max(0, cursor), Math.max(0, dataStream.length - 1));
+        const primaryCursor = this._findNearestRenderableCursorOffset(
+            skeleton,
+            dataStream,
+            customRanges,
+            boundedCursor,
+            direction,
+            segmentId,
+            segmentPage
+        );
+
+        if (primaryCursor != null) {
+            return primaryCursor;
+        }
+
+        const fallbackDirection = direction === Direction.LEFT || direction === Direction.UP ? Direction.DOWN : Direction.UP;
+
+        return this._findNearestRenderableCursorOffset(
+            skeleton,
+            dataStream,
+            customRanges,
+            boundedCursor,
+            fallbackDirection,
+            segmentId,
+            segmentPage
+        );
+    }
+
+    private _findNearestRenderableCursorOffset(
+        skeleton: DocumentSkeleton,
+        dataStream: string,
+        customRanges: IWholeEntityRange[],
+        cursor: number,
+        direction: Direction,
+        segmentId: string,
+        segmentPage: number
+    ): Nullable<number> {
+        const step = direction === Direction.LEFT || direction === Direction.UP ? -1 : 1;
+        let current = Math.min(Math.max(0, cursor), Math.max(0, dataStream.length - 1));
+        const visited = new Set<number>();
+
+        while (current >= 0 && current < dataStream.length && !visited.has(current)) {
+            visited.add(current);
+
+            const normalizedCursor = this._normalizeCursorOffset(dataStream, customRanges, current, direction);
+
+            if (normalizedCursor < 0 || normalizedCursor >= dataStream.length) {
+                return;
+            }
+
+            if (this._isRenderableCursorOffset(skeleton, dataStream, normalizedCursor, segmentId, segmentPage)) {
+                return normalizedCursor;
+            }
+
+            current = normalizedCursor + step;
+        }
+    }
+
+    private _isRenderableCursorOffset(
+        skeleton: DocumentSkeleton,
+        dataStream: string,
+        cursor: number,
+        segmentId: string,
+        segmentPage: number
+    ): boolean {
+        if (cursor < 0 || cursor >= dataStream.length) {
+            return false;
+        }
+
+        if (this._getNonRenderableCursorTokens().includes(dataStream[cursor])) {
+            return false;
+        }
+
+        return skeleton.findNodePositionByCharIndex(cursor, true, segmentId, segmentPage) != null;
+    }
+
     private _normalizeWholeEntityRanges(
         customRanges: IWholeEntityRange[],
         cursor: number,
@@ -629,6 +863,16 @@ export class DocMoveCursorController extends Disposable {
         return tokens;
     }
 
+    private _getNonRenderableCursorTokens(): string[] {
+        return [
+            ...this._getCursorSkipTokens(),
+            DataStreamTreeTokenType.COLUMN_GROUP_START,
+            DataStreamTreeTokenType.COLUMN_GROUP_END,
+            DataStreamTreeTokenType.COLUMN_START,
+            DataStreamTreeTokenType.COLUMN_END,
+        ];
+    }
+
     private _getTopOrBottomPosition(
         docSkeleton: DocumentSkeleton,
         glyph: Nullable<IDocumentSkeletonGlyph>,
@@ -642,13 +886,13 @@ export class DocMoveCursorController extends Disposable {
 
         const offsetLeft = this._getGlyphLeftOffsetInLine(glyph);
 
-        const line = this._getNextOrPrevLine(glyph, direction, skipCellContent);
+        const target = this._getNextOrPrevLineTarget(glyph, direction, offsetLeft, skipCellContent);
 
-        if (line == null) {
+        if (target == null) {
             return;
         }
 
-        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, line, offsetLeft, nodePosition);
+        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, target.line, target.offsetLeft, nodePosition);
 
         if (position == null) {
             return;
@@ -727,7 +971,12 @@ export class DocMoveCursorController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean, skipCellContent = false) {
+    private _getNextOrPrevLineTarget(
+        glyph: IDocumentSkeletonGlyph,
+        direction: boolean,
+        offsetLeft: number,
+        skipCellContent = false
+    ): Nullable<ILineSearchTarget> {
         const divide = glyph.parent;
         const line = divide?.parent;
         const column = line?.parent;
@@ -746,38 +995,37 @@ export class DocMoveCursorController extends Disposable {
 
         let newLine: IDocumentSkeletonLine;
 
-        if (page.type === DocumentSkeletonPageType.CELL && skipCellContent) {
-            const nLine = findAboveOrBellowCellLine(page, direction);
+        if (this._isTableCellContentPage(page) && skipCellContent) {
+            const tableCellTarget = this._getAdjacentTableCellLineTarget(page, direction, offsetLeft);
 
-            if (nLine) {
-                return nLine;
+            if (tableCellTarget != null) {
+                return tableCellTarget;
             }
         }
 
         if (direction === true) {
             newLine = column.lines[currentLineIndex + 1];
-            const tableAfterLine = findTableAfterLine(line, page);
+            const tableTarget = this._getTableLineTargetFromPageLine(line, page, direction, offsetLeft);
 
-            if (tableAfterLine) {
-                const firstLine = firstLineInTable(tableAfterLine);
-                if (firstLine) {
-                    newLine = firstLine;
-                }
+            if (tableTarget != null) {
+                return tableTarget;
             }
         } else {
             newLine = column.lines[currentLineIndex - 1];
-            // If the previous line is behind the table, find the last line of the table.
-            const tableBeforeLine = findTableBeforeLine(line, page);
-            if (tableBeforeLine) {
-                const lastLine = lastLineInTable(tableBeforeLine);
-                if (lastLine) {
-                    newLine = lastLine;
-                }
+            const tableTarget = this._getTableLineTargetFromPageLine(line, page, direction, offsetLeft);
+
+            if (tableTarget != null) {
+                return tableTarget;
             }
         }
 
+        const columnGroupTarget = this._getColumnGroupLineTargetFromBlockLine(newLine, page, direction, offsetLeft);
+        if (columnGroupTarget != null) {
+            return columnGroupTarget;
+        }
+
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
 
         const currentColumnIndex = section.columns.indexOf(column);
@@ -794,7 +1042,7 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
 
         const currentSectionIndex = page.sections.indexOf(section);
@@ -813,11 +1061,18 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
 
-        if (page.type === DocumentSkeletonPageType.CELL) {
-            return findAboveOrBellowCellLine(page, direction);
+        if (this._isColumnGroupContentPage(page)) {
+            const exitTarget = this._getColumnGroupExitLineTarget(page, direction, offsetLeft);
+            if (exitTarget != null) {
+                return exitTarget;
+            }
+        }
+
+        if (this._isTableCellContentPage(page)) {
+            return this._getAdjacentTableCellLineTarget(page, direction, offsetLeft);
         }
 
         const skeleton: Nullable<IDocumentSkeletonCached> = page.parent as IDocumentSkeletonCached;
@@ -846,8 +1101,367 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (newLine != null) {
-            return newLine;
+            return { line: newLine, offsetLeft };
         }
+    }
+
+    private _getTableLineTargetFromPageLine(
+        line: IDocumentSkeletonLine,
+        page: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const table = direction ? findTableAfterLine(line, page) : findTableBeforeLine(line, page);
+
+        if (table == null) {
+            return;
+        }
+
+        return this._getTableBoundaryLineTarget(table, direction, offsetLeft);
+    }
+
+    private _getTableBoundaryLineTarget(
+        table: IDocumentSkeletonTable,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const rows = direction ? table.rows : [...table.rows].reverse();
+
+        for (const row of rows) {
+            if (row.isRepeatRow) {
+                continue;
+            }
+
+            const target = this._getNearestTableCellLineTarget(row.cells, direction, offsetLeft);
+            if (target != null) {
+                return target;
+            }
+        }
+    }
+
+    private _getAdjacentTableCellLineTarget(
+        cell: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const row = cell.parent as Nullable<IDocumentSkeletonRow>;
+        const table = row?.parent;
+
+        if (row == null || table == null) {
+            return;
+        }
+
+        const hostOffsetLeft = this._getTableCellHostOffsetLeft(cell) + offsetLeft;
+        const adjacentRow = this._findAdjacentTableRow(table, row, direction);
+
+        if (adjacentRow != null) {
+            return this._getNearestTableCellLineTarget(adjacentRow.cells, direction, hostOffsetLeft);
+        }
+
+        const line = this._findLineAroundTable(table, direction);
+
+        if (line == null) {
+            return;
+        }
+
+        return { line, offsetLeft: hostOffsetLeft };
+    }
+
+    private _findAdjacentTableRow(
+        table: IDocumentSkeletonTable,
+        row: IDocumentSkeletonRow,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonRow> {
+        const currentRowIndex = table.rows.indexOf(row);
+        if (currentRowIndex === -1) {
+            return;
+        }
+
+        const step = direction ? 1 : -1;
+        let rowIndex = currentRowIndex + step;
+
+        while (rowIndex >= 0 && rowIndex < table.rows.length) {
+            const adjacentRow = table.rows[rowIndex];
+            if (!adjacentRow.isRepeatRow) {
+                return adjacentRow;
+            }
+
+            rowIndex += step;
+        }
+
+        return this._findAdjacentTableSliceRow(table, direction);
+    }
+
+    private _findAdjacentTableSliceRow(
+        table: IDocumentSkeletonTable,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonRow> {
+        if (!table.tableId.includes('#-#')) {
+            return;
+        }
+
+        const [sourceTableId, sliceIndexText] = table.tableId.split('#-#');
+        const sliceIndex = Number.parseInt(sliceIndexText);
+        const tablePage = table.parent;
+        const skeleton = tablePage?.parent as Nullable<IDocumentSkeletonCached>;
+
+        if (!Number.isFinite(sliceIndex) || skeleton?.pages == null) {
+            return;
+        }
+
+        const nextTableId = `${sourceTableId}#-#${sliceIndex + (direction ? 1 : -1)}`;
+        for (const page of skeleton.pages) {
+            const nextTable = page.skeTables?.get(nextTableId);
+            const rows = nextTable == null ? [] : direction ? nextTable.rows : [...nextTable.rows].reverse();
+            const row = rows.find((item) => !item.isRepeatRow);
+
+            if (row != null) {
+                return row;
+            }
+        }
+    }
+
+    private _getNearestTableCellLineTarget(
+        cells: IDocumentSkeletonPage[],
+        direction: boolean,
+        hostOffsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const candidates = cells
+            .filter((cell) => !(cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered)
+            .map((cell) => ({
+                cell,
+                distance: this._getDistanceToTableCell(cell, hostOffsetLeft),
+            }))
+            .sort((a, b) => a.distance - b.distance);
+
+        for (const candidate of candidates) {
+            const line = direction ? firstLineInCell(candidate.cell) : lastLineInCell(candidate.cell);
+            if (line != null) {
+                return {
+                    line,
+                    offsetLeft: hostOffsetLeft - this._getTableCellHostOffsetLeft(candidate.cell),
+                };
+            }
+        }
+    }
+
+    private _findLineAroundTable(
+        table: IDocumentSkeletonTable,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonLine> {
+        const tablePage = table.parent;
+
+        if (tablePage == null) {
+            return;
+        }
+
+        const pages = (tablePage.parent as Nullable<IDocumentSkeletonCached>)?.pages ?? [tablePage];
+        const lineMatcher = direction
+            ? (line: IDocumentSkeletonLine) => line.st === table.ed + 1
+            : (line: IDocumentSkeletonLine) => line.ed === table.st - 1;
+
+        for (const page of pages) {
+            for (const section of page.sections) {
+                for (const column of section.columns) {
+                    const lines = direction ? column.lines : [...column.lines].reverse();
+                    const line = lines.find(lineMatcher);
+                    if (line != null) {
+                        return line;
+                    }
+                }
+            }
+        }
+    }
+
+    private _getDistanceToTableCell(cell: IDocumentSkeletonPage, offsetLeft: number): number {
+        const left = this._getTableCellHostOffsetLeft(cell);
+        const right = left + this._getTableCellContentWidth(cell);
+
+        if (offsetLeft >= left && offsetLeft <= right) {
+            return 0;
+        }
+
+        return Math.min(Math.abs(offsetLeft - left), Math.abs(offsetLeft - right));
+    }
+
+    private _getTableCellHostOffsetLeft(cell: IDocumentSkeletonPage): number {
+        const row = cell.parent as Nullable<IDocumentSkeletonRow>;
+        const table = row?.parent;
+
+        return (table?.left ?? 0) + (cell.left ?? 0) + (cell.marginLeft ?? 0);
+    }
+
+    private _getTableCellContentWidth(cell: IDocumentSkeletonPage): number {
+        return Math.max(0, (cell.pageWidth ?? 0) - (cell.marginLeft ?? 0) - (cell.marginRight ?? 0));
+    }
+
+    private _isTableCellContentPage(page: IDocumentSkeletonPage): boolean {
+        const row = page.parent as Nullable<IDocumentSkeletonRow>;
+        const table = row?.parent;
+
+        return page.type === DocumentSkeletonPageType.CELL && row != null && table?.rows?.includes(row) === true && row.cells.includes(page);
+    }
+
+    private _getColumnGroupLineTargetFromBlockLine(
+        line: Nullable<IDocumentSkeletonLine>,
+        page: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        if (line == null || line.type !== LineType.BLOCK) {
+            return;
+        }
+
+        const columnGroup = this._findColumnGroupByBlockLine(page, line);
+        if (columnGroup == null) {
+            return;
+        }
+
+        return this._getColumnGroupContentLineTarget(columnGroup, direction, offsetLeft);
+    }
+
+    private _getColumnGroupContentLineTarget(
+        columnGroup: IDocumentSkeletonColumnGroup,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const candidates = columnGroup.columns
+            .map((column) => ({
+                column,
+                distance: this._getDistanceToColumnGroupColumn(column, offsetLeft),
+            }))
+            .sort((a, b) => a.distance - b.distance);
+
+        for (const candidate of candidates) {
+            const line = this._getColumnGroupColumnBoundaryLine(candidate.column, direction);
+            if (line != null) {
+                return {
+                    line,
+                    offsetLeft: offsetLeft - candidate.column.left,
+                };
+            }
+        }
+    }
+
+    private _getColumnGroupExitLineTarget(
+        page: IDocumentSkeletonPage,
+        direction: boolean,
+        offsetLeft: number
+    ): Nullable<ILineSearchTarget> {
+        const columnGroupColumn = page.parent as Nullable<IDocumentSkeletonColumnGroupColumn>;
+        const columnGroup = columnGroupColumn?.parent;
+        const hostPage = columnGroup?.parent;
+
+        if (columnGroupColumn == null || columnGroup == null || hostPage == null) {
+            return;
+        }
+
+        const blockLine = this._findColumnGroupBlockLine(columnGroup);
+        const line = blockLine == null ? undefined : this._getAdjacentLineAroundBlockLine(blockLine, direction);
+
+        if (line == null) {
+            return;
+        }
+
+        return {
+            line,
+            offsetLeft: columnGroupColumn.left + offsetLeft,
+        };
+    }
+
+    private _findColumnGroupByBlockLine(
+        page: IDocumentSkeletonPage,
+        line: IDocumentSkeletonLine
+    ): Nullable<IDocumentSkeletonColumnGroup> {
+        for (const columnGroup of page.skeColumnGroups?.values() ?? []) {
+            if (line.paragraphIndex === columnGroup.ed || (line.st <= columnGroup.ed && line.ed >= columnGroup.st)) {
+                return columnGroup;
+            }
+        }
+    }
+
+    private _findColumnGroupBlockLine(columnGroup: IDocumentSkeletonColumnGroup): Nullable<IDocumentSkeletonLine> {
+        const page = columnGroup.parent;
+        if (page == null) {
+            return;
+        }
+
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    if (line.type === LineType.BLOCK && this._findColumnGroupByBlockLine(page, line) === columnGroup) {
+                        return line;
+                    }
+                }
+            }
+        }
+    }
+
+    private _getAdjacentLineAroundBlockLine(
+        line: IDocumentSkeletonLine,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonLine> {
+        const column = line.parent;
+        const section = column?.parent;
+        const page = section?.parent;
+
+        if (column == null || section == null || page == null) {
+            return;
+        }
+
+        const lineIndex = column.lines.indexOf(line);
+        if (lineIndex === -1) {
+            return;
+        }
+
+        const sameColumnLine = column.lines[direction ? lineIndex + 1 : lineIndex - 1];
+        if (sameColumnLine != null) {
+            return sameColumnLine;
+        }
+
+        const columnIndex = section.columns.indexOf(column);
+        if (columnIndex === -1) {
+            return;
+        }
+
+        if (direction) {
+            return section.columns[columnIndex + 1]?.lines[0];
+        }
+
+        const prevColumnLines = section.columns[columnIndex - 1]?.lines;
+        return prevColumnLines?.[prevColumnLines.length - 1];
+    }
+
+    private _getColumnGroupColumnBoundaryLine(
+        column: IDocumentSkeletonColumnGroupColumn,
+        direction: boolean
+    ): Nullable<IDocumentSkeletonLine> {
+        const sections = direction ? column.page.sections : [...column.page.sections].reverse();
+
+        for (const section of sections) {
+            const columns = direction ? section.columns : [...section.columns].reverse();
+            for (const skeletonColumn of columns) {
+                const lines = direction ? skeletonColumn.lines : [...skeletonColumn.lines].reverse();
+                const line = lines.find((item) => item.type !== LineType.BLOCK);
+                if (line != null) {
+                    return line;
+                }
+            }
+        }
+    }
+
+    private _getDistanceToColumnGroupColumn(column: IDocumentSkeletonColumnGroupColumn, offsetLeft: number): number {
+        if (offsetLeft >= column.left && offsetLeft <= column.left + column.width) {
+            return 0;
+        }
+
+        return Math.min(Math.abs(offsetLeft - column.left), Math.abs(offsetLeft - column.left - column.width));
+    }
+
+    private _isColumnGroupContentPage(page: IDocumentSkeletonPage): boolean {
+        const parent = page.parent as Nullable<IDocumentSkeletonColumnGroupColumn>;
+
+        return parent?.page === page && parent.parent?.columns?.includes(parent) === true;
     }
 
     private _scrollToFocusNodePosition(unitId: string, offset: number) {
@@ -867,38 +1481,4 @@ export class DocMoveCursorController extends Disposable {
     private _getDocObject() {
         return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
-}
-
-function findAboveOrBellowCellLine(
-    page: IDocumentSkeletonPage,
-    direction: boolean
-) {
-    let newLine = null;
-    if (direction === true) {
-        const bellowCell = findBellowCell(page);
-        if (bellowCell) {
-            newLine = firstLineInCell(bellowCell);
-        } else {
-            const table = page.parent?.parent as IDocumentSkeletonTable;
-            const { lineAfterTable } = findLineBeforeAndAfterTable(table);
-
-            if (lineAfterTable) {
-                newLine = lineAfterTable;
-            }
-        }
-    } else {
-        const aboveCell = findAboveCell(page);
-        if (aboveCell) {
-            newLine = lastLineInCell(aboveCell)!;
-        } else {
-            const table = page.parent?.parent as IDocumentSkeletonTable;
-            const { lineBeforeTable } = findLineBeforeAndAfterTable(table);
-
-            if (lineBeforeTable) {
-                newLine = lineBeforeTable;
-            }
-        }
-    }
-
-    return newLine;
 }

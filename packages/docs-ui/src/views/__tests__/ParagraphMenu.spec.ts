@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDocumentBlockRange } from '@univerjs/core';
+import type { IDocumentBlockRange, IDocumentBody, IParagraphStyle } from '@univerjs/core';
 import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
-import { DocumentBlockRangeType, NamedStyleType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { describe, expect, it } from 'vitest';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
@@ -35,6 +35,7 @@ import {
     isEmptyParagraphMenuTarget,
     shouldExecuteParagraphMenuMove,
     shouldUseInsertBelowRange,
+    unwrapBlockRangeBody,
 } from '../ParagraphMenu';
 
 function paragraphBound(): IMutiPageParagraphBound {
@@ -48,7 +49,7 @@ function paragraphBound(): IMutiPageParagraphBound {
 
 function blockTarget(blockRange: IDocumentBlockRange): IDocBlockMenuTarget {
     return {
-        kind: 'blockRange',
+        kind: DocumentBlockType.BLOCK_RANGE,
         key: 'block:quote-1',
         blockRange,
         menuRange: {
@@ -62,6 +63,25 @@ function blockTarget(blockRange: IDocumentBlockRange): IDocBlockMenuTarget {
         },
         emptyMode: false,
         draggable: true,
+    };
+}
+
+function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IParagraphStyle): IDocumentBody {
+    const T = DataStreamTreeTokenType;
+
+    return {
+        dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+        paragraphs: [{
+            startIndex: 2,
+            paragraphId: 'paragraph-1',
+            paragraphStyle,
+        }],
+        blockRanges: [{
+            blockId: 'block-1',
+            blockType,
+            startIndex: 0,
+            endIndex: 2,
+        }],
     };
 }
 
@@ -151,6 +171,59 @@ describe('ParagraphMenu command behavior', () => {
 
         expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).toContain('docs-callout.command.insert');
         expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).not.toContain('docs-quote.command.insert');
+    });
+
+    it('strips block paragraph styles when unwrapping block ranges', () => {
+        const codeResult = unwrapBlockRangeBody(blockRangeBody(DocumentBlockRangeType.CODE, {
+            indentStart: { v: 12 },
+            indentEnd: { v: 8 },
+            spaceAbove: { v: 4 },
+            spaceBelow: { v: 6 },
+            textStyle: { ff: 'monospace', fs: 12 },
+            horizontalAlign: 1,
+        }), {
+            blockId: 'block-1',
+            blockType: DocumentBlockRangeType.CODE,
+            startIndex: 0,
+            endIndex: 2,
+        });
+
+        expect(codeResult.body.paragraphs?.[0].paragraphStyle).toEqual({
+            horizontalAlign: 1,
+        });
+
+        const calloutResult = unwrapBlockRangeBody(blockRangeBody(DocumentBlockRangeType.CALLOUT, {
+            indentStart: { v: 12 },
+            indentEnd: { v: 8 },
+            spaceAbove: { v: 4 },
+            spaceBelow: { v: 6 },
+            textStyle: { ff: 'Inter' },
+        }), {
+            blockId: 'block-1',
+            blockType: DocumentBlockRangeType.CALLOUT,
+            startIndex: 0,
+            endIndex: 2,
+        });
+
+        expect(calloutResult.body.paragraphs?.[0].paragraphStyle).toEqual({
+            textStyle: { ff: 'Inter' },
+        });
+
+        const quoteResult = unwrapBlockRangeBody(blockRangeBody(DocumentBlockRangeType.QUOTE, {
+            indentStart: { v: 12 },
+            indentEnd: { v: 8 },
+            spaceAbove: { v: 4 },
+            spaceBelow: { v: 6 },
+        }), {
+            blockId: 'block-1',
+            blockType: DocumentBlockRangeType.QUOTE,
+            startIndex: 0,
+            endIndex: 2,
+        });
+
+        expect(quoteResult.body.paragraphs?.[0].paragraphStyle).toEqual({
+            indentEnd: { v: 8 },
+        });
     });
 
     it('routes explicit and declared insert actions below the active block', () => {

@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: '评论管理',
         },
+        permission: {
+            commentErr: '你没有权限使用评论。',
+        },
         menu: {
             addComment: '添加评论',
             commentManagement: '评论管理',

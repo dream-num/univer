@@ -16,11 +16,11 @@
 
 import type { Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { DocumentBlockRangeType } from '@univerjs/core';
+import { DocumentBlockRangeType, DocumentBlockType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createBlockRangeDocument, createTestBed } from './create-test-bed';
 
-describe('FDocBlockRange', () => {
+describe('FDocumentBlockRange', () => {
     let univer: Univer | null = null;
     let document: FDocument;
 
@@ -36,33 +36,32 @@ describe('FDocBlockRange', () => {
         univer = null;
     });
 
-    it('should edit and remove block range content while preserving surrounding paragraphs', () => {
+    it('edits and removes block range content while preserving surrounding paragraphs', () => {
         for (const blockType of [DocumentBlockRangeType.QUOTE, DocumentBlockRangeType.CALLOUT, DocumentBlockRangeType.CODE]) {
             createDocumentFacade(blockType);
 
             const body = document.getBody();
-            const block = body.getChild(0).asBlockRange();
+            const block = body.getElement(0)!.asBlockRange();
 
-            expect(block.getType()).toBe('blockRange');
+            expect(block.getType()).toBe(DocumentBlockType.BLOCK_RANGE);
             expect(block.getKey()).toBe(`${blockType}-1`);
             expect(block.getParent()).toBe(body);
             expect(block.getBlockType()).toBe(blockType);
             expect(block.getText()).toBe('Block');
-            expect(body.getBlockRange(block.getKey()).blockType).toBe(blockType);
-            expect(body.getBlockRangeText(block.getKey())).toBe('Block');
+            expect(block.getBlockRange().blockType).toBe(blockType);
             expect(body.insertParagraph(0, 'Intro').getText()).toBe('Intro');
             expect(block.getText()).toBe('Block');
             expect(block.setText('Updated')).toBe(true);
-            expect(body.getBlockRangeText(block.getKey())).toBe('Updated');
-            expect(block.removeFromParent()).toBe(true);
+            expect(block.getText()).toBe('Updated');
+            expect(block.remove()).toBe(true);
             expect(document.save().body?.dataStream).toBe('Intro\rAfter\r\n');
         }
     });
 
-    it('should unwrap a block range from the body', () => {
+    it('unwraps a block range from the body', () => {
         createDocumentFacade();
 
-        expect(document.getBody().getChild(0).asBlockRange().unwrap()).toBe(true);
+        expect(document.getBody().getElement(0)!.asBlockRange().unwrap()).toBe(true);
         expect(document.save().body?.dataStream).toBe('After\r\n');
     });
 });

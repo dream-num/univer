@@ -38,6 +38,9 @@ const locale: typeof enUS = {
         menu: {
             add: 'Wstaw łącze',
         },
+        permission: {
+            hyperLinkErr: 'Nie masz uprawnień do wstawiania łącza.',
+        },
         message: {
             noSheet: 'Arkusz docelowy został usunięty',
             refError: 'Nieprawidłowy zakres',

@@ -2,9 +2,18 @@ name: 🔐 Semgrep
 
 on:
     push:
-        branches: [main, dev]
+        branches:
+            - main
+            - dev
     pull_request:
-        branches: [main, dev]
+        branches:
+            - main
+            - dev
+        types:
+            - opened
+            - synchronize
+            - reopened
+            - ready_for_review
     workflow_dispatch:
 
 concurrency:
@@ -18,7 +27,7 @@ permissions:
 
 jobs:
     semgrep:
-        if: github.repository == 'dream-num/univer'
+        if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
         timeout-minutes: 20
 

@@ -106,8 +106,16 @@ const locale = {
             cancel: 'Cancel merge',
             overlappingError: 'Cannot merge overlapping areas',
             partiallyError: 'Cannot perform this operation on partially merged cells',
+            confirm: {
+                warning: 'Warning',
+                dismantleMergeCellWarning: 'This operation will unmerge merged cells. Continue?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Cannot perform this operation',
+                notAllowedToInsertRange: 'This operation is not allowed because the range contains filtered rows.',
+            },
         },
         textWrap: {
             overflow: 'Overflow',

@@ -18,6 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ComponentType } from 'react';
 import type { IRangeSelectorProps } from '../../basics/editor/range';
+import type { LocaleKey } from '../../locale/types';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, IFunctionService, isReferenceStrings, ISuperTableService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
@@ -84,7 +85,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
 
     const options = [{
-        label: localeService.t('sheets-ui.definedName.scopeWorkbook'),
+        label: localeService.t<LocaleKey>('sheets-ui.definedName.scopeWorkbook'),
         value: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     }];
 
@@ -145,7 +146,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         }
 
         if (!validFormulaOrRange) {
-            setValidString(localeService.t('sheets-ui.definedName.formulaOrRefStringInvalid'));
+            setValidString(localeService.t<LocaleKey>('sheets-ui.definedName.formulaOrRefStringInvalid'));
             return;
         }
 
@@ -194,7 +195,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             <div>
                 <Input
                     className="univer-w-full"
-                    placeholder={localeService.t('sheets-ui.definedName.inputNamePlaceholder')}
+                    placeholder={localeService.t<LocaleKey>('sheets-ui.definedName.inputNamePlaceholder')}
                     value={nameValue}
                     allowClear
                     onChange={setNameValue}
@@ -202,8 +203,8 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             </div>
             <div>
                 <RadioGroup value={typeValue} onChange={typeValueChange}>
-                    <Radio value="range">{localeService.t('sheets-ui.definedName.ratioRange')}</Radio>
-                    <Radio value="formula">{localeService.t('sheets-ui.definedName.ratioFormula')}</Radio>
+                    <Radio value="range">{localeService.t<LocaleKey>('sheets-ui.definedName.ratioRange')}</Radio>
+                    <Radio value="formula">{localeService.t<LocaleKey>('sheets-ui.definedName.ratioFormula')}</Radio>
                 </RadioGroup>
             </div>
             {typeValue === 'range'
@@ -259,7 +260,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             <div>
                 <Input
                     className="univer-w-full"
-                    placeholder={localeService.t('sheets-ui.definedName.inputCommentPlaceholder')}
+                    placeholder={localeService.t<LocaleKey>('sheets-ui.definedName.inputCommentPlaceholder')}
                     value={commentValue}
                     onChange={setCommentValue}
                     allowClear
@@ -283,13 +284,13 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         cancel?.();
                     }}
                 >
-                    {localeService.t('sheets-ui.definedName.cancel')}
+                    {localeService.t<LocaleKey>('sheets-ui.definedName.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     onClick={confirmChange}
                 >
-                    {localeService.t('sheets-ui.definedName.confirm')}
+                    {localeService.t<LocaleKey>('sheets-ui.definedName.confirm')}
                 </Button>
             </div>
         </div>

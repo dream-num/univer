@@ -42,7 +42,7 @@ describe('FDocument', () => {
         univer.dispose();
     });
 
-    it('should edit document text through append, insert and paragraph operations', () => {
+    it('edits document text through append, insert and paragraph operations', () => {
         expect(document.appendText('Univer')).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello,Univer\r\n');
 
@@ -65,7 +65,7 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Hello,Line 1\rLine 2\r\r\n');
     });
 
-    it('should include current document resources in saved snapshots', () => {
+    it('includes current document resources in saved snapshots', () => {
         const resourceManagerService = get(IResourceManagerService);
 
         resourceManagerService.registerPluginResource({
@@ -74,7 +74,7 @@ describe('FDocument', () => {
             onLoad: () => undefined,
             onUnLoad: () => undefined,
             toJson: () => '{"value":1}',
-            parseJson: (bytes) => JSON.parse(bytes),
+            parseJson: (bytes: string) => JSON.parse(bytes),
         });
 
         expect(document.save().resources).toEqual([
@@ -85,14 +85,14 @@ describe('FDocument', () => {
         ]);
     });
 
-    it('should expose document identity and snapshot data from the active model', () => {
+    it('exposes document identity and snapshot data from the active model', () => {
         expect(document.getId()).toBe('test');
         expect(document.getName()).toBe('');
         expect(document.getDocumentDataModel().getUnitId()).toBe('test');
         expect(document.save().body?.dataStream).toBe('Hello,\r\n');
     });
 
-    it('should run undo and redo against the active document', () => {
+    it('runs undo and redo against the active document', () => {
         get(IUndoRedoService);
 
         expect(document.appendText('One')).toBe(true);
@@ -105,21 +105,21 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Hello,One\r\n');
     });
 
-    it('should preserve paragraph ids in saved snapshots and body wrappers', () => {
+    it('preserves paragraph ids in saved snapshots and body wrappers', () => {
         univer.dispose();
         createDocumentFacade(createSimpleDocument());
 
         const savedParagraphs = document.save().body?.paragraphs;
         const body = document.getBody();
-        const paragraph = body.getChild(0).asParagraph();
+        const paragraph = body.getElement(0)!.asParagraph();
 
         expect(savedParagraphs?.map((item) => item.paragraphId)).toEqual(['para_alpha', 'para_beta', 'para_gamma']);
         expect(savedParagraphs?.map((item) => item.startIndex)).toEqual([5, 10, 16]);
-        expect(paragraph.getId()).toBe('para_alpha');
+        expect(paragraph.getParagraphId()).toBe('para_alpha');
         expect(paragraph.getText()).toBe('Alpha');
     });
 
-    it('should keep caller-provided paragraph ids when creating a body facade', () => {
+    it('keeps caller-provided paragraph ids when creating a body facade', () => {
         univer.dispose();
         createDocumentFacade(createDocumentData('doc-with-ids', {
             dataStream: 'Legacy\r\n',
@@ -127,9 +127,9 @@ describe('FDocument', () => {
             sectionBreaks: [{ startIndex: 7 }],
         }));
 
-        const paragraph = document.getBody().getChild(0).asParagraph();
+        const paragraph = document.getBody().getElement(0)!.asParagraph();
 
-        expect(paragraph.getId()).toBe('para_fixture_26');
+        expect(paragraph.getParagraphId()).toBe('para_fixture_26');
         expect(document.save().body?.paragraphs?.[0].paragraphId).toBe('para_fixture_26');
     });
 });

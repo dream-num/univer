@@ -15,6 +15,7 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, InsertRangeMoveRightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 
@@ -58,10 +59,10 @@ export const InsertRangeMoveRightConfirmCommand: ICommand = {
 
         const result = await confirmService.confirm({
             id: InsertRangeMoveRightConfirmCommand.id,
-            title: { title: localeService.t('sheets-ui.merge.confirm.warning') },
-            children: { title: localeService.t('sheets-ui.merge.confirm.dismantleMergeCellWarning') },
-            cancelText: localeService.t('sheets-ui.button.cancel'),
-            confirmText: localeService.t('sheets-ui.button.confirm'),
+            title: { title: localeService.t<LocaleKey>('sheets-ui.merge.confirm.warning') },
+            children: { title: localeService.t<LocaleKey>('sheets-ui.merge.confirm.dismantleMergeCellWarning') },
+            cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+            confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
         });
         if (result) {
             return commandService.executeCommand(InsertRangeMoveRightCommand.id);

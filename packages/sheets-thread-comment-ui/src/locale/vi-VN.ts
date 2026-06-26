@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: 'Quản lý bình luận',
         },
+        permission: {
+            commentErr: 'Bạn không có quyền sử dụng bình luận.',
+        },
         menu: {
             addComment: 'Thêm bình luận',
             commentManagement: 'Quản lý bình luận',

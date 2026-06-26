@@ -108,8 +108,16 @@ const locale: typeof enUS = {
             cancel: 'Cancelar mesclagem',
             overlappingError: 'Não é possível mesclar áreas sobrepostas',
             partiallyError: 'Não é possível realizar esta operação em células parcialmente mescladas',
+            confirm: {
+                warning: 'Aviso',
+                dismantleMergeCellWarning: 'Esta operação desfará a mesclagem das células. Continuar?',
+            },
         },
         filter: {
+            confirm: {
+                error: 'Não é possível realizar esta operação',
+                notAllowedToInsertRange: 'Esta operação não é permitida porque o intervalo contém linhas filtradas.',
+            },
         },
         textWrap: {
             overflow: 'Transbordar',

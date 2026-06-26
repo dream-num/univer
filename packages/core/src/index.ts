@@ -75,7 +75,7 @@ export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export { TextXActionType } from './docs/data-model/text-x/action-types';
 export type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './docs/data-model/text-x/action-types';
-export { normalizeTextRuns } from './docs/data-model/text-x/apply-utils/common';
+export { normalizeTextRuns, RESTORE_INSERTED_PARAGRAPH_IDS } from './docs/data-model/text-x/apply-utils/common';
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { getPlainText } from './docs/data-model/text-x/build-utils/parse';

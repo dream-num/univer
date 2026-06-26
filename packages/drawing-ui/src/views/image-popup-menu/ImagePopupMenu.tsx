@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { ReactNode } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     ICommandService,
@@ -30,7 +31,7 @@ import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
-    label: string;
+    label: LocaleKey;
     index: number;
     commandId: string;
     commandParams?: object;
@@ -108,7 +109,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                 align="start"
                 items={menuItems.map((item) => ({
                     type: 'item',
-                    children: localeService.t(item.label),
+                    children: localeService.t<LocaleKey>(item.label),
                     disabled: item.disable,
                     onSelect: () => handleClick(item),
                 }))}
@@ -300,27 +301,27 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
     const deleteItem = getMenuItem('drawing-ui.image-popup.delete');
     const wrappingStyleOptions = [
         {
-            label: localeService.t('drawing-ui.image-text-wrap.inline'),
+            label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inline'),
             value: TextWrappingStyle.INLINE,
             icon: <TextWrapShapeIcon />,
         },
         {
-            label: localeService.t('drawing-ui.image-text-wrap.square'),
+            label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.square'),
             value: TextWrappingStyle.WRAP_SQUARE,
             icon: <TextWrapShapeIcon />,
         },
         {
-            label: localeService.t('drawing-ui.image-text-wrap.topAndBottom'),
+            label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.topAndBottom'),
             value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM,
             icon: <TextWrapShapeIcon />,
         },
         {
-            label: localeService.t('drawing-ui.image-text-wrap.behindText'),
+            label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.behindText'),
             value: TextWrappingStyle.BEHIND_TEXT,
             icon: <TextWrapShapeIcon />,
         },
         {
-            label: localeService.t('drawing-ui.image-text-wrap.inFrontText'),
+            label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inFrontText'),
             value: TextWrappingStyle.IN_FRONT_OF_TEXT,
             icon: <TextWrapShapeIcon />,
         },
@@ -362,7 +363,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
         >
             <ToolbarGroup>
                 <ToolbarDropdownButton
-                    title={wrappingStyleOptions.find((option) => option.value === wrappingStyle)?.label ?? localeService.t('drawing-ui.image-text-wrap.inline')}
+                    title={wrappingStyleOptions.find((option) => option.value === wrappingStyle)?.label ?? localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inline')}
                     value={wrappingStyle}
                     options={wrappingStyleOptions}
                     onChange={updateWrappingStyle}
@@ -371,7 +372,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
             <Separator orientation="vertical" />
             <ToolbarGroup>
                 <ToolbarButton
-                    title={editItem ? localeService.t(editItem.label) : localeService.t('drawing-ui.image-popup.edit')}
+                    title={editItem ? localeService.t<LocaleKey>(editItem.label) : localeService.t<LocaleKey>('drawing-ui.image-popup.edit')}
                     disabled={!editItem || editItem.disable}
                     onClick={() => {
                         setHidden(true);
@@ -381,7 +382,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     <DocSettingIcon />
                 </ToolbarButton>
                 <ToolbarButton
-                    title={cropItem ? localeService.t(cropItem.label) : localeService.t('drawing-ui.image-popup.crop')}
+                    title={cropItem ? localeService.t<LocaleKey>(cropItem.label) : localeService.t<LocaleKey>('drawing-ui.image-popup.crop')}
                     disabled={!cropItem || cropItem.disable}
                     onClick={() => executeMenuItem(cropItem)}
                 >
@@ -391,7 +392,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
             <Separator orientation="vertical" />
             <ToolbarGroup>
                 <ToolbarButton
-                    title={deleteItem ? localeService.t(deleteItem.label) : localeService.t('drawing-ui.image-popup.delete')}
+                    title={deleteItem ? localeService.t<LocaleKey>(deleteItem.label) : localeService.t<LocaleKey>('drawing-ui.image-popup.delete')}
                     disabled={!deleteItem || deleteItem.disable}
                     onClick={() => executeMenuItem(deleteItem)}
                 >

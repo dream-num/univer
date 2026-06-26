@@ -18,8 +18,8 @@ import type { IRange } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
-import { SheetCrosshairHighlightRenderController } from './crosshair-highlight.render-controller';
+import { SheetCrossHairHighlightShape } from '../crosshair-highlight-shape';
+import { SheetCrosshairHighlightRenderController } from '../crosshair-highlight.render-controller';
 
 class TestSheet {
     getRowCount(): number {

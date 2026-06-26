@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
+import { SheetCrossHairHighlightShape } from '../crosshair-highlight-shape';
 
 class TestCanvasContext {
     fillStyle = '';

@@ -16,7 +16,7 @@
 
 import { RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { CrossHairRangeCollection } from './util';
+import { CrossHairRangeCollection } from '../util';
 
 describe('CrossHairRangeCollection', () => {
     it('should add/split/reset ranges and skip full row/column/all ranges', () => {

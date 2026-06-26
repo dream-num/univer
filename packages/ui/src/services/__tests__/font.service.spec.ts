@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUniverUIConfig } from '../config/config';
+import type { IUniverUIConfig } from '../../config/config';
 import { ConfigService, IConfigService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { UI_PLUGIN_CONFIG_KEY } from '../config/config';
-import { FontService, IFontService } from './font.service';
+import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { FontService, IFontService } from '../font.service';
 
 class CustomFontConfigService extends ConfigService {
     override getConfig<T>(key: string): T {

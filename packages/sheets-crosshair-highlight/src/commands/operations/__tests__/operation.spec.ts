@@ -28,13 +28,13 @@ import {
 } from '@univerjs/core';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
+import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS, SheetsCrosshairHighlightService } from '../../../services/crosshair.service';
 import {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
     SetCrosshairHighlightColorOperation,
     ToggleCrosshairHighlightOperation,
-} from './operation';
+} from '../operation';
 
 function createOperationTestBed() {
     const injector = new Injector();

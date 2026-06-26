@@ -34,10 +34,10 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import enUS from '../../locale/en-US';
-import { ScriptEditorService } from '../../services/script-editor.service';
-import { IUniscriptExecutionService } from '../../services/script-execution.service';
-import { ScriptEditorPanel } from './ScriptEditorPanel';
+import enUS from '../../../locale/en-US';
+import { ScriptEditorService } from '../../../services/script-editor.service';
+import { IUniscriptExecutionService } from '../../../services/script-execution.service';
+import { ScriptEditorPanel } from '../ScriptEditorPanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

@@ -15,9 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { createCoreTestBed } from '@univerjs/core/sheets/__tests__/create-core-test-bed.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { expandToContinuousRange } from '../expand-range';
+import { createCoreTestBed } from './create-core-test-bed';
 import { snapshot } from './expand.data';
 
 // the work book can be get 'unit=YSvbxFMCTxugbku-IWNyxQ&type=2&subunit=U_wr1DEF84N_mbesFNmxR' in pro

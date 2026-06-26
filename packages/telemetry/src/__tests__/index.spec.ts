@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import * as indexModule from './index';
-import { ITelemetryService } from './services/telemetry.service';
+import * as indexModule from '../index';
+import { ITelemetryService } from '../services/telemetry.service';
 
 describe('telemetry exports', () => {
     it('should re-export ITelemetryService identifier from index', () => {

@@ -29,8 +29,8 @@ import {
 } from '@univerjs/core';
 import { ILocalFileService } from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ActionRecorderService } from '../../services/action-recorder.service';
-import { CloseRecordPanelOperation, OpenRecordPanelOperation } from './operation';
+import { ActionRecorderService } from '../../../services/action-recorder.service';
+import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../operation';
 
 class TestLocalFileService implements ILocalFileService {
     static downloads = 0;

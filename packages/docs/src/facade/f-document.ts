@@ -27,8 +27,7 @@ import {
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { InsertTextCommand } from '@univerjs/docs';
-import { DocElementRegistry } from './doc-element-registry';
-import { FDocBody } from './f-doc-body';
+import { FDocumentBody } from './f-document-body';
 import {
     buildPlainTextInsertBody,
     getNormalizedPlainTextCursorOffset,
@@ -48,7 +47,6 @@ export interface IDocumentInsertTextFacadeOptions {
  */
 export class FDocument extends FBaseInitialable {
     readonly id: string;
-    private readonly _docElementRegistry = new DocElementRegistry();
 
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
@@ -84,23 +82,23 @@ export class FDocument extends FBaseInitialable {
      * use their persisted `paragraphId` values. Persisted elements, such as tables
      * and custom blocks, use their existing ids.
      *
-     * @returns {FDocBody} The document body API instance.
+     * @returns {FDocumentBody} The document body API instance.
      * @example
      * ```typescript
-     * const doc = univerAPI.getActiveDocument();
-     * if (!doc) throw new Error('No active document');
+     * const fDocument = univerAPI.getActiveDocument();
+     * const fDocumentBody = fDocument.getBody();
+     * console.log(fDocumentBody.getBody());
      *
-     * const body = doc.getBody();
-     * const paragraph = body.getChild(0).asParagraph();
-     * paragraph.appendText(' updated');
+     * const element = fDocumentBody.getElement(0);
+     * if (element.isParagraph()) {
+     *   const paragraph = element.asParagraph();
+     *   paragraph.appendText(' updated');
+     *   console.log(paragraph.getText());
+     * }
      * ```
      */
-    getBody(): FDocBody {
-        return new FDocBody(
-            this._documentDataModel,
-            this._commandService,
-            this._docElementRegistry
-        );
+    getBody(): FDocumentBody {
+        return this._injector.createInstance(FDocumentBody, this._documentDataModel, this._injector);
     }
 
     override dispose(): void {

@@ -16,7 +16,7 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { DocumentBlockRangeType } from '@univerjs/core';
+import { DocumentBlockRangeType, DocumentBlockType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
     createBlockRangeDocument,
@@ -26,7 +26,7 @@ import {
     createTestBed,
 } from './create-test-bed';
 
-describe('FDocElement', () => {
+describe('FDocumentElement', () => {
     let univer: Univer | null = null;
     let document: FDocument;
 
@@ -42,42 +42,45 @@ describe('FDocElement', () => {
         univer = null;
     });
 
-    it('should cast body elements to their concrete facade types', () => {
+    it('casts body elements to their concrete facade types', () => {
         createDocumentFacade(createSimpleDocument());
-        expect(document.getBody().getChild(0).asParagraph().getText()).toBe('Alpha');
+        expect(document.getBody().getElement(0)!.asParagraph().getText()).toBe('Alpha');
 
         createDocumentFacade(createBlockRangeDocument());
-        expect(document.getBody().getChild(0).asBlockRange().getBlockType()).toBe(DocumentBlockRangeType.QUOTE);
+        expect(document.getBody().getElement(0)!.asBlockRange().getBlockType()).toBe(DocumentBlockRangeType.QUOTE);
 
         createDocumentFacade(createTableDocument());
-        expect(document.getBody().getChild(0).asTable().getTableId()).toBe('table-1');
+        expect(document.getBody().getElement(0)!.asTable().getTable().tableId).toBe('table-1');
 
         createDocumentFacade(createCustomBlockDocument());
-        expect(document.getBody().getChild(0).asCustomBlock().getBlockId()).toBe('custom-1');
+        expect(document.getBody().getElement(0)!.asCustomBlock().getCustomBlock().blockId).toBe('custom-1');
     });
 
-    it('should remove a generic element from its parent', () => {
+    it('removes a generic element from its parent', () => {
         createDocumentFacade(createSimpleDocument());
 
-        expect(document.getBody().getChild(0).removeFromParent()).toBe(true);
+        expect(document.getBody().getElement(0)!.remove()).toBe(true);
         expect(document.save().body?.dataStream).toBe('Beta\rGamma\r\n');
     });
 
-    it('should navigate siblings and reject invalid casts', () => {
+    it('navigates siblings and rejects invalid casts without changing the element type', () => {
         createDocumentFacade(createSimpleDocument());
 
         const body = document.getBody();
-        const first = body.getChild(0);
-        const second = body.getChild(1);
+        const first = body.getElement(0)!;
+        const second = body.getElement(1)!;
 
         expect(first.getPreviousSibling()).toBeNull();
         expect(first.getNextSibling()?.getKey()).toBe(second.getKey());
         expect(second.getPreviousSibling()?.getKey()).toBe(first.getKey());
-        expect(() => first.asTable()).toThrow('Cannot cast paragraph to table.');
-        expect(() => first.asBlockRange()).toThrow('Cannot cast paragraph to blockRange.');
-        expect(() => first.asCustomBlock()).toThrow('Cannot cast paragraph to customBlock.');
+        expect(() => first.asTable()).toThrow('Element type is not a table: paragraph');
+        expect(() => first.asBlockRange()).toThrow('Element type is not a block range: paragraph');
+        expect(() => first.asCustomBlock()).toThrow('Element type is not a custom block: paragraph');
+        expect(first.getType()).toBe(DocumentBlockType.PARAGRAPH);
 
         createDocumentFacade(createTableDocument());
-        expect(() => document.getBody().getChild(0).asParagraph()).toThrow('Cannot cast table to paragraph.');
+        const table = document.getBody().getElement(0)!;
+        expect(() => table.asParagraph()).toThrow('Element type is not a paragraph: table');
+        expect(table.getType()).toBe(DocumentBlockType.TABLE);
     });
 });

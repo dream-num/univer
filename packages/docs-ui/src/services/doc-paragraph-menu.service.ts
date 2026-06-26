@@ -18,15 +18,7 @@ import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import {
-    BlockType,
-    DataStreamTreeTokenType,
-    Disposable,
-    DOC_RANGE_TYPE,
-    Inject,
-    isInternalEditorID,
-    PresetListType,
-} from '@univerjs/core';
+import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
@@ -45,10 +37,8 @@ import {
 import { DocFloatMenuService } from './float-menu.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 
-export type DocBlockMenuTargetKind = 'paragraph' | 'blockRange' | 'table' | 'customBlock';
-
 export interface IDocBlockMenuTarget {
-    kind: DocBlockMenuTargetKind;
+    kind: Exclude<DocumentBlockType, DocumentBlockType.COLUMN_GROUP>;
     key: string;
     paragraph?: IMutiPageParagraphBound;
     blockRange?: IDocumentBlockRange;
@@ -268,7 +258,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                     return;
                 }
 
-                if (this._paragrahMenu?.target.kind === 'table') {
+                if (this._paragrahMenu?.target.kind === DocumentBlockType.TABLE) {
                     return;
                 }
 
@@ -319,7 +309,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe(({ textRanges, rectRanges }) => {
             const selectionState = this._getExpandedSelectionState([...textRanges, ...rectRanges]);
-            if (selectionState.hasExpandedTextRange || (selectionState.hasRectRange && this._paragrahMenu?.target.kind !== 'table')) {
+            if (selectionState.hasExpandedTextRange || (selectionState.hasRectRange && this._paragrahMenu?.target.kind !== DocumentBlockType.TABLE)) {
                 this.hideParagraphMenu(true);
             }
         }));
@@ -561,8 +551,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
 
         const target: IDocBlockMenuTarget = {
-            kind: 'table',
-            key: `table:${table.tableId}`,
+            kind: DocumentBlockType.TABLE,
+            key: `${DocumentBlockType.TABLE}:${table.tableId}`,
             table,
             icon: 'GridIcon',
             menuRange: {
@@ -623,7 +613,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private _shouldKeepCurrentCellMenuForTable(table: ICustomTable): boolean {
         const target = this._paragrahMenu?.target;
-        if (!target || target.kind === 'table' || !target.cellRange) {
+        if (!target || target.kind === DocumentBlockType.TABLE || !target.cellRange) {
             return false;
         }
 
@@ -706,8 +696,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 blockRange,
             } as IMutiPageParagraphBound;
             return {
-                kind: 'blockRange',
-                key: `blockRange:${blockRange.blockId}`,
+                kind: DocumentBlockType.BLOCK_RANGE,
+                key: `${DocumentBlockType.BLOCK_RANGE}:${blockRange.blockId}`,
                 paragraph: targetParagraph,
                 blockRange,
                 icon: BLOCK_RANGE_ICON_MAP[blockRange.blockType],
@@ -734,8 +724,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const isCustomBlockOnly = customBlock?.blockType === BlockType.CUSTOM && paragraphDataStream.replace(/[\b\r\n]/g, '') === '';
         if (customBlock && customBlock.blockType === BlockType.CUSTOM && isCustomBlockOnly) {
             return {
-                kind: 'customBlock',
-                key: `customBlock:${customBlock.blockId}`,
+                kind: DocumentBlockType.CUSTOM_BLOCK,
+                key: `${DocumentBlockType.CUSTOM_BLOCK}:${customBlock.blockId}`,
                 paragraph,
                 customBlock,
                 icon: 'TextTypeIcon',
@@ -756,8 +746,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
 
         return {
-            kind: 'paragraph',
-            key: `paragraph:${paragraph.startIndex}`,
+            kind: DocumentBlockType.PARAGRAPH,
+            key: `${DocumentBlockType.PARAGRAPH}:${paragraph.startIndex}`,
             paragraph,
             icon: isHorizontalRuleParagraph ? 'ReduceIcon' : listIcon,
             cellRange: cellRange ?? undefined,
@@ -790,8 +780,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
 
             targets.push({
-                kind: 'table',
-                key: `table:${table.tableId}`,
+                kind: DocumentBlockType.TABLE,
+                key: `${DocumentBlockType.TABLE}:${table.tableId}`,
                 table,
                 icon: 'GridIcon',
                 menuRange: { startOffset: table.startIndex, endOffset: table.endIndex, collapsed: false },
@@ -810,8 +800,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
 
             targets.push({
-                kind: 'blockRange',
-                key: `blockRange:${blockRange.blockId}`,
+                kind: DocumentBlockType.BLOCK_RANGE,
+                key: `${DocumentBlockType.BLOCK_RANGE}:${blockRange.blockId}`,
                 blockRange,
                 icon: BLOCK_RANGE_ICON_MAP[blockRange.blockType],
                 menuRange: { startOffset: blockRange.startIndex, endOffset: blockRange.endIndex + 1, collapsed: false },
@@ -868,8 +858,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
 
             targets.push({
-                kind: 'blockRange',
-                key: `blockRange:${blockRange.blockId}`,
+                kind: DocumentBlockType.BLOCK_RANGE,
+                key: `${DocumentBlockType.BLOCK_RANGE}:${blockRange.blockId}`,
                 blockRange,
                 icon: BLOCK_RANGE_ICON_MAP[blockRange.blockType],
                 cellRange,

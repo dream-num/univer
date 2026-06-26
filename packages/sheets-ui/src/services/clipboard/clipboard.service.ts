@@ -352,17 +352,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     async paste(item: ClipboardItem, pasteType = PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE): Promise<boolean> {
         const types = item.types;
-        if (types.indexOf(FORMULA_CLIPBOARD_MIME_TYPE) !== -1) {
-            const pasted = await item.getType(FORMULA_CLIPBOARD_MIME_TYPE)
-                .then((blob) => blob && blob.text())
-                .then((text) => this._pasteFormulaClipboardPayload(text, pasteType))
-                .catch(() => false);
-
-            if (pasted) {
-                return true;
-            }
-        }
-
         const text =
             types.indexOf(PLAIN_TEXT_CLIPBOARD_MIME_TYPE) !== -1
                 ? await item.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
@@ -370,6 +359,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const html =
             types.indexOf(HTML_CLIPBOARD_MIME_TYPE) !== -1
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
+                : '';
+        const formulaClipboardPayload =
+            types.indexOf(FORMULA_CLIPBOARD_MIME_TYPE) !== -1
+                ? await item.getType(FORMULA_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text()).catch(() => '')
                 : '';
 
         const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
@@ -387,7 +380,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 // After the pop-up window prompts, can paste the contents of the clipboard as much as possible.
             }
 
-            return this._pasteHTML(html, pasteType);
+            return this._pasteHTML(html, pasteType, formulaClipboardPayload);
         }
 
         // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
@@ -705,12 +698,48 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
     }
 
-    private _pasteFormulaClipboardPayload(text: string, pasteType: IPasteHookValueType): boolean {
+    private _pasteUnrecognized() {
+        return this._executePaste((h, payload) => {
+            return h.onPasteUnrecognized?.(payload);
+        });
+    }
+
+    private async _pasteHTML(html: string, pasteType: IPasteHookValueType, formulaClipboardPayload?: string): Promise<boolean> {
+        const copyId = extractId(html);
+        if (copyId && this._copyContentCache.get(copyId)) {
+            return this._pasteInternal(copyId, pasteType);
+        }
+        return this._pasteExternal(html, pasteType, formulaClipboardPayload);
+    }
+
+    private async _pasteExternal(html: string, pasteType: IPasteHookValueType, formulaClipboardPayload?: string): Promise<boolean> {
+        // this._logService.log('[SheetClipboardService]', 'pasting external content', html);
+
+        // steps of pasting:
+
+        // 1. get properties of the table by parsing raw html content, including col properties / row properties
+        // cell properties and cell contents.
+        const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
+        if (!cellMatrix) {
+            return false;
+        }
+
+        const sourceRange = formulaClipboardPayload
+            ? this._applyFormulaClipboardPayload(cellMatrix, formulaClipboardPayload)
+            : undefined;
+
+        return this._pasteExternalData({ rowProperties, colProperties, cellMatrix }, pasteType, sourceRange);
+    }
+
+    private _applyFormulaClipboardPayload(
+        cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>,
+        text: string
+    ): IDiscreteRange | undefined {
         let payload: IFormulaClipboardPayload;
         try {
             payload = JSON.parse(text) as IFormulaClipboardPayload;
         } catch {
-            return false;
+            return undefined;
         }
 
         if (
@@ -720,11 +749,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             payload.rowCount <= 0 ||
             payload.columnCount <= 0
         ) {
-            return false;
+            return undefined;
         }
 
-        const cellMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
-        cellMatrix.setValue(payload.rowCount - 1, payload.columnCount - 1, getEmptyCell());
+        cellMatrix.setValue(payload.rowCount - 1, payload.columnCount - 1, {
+            ...getEmptyCell(),
+            ...cellMatrix.getValue(payload.rowCount - 1, payload.columnCount - 1),
+        });
         payload.formulas.forEach((formula) => {
             if (
                 isFormulaString(formula.f) &&
@@ -735,59 +766,24 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             ) {
                 cellMatrix.setValue(formula.row, formula.column, {
                     ...getEmptyCell(),
+                    ...cellMatrix.getValue(formula.row, formula.column),
                     f: formula.f,
                 });
             }
         });
 
-        const pasteTarget = this._getPastedRange(cellMatrix);
-        if (!pasteTarget) {
-            return false;
-        }
-
-        const rows = Array.from({ length: payload.rowCount }, (_, index) => payload.origin.row + index);
-        const cols = Array.from({ length: payload.columnCount }, (_, index) => payload.origin.column + index);
-
-        return this._pasteUSM(
-            {
-                cellMatrix,
-                colProperties: [],
-                rowProperties: [],
-            },
-            pasteTarget,
-            pasteType,
-            {
-                range: { rows, cols },
-                unitId: pasteTarget.unitId,
-                subUnitId: pasteTarget.subUnitId,
-                copyType: COPY_TYPE.COPY,
-                copyId: '',
-            }
-        );
+        return {
+            rows: Array.from({ length: payload.rowCount }, (_, index) => payload.origin.row + index),
+            cols: Array.from({ length: payload.columnCount }, (_, index) => payload.origin.column + index),
+        };
     }
 
-    private _pasteUnrecognized() {
-        return this._executePaste((h, payload) => {
-            return h.onPasteUnrecognized?.(payload);
-        });
-    }
-
-    private async _pasteHTML(html: string, pasteType: IPasteHookValueType): Promise<boolean> {
-        const copyId = extractId(html);
-        if (copyId && this._copyContentCache.get(copyId)) {
-            return this._pasteInternal(copyId, pasteType);
-        }
-        return this._pasteExternal(html, pasteType);
-    }
-
-    private async _pasteExternal(html: string, pasteType: IPasteHookValueType): Promise<boolean> {
-        // this._logService.log('[SheetClipboardService]', 'pasting external content', html);
-
-        // steps of pasting:
-
-        // 1. get properties of the table by parsing raw html content, including col properties / row properties
-        // cell properties and cell contents.
-        const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
+    private _pasteExternalData(
+        data: IUniverSheetCopyDataModel,
+        pasteType: IPasteHookValueType,
+        sourceRange?: IDiscreteRange
+    ): boolean {
+        const { rowProperties, colProperties, cellMatrix } = data;
         if (!cellMatrix) {
             return false;
         }
@@ -830,16 +826,26 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         // 4. execute these mutations by the one method
-        const res = this._pasteUSM(
+        const source = sourceRange
+            ? {
+                range: sourceRange,
+                unitId: pasteTarget.unitId,
+                subUnitId: pasteTarget.subUnitId,
+                copyType: COPY_TYPE.COPY,
+                copyId: '',
+            }
+            : undefined;
+
+        return this._pasteUSM(
             {
                 rowProperties,
                 colProperties,
                 cellMatrix,
             },
             pasteTarget,
-            pasteType
+            pasteType,
+            source
         );
-        return res;
     }
 
     // eslint-disable-next-line max-lines-per-function

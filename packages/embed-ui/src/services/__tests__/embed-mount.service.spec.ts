@@ -447,13 +447,14 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         entry: overrides.entry ?? 'docs-custom-block',
         source: overrides.source ?? {
             kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },
                 unit: { selector: 'child-sheet', type: 'sheet' },
             },
         },
         childUnitId: 'childUnitId' in overrides ? overrides.childUnitId : 'child-sheet',
-        childType: 'childType' in overrides ? overrides.childType : UniverInstanceType.UNIVER_SHEET,
+        childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,
         mode: overrides.mode ?? 'interactive',
         sourceMeta: overrides.sourceMeta ?? {
             floating: {

@@ -18,13 +18,12 @@ import type { IAccessor, Injector } from '@univerjs/core';
 import type { IEmbedDescriptor, IEmbedGuestContribution } from '../../types/embed';
 import type { IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../../types/host-adapter';
 import type { IEmbedHostAnchorRecord } from '../../types/host-anchor';
-import type { IResourceRef } from '../../types/resource-ref';
+import type { IResourceRef, ResourceRefInput } from '../../types/resource-ref';
 import { ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import {
     CopyEmbedCommand,
     CreateEmbedCommand,
-    InsertEmbedBySnapshotCommand,
     RemoveEmbedCommand,
 } from '../../commands/commands/embed.command';
 import {
@@ -37,7 +36,6 @@ import {
 } from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { assertResourceRef, getResourceRefKey, normalizeResourceRef } from '../../common/resource-ref';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../../common/unit-type';
-import { EmbedCapabilityRegistryService } from '../embed-capability-registry.service';
 import { EmbedChildRetentionService } from '../embed-child-retention.service';
 import { EmbedCreationService } from '../embed-creation.service';
 import { EmbedFocusOwnerService } from '../embed-focus-owner.service';
@@ -160,6 +158,7 @@ describe('EmbedModelService', () => {
         const descriptor = createDescriptor({
             source: {
                 kind: 'ref',
+                unitType: UniverInstanceType.UNIVER_SHEET,
                 ref: {
                     file: { kind: 'uri', uri: 'univer://workspace/file-1' },
                     unit: { selector: 'remote-sheet', type: 'sheet' },
@@ -331,7 +330,7 @@ describe('embed commands and mutations', () => {
     it('creates, copies, removes, and records undo redo mutations', async () => {
         const descriptor = createDescriptor();
         const creationService = {
-            prepareCreateEmbed: vi.fn(async () => ({ descriptor })),
+            prepareCreateEmbed: vi.fn(() => ({ descriptor })),
             prepareCopyEmbed: vi.fn(() => createDescriptor({ embedId: 'embed-copy', hostAnchorId: 'anchor-copy' })),
         };
         const descriptors = new Map<string, IEmbedDescriptor>([[descriptor.embedId, descriptor]]);
@@ -350,14 +349,14 @@ describe('embed commands and mutations', () => {
         const undoRedoService = { pushUndoRedo: vi.fn() };
         const accessor = createCommandAccessor(creationService, modelService, undoRedoService);
 
-        await expect(CreateEmbedCommand.handler(accessor, {
+        expect(CreateEmbedCommand.handler(accessor, {
             embedId: 'embed-1',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             requestedHostAnchorId: 'anchor-1',
             entry: 'docs-custom-block',
             source: descriptor.source,
-        })).resolves.toBe(descriptor);
+        })).toBe(descriptor);
         expect(undoRedoService.pushUndoRedo).toHaveBeenLastCalledWith(expect.objectContaining({
             unitID: 'host-1',
             undoMutations: [
@@ -379,7 +378,7 @@ describe('embed commands and mutations', () => {
         expect(RemoveEmbedCommand.handler(accessor, { hostUnitId: 'host-1', embedId: 'embed-1' })).toBe(true);
         expect(modelService.softDeleteDescriptor).toHaveBeenCalledWith('host-1', 'embed-1');
 
-        expect(await CreateEmbedCommand.handler(accessor, undefined)).toBe(false);
+        expect(CreateEmbedCommand.handler(accessor, undefined)).toBe(false);
         expect(CopyEmbedCommand.handler(accessor, undefined)).toBe(false);
         expect(RemoveEmbedCommand.handler(accessor, undefined)).toBe(false);
         modelService.getDescriptor.mockReturnValueOnce(undefined);
@@ -401,68 +400,6 @@ describe('embed commands and mutations', () => {
         expect(SetEmbedDescriptorMutation.handler(accessor, undefined as never)).toBe(false);
         expect(SoftDeleteEmbedDescriptorMutation.handler(accessor, undefined as never)).toBe(false);
     });
-
-    it('inserts an embed from a local snapshot synchronously', () => {
-        let storedDescriptor: IEmbedDescriptor | undefined;
-        const modelService = {
-            addDescriptor: vi.fn((_hostUnitId: string, descriptor: IEmbedDescriptor) => {
-                storedDescriptor = descriptor;
-            }),
-            getDescriptor: vi.fn(() => storedDescriptor),
-            getActiveDescriptorsByChildUnit: vi.fn(() => []),
-        };
-        const undoRedoService = { pushUndoRedo: vi.fn() };
-        const instanceService = {
-            createUnit: vi.fn(() => ({ getUnitId: () => 'child-doc' })),
-        };
-        const capabilityRegistry = {
-            getCapability: vi.fn(() => ({
-                hostType: UniverInstanceType.UNIVER_SHEET,
-                childType: UniverInstanceType.UNIVER_DOC,
-                entry: 'sheets-sheet-tab',
-                mode: 'tab',
-                layout: 'tab-peer',
-                menuBehavior: 'host-override',
-                nestedEmbed: false,
-            })),
-        };
-        const accessor = createCommandAccessor({}, modelService, undoRedoService, instanceService, capabilityRegistry);
-
-        expect(InsertEmbedBySnapshotCommand.handler(accessor, {
-            embedId: 'embed-doc',
-            hostUnitId: 'host-sheet',
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            hostAnchorId: 'anchor-doc',
-            entry: 'sheets-sheet-tab',
-            childType: UniverInstanceType.UNIVER_DOC,
-            unitSnapshot: { id: 'child-doc', body: { dataStream: '\r\n' } },
-            hostContext: { tabIndex: 1, name: 'Notes' },
-        })).toMatchObject({
-            embedId: 'embed-doc',
-            hostUnitId: 'host-sheet',
-            hostAnchorId: 'anchor-doc',
-            childUnitId: 'child-doc',
-            childType: UniverInstanceType.UNIVER_DOC,
-            source: {
-                kind: 'ref',
-                ref: { file: { kind: 'self' }, unit: { selector: 'child-doc', type: 'doc' } },
-            },
-        });
-        expect(instanceService.createUnit).toHaveBeenCalledWith(
-            UniverInstanceType.UNIVER_DOC,
-            { id: 'child-doc', body: { dataStream: '\r\n' } },
-            expect.objectContaining({ makeCurrent: false, skipAutoRender: true, embeddedRender: true })
-        );
-        expect(modelService.addDescriptor).toHaveBeenCalledWith('host-sheet', expect.objectContaining({ embedId: 'embed-doc' }));
-        expect(undoRedoService.pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            unitID: 'host-sheet',
-            undoMutations: [
-                { id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-sheet', embedId: 'embed-doc' } },
-                { id: RemoveEmbedHostAnchorRecordMutation.id, params: { hostUnitId: 'host-sheet', hostAnchorId: 'anchor-doc' } },
-            ],
-        }));
-        expect(InsertEmbedBySnapshotCommand.handler(accessor, undefined)).toBe(false);
-    });
 });
 
 function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {
@@ -474,13 +411,14 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         entry: overrides.entry ?? 'docs-custom-block',
         source: overrides.source ?? {
             kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },
                 unit: { selector: 'child-sheet', type: 'sheet' },
             },
         },
         childUnitId: overrides.childUnitId,
-        childType: overrides.childType,
+        childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,
         mode: overrides.mode ?? 'interactive',
         sourceMeta: overrides.sourceMeta ?? {
             floating: {
@@ -520,8 +458,7 @@ function createCommandAccessor(
     creationService: unknown,
     modelService: unknown,
     undoRedoService: unknown,
-    instanceService?: unknown,
-    capabilityRegistry?: unknown
+    instanceService: unknown = { getUnit: vi.fn() }
 ): IAccessor {
     let accessor: IAccessor;
     const hostAdapterRegistry = createTestHostAdapterRegistry();
@@ -547,9 +484,7 @@ function createCommandAccessor(
     const lifecycleService = new EmbedHostLifecycleService(
         creationService as never,
         modelService as never,
-        capabilityRegistry as never,
         instanceService as never,
-        undefined,
         hostAdapterRegistry,
         commandService as never,
         undoRedoService as never
@@ -581,10 +516,6 @@ function createCommandAccessor(
             if (token === IUniverInstanceService) {
                 return instanceService;
             }
-            if (token === EmbedCapabilityRegistryService) {
-                return capabilityRegistry;
-            }
-
             throw new Error('unexpected token');
         }),
     } as never;
@@ -682,7 +613,7 @@ function createTestRemoveAnchorPlan(
     };
 }
 
-function getDescriptorRef(descriptor: IEmbedDescriptor): IResourceRef {
+function getDescriptorRef(descriptor: IEmbedDescriptor): ResourceRefInput {
     if (descriptor.source.kind !== 'ref') {
         throw new Error('test descriptor must use a ref source');
     }

@@ -17,10 +17,9 @@
 export {
     CopyEmbedCommand,
     CreateEmbedCommand,
-    InsertEmbedBySnapshotCommand,
     RemoveEmbedCommand,
 } from './commands/commands/embed.command';
-export type { ICopyEmbedCommandParams, ICreateEmbedCommandParams, IInsertEmbedBySnapshotCommandParams, IRemoveEmbedCommandParams } from './commands/commands/embed.command';
+export type { ICopyEmbedCommandParams, ICreateEmbedCommandParams, IRemoveEmbedCommandParams } from './commands/commands/embed.command';
 export { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
 export type { ISetEmbedDescriptorMutationParams, ISoftDeleteEmbedDescriptorMutationParams } from './commands/mutations/embed-descriptor.mutation';
 export {
@@ -53,6 +52,8 @@ export {
     upsertEmbedResourceEntry,
 } from './common/embed-resource';
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
+export { getResourceRefInputKey, normalizeResourceRefInput } from './common/resource-ref-input';
+export { normalizeResourceRefLocator } from './common/resource-ref-locator';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
 export { EmbedResourceController } from './controllers/embed-resource.controller';
 export { UniverEmbedPlugin } from './plugin';
@@ -78,9 +79,8 @@ export type {
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
-export type { IEmbedReferencedUnitEnsureInput, IEmbedReferencedUnitEnsureResult, IEmbedReferencedUnitListFilter, IEmbedReferencedUnitRecord, IEmbedReferencedUnitUsageOwner } from './services/embed-referenced-unit-manager.service';
 export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
-export type { EmbedResourceRefMaterializationProfile, IEmbedResourceRefEnsureInput, IEmbedResourceRefEnsureResult, IEmbedResourceRefProvider, IEmbedResourceRefProviderMatch, IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
+export type { EmbedResourceRefMaterializationProfile, IEmbedResourceRefEnsureInput, IEmbedResourceRefProvider, IEmbedResourceRefProviderMatch, IEmbedResourceRefProviderRegistration, IReferencedUnitLoadResult } from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
     EmbedHostEntry,
@@ -121,9 +121,22 @@ export type {
     IEmbedHostAnchorRecord,
 } from './types/host-anchor';
 export type {
+    IReferencedUnitEnsureInput,
+    IReferencedUnitHandle,
+    IReferencedUnitListFilter,
+    IReferencedUnitManagerService,
+    IReferencedUnitOwner,
+    IReferencedUnitRecord,
+    IReferencedUnitUsageRecord,
+} from './types/referenced-unit';
+export {
+    ReferencedUnitOwnerKind,
+} from './types/referenced-unit';
+export type {
     IResourceRef,
     IResourceRefUnit,
     ResourceRefFile,
+    ResourceRefInput,
     ResourceRefPart,
     ResourceRefUnitType,
 } from './types/resource-ref';

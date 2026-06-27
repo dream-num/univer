@@ -113,7 +113,10 @@ describe('formula highlight helpers', () => {
     });
 
     it('calculates visible formula reference selections and activates the reference under the editor cursor', () => {
-        const currentSelections = [{ primary: { actualRow: 9, actualColumn: 9 } }];
+        const currentSelections = [{
+            range: range(0, 0),
+            primary: { actualRow: 9, actualColumn: 9 },
+        }];
         const refSelectionsService = {
             getCurrentSelections: vi.fn(() => currentSelections),
             setSelections: vi.fn(),
@@ -163,6 +166,84 @@ describe('formula highlight helpers', () => {
         expect(result?.[0].primary).toBe(currentSelections[0].primary);
         expect(result?.[0].style).toMatchObject({ stroke: '#ff0000', widgetStroke: '#fff' });
         expect(refSelectionsRenderService.setActiveSelectionIndex).toHaveBeenCalledWith(0);
+    });
+
+    it('does not assign the active keyboard selection primary to an earlier formula reference', () => {
+        const activeKeyboardSelection = {
+            range: range(7, 2),
+            primary: { actualRow: 7, actualColumn: 2 },
+        };
+        const workbook = {
+            getUnitId: vi.fn(() => 'unit1'),
+            getActiveSheet: vi.fn(() => ({
+                getSheetId: () => 'sheet1',
+                getName: () => 'Sheet1',
+                getRowCount: () => 100,
+                getColumnCount: () => 50,
+            })),
+            getSheetBySheetName: vi.fn(() => ({ getSheetId: () => 'sheet1' })),
+        };
+
+        const result = calcHighlightRanges({
+            unitId: 'unit1',
+            subUnitId: 'sheet1',
+            currentWorkbook: workbook as any,
+            refSelections: [
+                { token: 'C10', themeColor: '#ff0000', refIndex: 0, startIndex: 0, endIndex: 2, index: 0 },
+                { token: 'C8', themeColor: '#00ff00', refIndex: 1, startIndex: 4, endIndex: 5, index: 1 },
+            ],
+            editor: undefined,
+            refSelectionsService: {
+                getCurrentSelections: vi.fn(() => [activeKeyboardSelection]),
+                setSelections: vi.fn(),
+            } as any,
+            refSelectionsRenderService: undefined,
+            sheetSkeletonManagerService: {
+                getSkeleton: vi.fn(() => ({})),
+            } as any,
+            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'white' ? '#fff' : key) } as any,
+            univerInstanceService: { getUnit: vi.fn(() => workbook) } as any,
+        });
+
+        expect(result?.[0].range).toMatchObject(range(9, 2));
+        expect(result?.[0].primary).toBeUndefined();
+        expect(result?.[1].range).toMatchObject(range(7, 2));
+        expect(result?.[1].primary).toBe(activeKeyboardSelection.primary);
+    });
+
+    it('ignores primary-only selections when calculating formula reference highlight primary cells', () => {
+        const workbook = {
+            getUnitId: vi.fn(() => 'unit1'),
+            getActiveSheet: vi.fn(() => ({
+                getSheetId: () => 'sheet1',
+                getName: () => 'Sheet1',
+                getRowCount: () => 100,
+                getColumnCount: () => 50,
+            })),
+            getSheetBySheetName: vi.fn(() => ({ getSheetId: () => 'sheet1' })),
+        };
+
+        const result = calcHighlightRanges({
+            unitId: 'unit1',
+            subUnitId: 'sheet1',
+            currentWorkbook: workbook as any,
+            refSelections: [
+                { token: 'A1', themeColor: '#ff0000', refIndex: 0, startIndex: 0, endIndex: 1, index: 0 },
+            ],
+            editor: undefined,
+            refSelectionsService: {
+                getCurrentSelections: vi.fn(() => [{ primary: { actualRow: 9, actualColumn: 9 } }]),
+                setSelections: vi.fn(),
+            } as any,
+            refSelectionsRenderService: undefined,
+            sheetSkeletonManagerService: {
+                getSkeleton: vi.fn(() => ({})),
+            } as any,
+            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'white' ? '#fff' : key) } as any,
+            univerInstanceService: { getUnit: vi.fn(() => workbook) } as any,
+        });
+
+        expect(result?.[0].primary).toBeUndefined();
     });
 
     it('clears highlight selections when the workbook or active sheet is unavailable', () => {

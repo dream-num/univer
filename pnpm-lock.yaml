@@ -6985,6 +6985,12 @@ packages:
   '@univerjs/icons-svg@1.18.0':
     resolution: {integrity: sha512-ubflVwfPl7JaOMN9dLnuuRrzum/ZRZPl3HiRRpTOkShXpWMotn7sX8EteZZMJjmvT4D9cj7o56S6J86tPUzKuA==}
 
+  '@univerjs/icons@1.13.0':
+    resolution: {integrity: sha512-K1wBl7I+TZa+B8SvQHwojO9c/cYdk+Pkfd7hVB8wd0yMg4neuH4JeOdra2zxoG7qTcBEXSBPZbKLMxuA8/GNZQ==}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
+
   '@univerjs/icons@1.18.0':
     resolution: {integrity: sha512-zT8oH9W2oELkz9mD8Zic705TU5/PYB1GedzvlbSQR5lyrK0RCMQCzaC2qZZyD1N13W24takpfyX9j1fIYT6adg==}
     peerDependencies:
@@ -14695,6 +14701,11 @@ snapshots:
       eslint-visitor-keys: 5.0.1
 
   '@univerjs/icons-svg@1.18.0': {}
+
+  '@univerjs/icons@1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   '@univerjs/icons@1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:

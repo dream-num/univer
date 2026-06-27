@@ -30,6 +30,7 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -50,6 +51,7 @@ import {
     shouldAutoMountFloatDomRuntime,
     shouldPassThroughFloatDomActivationEvent,
     shouldPassThroughFloatDomRuntimeEvents,
+    shouldPreserveFloatDomOnFocusChange,
     shouldStartFloatDomMoveFromHandle,
     shouldUseFloatDomPreviewObject,
     syncFloatDomHostSelectionOnStageEnter,
@@ -67,6 +69,26 @@ const BASE_WORKBOOK_DATA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             name: 'Sheet1',
+            rowCount: 20,
+            columnCount: 20,
+            defaultColumnWidth: 72,
+            defaultRowHeight: 24,
+            rowHeader: { width: 46 },
+            columnHeader: { height: 28 },
+            cellData: {},
+            hidden: BooleanNumber.FALSE,
+        },
+    },
+};
+
+const TWO_SHEET_WORKBOOK_DATA: IWorkbookData = {
+    ...BASE_WORKBOOK_DATA,
+    sheetOrder: ['sheet1', 'sheet2'],
+    sheets: {
+        ...BASE_WORKBOOK_DATA.sheets,
+        sheet2: {
+            id: 'sheet2',
+            name: 'Sheet2',
             rowCount: 20,
             columnCount: 20,
             defaultColumnWidth: 72,
@@ -386,14 +408,25 @@ describe('SheetCanvasFloatDomManagerService', () => {
         expect(isCanvasFloatDomDrawingType(DrawingTypeEnum.DRAWING_IMAGE)).toBe(false);
     });
 
-    it('does not auto mount embed float doms that opt into stage2 runtime mounting', () => {
+    it('only defers auto mounting for same-sheet embed float doms that opt into stage2 runtime mounting', () => {
         expect(shouldAutoMountFloatDomRuntime({
             data: {
                 version: 1,
-                embedId: 'embed-slide',
+                embedId: 'embed-sheet',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
                 runtimeMountMode: 'stage2',
             },
         } as any)).toBe(false);
+        expect(shouldAutoMountFloatDomRuntime({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
     });
 
     it('keeps existing float doms auto mounted by default', () => {
@@ -410,19 +443,45 @@ describe('SheetCanvasFloatDomManagerService', () => {
         } as any)).toBe(true);
     });
 
-    it('does not use host scene preview image objects for embed float doms', () => {
+    it('keeps embed float dom layers rendered when focus moves into child units', () => {
+        expect(shouldPreserveFloatDomOnFocusChange({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+        expect(shouldPreserveFloatDomOnFocusChange({
+            data: { label: 'plain sheet float dom' },
+        } as any)).toBe(false);
+    });
+
+    it('uses host scene preview image objects only for same-sheet stage2-only embed float doms', () => {
         expect(shouldUseFloatDomPreviewObject({
             data: {
                 version: 1,
-                embedId: 'embed-slide',
+                embedId: 'embed-sheet',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+        expect(shouldUseFloatDomPreviewObject({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
                 runtimeMountMode: 'stage2',
             },
         } as any)).toBe(false);
         expect(shouldUseFloatDomPreviewObject({
             data: {
                 version: 1,
-                embedId: 'embed-slide',
-                runtimeMountMode: 'always',
+                embedId: 'embed-legacy',
+                runtimeMountMode: 'stage2',
             },
         } as any)).toBe(false);
     });
@@ -432,6 +491,8 @@ describe('SheetCanvasFloatDomManagerService', () => {
             data: {
                 version: 1,
                 embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
                 runtimeMountMode: 'stage2',
             },
         } as any)).toBe(false);
@@ -475,6 +536,8 @@ describe('SheetCanvasFloatDomManagerService', () => {
             data: {
                 version: 1,
                 embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
                 runtimeMountMode: 'stage2',
             },
         };
@@ -1613,6 +1676,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         expect(findFloatDom(canvasFloatDomService, 'position-card')).toEqual(expect.objectContaining({
             componentKey: 'PositionCard',
             data: { label: 'Pinned note' },
+            preserveOnFocusChange: false,
             unitId: 'test',
         }));
         findFloatDom(canvasFloatDomService, 'position-card')?.onPointerDown(new MouseEvent('pointerdown'));
@@ -1700,6 +1764,75 @@ describe('SheetCanvasFloatDomManagerService', () => {
         disposable.unsubscribe();
     });
 
+    it('creates the dom binding when the host rect already exists in the scene', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+        const drawingId = 'existing-rect-card';
+        const rectShapeKey = getDrawingShapeKeyByDrawingSearch({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId,
+        });
+
+        fixture.scene.addObject(new Rect(rectShapeKey, {
+            left: 76,
+            top: 30,
+            width: 100,
+            height: 40,
+        }));
+
+        fixture.manager.addFloatDomToPosition({
+            componentKey: 'ExistingRectCard',
+            initPosition: {
+                startX: 76,
+                startY: 30,
+                endX: 176,
+                endY: 70,
+            },
+            data: { label: 'Existing rect' },
+            allowTransform: true,
+        }, drawingId)!;
+        await Promise.resolve();
+
+        expect(findFloatDom(canvasFloatDomService, drawingId)).toEqual(expect.objectContaining({
+            componentKey: 'ExistingRectCard',
+            data: { label: 'Existing rect' },
+            unitId: 'test',
+        }));
+        expect(fixture.manager.getFloatDomInfo(drawingId)?.rect).toBe(fixture.scene.getObject(rectShapeKey));
+    });
+
+    it('preserves embed float dom layers while child units own focus', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+
+        fixture.manager.addFloatDomToPosition({
+            componentKey: 'EmbedCard',
+            initPosition: {
+                startX: 76,
+                startY: 30,
+                endX: 176,
+                endY: 70,
+            },
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+            allowTransform: true,
+        }, 'embed-card')!;
+        await Promise.resolve();
+
+        expect(findFloatDom(canvasFloatDomService, 'embed-card')).toEqual(expect.objectContaining({
+            componentKey: 'EmbedCard',
+            preserveOnFocusChange: true,
+        }));
+    });
+
     it('refreshes float dom position when the sheet viewport scrolls', () => {
         const fixture = setup();
         disposables.push(fixture);
@@ -1742,6 +1875,40 @@ describe('SheetCanvasFloatDomManagerService', () => {
         });
 
         subscription.unsubscribe();
+    });
+
+    it('hides worksheet-scoped float doms when another sheet tab becomes active', async () => {
+        const fixture = setup(TWO_SHEET_WORKBOOK_DATA);
+        disposables.push(fixture);
+        fixture.get(LifecycleService).stage = LifecycleStages.Rendered;
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+
+        fixture.manager.addFloatDomToPosition({
+            componentKey: 'SheetScopedCard',
+            initPosition: {
+                startX: 76,
+                startY: 30,
+                endX: 176,
+                endY: 70,
+            },
+            data: { label: 'Sheet scoped' },
+            allowTransform: true,
+        }, 'sheet-scoped-card')!;
+        await Promise.resolve();
+
+        expect(findFloatDom(canvasFloatDomService, 'sheet-scoped-card')).toBeDefined();
+
+        (fixture.manager as unknown as {
+            _syncFloatDomVisibilityForActiveSheet: (unitId: string, activeSubUnitId: string) => void;
+        })._syncFloatDomVisibilityForActiveSheet('test', 'sheet2');
+
+        expect(findFloatDom(canvasFloatDomService, 'sheet-scoped-card')).toBeUndefined();
+
+        (fixture.manager as unknown as {
+            _syncFloatDomVisibilityForActiveSheet: (unitId: string, activeSubUnitId: string) => void;
+        })._syncFloatDomVisibilityForActiveSheet('test', 'sheet1');
+
+        expect(findFloatDom(canvasFloatDomService, 'sheet-scoped-card')).toBeDefined();
     });
 });
 

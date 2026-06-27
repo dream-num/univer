@@ -77,4 +77,21 @@ describe('EmbedFloatingActiveService', () => {
 
         expect(service.getStage('embed-1')).toBe('stage2');
     });
+
+    it('does not emit when activation or stage does not change', () => {
+        const service = new EmbedFloatingActiveService();
+        const values: unknown[] = [];
+        service.active$.subscribe((value) => values.push(value));
+        const activation = {
+            hostUnitId: 'host-1',
+            embedId: 'embed-1',
+            childUnitId: 'child-1',
+        };
+
+        service.activate(activation, 'stage2');
+        service.activate(activation, 'stage2');
+        service.setStage('embed-1', 'stage2');
+
+        expect(values).toHaveLength(2);
+    });
 });

@@ -258,6 +258,44 @@ describe('EmbedActivationService', () => {
         expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
     });
 
+    it('does not restore host focus when clearing an inactive floating embed', () => {
+        const univerInstanceService = {
+            setCurrentUnitForType: vi.fn(),
+            focusUnit: vi.fn(),
+        };
+        const focusOwnerService = {
+            getFocusOwner: vi.fn(() => null),
+            setFocusOwner: vi.fn(),
+            clearFocusOwner: vi.fn(),
+        };
+        const floatingActiveService = {
+            getActive: vi.fn(() => null),
+            clear: vi.fn(),
+        };
+        const mountService = {
+            activateSession: vi.fn(),
+            deactivateTabSessions: vi.fn(() => []),
+            setActive: vi.fn(),
+        };
+        const service = new EmbedActivationService(
+            univerInstanceService as never,
+            focusOwnerService as never,
+            { activateAnchor: vi.fn() } as never,
+            { activate: vi.fn(), clear: vi.fn() } as never,
+            mountService as never,
+            undefined,
+            floatingActiveService as never
+        );
+
+        service.clearFloating('inactive-sheet', 'host-workbook');
+
+        expect(floatingActiveService.clear).not.toHaveBeenCalled();
+        expect(focusOwnerService.clearFocusOwner).not.toHaveBeenCalled();
+        expect(mountService.setActive).not.toHaveBeenCalled();
+        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+    });
+
     it('deactivates tab sessions and restores the host when clearing a tab', () => {
         const univerInstanceService = {
             setCurrentUnitForType: vi.fn(),

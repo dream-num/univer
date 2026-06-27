@@ -17,13 +17,15 @@
 import type { Serializable } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 
 export const EMBED_SHEETS_FLOATING_COMPONENT_KEY = 'UniverEmbedSheetsFloatingObject';
 
 export interface IEmbedSheetsFloatingObjectData {
     version: 1;
     embedId: string;
+    hostType?: UniverInstanceType;
+    childType?: UniverInstanceType;
     hostUnitId?: string;
     hostAnchorId: string;
     /**
@@ -38,6 +40,7 @@ export interface IEmbedSheetsFloatingObjectData {
 
 export interface IEmbedSheetsFloatingObjectParams {
     embedId: string;
+    childType?: UniverInstanceType;
     hostUnitId: string;
     hostSubUnitId: string;
     hostAnchorId: string;
@@ -61,6 +64,7 @@ const MIN_FLOATING_SIZE = 1;
 
 export function createEmbedSheetsFloatingObjectData(params: {
     embedId: string;
+    childType?: UniverInstanceType;
     hostUnitId?: string;
     hostAnchorId: string;
     resizeBehavior?: IEmbedSheetsFloatingObjectData['resizeBehavior'];
@@ -70,6 +74,8 @@ export function createEmbedSheetsFloatingObjectData(params: {
     return {
         version: 1,
         embedId: params.embedId,
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: params.childType,
         hostUnitId: params.hostUnitId,
         hostAnchorId: params.hostAnchorId,
         runtimeMountMode: params.runtimeMountMode ?? 'stage2',
@@ -150,6 +156,7 @@ export function createEmbedSheetsFloatingDrawingFromDescriptor(
 ): ISheetFloatDom {
     return createEmbedSheetsFloatingDrawing({
         embedId: descriptor.embedId,
+        childType: descriptor.childType,
         hostUnitId: descriptor.hostUnitId,
         hostSubUnitId,
         hostAnchorId: descriptor.hostAnchorId,

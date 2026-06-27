@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import './f-univer';
+import type {} from '@univerjs/embed/facade';
+import type { FWorkbook } from './f-workbook';
 
-export { FDocument } from './f-document';
-export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
-export type { IFDocumentParagraphInfo } from './f-document-paragraph';
-export type { FDocEmbedUnitFacadeMapAugmentation } from './f-types';
-export type { IFDocumentTextRange } from './utils';
-export { stripBlockTokens } from './utils';
+declare module '@univerjs/embed/facade' {
+
+    interface IUnitFacadeMap {
+        // UniverInstanceType.UNIVER_SHEET
+        2: FWorkbook;
+    }
+}
+
+export type FSheetEmbedUnitFacadeMapAugmentation = never;

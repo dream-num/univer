@@ -78,6 +78,16 @@ export type {
 } from './services/embed-host-lifecycle.service';
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
+export {
+    createDefaultReferencedUnitFacadeResolvers,
+    EmbedReferencedUnitFacadeResolverRegistryService,
+    flushPendingReferencedUnitFacadeResolvers,
+    registerReferencedUnitFacadeResolvers,
+} from './services/embed-referenced-unit-api-resolver-registry.service';
+export type {
+    IReferencedUnitFacadeResolveContext,
+    IReferencedUnitFacadeResolverRegistration,
+} from './services/embed-referenced-unit-api-resolver-registry.service';
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 export type { EmbedResourceRefMaterializationProfile, IEmbedResourceRefEnsureInput, IEmbedResourceRefProvider, IEmbedResourceRefProviderMatch, IEmbedResourceRefProviderRegistration, IReferencedUnitLoadResult } from './services/embed-resource-ref-provider-registry.service';

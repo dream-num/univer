@@ -206,13 +206,13 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
 
     private _withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
         if (signal.aborted) {
-            return Promise.reject(new Error('REFERENCED_UNIT_ENSURE_ABORTED'));
+            return Promise.reject(new Error('REFERENCED_UNIT_LOAD_ABORTED'));
         }
 
         return new Promise<T>((resolve, reject) => {
             const onAbort = () => {
                 signal.removeEventListener('abort', onAbort);
-                reject(new Error('REFERENCED_UNIT_ENSURE_ABORTED'));
+                reject(new Error('REFERENCED_UNIT_LOAD_ABORTED'));
             };
 
             signal.addEventListener('abort', onAbort, { once: true });

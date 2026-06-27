@@ -19,6 +19,7 @@ import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@un
 import { describe, expect, it, vi } from 'vitest';
 import { CreateEmbedCommand, RemoveEmbedCommand } from '../../commands/commands/embed.command';
 import { EmbedModelService } from '../../services/embed-model.service';
+import { EmbedReferencedUnitFacadeResolverRegistryService } from '../../services/embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
 import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
@@ -111,11 +112,17 @@ describe('embed facade', () => {
     it('loads units through the generic facade and embed facade', async () => {
         const descriptor = createDescriptor();
         const workbookFacade = { getId: vi.fn(() => 'child-1') };
-        const { api, referencedUnitManager } = createFacade([descriptor], workbookFacade);
+        const { api, facadeResolverRegistry, referencedUnitManager } = createFacade([descriptor], workbookFacade);
         const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
         expect(ref).toBeDefined();
 
         await expect(api.loadUnitAsync(ref!, { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
+        expect(facadeResolverRegistry.resolve).toHaveBeenCalledWith({
+            unitId: 'child-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            injector: expect.any(Object),
+            univerAPI: api,
+        });
         expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
             ref,
             unitType: UniverInstanceType.UNIVER_SHEET,
@@ -125,6 +132,12 @@ describe('embed facade', () => {
 
         const embed = api.getEmbed({ hostUnitId: 'host-1', embedId: 'embed-1' })!;
         await expect(embed.loadAsync({ makeCurrent: true })).resolves.toBe(workbookFacade);
+        expect(facadeResolverRegistry.resolve).toHaveBeenLastCalledWith({
+            unitId: 'child-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            injector: expect.any(Object),
+            univerAPI: api,
+        });
         expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
             ref,
             owner: {
@@ -174,7 +187,7 @@ describe('embed facade', () => {
     });
 });
 
-function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], loadedUnit: object = { getId: vi.fn(() => 'child-1') }) {
+function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], loadedUnitFacade: object = { getId: vi.fn(() => 'child-1') }) {
     const commandService = {
         syncExecuteCommand: vi.fn((id: string, params: {
             embedId?: string;
@@ -214,9 +227,11 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
             dispose: vi.fn(),
         })),
     };
+    const facadeResolverRegistry = {
+        resolve: vi.fn(() => loadedUnitFacade),
+    };
     const univerInstanceService = {
         getUnitType: vi.fn(() => UniverInstanceType.UNIVER_DOC),
-        getUnit: vi.fn(() => loadedUnit),
     };
     const injector = {
         get: vi.fn((token: unknown) => {
@@ -232,9 +247,12 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
             if (token === EmbedReferencedUnitManagerService) {
                 return referencedUnitManager;
             }
+            if (token === EmbedReferencedUnitFacadeResolverRegistryService) {
+                return facadeResolverRegistry;
+            }
             throw new Error('Unexpected token');
         }),
-        createInstance: vi.fn((Ctor: typeof FEmbed, descriptor: IEmbedDescriptor) => new Ctor(descriptor, injector as never)),
+        createInstance: vi.fn((Ctor: typeof FEmbed, descriptor: IEmbedDescriptor, univerAPI: FUniverEmbedMixin) => new Ctor(descriptor, univerAPI, injector as never)),
     };
     const api = Object.assign(Object.create(FUniverEmbedMixin.prototype), {
         _commandService: commandService,
@@ -242,7 +260,7 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
         _univerInstanceService: univerInstanceService,
     }) as FUniverEmbedMixin;
 
-    return { api, commandService, injector, model, referencedUnitManager, univerInstanceService };
+    return { api, commandService, facadeResolverRegistry, injector, model, referencedUnitManager, univerInstanceService };
 }
 
 function createRef() {

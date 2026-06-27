@@ -15,6 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import type { IReferencedUnitFacadeResolverRegistration } from './services/embed-referenced-unit-api-resolver-registry.service';
 import type { IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
 import type { IEmbedCapability, IEmbedGuestContribution } from './types/embed';
 import type { IEmbedHostAdapterContribution } from './types/host-adapter';
@@ -36,6 +37,12 @@ import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.
 import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
 import { EmbedModelService } from './services/embed-model.service';
 import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
+import {
+    createDefaultReferencedUnitFacadeResolvers,
+    EmbedReferencedUnitFacadeResolverRegistryService,
+    flushPendingReferencedUnitFacadeResolvers,
+    registerReferencedUnitFacadeResolvers,
+} from './services/embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 import { EmbedSourceResolverService } from './services/embed-source-resolver.service';
@@ -46,6 +53,7 @@ export interface IUniverEmbedPluginConfig {
     hostAdapters?: readonly IEmbedHostAdapterContribution[];
     guestContributions?: readonly IEmbedGuestContribution[];
     resourceRefProviderRegistrations?: readonly IEmbedResourceRefProviderRegistration[];
+    referencedUnitFacadeResolvers?: readonly IReferencedUnitFacadeResolverRegistration[];
 }
 
 export class UniverEmbedPlugin extends Plugin {
@@ -73,6 +81,7 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedFocusOwnerService],
             [EmbedGuestContributionRegistryService],
             [EmbedResourceRefProviderRegistryService],
+            [EmbedReferencedUnitFacadeResolverRegistryService],
             [EmbedReferencedUnitManagerService],
             [EmbedSourceResolverService],
             [EmbedNestedGuardService],
@@ -96,6 +105,11 @@ export class UniverEmbedPlugin extends Plugin {
         const resourceRefProviderRegistry = this._injector.get(EmbedResourceRefProviderRegistryService);
         (this._config.resourceRefProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.register(registration)));
 
+        const referencedUnitFacadeResolverRegistry = this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService);
+        referencedUnitFacadeResolverRegistry.registerMany(createDefaultReferencedUnitFacadeResolvers()).forEach((disposable) => this.disposeWithMe(disposable));
+        flushPendingReferencedUnitFacadeResolvers(this._injector);
+        registerReferencedUnitFacadeResolvers(this._injector, this._config.referencedUnitFacadeResolvers ?? []);
+
         touchDependencies(this._injector, [
             [EmbedModelService],
             [EmbedChildRetentionService],
@@ -104,6 +118,7 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedHostLifecycleService],
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
+            [EmbedReferencedUnitFacadeResolverRegistryService],
             [EmbedReferencedUnitManagerService],
             [EmbedSourceResolverService],
             [EmbedCreationService],

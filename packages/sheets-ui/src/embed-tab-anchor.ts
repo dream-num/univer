@@ -14,99 +14,15 @@
  * limitations under the License.
  */
 
-import type { IWorksheetData } from '@univerjs/core';
-import type { IEmbedDescriptor } from '@univerjs/embed';
-import { BooleanNumber } from '@univerjs/core';
-
-export const EMBED_SHEETS_TAB_CUSTOM_KEY = 'UNIVER_EMBED_SHEETS_TAB';
-
-export interface IEmbedSheetsTabCustomData {
-    version: 1;
-    embedId: string;
-    hostAnchorId: string;
-}
-
-export interface IEmbedSheetsTabSnapshotParams {
-    embedId: string;
-    hostAnchorId: string;
-    name?: string;
-}
-
-export function createEmbedSheetsTabSnapshot(params: IEmbedSheetsTabSnapshotParams): IWorksheetData {
-    return {
-        id: params.hostAnchorId,
-        name: params.name ?? params.embedId,
-        tabColor: '',
-        hidden: BooleanNumber.FALSE,
-        rowCount: 1,
-        columnCount: 1,
-        zoomRatio: 1,
-        freeze: {
-            startRow: -1,
-            startColumn: -1,
-            ySplit: 0,
-            xSplit: 0,
-        },
-        scrollTop: 0,
-        scrollLeft: 0,
-        defaultColumnWidth: 88,
-        defaultRowHeight: 24,
-        mergeData: [],
-        cellData: {},
-        rowData: {},
-        columnData: {},
-        showGridlines: BooleanNumber.FALSE,
-        rowHeader: {
-            width: 46,
-            hidden: BooleanNumber.TRUE,
-        },
-        columnHeader: {
-            height: 20,
-            hidden: BooleanNumber.TRUE,
-        },
-        rightToLeft: BooleanNumber.FALSE,
-        custom: {
-            [EMBED_SHEETS_TAB_CUSTOM_KEY]: createEmbedSheetsTabCustomData(params),
-        },
-    };
-}
-
-export function createEmbedSheetsTabCustomData(params: IEmbedSheetsTabSnapshotParams): IEmbedSheetsTabCustomData {
-    return {
-        version: 1,
-        embedId: params.embedId,
-        hostAnchorId: params.hostAnchorId,
-    };
-}
-
-export function createEmbedSheetsTabSnapshotFromDescriptor(descriptor: IEmbedDescriptor, name?: string): IWorksheetData {
-    return createEmbedSheetsTabSnapshot({
-        embedId: descriptor.embedId,
-        hostAnchorId: descriptor.hostAnchorId,
-        name,
-    });
-}
-
-export function getEmbedSheetsTabCustomData(snapshot: Pick<IWorksheetData, 'custom'>): IEmbedSheetsTabCustomData | undefined {
-    const value = snapshot.custom?.[EMBED_SHEETS_TAB_CUSTOM_KEY];
-    if (!isEmbedSheetsTabCustomData(value)) {
-        return undefined;
-    }
-
-    return value;
-}
-
-export function isEmbedSheetsTabSnapshot(snapshot: Pick<IWorksheetData, 'custom'>): boolean {
-    return getEmbedSheetsTabCustomData(snapshot) != null;
-}
-
-function isEmbedSheetsTabCustomData(value: unknown): value is IEmbedSheetsTabCustomData {
-    if (!value || typeof value !== 'object') {
-        return false;
-    }
-
-    const candidate = value as Partial<IEmbedSheetsTabCustomData>;
-    return candidate.version === 1 &&
-        typeof candidate.embedId === 'string' &&
-        typeof candidate.hostAnchorId === 'string';
-}
+export {
+    createEmbedSheetsTabCustomData,
+    createEmbedSheetsTabSnapshot,
+    createEmbedSheetsTabSnapshotFromDescriptor,
+    EMBED_SHEETS_TAB_CUSTOM_KEY,
+    getEmbedSheetsTabCustomData,
+    isEmbedSheetsTabSnapshot,
+} from '@univerjs/sheets-drawing';
+export type {
+    IEmbedSheetsTabCustomData,
+    IEmbedSheetsTabSnapshotParams,
+} from '@univerjs/sheets-drawing';

@@ -16,3 +16,7 @@
 
 export const EMBED_PLUGIN_NAME = 'UNIVER_EMBED_PLUGIN';
 export const EMBED_RESOURCE_PLUGIN_NAME = 'UNIVER_EMBED_RESOURCE_PLUGIN';
+export const CREATE_EMBED_HOST_ANCHOR_MUTATION_ID = 'embed.mutation.create-host-anchor';
+export const REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID = 'embed.mutation.remove-host-anchor';
+export const SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID = 'embed.mutation.set-host-anchor-record';
+export const REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID = 'embed.mutation.remove-host-anchor-record';

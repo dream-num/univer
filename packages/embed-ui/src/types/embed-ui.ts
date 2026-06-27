@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IDisposable, IMutationInfo, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICommandService, IDisposable, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry, EmbedLayout, EmbedMenuBehavior, IEmbedDescriptor, IEmbedLayoutPolicies } from '@univerjs/embed';
 import type { IMenuManagerService, IRibbonService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
-import type { IEmbedHostAnchorRecord } from './host-anchor';
+
+export type {
+    IEmbedHostAdapterContribution,
+    IEmbedHostAnchorContext,
+    IEmbedHostAnchorMutationPlan,
+    IEmbedHostAnchorRemoveMutationPlan,
+} from '@univerjs/embed';
 
 export interface IEmbedContainerContext {
     descriptor: IEmbedDescriptor;
@@ -104,49 +110,6 @@ export interface IEmbedHostMountResult {
     };
     disposable?: IDisposable;
 }
-
-export interface IEmbedHostAnchorContext {
-    embedId: string;
-    hostUnitId: string;
-    hostType: UniverInstanceType;
-    entry: EmbedHostEntry;
-    requestedAnchorId?: string;
-    hostContext?: Record<string, unknown>;
-    descriptor?: IEmbedDescriptor;
-}
-
-export interface IEmbedHostAnchorMutationPlan {
-    hostAnchorId: string;
-    redoMutations: IMutationInfo[];
-    undoMutations: IMutationInfo[];
-}
-
-export interface IEmbedHostAnchorRemoveMutationPlan {
-    redoMutations: IMutationInfo[];
-    undoMutations: IMutationInfo[];
-}
-
-interface IEmbedHostAdapterContributionBase {
-    hostType: UniverInstanceType;
-    entry: EmbedHostEntry;
-    removeAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string }) => void;
-    removeAnchorPlan?: (context: IEmbedHostAnchorContext & { hostAnchorId: string }) => IEmbedHostAnchorRemoveMutationPlan;
-    afterCreateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
-    afterRemoveAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor?: IEmbedDescriptor }) => void;
-    activateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
-    restoreAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => IEmbedHostAnchorRecord;
-}
-
-export type IEmbedHostAdapterContribution = IEmbedHostAdapterContributionBase & (
-    | {
-        createAnchorPlan: (context: IEmbedHostAnchorContext) => IEmbedHostAnchorMutationPlan;
-        createAnchor?: (context: IEmbedHostAnchorContext) => string;
-    }
-    | {
-        createAnchor: (context: IEmbedHostAnchorContext) => string;
-        createAnchorPlan?: (context: IEmbedHostAnchorContext) => IEmbedHostAnchorMutationPlan;
-    }
-);
 
 export interface IEmbedHostContainerContribution {
     hostType: UniverInstanceType;

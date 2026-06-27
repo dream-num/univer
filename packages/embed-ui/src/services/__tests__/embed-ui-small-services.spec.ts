@@ -28,7 +28,7 @@ import {
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,
 } from '../../common/tab-peer-workbench';
-import { shouldDeferSheetFloatRuntimeMount } from '../../components/EmbedFloatDomRenderer';
+import { shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
 import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
@@ -119,6 +119,45 @@ describe('embed-ui small services and controllers', () => {
             childType: UniverInstanceType.UNIVER_DOC,
             sourceMeta: { floating: { enabled: true } },
         } as never, 'inactive')).toBe(false);
+    });
+
+    it('keeps empty overlay and popup roots transparent to stage2 runtime hit testing', () => {
+        const container = document.createElement('div');
+        container.innerHTML = `
+            <div class="univer-embed-float-dom__content"></div>
+            <div class="univer-embed-float-dom__live"></div>
+            <div class="univer-embed-float-dom__live-canvas"></div>
+            <div class="univer-embed-float-dom__live-content"></div>
+            <div class="univer-embed-float-dom__interaction-gate"></div>
+        `;
+        const chrome = document.createElement('div');
+        chrome.innerHTML = `
+            <div data-embed-overlay-root="true"></div>
+            <div data-embed-popup-root="true"></div>
+        `;
+
+        syncRuntimeInteractionVisibility(container, chrome, true, 'stage2');
+
+        expect(chrome.querySelector<HTMLElement>('[data-embed-overlay-root]')?.style.pointerEvents).toBe('none');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-popup-root]')?.style.pointerEvents).toBe('none');
+        expect(container.querySelector<HTMLElement>('.univer-embed-float-dom__interaction-gate')?.style.pointerEvents).toBe('');
+    });
+
+    it('does not let stage2 chrome menu roots cover the runtime surface', () => {
+        const chrome = document.createElement('div');
+        chrome.innerHTML = `
+            <button data-embed-float-fullscreen-button="true"></button>
+            <button data-embed-float-drag-handle="true"></button>
+            <div data-embed-overlay-root="true"><button data-child-overlay="true"></button></div>
+            <div data-embed-popup-root="true"><button data-child-popup="true"></button></div>
+        `;
+
+        syncChromeControlsVisibility(chrome, true, true, 'stage2');
+
+        expect(chrome.querySelector<HTMLElement>('[data-embed-overlay-root]')?.style.visibility).toBe('');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-popup-root]')?.style.visibility).toBe('');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-overlay-root]')?.style.pointerEvents).toBe('none');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-popup-root]')?.style.pointerEvents).toBe('none');
     });
 
     it('routes child undo redo to host stack when focus owner matches', () => {

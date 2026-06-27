@@ -15,7 +15,7 @@
  */
 
 import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
-import type { IResourceRef } from './resource-ref';
+import type { ResourceRefInput } from './resource-ref';
 
 export const EmbedHostEntryEnum = {
     DocsCustomBlock: 'docs-custom-block',
@@ -27,7 +27,7 @@ export const EmbedHostEntryEnum = {
     BoardsFloatingObject: 'boards-floating-object',
 } as const;
 
-export type EmbedHostEntry = typeof EmbedHostEntryEnum[keyof typeof EmbedHostEntryEnum];
+export type EmbedHostEntry = typeof EmbedHostEntryEnum[keyof typeof EmbedHostEntryEnum] | (string & {});
 
 export type EmbedMode = 'float' | 'tab';
 export type EmbedMenuBehavior = 'floating' | 'host-override' | 'none';
@@ -103,7 +103,8 @@ export interface IEmbedCapability {
 export type EmbedSource =
     | {
         kind: 'ref';
-        ref: IResourceRef;
+        ref: ResourceRefInput;
+        unitType: UniverInstanceType;
     }
     | {
         kind: 'empty';
@@ -142,7 +143,7 @@ export interface IEmbedDescriptor {
     hostAnchorId: string;
     source: EmbedSource;
     childUnitId?: string;
-    childType?: UniverInstanceType;
+    childType: UniverInstanceType;
     mode?: 'readonly' | 'interactive';
     sourceMeta?: IEmbedSourceMeta;
     lifecycle?: 'active' | 'soft-deleted';
@@ -164,7 +165,7 @@ export interface IEmbeddedFocusOwner {
 }
 
 export interface IEmbedResolvedSource {
-    childUnitId: string;
+    childUnitId?: string;
     childType: UniverInstanceType;
     source: EmbedSource;
 }

@@ -29,7 +29,7 @@ import {
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,
 } from '../../common/tab-peer-workbench';
-import { shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
+import { resolveFloatRuntimeMountGate, shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
 import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
@@ -120,6 +120,26 @@ describe('embed-ui small services and controllers', () => {
             childType: UniverInstanceType.UNIVER_DOC,
             sourceMeta: { floating: { enabled: true } },
         } as never, 'inactive')).toBe(false);
+    });
+
+    it('only makes the runtime mount effect stage-sensitive for deferred sheet float runtimes', () => {
+        const sheetInSheet = {
+            hostType: UniverInstanceType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
+            sourceMeta: { floating: { enabled: true } },
+        };
+        const slideInSheet = {
+            hostType: UniverInstanceType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SLIDE,
+            sourceMeta: { floating: { enabled: true } },
+        };
+
+        expect(resolveFloatRuntimeMountGate(sheetInSheet as never, 'inactive')).toBe('deferred');
+        expect(resolveFloatRuntimeMountGate(sheetInSheet as never, 'stage1')).toBe('deferred');
+        expect(resolveFloatRuntimeMountGate(sheetInSheet as never, 'stage2')).toBe('ready');
+        expect(resolveFloatRuntimeMountGate(slideInSheet as never, 'inactive')).toBe('ready');
+        expect(resolveFloatRuntimeMountGate(slideInSheet as never, 'stage1')).toBe('ready');
+        expect(resolveFloatRuntimeMountGate(slideInSheet as never, 'stage2')).toBe('ready');
     });
 
     it('centralizes float block interaction ownership across inactive stage1 stage2 and doc-block flows', () => {

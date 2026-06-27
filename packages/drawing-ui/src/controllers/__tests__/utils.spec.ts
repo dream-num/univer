@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { DrawingGroupObject, Group } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
@@ -23,6 +23,7 @@ import { getCurrentUnitInfo, insertGroupObject } from '../utils';
 const { MockGroup } = vi.hoisted(() => {
     class HoistedMockGroup {
         oKey: string;
+        transformerConfig?: { rotateEnabled?: boolean };
         private _objects: Array<{ oKey: string }> = [];
         setBaseBound = vi.fn();
         transformByState = vi.fn();
@@ -49,9 +50,14 @@ const { MockGroup } = vi.hoisted(() => {
     };
 });
 
-vi.mock('@univerjs/drawing', () => ({
-    getDrawingShapeKeyByDrawingSearch: vi.fn(({ drawingId }) => `group-${drawingId}`),
-}));
+vi.mock('@univerjs/drawing', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@univerjs/drawing')>();
+
+    return {
+        ...actual,
+        getDrawingShapeKeyByDrawingSearch: vi.fn(({ drawingId }) => `group-${drawingId}`),
+    };
+});
 
 vi.mock('@univerjs/engine-render', () => ({
     DRAWING_OBJECT_LAYER_INDEX: 99,
@@ -80,9 +86,14 @@ describe('drawing controller utils', () => {
         };
         const drawingManagerService = {
             getDrawingByParam: vi.fn(() => ({
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawingId: 'group-1',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
                 transform: { left: 10, top: 20, width: 30, height: 40, angle: 15 },
                 groupBaseBound: { left: 1, top: 2, width: 3, height: 4 },
             })),
+            getDrawingsByGroup: vi.fn(() => []),
         };
 
         insertGroupObject({ drawingId: 'group-1' } as never, object as never, scene as never, drawingManagerService as never);
@@ -99,6 +110,48 @@ describe('drawing controller utils', () => {
         expect(group.getObjects()).toEqual([object]);
     });
 
+    it('disables restored group rotation when descendants include an old chart drawing', () => {
+        const object = { oKey: 'chart-1' };
+        const scene = {
+            objects: new Map<string, InstanceType<typeof MockGroup> | { oKey: string }>(),
+            getObject(key: string) {
+                return this.objects.get(key) ?? null;
+            },
+            addObject(group: InstanceType<typeof MockGroup>) {
+                this.objects.set(group.oKey, group);
+                return {
+                    attachTransformerTo: vi.fn(),
+                };
+            },
+            getObjectIncludeInGroup(key: string) {
+                return this.getObject(key);
+            },
+        };
+        const drawingManagerService = {
+            getDrawingByParam: vi.fn(() => ({
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawingId: 'group-1',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                transform: { left: 10, top: 20, width: 30, height: 40, angle: 30 },
+            })),
+            getDrawingsByGroup: vi.fn(() => [{
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawingId: 'chart-1',
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                transform: { left: 10, top: 20, width: 30, height: 40 },
+                groupId: 'group-1',
+            }]),
+        };
+
+        insertGroupObject({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'group-1' }, object as never, scene as never, drawingManagerService as never);
+
+        const group = scene.getObject('group-group-1') as InstanceType<typeof MockGroup>;
+        expect(group.transformerConfig?.rotateEnabled).toBe(false);
+        expect(group.transformByState).toHaveBeenCalledWith({ left: 10, top: 20, width: 30, height: 40, angle: 30 });
+    });
+
     it('skips invalid group targets and resolves current unit info for sheet, doc, and slide', () => {
         const scene = {
             getObject: vi.fn(() => ({ oKey: 'not-a-group' })),
@@ -107,6 +160,7 @@ describe('drawing controller utils', () => {
         };
         const drawingManagerService = {
             getDrawingByParam: vi.fn(() => ({ transform: { left: 0, top: 0, width: 10, height: 10 } })),
+            getDrawingsByGroup: vi.fn(() => []),
         };
 
         insertGroupObject({ drawingId: 'group-2' } as never, { oKey: 'child-2' } as never, scene as never, drawingManagerService as never);

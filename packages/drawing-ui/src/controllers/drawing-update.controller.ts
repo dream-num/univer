@@ -48,7 +48,7 @@ import { AlignType, SetDrawingAlignOperation } from '../commands/operations/draw
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ensureDrawingRenderLayer } from '../services/drawing-render.service';
 import { getUpdateParams } from '../utils/get-update-params';
-import { getCurrentUnitInfo, insertGroupObject } from './utils';
+import { getCurrentUnitInfo, insertGroupObject, syncGroupRotateEnabled } from './utils';
 
 interface IDrawingTransformCache {
     unitId: string;
@@ -276,6 +276,7 @@ export class DrawingUpdateController extends Disposable {
         scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
         group.addObjects(...objects);
+        syncGroupRotateEnabled(group, parent, scene, this._drawingManagerService, children);
         if (parent.groupBaseBound) {
             group.setBaseBound(parent.groupBaseBound);
         }

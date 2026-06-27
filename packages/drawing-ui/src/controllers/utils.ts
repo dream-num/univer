@@ -14,12 +14,41 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
 import type { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group } from '@univerjs/engine-render';
+import { resolveDrawingUIRotateEnabled } from '../utils/rotate-enabled';
+
+function getRenderObjectForDrawing(scene: Scene, drawing: IDrawingParam): BaseObject | null {
+    const key = getDrawingShapeKeyByDrawingSearch(drawing);
+    return scene.getObjectIncludeInGroup?.(key) ?? scene.getObject(key) ?? null;
+}
+
+export function syncGroupRotateEnabled(
+    group: Group,
+    groupParam: IDrawingParam,
+    scene: Scene,
+    drawingManagerService: IDrawingManagerService,
+    children?: readonly IDrawingParam[]
+): void {
+    const rotateEnabled = resolveDrawingUIRotateEnabled(groupParam, {
+        getChildren: (drawing) => {
+            if (children && drawing.drawingId === groupParam.drawingId && drawing.unitId === groupParam.unitId && drawing.subUnitId === groupParam.subUnitId) {
+                return children;
+            }
+
+            return drawingManagerService.getDrawingsByGroup(drawing);
+        },
+        getRenderObject: (drawing) => getRenderObjectForDrawing(scene, drawing),
+    });
+    group.transformerConfig = {
+        ...group.transformerConfig,
+        rotateEnabled,
+    };
+}
 
 export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService) {
     const groupParam = drawingManagerService.getDrawingByParam(objectParam);
@@ -42,6 +71,7 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
             }
         }
         groupObject.addObject(object);
+        syncGroupRotateEnabled(groupObject, groupParam, scene, drawingManagerService);
         return;
     }
 
@@ -50,6 +80,7 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
     group.addObject(object);
+    syncGroupRotateEnabled(group, groupParam, scene, drawingManagerService);
 
     const { transform, groupBaseBound } = groupParam;
 

@@ -76,6 +76,35 @@ function createSheetDrawing(drawingId: string, subUnitId = 'sheet1'): ISheetDraw
     };
 }
 
+function createSheetDrawingTransform(angle = 0) {
+    return {
+        left: 10,
+        top: 20,
+        width: 30,
+        height: 40,
+        angle,
+    };
+}
+
+function createGroupSheetDrawing(drawingId: string, angle = 0): ISheetDrawing {
+    const drawing = createSheetDrawing(drawingId);
+
+    return {
+        ...drawing,
+        drawingType: DrawingTypeEnum.DRAWING_GROUP,
+        transform: createSheetDrawingTransform(angle),
+        groupBaseBound: createSheetDrawingTransform(angle),
+        sheetTransform: {
+            ...drawing.sheetTransform,
+            angle,
+        },
+        axisAlignSheetTransform: {
+            ...drawing.axisAlignSheetTransform,
+            angle,
+        },
+    } as ISheetDrawing;
+}
+
 describe('sheet drawing integration', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -191,6 +220,92 @@ describe('sheet drawing integration', () => {
         });
         expect(drawingManagerService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-update' })).toMatchObject({
             source: 'https://example.com/updated.png',
+        });
+    });
+
+    it('preserves angle updates for groups containing charts while applying move and resize fields', async () => {
+        const image = {
+            ...createSheetDrawing('image-child'),
+            groupId: 'group-with-chart',
+            transform: createSheetDrawingTransform(),
+        };
+        const chart = {
+            ...createSheetDrawing('chart-child'),
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+            groupId: 'group-with-chart',
+            transform: createSheetDrawingTransform(),
+        } as ISheetDrawing;
+
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createGroupSheetDrawing('group-with-chart', 30),
+                image,
+                chart,
+            ],
+        });
+
+        expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'group-with-chart',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                transform: {
+                    left: 15,
+                    top: 25,
+                    width: 35,
+                    height: 45,
+                    angle: 60,
+                },
+                sheetTransform: {
+                    ...createSheetDrawing('group-with-chart').sheetTransform,
+                    angle: 60,
+                },
+                axisAlignSheetTransform: {
+                    ...createSheetDrawing('group-with-chart').axisAlignSheetTransform,
+                    angle: 60,
+                },
+            }],
+        })).toBe(true);
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-with-chart' })).toMatchObject({
+            transform: {
+                left: 15,
+                top: 25,
+                width: 35,
+                height: 45,
+                angle: 30,
+            },
+            sheetTransform: expect.objectContaining({ angle: 30 }),
+            axisAlignSheetTransform: expect.objectContaining({ angle: 30 }),
+        });
+
+        expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'group-with-chart',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                transform: {
+                    angle: 60,
+                },
+            }],
+        })).toBe(true);
+
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-with-chart' })).toMatchObject({
+            transform: {
+                left: 15,
+                top: 25,
+                width: 35,
+                height: 45,
+                angle: 30,
+            },
+            sheetTransform: expect.objectContaining({ angle: 30 }),
+            axisAlignSheetTransform: expect.objectContaining({ angle: 30 }),
         });
     });
 

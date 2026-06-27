@@ -24,6 +24,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
+import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
@@ -31,6 +32,70 @@ import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawi
 export interface ISetDrawingCommandParams {
     unitId: string;
     drawings: Partial<ISheetDrawing>[];
+}
+
+function hasIncomingAngle(drawing: Partial<ISheetDrawing>): boolean {
+    return drawing.transform?.angle !== undefined || drawing.sheetTransform?.angle !== undefined || drawing.axisAlignSheetTransform?.angle !== undefined;
+}
+
+type NullableAngleState = { angle?: number } | null | undefined | void;
+
+function preserveAngle<T extends { angle?: number }>(incoming: T, current: NullableAngleState): T {
+    if (incoming.angle === undefined) {
+        return incoming;
+    }
+
+    const currentAngle = (current as { angle?: number } | null | undefined)?.angle;
+    const next = { ...((current ?? {}) as object), ...incoming } as T;
+    if (currentAngle === undefined) {
+        delete next.angle;
+    } else {
+        next.angle = currentAngle;
+    }
+
+    return next;
+}
+
+function normalizeNonRotatableAngleUpdate(drawing: Partial<ISheetDrawing>, sheetDrawingService: ISheetDrawingService): Partial<ISheetDrawing> {
+    if (!drawing.drawingId || !drawing.unitId || !drawing.subUnitId || !hasIncomingAngle(drawing)) {
+        return drawing;
+    }
+
+    const current = sheetDrawingService.getDrawingByParam({
+        unitId: drawing.unitId,
+        subUnitId: drawing.subUnitId,
+        drawingId: drawing.drawingId,
+    });
+    if (!current) {
+        return drawing;
+    }
+
+    const resolveTarget = {
+        ...current,
+        ...drawing,
+        drawingType: drawing.drawingType ?? current.drawingType,
+        transform: {
+            ...current.transform,
+            ...drawing.transform,
+        },
+    } as ISheetDrawing;
+
+    if (resolveSheetDrawingRotateEnabled(resolveTarget, sheetDrawingService)) {
+        return drawing;
+    }
+
+    const normalized = { ...drawing };
+    if (drawing.transform?.angle !== undefined) {
+        normalized.transform = preserveAngle(drawing.transform, current.transform);
+    }
+    if (drawing.sheetTransform?.angle !== undefined) {
+        normalized.sheetTransform = preserveAngle(drawing.sheetTransform, current.sheetTransform);
+    }
+    if (drawing.axisAlignSheetTransform?.angle !== undefined) {
+        normalized.axisAlignSheetTransform = preserveAngle(drawing.axisAlignSheetTransform, current.axisAlignSheetTransform);
+    }
+
+    return normalized;
 }
 
 export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
@@ -45,10 +110,12 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const { drawings } = params;
-        const jsonOp = sheetDrawingService.getBatchUpdateOp(drawings as ISheetDrawing[]) as IDrawingJsonUndo1;
+        const normalizedDrawings = drawings.map((drawing) => normalizeNonRotatableAngleUpdate(drawing, sheetDrawingService));
+        const normalizedParams = { ...params, drawings: normalizedDrawings };
+        const jsonOp = sheetDrawingService.getBatchUpdateOp(normalizedDrawings as ISheetDrawing[]) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
-        const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params });
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params: normalizedParams });
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
             {

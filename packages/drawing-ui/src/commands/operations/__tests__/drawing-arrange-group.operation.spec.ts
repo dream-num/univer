@@ -67,6 +67,20 @@ function createChartDrawing(drawingId: string, left: number): IDrawingParam {
     };
 }
 
+function createGroupDrawing(drawingId: string, left: number, rotateEnabled?: boolean): IDrawingParam {
+    return {
+        ...createDrawing(drawingId, left),
+        drawingType: DrawingTypeEnum.DRAWING_GROUP,
+        transform: {
+            left,
+            top: 10,
+            width: 20,
+            height: 30,
+            rotateEnabled,
+        },
+    };
+}
+
 describe('drawing arrange and group operations', () => {
     let univer: Univer;
     let commandService: ICommandService;
@@ -203,6 +217,7 @@ describe('drawing arrange and group operations', () => {
             unitId,
             subUnitId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            transform: expect.objectContaining({ rotateEnabled: true }),
         });
 
         const childIds: string[] = [];
@@ -223,11 +238,39 @@ describe('drawing arrange and group operations', () => {
 
         expect(result).toBe(true);
         expect(groupUpdates).toHaveLength(1);
+        expect(groupUpdates[0][0].parent.transform?.rotateEnabled).toBe(false);
         expect(groupUpdates[0][0].children.map((child) => child.drawingId)).toEqual(['chart-1', 'image-1']);
         expect(groupUpdates[0][0].children[0]).toMatchObject({
             drawingId: 'chart-1',
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
             groupId: groupUpdates[0][0].parent.drawingId,
         });
+    });
+
+    it('recomputes nested group rotate capability from current descendants', async () => {
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    staleGroup: {
+                        ...createGroupDrawing('staleGroup', 0, false),
+                    },
+                    'nested-child': {
+                        ...createDrawing('nested-child', 10),
+                        groupId: 'staleGroup',
+                    },
+                },
+                order: ['staleGroup', 'nested-child'],
+            },
+        });
+        const groupUpdates: IDrawingGroupUpdateParam[][] = [];
+        drawingManagerService.featurePluginGroupUpdate$.subscribe((update) => groupUpdates.push(update));
+
+        const result = await commandService.executeCommand(SetDrawingGroupOperation.id, {
+            drawings: [createGroupDrawing('staleGroup', 0, false), createDrawing('image-1', 30)],
+        });
+
+        expect(result).toBe(true);
+        expect(groupUpdates[0][0].parent.transform?.rotateEnabled).toBe(true);
     });
 
     it('does not create a drawing group from a single selected drawing', async () => {

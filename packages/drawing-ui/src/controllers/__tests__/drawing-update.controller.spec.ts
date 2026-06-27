@@ -267,7 +267,7 @@ describe('DrawingUpdateController', () => {
         const chartRect = new Rect(chartKey, { left: 40, top: 0, width: 20, height: 10 });
         const imageTransformSpy = vi.spyOn(imageRect, 'transformByState');
         const chartTransformSpy = vi.spyOn(chartRect, 'transformByState');
-        let createdGroup: { oKey: string; getObjects: () => unknown[] } | undefined;
+        let createdGroup: { oKey: string; getObjects: () => unknown[]; transformerConfig?: { rotateEnabled?: boolean }; angle?: number } | undefined;
 
         harness.scene.getObjectIncludeInGroup.mockImplementation((key: string) => {
             if (key === imageKey) {
@@ -280,7 +280,7 @@ describe('DrawingUpdateController', () => {
         });
         harness.scene.addObject.mockImplementation((object: { oKey: string; getObjects?: () => unknown[] }) => {
             if (object.oKey === groupKey && object.getObjects) {
-                createdGroup = object as { oKey: string; getObjects: () => unknown[] };
+                createdGroup = object as { oKey: string; getObjects: () => unknown[]; transformerConfig?: { rotateEnabled?: boolean }; angle?: number };
             }
             return { attachTransformerTo: vi.fn() };
         });
@@ -291,7 +291,7 @@ describe('DrawingUpdateController', () => {
                 subUnitId,
                 drawingId: 'group-1',
                 drawingType: DrawingTypeEnum.DRAWING_GROUP,
-                transform: { left: 0, top: 0, width: 60, height: 10, angle: 0 },
+                transform: { left: 0, top: 0, width: 60, height: 10, angle: 30 },
                 groupBaseBound: { left: 0, top: 0, width: 60, height: 10 },
             },
             children: [
@@ -302,6 +302,8 @@ describe('DrawingUpdateController', () => {
 
         expect(createdGroup?.oKey).toBe(groupKey);
         expect(createdGroup?.getObjects()).toEqual([imageRect, chartRect]);
+        expect(createdGroup?.transformerConfig?.rotateEnabled).toBe(false);
+        expect(createdGroup?.angle).toBe(30);
         expect(imageRect.isInGroup).toBe(true);
         expect(chartRect.isInGroup).toBe(true);
         expect(imageRect.groupKey).toBe(groupKey);

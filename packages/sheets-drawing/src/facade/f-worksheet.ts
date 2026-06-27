@@ -22,6 +22,7 @@ import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } 
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
+import { withDerivedSheetGroupRotateEnabled } from '../common/rotate-enabled';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
 const GROUPABLE_DRAWING_TYPES = new Set([
@@ -515,7 +516,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
 
         const validDrawings = drawings as ISheetDrawing[];
         const groupTransform = getGroupState(0, 0, validDrawings.map((drawing) => drawing.transform || {}));
-        const groupParam = {
+        let groupParam = {
             unitId,
             subUnitId,
             drawingId: groupId,
@@ -532,6 +533,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             ...drawing,
             groupId,
         })) as IDrawingParam[];
+        groupParam = withDerivedSheetGroupRotateEnabled(groupParam, children, sheetDrawingService);
 
         const result = this._applyGroupDrawingOperation([{
             parent: groupParam,
@@ -679,7 +681,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             : groupParams.map((groupParam) => {
                 const { parent, children } = groupParam;
                 const groupTransform = getGroupState(0, 0, children.map((child) => child.transform || {}));
-                return {
+                let nextParent = {
                     parent: {
                         ...parent,
                         transform: groupTransform,
@@ -689,6 +691,11 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
                         groupId: parent.drawingId,
                     })),
                 };
+                nextParent = {
+                    ...nextParent,
+                    parent: withDerivedSheetGroupRotateEnabled(nextParent.parent, nextParent.children, this._injector.get(ISheetDrawingService)),
+                };
+                return nextParent;
             });
     }
 }

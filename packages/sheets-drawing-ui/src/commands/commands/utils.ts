@@ -18,6 +18,7 @@ import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam } 
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { DrawingTypeEnum, generateRandomId } from '@univerjs/core';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import { withDerivedSheetGroupRotateEnabledFromChildren } from '@univerjs/sheets-drawing';
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
     const newGroupParams: IDrawingGroupUpdateParam[] = [];
@@ -43,14 +44,14 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
             };
         }) as IDrawingParam[];
 
-        const groupParam = {
+        const groupParam = withDerivedSheetGroupRotateEnabledFromChildren({
             unitId,
             subUnitId,
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             groupBaseBound: { ...parent.groupBaseBound },
             transform: groupTransform,
-        } as IDrawingParam;
+        } as IDrawingParam, newChildren);
 
         newGroupParams.push({
             parent: groupParam,
@@ -83,7 +84,7 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
             };
         }) as IDrawingParam[];
 
-        const ungroupParam = {
+        const ungroupParam = withDerivedSheetGroupRotateEnabledFromChildren({
             unitId,
             subUnitId,
             drawingId: groupId,
@@ -92,7 +93,7 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
                 left: 0,
                 top: 0,
             },
-        } as IDrawingParam;
+        } as IDrawingParam, newChildren);
 
         newGroupParams.push({
             parent: ungroupParam,

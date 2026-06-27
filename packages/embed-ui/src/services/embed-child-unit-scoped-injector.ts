@@ -63,6 +63,9 @@ export function createEmbedChildUnitScopedInjector(
             if (property === 'setCurrentUnitForType') {
                 return (unitId: string) => {
                     if (unitId === context.childUnitId) {
+                        if (scopedCurrentChildUnit$.getValue() === childUnit) {
+                            return;
+                        }
                         scopedCurrentChildUnit$.next(childUnit);
                         return;
                     }
@@ -86,6 +89,9 @@ export function createEmbedChildUnitScopedInjector(
             if (property === 'focusUnit') {
                 return (unitId: string | null) => {
                     if (unitId === null || unitId === context.childUnitId) {
+                        if (scopedFocusedUnitId$.getValue() === unitId) {
+                            return;
+                        }
                         scopedFocusedUnitId$.next(unitId);
                         return;
                     }

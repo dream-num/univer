@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { createEmbedSheetsFloatingDrawing, createEmbedSheetsFloatingDrawingFromDescriptor, createEmbedSheetsFloatingObjectData, getEmbedSheetsFloatingObjectData, isEmbedSheetsFloatingDrawing, resolveEmbedSheetsFloatingObjectSize } from './embed-floating-anchor';
 
@@ -58,6 +58,7 @@ describe('embed floating anchor', () => {
         expect(drawing.transform?.height).toBe(258.75);
         expect(drawing.drawingType).toBe(DrawingTypeEnum.DRAWING_BLOCK);
         expect(drawing.data).toMatchObject({
+            hostType: UniverInstanceType.UNIVER_SHEET,
             resizeBehavior: 'aspect-ratio',
             aspectRatio: 16 / 9,
             runtimeMountMode: 'stage2',
@@ -74,6 +75,7 @@ describe('embed floating anchor', () => {
 
         expect(drawing.data).toMatchObject({
             embedId: 'embed-slide',
+            hostType: UniverInstanceType.UNIVER_SHEET,
             hostAnchorId: 'anchor-1',
             runtimeMountMode: 'stage2',
         });
@@ -91,6 +93,7 @@ describe('embed floating anchor', () => {
             embedId: 'embed-1',
             hostAnchorId: 'anchor-1',
             hostUnitId: 'host-1',
+            childType: UniverInstanceType.UNIVER_SHEET,
         } as never, 'sheet-1', {
             allowTransform: false,
             aspectRatio: 4 / 3,
@@ -109,7 +112,9 @@ describe('embed floating anchor', () => {
             componentKey: 'CustomComponent',
             data: {
                 aspectRatio: 4 / 3,
+                childType: UniverInstanceType.UNIVER_SHEET,
                 embedId: 'embed-1',
+                hostType: UniverInstanceType.UNIVER_SHEET,
                 hostAnchorId: 'anchor-1',
                 resizeBehavior: 'aspect-ratio',
                 runtimeMountMode: 'always',

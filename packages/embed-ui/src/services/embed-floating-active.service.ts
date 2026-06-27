@@ -36,15 +36,28 @@ export class EmbedFloatingActiveService {
         const sameTarget = current?.hostUnitId === next.hostUnitId &&
             current.embedId === next.embedId &&
             current.childUnitId === next.childUnitId;
-        this._active$.next({
+        const nextActive = {
             ...next,
             stage: stage ?? next.stage ?? (sameTarget ? current.stage ?? 'stage1' : 'stage1'),
-        });
+        };
+        if (
+            current?.hostUnitId === nextActive.hostUnitId &&
+            current.embedId === nextActive.embedId &&
+            current.childUnitId === nextActive.childUnitId &&
+            (current.stage ?? 'stage1') === nextActive.stage
+        ) {
+            return;
+        }
+
+        this._active$.next(nextActive);
     }
 
     setStage(embedId: string, stage: Exclude<EmbedFloatingStage, 'inactive'>): void {
         const active = this.getActive();
         if (!active || active.embedId !== embedId) {
+            return;
+        }
+        if ((active.stage ?? 'stage1') === stage) {
             return;
         }
 

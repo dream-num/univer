@@ -72,6 +72,8 @@ describe('sheets embed host adapter', () => {
                 }),
                 data: expect.objectContaining({
                     aspectRatio: 16 / 9,
+                    childType: UniverInstanceType.UNIVER_SLIDE,
+                    hostType: UniverInstanceType.UNIVER_SHEET,
                     resizeBehavior: 'aspect-ratio',
                 }),
             }),
@@ -240,6 +242,14 @@ describe('sheets embed host adapter', () => {
         });
         expect(sheetDrawingService.applyJson1).toHaveBeenCalledWith('host-sheet', 'sheet-1', { add: true });
         expect(drawingManagerService.applyJson1).toHaveBeenCalledWith('host-sheet', 'sheet-1', { add: true });
+        expect(sheetDrawingService.getBatchAddOp).toHaveBeenCalledWith([
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    childType: UniverInstanceType.UNIVER_DOC,
+                    hostType: UniverInstanceType.UNIVER_SHEET,
+                }),
+            }),
+        ]);
         expect(sheetDrawingService.addNotification).toHaveBeenCalledWith([drawingSearch]);
         expect(drawingManagerService.addNotification).toHaveBeenCalledWith([drawingSearch]);
     });

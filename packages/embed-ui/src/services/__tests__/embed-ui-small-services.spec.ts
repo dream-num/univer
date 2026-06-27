@@ -24,12 +24,13 @@ import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { resolveEmbedFloatInteractionPolicy } from '../../common/embed-float-interaction-policy';
 import { getEmbedHostChromePolicy } from '../../common/embed-host-chrome-policy';
+import { resolveEmbedFloatingMenuStage, resolveEmbedRuntimeMountGate } from '../../common/embed-runtime-policy';
 import {
     getEmbedTabPeerHostHeaderMode,
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,
 } from '../../common/tab-peer-workbench';
-import { resolveFloatRuntimeMountGate, shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
+import { shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
 import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
@@ -134,12 +135,47 @@ describe('embed-ui small services and controllers', () => {
             sourceMeta: { floating: { enabled: true } },
         };
 
-        expect(resolveFloatRuntimeMountGate(sheetInSheet as never, 'inactive')).toBe('deferred');
-        expect(resolveFloatRuntimeMountGate(sheetInSheet as never, 'stage1')).toBe('deferred');
-        expect(resolveFloatRuntimeMountGate(sheetInSheet as never, 'stage2')).toBe('ready');
-        expect(resolveFloatRuntimeMountGate(slideInSheet as never, 'inactive')).toBe('ready');
-        expect(resolveFloatRuntimeMountGate(slideInSheet as never, 'stage1')).toBe('ready');
-        expect(resolveFloatRuntimeMountGate(slideInSheet as never, 'stage2')).toBe('ready');
+        expect(resolveEmbedRuntimeMountGate(sheetInSheet as never, 'inactive')).toBe('deferred');
+        expect(resolveEmbedRuntimeMountGate(sheetInSheet as never, 'stage1')).toBe('deferred');
+        expect(resolveEmbedRuntimeMountGate(sheetInSheet as never, 'stage2')).toBe('ready');
+        expect(resolveEmbedRuntimeMountGate(slideInSheet as never, 'inactive')).toBe('ready');
+        expect(resolveEmbedRuntimeMountGate(slideInSheet as never, 'stage1')).toBe('ready');
+        expect(resolveEmbedRuntimeMountGate(slideInSheet as never, 'stage2')).toBe('ready');
+    });
+
+    it('uses the same floating menu stage policy for all product menus', () => {
+        const base = {
+            embedId: 'embed-1',
+            fullscreen: false,
+            usesDomFloatingStage: true,
+            renderScopeActive: false,
+        };
+
+        expect(resolveEmbedFloatingMenuStage({
+            ...base,
+            active: { hostUnitId: 'host-1', embedId: 'embed-1', childUnitId: 'child-1', stage: 'stage2' },
+        })).toBe('stage2');
+        expect(resolveEmbedFloatingMenuStage({
+            ...base,
+            active: { hostUnitId: 'host-1', embedId: 'embed-1', childUnitId: 'child-1', stage: 'stage1' },
+        })).toBe('inactive');
+        expect(resolveEmbedFloatingMenuStage({
+            ...base,
+            active: null,
+            fullscreen: true,
+        })).toBe('stage2');
+        expect(resolveEmbedFloatingMenuStage({
+            ...base,
+            active: null,
+            usesDomFloatingStage: false,
+            renderScopeActive: true,
+        })).toBe('stage2');
+        expect(resolveEmbedFloatingMenuStage({
+            ...base,
+            active: null,
+            usesDomFloatingStage: false,
+            renderScopeActive: false,
+        })).toBe('inactive');
     });
 
     it('centralizes float block interaction ownership across inactive stage1 stage2 and doc-block flows', () => {

@@ -252,6 +252,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 // NOT same as SetScrollRelativeCommand. that was exec in sheetRenderController
                 this._commandService.executeCommand(ScrollCommand.id, {
+                    unitId: this._context.unitId,
+                    sheetId: sheetObject.worksheet.getSheetId(),
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,
@@ -376,6 +378,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             xSplit: freezeXSplit,
         } = worksheet.getFreeze();
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
+            unitId: this._context.unitId,
+            sheetId: worksheet.getSheetId(),
             sheetViewStartRow: row - freezeYSplit,
             sheetViewStartColumn: column - freezeXSplit,
             offsetX: 0,
@@ -662,6 +666,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
+            unitId: this._context.unitId,
+            sheetId: worksheet.getSheetId(),
             // sheetViewStartRow & offsetX should never be undefined, it's rendering, there should always be a value!
 
             // sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : ((startSheetViewRow ?? 0) - freezeYSplit),

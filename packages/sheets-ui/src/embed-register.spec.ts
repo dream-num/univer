@@ -16,9 +16,11 @@
 
 // @vitest-environment jsdom
 
+import { EmbedModelService } from '@univerjs/embed';
+import { CanvasFloatDomPreviewService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { createSheetsEmbedRuntimeService, wireSheetsFloatPreviewBridge } from './embed-register';
+import { createSheetsEmbedRuntimeService, ensureSheetsFloatPreviewBridge, wireSheetsFloatPreviewBridge } from './embed-register';
 
 describe('sheets embed register', () => {
     it('mounts sheet-tab embeds through the sheets runtime bridge', () => {
@@ -199,5 +201,130 @@ describe('sheets embed register', () => {
         }));
 
         disposable.unsubscribe();
+    });
+
+    it('retries pending host scene preview requests until the embed descriptor is registered', async () => {
+        vi.useFakeTimers();
+
+        const previewUpdated$ = new Subject<any>();
+        const previewRequested$ = new Subject<any>();
+        const requestPreview = vi.fn();
+        let descriptor: any;
+        const disposable = wireSheetsFloatPreviewBridge({
+            previewService: { previewUpdated$, requestPreview } as any,
+            embedModelService: {
+                getDescriptor: vi.fn(() => descriptor),
+                getActiveDescriptorsByChildUnit: vi.fn(() => []),
+            } as any,
+            canvasFloatDomPreviewService: {
+                setPreview: vi.fn(),
+                getPendingRequests: vi.fn(() => [{
+                    id: 'drawing-1',
+                    width: 320,
+                    height: 180,
+                    data: {
+                        version: 1,
+                        embedId: 'embed-1',
+                        hostUnitId: 'host-1',
+                    },
+                }]),
+                previewRequested$,
+            } as any,
+        });
+
+        previewRequested$.next({
+            id: 'drawing-1',
+            width: 320,
+            height: 180,
+            data: {
+                version: 1,
+                embedId: 'embed-1',
+                hostUnitId: 'host-1',
+            },
+        });
+        expect(requestPreview).not.toHaveBeenCalled();
+
+        descriptor = {
+            embedId: 'embed-1',
+            entry: 'sheets-floating-object',
+            hostAnchorId: 'drawing-1',
+            childUnitId: 'child-1',
+            childType: 2,
+        };
+        await vi.advanceTimersByTimeAsync(250);
+
+        expect(requestPreview).toHaveBeenCalledWith(expect.objectContaining({
+            childUnitId: 'child-1',
+            width: 320,
+            height: 180,
+            reason: 'initial',
+        }));
+
+        disposable.unsubscribe();
+        vi.useRealTimers();
+    });
+
+    it('defers the host scene preview bridge until embed model service is available', async () => {
+        vi.useFakeTimers();
+
+        const previewUpdated$ = new Subject<any>();
+        const requestPreview = vi.fn();
+        const canvasPreviewService = {
+            setPreview: vi.fn(),
+            getPendingRequests: vi.fn(() => [{
+                id: 'drawing-1',
+                width: 320,
+                height: 180,
+                data: {
+                    version: 1,
+                    embedId: 'embed-1',
+                    hostUnitId: 'host-1',
+                },
+            }]),
+            previewRequested$: new Subject<any>(),
+        };
+        const embedModelService = {
+            getDescriptor: vi.fn(() => ({
+                embedId: 'embed-1',
+                entry: 'sheets-floating-object',
+                hostAnchorId: 'drawing-1',
+                childUnitId: 'child-1',
+                childType: 2,
+            })),
+            getActiveDescriptorsByChildUnit: vi.fn(() => []),
+        };
+        const services = new Map<any, any>([
+            [CanvasFloatDomPreviewService, canvasPreviewService],
+        ]);
+        const injector = {
+            has: vi.fn((token) => services.has(token)),
+            get: vi.fn((token) => services.get(token)),
+        };
+
+        ensureSheetsFloatPreviewBridge({
+            injector: injector as any,
+            previewService: { previewUpdated$, requestPreview } as any,
+            maxRetries: 3,
+            retryDelay: 1,
+        });
+        expect(requestPreview).not.toHaveBeenCalled();
+
+        services.set(EmbedModelService, embedModelService);
+        await vi.advanceTimersByTimeAsync(1);
+
+        expect(requestPreview).toHaveBeenCalledWith(expect.objectContaining({
+            childUnitId: 'child-1',
+            width: 320,
+            height: 180,
+            reason: 'initial',
+        }));
+
+        const disposable = ensureSheetsFloatPreviewBridge({
+            injector: injector as any,
+            previewService: { previewUpdated$, requestPreview } as any,
+            retry: false,
+        });
+        disposable?.unsubscribe();
+        vi.useRealTimers();
     });
 });

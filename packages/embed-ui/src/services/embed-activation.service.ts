@@ -95,7 +95,12 @@ export class EmbedActivationService {
         if (embedId && owner?.embedId && owner.embedId !== embedId) {
             return;
         }
-        const nextHostUnitId = hostUnitId ?? owner?.hostUnitId;
+        const getActive = (this._floatingActiveService as { getActive?: () => ReturnType<EmbedFloatingActiveService['getActive']> } | undefined)?.getActive;
+        const active = typeof getActive === 'function' ? getActive.call(this._floatingActiveService) : null;
+        if (embedId && !owner && active?.embedId !== embedId) {
+            return;
+        }
+        const nextHostUnitId = hostUnitId ?? owner?.hostUnitId ?? active?.hostUnitId;
 
         this._floatingActiveService?.clear(embedId);
         this._focusOwnerService.clearFocusOwner(embedId);

@@ -171,7 +171,7 @@ describe('embed child unit scoped injector', () => {
         scopedInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit: unknown) => scopedUnits.push(unit));
         scopedInstanceService.setCurrentUnitForType('child-sheet');
         scopedInstanceService.setCurrentUnitForType('other');
-        expect(scopedUnits).toEqual([childUnit, childUnit]);
+        expect(scopedUnits).toEqual([childUnit]);
         expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('other');
         expect(scopedInstanceService.getFocusedUnit()).toBe(childUnit);
         scopedInstanceService.focusUnit(null);

@@ -1385,7 +1385,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+        version: 4.1.10(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/embed-ui:
     dependencies:
@@ -1422,7 +1422,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+        version: 4.1.10(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/engine-formula:
     dependencies:
@@ -6899,6 +6899,12 @@ packages:
 
   '@univerjs/icons-svg@1.19.0':
     resolution: {integrity: sha512-W1udOqHTHzFYz3rVJDXY5tOEw1tKrMWq4jVmIT1R7PfSCMCbXZzz54M+7nr9PZhXOs7/PXYhfokfG1P0JNpqDQ==}
+
+  '@univerjs/icons@1.13.0':
+    resolution: {integrity: sha512-K1wBl7I+TZa+B8SvQHwojO9c/cYdk+Pkfd7hVB8wd0yMg4neuH4JeOdra2zxoG7qTcBEXSBPZbKLMxuA8/GNZQ==}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
 
   '@univerjs/icons@1.19.0':
     resolution: {integrity: sha512-0aFxjvTtqQBEQt7BFnz4kxBCQTMaDEOi8WhG9lEeoK9JXlRn+GVRDQezwQXfMeqA3AtkNYmjRd9OvOMMqFerMw==}
@@ -14558,6 +14564,11 @@ snapshots:
       eslint-visitor-keys: 5.0.1
 
   '@univerjs/icons-svg@1.19.0': {}
+
+  '@univerjs/icons@1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   '@univerjs/icons@1.19.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:

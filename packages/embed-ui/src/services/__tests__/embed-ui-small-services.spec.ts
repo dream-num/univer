@@ -28,6 +28,7 @@ import {
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,
 } from '../../common/tab-peer-workbench';
+import { shouldDeferSheetFloatRuntimeMount } from '../../components/EmbedFloatDomRenderer';
 import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
@@ -95,6 +96,29 @@ describe('embed-ui small services and controllers', () => {
         service.clear('embed-1');
         expect(service.getActive()).toBeNull();
         expect(values.length).toBeGreaterThan(1);
+    });
+
+    it('defers same-product sheet float runtime until stage2', () => {
+        expect(shouldDeferSheetFloatRuntimeMount({
+            hostType: UniverInstanceType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
+            sourceMeta: { floating: { enabled: true } },
+        } as never, 'inactive')).toBe(true);
+        expect(shouldDeferSheetFloatRuntimeMount({
+            hostType: UniverInstanceType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
+            sourceMeta: { floating: { enabled: true } },
+        } as never, 'stage1')).toBe(true);
+        expect(shouldDeferSheetFloatRuntimeMount({
+            hostType: UniverInstanceType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_SHEET,
+            sourceMeta: { floating: { enabled: true } },
+        } as never, 'stage2')).toBe(false);
+        expect(shouldDeferSheetFloatRuntimeMount({
+            hostType: UniverInstanceType.UNIVER_SHEET,
+            childType: UniverInstanceType.UNIVER_DOC,
+            sourceMeta: { floating: { enabled: true } },
+        } as never, 'inactive')).toBe(false);
     });
 
     it('routes child undo redo to host stack when focus owner matches', () => {

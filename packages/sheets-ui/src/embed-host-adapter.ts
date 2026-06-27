@@ -119,6 +119,7 @@ function createSheetsFloatingObjectAnchorPlan(
     const record = createSheetsFloatingObjectRecord(context);
     const drawing = createEmbedSheetsFloatingDrawing({
         embedId: record.embedId,
+        childType: context.descriptor?.childType,
         hostUnitId: record.hostUnitId,
         hostSubUnitId,
         hostAnchorId: record.hostAnchorId,
@@ -248,6 +249,7 @@ function restoreSheetsFloatingObjectAnchor(
     });
     const drawing = createEmbedSheetsFloatingDrawing({
         embedId: record.embedId,
+        childType: context.descriptor?.childType,
         hostUnitId: record.hostUnitId,
         hostSubUnitId,
         hostAnchorId: record.hostAnchorId,

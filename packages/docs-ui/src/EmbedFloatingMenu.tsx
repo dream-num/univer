@@ -17,7 +17,7 @@
 import type { IEmbedFloatingActivation, IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { Observable } from 'rxjs';
 import { Injector, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, mountEmbedProductRibbonMenu, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, mountEmbedProductRibbonMenu, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { createElement, useEffect, useRef } from 'react';
 
@@ -152,19 +152,7 @@ export function resolveDocsFloatingMenuStage(params: {
     usesDomFloatingStage: boolean;
     renderScopeActive: boolean;
 }): 'inactive' | 'stage2' {
-    if (params.fullscreen) {
-        return 'stage2';
-    }
-
-    if (params.active?.embedId === params.embedId && params.active.stage === 'stage2') {
-        return 'stage2';
-    }
-
-    if (!params.usesDomFloatingStage && params.renderScopeActive) {
-        return 'stage2';
-    }
-
-    return 'inactive';
+    return resolveCommonEmbedFloatingMenuStage(params);
 }
 
 function ensureDocsFloatingMenuStyles(): void {

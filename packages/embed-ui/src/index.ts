@@ -51,6 +51,12 @@ export {
 export { getEmbedHostChromePolicy } from './common/embed-host-chrome-policy';
 export type { IEmbedHostChromePolicy, IEmbedHostChromePolicyInput } from './common/embed-host-chrome-policy';
 export {
+    resolveEmbedFloatingMenuStage,
+    resolveEmbedRuntimeMountGate,
+    shouldDeferEmbedRuntimeMount,
+} from './common/embed-runtime-policy';
+export type { EmbedFloatingMenuStage, EmbedRuntimeMountGate } from './common/embed-runtime-policy';
+export {
     getEmbedTabPeerHostHeaderMode,
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,

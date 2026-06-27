@@ -32,7 +32,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { Button, ColorPicker, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
-import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import {
     AlignBottomIcon,
     AlignTopIcon,
@@ -325,19 +325,7 @@ export function resolveSheetsFloatingMenuStage(params: {
     usesDomFloatingStage: boolean;
     renderScopeActive: boolean;
 }): SheetFloatingMenuStage {
-    if (params.fullscreen) {
-        return 'stage2';
-    }
-
-    if (params.active?.embedId === params.embedId && params.active.stage === 'stage2') {
-        return 'stage2';
-    }
-
-    if (!params.usesDomFloatingStage && params.renderScopeActive) {
-        return 'stage2';
-    }
-
-    return 'inactive';
+    return resolveCommonEmbedFloatingMenuStage(params);
 }
 
 function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {

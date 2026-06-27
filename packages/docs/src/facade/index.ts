@@ -15,7 +15,6 @@
  */
 
 import './f-univer';
-import './f-enum';
 
 export { FDocument } from './f-document';
 export { FDocumentBlockRange } from './f-document-block-range';

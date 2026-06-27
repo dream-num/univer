@@ -16,7 +16,8 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
+import { InsertTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
 
@@ -42,27 +43,20 @@ describe('FDocument', () => {
         univer.dispose();
     });
 
-    it('edits document text through append, insert and paragraph operations', () => {
-        expect(document.appendText('Univer')).toBe(true);
+    it('edits document text through body and paragraph operations', () => {
+        expect(document.getBody().insertText(6, 'Univer')).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello,Univer\r\n');
 
         univer.dispose();
         createDocumentFacade();
-        expect(document.insertText('Docs', {
-            endOffset: 4,
-            segmentId: '',
-            startOffset: 2,
-        })).toBe(true);
+        expect(document.getBody().getElement(0)!.asParagraph().setText('HeDocso,')).toBe(true);
         expect(document.save().body?.dataStream).toBe('HeDocso,\r\n');
 
         univer.dispose();
         createDocumentFacade();
-        expect(document.insertParagraph('Line 1\nLine 2', {
-            endOffset: 6,
-            segmentId: '',
-            startOffset: 6,
-        })).toBe(true);
-        expect(document.save().body?.dataStream).toBe('Hello,Line 1\rLine 2\r\r\n');
+        expect(document.getBody().appendParagraph('Line 1').getText()).toBe('Line 1');
+        expect(document.getBody().appendParagraph('Line 2').getText()).toBe('Line 2');
+        expect(document.save().body?.dataStream).toBe('Hello,\rLine 1\rLine 2\r\n');
     });
 
     it('includes current document resources in saved snapshots', () => {
@@ -95,7 +89,12 @@ describe('FDocument', () => {
     it('runs undo and redo against the active document', () => {
         get(IUndoRedoService);
 
-        expect(document.appendText('One')).toBe(true);
+        expect(get(ICommandService).syncExecuteCommand(InsertTextCommand.id, {
+            unitId: document.getId(),
+            body: { dataStream: 'One' },
+            range: { startOffset: 6, endOffset: 6, collapsed: true, segmentId: '' },
+            segmentId: '',
+        })).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello,One\r\n');
 
         expect(document.undo()).toBe(true);

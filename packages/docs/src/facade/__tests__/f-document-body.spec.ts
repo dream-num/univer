@@ -68,7 +68,7 @@ describe('FDocumentBody', () => {
         expect(body.deleteRange({ startOffset: 0, endOffset: 6 })).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello Alpha\rBeta\rGamma\rTail\r\n');
 
-        expect(body.replaceRange({ startOffset: 0, endOffset: 5 }, 'Hi')).toBe(true);
+        expect(body.getElement(0)!.asParagraph().setText('Hi Alpha')).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hi Alpha\rBeta\rGamma\rTail\r\n');
 
         expect(body.setTextStyle({ startOffset: 0, endOffset: 2 }, { bl: 1 })).toBe(true);

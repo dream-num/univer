@@ -15,7 +15,7 @@
  */
 
 import type { DocumentBlockRangeType, IDocumentBlockRange, Injector } from '@univerjs/core';
-import type { FDocumentBody } from './f-document-body';
+import type { FDocumentBody, IFDocumentBodyEdit } from './f-document-body';
 import type { IFDocumentElementInfo } from './f-document-element';
 import { DocumentBlockType } from '@univerjs/core';
 import { FDocumentElement } from './f-document-element';
@@ -36,10 +36,11 @@ interface IFDocumentBlockRangeMixin {
 export class FDocumentBlockRange extends FDocumentElement {
     constructor(
         protected readonly body: FDocumentBody,
+        protected readonly bodyEdit: IFDocumentBodyEdit,
         protected readonly info: IFDocumentElementInfo,
         protected readonly injector: Injector
     ) {
-        super(body, info, injector);
+        super(body, bodyEdit, info, injector);
 
         if (this.getType() !== DocumentBlockType.BLOCK_RANGE) {
             throw new Error(`Element type is not a block range: ${this.getType()}`);
@@ -138,7 +139,7 @@ export class FDocumentBlockRange extends FDocumentElement {
             endIndex: text.length,
         }];
 
-        return this._body.replaceRange({ startOffset: startIndex, endOffset: endIndex + 1 }, updateBody);
+        return this._bodyEdit.replaceRange({ startOffset: startIndex, endOffset: endIndex + 1 }, updateBody);
     }
 
     /**
@@ -171,7 +172,7 @@ export class FDocumentBlockRangeMixin extends FDocumentElement {
         if (this.getType() !== DocumentBlockType.BLOCK_RANGE) {
             throw new Error(`Element type is not a block range: ${this.getType()}`);
         }
-        return this._injector.createInstance(FDocumentBlockRange, this._body, this.getResolvedInfo(), this._injector);
+        return this._injector.createInstance(FDocumentBlockRange, this._body, this._bodyEdit, this.getResolvedInfo(), this._injector);
     }
 }
 

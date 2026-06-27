@@ -15,10 +15,11 @@
  */
 
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
-import type { FDocumentBody, IFDocumentTextRange } from './f-document-body';
+import type { FDocumentBody, IFDocumentBodyEdit, IFDocumentTextRange } from './f-document-body';
 import type { IFDocumentElementInfo } from './f-document-element';
 import { DocumentBlockType, PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
 import { FDocumentElement } from './f-document-element';
+import { buildPlainTextInsertBody } from './utils';
 
 interface IFDocumentParagraphMixin {
     asParagraph(): FDocumentParagraph;
@@ -50,10 +51,11 @@ export interface IFDocumentResolvedParagraph {
 export class FDocumentParagraph extends FDocumentElement {
     constructor(
         protected readonly body: FDocumentBody,
+        protected readonly bodyEdit: IFDocumentBodyEdit,
         protected readonly info: IFDocumentElementInfo,
         protected readonly injector: Injector
     ) {
-        super(body, info, injector);
+        super(body, bodyEdit, info, injector);
 
         if (this.getType() !== DocumentBlockType.PARAGRAPH) {
             throw new Error(`Element type is not a paragraph: ${this.getType()}`);
@@ -180,7 +182,7 @@ export class FDocumentParagraph extends FDocumentElement {
      */
     setText(text: string): boolean {
         const { startOffset, endOffset } = this.getResolvedParagraphInfo();
-        return this._body.replaceRange({ startOffset, endOffset }, text);
+        return this._bodyEdit.replaceRange({ startOffset, endOffset }, buildPlainTextInsertBody(text));
     }
 
     /**
@@ -238,7 +240,7 @@ export class FDocumentParagraph extends FDocumentElement {
 
         this._preserveExplicitParagraphIds(updateBody);
 
-        return this._body.retainRange(
+        return this._bodyEdit.retainRange(
             { startOffset: endOffset, endOffset: endOffset + 1 },
             updateBody,
             UpdateDocsAttributeType.REPLACE
@@ -328,7 +330,7 @@ export class FDocumentParagraph extends FDocumentElement {
 
         this._preserveExplicitParagraphIds(updateBody);
 
-        return this._body.retainRange(
+        return this._bodyEdit.retainRange(
             { startOffset: endOffset, endOffset: endOffset + 1 },
             updateBody,
             UpdateDocsAttributeType.REPLACE
@@ -345,7 +347,7 @@ export class FDocumentParagraphMixin extends FDocumentElement {
         if (this.getType() !== DocumentBlockType.PARAGRAPH) {
             throw new Error(`Element type is not a paragraph: ${this.getType()}`);
         }
-        return this._injector.createInstance(FDocumentParagraph, this._body, this.getResolvedInfo(), this._injector);
+        return this._injector.createInstance(FDocumentParagraph, this._body, this._bodyEdit, this.getResolvedInfo(), this._injector);
     }
 }
 

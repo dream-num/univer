@@ -19,7 +19,6 @@ import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { CommandType, DrawingTypeEnum, generateRandomId } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
-import { resolveDrawingUIRotateEnabled } from '../../utils/rotate-enabled';
 
 /**
  * Now only support grouping images, shapes, charts, and groups.
@@ -79,15 +78,6 @@ export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> 
                 groupId,
             };
         }) as IDrawingParam[];
-
-        groupParam.transform = {
-            ...groupTransform,
-            rotateEnabled: resolveDrawingUIRotateEnabled(groupParam, {
-                getChildren: (drawing) => drawing.drawingId === groupId
-                    ? children
-                    : drawingManagerService.getDrawingsByGroup(drawing),
-            }),
-        };
 
         drawingManagerService.featurePluginGroupUpdateNotification([{
             parent: groupParam,

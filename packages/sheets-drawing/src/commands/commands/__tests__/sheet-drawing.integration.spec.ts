@@ -21,6 +21,7 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
+import { resolveSheetDrawingRotateEnabled } from '../../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
@@ -245,6 +246,12 @@ describe('sheet drawing integration', () => {
             ],
         });
 
+        const sheetDrawingService = get(ISheetDrawingService);
+        const restoredGroup = sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-with-chart' })!;
+        expect(Object.prototype.hasOwnProperty.call(restoredGroup.transform ?? {}, 'rotateEnabled')).toBe(false);
+        expect(restoredGroup.transform?.angle).toBe(30);
+        expect(resolveSheetDrawingRotateEnabled(restoredGroup, sheetDrawingService)).toBe(false);
+
         expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
             unitId: 'test',
             drawings: [{
@@ -270,7 +277,6 @@ describe('sheet drawing integration', () => {
             }],
         })).toBe(true);
 
-        const sheetDrawingService = get(ISheetDrawingService);
         expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-with-chart' })).toMatchObject({
             transform: {
                 left: 15,

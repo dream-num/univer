@@ -58,10 +58,11 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings })).toBe(true);
 
         const groupId = fWorksheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-1');
+        const groupDrawing = sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' });
 
         expect(groupId).toBe('group-1');
-        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' })?.drawingType)
-            .toBe(DrawingTypeEnum.DRAWING_GROUP);
+        expect(groupDrawing?.drawingType).toBe(DrawingTypeEnum.DRAWING_GROUP);
+        expect(Object.prototype.hasOwnProperty.call(groupDrawing?.transform ?? {}, 'rotateEnabled')).toBe(false);
         expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);
         expect(fWorksheet.getDrawingParentGroup('drawing-1')?.drawingId).toBe('group-1');
         expect(fWorksheet.getDrawingGroupChildren('group-1').map((drawing: ISheetDrawing) => drawing.drawingId))

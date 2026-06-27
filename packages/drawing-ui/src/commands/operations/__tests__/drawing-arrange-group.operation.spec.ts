@@ -41,6 +41,7 @@ import {
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../drawing-group.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../image-crop.operation';
 import { ImageResetSizeOperation } from '../image-reset-size.operation';
+import { resolveDrawingUIRotateEnabled } from '../../../utils/rotate-enabled';
 
 const unitId = 'drawing-ui-unit';
 const subUnitId = 'drawing-ui-subunit';
@@ -79,6 +80,10 @@ function createGroupDrawing(drawingId: string, left: number, rotateEnabled?: boo
             rotateEnabled,
         },
     };
+}
+
+function expectNoPersistedRotateEnabled(drawing: IDrawingParam): void {
+    expect(Object.prototype.hasOwnProperty.call(drawing.transform ?? {}, 'rotateEnabled')).toBe(false);
 }
 
 describe('drawing arrange and group operations', () => {
@@ -217,8 +222,13 @@ describe('drawing arrange and group operations', () => {
             unitId,
             subUnitId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
-            transform: expect.objectContaining({ rotateEnabled: true }),
         });
+        expectNoPersistedRotateEnabled(groupUpdates[0][0].parent);
+        expect(resolveDrawingUIRotateEnabled(groupUpdates[0][0].parent, {
+            getChildren: (drawing) => drawing.drawingId === groupUpdates[0][0].parent.drawingId
+                ? groupUpdates[0][0].children
+                : drawingManagerService.getDrawingsByGroup(drawing),
+        })).toBe(true);
 
         const childIds: string[] = [];
         for (const child of groupUpdates[0][0].children) {
@@ -238,7 +248,12 @@ describe('drawing arrange and group operations', () => {
 
         expect(result).toBe(true);
         expect(groupUpdates).toHaveLength(1);
-        expect(groupUpdates[0][0].parent.transform?.rotateEnabled).toBe(false);
+        expectNoPersistedRotateEnabled(groupUpdates[0][0].parent);
+        expect(resolveDrawingUIRotateEnabled(groupUpdates[0][0].parent, {
+            getChildren: (drawing) => drawing.drawingId === groupUpdates[0][0].parent.drawingId
+                ? groupUpdates[0][0].children
+                : drawingManagerService.getDrawingsByGroup(drawing),
+        })).toBe(false);
         expect(groupUpdates[0][0].children.map((child) => child.drawingId)).toEqual(['chart-1', 'image-1']);
         expect(groupUpdates[0][0].children[0]).toMatchObject({
             drawingId: 'chart-1',
@@ -270,7 +285,12 @@ describe('drawing arrange and group operations', () => {
         });
 
         expect(result).toBe(true);
-        expect(groupUpdates[0][0].parent.transform?.rotateEnabled).toBe(true);
+        expectNoPersistedRotateEnabled(groupUpdates[0][0].parent);
+        expect(resolveDrawingUIRotateEnabled(groupUpdates[0][0].parent, {
+            getChildren: (drawing) => drawing.drawingId === groupUpdates[0][0].parent.drawingId
+                ? groupUpdates[0][0].children
+                : drawingManagerService.getDrawingsByGroup(drawing),
+        })).toBe(true);
     });
 
     it('does not create a drawing group from a single selected drawing', async () => {

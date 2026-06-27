@@ -76,7 +76,6 @@ import {
     SetSheetDrawingCommand,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
-    withDerivedSheetGroupRotateEnabled,
 } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
@@ -685,7 +684,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             const grpParams = [];
             for (const param of params) {
-                const parent = withDerivedSheetGroupRotateEnabled(param.parent, param.children, this._sheetDrawingService);
+                const parent = param.parent;
                 const grpSheetTransform = this._getSheetTransformByParam(parent, true);
 
                 const children = [];

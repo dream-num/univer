@@ -240,7 +240,7 @@ describe('SheetDrawingUpdateController', () => {
         controller.dispose();
     });
 
-    it('derives group rotateEnabled from chart children before grouping', () => {
+    it('does not persist derived group rotateEnabled before grouping', () => {
         const {
             controller,
             commandService,
@@ -276,10 +276,11 @@ describe('SheetDrawingUpdateController', () => {
             expect.objectContaining({
                 parent: expect.objectContaining({
                     drawingId: 'group-1',
-                    transform: expect.objectContaining({ rotateEnabled: false }),
                 }),
             }),
         ]);
+        const groupCommandParams = commandService.executeCommand.mock.calls.find(([commandId]) => commandId === GroupSheetDrawingCommand.id)?.[1] as any[];
+        expect(Object.prototype.hasOwnProperty.call(groupCommandParams[0].parent.transform ?? {}, 'rotateEnabled')).toBe(false);
 
         controller.dispose();
     });

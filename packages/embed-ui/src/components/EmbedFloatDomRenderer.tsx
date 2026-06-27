@@ -24,6 +24,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { resolveEmbedFloatInteractionPolicy } from '../common/embed-float-interaction-policy';
 import {
     EMBED_CANVAS_ROOT_ATTRIBUTE,
     EMBED_CONTENT_ROOT_ATTRIBUTE,
@@ -692,7 +693,11 @@ export function EmbedFloatDomRenderer(props: {
             const distance = Math.hypot(event.clientX - intent.startX, event.clientY - intent.startY);
             if (distance > CLICK_DISTANCE_THRESHOLD) {
                 intent.moved = true;
-                if (props.enableStage1BodyDrag && !intent.dragStarted && floatingActiveService.getStage(data.embedId) === 'stage1') {
+                const dragPolicy = resolveEmbedFloatInteractionPolicy({
+                    stage: floatingActiveService.getStage(data.embedId),
+                    interactionFlow,
+                });
+                if (props.enableStage1BodyDrag && !intent.dragStarted && dragPolicy.allowHostBodyDrag) {
                     intent.dragStarted = true;
                     document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, {
                         detail: {
@@ -1227,11 +1232,18 @@ export function EmbedFloatDomRenderer(props: {
         }
 
         const currentStage = floatingActiveService.getStage(data.embedId);
+        const dragPolicy = resolveEmbedFloatInteractionPolicy({
+            stage: currentStage,
+            interactionFlow,
+        });
+        if (!dragPolicy.allowHostDragHandle) {
+            return;
+        }
         floatingActiveService.activate({
             hostUnitId: data.hostUnitId,
             embedId: data.embedId,
             childUnitId: descriptor.childUnitId,
-        }, currentStage === 'stage2' ? 'stage2' : 'stage1');
+        }, 'stage1');
         const pointerEvent = 'nativeEvent' in event ? event.nativeEvent : event;
         document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, {
             detail: {
@@ -1244,7 +1256,7 @@ export function EmbedFloatDomRenderer(props: {
                 button: pointerEvent.button,
             },
         }));
-    }, [data?.embedId, data?.hostAnchorId, data?.hostUnitId, embedModelService, floatingActiveService]);
+    }, [data?.embedId, data?.hostAnchorId, data?.hostUnitId, embedModelService, floatingActiveService, interactionFlow]);
 
     useEffect(() => {
         const dragHandle = dragHandleRef.current;
@@ -1256,9 +1268,10 @@ export function EmbedFloatDomRenderer(props: {
         return () => dragHandle.removeEventListener('pointerdown', keepStageForDragHandle);
     }, [keepStageForDragHandle]);
 
-    const disableLiveHostPointerEvents = interactionFlow !== 'doc-block' && (stage === 'inactive' || stage === 'stage1');
-    const passThroughInteractionGate = interactionFlow === 'doc-block' || stage === 'stage2';
-    const showDragHandle = stage === 'stage1' || stage === 'stage2';
+    const interactionPolicy = resolveEmbedFloatInteractionPolicy({ stage, interactionFlow });
+    const disableLiveHostPointerEvents = interactionPolicy.disableLiveHostPointerEvents;
+    const passThroughInteractionGate = interactionPolicy.passThroughInteractionGate;
+    const showDragHandle = interactionPolicy.showHostDragHandle;
 
     return (
         <div
@@ -1456,8 +1469,9 @@ export function syncRuntimeInteractionVisibility(container: HTMLElement, chrome:
 export function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, dragHandleVisible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
     const visibility = visible ? '' : 'hidden';
     const pointerEvents = visible ? '' : 'none';
-    const dragHandleVisibility = dragHandleVisible ? '' : 'hidden';
-    const dragHandlePointerEvents = dragHandleVisible ? '' : 'none';
+    const allowDragHandle = dragHandleVisible && stage === 'stage1';
+    const dragHandleVisibility = allowDragHandle ? '' : 'hidden';
+    const dragHandlePointerEvents = allowDragHandle ? '' : 'none';
     const menuVisibility = visible && stage === 'stage2' ? '' : 'hidden';
     const fullscreenButton = chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
     const dragHandle = chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]');

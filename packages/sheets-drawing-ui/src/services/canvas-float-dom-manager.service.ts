@@ -250,7 +250,7 @@ function isStage2RuntimeEmbedFloatDom(floatDomParam: Pick<IFloatDomData, 'data'>
         embedData.runtimeMountMode === 'stage2';
 }
 
-function isEmbedFloatDomData(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+export function isEmbedFloatDomData(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
     const data = floatDomParam.data;
     if (!data || typeof data !== 'object') {
         return false;
@@ -265,20 +265,57 @@ function isEmbedFloatDomData(floatDomParam: Pick<IFloatDomData, 'data'>): boolea
         typeof embedData.embedId === 'string';
 }
 
+export function isSheetHostedEmbedFloatDom(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    if (!isEmbedFloatDomData(floatDomParam)) {
+        return false;
+    }
+
+    const embedData = floatDomParam.data as {
+        hostType?: UniverInstanceType;
+        childType?: UniverInstanceType;
+    };
+
+    return embedData.hostType === UniverInstanceType.UNIVER_SHEET &&
+        embedData.childType != null;
+}
+
+export function resolveSheetFloatDomRuntimePolicy(
+    floatDomParam: Pick<IFloatDomData, 'data'>,
+    stage: ICanvasFloatDomInfo['runtimeStage'] = 'inactive'
+): {
+    autoMountRuntime: boolean;
+    passThroughRuntimeEvents: boolean;
+    preserveOnFocusChange: boolean;
+    usePreviewObject: boolean;
+} {
+    const autoMountRuntime = !isStage2RuntimeEmbedFloatDom(floatDomParam);
+    const sheetHostedEmbed = isSheetHostedEmbedFloatDom(floatDomParam);
+
+    return {
+        autoMountRuntime,
+        passThroughRuntimeEvents: !(sheetHostedEmbed && stage === 'stage2'),
+        preserveOnFocusChange: isEmbedFloatDomData(floatDomParam),
+        usePreviewObject: isStage2RuntimeEmbedFloatDom(floatDomParam),
+    };
+}
+
 export function shouldAutoMountFloatDomRuntime(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
-    return !isStage2RuntimeEmbedFloatDom(floatDomParam);
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam).autoMountRuntime;
 }
 
 export function shouldPreserveFloatDomOnFocusChange(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
-    return isEmbedFloatDomData(floatDomParam);
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam).preserveOnFocusChange;
 }
 
 export function shouldUseFloatDomPreviewObject(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
-    return isStage2RuntimeEmbedFloatDom(floatDomParam);
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam).usePreviewObject;
 }
 
-export function shouldPassThroughFloatDomRuntimeEvents(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
-    return shouldAutoMountFloatDomRuntime(floatDomParam);
+export function shouldPassThroughFloatDomRuntimeEvents(
+    floatDomParam: Pick<IFloatDomData, 'data'>,
+    stage: ICanvasFloatDomInfo['runtimeStage'] = 'inactive'
+): boolean {
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam, stage).passThroughRuntimeEvents;
 }
 
 export function shouldPassThroughFloatDomActivationEvent(nextStage: ICanvasFloatDomInfo['runtimeStage'] | undefined): boolean {
@@ -897,7 +934,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         if (info.floatDomConfig && !shouldAutoMountFloatDomRuntime(info.floatDomConfig)) {
             this._canvasFloatDomService.updateFloatDom(id, {
-                eventPassThrough: true,
+                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'inactive'),
                 props: info.floatDomConfig.props,
             });
         } else {
@@ -930,7 +967,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 this._canvasFloatDomService.addFloatDom(info.floatDomConfig);
                 const shouldAutoMountRuntime = shouldAutoMountFloatDomRuntime(info.floatDomConfig);
                 info.runtimeMounted = shouldAutoMountRuntime;
-                info.runtimeStage = shouldAutoMountRuntime ? 'stage2' : 'inactive';
+                info.runtimeStage = isEmbedFloatDomData(info.floatDomConfig)
+                    ? 'inactive'
+                    : shouldAutoMountRuntime ? 'stage2' : 'inactive';
             });
     }
 
@@ -940,14 +979,26 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             return undefined;
         }
 
-        if (info.runtimeMounted) {
+        const sheetHostedEmbed = isSheetHostedEmbedFloatDom(info.floatDomConfig);
+        if (info.runtimeMounted && !sheetHostedEmbed) {
             info.runtimeStage = 'stage2';
             return 'stage2';
         }
 
         if (info.runtimeStage !== 'stage1') {
             info.runtimeStage = 'stage1';
+            this._canvasFloatDomService.updateFloatDom(id, {
+                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage1'),
+            });
             return 'stage1';
+        }
+
+        if (info.runtimeMounted) {
+            info.runtimeStage = 'stage2';
+            this._canvasFloatDomService.updateFloatDom(id, {
+                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage2'),
+            });
+            return 'stage2';
         }
 
         this.mountFloatDomRuntime(id);
@@ -1117,13 +1168,14 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     const domId = `${SHEET_FLOAT_DOM_PREFIX}${generateRandomId(6)}`;
                     const shouldAutoMountRuntime = shouldAutoMountFloatDomRuntime(floatDomParam);
+                    const shouldSyncEmbedRuntimeStage = isEmbedFloatDomData(floatDomParam);
                     let info: ICanvasFloatDomInfo | undefined;
                     const handleRuntimeStageEnter = (stage: ICanvasFloatDomInfo['runtimeStage']) => {
                         if (info) {
                             info.runtimeStage = stage;
-                            info.runtimeMounted = stage === 'stage2';
+                            info.runtimeMounted = shouldAutoMountRuntime || stage === 'stage2';
                             this._canvasFloatDomService.updateFloatDom(drawingId, {
-                                eventPassThrough: stage !== 'stage2',
+                                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, stage),
                             });
                         }
                         const currentRenderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
@@ -1134,7 +1186,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         id: drawingId,
                         domId,
                         componentKey: floatDomParam.componentKey,
-                        eventPassThrough: shouldAutoMountRuntime ? shouldPassThroughFloatDomRuntimeEvents(floatDomParam) : true,
+                        eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, 'inactive'),
                         preserveOnFocusChange: shouldPreserveFloatDomOnFocusChange(floatDomParam),
                         onPointerDown: (evt) => {
                             canvas.dispatchEvent(new PointerEvent(evt.type, evt));
@@ -1149,11 +1201,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
                         data,
-                        props: shouldAutoMountRuntime
-                            ? undefined
-                            : {
+                        props: shouldSyncEmbedRuntimeStage
+                            ? {
                                 onRuntimeStageEnter: handleRuntimeStageEnter,
-                            },
+                            }
+                            : undefined,
                         unitId,
                     };
                     info = {
@@ -1166,7 +1218,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         domId,
                         floatDomConfig,
                         runtimeMounted: shouldAutoMountRuntime,
-                        runtimeStage: shouldAutoMountRuntime ? 'stage2' : 'inactive',
+                        runtimeStage: shouldSyncEmbedRuntimeStage
+                            ? 'inactive'
+                            : shouldAutoMountRuntime ? 'stage2' : 'inactive',
                         previewObjectKey,
                     };
 

@@ -486,7 +486,22 @@ describe('SheetCanvasFloatDomManagerService', () => {
         } as any)).toBe(false);
     });
 
-    it('disables host event pass-through for stage2-only embed runtimes', () => {
+    it('allows host event pass-through before stage2 so sheet-hosted embed blocks can be selected', () => {
+        const floatDomParam = {
+            data: {
+                version: 1,
+                embedId: 'embed-base',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_BASE,
+                runtimeMountMode: 'stage2',
+            },
+        };
+
+        expect(shouldPassThroughFloatDomRuntimeEvents(floatDomParam as any, 'inactive')).toBe(true);
+        expect(shouldPassThroughFloatDomRuntimeEvents(floatDomParam as any, 'stage1')).toBe(true);
+    });
+
+    it('disables host event pass-through for every sheet-hosted stage2 embed runtime', () => {
         expect(shouldPassThroughFloatDomRuntimeEvents({
             data: {
                 version: 1,
@@ -495,13 +510,39 @@ describe('SheetCanvasFloatDomManagerService', () => {
                 childType: UniverInstanceType.UNIVER_SHEET,
                 runtimeMountMode: 'stage2',
             },
-        } as any)).toBe(false);
+        } as any, 'stage2')).toBe(false);
         expect(shouldPassThroughFloatDomRuntimeEvents({
             data: {
                 version: 1,
-                embedId: 'embed-chart',
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
             },
-        } as any)).toBe(true);
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                version: 1,
+                embedId: 'embed-base',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_BASE,
+                runtimeMountMode: 'stage2',
+            },
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+                runtimeMountMode: 'stage2',
+            },
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                label: 'plain sheet float dom',
+            },
+        } as any, 'stage2')).toBe(true);
     });
 
     it('applies embed transformer config with visual padding and aspect-ratio locking', () => {
@@ -616,6 +657,46 @@ describe('SheetCanvasFloatDomManagerService', () => {
             eventPassThrough: false,
             props: expect.objectContaining({ initialStage: 'stage2' }),
         }));
+    });
+
+    it('keeps auto-mounted sheet-hosted embed runtimes in stage1 before the second activation', () => {
+        const updateFloatDom = vi.fn();
+        const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
+        const floatDomConfig = {
+            id: 'float-dom-1',
+            componentKey: 'Component',
+            unitId: 'unit-1',
+            data: {
+                version: 1,
+                embedId: 'embed-base',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_BASE,
+                runtimeMountMode: 'stage2',
+            },
+        };
+        service._canvasFloatDomService = {
+            updateFloatDom,
+        };
+        service._domLayerInfoMap = new Map([
+            ['float-dom-1', {
+                id: 'float-dom-1',
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                floatDomConfig,
+                runtimeMounted: true,
+                runtimeStage: 'inactive',
+            }],
+        ]);
+
+        expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage1');
+        expect(updateFloatDom).toHaveBeenLastCalledWith('float-dom-1', {
+            eventPassThrough: true,
+        });
+
+        expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage2');
+        expect(updateFloatDom).toHaveBeenLastCalledWith('float-dom-1', {
+            eventPassThrough: false,
+        });
     });
 
     it('lets stage1 activation continue to host selection but stops stage2 activation', () => {

@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-import './f-enum';
-import './f-univer';
+import type {} from '@univerjs/embed/facade';
+import type { FWorkbook } from './f-workbook';
 
-export { FEmbed, type ILoadEmbedOptions } from './f-embed';
-export { FEmbedHostSurface, type IFEmbedEnumMixin } from './f-enum';
-export {
-    type FEmbedSource,
-    type FResolvedUnitFacade,
-    type FUnitFacade,
-    type FUnitRef,
-    FUniverEmbedMixin,
-    type ICreateEmbedHostParams,
-    type ICreateEmbedParams,
-    type IFUniverEmbedMixin,
-    type IGetEmbedParams,
-    type IListEmbedsParams,
-    type ILoadUnitAsyncOptions,
-    type IRemoveEmbedParams,
-    type IUnitFacadeMap,
-} from './f-univer';
+declare module '@univerjs/embed/facade' {
+
+    interface IUnitFacadeMap {
+        // UniverInstanceType.UNIVER_SHEET
+        2: FWorkbook;
+    }
+}
+
+export type FSheetEmbedUnitFacadeMapAugmentation = never;

@@ -15,10 +15,11 @@
  */
 
 import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
-import { ICommandService, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind, RemoveEmbedCommand } from '@univerjs/embed';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitFacadeResolverRegistryService, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind, RemoveEmbedCommand } from '@univerjs/embed';
 
 export interface ILoadEmbedOptions extends ICreateUnitOptions {
     signal?: AbortSignal;
@@ -32,9 +33,10 @@ export interface ILoadEmbedOptions extends ICreateUnitOptions {
  *
  * @hideconstructor
  */
-export class FEmbed extends FBase {
+export class FEmbed<TUnitFacade = unknown> extends FBase {
     constructor(
         private readonly _descriptor: IEmbedDescriptor,
+        private readonly _univerAPI: FUniver,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
@@ -109,8 +111,8 @@ export class FEmbed extends FBase {
 
     /**
      * Get the embedded child unit type.
-     * @returns The child {@link UniverInstanceType}, or `undefined` when it is
-     * not resolved locally yet.
+     * @returns The child {@link UniverInstanceType}, or `undefined` only when
+     * the descriptor does not declare a child type.
      * @example
      * ```ts
      * const embed = univerAPI.listEmbeds()[0];
@@ -152,15 +154,35 @@ export class FEmbed extends FBase {
      * Load this embed's referenced child unit into the current runtime.
      *
      * @param options Optional request controls.
-     * @returns A promise resolving to the loaded child unit object in the core runtime.
-     * @example Browser console
+     * @returns A promise resolving to the loaded child unit facade instance.
+     * @example TypeScript
      * ```ts
+     * const embed = univerAPI.createEmbed({
+     *     host: {
+     *         unitId: hostWorkbookId,
+     *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
+     *     },
+     *     content: { kind: 'ref', unitType: UniverInstanceType.UNIVER_SHEET, ref },
+     * });
+     * const childWorkbook = await embed.loadAsync();
+     * console.log(childWorkbook.getId());
+     * ```
+     * @example TypeScript descriptor read
+     * ```ts
+     * import type { FWorkbook } from '@univerjs/sheets/facade';
+     *
      * const embed = univerAPI.listEmbeds()[0];
      * const childWorkbook = await embed.loadAsync<FWorkbook>();
+     * console.log(childWorkbook.getActiveSheet());
+     * ```
+     * @example JavaScript
+     * ```js
+     * const embed = univerAPI.listEmbeds()[0];
+     * const childWorkbook = await embed.loadAsync();
      * console.log(childWorkbook.getId());
      * ```
      */
-    async loadAsync<TUnit = unknown>(options: ILoadEmbedOptions = {}): Promise<TUnit> {
+    async loadAsync<TLoadFacade = TUnitFacade>(options: ILoadEmbedOptions = {}): Promise<TLoadFacade> {
         if (this._descriptor.source.kind !== 'ref') {
             throw new Error('EMBED_SOURCE_NOT_REFERENCE');
         }
@@ -181,7 +203,12 @@ export class FEmbed extends FBase {
             },
         });
         const record = await handle.loaded;
-        return this._injector.get(IUniverInstanceService).getUnit(record.unitId, record.unitType) as TUnit;
+        return this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService).resolve<TLoadFacade>({
+            unitId: record.unitId,
+            unitType: record.unitType,
+            injector: this._injector,
+            univerAPI: this._univerAPI,
+        });
     }
 
     /**

@@ -16,7 +16,8 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService } from '@univerjs/core';
+import type { FUnitRef } from '@univerjs/embed/facade';
+import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import {
     InsertSheetCommand,
     InsertSheetMutation,
@@ -112,6 +113,13 @@ describe('Test FUniver sheets facade', () => {
         expect(univerAPI.disposeUnit(workbook.getId())).toBe(true);
         expect(univerAPI.getWorkbook('facade-workbook')).toBeNull();
         expect(disposed).toEqual([{ unitId: 'facade-workbook', sheetCount: 1 }]);
+    });
+
+    it('infers workbook facade from embed unit type', () => {
+        type LoadedWorkbook = Awaited<ReturnType<typeof _loadWorkbookForTypeInference>>;
+        const assertWorkbook: LoadedWorkbook extends { getActiveSheet(): unknown } ? true : false = true;
+
+        expect(assertWorkbook).toBe(true);
     });
 
     it('reports sheet lifecycle events with the resulting workbook state', () => {
@@ -297,3 +305,7 @@ describe('Test FUniver sheets facade', () => {
         expect(opsSheet.isSheetHidden()).toBe(true);
     });
 });
+
+function _loadWorkbookForTypeInference(api: FUniver, ref: FUnitRef) {
+    return api.loadUnitAsync(ref, { unitType: UniverInstanceType.UNIVER_SHEET });
+}

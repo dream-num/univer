@@ -23,3 +23,4 @@ export { FDocumentCustomBlock } from './f-document-custom-block';
 export { FDocumentElement } from './f-document-element';
 export { FDocumentParagraph } from './f-document-paragraph';
 export { FDocumentTable } from './f-document-table';
+export type { FDocEmbedUnitFacadeMapAugmentation } from './f-types';

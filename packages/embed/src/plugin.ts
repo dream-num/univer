@@ -17,10 +17,13 @@
 import type { Dependency } from '@univerjs/core';
 import type { IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
 import type { IEmbedCapability, IEmbedGuestContribution } from './types/embed';
+import type { IEmbedHostAdapterContribution } from './types/host-adapter';
 import { ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import { CopyEmbedCommand, CreateEmbedCommand, InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
+import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
+import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';
 import { EMBED_PLUGIN_NAME } from './common/const';
 import { EmbedResourceController } from './controllers/embed-resource.controller';
 import { createDefaultEmbedCapabilities, EmbedCapabilityRegistryService, flushPendingEmbedCapabilities } from './services/embed-capability-registry.service';
@@ -28,6 +31,9 @@ import { EmbedChildRetentionService } from './services/embed-child-retention.ser
 import { EmbedCreationService } from './services/embed-creation.service';
 import { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 import { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
+import { EmbedHostAdapterRegistryService, flushPendingEmbedHostAdapterContributions, registerEmbedHostAdapterContributions } from './services/embed-host-adapter-registry.service';
+import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
+import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
 import { EmbedModelService } from './services/embed-model.service';
 import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
@@ -37,6 +43,7 @@ import { EmbedSourceResolverService } from './services/embed-source-resolver.ser
 export interface IUniverEmbedPluginConfig {
     useDefaultCapabilities?: boolean;
     capabilities?: readonly IEmbedCapability[];
+    hostAdapters?: readonly IEmbedHostAdapterContribution[];
     guestContributions?: readonly IEmbedGuestContribution[];
     resourceRefProviderRegistrations?: readonly IEmbedResourceRefProviderRegistration[];
 }
@@ -60,6 +67,9 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedModelService],
             [EmbedChildRetentionService],
             [EmbedCapabilityRegistryService],
+            [EmbedHostAdapterRegistryService],
+            [EmbedHostAnchorModelService],
+            [EmbedHostLifecycleService],
             [EmbedFocusOwnerService],
             [EmbedGuestContributionRegistryService],
             [EmbedResourceRefProviderRegistryService],
@@ -77,6 +87,9 @@ export class UniverEmbedPlugin extends Plugin {
         flushPendingEmbedCapabilities(this._injector);
         capabilityRegistry.registerMany(this._config.capabilities ?? []);
 
+        flushPendingEmbedHostAdapterContributions(this._injector);
+        registerEmbedHostAdapterContributions(this._injector, this._config.hostAdapters ?? []);
+
         flushPendingEmbedGuestContributions(this._injector);
         (this._config.guestContributions ?? []).forEach((contribution) => registerEmbedGuestContribution(this._injector, contribution));
 
@@ -86,6 +99,9 @@ export class UniverEmbedPlugin extends Plugin {
         touchDependencies(this._injector, [
             [EmbedModelService],
             [EmbedChildRetentionService],
+            [EmbedHostAdapterRegistryService],
+            [EmbedHostAnchorModelService],
+            [EmbedHostLifecycleService],
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
             [EmbedReferencedUnitManagerService],
@@ -97,6 +113,10 @@ export class UniverEmbedPlugin extends Plugin {
         [
             SetEmbedDescriptorMutation,
             SoftDeleteEmbedDescriptorMutation,
+            CreateEmbedHostAnchorMutation,
+            RemoveEmbedHostAnchorMutation,
+            SetEmbedHostAnchorRecordMutation,
+            RemoveEmbedHostAnchorRecordMutation,
             CreateEmbedCommand,
             InsertEmbedBySnapshotCommand,
             CopyEmbedCommand,

@@ -287,6 +287,22 @@ describe('EmbedMountService', () => {
         const service = createMountService({ hostRegistry, childRegistry });
 
         expect(() => service.mount(createDescriptor({ childUnitId: undefined }))).toThrow('EMBED_MOUNT_CHILD_NOT_RESOLVED');
+        expect(() => createMountService({
+            hostRegistry,
+            childRegistry,
+            instanceService: createInstanceService({
+                getUnit: vi.fn(() => null),
+                getUnitType: vi.fn(() => UniverInstanceType.UNRECOGNIZED),
+            }),
+        }).mount(createDescriptor())).toThrow('EMBED_MOUNT_CHILD_UNIT_NOT_AVAILABLE');
+        expect(() => createMountService({
+            hostRegistry,
+            childRegistry,
+            instanceService: createInstanceService({
+                getUnit: vi.fn(() => null),
+                getUnitType: vi.fn(() => UniverInstanceType.UNIVER_DOC),
+            }),
+        }).mount(createDescriptor())).toThrow('EMBED_MOUNT_CHILD_TYPE_MISMATCH');
         expect(() => service.mount(createDescriptor({ sourceMeta: { floating: false, tab: false } }))).toThrow('EMBED_MOUNT_LAYOUT_NOT_RESOLVED');
         expect(() => createMountService({
             hostRegistry: new EmbedHostContainerRegistryService(),
@@ -313,6 +329,7 @@ function createMountService(options: {
     hostRegistry: EmbedHostContainerRegistryService;
     childRegistry: EmbedChildViewRegistryService;
     overlayRootService?: EmbedOverlayRootService;
+    instanceService?: Pick<IUniverInstanceService, 'getUnit' | 'getUnitType'>;
     injectorEntries?: Array<[unknown, unknown]>;
 }): EmbedMountService {
     return new EmbedMountService(
@@ -320,8 +337,17 @@ function createMountService(options: {
         options.childRegistry,
         options.overlayRootService ?? new EmbedOverlayRootService(),
         { registerContext: vi.fn(() => toDisposable(() => {})) } as never,
+        (options.instanceService ?? createInstanceService()) as IUniverInstanceService,
         createInjector(options.injectorEntries ?? []) as never
     );
+}
+
+function createInstanceService(overrides: Partial<Pick<IUniverInstanceService, 'getUnit' | 'getUnitType'>> = {}): Pick<IUniverInstanceService, 'getUnit' | 'getUnitType'> {
+    return {
+        getUnit: vi.fn(() => ({ getUnitId: () => 'child-sheet' }) as never),
+        getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
+        ...overrides,
+    };
 }
 
 function createHostRegistry(mount: () => IDisposable | { hostElement?: HTMLElement; disposable?: IDisposable } | undefined): EmbedHostContainerRegistryService {

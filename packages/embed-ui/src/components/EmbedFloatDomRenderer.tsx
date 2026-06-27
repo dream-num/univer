@@ -37,6 +37,7 @@ import { EmbedFloatPreviewService } from '../services/embed-float-preview.servic
 import { EmbedFloatingActiveService } from '../services/embed-floating-active.service';
 import { EmbedFloatingGeometryService } from '../services/embed-floating-geometry.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
+import { EmbedHostRestoreService } from '../services/embed-host-restore.service';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     EmbedInteractionBoundaryService,
@@ -119,6 +120,7 @@ export function EmbedFloatDomRenderer(props: {
     const fullscreenService = useDependency(EmbedFullscreenService);
     const interactionBoundaryService = useDependency(EmbedInteractionBoundaryService);
     const mountService = useDependency(EmbedMountService);
+    const restoreService = useDependency(EmbedHostRestoreService);
     const passiveViewportRegistry = useDependency(EmbedPassiveViewportRegistryService);
     const focusCoordinator = useDependency(EmbedRuntimeFocusCoordinator);
     const data = normalizeFloatDomData(props.data);
@@ -234,33 +236,45 @@ export function EmbedFloatDomRenderer(props: {
 
         const descriptor = data?.hostUnitId ? embedModelService.getDescriptor(data.hostUnitId, data.embedId) : undefined;
         const layout = descriptor ? resolveDescriptorLayout(descriptor) : undefined;
-        if (!descriptor || !layout || !descriptor.childUnitId || descriptor.childType == null) {
+        if (!descriptor || !layout) {
             return undefined;
         }
         if (runtimeMountGate === 'deferred') {
             return undefined;
         }
 
-        const session = mountService.mountIntoHostElement(descriptor, container, {
-            content: contentRoot,
-            canvas: canvasRoot,
-            overlay: overlayRoot,
-            popup: popupRoot,
+        let disposed = false;
+        let mountedEmbedId: string | undefined;
+        void restoreService.materializeDescriptor({ descriptor }).then((materializedDescriptor) => {
+            if (disposed) {
+                return;
+            }
+
+            const session = mountService.mountIntoHostElement(materializedDescriptor, container, {
+                content: contentRoot,
+                canvas: canvasRoot,
+                overlay: overlayRoot,
+                popup: popupRoot,
+            });
+            mountedEmbedId = materializedDescriptor.embedId;
+            const childContext = session?.context;
+            childContextRef.current = childContext;
+            const cachedViewState = data?.embedId ? previewService.getPreview(data.embedId)?.viewState : undefined;
+            if (childContext && cachedViewState != null) {
+                void previewService.restoreViewState(childContext, cachedViewState);
+            }
+        }).catch((error) => {
+            throw error;
         });
-        const childContext = session?.context;
-        childContextRef.current = childContext;
-        const cachedViewState = data?.embedId ? previewService.getPreview(data.embedId)?.viewState : undefined;
-        if (childContext && cachedViewState != null) {
-            void previewService.restoreViewState(childContext, cachedViewState);
-        }
 
         return () => {
-            if (childContextRef.current === childContext) {
+            disposed = true;
+            if (mountedEmbedId && childContextRef.current?.embedId === mountedEmbedId) {
                 childContextRef.current = undefined;
             }
             mountService.unmount(descriptor.embedId);
         };
-    }, [data?.embedId, data?.hostUnitId, embedModelService, mountService, mountVersion, previewService, runtimeMountGate]);
+    }, [data?.embedId, data?.hostUnitId, embedModelService, mountService, mountVersion, previewService, restoreService, runtimeMountGate]);
 
     useEffect(() => {
         if (!data?.embedId) {

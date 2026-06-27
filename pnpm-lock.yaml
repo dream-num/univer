@@ -1904,6 +1904,9 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
+      '@univerjs/embed':
+        specifier: workspace:*
+        version: link:../embed
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -2700,6 +2703,9 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/embed':
         specifier: workspace:*
         version: link:../embed
@@ -2734,9 +2740,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../drawing
       '@univerjs/themes':
         specifier: workspace:*
         version: link:../themes

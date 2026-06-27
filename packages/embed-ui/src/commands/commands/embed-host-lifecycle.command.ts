@@ -14,65 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import type { IEmbedDescriptor, IInsertEmbedBySnapshotCommandParams } from '@univerjs/embed';
-import type {
-    IEmbedHostCopyContext,
-    IEmbedHostCreateContext,
-    IEmbedHostRemoveContext,
-} from '../../services/embed-host-lifecycle.service';
-import { CommandType } from '@univerjs/core';
-import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.service';
-
-export type ICreateHostEmbedCommandParams = IEmbedHostCreateContext;
-export type ICopyHostEmbedCommandParams = IEmbedHostCopyContext;
-export type IRemoveHostEmbedCommandParams = IEmbedHostRemoveContext;
-export type IInsertHostEmbedBySnapshotCommandParams = IInsertEmbedBySnapshotCommandParams;
-
-export const CreateHostEmbedCommand: ICommand<ICreateHostEmbedCommandParams, IEmbedDescriptor | false> = {
-    id: 'embed-ui.command.create-host-embed',
-    type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        return accessor.get(EmbedHostLifecycleService).createEmbed(params);
-    },
-};
-
-export const InsertHostEmbedBySnapshotCommand: ICommand<IInsertHostEmbedBySnapshotCommandParams, IEmbedDescriptor | false> = {
-    id: 'embed-ui.command.insert-host-embed-by-snapshot',
-    type: CommandType.COMMAND,
-    handler: (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        return accessor.get(EmbedHostLifecycleService).createEmbedBySnapshot(params);
-    },
-};
-
-export const CopyHostEmbedCommand: ICommand<ICopyHostEmbedCommandParams, IEmbedDescriptor | false> = {
-    id: 'embed-ui.command.copy-host-embed',
-    type: CommandType.COMMAND,
-    handler: (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        return accessor.get(EmbedHostLifecycleService).copyEmbed(params);
-    },
-};
-
-export const RemoveHostEmbedCommand: ICommand<IRemoveHostEmbedCommandParams, boolean> = {
-    id: 'embed-ui.command.remove-host-embed',
-    type: CommandType.COMMAND,
-    handler: (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        return accessor.get(EmbedHostLifecycleService).removeEmbed(params);
-    },
-};
+export {
+    CopyEmbedCommand as CopyHostEmbedCommand,
+    CreateEmbedCommand as CreateHostEmbedCommand,
+    InsertEmbedBySnapshotCommand as InsertHostEmbedBySnapshotCommand,
+    RemoveEmbedCommand as RemoveHostEmbedCommand,
+} from '@univerjs/embed';
+export type {
+    ICopyEmbedCommandParams as ICopyHostEmbedCommandParams,
+    ICreateEmbedCommandParams as ICreateHostEmbedCommandParams,
+    IInsertEmbedBySnapshotCommandParams as IInsertHostEmbedBySnapshotCommandParams,
+    IRemoveEmbedCommandParams as IRemoveHostEmbedCommandParams,
+} from '@univerjs/embed';

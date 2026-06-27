@@ -21,6 +21,8 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
 import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
+import { registerSheetsDrawingEmbedHostAdapters } from './embed-host-adapter';
+import { registerSheetsSheetTabEmbedHostAdapters } from './embed-tab-host-adapter';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 
 @DependentOn(UniverDrawingPlugin)
@@ -53,5 +55,7 @@ export class UniverSheetsDrawingPlugin extends Plugin {
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
         this._injector.get(SheetsDrawingLoadController);
+        registerSheetsDrawingEmbedHostAdapters(this._injector);
+        registerSheetsSheetTabEmbedHostAdapters(this._injector);
     }
 }

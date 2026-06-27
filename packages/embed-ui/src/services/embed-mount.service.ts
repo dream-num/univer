@@ -61,6 +61,8 @@ export class EmbedMountService {
         private readonly _overlayRootService: EmbedOverlayRootService,
         @Inject(EmbedSceneCanvasCaptureService)
         private readonly _sceneCanvasCaptureService: EmbedSceneCanvasCaptureService,
+        @IUniverInstanceService
+        private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector)
         private readonly _injector: Injector
     ) {
@@ -617,6 +619,18 @@ export class EmbedMountService {
         if (duplicated) {
             throw new EmbedDuplicateChildUnitError(descriptor.childUnitId!, duplicated.session.embedId);
         }
+
+        const childUnit = this._univerInstanceService.getUnit(descriptor.childUnitId!, descriptor.childType!);
+        if (childUnit) {
+            return;
+        }
+
+        const actualType = this._univerInstanceService.getUnitType(descriptor.childUnitId!);
+        if (actualType !== UniverInstanceType.UNRECOGNIZED && actualType !== descriptor.childType) {
+            throw new Error('EMBED_MOUNT_CHILD_TYPE_MISMATCH');
+        }
+
+        throw new Error('EMBED_MOUNT_CHILD_UNIT_NOT_AVAILABLE');
     }
 }
 

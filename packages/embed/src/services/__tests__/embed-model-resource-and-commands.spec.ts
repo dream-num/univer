@@ -16,6 +16,8 @@
 
 import type { IAccessor, Injector } from '@univerjs/core';
 import type { IEmbedDescriptor, IEmbedGuestContribution } from '../../types/embed';
+import type { IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../../types/host-adapter';
+import type { IEmbedHostAnchorRecord } from '../../types/host-anchor';
 import type { IResourceRef } from '../../types/resource-ref';
 import { ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
@@ -29,6 +31,10 @@ import {
     SetEmbedDescriptorMutation,
     SoftDeleteEmbedDescriptorMutation,
 } from '../../commands/mutations/embed-descriptor.mutation';
+import {
+    RemoveEmbedHostAnchorRecordMutation,
+    SetEmbedHostAnchorRecordMutation,
+} from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { assertResourceRef, getResourceRefKey, normalizeResourceRef } from '../../common/resource-ref';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../../common/unit-type';
 import { EmbedCapabilityRegistryService } from '../embed-capability-registry.service';
@@ -40,6 +46,9 @@ import {
     flushPendingEmbedGuestContributions,
     registerEmbedGuestContribution,
 } from '../embed-guest-contribution-registry.service';
+import { EmbedHostAdapterRegistryService } from '../embed-host-adapter-registry.service';
+import { EmbedHostAnchorModelService } from '../embed-host-anchor-model.service';
+import { EmbedHostLifecycleService } from '../embed-host-lifecycle.service';
 import { EmbedModelService } from '../embed-model.service';
 import { EmbedResourceRefProviderRegistryService } from '../embed-resource-ref-provider-registry.service';
 
@@ -345,21 +354,27 @@ describe('embed commands and mutations', () => {
             embedId: 'embed-1',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
-            hostAnchorId: 'anchor-1',
+            requestedHostAnchorId: 'anchor-1',
             entry: 'docs-custom-block',
             source: descriptor.source,
         })).resolves.toBe(descriptor);
         expect(undoRedoService.pushUndoRedo).toHaveBeenLastCalledWith(expect.objectContaining({
             unitID: 'host-1',
-            undoMutations: [{ id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-1', embedId: 'embed-1' } }],
-            redoMutations: [{ id: SetEmbedDescriptorMutation.id, params: { unitId: 'host-1', descriptor } }],
+            undoMutations: [
+                { id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-1', embedId: 'embed-1' } },
+                { id: RemoveEmbedHostAnchorRecordMutation.id, params: { hostUnitId: 'host-1', hostAnchorId: 'anchor-1' } },
+            ],
+            redoMutations: [
+                { id: SetEmbedHostAnchorRecordMutation.id, params: { record: expect.objectContaining({ hostAnchorId: 'anchor-1' }) } },
+                { id: SetEmbedDescriptorMutation.id, params: { unitId: 'host-1', descriptor } },
+            ],
         }));
 
         expect(CopyEmbedCommand.handler(accessor, {
             hostUnitId: 'host-1',
             sourceEmbedId: 'embed-1',
             nextEmbedId: 'embed-copy',
-            nextHostAnchorId: 'anchor-copy',
+            requestedHostAnchorId: 'anchor-copy',
         })).toMatchObject({ embedId: 'embed-copy' });
         expect(RemoveEmbedCommand.handler(accessor, { hostUnitId: 'host-1', embedId: 'embed-1' })).toBe(true);
         expect(modelService.softDeleteDescriptor).toHaveBeenCalledWith('host-1', 'embed-1');
@@ -394,6 +409,7 @@ describe('embed commands and mutations', () => {
                 storedDescriptor = descriptor;
             }),
             getDescriptor: vi.fn(() => storedDescriptor),
+            getActiveDescriptorsByChildUnit: vi.fn(() => []),
         };
         const undoRedoService = { pushUndoRedo: vi.fn() };
         const instanceService = {
@@ -440,7 +456,10 @@ describe('embed commands and mutations', () => {
         expect(modelService.addDescriptor).toHaveBeenCalledWith('host-sheet', expect.objectContaining({ embedId: 'embed-doc' }));
         expect(undoRedoService.pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
             unitID: 'host-sheet',
-            undoMutations: [{ id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-sheet', embedId: 'embed-doc' } }],
+            undoMutations: [
+                { id: SoftDeleteEmbedDescriptorMutation.id, params: { unitId: 'host-sheet', embedId: 'embed-doc' } },
+                { id: RemoveEmbedHostAnchorRecordMutation.id, params: { hostUnitId: 'host-sheet', hostAnchorId: 'anchor-doc' } },
+            ],
         }));
         expect(InsertEmbedBySnapshotCommand.handler(accessor, undefined)).toBe(false);
     });
@@ -505,6 +524,8 @@ function createCommandAccessor(
     capabilityRegistry?: unknown
 ): IAccessor {
     let accessor: IAccessor;
+    const hostAdapterRegistry = createTestHostAdapterRegistry();
+    const anchorModelService = new EmbedHostAnchorModelService();
     const commandService = {
         syncExecuteCommand: vi.fn((id: string, params?: object) => {
             if (id === SetEmbedDescriptorMutation.id) {
@@ -513,13 +534,38 @@ function createCommandAccessor(
             if (id === SoftDeleteEmbedDescriptorMutation.id) {
                 return SoftDeleteEmbedDescriptorMutation.handler(accessor, params as never);
             }
+            if (id === SetEmbedHostAnchorRecordMutation.id) {
+                return SetEmbedHostAnchorRecordMutation.handler(accessor, params as never);
+            }
+            if (id === RemoveEmbedHostAnchorRecordMutation.id) {
+                return RemoveEmbedHostAnchorRecordMutation.handler(accessor, params as never);
+            }
 
             throw new Error('unexpected command');
         }),
     };
+    const lifecycleService = new EmbedHostLifecycleService(
+        creationService as never,
+        modelService as never,
+        capabilityRegistry as never,
+        instanceService as never,
+        undefined,
+        hostAdapterRegistry,
+        commandService as never,
+        undoRedoService as never
+    );
 
     accessor = {
         get: vi.fn((token: unknown) => {
+            if (token === EmbedHostLifecycleService) {
+                return lifecycleService;
+            }
+            if (token === EmbedHostAdapterRegistryService) {
+                return hostAdapterRegistry;
+            }
+            if (token === EmbedHostAnchorModelService) {
+                return anchorModelService;
+            }
             if (token === EmbedCreationService) {
                 return creationService;
             }
@@ -544,6 +590,96 @@ function createCommandAccessor(
     } as never;
 
     return accessor;
+}
+
+function createTestHostAdapterRegistry(): EmbedHostAdapterRegistryService {
+    const registry = new EmbedHostAdapterRegistryService();
+    createTestHostAdapters().forEach((adapter) => registry.register(adapter));
+    return registry;
+}
+
+function createTestHostAdapters(): IEmbedHostAdapterContribution[] {
+    return [
+        createTestHostAdapter(UniverInstanceType.UNIVER_DOC, 'docs-custom-block', 'docs-custom-block'),
+        createTestHostAdapter(UniverInstanceType.UNIVER_SHEET, 'sheets-sheet-tab', 'sheets-sheet-tab'),
+        createTestHostAdapter(UniverInstanceType.UNIVER_SHEET, 'sheets-floating-object', 'sheets-floating-object'),
+        createTestHostAdapter(UniverInstanceType.UNIVER_BASE, 'bases-table-list-block', 'bases-table-list-block'),
+        createTestHostAdapter(UniverInstanceType.UNIVER_SLIDE, 'slides-page-list-block', 'slides-page-list-block'),
+        createTestHostAdapter(UniverInstanceType.UNIVER_SLIDE, 'slides-floating-object', 'slides-floating-object'),
+    ];
+}
+
+function createTestHostAdapter(
+    hostType: UniverInstanceType,
+    entry: IEmbedHostAdapterContribution['entry'],
+    kind: IEmbedHostAnchorRecord['kind']
+): IEmbedHostAdapterContribution {
+    return {
+        hostType,
+        entry,
+        createAnchorPlan: (context) => createTestAnchorPlan(context, kind),
+        removeAnchorPlan: (context) => createTestRemoveAnchorPlan(context, kind),
+    };
+}
+
+function createTestAnchorPlan(
+    context: IEmbedHostAnchorContext,
+    kind: IEmbedHostAnchorRecord['kind']
+): IEmbedHostAnchorMutationPlan {
+    const hostAnchorId = context.requestedAnchorId ?? `${kind}:${context.embedId}`;
+    return {
+        hostAnchorId,
+        redoMutations: [{
+            id: SetEmbedHostAnchorRecordMutation.id,
+            params: {
+                record: {
+                    embedId: context.embedId,
+                    hostUnitId: context.hostUnitId,
+                    hostType: context.hostType,
+                    entry: context.entry,
+                    hostAnchorId,
+                    kind,
+                    lifecycle: 'active',
+                },
+            },
+        }],
+        undoMutations: [{
+            id: RemoveEmbedHostAnchorRecordMutation.id,
+            params: {
+                hostUnitId: context.hostUnitId,
+                hostAnchorId,
+            },
+        }],
+    };
+}
+
+function createTestRemoveAnchorPlan(
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    kind: IEmbedHostAnchorRecord['kind']
+): IEmbedHostAnchorRemoveMutationPlan {
+    return {
+        redoMutations: [{
+            id: RemoveEmbedHostAnchorRecordMutation.id,
+            params: {
+                hostUnitId: context.hostUnitId,
+                hostAnchorId: context.hostAnchorId,
+            },
+        }],
+        undoMutations: [{
+            id: SetEmbedHostAnchorRecordMutation.id,
+            params: {
+                record: {
+                    embedId: context.embedId,
+                    hostUnitId: context.hostUnitId,
+                    hostType: context.hostType,
+                    entry: context.entry,
+                    hostAnchorId: context.hostAnchorId,
+                    kind,
+                    lifecycle: 'active',
+                },
+            },
+        }],
+    };
 }
 
 function getDescriptorRef(descriptor: IEmbedDescriptor): IResourceRef {

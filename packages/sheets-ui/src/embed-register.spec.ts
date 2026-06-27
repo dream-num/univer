@@ -23,21 +23,27 @@ import { describe, expect, it, vi } from 'vitest';
 import { createSheetsEmbedRuntimeService, ensureSheetsFloatPreviewBridge, wireSheetsFloatPreviewBridge } from './embed-register';
 
 describe('sheets embed register', () => {
-    it('mounts sheet-tab embeds through the sheets runtime bridge', () => {
+    it('materializes and mounts sheet-tab embeds through the sheets runtime bridge', async () => {
         const descriptor = {
             embedId: 'embed-1',
             hostUnitId: 'host-1',
             hostAnchorId: 'anchor-1',
             entry: 'sheets-sheet-tab',
         };
+        const restoredDescriptor = {
+            ...descriptor,
+            childUnitId: 'child-1',
+        };
         const mount = vi.fn();
         const unmount = vi.fn();
         const activateTab = vi.fn();
         const clearTab = vi.fn();
+        const materializeDescriptor = vi.fn(() => Promise.resolve(restoredDescriptor));
         const service = createSheetsEmbedRuntimeService({
             embedModelService: { getDescriptor: vi.fn(() => descriptor) } as any,
             mountService: { mount, unmount } as any,
             activationService: { activateTab, clearTab } as any,
+            restoreService: { materializeDescriptor } as any,
         });
 
         const disposable = service.mountSheetTab({
@@ -46,8 +52,11 @@ describe('sheets embed register', () => {
             embedId: 'embed-1',
         });
 
-        expect(mount).toHaveBeenCalledWith(descriptor);
-        expect(activateTab).toHaveBeenCalledWith(descriptor);
+        await Promise.resolve();
+
+        expect(materializeDescriptor).toHaveBeenCalledWith({ descriptor });
+        expect(mount).toHaveBeenCalledWith(restoredDescriptor);
+        expect(activateTab).toHaveBeenCalledWith(restoredDescriptor);
 
         disposable?.dispose();
 

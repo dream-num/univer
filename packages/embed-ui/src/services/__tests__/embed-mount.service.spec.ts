@@ -61,7 +61,10 @@ describe('EmbedMountService', () => {
         const overlayRootService = new EmbedOverlayRootService();
         const focusOwnerService = new EmbedFocusOwnerService();
         const floatingMenuRegistry = new EmbedFloatingMenuRegistryService();
-        const floatingActiveService = { getActive: vi.fn(() => ({ embedId: 'embed-1', stage: 'stage2' })) };
+        const floatingActiveService = {
+            getActive: vi.fn(() => ({ embedId: 'embed-1', stage: 'stage2' })),
+            getStage: vi.fn(() => 'stage2'),
+        };
         floatingMenuRegistry.register({
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
@@ -146,7 +149,46 @@ describe('EmbedMountService', () => {
         expect(secondHost.dataset.embedRenderScopeActive).toBe('true');
     });
 
-    it('focuses the child unit in both the scoped and global runtime when a floating child receives pointer focus', () => {
+    it('keeps inactive floating child focus inside the host until stage2', () => {
+        const hostElement = document.createElement('div');
+        const instanceService = {
+            currentUnitId: 'host-doc',
+            getUnit: vi.fn(() => ({ getUnitId: () => 'child-sheet' })),
+            setCurrentUnitForType: vi.fn((unitId: string) => {
+                instanceService.currentUnitId = unitId;
+            }),
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => instanceService.currentUnitId })),
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'host-doc' })),
+            focusUnit: vi.fn(),
+        };
+        const contextService = { setContextValue: vi.fn() };
+        const focusOwnerService = new EmbedFocusOwnerService();
+        const floatingActiveService = {
+            getActive: vi.fn(() => null),
+            getStage: vi.fn(() => 'inactive'),
+        };
+        const service = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement })),
+            childRegistry: createChildRegistry(),
+            injectorEntries: [
+                [IUniverInstanceService, instanceService],
+                [IContextService, contextService],
+                [EmbedFocusOwnerService, focusOwnerService],
+                [EmbedFloatingActiveService, floatingActiveService],
+            ],
+        });
+
+        service.mount(createDescriptor());
+        hostElement.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        hostElement.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(instanceService.focusUnit).not.toHaveBeenCalled();
+        expect(contextService.setContextValue).not.toHaveBeenCalled();
+        expect(focusOwnerService.getFocusOwner()).toBeNull();
+    });
+
+    it('focuses the child unit in both the scoped and global runtime when a stage2 floating child receives pointer focus', () => {
         const hostElement = document.createElement('div');
         const childUnit = { getUnitId: () => 'child-sheet' };
         let childContext: IEmbedChildContainerContext | undefined;
@@ -166,6 +208,10 @@ describe('EmbedMountService', () => {
         };
         const contextService = { setContextValue: vi.fn() };
         const focusOwnerService = new EmbedFocusOwnerService();
+        const floatingActiveService = {
+            getActive: vi.fn(() => ({ embedId: 'embed-1', stage: 'stage2' })),
+            getStage: vi.fn(() => 'stage2'),
+        };
         const service = createMountService({
             hostRegistry: createHostRegistry(() => ({ hostElement })),
             childRegistry: createChildRegistry((context) => {
@@ -176,6 +222,7 @@ describe('EmbedMountService', () => {
                 [ICommandService, commandService],
                 [IContextService, contextService],
                 [EmbedFocusOwnerService, focusOwnerService],
+                [EmbedFloatingActiveService, floatingActiveService],
             ],
         });
 

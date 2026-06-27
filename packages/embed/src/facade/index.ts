@@ -20,6 +20,9 @@ import './f-univer';
 export { FEmbed, type ILoadEmbedOptions } from './f-embed';
 export { FEmbedHostSurface, type IFEmbedEnumMixin } from './f-enum';
 export {
+    type FEmbedSource,
+    type FResolvedUnitFacade,
+    type FUnitFacade,
     type FUnitRef,
     FUniverEmbedMixin,
     type ICreateEmbedHostParams,
@@ -29,4 +32,5 @@ export {
     type IListEmbedsParams,
     type ILoadUnitAsyncOptions,
     type IRemoveEmbedParams,
+    type IUnitFacadeMap,
 } from './f-univer';

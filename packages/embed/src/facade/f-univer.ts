@@ -27,7 +27,7 @@ import type {
 import type { FEmbedHostSurface } from './f-enum';
 import { generateRandomId, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitManagerService, normalizeResourceRefLocator } from '@univerjs/embed';
+import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitFacadeResolverRegistryService, EmbedReferencedUnitManagerService, normalizeResourceRefLocator } from '@univerjs/embed';
 import { FEmbed } from './f-embed';
 
 export interface ICreateEmbedHostParams {
@@ -37,10 +37,22 @@ export interface ICreateEmbedHostParams {
     context?: Record<string, unknown>;
 }
 
-export interface ICreateEmbedParams {
+export interface IUnitFacadeMap {}
+
+export type FUnitFacade<TUnitType extends UniverInstanceType | undefined> =
+    TUnitType extends keyof IUnitFacadeMap ? IUnitFacadeMap[TUnitType] : unknown;
+
+export type FResolvedUnitFacade<TUnitFacade, TUnitType extends UniverInstanceType | undefined> =
+    [TUnitFacade] extends [never] ? FUnitFacade<TUnitType> : TUnitFacade;
+
+export type FEmbedSource<TChildType extends UniverInstanceType = UniverInstanceType> = EmbedSource & {
+    unitType: TChildType;
+};
+
+export interface ICreateEmbedParams<TChildType extends UniverInstanceType = UniverInstanceType> {
     embedId?: string;
     host: ICreateEmbedHostParams;
-    content: EmbedSource;
+    content: FEmbedSource<TChildType>;
     interaction?: IEmbedDescriptor['mode'];
     sourceMeta?: IEmbedSourceMeta;
 }
@@ -61,8 +73,8 @@ export interface IListEmbedsParams {
 
 export type FUnitRef = IResourceRef | string;
 
-export interface ILoadUnitAsyncOptions extends ICreateUnitOptions {
-    unitType?: UniverInstanceType;
+export interface ILoadUnitAsyncOptions<TUnitType extends UniverInstanceType | undefined = UniverInstanceType | undefined> extends ICreateUnitOptions {
+    unitType?: TUnitType;
     signal?: AbortSignal;
 }
 
@@ -77,11 +89,14 @@ export interface IFUniverEmbedMixin {
      * @param params Embed creation parameters.
      * @returns The created embed facade.
      */
-    createEmbed(params: ICreateEmbedParams): FEmbed;
+    createEmbed<TUnitFacade = never, TChildType extends UniverInstanceType = UniverInstanceType>(
+        params: ICreateEmbedParams<TChildType>
+    ): FEmbed<FResolvedUnitFacade<TUnitFacade, TChildType>>;
 
     /**
      * Remove an embed by host unit id and embed id.
      *
+     * @param params Remove parameters.
      * @param params.hostUnitId The host unit id that owns the embed.
      * @param params.embedId The embed id to remove.
      * @returns `true` when the remove command succeeds.
@@ -91,20 +106,22 @@ export interface IFUniverEmbedMixin {
     /**
      * Get one embed by host unit id and embed id.
      *
+     * @param params Get parameters.
      * @param params.hostUnitId The host unit id that owns the embed.
      * @param params.embedId The embed id to read.
      * @returns The embed facade, or `null` when it does not exist.
      */
-    getEmbed(params: IGetEmbedParams): FEmbed | null;
+    getEmbed(params: IGetEmbedParams): FEmbed<unknown> | null;
 
     /**
      * List active embeds.
      *
+     * @param params List parameters.
      * @param params.hostUnitId Optional host unit id. When omitted, all active
      * embeds in the local runtime are returned.
      * @returns Active embed facades.
      */
-    listEmbeds(params?: IListEmbedsParams): FEmbed[];
+    listEmbeds(params?: IListEmbedsParams): Array<FEmbed<unknown>>;
 
     /**
      * Load a ResourceRef-targeted unit into the current runtime.
@@ -119,9 +136,29 @@ export interface IFUniverEmbedMixin {
      * String locators require `options.unitType` because the locator and the
      * render unit type are separate concepts.
      * @param options Optional request controls.
-     * @returns A promise resolving to the loaded unit object in the core runtime.
+     * @returns A promise resolving to the loaded unit facade instance.
+     * @example TypeScript
+     * ```ts
+     * const workbook = await univerAPI.loadUnitAsync(ref, {
+     *     unitType: UniverInstanceType.UNIVER_SHEET,
+     * });
+     * console.log(workbook.getId());
+     * ```
+     * @example JavaScript
+     * ```js
+     * const workbook = await univerAPI.loadUnitAsync(ref, {
+     *     unitType: UniverInstanceType.UNIVER_SHEET,
+     * });
+     * console.log(workbook.getId());
+     * ```
      */
-    loadUnitAsync<TUnit = unknown>(ref: FUnitRef, options?: ILoadUnitAsyncOptions): Promise<TUnit>;
+    loadUnitAsync<
+        TUnitFacade = never,
+        TUnitType extends UniverInstanceType | undefined = undefined
+    >(
+        ref: FUnitRef,
+        options?: ILoadUnitAsyncOptions<TUnitType>
+    ): Promise<FResolvedUnitFacade<TUnitFacade, TUnitType>>;
 }
 
 /**
@@ -129,7 +166,9 @@ export interface IFUniverEmbedMixin {
  * @ignore
  */
 export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
-    override createEmbed(params: ICreateEmbedParams): FEmbed {
+    override createEmbed<TUnitFacade = never, TChildType extends UniverInstanceType = UniverInstanceType>(
+        params: ICreateEmbedParams<TChildType>
+    ): FEmbed<FResolvedUnitFacade<TUnitFacade, TChildType>> {
         const hostType = this._univerInstanceService.getUnitType(params.host.unitId);
         if (hostType === UniverInstanceType.UNRECOGNIZED) {
             throw new Error('EMBED_HOST_UNIT_NOT_FOUND');
@@ -153,7 +192,7 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
             throw new Error('EMBED_CREATE_FAILED');
         }
 
-        return this._toFEmbed(descriptor);
+        return this._toFEmbed<FResolvedUnitFacade<TUnitFacade, TChildType>>(descriptor);
     }
 
     override removeEmbed(params: IRemoveEmbedParams): boolean {
@@ -161,12 +200,12 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
         return embed ? embed.remove() : false;
     }
 
-    override getEmbed(params: IGetEmbedParams): FEmbed | null {
+    override getEmbed(params: IGetEmbedParams): FEmbed<unknown> | null {
         const descriptor = this._injector.get(EmbedModelService).getDescriptor(params.hostUnitId, params.embedId);
         return descriptor ? this._toFEmbed(descriptor) : null;
     }
 
-    override listEmbeds(params: IListEmbedsParams = {}): FEmbed[] {
+    override listEmbeds(params: IListEmbedsParams = {}): Array<FEmbed<unknown>> {
         const model = this._injector.get(EmbedModelService);
         const descriptors = params.hostUnitId
             ? model.getActiveDescriptors(params.hostUnitId)
@@ -174,7 +213,13 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
         return descriptors.map((descriptor) => this._toFEmbed(descriptor));
     }
 
-    override async loadUnitAsync<TUnit = unknown>(ref: FUnitRef, options: ILoadUnitAsyncOptions = {}): Promise<TUnit> {
+    override async loadUnitAsync<
+        TUnitFacade = never,
+        TUnitType extends UniverInstanceType | undefined = undefined
+    >(
+        ref: FUnitRef,
+        options: ILoadUnitAsyncOptions<TUnitType> = {}
+    ): Promise<FResolvedUnitFacade<TUnitFacade, TUnitType>> {
         const { signal, unitType, ...createOptions } = options;
         const normalizedRef = this._normalizeLoadUnitRef(ref);
         if (typeof normalizedRef === 'string' && (unitType === undefined || unitType === UniverInstanceType.UNRECOGNIZED)) {
@@ -188,7 +233,12 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
             createOptions,
         });
         const record = await handle.loaded;
-        return this._univerInstanceService.getUnit(record.unitId, record.unitType) as TUnit;
+        return this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService).resolve<FResolvedUnitFacade<TUnitFacade, TUnitType>>({
+            unitId: record.unitId,
+            unitType: record.unitType,
+            injector: this._injector,
+            univerAPI: this,
+        });
     }
 
     private _normalizeLoadUnitRef(ref: FUnitRef): ResourceRefInput {
@@ -199,8 +249,12 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
         return ref;
     }
 
-    private _toFEmbed(descriptor: IEmbedDescriptor): FEmbed {
-        return this._injector.createInstance(FEmbed, descriptor);
+    private _toFEmbed<TUnitFacade = unknown>(descriptor: IEmbedDescriptor): FEmbed<TUnitFacade> {
+        return this._injector.createInstance(
+            FEmbed as unknown as new (descriptor: IEmbedDescriptor, univerAPI: FUniver) => FEmbed<TUnitFacade>,
+            descriptor,
+            this
+        );
     }
 }
 

@@ -29,6 +29,12 @@ import {
 } from '../embed-capability-registry.service';
 import { EmbedCreationService } from '../embed-creation.service';
 import { EmbedNestedGuardService } from '../embed-nested-guard.service';
+import {
+    createDefaultReferencedUnitFacadeResolvers,
+    EmbedReferencedUnitFacadeResolverRegistryService,
+    flushPendingReferencedUnitFacadeResolvers,
+    registerReferencedUnitFacadeResolvers,
+} from '../embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from '../embed-referenced-unit-manager.service';
 import { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from '../embed-source-resolver.service';
 
@@ -104,6 +110,81 @@ describe('EmbedCapabilityRegistryService', () => {
         flushPendingEmbedCapabilities(injector);
 
         expect(registry.list()).toEqual([capability]);
+    });
+});
+
+describe('EmbedReferencedUnitFacadeResolverRegistryService', () => {
+    it('resolves first-party facade instances through registered facade APIs', () => {
+        const workbookFacade = { getId: vi.fn(() => 'workbook-1') };
+        const documentFacade = { getId: vi.fn(() => 'doc-1') };
+        const univerAPI = {
+            getWorkbook: vi.fn(() => workbookFacade),
+            getDocument: vi.fn(() => documentFacade),
+        };
+        const registry = new EmbedReferencedUnitFacadeResolverRegistryService();
+        registry.registerMany(createDefaultReferencedUnitFacadeResolvers());
+
+        expect(registry.resolve({
+            unitId: 'workbook-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            injector: {} as Injector,
+            univerAPI,
+        })).toBe(workbookFacade);
+        expect(registry.resolve({
+            unitId: 'doc-1',
+            unitType: UniverInstanceType.UNIVER_DOC,
+            injector: {} as Injector,
+            univerAPI,
+        })).toBe(documentFacade);
+        expect(univerAPI.getWorkbook).toHaveBeenCalledWith('workbook-1');
+        expect(univerAPI.getDocument).toHaveBeenCalledWith('doc-1');
+    });
+
+    it('rejects missing and conflicting facade resolvers with stable errors', () => {
+        const registry = new EmbedReferencedUnitFacadeResolverRegistryService();
+
+        expect(() => registry.resolve({
+            unitId: 'slide-1',
+            unitType: UniverInstanceType.UNIVER_SLIDE,
+            injector: {} as Injector,
+            univerAPI: {},
+        })).toThrow('REFERENCED_UNIT_FACADE_UNAVAILABLE');
+
+        registry.register({
+            registrationId: 'sheet-a',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            resolve: () => ({}),
+        });
+        registry.register({
+            registrationId: 'sheet-b',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            resolve: () => ({}),
+        });
+
+        expect(() => registry.resolve({
+            unitId: 'sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            injector: {} as Injector,
+            univerAPI: {},
+        })).toThrow('REFERENCED_UNIT_FACADE_RESOLVER_CONFLICT');
+    });
+
+    it('queues facade resolvers until the registry service is available', () => {
+        const registration = {
+            registrationId: 'base-facade',
+            unitType: UniverInstanceType.UNIVER_BASE,
+            resolve: vi.fn(() => ({ id: 'base-1' })),
+        };
+        const pendingInjector = createFacadeResolverInjector(undefined);
+
+        registerReferencedUnitFacadeResolvers(pendingInjector, [registration, registration]);
+        flushPendingReferencedUnitFacadeResolvers(pendingInjector);
+
+        const registry = new EmbedReferencedUnitFacadeResolverRegistryService();
+        const injector = createFacadeResolverInjector(registry, pendingInjector);
+
+        flushPendingReferencedUnitFacadeResolvers(injector);
+        expect(registry.list()).toEqual([registration]);
     });
 });
 
@@ -338,6 +419,32 @@ describe('EmbedReferencedUnitManagerService', () => {
             }],
         }]);
     });
+
+    it('rejects aborted load handles with a load-scoped stable error', async () => {
+        const ref = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet', type: 'sheet' as const },
+        };
+        const provider = {
+            ensure: vi.fn(() => new Promise<IReferencedUnitLoadResult>(() => {
+                // Keep the provider pending so the caller-owned signal decides this handle.
+            })),
+        };
+        const providerRegistry = {
+            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
+        };
+        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const abortController = new AbortController();
+
+        const handle = manager.ensure({
+            ref,
+            signal: abortController.signal,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        });
+        abortController.abort();
+
+        await expect(handle.loaded).rejects.toThrow('REFERENCED_UNIT_LOAD_ABORTED');
+    });
 });
 
 describe('EmbedNestedGuardService', () => {
@@ -473,6 +580,19 @@ function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key
         has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedCapabilityRegistryService),
         get: vi.fn((token: unknown) => {
             if (!registry || token !== EmbedCapabilityRegistryService) {
+                throw new Error('unexpected token');
+            }
+
+            return registry;
+        }),
+    }) as unknown as Pick<Injector, 'get' | 'has'>;
+}
+
+function createFacadeResolverInjector(registry?: EmbedReferencedUnitFacadeResolverRegistryService, key: object = {}): Pick<Injector, 'get' | 'has'> {
+    return Object.assign(key, {
+        has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedReferencedUnitFacadeResolverRegistryService),
+        get: vi.fn((token: unknown) => {
+            if (!registry || token !== EmbedReferencedUnitFacadeResolverRegistryService) {
                 throw new Error('unexpected token');
             }
 

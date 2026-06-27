@@ -195,6 +195,9 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     setCurrentUnitForType(unitId: string): void {
         const result = this._getUnitById(unitId);
         if (!result) throw new Error(`[UniverInstanceService]: no document with unitId ${unitId}!`);
+        if (this._currentUnits.get(result[1]) === result[0]) {
+            return;
+        }
 
         this._currentUnits.set(result[1], result[0]);
         this._currentUnits$.next(this._currentUnits);
@@ -284,6 +287,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     focusUnit(id: string | null): void {
+        if (this._focused$.getValue() === id) {
+            return;
+        }
+
         this._focused$.next(id);
 
         if (this.focused instanceof Workbook) {

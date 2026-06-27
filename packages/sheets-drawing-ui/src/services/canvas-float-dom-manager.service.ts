@@ -20,14 +20,14 @@ import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, Spreads
 import type { ISetFrozenMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, IInsertDrawingCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, Tools, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { disposeDrawingRenderObject, insertGroupObject } from '@univerjs/drawing-ui';
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, Image as RenderImage, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingApplyMutation, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { CanvasFloatDomService } from '@univerjs/ui';
+import { CanvasFloatDomPreviewService, CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
 
 export interface ICanvasFloatDom {
@@ -85,6 +85,7 @@ export interface ICanvasFloatDomInfo {
     floatDomConfig?: IFloatDom;
     runtimeMounted?: boolean;
     runtimeStage?: 'inactive' | 'stage1' | 'stage2';
+    previewObjectKey?: string;
 }
 
 /**
@@ -144,6 +145,7 @@ const SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG = {
 
 const FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY = -100;
 const FLOAT_DOM_STAGE2_CLICK_DISTANCE_THRESHOLD = 4;
+const FLOAT_DOM_PREVIEW_OBJECT_SUFFIX = '__preview';
 export const EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT = 'univer:embed-float-drag-handle:pointerdown';
 
 export interface IFloatDomHostClickIntent {
@@ -232,25 +234,47 @@ export function applyFloatDomTransformerConfig(rect: BaseObject, floatDomParam: 
     };
 }
 
-export function shouldAutoMountFloatDomRuntime(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+function isStage2RuntimeEmbedFloatDom(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    if (!isEmbedFloatDomData(floatDomParam)) {
+        return false;
+    }
+
+    const embedData = floatDomParam.data as {
+        hostType?: UniverInstanceType;
+        childType?: UniverInstanceType;
+        runtimeMountMode?: string;
+    };
+
+    return embedData.hostType === UniverInstanceType.UNIVER_SHEET &&
+        embedData.childType === UniverInstanceType.UNIVER_SHEET &&
+        embedData.runtimeMountMode === 'stage2';
+}
+
+function isEmbedFloatDomData(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
     const data = floatDomParam.data;
     if (!data || typeof data !== 'object') {
-        return true;
+        return false;
     }
 
     const embedData = data as {
         version?: number;
         embedId?: string;
-        runtimeMountMode?: string;
     };
 
-    return !(embedData.version === 1 &&
-        typeof embedData.embedId === 'string' &&
-        embedData.runtimeMountMode === 'stage2');
+    return embedData.version === 1 &&
+        typeof embedData.embedId === 'string';
 }
 
-export function shouldUseFloatDomPreviewObject(_floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
-    return false;
+export function shouldAutoMountFloatDomRuntime(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return !isStage2RuntimeEmbedFloatDom(floatDomParam);
+}
+
+export function shouldPreserveFloatDomOnFocusChange(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return isEmbedFloatDomData(floatDomParam);
+}
+
+export function shouldUseFloatDomPreviewObject(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return isStage2RuntimeEmbedFloatDom(floatDomParam);
 }
 
 export function shouldPassThroughFloatDomRuntimeEvents(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
@@ -573,7 +597,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         @IDrawingManagerService private _drawingManagerService: IDrawingManagerService,
         @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
+        @Optional(CanvasFloatDomPreviewService) private readonly _canvasFloatDomPreviewService?: CanvasFloatDomPreviewService
     ) {
         super();
         this._drawingAddListener();
@@ -758,6 +783,77 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return this._domLayerInfoMap.get(id)?.runtimeMounted === true;
     }
 
+    private _getFloatDomPreviewObjectKey(rectShapeKey: string): string {
+        return `${rectShapeKey}${FLOAT_DOM_PREVIEW_OBJECT_SUFFIX}`;
+    }
+
+    private _syncPreviewObjectTransform(previewObject: BaseObject | null | undefined, rect: BaseObject): void {
+        previewObject?.transformByState({
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            angle: rect.angle,
+            flipX: rect.flipX,
+            flipY: rect.flipY,
+            skewX: rect.skewX,
+            skewY: rect.skewY,
+        } as ITransformState);
+    }
+
+    private _requestFloatDomPreview(drawingId: string, rect: BaseObject, data: Serializable | undefined): void {
+        if (!this._canvasFloatDomPreviewService) {
+            return;
+        }
+
+        this._canvasFloatDomPreviewService.requestPreview({
+            id: drawingId,
+            width: rect.width,
+            height: rect.height,
+            data,
+        });
+    }
+
+    private _upsertFloatDomPreviewObject(
+        scene: Scene,
+        rect: BaseObject,
+        rectShapeKey: string,
+        drawingId: string,
+        data: Serializable | undefined
+    ): BaseObject | undefined {
+        const preview = this._canvasFloatDomPreviewService?.getPreview(drawingId);
+        if (!preview?.image) {
+            this._requestFloatDomPreview(drawingId, rect, data);
+            return undefined;
+        }
+
+        const previewObjectKey = this._getFloatDomPreviewObjectKey(rectShapeKey);
+        const existingPreviewObject = scene.getObject(previewObjectKey);
+        if (existingPreviewObject instanceof RenderImage) {
+            existingPreviewObject.changeSource(preview.image);
+            this._syncPreviewObjectTransform(existingPreviewObject, rect);
+            return existingPreviewObject;
+        }
+
+        const previewObject = new RenderImage(previewObjectKey, {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            angle: rect.angle,
+            flipX: rect.flipX,
+            flipY: rect.flipY,
+            skewX: rect.skewX,
+            skewY: rect.skewY,
+            url: preview.image,
+            evented: false,
+            rotateEnabled: false,
+            resizeEnabled: false,
+        });
+        scene.addObject(previewObject, DRAWING_OBJECT_LAYER_INDEX);
+        return previewObject;
+    }
+
     mountFloatDomRuntime(id: string): boolean {
         const info = this._domLayerInfoMap.get(id);
         if (!info?.floatDomConfig) {
@@ -809,6 +905,33 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
         info.runtimeMounted = false;
         info.runtimeStage = 'inactive';
+    }
+
+    private _syncFloatDomVisibilityForActiveSheet(unitId: string, activeSubUnitId: string): void {
+        Array.from(this._domLayerInfoMap.values())
+            .filter((info) => info.unitId === unitId && info.floatDomConfig)
+            .forEach((info) => {
+                const isActiveSheet = info.subUnitId === activeSubUnitId;
+                const isInDomLayer = isFloatDomInDomLayer(this._canvasFloatDomService, info.id);
+
+                if (!isActiveSheet) {
+                    if (isInDomLayer) {
+                        this._canvasFloatDomService.removeFloatDom(info.id);
+                    }
+                    info.runtimeMounted = false;
+                    info.runtimeStage = 'inactive';
+                    return;
+                }
+
+                if (isInDomLayer || !info.floatDomConfig) {
+                    return;
+                }
+
+                this._canvasFloatDomService.addFloatDom(info.floatDomConfig);
+                const shouldAutoMountRuntime = shouldAutoMountFloatDomRuntime(info.floatDomConfig);
+                info.runtimeMounted = shouldAutoMountRuntime;
+                info.runtimeStage = shouldAutoMountRuntime ? 'stage2' : 'inactive';
+            });
     }
 
     promoteFloatDomRuntimeStage(id: string): ICanvasFloatDomInfo['runtimeStage'] | undefined {
@@ -914,7 +1037,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         applyFloatDomTransformerConfig(rectShape, floatDomParam);
                         rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                         this._syncFloatDomRect(drawingId, rectShape);
-                        return;
+                        if (shouldUseFloatDomPreviewObject(floatDomParam)) {
+                            this._syncPreviewObjectTransform(scene.getObject(this._getFloatDomPreviewObjectKey(rectShapeKey)), rectShape);
+                            this._requestFloatDomPreview(drawingId, rectShape, data);
+                        }
+                        if (this._domLayerInfoMap.has(drawingId)) {
+                            return;
+                        }
                     }
 
                     const imageConfig: IRectProps = {
@@ -943,7 +1072,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         imageConfig.radius = 8;
                     }
 
-                    const rect = this._createRenderObject({
+                    const rect = rectShape ?? this._createRenderObject({
                         key: rectShapeKey,
                         config: imageConfig,
                         unitId,
@@ -960,14 +1089,29 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         rect.objectType = ObjectType.DRAWING_DOM;
                     }
 
-                    scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
-                    if (floatDomParam.allowTransform !== false) {
+                    if (!rectShape) {
+                        scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
+                    }
+                    if (!rectShape && floatDomParam.allowTransform !== false) {
                         scene.attachTransformerTo(rect);
                     }
-                    if (isChart && groupId) {
+                    if (!rectShape && isChart && groupId) {
                         insertGroupObject({ drawingId: groupId, unitId, subUnitId }, rect, scene, this._drawingManagerService);
                     }
                     const disposableCollection = new DisposableCollection();
+                    const shouldUsePreviewObject = shouldUseFloatDomPreviewObject(floatDomParam);
+                    const previewObjectKey = shouldUsePreviewObject ? this._getFloatDomPreviewObjectKey(rectShapeKey) : undefined;
+                    if (shouldUsePreviewObject) {
+                        this._upsertFloatDomPreviewObject(scene, rect, rectShapeKey, drawingId, data);
+                        const previewSubscription = this._canvasFloatDomPreviewService?.previewUpdated$.subscribe((preview) => {
+                            if (preview.id !== drawingId) {
+                                return;
+                            }
+
+                            this._upsertFloatDomPreviewObject(scene, rect, rectShapeKey, drawingId, data);
+                        });
+                        previewSubscription && disposableCollection.add(previewSubscription);
+                    }
                     const initPosition = calcSheetFloatDomPosition(rect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                     const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
 
@@ -991,7 +1135,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         domId,
                         componentKey: floatDomParam.componentKey,
                         eventPassThrough: shouldAutoMountRuntime ? shouldPassThroughFloatDomRuntimeEvents(floatDomParam) : true,
-                        preserveOnFocusChange: !shouldAutoMountRuntime,
+                        preserveOnFocusChange: shouldPreserveFloatDomOnFocusChange(floatDomParam),
                         onPointerDown: (evt) => {
                             canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                         },
@@ -1023,6 +1167,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         floatDomConfig,
                         runtimeMounted: shouldAutoMountRuntime,
                         runtimeStage: shouldAutoMountRuntime ? 'stage2' : 'inactive',
+                        previewObjectKey,
                     };
 
                     this._canvasFloatDomService.addFloatDom(floatDomConfig);
@@ -1107,10 +1252,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         position$.next(
                             newPosition
                         );
+                        if (previewObjectKey) {
+                            this._syncPreviewObjectTransform(scene.getObject(previewObjectKey), rect);
+                        }
                     });
 
                     disposableCollection.add(() => {
                         this._canvasFloatDomService.removeFloatDom(drawingId);
+                        if (previewObjectKey) {
+                            scene.removeObject(previewObjectKey);
+                        }
                     });
                     listener && disposableCollection.add(listener);
                     this._domLayerInfoMap.set(drawingId, info);
@@ -1160,6 +1311,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 }
             });
         };
+
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+                switchMap((workbook) => workbook ? workbook.activeSheet$ : of(null))
+            ).subscribe((worksheet) => {
+                if (!worksheet) {
+                    return;
+                }
+
+                const unitId = worksheet.getUnitId();
+                const subUnitId = worksheet.getSheetId();
+                this._syncFloatDomVisibilityForActiveSheet(unitId, subUnitId);
+                updateSheet(unitId, subUnitId);
+            })
+        );
 
         // #region scroll
         this.disposeWithMe(

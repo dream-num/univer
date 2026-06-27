@@ -232,6 +232,9 @@ export function EmbedFloatDomRenderer(props: {
         if (!descriptor || !layout || !descriptor.childUnitId || descriptor.childType == null) {
             return undefined;
         }
+        if (shouldDeferSheetFloatRuntimeMount(descriptor, stage)) {
+            return undefined;
+        }
 
         const session = mountService.mountIntoHostElement(descriptor, container, {
             content: contentRoot,
@@ -252,7 +255,7 @@ export function EmbedFloatDomRenderer(props: {
             }
             mountService.unmount(descriptor.embedId);
         };
-    }, [data?.embedId, data?.hostUnitId, embedModelService, mountService, mountVersion, previewService]);
+    }, [data?.embedId, data?.hostUnitId, embedModelService, mountService, mountVersion, previewService, stage]);
 
     useEffect(() => {
         if (!data?.embedId) {
@@ -564,6 +567,9 @@ export function EmbedFloatDomRenderer(props: {
             const chrome = chromeRef.current;
             const target = event.target as HTMLElement | null;
             const externalHostInteraction = isExternalHostInteraction?.(event) ?? false;
+            if (floatingActiveService.getStage(data.embedId) === 'inactive') {
+                return;
+            }
             if (externalHostInteraction) {
                 externalHostInteractionUntilRef.current = Date.now() + EMBED_EXTERNAL_HOST_INTERACTION_GRACE_MS;
             }
@@ -592,6 +598,9 @@ export function EmbedFloatDomRenderer(props: {
             const hasActiveChildEditorOrPopup = focusCoordinator.hasBlockingChildFocusLease(data.embedId, {
                 ignoreOwners: EMBED_STAGE2_RUNTIME_FOCUS_OWNERS,
             });
+            if (floatingActiveService.getStage(data.embedId) === 'inactive') {
+                return;
+            }
             if (
                 !container ||
                 !target ||
@@ -1988,6 +1997,16 @@ function shouldAutoFocusRuntimeCanvas(childType: UniverInstanceType | undefined)
     return childType !== UniverInstanceType.UNIVER_SHEET &&
         childType !== UniverInstanceType.UNIVER_DOC &&
         childType !== UniverInstanceType.UNIVER_BASE;
+}
+
+export function shouldDeferSheetFloatRuntimeMount(
+    descriptor: Pick<IEmbedDescriptor, 'hostType' | 'childType' | 'sourceMeta'> | undefined,
+    stage: EmbedFloatingStage
+): boolean {
+    return descriptor?.hostType === UniverInstanceType.UNIVER_SHEET &&
+        descriptor.childType === UniverInstanceType.UNIVER_SHEET &&
+        Boolean(descriptor.sourceMeta?.floating) &&
+        stage !== 'stage2';
 }
 
 function isChildEditorOrPopupRuntimeElement(target: EventTarget | null): boolean {

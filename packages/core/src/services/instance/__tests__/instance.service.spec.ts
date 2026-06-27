@@ -217,4 +217,23 @@ describe('UniverInstanceService', () => {
         expect(service.getAllUnitsForType<MockBoardUnit>(UniverInstanceType.UNIVER_BOARD)).toEqual([board]);
         expect(service.getUnitType('board-unit')).toBe(UniverInstanceType.UNIVER_BOARD);
     });
+
+    it('does not rebroadcast unchanged current or focused units', () => {
+        const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        const currentIds: Array<string | null> = [];
+        const focusedIds: Array<string | null> = [];
+        service.getCurrentTypeOfUnit$<WorkbookModel>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+            currentIds.push(unit?.getUnitId() ?? null);
+        });
+        service.focused$.subscribe((unitId) => {
+            focusedIds.push(unitId);
+        });
+
+        service.setCurrentUnitForType(workbook.getUnitId());
+        service.focusUnit(workbook.getUnitId());
+        service.focusUnit(workbook.getUnitId());
+
+        expect(currentIds).toEqual([workbook.getUnitId()]);
+        expect(focusedIds).toEqual([null, workbook.getUnitId()]);
+    });
 });

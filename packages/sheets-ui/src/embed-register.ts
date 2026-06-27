@@ -34,6 +34,11 @@ import { createSheetsFloatingMenuContributions } from './EmbedFloatingMenu';
 import { ISheetEmbedRuntimeService } from './services/sheet-embed-runtime.service';
 import { ISheetHostChromeOverrideService } from './services/sheet-host-chrome-override.service';
 
+const SHEETS_FLOAT_PREVIEW_BRIDGE_SUBSCRIPTIONS = new WeakMap<object, Subscription>();
+const SHEETS_FLOAT_PREVIEW_BRIDGE_RETRYING = new WeakSet<object>();
+const SHEETS_FLOAT_PREVIEW_BRIDGE_MAX_RETRIES = 240;
+const SHEETS_FLOAT_PREVIEW_BRIDGE_RETRY_DELAY = 250;
+
 export function registerSheetsEmbedUIContributions(injector: Injector): void {
     registerEmbedUIContribution(injector, 'sheets-ui.embed', registerSheetsEmbedUIContributionsNow);
 }
@@ -116,13 +121,7 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
         passiveViewportRegistry.register(createSheetsPassiveViewportProvider(injector));
     }
 
-    if (injector.has(CanvasFloatDomPreviewService) && injector.has(EmbedModelService)) {
-        wireSheetsFloatPreviewBridge({
-            previewService,
-            embedModelService: injector.get(EmbedModelService),
-            canvasFloatDomPreviewService: injector.get(CanvasFloatDomPreviewService),
-        });
-    }
+    ensureSheetsFloatPreviewBridge({ injector, previewService });
 }
 
 export function createSheetsEmbedRuntimeService(params: {
@@ -157,6 +156,8 @@ export function wireSheetsFloatPreviewBridge(params: {
     canvasFloatDomPreviewService: CanvasFloatDomPreviewService;
 }): Subscription {
     const subscription = new Subscription();
+    let pendingDrainAttempts = 0;
+    let pendingDrainTimer: ReturnType<typeof setTimeout> | undefined;
 
     subscription.add(params.previewService.previewUpdated$.subscribe((entry) => {
         if (typeof entry.image !== 'string') {
@@ -181,21 +182,32 @@ export function wireSheetsFloatPreviewBridge(params: {
         return subscription;
     }
 
-    const handlePreviewRequest = (request: Parameters<typeof params.canvasFloatDomPreviewService.requestPreview>[0]) => {
+    const schedulePendingDrain = () => {
+        if (pendingDrainTimer || pendingDrainAttempts >= SHEETS_FLOAT_PREVIEW_BRIDGE_MAX_RETRIES) {
+            return;
+        }
+
+        pendingDrainTimer = globalThis.setTimeout(() => {
+            pendingDrainTimer = undefined;
+            pendingDrainAttempts += 1;
+            drainPendingPreviewRequests();
+        }, SHEETS_FLOAT_PREVIEW_BRIDGE_RETRY_DELAY);
+    };
+    const handlePreviewRequest = (request: Parameters<typeof params.canvasFloatDomPreviewService.requestPreview>[0]): boolean => {
         const data = request.data;
         if (!data || typeof data !== 'object') {
-            return;
+            return true;
         }
 
         const embedId = getString(data, 'embedId');
         const hostUnitId = getString(data, 'hostUnitId');
         if (!embedId || !hostUnitId) {
-            return;
+            return true;
         }
 
         const descriptor = params.embedModelService.getDescriptor(hostUnitId, embedId);
         if (!descriptor || descriptor.entry !== 'sheets-floating-object' || !descriptor.childUnitId || descriptor.childType == null) {
-            return;
+            return false;
         }
 
         params.previewService.requestPreview({
@@ -207,12 +219,111 @@ export function wireSheetsFloatPreviewBridge(params: {
             dpr: typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1,
             reason: 'initial',
         });
+        return true;
+    };
+    const drainPendingPreviewRequests = () => {
+        let hasUnresolvedRequest = false;
+        params.canvasFloatDomPreviewService.getPendingRequests?.().forEach((request) => {
+            if (!handlePreviewRequest(request)) {
+                hasUnresolvedRequest = true;
+            }
+        });
+        if (hasUnresolvedRequest) {
+            schedulePendingDrain();
+        }
     };
 
-    params.canvasFloatDomPreviewService.getPendingRequests?.().forEach(handlePreviewRequest);
-    subscription.add(params.canvasFloatDomPreviewService.previewRequested$.subscribe(handlePreviewRequest));
+    drainPendingPreviewRequests();
+    subscription.add(params.canvasFloatDomPreviewService.previewRequested$.subscribe((request) => {
+        if (!handlePreviewRequest(request)) {
+            schedulePendingDrain();
+        }
+    }));
+    subscription.add(() => {
+        if (pendingDrainTimer) {
+            globalThis.clearTimeout(pendingDrainTimer);
+        }
+    });
 
     return subscription;
+}
+
+export function ensureSheetsFloatPreviewBridge(params: {
+    injector: Pick<Injector, 'get' | 'has'>;
+    previewService: EmbedFloatPreviewService;
+    retry?: boolean;
+    maxRetries?: number;
+    retryDelay?: number;
+}): Subscription | undefined {
+    const injectorKey = params.injector as object;
+    const existing = SHEETS_FLOAT_PREVIEW_BRIDGE_SUBSCRIPTIONS.get(injectorKey);
+    if (existing) {
+        return existing;
+    }
+
+    const services = resolveSheetsFloatPreviewBridgeServices(params.injector);
+    if (services === null) {
+        return undefined;
+    }
+
+    if (services) {
+        const subscription = wireSheetsFloatPreviewBridge({
+            previewService: params.previewService,
+            embedModelService: services.embedModelService,
+            canvasFloatDomPreviewService: services.canvasFloatDomPreviewService,
+        });
+        SHEETS_FLOAT_PREVIEW_BRIDGE_SUBSCRIPTIONS.set(injectorKey, subscription);
+        return subscription;
+    }
+
+    if (params.retry === false || SHEETS_FLOAT_PREVIEW_BRIDGE_RETRYING.has(injectorKey)) {
+        return undefined;
+    }
+
+    SHEETS_FLOAT_PREVIEW_BRIDGE_RETRYING.add(injectorKey);
+    retryEnsureSheetsFloatPreviewBridge(params, 0);
+
+    return undefined;
+}
+
+function retryEnsureSheetsFloatPreviewBridge(
+    params: Parameters<typeof ensureSheetsFloatPreviewBridge>[0],
+    attempt: number
+): void {
+    const maxRetries = params.maxRetries ?? SHEETS_FLOAT_PREVIEW_BRIDGE_MAX_RETRIES;
+    const retryDelay = params.retryDelay ?? SHEETS_FLOAT_PREVIEW_BRIDGE_RETRY_DELAY;
+    const injectorKey = params.injector as object;
+
+    globalThis.setTimeout(() => {
+        const subscription = ensureSheetsFloatPreviewBridge({
+            ...params,
+            retry: false,
+        });
+        if (subscription || attempt + 1 >= maxRetries) {
+            SHEETS_FLOAT_PREVIEW_BRIDGE_RETRYING.delete(injectorKey);
+            return;
+        }
+
+        retryEnsureSheetsFloatPreviewBridge(params, attempt + 1);
+    }, retryDelay);
+}
+
+function resolveSheetsFloatPreviewBridgeServices(injector: Pick<Injector, 'get' | 'has'>): {
+    embedModelService: EmbedModelService;
+    canvasFloatDomPreviewService: CanvasFloatDomPreviewService;
+} | undefined | null {
+    try {
+        if (!injector.has(CanvasFloatDomPreviewService) || !injector.has(EmbedModelService)) {
+            return undefined;
+        }
+
+        return {
+            embedModelService: injector.get(EmbedModelService),
+            canvasFloatDomPreviewService: injector.get(CanvasFloatDomPreviewService),
+        };
+    } catch {
+        return null;
+    }
 }
 
 function getString(data: object, key: string): string | undefined {

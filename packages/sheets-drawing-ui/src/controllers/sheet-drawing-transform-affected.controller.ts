@@ -1493,6 +1493,10 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             const removeDrawings: IDrawingParam[] = [];
 
             Object.keys(drawingMap).forEach((unitId) => {
+                if (unitId !== showUnitId) {
+                    return;
+                }
+
                 const subUnitMap = drawingMap[unitId];
 
                 Object.keys(subUnitMap).forEach((subUnitId) => {

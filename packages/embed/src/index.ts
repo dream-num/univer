@@ -23,7 +23,27 @@ export {
 export type { ICopyEmbedCommandParams, ICreateEmbedCommandParams, IInsertEmbedBySnapshotCommandParams, IRemoveEmbedCommandParams } from './commands/commands/embed.command';
 export { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
 export type { ISetEmbedDescriptorMutationParams, ISoftDeleteEmbedDescriptorMutationParams } from './commands/mutations/embed-descriptor.mutation';
-export { EMBED_PLUGIN_NAME, EMBED_RESOURCE_PLUGIN_NAME } from './common/const';
+export {
+    RemoveEmbedHostAnchorRecordMutation,
+    SetEmbedHostAnchorRecordMutation,
+} from './commands/mutations/embed-host-anchor-record.mutation';
+export type {
+    IRemoveEmbedHostAnchorMutationParams,
+    ISetEmbedHostAnchorMutationParams,
+} from './commands/mutations/embed-host-anchor-record.mutation';
+export {
+    CreateEmbedHostAnchorMutation,
+    RemoveEmbedHostAnchorMutation,
+} from './commands/mutations/embed-host-anchor.mutation';
+export type { IEmbedHostAnchorMutationParams } from './commands/mutations/embed-host-anchor.mutation';
+export {
+    CREATE_EMBED_HOST_ANCHOR_MUTATION_ID,
+    EMBED_PLUGIN_NAME,
+    EMBED_RESOURCE_PLUGIN_NAME,
+    REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID,
+    REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
+    SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
+} from './common/const';
 export {
     cloneEmbedResource,
     createEmbedResourceEntry,
@@ -43,25 +63,24 @@ export type { IEmbedChildRetentionState } from './services/embed-child-retention
 export { EmbedCreationService } from './services/embed-creation.service';
 export { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 export { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
+export {
+    EmbedHostAdapterRegistryService,
+    flushPendingEmbedHostAdapterContributions,
+    registerEmbedHostAdapterContributions,
+} from './services/embed-host-adapter-registry.service';
+export { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
+export { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
+export type {
+    IEmbedHostCopyContext,
+    IEmbedHostCreateContext,
+    IEmbedHostRemoveContext,
+} from './services/embed-host-lifecycle.service';
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
-export {
-    EmbedReferencedUnitManagerService,
-    type IEmbedReferencedUnitEnsureInput,
-    type IEmbedReferencedUnitEnsureResult,
-    type IEmbedReferencedUnitListFilter,
-    type IEmbedReferencedUnitRecord,
-    type IEmbedReferencedUnitUsageOwner,
-} from './services/embed-referenced-unit-manager.service';
-export {
-    type EmbedResourceRefMaterializationProfile,
-    EmbedResourceRefProviderRegistryService,
-    type IEmbedResourceRefEnsureInput,
-    type IEmbedResourceRefEnsureResult,
-    type IEmbedResourceRefProvider,
-    type IEmbedResourceRefProviderMatch,
-    type IEmbedResourceRefProviderRegistration,
-} from './services/embed-resource-ref-provider-registry.service';
+export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
+export type { IEmbedReferencedUnitEnsureInput, IEmbedReferencedUnitEnsureResult, IEmbedReferencedUnitListFilter, IEmbedReferencedUnitRecord, IEmbedReferencedUnitUsageOwner } from './services/embed-referenced-unit-manager.service';
+export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
+export type { EmbedResourceRefMaterializationProfile, IEmbedResourceRefEnsureInput, IEmbedResourceRefEnsureResult, IEmbedResourceRefProvider, IEmbedResourceRefProviderMatch, IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
     EmbedHostEntry,
@@ -91,6 +110,16 @@ export {
     DEFAULT_EMBED_TAB_LAYOUT_POLICY,
     EmbedHostEntryEnum,
 } from './types/embed';
+export type {
+    IEmbedHostAdapterContribution,
+    IEmbedHostAnchorContext,
+    IEmbedHostAnchorMutationPlan,
+    IEmbedHostAnchorRemoveMutationPlan,
+} from './types/host-adapter';
+export type {
+    EmbedHostAnchorKind,
+    IEmbedHostAnchorRecord,
+} from './types/host-anchor';
 export type {
     IResourceRef,
     IResourceRefUnit,

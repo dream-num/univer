@@ -16,10 +16,13 @@
 
 import type { IBaseSnapshot, IDocumentData, IWorkbookData } from '@univerjs/core';
 import type { IEmbedCapability } from '../../types/embed';
+import type { IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../../types/host-adapter';
+import type { IEmbedHostAnchorRecord } from '../../types/host-anchor';
 import { BaseDataModel, IUniverInstanceService, UnitModel, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
+import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { UniverEmbedPlugin } from '../../plugin';
 import '../index';
 
@@ -259,6 +262,7 @@ function createUniver(): Univer {
     univer.registerPlugin(UniverEmbedPlugin, {
         useDefaultCapabilities: false,
         capabilities: createCapabilities(),
+        hostAdapters: createHostAdapters(),
     });
     return univer;
 }
@@ -302,6 +306,90 @@ function createCapability(
         layout,
         menuBehavior,
         nestedEmbed: false,
+    };
+}
+
+function createHostAdapters(): IEmbedHostAdapterContribution[] {
+    return [
+        createHostAdapter(UniverInstanceType.UNIVER_DOC, 'docs-custom-block', 'docs-custom-block'),
+        createHostAdapter(UniverInstanceType.UNIVER_SHEET, 'sheets-sheet-tab', 'sheets-sheet-tab'),
+        createHostAdapter(UniverInstanceType.UNIVER_SHEET, 'sheets-floating-object', 'sheets-floating-object'),
+        createHostAdapter(UniverInstanceType.UNIVER_BASE, 'bases-table-list-block', 'bases-table-list-block'),
+        createHostAdapter(UniverInstanceType.UNIVER_SLIDE, 'slides-page-list-block', 'slides-page-list-block'),
+        createHostAdapter(UniverInstanceType.UNIVER_SLIDE, 'slides-floating-object', 'slides-floating-object'),
+    ];
+}
+
+function createHostAdapter(
+    hostType: UniverInstanceType,
+    entry: IEmbedHostAdapterContribution['entry'],
+    kind: IEmbedHostAnchorRecord['kind']
+): IEmbedHostAdapterContribution {
+    return {
+        hostType,
+        entry,
+        createAnchorPlan: (context) => createAnchorPlan(context, kind),
+        removeAnchorPlan: (context) => createRemoveAnchorPlan(context, kind),
+    };
+}
+
+function createAnchorPlan(
+    context: IEmbedHostAnchorContext,
+    kind: IEmbedHostAnchorRecord['kind']
+): IEmbedHostAnchorMutationPlan {
+    const hostAnchorId = context.requestedAnchorId ?? `${kind}:${context.embedId}`;
+    return {
+        hostAnchorId,
+        redoMutations: [{
+            id: SetEmbedHostAnchorRecordMutation.id,
+            params: {
+                record: {
+                    embedId: context.embedId,
+                    hostUnitId: context.hostUnitId,
+                    hostType: context.hostType,
+                    entry: context.entry,
+                    hostAnchorId,
+                    kind,
+                    lifecycle: 'active',
+                },
+            },
+        }],
+        undoMutations: [{
+            id: RemoveEmbedHostAnchorRecordMutation.id,
+            params: {
+                hostUnitId: context.hostUnitId,
+                hostAnchorId,
+            },
+        }],
+    };
+}
+
+function createRemoveAnchorPlan(
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    kind: IEmbedHostAnchorRecord['kind']
+): IEmbedHostAnchorRemoveMutationPlan {
+    return {
+        redoMutations: [{
+            id: RemoveEmbedHostAnchorRecordMutation.id,
+            params: {
+                hostUnitId: context.hostUnitId,
+                hostAnchorId: context.hostAnchorId,
+            },
+        }],
+        undoMutations: [{
+            id: SetEmbedHostAnchorRecordMutation.id,
+            params: {
+                record: {
+                    embedId: context.embedId,
+                    hostUnitId: context.hostUnitId,
+                    hostType: context.hostType,
+                    entry: context.entry,
+                    hostAnchorId: context.hostAnchorId,
+                    kind,
+                    lifecycle: 'active',
+                },
+            },
+        }],
     };
 }
 

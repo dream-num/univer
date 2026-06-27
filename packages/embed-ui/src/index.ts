@@ -112,7 +112,7 @@ export type {
 } from './services/embed-host-lifecycle.service';
 export { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
 export { EmbedHostRestoreService } from './services/embed-host-restore.service';
-export type { IEmbedHostRestoreContext } from './services/embed-host-restore.service';
+export type { IEmbedDescriptorMaterializeContext, IEmbedHostRestoreContext } from './services/embed-host-restore.service';
 export {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     EmbedInteractionBoundaryService,

@@ -137,12 +137,14 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     override dispose(): void {
-        this._injector.dispose();
-
-        super.dispose();
-
+        if (this._disposed) {
+            return;
+        }
         this._activated$.next(false);
         this._activated$.complete();
+
+        super.dispose();
+        this._injector.dispose();
 
         //@ts-ignore
         this._renderContext.unit = null;

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.25.0",
+    "version": "0.25.1",
     "private": false,
     "description": "Core spreadsheet model and business logic for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

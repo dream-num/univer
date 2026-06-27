@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.25.1](https://github.com/dream-num/univer/compare/v0.25.0...v0.25.1) (2026-06-27)
+
 # [0.25.0](https://github.com/dream-num/univer/compare/v0.24.0...v0.25.0) (2026-05-30)
 
 

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs",
-    "version": "0.25.0",
+    "version": "0.25.1",
     "private": false,
     "description": "Core document model and rich-text operations for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

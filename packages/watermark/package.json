@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/watermark",
-    "version": "0.25.0",
+    "version": "0.25.1",
     "private": false,
     "description": "Watermark rendering plugin for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

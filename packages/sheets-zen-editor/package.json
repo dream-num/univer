@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-zen-editor",
-    "version": "0.25.0",
+    "version": "0.25.1",
     "private": false,
     "description": "Immersive cell editing experience for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

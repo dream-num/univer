@@ -25,6 +25,7 @@ import { EmbedModelService } from '@univerjs/embed';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { resolveEmbedFloatInteractionPolicy } from '../common/embed-float-interaction-policy';
+import { resolveEmbedRuntimeMountGate, shouldDeferEmbedRuntimeMount } from '../common/embed-runtime-policy';
 import {
     EMBED_CANVAS_ROOT_ATTRIBUTE,
     EMBED_CONTENT_ROOT_ATTRIBUTE,
@@ -167,7 +168,7 @@ export function EmbedFloatDomRenderer(props: {
             }
         });
     }, [data?.embedId, floatingActiveService, releaseStage2SessionLease]);
-    const runtimeMountGate = resolveFloatRuntimeMountGate(
+    const runtimeMountGate = resolveEmbedRuntimeMountGate(
         data?.hostUnitId ? embedModelService.getDescriptor(data.hostUnitId, data.embedId) : undefined,
         stage
     );
@@ -2035,17 +2036,14 @@ export function shouldDeferSheetFloatRuntimeMount(
     descriptor: Pick<IEmbedDescriptor, 'hostType' | 'childType' | 'sourceMeta'> | undefined,
     stage: EmbedFloatingStage
 ): boolean {
-    return descriptor?.hostType === UniverInstanceType.UNIVER_SHEET &&
-        descriptor.childType === UniverInstanceType.UNIVER_SHEET &&
-        Boolean(descriptor.sourceMeta?.floating) &&
-        stage !== 'stage2';
+    return shouldDeferEmbedRuntimeMount(descriptor, stage);
 }
 
 export function resolveFloatRuntimeMountGate(
     descriptor: Pick<IEmbedDescriptor, 'hostType' | 'childType' | 'sourceMeta'> | undefined,
     stage: EmbedFloatingStage
 ): 'deferred' | 'ready' {
-    return shouldDeferSheetFloatRuntimeMount(descriptor, stage) ? 'deferred' : 'ready';
+    return resolveEmbedRuntimeMountGate(descriptor, stage);
 }
 
 function isChildEditorOrPopupRuntimeElement(target: EventTarget | null): boolean {

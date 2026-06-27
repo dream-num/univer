@@ -15,7 +15,7 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { FDocumentBody } from './f-document-body';
+import type { FDocumentBody, IFDocumentBodyEdit } from './f-document-body';
 import { DocumentBlockType } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 
@@ -40,6 +40,7 @@ export interface IFDocumentElementInfo {
 export class FDocumentElement extends FBase {
     constructor(
         protected readonly _body: FDocumentBody,
+        protected readonly _bodyEdit: IFDocumentBodyEdit,
         protected readonly _info: IFDocumentElementInfo,
         protected readonly _injector: Injector
     ) {

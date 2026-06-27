@@ -15,7 +15,7 @@
  */
 
 import type { ICustomTable, Injector } from '@univerjs/core';
-import type { FDocumentBody } from './f-document-body';
+import type { FDocumentBody, IFDocumentBodyEdit } from './f-document-body';
 import type { IFDocumentElementInfo } from './f-document-element';
 import { DocumentBlockType } from '@univerjs/core';
 import { FDocumentElement } from './f-document-element';
@@ -31,10 +31,11 @@ interface IFDocumentTableMixin {
 export class FDocumentTable extends FDocumentElement {
     constructor(
         protected readonly body: FDocumentBody,
+        protected readonly bodyEdit: IFDocumentBodyEdit,
         protected readonly info: IFDocumentElementInfo,
         protected readonly injector: Injector
     ) {
-        super(body, info, injector);
+        super(body, bodyEdit, info, injector);
 
         if (this.getType() !== DocumentBlockType.TABLE) {
             throw new Error(`Element type is not a table: ${this.getType()}`);
@@ -71,7 +72,7 @@ export class FDocumentTableMixin extends FDocumentElement {
         if (this.getType() !== DocumentBlockType.TABLE) {
             throw new Error(`Element type is not a table: ${this.getType()}`);
         }
-        return this._injector.createInstance(FDocumentTable, this._body, this.getResolvedInfo(), this._injector);
+        return this._injector.createInstance(FDocumentTable, this._body, this._bodyEdit, this.getResolvedInfo(), this._injector);
     }
 }
 

@@ -38,6 +38,11 @@ export interface IFDocumentTextRange {
     segmentId?: string;
 }
 
+export interface IFDocumentBodyEdit {
+    replaceRange: (range: IFDocumentTextRange, body: IDocumentBody) => boolean;
+    retainRange: (range: IFDocumentTextRange, body: IDocumentBody, coverType: UpdateDocsAttributeType) => boolean;
+}
+
 /**
  * A Facade API object bounded to a document body or header/footer segment.
  * It provides Google Docs-like element access and range editing methods.
@@ -48,11 +53,18 @@ export interface IFDocumentTextRange {
  * @hideconstructor
  */
 export class FDocumentBody {
+    private readonly _bodyEdit: IFDocumentBodyEdit;
+
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
         private readonly _injector: Injector,
         private readonly _segmentId = ''
-    ) {}
+    ) {
+        this._bodyEdit = {
+            replaceRange: this._replaceBodyRange.bind(this),
+            retainRange: this._retainBodyRange.bind(this),
+        };
+    }
 
     /**
      * Get the segment id of this document body facade.
@@ -103,7 +115,13 @@ export class FDocumentBody {
     getElements(): FDocumentElement[] {
         const children = this._getChildren();
         return children.map((child) => {
-            return this._injector.createInstance(FDocumentElement, this, child, this._injector);
+            return this._injector.createInstance(
+                FDocumentElement,
+                this,
+                this._bodyEdit,
+                child,
+                this._injector
+            );
         });
     }
 
@@ -218,7 +236,13 @@ export class FDocumentBody {
 
         const info = this._resolveParagraphInfo(paragraph, index, paragraphs[index - 1]?.startIndex);
 
-        return this._injector.createInstance(FDocumentParagraph, this, info, this._injector);
+        return this._injector.createInstance(
+            FDocumentParagraph,
+            this,
+            this._bodyEdit,
+            info,
+            this._injector
+        );
     }
 
     /**
@@ -251,56 +275,6 @@ export class FDocumentBody {
      */
     deleteRange(range: IFDocumentTextRange): boolean {
         return this._replaceBodyRange(range, { dataStream: '' });
-    }
-
-    /**
-     * Replace a range with plain text or rich text body data.
-     * @param {IFDocumentTextRange} range The text range to replace.
-     * @param {string | IDocumentBody | undefined} value The replacement text or rich text body data. If `undefined`, the range is deleted.
-     * @returns {boolean} `true` if the replacement was applied.
-     * @example
-     * ```ts
-     * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     *
-     * // Replace a range with plain text
-     * fDocumentBody.replaceRange({ startOffset: 0, endOffset: 5 }, 'Hello');
-     *
-     * // Replace a range with rich text body data
-     * const richText = univerAPI.newRichText().insertText(5, 'World', { ff: 'Arial', fs: 12 });
-     * fDocumentBody.replaceRange({ startOffset: 5, endOffset: 10 }, richText);
-     * ```
-     */
-    replaceRange(range: IFDocumentTextRange, value: string | IDocumentBody | undefined): boolean {
-        let body: IDocumentBody = { dataStream: '' };
-
-        if (typeof value === 'string') {
-            body = buildPlainTextInsertBody(value);
-        } else if (value) {
-            body = value;
-        }
-
-        return this._replaceBodyRange(range, body);
-    }
-
-    /**
-     * Retain a range with a new body and cover type.
-     * @param {IFDocumentTextRange} range The text range to retain.
-     * @param {IDocumentBody} body The new body data to retain.
-     * @param {UpdateDocsAttributeType} coverType The cover type for the retained range.
-     * @returns {boolean} `true` if the retention was applied.
-     * @example
-     * ```ts
-     * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     *
-     * // Retain a range with a new body and cover type
-     * const newBody = univerAPI.newRichText().insertText(0, 'Retained text', { bl: 1 });
-     * fDocumentBody.retainRange({ startOffset: 0, endOffset: 5 }, newBody, univerAPI.Enum.UpdateDocsAttributeType.COVER);
-     * ```
-     */
-    retainRange(range: IFDocumentTextRange, body: IDocumentBody, coverType: UpdateDocsAttributeType): boolean {
-        return this._retainBodyRange(range, body, coverType);
     }
 
     /**

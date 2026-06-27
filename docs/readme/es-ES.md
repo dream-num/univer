@@ -230,6 +230,8 @@ Consulta más detalles en la [guía de instalación y uso básico](https://docs.
 
 Mantén todos los paquetes `@univerjs/*` en la misma versión. Si usas paquetes de Univer Pro, mantén también alineadas las versiones de `@univerjs-pro/*`.
 
+Para expectativas de compatibilidad de API, APIs experimentales, APIs internas y reglas de deprecación, consulta la [política de estabilidad de API](../API_STABILITY.md).
+
 ## 🧭 Compatibilidad
 
 - **Runtime de navegador**: Univer se compila con objetivo Chrome 70 y busca funcionar en Edge `>=70`, Firefox `>=63`, Chrome `>=70`, Safari `>=12.0` y Electron `>=5`.
@@ -265,6 +267,13 @@ Este repositorio contiene el núcleo open source de Univer y plugins OSS de prim
 | **Servidor y runtime** | Runtime headless en Node.js, patrones RPC/Web Worker y primitivas de automatización orientada al servidor. | Servidor de colaboración, cliente de colaboración para Node.js, servicios SSR, delegación de cómputo, cálculo del lado del servidor y herramientas de replay de changesets de colaboración. |
 
 Las funciones Pro están documentadas en la [guía de Univer Pro](https://docs.univer.ai/guides/pro). Se separan aquí intencionalmente para que el alcance OSS sea claro.
+
+Principios de separación:
+
+- Los paquetes OSS de este repositorio están pensados para ser útiles por sí mismos bajo la licencia Apache-2.0. Univer Pro es opcional y no se requiere para usar las APIs públicas del SDK OSS.
+- Los bugs, regresiones y problemas de seguridad en paquetes OSS deben reportarse y corregirse en el repositorio OSS, incluso cuando exista una función Pro relacionada.
+- La documentación OSS no debe sugerir que capacidades Pro-only están disponibles en los paquetes públicos `@univerjs/*`. Las APIs, paquetes y rutas de despliegue Pro-only deben nombrarse explícitamente.
+- Cuando una función OSS tenga una mejora Pro, el comportamiento OSS debe seguir documentado de forma independiente para que los usuarios puedan evaluar el alcance open source sin leer primero documentación comercial.
 
 ## 🌐 Ecosistema
 
@@ -322,7 +331,8 @@ Lee [CONTRIBUTING.md](../../CONTRIBUTING.md) antes de abrir un pull request.
 
 Notas locales del repositorio que vale la pena leer antes de cambios profundos:
 
-- [Building Isomorphic Univer](../ISOMOPHIC.md): cómo separar lógica de navegador, Node.js, UI y plugins compartidos.
+- [Building Isomorphic Univer](../ISOMORPHIC.md): cómo separar lógica de navegador, Node.js, UI y plugins compartidos.
+- [Política de estabilidad de API](../API_STABILITY.md): expectativas sobre stable, experimental, internal, deprecated y breaking changes.
 - [Contributing to Facade API](../CONTRIBUTING-FACADE.md): expectativas de diseño para `FUniver`, `FWorkbook`, `FRange` y clases Facade relacionadas.
 - [Naming Convention](../NAMING_CONVENTION.md): convenciones para archivos, carpetas, interfaces, plugins, comandos y tokens de inyección de dependencias.
 - [Fixing Memory Leaks](../FIX_MEMORY_LEAK.md): patrones comunes de fugas de memoria y flujo de depuración para instancias Univer.

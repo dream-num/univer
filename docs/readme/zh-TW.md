@@ -230,6 +230,8 @@ univerAPI.createWorkbook({})
 
 請保持所有 `@univerjs/*` 套件版本一致。如果使用 Univer Pro 套件，也請保持 `@univerjs-pro/*` 版本一致。
 
+關於 API 相容性預期、實驗性 API、內部 API 和棄用規則，請閱讀 [API 穩定性政策](../API_STABILITY.md)。
+
 ## 🧭 相容性
 
 - **瀏覽器執行時**：Univer 的編譯目標是 Chrome 70，並盡力支援 Edge `>=70`、Firefox `>=63`、Chrome `>=70`、Safari `>=12.0` 和 Electron `>=5`。
@@ -265,6 +267,13 @@ Sheets 是目前最成熟的產品介面。Docs 和 Slides 共享 Univer 的架�
 | **伺服器端與執行時** | Node.js 無頭執行時、RPC/Web Worker 模式和面向伺服器端自動化的基礎能力。 | 協作伺服器、Node.js 協作客戶端、SSR 服務、計算委派、伺服器端計算和協作 changeset 回放工具。 |
 
 Pro 功能請參考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。這裡將其單獨列出，是為了清楚區分 OSS 套件的能力邊界。
+
+邊界原則：
+
+- 本倉庫中的 OSS 套件應能在 Apache-2.0 授權下獨立使用。Univer Pro 是選用的，使用公開 OSS SDK API 不需要依賴 Pro。
+- OSS 套件中的 bug、回歸和安全問題應在 OSS 倉庫中回報和修復，即使存在相關的 Pro 功能。
+- OSS 文件不應暗示 Pro-only 能力已包含在公開的 `@univerjs/*` 套件中。Pro-only API、套件和部署路徑應被明確命名。
+- 當某個 OSS 功能存在 Pro 增強時，OSS 行為仍應被獨立記錄，方便使用者在不先閱讀商業文件的情況下評估開源能力。
 
 ## 🌐 生態
 
@@ -322,7 +331,8 @@ pnpm dev
 
 深入修改前，建議閱讀這些倉庫內說明：
 
-- [Building Isomorphic Univer](../ISOMOPHIC.md)：如何拆分瀏覽器、Node.js、UI 與共享外掛邏輯。
+- [Building Isomorphic Univer](../ISOMORPHIC.md)：如何拆分瀏覽器、Node.js、UI 與共享外掛邏輯。
+- [API 穩定性政策](../API_STABILITY.md)：stable、experimental、internal、deprecated 和破壞性變更預期。
 - [Contributing to Facade API](../CONTRIBUTING-FACADE.md)：`FUniver`、`FWorkbook`、`FRange` 等 Facade API 的設計約定。
 - [Naming Convention](../NAMING_CONVENTION.md)：檔案、目錄、介面、外掛、命令和依賴注入 token 的命名規則。
 - [Fixing Memory Leaks](../FIX_MEMORY_LEAK.md)：Univer 實例常見記憶體洩漏模式和除錯流程。

@@ -231,6 +231,8 @@ univerAPI.createWorkbook({})
 
 すべての `@univerjs/*` パッケージは同じバージョンに揃えてください。Univer Pro パッケージを使う場合も、`@univerjs-pro/*` のバージョンを揃えてください。
 
+API 互換性、experimental API、internal API、deprecation rules については [API Stability Policy](../API_STABILITY.md) を参照してください。
+
 ## 🧭 互換性
 
 - **ブラウザ実行環境**：Univer は Chrome 70 をターゲットとしてコンパイルされており、Edge `>=70`、Firefox `>=63`、Chrome `>=70`、Safari `>=12.0`、Electron `>=5` で動作することを目指しています。
@@ -266,6 +268,13 @@ univerAPI.createWorkbook({})
 | **Server and runtime** | Node.js ヘッドレスランタイム、RPC/Web Worker パターン、サーバー向け自動化のプリミティブ。 | 共同編集サーバー、Node.js 共同編集クライアント、SSR サービス、計算委譲、サーバーサイド計算、共同編集 changeset replay ツール。 |
 
 Pro 機能は [Univer Pro guide](https://docs.univer.ai/guides/pro) に記載されています。ここでは OSS パッケージの範囲を明確にするため、意図的に分けて説明しています。
+
+Boundary principles:
+
+- このリポジトリの OSS パッケージは Apache-2.0 license の下で単独利用できることを意図しています。Univer Pro は任意であり、公開 OSS SDK API の利用に Pro は不要です。
+- OSS パッケージの bugs、regressions、security issues は、関連する Pro 機能がある場合でも OSS リポジトリで報告・修正されるべきです。
+- OSS documentation は、Pro-only capabilities が公開 `@univerjs/*` packages に含まれるかのように示すべきではありません。Pro-only APIs、packages、deployment paths は明示的に名前を出してください。
+- OSS feature に Pro enhancement がある場合でも、OSS behavior は独立して文書化し、commercial docs を先に読まなくても open-source surface を評価できるようにします。
 
 ## 🌐 エコシステム
 
@@ -323,7 +332,8 @@ Pull request を作成する前に [CONTRIBUTING.md](../../CONTRIBUTING.md) を�
 
 より深い変更を行う前に読む価値のあるリポジトリ内メモです。
 
-- [Building Isomorphic Univer](../ISOMOPHIC.md)：ブラウザ、Node.js、UI、共有プラグインロジックの分離方針。
+- [Building Isomorphic Univer](../ISOMORPHIC.md)：ブラウザ、Node.js、UI、共有プラグインロジックの分離方針。
+- [API Stability Policy](../API_STABILITY.md)：stable、experimental、internal、deprecated、breaking-change expectations。
 - [Contributing to Facade API](../CONTRIBUTING-FACADE.md)：`FUniver`、`FWorkbook`、`FRange` などの Facade API 設計方針。
 - [Naming Convention](../NAMING_CONVENTION.md)：ファイル、フォルダ、インターフェース、プラグイン、コマンド、DI token の命名規則。
 - [Fixing Memory Leaks](../FIX_MEMORY_LEAK.md)：Univer インスタンスでよくあるメモリリークパターンとデバッグ手順。

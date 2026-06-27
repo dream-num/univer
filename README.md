@@ -230,6 +230,8 @@ Learn more in the [Installation & Basic Usage guide](https://docs.univer.ai/guid
 
 Keep all `@univerjs/*` packages on the same version. If you use Univer Pro packages, keep `@univerjs-pro/*` versions aligned as well.
 
+For API compatibility expectations, experimental APIs, internal APIs, and deprecation rules, see the [API Stability Policy](./docs/API_STABILITY.md).
+
 ## 🧭 Compatibility
 
 - **Browser runtime**: Univer is compiled with a Chrome 70 target and aims to work on Edge `>=70`, Firefox `>=63`, Chrome `>=70`, Safari `>=12.0`, and Electron `>=5`.
@@ -265,6 +267,13 @@ This repository contains Univer's open-source core and first-party OSS plugins. 
 | **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, and server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, and collaboration changeset replay tooling. |
 
 Pro features are documented in the [Univer Pro guide](https://docs.univer.ai/guides/pro). They are intentionally separated here so the OSS package surface is clear.
+
+Boundary principles:
+
+- OSS packages in this repository are intended to be useful on their own under the Apache-2.0 license. Univer Pro is optional and is not required to use the public OSS SDK APIs.
+- Bugs, regressions, and security issues in OSS packages should be reported and fixed in the OSS repository, even when a related Pro feature exists.
+- OSS documentation should not imply that Pro-only capabilities are available in public `@univerjs/*` packages. Pro-only APIs, packages, and deployment paths should be named explicitly.
+- When an OSS feature has a Pro enhancement, the OSS behavior should remain documented independently so users can evaluate the open-source surface without reading commercial docs first.
 
 ## 🌐 Ecosystem
 
@@ -322,7 +331,8 @@ Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 
 Repository-local notes worth reading before deeper changes:
 
-- [Building Isomorphic Univer](./docs/ISOMOPHIC.md): how to split browser, Node.js, UI, and shared plugin logic.
+- [Building Isomorphic Univer](./docs/ISOMORPHIC.md): how to split browser, Node.js, UI, and shared plugin logic.
+- [API Stability Policy](./docs/API_STABILITY.md): stable, experimental, internal, deprecated, and breaking-change expectations.
 - [Contributing to Facade API](./docs/CONTRIBUTING-FACADE.md): API design expectations for `FUniver`, `FWorkbook`, `FRange`, and related Facade classes.
 - [Naming Convention](./docs/NAMING_CONVENTION.md): file, folder, interface, plugin, command, and dependency injection token conventions.
 - [Fixing Memory Leaks](./docs/FIX_MEMORY_LEAK.md): common leak patterns and debugging workflow for Univer instances.

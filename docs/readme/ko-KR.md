@@ -231,6 +231,8 @@ univerAPI.createWorkbook({})
 
 모든 `@univerjs/*` 패키지는 같은 버전으로 유지하세요. Univer Pro 패키지를 사용하는 경우 `@univerjs-pro/*` 버전도 맞춰야 합니다.
 
+API 호환성 기대치, experimental APIs, internal APIs, deprecation rules는 [API Stability Policy](../API_STABILITY.md)를 참고하세요.
+
 ## 🧭 호환성
 
 - **브라우저 런타임**: Univer는 Chrome 70을 대상으로 컴파일되며 Edge `>=70`, Firefox `>=63`, Chrome `>=70`, Safari `>=12.0`, Electron `>=5`에서 잘 동작하도록 노력합니다.
@@ -266,6 +268,13 @@ Sheets는 현재 가장 성숙한 제품 영역입니다. Docs와 Slides는 Univ
 | **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, collaboration changeset replay tooling. |
 
 Pro 기능은 [Univer Pro guide](https://docs.univer.ai/guides/pro)에 문서화되어 있습니다. 여기서는 OSS 패키지의 범위를 명확히 하기 위해 의도적으로 분리했습니다.
+
+Boundary principles:
+
+- 이 저장소의 OSS 패키지는 Apache-2.0 license 아래에서 독립적으로 유용하게 사용할 수 있도록 의도되었습니다. Univer Pro는 선택 사항이며, 공개 OSS SDK API를 사용하는 데 필요하지 않습니다.
+- OSS 패키지의 bugs, regressions, security issues는 관련 Pro 기능이 있더라도 OSS 저장소에서 보고하고 수정해야 합니다.
+- OSS documentation은 Pro-only capabilities가 공개 `@univerjs/*` packages에 포함된 것처럼 암시해서는 안 됩니다. Pro-only APIs, packages, deployment paths는 명확히 이름을 표시해야 합니다.
+- OSS feature에 Pro enhancement가 있더라도 OSS behavior는 독립적으로 문서화되어야 하며, 사용자가 commercial docs를 먼저 읽지 않고도 open-source surface를 평가할 수 있어야 합니다.
 
 ## 🌐 생태계
 
@@ -323,7 +332,8 @@ Pull request를 열기 전에 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 읽어
 
 더 깊은 변경을 하기 전에 읽어볼 만한 저장소 내부 문서입니다.
 
-- [Building Isomorphic Univer](../ISOMOPHIC.md): 브라우저, Node.js, UI, 공유 플러그인 로직을 나누는 방법.
+- [Building Isomorphic Univer](../ISOMORPHIC.md): 브라우저, Node.js, UI, 공유 플러그인 로직을 나누는 방법.
+- [API Stability Policy](../API_STABILITY.md): stable, experimental, internal, deprecated, breaking-change expectations.
 - [Contributing to Facade API](../CONTRIBUTING-FACADE.md): `FUniver`, `FWorkbook`, `FRange` 등 Facade API의 설계 기준.
 - [Naming Convention](../NAMING_CONVENTION.md): 파일, 폴더, 인터페이스, 플러그인, 명령, DI token naming 규칙.
 - [Fixing Memory Leaks](../FIX_MEMORY_LEAK.md): Univer 인스턴스의 흔한 memory leak 패턴과 디버깅 흐름.

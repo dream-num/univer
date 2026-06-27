@@ -422,7 +422,10 @@ export class EditingRenderController extends Disposable {
             return;
         }
 
+        const { unitId, isInArrayFormulaRange = false } = editCellState;
+
         this._commandService.syncExecuteCommand(ScrollToRangeOperation.id, {
+            unitId,
             range: {
                 startRow: editCellState.row,
                 startColumn: editCellState.column,
@@ -432,7 +435,6 @@ export class EditingRenderController extends Disposable {
         });
 
         this._editorBridgeService.refreshEditCellPosition(false);
-        const { unitId, isInArrayFormulaRange = false } = editCellState;
         const editorObject = this._getEditorObject();
 
         if (editorObject == null) {

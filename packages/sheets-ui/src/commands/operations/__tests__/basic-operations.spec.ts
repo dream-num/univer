@@ -120,9 +120,10 @@ describe('sheets-ui basic operations', () => {
 
     it('ScrollToRangeOperation should guard params and call scroll controller', () => {
         const scrollToRange = vi.fn(() => true);
+        const getRenderById = vi.fn(() => ({ with: () => ({ scrollToRange }) }));
         const accessor = createAccessor([
             [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'u1' }) }],
-            [IRenderManagerService, { getRenderById: () => ({ with: () => ({ scrollToRange }) }) }],
+            [IRenderManagerService, { getRenderById }],
         ]);
 
         expect(ScrollToRangeOperation.handler(accessor, undefined as any)).toBe(false);
@@ -138,5 +139,20 @@ describe('sheets-ui basic operations', () => {
             true,
             false
         );
+        expect(getRenderById).toHaveBeenCalledWith('u1');
+
+        expect(ScrollToRangeOperation.handler(accessor, {
+            unitId: 'embedded-u1',
+            range: { startRow: 2, endRow: 3, startColumn: 2, endColumn: 3 },
+        } as any)).toBe(true);
+        expect(getRenderById).toHaveBeenLastCalledWith('embedded-u1');
+
+        const missingRenderAccessor = createAccessor([
+            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'missing' }) }],
+            [IRenderManagerService, { getRenderById: () => null }],
+        ]);
+        expect(ScrollToRangeOperation.handler(missingRenderAccessor, {
+            range: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 },
+        } as any)).toBe(false);
     });
 });

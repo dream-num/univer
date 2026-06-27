@@ -32,6 +32,14 @@ import { DocTableTabCommand } from '../commands/commands/table/doc-table-tab.com
 import { DocAutoFormatService } from '../services/doc-auto-format.service';
 import { isInSameTableCellData } from '../services/selection/convert-rect-range';
 
+function hasQuickListType(text: string): text is keyof typeof QuickListTypeMap {
+    return Object.prototype.hasOwnProperty.call(QuickListTypeMap, text);
+}
+
+function hasQuickHeading(text: string): text is keyof typeof QUICK_HEADING_MAP {
+    return Object.prototype.hasOwnProperty.call(QUICK_HEADING_MAP, text);
+}
+
 export class DocAutoFormatController extends Disposable {
     constructor(
         @Inject(DocAutoFormatService) private readonly _docAutoFormatService: DocAutoFormatService,
@@ -137,7 +145,7 @@ export class DocAutoFormatController extends Disposable {
                         return false;
                     }
                     const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, selection.startOffset - 1);
-                    if (text && (Object.keys(QuickListTypeMap).includes(text) || Object.keys(QUICK_HEADING_MAP).includes(text))) {
+                    if (text && (hasQuickListType(text) || hasQuickHeading(text))) {
                         return true;
                     }
                     return false;
@@ -145,8 +153,8 @@ export class DocAutoFormatController extends Disposable {
                 getMutations(context) {
                     const { paragraphs, unit, selection } = context;
                     const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, selection.startOffset - 1);
-                    if (text && Object.keys(QuickListTypeMap).includes(text)) {
-                        const type = QuickListTypeMap[text as keyof typeof QuickListTypeMap];
+                    if (text && hasQuickListType(text)) {
+                        const type = QuickListTypeMap[text];
                         return [{
                             id: QuickListCommand.id,
                             params: {
@@ -156,8 +164,8 @@ export class DocAutoFormatController extends Disposable {
                         }];
                     }
 
-                    if (text && Object.keys(QUICK_HEADING_MAP).includes(text)) {
-                        const type = QUICK_HEADING_MAP[text as keyof typeof QUICK_HEADING_MAP];
+                    if (text && hasQuickHeading(text)) {
+                        const type = QUICK_HEADING_MAP[text];
                         return [{
                             id: QuickHeadingCommand.id,
                             params: {

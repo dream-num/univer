@@ -123,39 +123,90 @@ function usePrimaryOptions(localeService: LocaleService): ISelectProps['options'
     return useMemo(() => [
         {
             options: [
-                { label: localeService.t(FilterConditionItems.NONE.label), value: FilterConditionItems.NONE.operator },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.NONE.label),
+                    value: FilterConditionItems.NONE.operator,
+                },
             ],
         },
         {
             options: [
-                { label: localeService.t(FilterConditionItems.EMPTY.label), value: FilterConditionItems.EMPTY.operator },
-                { label: localeService.t(FilterConditionItems.NOT_EMPTY.label), value: FilterConditionItems.NOT_EMPTY.operator },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.EMPTY.label),
+                    value: FilterConditionItems.EMPTY.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.NOT_EMPTY.label),
+                    value: FilterConditionItems.NOT_EMPTY.operator,
+                },
             ],
         },
         {
             options: [
-                { label: localeService.t(FilterConditionItems.TEXT_CONTAINS.label), value: FilterConditionItems.TEXT_CONTAINS.operator },
-                { label: localeService.t(FilterConditionItems.DOES_NOT_CONTAIN.label), value: FilterConditionItems.DOES_NOT_CONTAIN.operator },
-                { label: localeService.t(FilterConditionItems.STARTS_WITH.label), value: FilterConditionItems.STARTS_WITH.operator },
-                { label: localeService.t(FilterConditionItems.ENDS_WITH.label), value: FilterConditionItems.ENDS_WITH.operator },
-                { label: localeService.t(FilterConditionItems.EQUALS.label), value: FilterConditionItems.EQUALS.operator },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.TEXT_CONTAINS.label),
+                    value: FilterConditionItems.TEXT_CONTAINS.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.DOES_NOT_CONTAIN.label),
+                    value: FilterConditionItems.DOES_NOT_CONTAIN.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.STARTS_WITH.label),
+                    value: FilterConditionItems.STARTS_WITH.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.ENDS_WITH.label),
+                    value: FilterConditionItems.ENDS_WITH.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.EQUALS.label),
+                    value: FilterConditionItems.EQUALS.operator,
+                },
             ],
         },
         {
             options: [
-                { label: localeService.t(FilterConditionItems.GREATER_THAN.label), value: FilterConditionItems.GREATER_THAN.operator },
-                { label: localeService.t(FilterConditionItems.GREATER_THAN_OR_EQUAL.label), value: FilterConditionItems.GREATER_THAN_OR_EQUAL.operator },
-                { label: localeService.t(FilterConditionItems.LESS_THAN.label), value: FilterConditionItems.LESS_THAN.operator },
-                { label: localeService.t(FilterConditionItems.LESS_THAN_OR_EQUAL.label), value: FilterConditionItems.LESS_THAN_OR_EQUAL.operator },
-                { label: localeService.t(FilterConditionItems.EQUAL.label), value: FilterConditionItems.EQUAL.operator },
-                { label: localeService.t(FilterConditionItems.NOT_EQUAL.label), value: FilterConditionItems.NOT_EQUAL.operator },
-                { label: localeService.t(FilterConditionItems.BETWEEN.label), value: FilterConditionItems.BETWEEN.operator },
-                { label: localeService.t(FilterConditionItems.NOT_BETWEEN.label), value: FilterConditionItems.NOT_BETWEEN.operator },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.GREATER_THAN.label),
+                    value: FilterConditionItems.GREATER_THAN.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.GREATER_THAN_OR_EQUAL.label),
+                    value: FilterConditionItems.GREATER_THAN_OR_EQUAL.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.LESS_THAN.label),
+                    value: FilterConditionItems.LESS_THAN.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.LESS_THAN_OR_EQUAL.label),
+                    value: FilterConditionItems.LESS_THAN_OR_EQUAL.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.EQUAL.label),
+                    value: FilterConditionItems.EQUAL.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.NOT_EQUAL.label),
+                    value: FilterConditionItems.NOT_EQUAL.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.BETWEEN.label),
+                    value: FilterConditionItems.BETWEEN.operator,
+                },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.NOT_BETWEEN.label),
+                    value: FilterConditionItems.NOT_BETWEEN.operator,
+                },
             ],
         },
         {
             options: [
-                { label: localeService.t(FilterConditionItems.CUSTOM.label), value: FilterConditionItems.CUSTOM.operator },
+                {
+                    label: localeService.t<LocaleKey>(FilterConditionItems.CUSTOM.label),
+                    value: FilterConditionItems.CUSTOM.operator,
+                },
             ],
         },
     ] as ISelectProps['options'], [locale, localeService]);
@@ -166,5 +217,8 @@ function useSecondaryOptions(localeService: LocaleService): ISelectProps['option
 
     return useMemo(() => FilterConditionItems.ALL_CONDITIONS
         .filter((c) => c.numOfParameters !== 2)
-        .map((c) => ({ label: localeService.t(c.label), value: c.operator })) as ISelectProps['options'], [locale, localeService]);
+        .map((c) => ({
+            label: localeService.t<LocaleKey>(c.label),
+            value: c.operator,
+        })) as ISelectProps['options'], [locale, localeService]);
 }

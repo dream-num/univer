@@ -43,6 +43,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
+import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
@@ -241,8 +242,12 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
         }
         if (spanCount === 1) {
             const lastSpan = line.divides[i].glyphGroup[0];
-            const { glyphType } = lastSpan;
-            if (glyphType !== GlyphType.TAB && glyphType !== GlyphType.LIST) {
+            const { glyphType, raw, streamType, width } = lastSpan;
+            const isZeroWidthColumnBreak =
+                width === 0 &&
+                (raw === DataStreamTreeTokenType.COLUMN_BREAK ||
+                    streamType === DataStreamTreeTokenType.COLUMN_BREAK);
+            if (glyphType !== GlyphType.TAB && glyphType !== GlyphType.LIST && !isZeroWidthColumnBreak) {
                 return false;
             }
         }
@@ -345,8 +350,16 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
-export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
+export function updateBlockIndex(
+    pages: IDocumentSkeletonPage[],
+    start: number = -1,
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
+) {
     let prePageStartIndex = start;
+    // Real docs declare a classic/modern compatibility mode, so their measured layout column
+    // width can be reused. Embedded editors keep the mode unspecified and must fall back to
+    // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
+    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified';
 
     for (const page of pages) {
         const { sections, skeTables, skeColumnGroups = new Map() } = page;
@@ -357,6 +370,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         let contentHeight = 0;
 
         for (const section of sections) {
+            collapseRedundantColumnBreakOverflow(section);
             const { columns } = section;
             const sectionStartIndex = preSectionStartIndex;
             const sectionEndIndex = pageStartIndex;
@@ -469,8 +483,11 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
-                column.width = maxColumnWidth;
-                sectionWidth += maxColumnWidth;
+                const measuredColumnWidth = shouldUseLayoutColumnWidth && Number.isFinite(column.width) && column.width > 0
+                    ? column.width
+                    : maxColumnWidth;
+                column.width = measuredColumnWidth;
+                sectionWidth += measuredColumnWidth;
 
                 maxSectionHeight = Math.max(maxSectionHeight, column.height);
 
@@ -507,6 +524,37 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
         prePageStartIndex = page.ed;
     }
+}
+
+function collapseRedundantColumnBreakOverflow(section: IDocumentSkeletonSection) {
+    const expectedColumnCount = section.colCount || section.columns.length;
+    if (expectedColumnCount <= 0 || section.columns.length <= expectedColumnCount) {
+        return;
+    }
+
+    const targetColumn = section.columns[expectedColumnCount - 1];
+    if (!targetColumn) {
+        return;
+    }
+
+    const overflowColumns = section.columns.slice(expectedColumnCount);
+    if (!overflowColumns.some((column) => column.lines.length > 0)) {
+        return;
+    }
+
+    const targetHeight = targetColumn.height ?? 0;
+    const overflowLines = overflowColumns.flatMap((column) => column.lines);
+    overflowLines.forEach((line) => {
+        line.top += targetHeight;
+        line.parent = targetColumn;
+    });
+    targetColumn.lines.push(...overflowLines);
+    targetColumn.height = Math.max(
+        ...overflowColumns.map((column) => targetHeight + (column.height ?? 0)),
+        targetHeight
+    );
+    targetColumn.isFull = overflowColumns.some((column) => column.isFull);
+    section.columns.splice(expectedColumnCount);
 }
 
 export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
@@ -1126,7 +1174,15 @@ export function getPositionHorizon(
             if (relativeFrom === ObjectRelativeFromH.LEFT_MARGIN) {
                 // TODO
             } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
-                // TODO
+                const { pageWidth, marginLeft, marginRight } = page;
+                const marginWidth = pageWidth - marginLeft - marginRight;
+                let absoluteLeft = marginLeft;
+                if (align === AlignTypeH.RIGHT) {
+                    absoluteLeft = marginLeft + marginWidth - objectWidth;
+                } else if (align === AlignTypeH.CENTER) {
+                    absoluteLeft = marginLeft + marginWidth / 2 - objectWidth / 2;
+                }
+                return absoluteLeft;
             } else if (relativeFrom === ObjectRelativeFromH.RIGHT_MARGIN) {
                 // TODO
             } else if (relativeFrom === ObjectRelativeFromH.INSIDE_MARGIN) {

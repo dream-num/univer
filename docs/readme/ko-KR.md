@@ -17,7 +17,7 @@ Univer는 플러그인 아키텍처, Canvas 기반 렌더링, 수식 엔진,
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
-[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build-packages.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build-packages.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat-square)](https://www.codefactor.io/repository/github/dream-num/univer/overview/dev)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 
@@ -154,6 +154,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render'
 import { UniverSheetsPlugin } from '@univerjs/sheets'
 import SheetsEnUS from '@univerjs/sheets/locale/en-US'
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula'
+import SheetsFormulaEnUS from '@univerjs/sheets-formula/locale/en-US'
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui'
 import SheetsFormulaUIEnUS from '@univerjs/sheets-formula-ui/locale/en-US'
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt'
@@ -187,6 +188,7 @@ const univer = new Univer({
       DocsUIEnUS,
       SheetsEnUS,
       SheetsUIEnUS,
+      SheetsFormulaEnUS,
       SheetsFormulaUIEnUS,
       SheetsNumfmtUIEnUS,
     ),
@@ -239,23 +241,29 @@ univerAPI.createWorkbook({})
 
 ## 🛠️ 만들 수 있는 것
 
-| 영역 | 오픈소스 기능 |
-| --- | --- |
-| **Sheets** | 워크북, 워크시트, 범위, 선택, 수식, 숫자 서식, 필터링, 정렬, 데이터 유효성 검사, 조건부 서식, 하이퍼링크, 댓글, 찾기/바꾸기, 노트, 테이블, drawing integration, 확장 가능한 UI 플러그인. |
-| **Docs** | 리치 문서 모델, 편집 UI, 목록, 하이퍼링크, drawing integration, 댓글, quick insert, 공유 문서 아키텍처. |
-| **Slides** | 프레젠테이션 데이터 모델과 UI 패키지. 현재 활발히 개발 중입니다. |
-| **Runtime** | 브라우저 앱, Node.js headless 사용, Web Worker/RPC 패턴, multi-instance 사용, 서버 지향 자동화. |
-| **Integrations** | React, Vue, Web Components, 프레임워크 템플릿, 테마, 로컬라이제이션, 커스텀 플러그인. |
+| 영역 | 오픈소스 기능 | Univer Pro 확장 |
+| --- | --- | --- |
+| **Sheets** | 워크북, 워크시트, 범위, 선택, 수식, 숫자 서식, 필터링, 정렬, 데이터 유효성 검사, 조건부 서식, 하이퍼링크, 댓글, 찾기/바꾸기, 노트, 테이블, drawing integration, 확장 가능한 UI 플러그인. | 실시간 협업, 편집 기록, import/export, printing, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, server-side calculation, 향상된 formula 기능. |
+| **Docs** | 리치 문서 모델, 편집 UI, 목록, 하이퍼링크, drawing integration, 댓글, quick insert, 공유 문서 아키텍처. | 협업, import/export, printing, 향상된 tables/lists, columns, callouts, code blocks, quotes, shapes, remote comment resources. |
+| **Slides** | 프레젠테이션 데이터 모델과 UI 패키지. 현재 활발히 개발 중입니다. | Pro slide model/UI, slide import/export, chart/table model 및 UI plugins, 공유 shape editing infrastructure. |
+| **Bases** | Univer의 plugin, command, model 아키텍처 위에서 커스텀 structured-data 경험을 만들 수 있습니다. | Base database model, commands, formula integration, workbench UI, field editors, render-engine views. |
+| **Runtime** | 브라우저 앱, Node.js headless 사용, Web Worker/RPC 패턴, multi-instance 사용, 서버 지향 자동화. | Collaboration client/server packages, Node.js collaboration client, Pro server services, SSR, computing delegation, server-side calculation, changeset replay tooling. |
+| **Integrations** | React, Vue, Web Components, 프레임워크 템플릿, 테마, 로컬라이제이션, 커스텀 플러그인. | Pro presets, enterprise deployment packages. |
 
 Sheets는 현재 가장 성숙한 제품 영역입니다. Docs와 Slides는 Univer의 아키텍처를 공유하며 같은 SDK 안에서 계속 발전하고 있습니다.
 
 ## 🔓 Open Source와 Pro
 
-이 저장소에는 Univer의 오픈소스 코어와 first-party OSS 플러그인이 포함되어 있습니다. 일부 엔터프라이즈 기능은 Univer Pro 패키지로 개발되며 별도 통합이 필요합니다.
+이 저장소에는 Univer의 오픈소스 코어와 first-party OSS 플러그인이 포함되어 있습니다. Univer Pro는 고급 product surfaces, collaboration, server features, enterprise integrations를 위한 commercial extension layer로 별도 개발됩니다.
 
-| Open source | Univer Pro / commercial |
-| --- | --- |
-| Core SDK, 플러그인 시스템, 렌더링 엔진, 수식 엔진, Facade API, Sheets/Docs/Slides 패키지, 테마, i18n, 다양한 first-party 플러그인. | 실시간 협업, import/export, printing, charts, pivot tables, sparklines, advanced formula capabilities, edit history, Pro server components, license management. |
+| 카테고리 | Open source | Univer Pro / commercial |
+| --- | --- | --- |
+| **Foundation** | Core SDK, 플러그인 시스템, 렌더링 엔진, 수식 엔진, Facade API, 테마, i18n, framework adapters. | Pro presets, enterprise deployment packages. |
+| **Sheets** | 핵심 스프레드시트 편집, 수식, 숫자 서식, filter/sort, 데이터 유효성 검사, 조건부 서식, 노트, 테이블, 하이퍼링크, 댓글, drawing, 찾기/바꾸기. | 협업, 편집 기록, import/export, print, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, range preprocessing, 향상된 formula engine 기능. |
+| **Docs** | 문서 모델과 편집 UI, 목록, 하이퍼링크, 댓글, quick insert, drawing integration. | 협업, import/export, print, 향상된 tables/lists, columns, callouts, code blocks, quotes, shapes, remote thread-comment resources. |
+| **Slides** | OSS presentation model과 UI packages. | Pro slide model/UI packages, slide import/export, charts, tables, reusable shape editor UI. |
+| **Bases** | 커스텀 data-centric products를 위한 확장 가능한 plugin architecture. | Base database core model, commands, mutations, formula integration, workbench UI, field editors, render-engine integration. |
+| **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, collaboration changeset replay tooling. |
 
 Pro 기능은 [Univer Pro guide](https://docs.univer.ai/guides/pro)에 문서화되어 있습니다. 여기서는 OSS 패키지의 범위를 명확히 하기 위해 의도적으로 분리했습니다.
 

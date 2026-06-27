@@ -239,12 +239,16 @@ export class Textafter extends BaseFunction {
 
         for (let i = 0; i < Math.abs(instanceNumValue); i++) {
             if (instanceNumValue < 0) {
-                const delimiterItem = _delimiterValue.map((item) => {
-                    return {
-                        index: substrText.lastIndexOf(item),
-                        length: item.length,
-                    };
-                }).filter((item) => item.index !== -1).sort((a, b) => b.index - a.index)[0];
+                let delimiterItem: { index: number; length: number } | undefined;
+                for (const item of _delimiterValue) {
+                    const index = substrText.lastIndexOf(item);
+                    if (index !== -1 && (!delimiterItem || index > delimiterItem.index)) {
+                        delimiterItem = {
+                            index,
+                            length: item.length,
+                        };
+                    }
+                }
 
                 if (!delimiterItem) {
                     break;
@@ -255,12 +259,16 @@ export class Textafter extends BaseFunction {
                 preDelimiterLength = delimiterItem.length;
                 matchNum++;
             } else {
-                const delimiterItem = _delimiterValue.map((item) => {
-                    return {
-                        index: substrText.indexOf(item),
-                        length: item.length,
-                    };
-                }).filter((item) => item.index !== -1).sort((a, b) => a.index - b.index)[0];
+                let delimiterItem: { index: number; length: number } | undefined;
+                for (const item of _delimiterValue) {
+                    const index = substrText.indexOf(item);
+                    if (index !== -1 && (!delimiterItem || index < delimiterItem.index)) {
+                        delimiterItem = {
+                            index,
+                            length: item.length,
+                        };
+                    }
+                }
 
                 if (!delimiterItem) {
                     break;

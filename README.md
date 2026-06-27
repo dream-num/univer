@@ -16,7 +16,7 @@ English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](./docs/readme/
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](./LICENSE)
-[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build-packages.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build-packages.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat-square)](https://www.codefactor.io/repository/github/dream-num/univer/overview/dev)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 
@@ -153,6 +153,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render'
 import { UniverSheetsPlugin } from '@univerjs/sheets'
 import SheetsEnUS from '@univerjs/sheets/locale/en-US'
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula'
+import SheetsFormulaEnUS from '@univerjs/sheets-formula/locale/en-US'
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui'
 import SheetsFormulaUIEnUS from '@univerjs/sheets-formula-ui/locale/en-US'
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt'
@@ -186,6 +187,7 @@ const univer = new Univer({
       DocsUIEnUS,
       SheetsEnUS,
       SheetsUIEnUS,
+      SheetsFormulaEnUS,
       SheetsFormulaUIEnUS,
       SheetsNumfmtUIEnUS,
     ),
@@ -238,23 +240,29 @@ Keep all `@univerjs/*` packages on the same version. If you use Univer Pro packa
 
 ## 🛠️ What You Can Build
 
-| Area | Open-source capabilities |
-| --- | --- |
-| **Sheets** | Workbooks, worksheets, ranges, selection, formulas, number formatting, filtering, sorting, data validation, conditional formatting, hyperlinks, comments, find and replace, notes, tables, drawing integration, and extensible UI plugins. |
-| **Docs** | Rich document model, editing UI, lists, hyperlinks, drawing integration, comments, quick insert, and shared document architecture. |
-| **Slides** | Presentation data model and UI packages under active development. |
-| **Runtime** | Browser apps, Node.js headless usage, Web Worker/RPC patterns, multi-instance usage, and server-oriented automation. |
-| **Integrations** | React, Vue, Web Components, framework templates, theming, localization, and custom plugins. |
+| Area | Open-source capabilities | Univer Pro extensions |
+| --- | --- | --- |
+| **Sheets** | Workbooks, worksheets, ranges, selection, formulas, number formatting, filtering, sorting, data validation, conditional formatting, hyperlinks, comments, find and replace, notes, tables, drawing integration, and extensible UI plugins. | Real-time collaboration, edit history, import/export, printing, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, server-side calculation, and performance-enhanced formula features. |
+| **Docs** | Rich document model, editing UI, lists, hyperlinks, drawing integration, comments, quick insert, and shared document architecture. | Collaboration, import/export, printing, enhanced tables and lists, columns, callouts, code blocks, quotes, shapes, and remote comment resources. |
+| **Slides** | Presentation data model and UI packages under active development. | Pro slide model and UI, slide import/export, chart and table model/UI plugins, and shared shape-editing infrastructure. |
+| **Bases** | Build custom structured-data experiences on top of Univer's plugin, command, and model architecture. | Base database model, commands, formula integration, workbench UI, field editors, and render-engine views. |
+| **Runtime** | Browser apps, Node.js headless usage, Web Worker/RPC patterns, multi-instance usage, and server-oriented automation. | Collaboration client/server packages, Node.js collaboration client, Pro server services, SSR, computing delegation, server-side calculation, and changeset replay tooling. |
+| **Integrations** | React, Vue, Web Components, framework templates, theming, localization, and custom plugins. | Pro presets and enterprise deployment packages. |
 
 Sheets are the most mature product surface today. Docs and Slides share Univer's architecture and continue to evolve in the same SDK.
 
 ## 🔓 Open Source and Pro
 
-This repository contains Univer's open-source core and first-party OSS plugins. Some enterprise features are developed as Univer Pro packages and require separate integration.
+This repository contains Univer's open-source core and first-party OSS plugins. Univer Pro is developed separately as a commercial extension layer for advanced product surfaces, collaboration, server features, and enterprise integrations.
 
-| Open source | Univer Pro / commercial |
-| --- | --- |
-| Core SDK, plugin system, rendering engine, formula engine, Facade API, Sheets/Docs/Slides packages, themes, i18n, and many first-party plugins. | Real-time collaboration, import/export, printing, charts, pivot tables, sparklines, advanced formula capabilities, edit history, Pro server components, and license management. |
+| Category | Open source | Univer Pro / commercial |
+| --- | --- | --- |
+| **Foundation** | Core SDK, plugin system, rendering engine, formula engine, Facade API, themes, i18n, and framework adapters. | Pro presets and enterprise deployment packages. |
+| **Sheets** | Core spreadsheet editing, formulas, number formatting, filter/sort, data validation, conditional formatting, notes, tables, hyperlinks, comments, drawing, find and replace. | Collaboration, edit history, import/export, print, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, range preprocessing, and enhanced formula engine features. |
+| **Docs** | Document model and editor UI, lists, hyperlinks, comments, quick insert, and drawing integration. | Collaboration, import/export, print, enhanced tables/lists, columns, callouts, code blocks, quotes, shapes, and remote thread-comment resources. |
+| **Slides** | OSS presentation model and UI packages. | Pro slide model/UI packages, slide import/export, charts, tables, and reusable shape editor UI. |
+| **Bases** | Extensible plugin architecture for custom data-centric products. | Base database core model, commands, mutations, formula integration, workbench UI, field editors, and render-engine integration. |
+| **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, and server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, and collaboration changeset replay tooling. |
 
 Pro features are documented in the [Univer Pro guide](https://docs.univer.ai/guides/pro). They are intentionally separated here so the OSS package surface is clear.
 

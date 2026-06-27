@@ -26,6 +26,7 @@ import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { BooleanNumber, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
 import { createSkeletonSection } from './section';
@@ -269,7 +270,7 @@ function _createSkeletonHeaderFooter(
         );
     }
 
-    updateBlockIndex([page]);
+    updateBlockIndex([page], -1, sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy());
 
     if (isHeader) {
         Object.assign(page, {
@@ -393,7 +394,11 @@ export function createSkeletonCellPages(
         p.segmentId = tableConfig.tableId;
     }
 
-    updateBlockIndex(pages, cellNode.startIndex);
+    updateBlockIndex(
+        pages,
+        cellNode.startIndex,
+        sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+    );
 
     applyTrailingBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
 

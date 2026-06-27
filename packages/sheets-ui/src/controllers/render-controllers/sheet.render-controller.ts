@@ -115,7 +115,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         this.disposeWithMe(engine.endFrame$.subscribe(() => {
             const validRenderInfo = this._renderFrameTimeMetric &&
-                Object.keys(this._renderFrameTimeMetric).filter((key) => key.startsWith(SHEET_EXTENSION_PREFIX)).length > 0;
+                Object.keys(this._renderFrameTimeMetric).some((key) => key.startsWith(SHEET_EXTENSION_PREFIX));
 
             if (validRenderInfo) {
                 this._afterRenderMetric$.next({

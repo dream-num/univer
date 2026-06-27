@@ -16,9 +16,8 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { PresetListType } from '@univerjs/core';
+import { DocumentBlockType, PresetListType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { DocElementStaleError } from '../doc-element-registry';
 import {
     createBulletDocument,
     createDuplicateDocument,
@@ -27,7 +26,7 @@ import {
     createTestBed,
 } from './create-test-bed';
 
-describe('FDocParagraph', () => {
+describe('FDocumentParagraph', () => {
     let univer: Univer | null = null;
     let document: FDocument;
 
@@ -43,50 +42,51 @@ describe('FDocParagraph', () => {
         univer = null;
     });
 
-    it('should keep paragraph handles stable when text is duplicated or inserted before them', () => {
+    it('keeps paragraph handles stable when text is duplicated or inserted before them', () => {
         createDocumentFacade(createDuplicateDocument());
 
         const body = document.getBody();
-        const secondSame = body.getChild(1).asParagraph();
+        const secondSame = body.getElement(1)!.asParagraph();
 
-        expect(secondSame.getId()).toBe('para_same_2');
+        expect(secondSame.getParagraphId()).toBe('para_same_2');
         expect(body.insertParagraph(0, 'X').getText()).toBe('X');
-        expect(body.getChildIndex(secondSame)).toBe(2);
+        expect(body.getElementIndex(secondSame)).toBe(2);
         expect(secondSame.setText('Picked')).toBe(true);
         expect(document.save().body?.dataStream).toBe('X\rSame\rPicked\rTail\r\n');
-        expect(secondSame.removeFromParent()).toBe(true);
+        expect(secondSame.remove()).toBe(true);
         expect(document.save().body?.dataStream).toBe('X\rSame\rTail\r\n');
     });
 
-    it('should mark paragraph handles as stale after their backing paragraph is removed', () => {
+    it('marks paragraph handles as stale after their backing paragraph is removed', () => {
         createDocumentFacade(createSimpleDocument());
 
-        const paragraph = document.getBody().getChild(1).asParagraph();
-        expect(paragraph.removeFromParent()).toBe(true);
-        expect(() => paragraph.getText()).toThrow(DocElementStaleError);
-        expect(() => paragraph.removeFromParent()).toThrow(DocElementStaleError);
+        const paragraph = document.getBody().getElement(1)!.asParagraph();
+        expect(paragraph.remove()).toBe(true);
+        expect(() => paragraph.getText()).toThrow('Document paragraph with id para_beta not found');
+        expect(() => paragraph.remove()).toThrow('Document paragraph with id para_beta not found');
     });
 
-    it('should update checklist paragraphs without changing non-task list items', () => {
+    it('updates checklist paragraphs without changing non-task list items', () => {
         createDocumentFacade(createBulletDocument());
 
         const bulletBody = document.getBody();
-        const listItem = bulletBody.getChild(0).asParagraph();
-        expect(listItem.getType()).toBe('paragraph');
+        const listItem = bulletBody.getElement(0)!.asParagraph();
+        expect(listItem.getType()).toBe(DocumentBlockType.PARAGRAPH);
         expect(listItem.getKey()).toMatch(/^para_/);
-        expect(listItem.getId()).toBe(listItem.getKey());
+        expect(listItem.getParagraphId()).toBe(listItem.getKey());
         expect(listItem.getParent()).toBe(bulletBody);
         expect(listItem.isListItem()).toBe(true);
         expect(listItem.isTask()).toBe(false);
+        expect(listItem.setTaskChecked(true)).toBe(false);
 
         createDocumentFacade(createTaskDocument());
 
-        const task = document.getBody().getChild(0).asParagraph();
+        const task = document.getBody().getElement(0)!.asParagraph();
         expect(task.isListItem()).toBe(true);
         expect(task.isTask()).toBe(true);
         expect(task.setTaskChecked(true)).toBe(true);
         expect(document.save().body?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
-        expect(document.getBody().setTaskChecked(task.getKey(), false)).toBe(true);
+        expect(task.setTaskChecked(false)).toBe(true);
         expect(document.save().body?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST);
     });
 });

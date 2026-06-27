@@ -22,6 +22,7 @@ import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { ColumnResponsiveType, DataStreamTreeNodeType } from '@univerjs/core';
 import { DocumentSkeletonPageType, LineType } from '../../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { applyTrailingBlockRangeSpaceBelow, createSkeletonPage } from '../model/page';
 import { getLastNotFullColumnInfo, updateBlockIndex } from '../tools';
 import { dealWidthParagraph } from './paragraph/paragraph-layout';
@@ -147,7 +148,11 @@ function createColumnContentPage(
         dealWidthParagraph(ctx, viewModel, paragraphNode, page, columnSectionBreakConfig);
     }
 
-    updateBlockIndex([page], columnNode.startIndex);
+    updateBlockIndex(
+        [page],
+        columnNode.startIndex,
+        sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+    );
     applyTrailingBlockRangeSpaceBelow([page], ctx.dataModel?.getBody?.(), columnNode.endIndex);
 
     return page;

@@ -16,7 +16,7 @@ Univer 以外掛化架構、Canvas 渲染引擎、公式引擎和統一的 Facad
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
-[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build-packages.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build-packages.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat-square)](https://www.codefactor.io/repository/github/dream-num/univer/overview/dev)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 
@@ -153,6 +153,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render'
 import { UniverSheetsPlugin } from '@univerjs/sheets'
 import SheetsEnUS from '@univerjs/sheets/locale/en-US'
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula'
+import SheetsFormulaEnUS from '@univerjs/sheets-formula/locale/en-US'
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui'
 import SheetsFormulaUIEnUS from '@univerjs/sheets-formula-ui/locale/en-US'
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt'
@@ -186,6 +187,7 @@ const univer = new Univer({
       DocsUIEnUS,
       SheetsEnUS,
       SheetsUIEnUS,
+      SheetsFormulaEnUS,
       SheetsFormulaUIEnUS,
       SheetsNumfmtUIEnUS,
     ),
@@ -238,23 +240,29 @@ univerAPI.createWorkbook({})
 
 ## 🛠️ 你可以構建什麼
 
-| 領域 | 開源能力 |
-| --- | --- |
-| **Sheets** | 活頁簿、工作表、範圍、選擇、公式、數字格式、篩選、排序、資料驗證、條件格式、超連結、評論、尋找取代、註記、表格、繪圖整合和可擴充 UI 外掛。 |
-| **Docs** | 富文字文件模型、編輯 UI、列表、超連結、繪圖整合、評論、快速插入和共享文件架構。 |
-| **Slides** | 簡報資料模型和 UI 套件，目前仍在積極開發中。 |
-| **Runtime** | 瀏覽器應用、Node.js 無頭使用、Web Worker/RPC 模式、多實例使用和伺服器端自動化。 |
-| **Integrations** | React、Vue、Web Components、框架模板、主題、本地化和自訂外掛。 |
+| 領域 | 開源能力 | Univer Pro 擴充 |
+| --- | --- | --- |
+| **Sheets** | 活頁簿、工作表、範圍、選擇、公式、數字格式、篩選、排序、資料驗證、條件格式、超連結、評論、尋找取代、註記、表格、繪圖整合和可擴充 UI 外掛。 | 即時協作、編輯歷史、匯入匯出、列印、圖表、樞紐分析表、迷你圖、大綱、形狀、儲存格內圖形、資料連接器、伺服器端計算和增強公式能力。 |
+| **Docs** | 富文字文件模型、編輯 UI、列表、超連結、繪圖整合、評論、快速插入和共享文件架構。 | 協作、匯入匯出、列印、增強表格和列表、分欄、提示區塊、程式碼區塊、引用區塊、形狀和遠端評論資源。 |
+| **Slides** | 簡報資料模型和 UI 套件，目前仍在積極開發中。 | Pro 簡報模型和 UI、投影片匯入匯出、圖表和表格模型/UI 外掛，以及共享形狀編輯基礎設施。 |
+| **Bases** | 基於 Univer 的外掛、命令和模型架構構建自訂結構化資料體驗。 | Base 資料庫模型、命令、公式整合、工作台 UI、欄位編輯器和渲染引擎視圖。 |
+| **Runtime** | 瀏覽器應用、Node.js 無頭使用、Web Worker/RPC 模式、多實例使用和伺服器端自動化。 | 協作客戶端/伺服器端套件、Node.js 協作客戶端、Pro 伺服器端服務、SSR、計算委派、伺服器端計算和 changeset 回放工具。 |
+| **Integrations** | React、Vue、Web Components、框架模板、主題、本地化和自訂外掛。 | Pro 預設和企業部署套件。 |
 
 Sheets 是目前最成熟的產品介面。Docs 和 Slides 共享 Univer 的架構，並在同一 SDK 中持續演進。
 
 ## 🔓 開源與 Pro
 
-本倉庫包含 Univer 的開源核心和第一方 OSS 外掛。一些企業級功能作為 Univer Pro 套件開發，需要單獨整合。
+本倉庫包含 Univer 的開源核心和第一方 OSS 外掛。Univer Pro 作為商業擴充層單獨開發，面向進階產品介面、協作、伺服器端能力和企業整合。
 
-| 開源 | Univer Pro / 商業版 |
-| --- | --- |
-| 核心 SDK、外掛系統、渲染引擎、公式引擎、Facade API、Sheets/Docs/Slides 套件、主題、i18n 和許多第一方外掛。 | 即時協作、匯入匯出、列印、圖表、樞紐分析表、迷你圖、高級公式能力、編輯歷史、Pro 伺服器端元件和授權管理。 |
+| 類別 | 開源 | Univer Pro / 商業版 |
+| --- | --- | --- |
+| **基礎能力** | 核心 SDK、外掛系統、渲染引擎、公式引擎、Facade API、主題、i18n 和框架適配器。 | Pro 預設和企業部署套件。 |
+| **Sheets** | 核心試算表編輯、公式、數字格式、篩選/排序、資料驗證、條件格式、註記、表格、超連結、評論、繪圖、尋找取代。 | 協作、編輯歷史、匯入匯出、列印、圖表、樞紐分析表、迷你圖、大綱、形狀、儲存格內圖形、資料連接器、範圍預處理和增強公式引擎能力。 |
+| **Docs** | 文件模型和編輯 UI、列表、超連結、評論、快速插入和繪圖整合。 | 協作、匯入匯出、列印、增強表格/列表、分欄、提示區塊、程式碼區塊、引用區塊、形狀和遠端執行緒評論資源。 |
+| **Slides** | OSS 簡報模型和 UI 套件。 | Pro 簡報模型/UI 套件、投影片匯入匯出、圖表、表格和可重複使用形狀編輯器 UI。 |
+| **Bases** | 用於自訂資料類產品的可擴充外掛架構。 | Base 資料庫核心模型、命令、變更、公式整合、工作台 UI、欄位編輯器和渲染引擎整合。 |
+| **伺服器端與執行時** | Node.js 無頭執行時、RPC/Web Worker 模式和面向伺服器端自動化的基礎能力。 | 協作伺服器、Node.js 協作客戶端、SSR 服務、計算委派、伺服器端計算和協作 changeset 回放工具。 |
 
 Pro 功能請參考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。這裡將其單獨列出，是為了清楚區分 OSS 套件的能力邊界。
 

@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/fa-IR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: 'جستجو',
+            random: 'ایموجی تصادفی',
+            recents: 'اخیر',
+            emojis: 'ایموجی‌ها',
+            animals: 'حیوانات',
+            food: 'غذا',
+            activities: 'فعالیت‌ها',
+            places: 'مکان‌ها',
+            objects: 'اشیا',
+            symbols: 'نمادها',
+            searchResults: 'نتایج جستجو',
+            noResults: 'ایموجی پیدا نشد',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'متن عادی',

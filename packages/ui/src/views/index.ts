@@ -16,6 +16,7 @@
 
 export * from './CommonLabel';
 export * from './custom-label/index';
+export * from './emoji-picker/index';
 export * from './HeadingItem';
 
 export { useScrollYOverContainer } from './hooks/layout';

@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
+import type { IDocumentBody, IParagraphStyle } from '@univerjs/core';
 import { createParagraphId } from '@univerjs/core';
-
-type IParagraphStyle = NonNullable<IDocumentBody['paragraphs']>[number]['paragraphStyle'];
 
 export interface IBuildPlainTextInsertBodyOptions {
     paragraphStyle?: IParagraphStyle;
@@ -58,7 +56,7 @@ export function getNormalizedPlainTextCursorOffset(
     );
 }
 
-export function getParagraphStyleAtOffset(body: IDocumentBody, offset: number): IParagraphStyle {
+export function getParagraphStyleAtOffset(body: IDocumentBody, offset: number): IParagraphStyle | undefined {
     const paragraphs = body.paragraphs ?? [];
     const paragraph = paragraphs.find((item) => item.startIndex >= offset) ?? paragraphs[paragraphs.length - 1];
 

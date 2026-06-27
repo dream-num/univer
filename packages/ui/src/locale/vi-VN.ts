@@ -15,9 +15,25 @@
  */
 
 import type enUS from './en-US';
+import emojiLocale from './emoji-locale/vi-VN.generated';
 
 const locale: typeof enUS = {
     ui: {
+        emojiPicker: {
+            search: 'Tìm kiếm',
+            random: 'Emoji ngẫu nhiên',
+            recents: 'Gần đây',
+            emojis: 'Emoji',
+            animals: 'Động vật',
+            food: 'Đồ ăn',
+            activities: 'Hoạt động',
+            places: 'Địa điểm',
+            objects: 'Đồ vật',
+            symbols: 'Ký hiệu',
+            searchResults: 'Kết quả tìm kiếm',
+            noResults: 'Không tìm thấy emoji',
+            ...emojiLocale,
+        },
         toolbar: {
             heading: {
                 normal: 'Văn bản',

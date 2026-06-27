@@ -53,7 +53,7 @@ export const DefinedNameContainer = () => {
         }
         const definedNameMap = definedNamesService.getDefinedNameMap(unitId);
         if (definedNameMap) {
-            return Array.from(Object.values(definedNameMap));
+            return Object.values(definedNameMap);
         }
         return [];
     };

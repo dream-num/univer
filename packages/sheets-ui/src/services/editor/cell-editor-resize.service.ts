@@ -86,6 +86,9 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
+        // Cell editors are embedded docs with unspecified compatibility mode. Reset before
+        // measuring so stale page width from a previous resize does not leak into this editor.
+        documentSkeleton.resetInitialWidth();
 
         const info = this._predictingSize(
             position,

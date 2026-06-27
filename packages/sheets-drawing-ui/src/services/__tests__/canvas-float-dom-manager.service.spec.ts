@@ -49,10 +49,12 @@ import {
     shouldActivateStage2FromHostClickIntent,
     shouldActivateStage2FromHostPointer,
     shouldAutoMountFloatDomRuntime,
+    shouldForwardSheetHostedEmbedFloatDomEvent,
     shouldPassThroughFloatDomActivationEvent,
     shouldPassThroughFloatDomRuntimeEvents,
     shouldPreserveFloatDomOnFocusChange,
     shouldStartFloatDomMoveFromHandle,
+    shouldUpdateFloatDomLayerOnRuntimeStageChange,
     shouldUseFloatDomPreviewObject,
     syncFloatDomHostSelectionOnStageEnter,
     transformBound2DOMBound,
@@ -545,6 +547,63 @@ describe('SheetCanvasFloatDomManagerService', () => {
         } as any, 'stage2')).toBe(true);
     });
 
+    it('keeps auto-mounted sheet embed runtimes stable across stage changes', () => {
+        expect(shouldUpdateFloatDomLayerOnRuntimeStageChange({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+                runtimeMountMode: 'auto',
+            },
+        } as any)).toBe(false);
+        expect(shouldUpdateFloatDomLayerOnRuntimeStageChange({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'auto',
+            },
+        } as any)).toBe(false);
+        expect(shouldUpdateFloatDomLayerOnRuntimeStageChange({
+            data: {
+                version: 1,
+                embedId: 'embed-sheet',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+    });
+
+    it('blocks sheet-host event forwarding from active stage2 embed runtimes', () => {
+        const runtime = document.createElement('div');
+        runtime.dataset.embedFloatDom = 'true';
+        runtime.dataset.embedFloatStage = 'stage2';
+        const target = document.createElement('button');
+        runtime.appendChild(target);
+
+        expect(shouldForwardSheetHostedEmbedFloatDomEvent({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+            },
+        } as any, { target } as any)).toBe(false);
+
+        runtime.dataset.embedFloatStage = 'stage1';
+        expect(shouldForwardSheetHostedEmbedFloatDomEvent({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+            },
+        } as any, { target } as any)).toBe(true);
+    });
+
     it('applies embed transformer config with visual padding and aspect-ratio locking', () => {
         const rect = {};
 
@@ -659,7 +718,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         }));
     });
 
-    it('keeps auto-mounted sheet-hosted embed runtimes in stage1 before the second activation', () => {
+    it('keeps auto-mounted sheet-hosted embed runtime stage changes inside the runtime layer', () => {
         const updateFloatDom = vi.fn();
         const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
         const floatDomConfig = {
@@ -689,14 +748,10 @@ describe('SheetCanvasFloatDomManagerService', () => {
         ]);
 
         expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage1');
-        expect(updateFloatDom).toHaveBeenLastCalledWith('float-dom-1', {
-            eventPassThrough: true,
-        });
+        expect(updateFloatDom).not.toHaveBeenCalled();
 
         expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage2');
-        expect(updateFloatDom).toHaveBeenLastCalledWith('float-dom-1', {
-            eventPassThrough: false,
-        });
+        expect(updateFloatDom).not.toHaveBeenCalled();
     });
 
     it('lets stage1 activation continue to host selection but stops stage2 activation', () => {

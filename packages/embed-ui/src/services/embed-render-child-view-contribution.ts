@@ -21,6 +21,7 @@ import { ICommandService, Injector, IUniverInstanceService, toDisposable } from 
 import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 
 export interface IEmbedRenderLike {
+    isMainScene?: boolean;
     engine: {
         mount: (target: HTMLElement) => void;
         unmount?: () => void;

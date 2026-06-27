@@ -36,6 +36,39 @@ export { ClearSheetDrawingTransformerOperation } from './commands/operations/cle
 export { isKnownSheetNonRotatableDrawingType, resolveSheetDrawingRotateEnabled } from './common/rotate-enabled';
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
+export {
+    createEmbedSheetsFloatingDrawing,
+    createEmbedSheetsFloatingDrawingFromDescriptor,
+    createEmbedSheetsFloatingObjectData,
+    EMBED_SHEETS_FLOATING_COMPONENT_KEY,
+    getEmbedSheetsFloatingObjectData,
+    isEmbedSheetsFloatingDrawing,
+    resolveEmbedSheetsFloatingObjectSize,
+} from './embed-floating-anchor';
+export type {
+    IEmbedSheetsFloatingObjectData,
+    IEmbedSheetsFloatingObjectParams,
+} from './embed-floating-anchor';
+export {
+    createSheetsFloatingObjectHostAdapterContribution,
+    registerSheetsDrawingEmbedHostAdapters,
+} from './embed-host-adapter';
+export {
+    createEmbedSheetsTabCustomData,
+    createEmbedSheetsTabSnapshot,
+    createEmbedSheetsTabSnapshotFromDescriptor,
+    EMBED_SHEETS_TAB_CUSTOM_KEY,
+    getEmbedSheetsTabCustomData,
+    isEmbedSheetsTabSnapshot,
+} from './embed-tab-anchor';
+export type {
+    IEmbedSheetsTabCustomData,
+    IEmbedSheetsTabSnapshotParams,
+} from './embed-tab-anchor';
+export {
+    createSheetsSheetTabHostAdapterContribution,
+    registerSheetsSheetTabEmbedHostAdapters,
+} from './embed-tab-host-adapter';
 export { UniverSheetsDrawingPlugin } from './plugin';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
 export type {

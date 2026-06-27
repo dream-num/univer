@@ -15,31 +15,14 @@
  */
 
 import type { ICommand, ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
-import type { EmbedHostEntry, IEmbedCreateContext, IEmbedDescriptor, IEmbedSourceMeta } from '../../types/embed';
-import { CommandType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
-import { toResourceRefUnitType } from '../../common/unit-type';
-import {
-    createDefaultEmbedSourceMeta,
-    EmbedCapabilityRegistryService,
-} from '../../services/embed-capability-registry.service';
-import { EmbedCreationService } from '../../services/embed-creation.service';
-import { EmbedModelService } from '../../services/embed-model.service';
-import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
-import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from '../mutations/embed-descriptor.mutation';
+import type { IEmbedHostCopyContext, IEmbedHostCreateContext, IEmbedHostRemoveContext } from '../../services/embed-host-lifecycle.service';
+import type { EmbedHostEntry, IEmbedDescriptor, IEmbedSourceMeta } from '../../types/embed';
+import { CommandType } from '@univerjs/core';
+import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.service';
 
-export type ICreateEmbedCommandParams = IEmbedCreateContext;
-
-export interface ICopyEmbedCommandParams {
-    hostUnitId: string;
-    sourceEmbedId: string;
-    nextEmbedId: string;
-    nextHostAnchorId: string;
-}
-
-export interface IRemoveEmbedCommandParams {
-    hostUnitId: string;
-    embedId: string;
-}
+export type ICreateEmbedCommandParams = IEmbedHostCreateContext;
+export type ICopyEmbedCommandParams = IEmbedHostCopyContext;
+export type IRemoveEmbedCommandParams = IEmbedHostRemoveContext;
 
 export interface IInsertEmbedBySnapshotCommandParams<TSnapshot = unknown> {
     hostUnitId: string;
@@ -63,34 +46,7 @@ export const CreateEmbedCommand: ICommand<ICreateEmbedCommandParams, IEmbedDescr
             return false;
         }
 
-        const result = await accessor.get(EmbedCreationService).prepareCreateEmbed(params);
-        const undoMutations = [{
-            id: SoftDeleteEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                embedId: params.embedId,
-            },
-        }];
-        const redoMutations = [{
-            id: SetEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                descriptor: result.descriptor,
-            },
-        }];
-
-        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
-        if (!executeResult.result) {
-            return false;
-        }
-
-        accessor.get(IUndoRedoService).pushUndoRedo({
-            unitID: params.hostUnitId,
-            undoMutations,
-            redoMutations,
-        });
-
-        return accessor.get(EmbedModelService).getDescriptor(params.hostUnitId, params.embedId) ?? result.descriptor;
+        return accessor.get(EmbedHostLifecycleService).createEmbed(params);
     },
 };
 
@@ -102,75 +58,7 @@ export const InsertEmbedBySnapshotCommand: ICommand<IInsertEmbedBySnapshotComman
             return false;
         }
 
-        const capability = accessor.get(EmbedCapabilityRegistryService).getCapability({
-            hostType: params.hostType,
-            childType: params.childType,
-            entry: params.entry,
-        });
-        if (!capability) {
-            throw new Error('EMBED_CAPABILITY_NOT_SUPPORTED');
-        }
-
-        const instanceService = accessor.get(IUniverInstanceService);
-        const childSnapshot = normalizeChildSnapshot(params.unitSnapshot, params.childUnitId);
-        const childUnit = instanceService.createUnit(
-            params.childType,
-            childSnapshot as Partial<unknown>,
-            {
-                ...EMBED_CHILD_CREATE_OPTIONS,
-                ...params.createUnitOptions,
-            }
-        );
-        const childUnitId = childUnit.getUnitId();
-        const embedId = params.embedId ?? `embed_${generateRandomId(10)}`;
-        const descriptor: IEmbedDescriptor = {
-            embedId,
-            hostUnitId: params.hostUnitId,
-            hostType: params.hostType,
-            hostAnchorId: params.hostAnchorId ?? `embed_anchor_${generateRandomId(10)}`,
-            entry: params.entry,
-            source: {
-                kind: 'ref',
-                ref: {
-                    file: { kind: 'self' },
-                    unit: {
-                        selector: childUnitId,
-                        type: toResourceRefUnitType(params.childType),
-                    },
-                },
-            },
-            childUnitId,
-            childType: params.childType,
-            mode: 'interactive',
-            sourceMeta: params.sourceMeta ?? createDefaultEmbedSourceMeta(capability),
-        };
-
-        const undoMutations = [{
-            id: SoftDeleteEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                embedId,
-            },
-        }];
-        const redoMutations = [{
-            id: SetEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                descriptor,
-            },
-        }];
-        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
-        if (!executeResult.result) {
-            return false;
-        }
-
-        accessor.get(IUndoRedoService).pushUndoRedo({
-            unitID: params.hostUnitId,
-            undoMutations,
-            redoMutations,
-        });
-
-        return accessor.get(EmbedModelService).getDescriptor(params.hostUnitId, embedId) ?? false;
+        return accessor.get(EmbedHostLifecycleService).createEmbedBySnapshot(params);
     },
 };
 
@@ -182,46 +70,9 @@ export const CopyEmbedCommand: ICommand<ICopyEmbedCommandParams, IEmbedDescripto
             return false;
         }
 
-        const descriptor = accessor.get(EmbedCreationService).prepareCopyEmbed(params);
-        const undoMutations = [{
-            id: SoftDeleteEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                embedId: params.nextEmbedId,
-            },
-        }];
-        const redoMutations = [{
-            id: SetEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                descriptor,
-            },
-        }];
-        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
-        if (!executeResult.result) {
-            return false;
-        }
-
-        accessor.get(IUndoRedoService).pushUndoRedo({
-            unitID: params.hostUnitId,
-            undoMutations,
-            redoMutations,
-        });
-
-        return accessor.get(EmbedModelService).getDescriptor(params.hostUnitId, params.nextEmbedId) ?? descriptor;
+        return accessor.get(EmbedHostLifecycleService).copyEmbed(params);
     },
 };
-
-function normalizeChildSnapshot<TSnapshot>(snapshot: TSnapshot, childUnitId?: string): TSnapshot {
-    if (!childUnitId || typeof snapshot !== 'object' || snapshot === null || Array.isArray(snapshot)) {
-        return snapshot;
-    }
-
-    return {
-        ...snapshot,
-        id: childUnitId,
-    };
-}
 
 export const RemoveEmbedCommand: ICommand<IRemoveEmbedCommandParams> = {
     id: 'embed.command.remove',
@@ -231,40 +82,6 @@ export const RemoveEmbedCommand: ICommand<IRemoveEmbedCommandParams> = {
             return false;
         }
 
-        const model = accessor.get(EmbedModelService);
-        const descriptor = model.getDescriptor(params.hostUnitId, params.embedId);
-        if (!descriptor) {
-            return false;
-        }
-
-        const undoMutations = [{
-            id: SetEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                descriptor: {
-                    ...descriptor,
-                    lifecycle: 'active',
-                },
-            },
-        }];
-        const redoMutations = [{
-            id: SoftDeleteEmbedDescriptorMutation.id,
-            params: {
-                unitId: params.hostUnitId,
-                embedId: params.embedId,
-            },
-        }];
-        const executeResult = sequenceExecute(redoMutations, accessor.get(ICommandService));
-        if (!executeResult.result) {
-            return false;
-        }
-
-        accessor.get(IUndoRedoService).pushUndoRedo({
-            unitID: params.hostUnitId,
-            undoMutations,
-            redoMutations,
-        });
-
-        return true;
+        return accessor.get(EmbedHostLifecycleService).removeEmbed(params);
     },
 };

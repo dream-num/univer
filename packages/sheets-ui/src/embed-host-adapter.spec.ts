@@ -43,9 +43,14 @@ describe('sheets embed host adapter', () => {
         });
     });
 
-    it('creates drawing mutations for floating object anchors and normalizes slide aspect ratio', () => {
+    it('creates drawing mutations for floating object anchors with sheet-derived transforms', () => {
         const drawingService = createDrawingService();
-        const adapter = createSheetsFloatingObjectHostAdapterContribution(undefined, drawingService as never);
+        const adapter = createSheetsFloatingObjectHostAdapterContribution(
+            undefined,
+            drawingService as never,
+            undefined,
+            createSheetSkeletonService() as never
+        );
         const plan = adapter.createAnchorPlan!(createFloatingContext({
             hostContext: {
                 subUnitId: 'sheet-1',
@@ -66,10 +71,14 @@ describe('sheets embed host adapter', () => {
                 allowTransform: false,
                 transform: expect.objectContaining({
                     height: 180,
-                    left: 10,
-                    top: 20,
+                    left: 56,
+                    top: 40,
                     width: 320,
                 }),
+                sheetTransform: {
+                    from: { column: 0, columnOffset: 10, row: 0, rowOffset: 20 },
+                    to: { column: 0, columnOffset: 330, row: 0, rowOffset: 200 },
+                },
                 data: expect.objectContaining({
                     aspectRatio: 16 / 9,
                     childType: UniverInstanceType.UNIVER_SLIDE,
@@ -95,6 +104,18 @@ describe('sheets embed host adapter', () => {
                 type: DrawingApplyType.REMOVE,
             }),
         });
+    });
+
+    it('rejects floating anchor creation when sheet skeleton is unavailable', () => {
+        const drawingService = createDrawingService();
+        const adapter = createSheetsFloatingObjectHostAdapterContribution(undefined, drawingService as never);
+
+        expect(() => adapter.createAnchorPlan!(createFloatingContext({
+            hostContext: {
+                subUnitId: 'sheet-1',
+            },
+        }) as never)).toThrow('EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE');
+        expect(drawingService.getBatchAddOp).not.toHaveBeenCalled();
     });
 
     it('creates drawing remove plans from existing floating records', () => {
@@ -221,7 +242,8 @@ describe('sheets embed host adapter', () => {
         const adapter = createSheetsFloatingObjectHostAdapterContribution(
             undefined,
             sheetDrawingService as never,
-            drawingManagerService as never
+            drawingManagerService as never,
+            createSheetSkeletonService() as never
         );
         const record = adapter.restoreAnchor?.({
             ...createFloatingContext({
@@ -332,5 +354,42 @@ function createDrawingService() {
         getDrawingData: vi.fn(() => ({})),
         applyJson1: vi.fn(),
         addNotification: vi.fn(),
+    };
+}
+
+function createSheetSkeletonService() {
+    const skeleton = {
+        columnHeaderHeight: 20,
+        columnTotalWidth: 2000,
+        getCellIndexAndOffsetByPosition: (left: number, top: number) => {
+            const x = left - 46;
+            const y = top - 20;
+            const column = Math.floor(x / 100);
+            const row = Math.floor(y / 20);
+            return {
+                column,
+                columnOffset: x - column * 100,
+                row,
+                rowOffset: y - row * 20,
+            };
+        },
+        getNoMergeCellWithCoordByIndex: (row: number, column: number) => ({
+            endX: 46 + (column + 1) * 100,
+            endY: 20 + (row + 1) * 20,
+            startX: 46 + column * 100,
+            startY: 20 + row * 20,
+        }),
+        rowHeaderWidth: 46,
+        rowTotalHeight: 1000,
+    };
+
+    return {
+        ensureSkeleton: vi.fn(() => skeleton),
+        getSkeletonParam: vi.fn(() => ({
+            dirty: false,
+            sheetId: 'sheet-1',
+            skeleton,
+            unitId: 'host-sheet',
+        })),
     };
 }

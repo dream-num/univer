@@ -74,6 +74,22 @@ describe('render unit', () => {
         renderUnit.dispose();
     });
 
+    it('keeps render dependencies accessible while dispose deactivates subscribers', () => {
+        const renderUnit = createRenderUnit();
+        renderUnit.addRenderDependencies([RenderModuleA as any] as any);
+        const resolvedDuringDeactivate: RenderModuleA[] = [];
+        const sub = renderUnit.activated$.subscribe((active) => {
+            if (!active) {
+                resolvedDuringDeactivate.push(renderUnit.with(RenderModuleA));
+            }
+        });
+
+        expect(() => renderUnit.dispose()).not.toThrow();
+        expect(resolvedDuringDeactivate).toHaveLength(1);
+
+        sub.unsubscribe();
+    });
+
     it('registers render dependencies by class and useClass mapping', () => {
         RenderModuleA.calls = 0;
         RenderModuleB.calls = 0;

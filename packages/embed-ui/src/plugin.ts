@@ -15,13 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import type { IEmbedHostAdapterContribution } from '@univerjs/embed';
 import type {
     IEmbedBlockContribution,
     IEmbedChildViewContribution,
     IEmbedContentSizeProvider,
     IEmbedFloatingMenuContribution,
     IEmbedFloatPreviewProvider,
-    IEmbedHostAdapterContribution,
     IEmbedHostContainerContribution,
     IEmbedPassiveViewportProvider,
     IEmbedProductMenuContribution,
@@ -29,7 +29,6 @@ import type {
 } from './types/embed-ui';
 import {
     DependentOn,
-    ICommandService,
     Inject,
     Injector,
     Plugin,
@@ -39,20 +38,6 @@ import {
 import { UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
-import {
-    CopyHostEmbedCommand,
-    CreateHostEmbedCommand,
-    InsertHostEmbedBySnapshotCommand,
-    RemoveHostEmbedCommand,
-} from './commands/commands/embed-host-lifecycle.command';
-import {
-    RemoveEmbedHostAnchorRecordMutation,
-    SetEmbedHostAnchorRecordMutation,
-} from './commands/mutations/embed-host-anchor-record.mutation';
-import {
-    CreateEmbedHostAnchorMutation,
-    RemoveEmbedHostAnchorMutation,
-} from './commands/mutations/embed-host-anchor.mutation';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
 import { EmbedHostToolbarMenu } from './components/EmbedHostToolbarMenu';
 import { EmbedHostAnchorCleanupController } from './controllers/embed-host-anchor-cleanup.controller';
@@ -68,9 +53,7 @@ import { EmbedFloatingGeometryService } from './services/embed-floating-geometry
 import { EmbedFloatingMenuRegistryService } from './services/embed-floating-menu-registry.service';
 import { EmbedFullscreenService } from './services/embed-fullscreen.service';
 import { EmbedHostAdapterRegistryService } from './services/embed-host-adapter-registry.service';
-import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
 import { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
-import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
 import { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
 import { EmbedHostRestoreService } from './services/embed-host-restore.service';
 import { EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
@@ -108,8 +91,7 @@ export class UniverEmbedUIPlugin extends Plugin {
 
     constructor(
         private readonly _config: IUniverEmbedUIPluginConfig = {},
-        @Inject(Injector) protected override readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @Inject(Injector) protected override readonly _injector: Injector
     ) {
         super();
     }
@@ -117,9 +99,6 @@ export class UniverEmbedUIPlugin extends Plugin {
     override onStarting() {
         ([
             [EmbedHostContainerRegistryService],
-            [EmbedHostAdapterRegistryService],
-            [EmbedHostAnchorModelService],
-            [EmbedHostLifecycleService],
             [EmbedHostRestoreService],
             [EmbedActivationService],
             [EmbedChildViewRegistryService],
@@ -217,9 +196,6 @@ export class UniverEmbedUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [EmbedHostContainerRegistryService],
-            [EmbedHostAdapterRegistryService],
-            [EmbedHostAnchorModelService],
-            [EmbedHostLifecycleService],
             [EmbedHostRestoreService],
             [EmbedActivationService],
             [EmbedChildViewRegistryService],
@@ -241,17 +217,6 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],
         ]);
-
-        [
-            CreateHostEmbedCommand,
-            InsertHostEmbedBySnapshotCommand,
-            CopyHostEmbedCommand,
-            RemoveHostEmbedCommand,
-            CreateEmbedHostAnchorMutation,
-            RemoveEmbedHostAnchorMutation,
-            SetEmbedHostAnchorRecordMutation,
-            RemoveEmbedHostAnchorRecordMutation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         if (this._config.useDefaultHostToolbar !== false && this._injector.has(IUIPartsService)) {
             this.disposeWithMe(

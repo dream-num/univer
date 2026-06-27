@@ -16,17 +16,15 @@
 
 import type { Injector } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
-import { IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
-import { createEmbedRenderCanvasPreviewProvider, EmbedActivationService, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatDomRenderer, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedHostMenuOverrideService, EmbedMountService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
+import { createEmbedRenderCanvasPreviewProvider, EmbedActivationService, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatDomRenderer, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostContainerRegistryService, EmbedHostMenuOverrideService, EmbedHostRestoreService, EmbedMountService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { CanvasFloatDomPreviewService, ComponentManager } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
 import { createSheetsContentSizeProvider } from './embed-content-size';
 import { EMBED_SHEETS_FLOATING_COMPONENT_KEY } from './embed-floating-anchor';
-import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
+import { createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
 import { createSheetsPassiveViewportProvider } from './embed-passive-viewport';
 import { registerSheetsEmbedProductMenus } from './embed-product-menu';
 import { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './EmbedBlock';
@@ -44,7 +42,6 @@ export function registerSheetsEmbedUIContributions(injector: Injector): void {
 }
 
 function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
-    const adapterRegistry = injector.get(EmbedHostAdapterRegistryService);
     const containerRegistry = injector.get(EmbedHostContainerRegistryService);
     const childViewRegistry = injector.get(EmbedChildViewRegistryService);
     const blockRegistry = injector.get(EmbedBlockRegistryService);
@@ -52,8 +49,6 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
     const previewService = injector.get(EmbedFloatPreviewService);
     const contentSizeRegistry = injector.get(EmbedContentSizeRegistryService);
     const passiveViewportRegistry = injector.get(EmbedPassiveViewportRegistryService);
-    const anchorModelService = injector.has(EmbedHostAnchorModelService) ? injector.get(EmbedHostAnchorModelService) : undefined;
-    const univerInstanceService = injector.has(IUniverInstanceService) ? injector.get(IUniverInstanceService) : undefined;
     registerSheetsEmbedProductMenus(injector);
 
     if (!injector.has(ISheetHostChromeOverrideService)) {
@@ -65,25 +60,13 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
                 embedModelService: injector.get(EmbedModelService),
                 mountService: injector.get(EmbedMountService),
                 activationService: injector.get(EmbedActivationService),
+                restoreService: injector.get(EmbedHostRestoreService),
             }),
         }]);
     }
     if (injector.has(ComponentManager)) {
         injector.get(ComponentManager).register(EMBED_SHEETS_FLOATING_COMPONENT_KEY, EmbedFloatDomRenderer);
     }
-
-    [
-        createSheetsFloatingObjectHostAdapterContribution(
-            anchorModelService,
-            () => injector.has(ISheetDrawingService) ? injector.get(ISheetDrawingService) : undefined,
-            () => injector.has(IDrawingManagerService) ? injector.get(IDrawingManagerService) : undefined
-        ),
-        createSheetsSheetTabHostAdapterContribution(anchorModelService, univerInstanceService),
-    ].forEach((adapter) => {
-        if (!adapterRegistry.get(adapter.hostType, adapter.entry)) {
-            adapterRegistry.register(adapter);
-        }
-    });
 
     [
         createSheetsFloatingObjectHostContainerContribution(),
@@ -128,6 +111,7 @@ export function createSheetsEmbedRuntimeService(params: {
     embedModelService: EmbedModelService;
     mountService: EmbedMountService;
     activationService: EmbedActivationService;
+    restoreService: EmbedHostRestoreService;
 }): ISheetEmbedRuntimeService {
     return {
         mountSheetTab: ({ hostUnitId, hostAnchorId, embedId }) => {
@@ -136,11 +120,25 @@ export function createSheetsEmbedRuntimeService(params: {
                 return undefined;
             }
 
-            params.mountService.mount(descriptor);
-            params.activationService.activateTab(descriptor);
+            let disposed = false;
+            let mounted = false;
+            void params.restoreService.materializeDescriptor({ descriptor }).then((materializedDescriptor) => {
+                if (disposed) {
+                    return;
+                }
+
+                params.mountService.mount(materializedDescriptor);
+                params.activationService.activateTab(materializedDescriptor);
+                mounted = true;
+            }).catch((error) => {
+                throw error;
+            });
 
             return toDisposable(() => {
-                params.mountService.unmount(embedId);
+                disposed = true;
+                if (mounted) {
+                    params.mountService.unmount(embedId);
+                }
                 params.activationService.clearTab(embedId);
             });
         },

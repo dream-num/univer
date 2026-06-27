@@ -22,6 +22,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { resolveEmbedFloatInteractionPolicy } from '../../common/embed-float-interaction-policy';
 import { getEmbedHostChromePolicy } from '../../common/embed-host-chrome-policy';
 import {
     getEmbedTabPeerHostHeaderMode,
@@ -121,6 +122,34 @@ describe('embed-ui small services and controllers', () => {
         } as never, 'inactive')).toBe(false);
     });
 
+    it('centralizes float block interaction ownership across inactive stage1 stage2 and doc-block flows', () => {
+        expect(resolveEmbedFloatInteractionPolicy({
+            stage: 'stage1',
+            interactionFlow: 'floating-stage',
+        })).toMatchObject({
+            allowHostBodyDrag: true,
+            allowHostDragHandle: true,
+            runtimeOwnsInteraction: false,
+        });
+        expect(resolveEmbedFloatInteractionPolicy({
+            stage: 'stage2',
+            interactionFlow: 'floating-stage',
+        })).toMatchObject({
+            allowHostBodyDrag: false,
+            allowHostDragHandle: false,
+            runtimeOwnsInteraction: true,
+        });
+        expect(resolveEmbedFloatInteractionPolicy({
+            stage: 'inactive',
+            interactionFlow: 'doc-block',
+        })).toMatchObject({
+            allowHostBodyDrag: false,
+            allowHostDragHandle: false,
+            passThroughInteractionGate: true,
+            runtimeOwnsInteraction: true,
+        });
+    });
+
     it('keeps empty overlay and popup roots transparent to stage2 runtime hit testing', () => {
         const container = document.createElement('div');
         container.innerHTML = `
@@ -158,6 +187,21 @@ describe('embed-ui small services and controllers', () => {
         expect(chrome.querySelector<HTMLElement>('[data-embed-popup-root]')?.style.visibility).toBe('');
         expect(chrome.querySelector<HTMLElement>('[data-embed-overlay-root]')?.style.pointerEvents).toBe('none');
         expect(chrome.querySelector<HTMLElement>('[data-embed-popup-root]')?.style.pointerEvents).toBe('none');
+    });
+
+    it('does not expose the host drag handle while the child runtime owns stage2 interaction', () => {
+        const chrome = document.createElement('div');
+        chrome.innerHTML = `
+            <button data-embed-float-fullscreen-button="true"></button>
+            <button data-embed-float-drag-handle="true"></button>
+            <div data-embed-overlay-root="true"></div>
+            <div data-embed-popup-root="true"></div>
+        `;
+
+        syncChromeControlsVisibility(chrome, true, true, 'stage2');
+
+        expect(chrome.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]')?.style.visibility).toBe('hidden');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]')?.style.pointerEvents).toBe('none');
     });
 
     it('routes child undo redo to host stack when focus owner matches', () => {

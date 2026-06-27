@@ -204,9 +204,10 @@ export function EmbedFloatDomRenderer(props: {
                     popupRootRef.current
                 )
             );
+            activationService.clearFloating(data?.embedId, data?.hostUnitId);
             onRuntimeStageExit?.();
         }
-    }, [data?.embedId, geometryService, onRuntimeStageEnter, onRuntimeStageExit, stage]);
+    }, [activationService, data?.embedId, data?.hostUnitId, geometryService, onRuntimeStageEnter, onRuntimeStageExit, stage]);
 
     useEffect(() => {
         if (initialStage !== 'stage2' || !data?.embedId || !data.hostUnitId) {

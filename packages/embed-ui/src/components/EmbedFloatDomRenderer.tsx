@@ -1425,22 +1425,24 @@ function isPointInsideDocsSheetLikeFloatBlock(container: HTMLElement, event: Poi
     );
 }
 
-function syncRuntimeInteractionVisibility(container: HTMLElement, chrome: HTMLElement | undefined, visible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
+export function syncRuntimeInteractionVisibility(container: HTMLElement, chrome: HTMLElement | undefined, visible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
     const pointerEvents = visible ? '' : 'none';
-    const popupPointerEvents = visible && stage === 'stage2' ? '' : 'none';
     const contentRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__content');
     const liveRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__live');
     const liveCanvasRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas');
     const liveContentRoot = container.querySelector<HTMLElement>('.univer-embed-float-dom__live-content');
     const gate = container.querySelector<HTMLElement>('.univer-embed-float-dom__interaction-gate');
+    const overlayRoot = chrome?.querySelector<HTMLElement>('[data-embed-overlay-root]');
     const popupRoot = chrome?.querySelector<HTMLElement>('[data-embed-popup-root]');
+    overlayRoot?.style.setProperty('pointer-events', 'none');
+    popupRoot?.style.setProperty('pointer-events', 'none');
+
     if (isDocsSheetLikeChrome(container)) {
         contentRoot?.style.setProperty('pointer-events', 'none');
         liveRoot?.style.setProperty('pointer-events', 'none');
         liveCanvasRoot?.style.setProperty('pointer-events', visible ? 'auto' : 'none');
         liveContentRoot?.style.setProperty('pointer-events', 'none');
         gate?.style.setProperty('pointer-events', 'none');
-        popupRoot?.style.setProperty('pointer-events', popupPointerEvents);
         return;
     }
 
@@ -1449,16 +1451,14 @@ function syncRuntimeInteractionVisibility(container: HTMLElement, chrome: HTMLEl
     liveCanvasRoot?.style.removeProperty('pointer-events');
     liveContentRoot?.style.removeProperty('pointer-events');
     gate?.style.setProperty('pointer-events', pointerEvents);
-    popupRoot?.style.setProperty('pointer-events', popupPointerEvents);
 }
 
-function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, dragHandleVisible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
+export function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, dragHandleVisible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
     const visibility = visible ? '' : 'hidden';
     const pointerEvents = visible ? '' : 'none';
     const dragHandleVisibility = dragHandleVisible ? '' : 'hidden';
     const dragHandlePointerEvents = dragHandleVisible ? '' : 'none';
     const menuVisibility = visible && stage === 'stage2' ? '' : 'hidden';
-    const menuPointerEvents = visible && stage === 'stage2' ? '' : 'none';
     const fullscreenButton = chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]');
     const dragHandle = chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]');
     const menuLayers = [
@@ -1472,7 +1472,7 @@ function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: 
     dragHandle?.style.setProperty('pointer-events', dragHandlePointerEvents);
     menuLayers.forEach((control) => {
         control?.style.setProperty('visibility', menuVisibility);
-        control?.style.setProperty('pointer-events', menuPointerEvents);
+        control?.style.setProperty('pointer-events', 'none');
         if (stage !== 'stage2') {
             control?.removeAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
             control?.querySelectorAll<HTMLElement>(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`).forEach((element) => {

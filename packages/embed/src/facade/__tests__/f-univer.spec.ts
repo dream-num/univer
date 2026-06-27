@@ -14,187 +14,92 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
 import type { IEmbedDescriptor } from '../../types/embed';
-import { ICommandService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from '../../commands/commands/embed.command';
+import { CreateEmbedCommand, RemoveEmbedCommand } from '../../commands/commands/embed.command';
 import { EmbedModelService } from '../../services/embed-model.service';
+import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
+import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
+import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
 import { FEmbed } from '../f-embed';
+import { FEmbedHostSurface } from '../f-enum';
 import { FUniverEmbedMixin } from '../f-univer';
 
 describe('embed facade', () => {
-    it('maps semantic insert APIs to the snapshot command', () => {
+    it('creates embeds through CreateEmbedCommand and resolves host type from unit id', () => {
         const { api, commandService } = createFacade();
-        const sheetSnapshot = { id: 'sheet-child' } as IWorkbookData;
+        const ref = createRef();
 
-        const embed = api.insertSheetIntoDoc({
-            hostDocUnitId: 'doc-host',
-            sheetSnapshot,
-            index: 2,
+        const embed = api.createEmbed({
+            host: {
+                unitId: 'host-1',
+                surface: FEmbedHostSurface.DocBlock,
+                anchorId: 'anchor-1',
+                context: { index: 2 },
+            },
+            content: {
+                kind: 'ref',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref,
+            },
+            interaction: 'interactive',
         });
 
         expect(embed).toBeInstanceOf(FEmbed);
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'doc-host',
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(CreateEmbedCommand.id, {
+            embedId: expect.stringMatching(/^embed_/),
+            hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
-            entry: 'docs-custom-block',
-            childType: UniverInstanceType.UNIVER_SHEET,
-            unitSnapshot: sheetSnapshot,
+            requestedHostAnchorId: 'anchor-1',
+            entry: FEmbedHostSurface.DocBlock,
+            source: {
+                kind: 'ref',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref,
+            },
+            mode: 'interactive',
+            sourceMeta: undefined,
             hostContext: { index: 2 },
         });
     });
 
-    it('keeps tab and floating params agent-friendly', () => {
-        const { api, commandService } = createFacade();
+    it('rejects createEmbed before command execution when the host unit does not exist', () => {
+        const { api, commandService, univerInstanceService } = createFacade();
+        univerInstanceService.getUnitType.mockReturnValueOnce(UniverInstanceType.UNRECOGNIZED);
 
-        api.insertSlideAsSheetTab({
-            hostWorkbookUnitId: 'workbook-host',
-            slideSnapshot: { id: 'slide-child' } as never,
-            tabIndex: 1,
-            name: 'Deck',
-        });
-        api.insertBaseAsSheetFloating({
-            hostWorkbookUnitId: 'workbook-host',
-            baseSnapshot: { id: 'base-child' } as never,
-            rect: { x: 10, y: 20, width: 480, height: 320 },
-        });
-
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(1, InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'workbook-host',
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            entry: 'sheets-sheet-tab',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            unitSnapshot: { id: 'slide-child' },
-            hostContext: { sheetIndex: 1, sheetName: 'Deck' },
-        });
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(2, InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'workbook-host',
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            entry: 'sheets-floating-object',
-            childType: UniverInstanceType.UNIVER_BASE,
-            unitSnapshot: { id: 'base-child' },
-            hostContext: { left: 10, top: 20, width: 480, height: 320 },
-        });
+        expect(() => api.createEmbed({
+            host: {
+                unitId: 'missing-host',
+                surface: FEmbedHostSurface.DocBlock,
+            },
+            content: {
+                kind: 'ref',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: createRef(),
+            },
+        })).toThrow('EMBED_HOST_UNIT_NOT_FOUND');
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
     });
 
-    it('creates a blank slide page when slide snapshot is omitted', () => {
-        const { api, commandService } = createFacade();
-
-        api.insertSlideAsSheetTab({
-            hostWorkbookUnitId: 'workbook-host',
-            tabIndex: 1,
-            name: 'Deck',
-        });
-
-        const params = commandService.syncExecuteCommand.mock.calls[0][1] as unknown as {
-            unitSnapshot: {
-                name: string;
-                defaultPageSize: { width: number; height: number };
-                slideOrder: string[];
-                activeSlideId: string;
-                slides: Record<string, { pageType: string; elementOrder: string[]; elements: Record<string, unknown> }>;
-                body: { pageOrder: string[]; pages: Record<string, unknown> };
-            };
-        };
-        const pageId = params.unitSnapshot.slideOrder[0];
-
-        expect(params.unitSnapshot.name).toBe('Deck');
-        expect(params.unitSnapshot.defaultPageSize).toEqual({ width: 960, height: 540 });
-        expect(params.unitSnapshot.activeSlideId).toBe(pageId);
-        expect(params.unitSnapshot.slides[pageId]).toMatchObject({
-            pageType: 'slide',
-            elementOrder: [],
-            elements: {},
-        });
-        expect(params.unitSnapshot.body.pageOrder).toEqual([pageId]);
-        expect(params.unitSnapshot.body.pages[pageId]).toBeTruthy();
-    });
-
-    it('maps base and slide host semantic APIs', () => {
-        const { api, commandService } = createFacade();
-
-        api.insertSlideIntoDoc({
-            hostDocUnitId: 'doc-host',
-            slideSnapshot: { id: 'slide-child' } as never,
-            index: 3,
-        });
-        api.insertSheetAsBaseTable({
-            hostBaseUnitId: 'base-host',
-            sheetSnapshot: { id: 'sheet-child' } as never,
-            tableIndex: 2,
-            name: 'Sheet Table',
-        });
-        api.insertDocAsSlidePage({
-            hostSlideUnitId: 'slide-host',
-            docSnapshot: { id: 'doc-child' } as never,
-            pageIndex: 1,
-            name: 'Doc Page',
-        });
-        api.insertBaseAsSlideFloating({
-            hostSlideUnitId: 'slide-host',
-            baseSnapshot: { id: 'base-child' } as never,
-            rect: { x: 40, y: 50, width: 300, height: 200 },
-        });
-
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(1, InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'doc-host',
-            hostType: UniverInstanceType.UNIVER_DOC,
-            entry: 'docs-custom-block',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            unitSnapshot: { id: 'slide-child' },
-            hostContext: { index: 3 },
-        });
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(2, InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'base-host',
-            hostType: UniverInstanceType.UNIVER_BASE,
-            entry: 'bases-table-list-block',
-            childType: UniverInstanceType.UNIVER_SHEET,
-            unitSnapshot: { id: 'sheet-child' },
-            hostContext: { tableIndex: 2, tableName: 'Sheet Table' },
-        });
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(3, InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'slide-host',
-            hostType: UniverInstanceType.UNIVER_SLIDE,
-            entry: 'slides-page-list-block',
-            childType: UniverInstanceType.UNIVER_DOC,
-            unitSnapshot: { id: 'doc-child' },
-            hostContext: { pageIndex: 1, pageName: 'Doc Page' },
-        });
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(4, InsertEmbedBySnapshotCommand.id, {
-            hostUnitId: 'slide-host',
-            hostType: UniverInstanceType.UNIVER_SLIDE,
-            entry: 'slides-floating-object',
-            childType: UniverInstanceType.UNIVER_BASE,
-            unitSnapshot: { id: 'base-child' },
-            hostContext: { left: 40, top: 50, width: 300, height: 200 },
-        });
-    });
-
-    it('uses host snapshot command when embed-ui registers one', () => {
-        const { api, commandService } = createFacade();
-        commandService.hasCommand.mockReturnValue(true);
-
-        api.insertBaseIntoDoc({
-            hostDocUnitId: 'doc-host',
-            baseSnapshot: { id: 'base-child' } as never,
-        });
-
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith('embed-ui.command.insert-host-embed-by-snapshot', expect.objectContaining({
-            hostUnitId: 'doc-host',
-            entry: 'docs-custom-block',
-        }));
-    });
-
-    it('reads descriptors and removes embeds through commands', () => {
+    it('gets, lists, and removes embeds through descriptors and commands', () => {
         const descriptor = createDescriptor();
         const { api, commandService, model } = createFacade([descriptor]);
 
-        expect(api.getEmbed({ hostUnitId: 'host-1', embedId: 'embed-1' })?.getChildUnitId()).toBe('child-1');
-        expect(api.listEmbeds({ hostUnitId: 'host-1' })).toHaveLength(1);
-        expect(api.listEmbeds()).toHaveLength(1);
-
+        expect(api.getEmbed({ hostUnitId: 'host-1', embedId: 'missing' })).toBeNull();
         const embed = api.getEmbed({ hostUnitId: 'host-1', embedId: 'embed-1' })!;
+        expect(embed.getId()).toBe('embed-1');
+        expect(embed.getHostUnitId()).toBe('host-1');
+        expect(embed.getChildUnitId()).toBe('child-1');
+        expect(embed.getChildType()).toBe(UniverInstanceType.UNIVER_SHEET);
+        expect(embed.getEntry()).toBe('docs-custom-block');
+        expect(embed.getDescriptor()).toEqual(descriptor);
+
+        expect(api.listEmbeds()).toHaveLength(1);
+        expect(api.listEmbeds({ hostUnitId: 'host-1' })).toHaveLength(1);
+        expect(api.listEmbeds({ hostUnitId: 'other' })).toHaveLength(0);
+
+        expect(api.removeEmbed({ hostUnitId: 'host-1', embedId: 'missing' })).toBe(false);
         expect(embed.remove()).toBe(true);
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(RemoveEmbedCommand.id, {
             hostUnitId: 'host-1',
@@ -202,24 +107,95 @@ describe('embed facade', () => {
         });
         expect(model.getActiveDescriptors).toHaveBeenCalledWith('host-1');
     });
+
+    it('loads units through the generic facade and embed facade', async () => {
+        const descriptor = createDescriptor();
+        const workbookFacade = { getId: vi.fn(() => 'child-1') };
+        const { api, referencedUnitManager } = createFacade([descriptor], workbookFacade);
+        const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
+        expect(ref).toBeDefined();
+
+        await expect(api.loadUnitAsync(ref!, { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
+        expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
+            ref,
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            signal: undefined,
+            createOptions: {},
+        });
+
+        const embed = api.getEmbed({ hostUnitId: 'host-1', embedId: 'embed-1' })!;
+        await expect(embed.loadAsync({ makeCurrent: true })).resolves.toBe(workbookFacade);
+        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
+            ref,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: 'host-1',
+                ownerId: 'embed-1',
+            },
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            signal: undefined,
+            createOptions: {
+                ...EMBED_CHILD_CREATE_OPTIONS,
+                makeCurrent: true,
+            },
+        });
+    });
+
+    it('loads locator refs from string locators', async () => {
+        const workbookFacade = { getId: vi.fn(() => 'child-1') };
+        const { api, referencedUnitManager, univerInstanceService } = createFacade(undefined, workbookFacade);
+
+        await expect(api.loadUnitAsync('#unit=child-1', { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
+        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
+            ref: '#unit=child-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            signal: undefined,
+            createOptions: {},
+        });
+
+        await expect(api.loadUnitAsync('child-1', { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
+        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
+            ref: '#unit=child-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            signal: undefined,
+            createOptions: {},
+        });
+        expect(univerInstanceService.getUnitType).not.toHaveBeenCalled();
+    });
+
+    it('rejects unsupported and invalid string locators before manager ensure', async () => {
+        const { api, referencedUnitManager } = createFacade();
+
+        await expect(api.loadUnitAsync('univer://remote-workbook#unit=child-1')).rejects.toThrow('RESOURCE_REF_LOCATOR_UNSUPPORTED');
+        await expect(api.loadUnitAsync('#unit=child-1&range=A1')).rejects.toThrow('RESOURCE_REF_LOCATOR_UNSUPPORTED');
+        await expect(api.loadUnitAsync('#unit=')).rejects.toThrow('RESOURCE_REF_LOCATOR_INVALID');
+        await expect(api.loadUnitAsync('#unit=child-1')).rejects.toThrow('RESOURCE_REF_UNIT_TYPE_REQUIRED');
+        expect(referencedUnitManager.ensure).not.toHaveBeenCalled();
+    });
 });
 
-function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()]) {
+function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], loadedUnit: object = { getId: vi.fn(() => 'child-1') }) {
     const commandService = {
-        hasCommand: vi.fn(() => false),
-        syncExecuteCommand: vi.fn((id: string, params: { hostUnitId: string; hostType: UniverInstanceType; entry: IEmbedDescriptor['entry']; childType: UniverInstanceType }) => id === RemoveEmbedCommand.id
+        syncExecuteCommand: vi.fn((id: string, params: {
+            embedId?: string;
+            hostUnitId?: string;
+            hostType?: UniverInstanceType;
+            entry?: IEmbedDescriptor['entry'];
+            source?: IEmbedDescriptor['source'];
+        }) => id === RemoveEmbedCommand.id
             ? true
             : ({
-                embedId: 'embed-1',
-                hostUnitId: params.hostUnitId,
-                hostType: params.hostType,
+                embedId: params.embedId ?? 'embed-1',
+                hostUnitId: params.hostUnitId ?? 'host-1',
+                hostType: params.hostType ?? UniverInstanceType.UNIVER_DOC,
                 hostAnchorId: 'anchor-1',
-                entry: params.entry,
+                entry: params.entry ?? 'docs-custom-block',
                 childUnitId: 'child-1',
-                childType: params.childType,
-                source: {
+                childType: UniverInstanceType.UNIVER_SHEET,
+                source: params.source ?? {
                     kind: 'ref',
-                    ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'sheet' } },
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                    ref: createRef(),
                 },
             })),
     };
@@ -228,13 +204,33 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()]) {
         getActiveDescriptors: vi.fn((hostUnitId?: string) => descriptors.filter((item) => !hostUnitId || item.hostUnitId === hostUnitId)),
         getAllActiveDescriptors: vi.fn(() => descriptors),
     };
+    const referencedUnitManager = {
+        ensure: vi.fn((input) => ({
+            loaded: Promise.resolve({
+                ref: input.ref,
+                unitId: 'child-1',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            }),
+            dispose: vi.fn(),
+        })),
+    };
+    const univerInstanceService = {
+        getUnitType: vi.fn(() => UniverInstanceType.UNIVER_DOC),
+        getUnit: vi.fn(() => loadedUnit),
+    };
     const injector = {
         get: vi.fn((token: unknown) => {
             if (token === ICommandService) {
                 return commandService;
             }
+            if (token === IUniverInstanceService) {
+                return univerInstanceService;
+            }
             if (token === EmbedModelService) {
                 return model;
+            }
+            if (token === EmbedReferencedUnitManagerService) {
+                return referencedUnitManager;
             }
             throw new Error('Unexpected token');
         }),
@@ -243,9 +239,14 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()]) {
     const api = Object.assign(Object.create(FUniverEmbedMixin.prototype), {
         _commandService: commandService,
         _injector: injector,
+        _univerInstanceService: univerInstanceService,
     }) as FUniverEmbedMixin;
 
-    return { api, commandService, injector, model };
+    return { api, commandService, injector, model, referencedUnitManager, univerInstanceService };
+}
+
+function createRef() {
+    return { file: { kind: 'self' as const }, unit: { selector: 'child-1', type: 'sheet' as const } };
 }
 
 function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {
@@ -257,7 +258,8 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         entry: 'docs-custom-block',
         source: {
             kind: 'ref',
-            ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'sheet' } },
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: createRef(),
         },
         childUnitId: 'child-1',
         childType: UniverInstanceType.UNIVER_SHEET,

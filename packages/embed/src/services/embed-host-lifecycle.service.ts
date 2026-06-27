@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IMutationInfo } from '@univerjs/core';
-import type { IInsertEmbedBySnapshotCommandParams } from '../commands/commands/embed.command';
-import type { IEmbedCreateContext, IEmbedDescriptor } from '../types/embed';
+import type { IMutationInfo } from '@univerjs/core';
+import type { EmbedHostEntry, IEmbedCreateContext, IEmbedDescriptor } from '../types/embed';
 import {
-    generateRandomId,
     ICommandService,
     Inject,
     IUndoRedoService,
     IUniverInstanceService,
-    Optional,
-    PluginService,
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from '../commands/mutations/embed-descriptor.mutation';
-import { toResourceRefUnitType } from '../common/unit-type';
-import { createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService } from './embed-capability-registry.service';
 import { EmbedCreationService } from './embed-creation.service';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 import { EmbedModelService } from './embed-model.service';
-import { EMBED_CHILD_CREATE_OPTIONS } from './embed-source-resolver.service';
 
 export interface IEmbedHostCreateContext extends Omit<IEmbedCreateContext, 'hostAnchorId'> {
     requestedHostAnchorId?: string;
@@ -54,18 +47,21 @@ export interface IEmbedHostRemoveContext {
     embedId: string;
 }
 
+interface IEmbedHostContextNormalizeInput {
+    hostUnitId: string;
+    hostType: UniverInstanceType;
+    entry: EmbedHostEntry;
+    hostContext?: Record<string, unknown>;
+}
+
 export class EmbedHostLifecycleService {
     constructor(
         @Inject(EmbedCreationService)
         private readonly _creationService: EmbedCreationService,
         @Inject(EmbedModelService)
         private readonly _modelService: EmbedModelService,
-        @Inject(EmbedCapabilityRegistryService)
-        private readonly _capabilityRegistry: EmbedCapabilityRegistryService,
         @IUniverInstanceService
         private readonly _univerInstanceService: IUniverInstanceService,
-        @Optional(PluginService)
-        private readonly _pluginService: PluginService | undefined,
         @Inject(EmbedHostAdapterRegistryService)
         private readonly _hostAdapterRegistry: EmbedHostAdapterRegistryService,
         @ICommandService
@@ -76,96 +72,20 @@ export class EmbedHostLifecycleService {
         // noop
     }
 
-    createEmbedBySnapshot<TSnapshot>(context: IInsertEmbedBySnapshotCommandParams<TSnapshot>): IEmbedDescriptor {
-        const embedId = context.embedId ?? `embed_${generateRandomId(10)}`;
+    createEmbed(context: IEmbedHostCreateContext): IEmbedDescriptor {
         const hostContext = this._normalizeHostContext(context);
-        const initialHostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
-            embedId,
-            hostUnitId: context.hostUnitId,
-            hostType: context.hostType,
-            entry: context.entry,
-            requestedAnchorId: context.hostAnchorId,
-            hostContext,
-        });
-        const capability = this._capabilityRegistry.getCapability({
-            hostType: context.hostType,
-            childType: context.childType,
-            entry: context.entry,
-        });
-        if (!capability) {
-            throw new Error('EMBED_CAPABILITY_NOT_SUPPORTED');
-        }
-
-        const childSnapshot = normalizeChildSnapshot(context.unitSnapshot, context.childUnitId);
-        this._pluginService?.startPluginsForType(context.childType);
-        const childUnit = this._univerInstanceService.createUnit(
-            context.childType,
-            childSnapshot as Partial<unknown>,
-            {
-                ...EMBED_CHILD_CREATE_OPTIONS,
-                ...context.createUnitOptions,
-            } as ICreateUnitOptions
-        );
-        const childUnitId = childUnit.getUnitId();
-        const descriptor: IEmbedDescriptor = {
-            embedId,
-            hostUnitId: context.hostUnitId,
-            hostType: context.hostType,
-            hostAnchorId: initialHostAnchorPlan.hostAnchorId,
-            entry: context.entry,
-            source: {
-                kind: 'ref',
-                ref: {
-                    file: { kind: 'self' },
-                    unit: {
-                        selector: childUnitId,
-                        type: toResourceRefUnitType(context.childType),
-                    },
-                },
-            },
-            childUnitId,
-            childType: context.childType,
-            mode: 'interactive',
-            sourceMeta: context.sourceMeta ?? createDefaultEmbedSourceMeta(capability),
-        };
-        this._assertChildUnitAvailable(context.hostUnitId, descriptor);
-
-        const hostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
-            embedId,
-            hostUnitId: context.hostUnitId,
-            hostType: context.hostType,
-            entry: context.entry,
-            requestedAnchorId: descriptor.hostAnchorId,
-            hostContext,
-            descriptor,
-        });
-        const redoMutations: IMutationInfo[] = [
-            ...hostAnchorPlan.redoMutations,
-            this._toSetDescriptorMutation(descriptor),
-        ];
-        const undoMutations: IMutationInfo[] = [
-            this._toSoftDeleteDescriptorMutation(descriptor),
-            ...hostAnchorPlan.undoMutations,
-        ];
-
-        this._executeAndPushUndoRedo(descriptor.hostUnitId, redoMutations, undoMutations);
-        const created = this._getDescriptor(descriptor.hostUnitId, descriptor.embedId);
-        this._afterCreateAnchor(created, hostContext);
-        return created;
-    }
-
-    async createEmbed(context: IEmbedHostCreateContext): Promise<IEmbedDescriptor> {
         const initialHostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
             embedId: context.embedId,
             hostUnitId: context.hostUnitId,
             hostType: context.hostType,
             entry: context.entry,
             requestedAnchorId: context.requestedHostAnchorId,
-            hostContext: context.hostContext,
+            hostContext,
         });
 
-        const result = await this._creationService.prepareCreateEmbed({
+        const result = this._creationService.prepareCreateEmbed({
             ...context,
+            hostContext,
             hostAnchorId: initialHostAnchorPlan.hostAnchorId,
         });
         const hostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
@@ -174,7 +94,7 @@ export class EmbedHostLifecycleService {
             hostType: context.hostType,
             entry: context.entry,
             requestedAnchorId: result.descriptor.hostAnchorId,
-            hostContext: context.hostContext,
+            hostContext,
             descriptor: result.descriptor,
         });
         const redoMutations: IMutationInfo[] = [
@@ -188,7 +108,7 @@ export class EmbedHostLifecycleService {
 
         this._executeAndPushUndoRedo(result.descriptor.hostUnitId, redoMutations, undoMutations);
         const descriptor = this._getDescriptor(result.descriptor.hostUnitId, result.descriptor.embedId);
-        this._afterCreateAnchor(descriptor, context.hostContext);
+        this._afterCreateAnchor(descriptor, hostContext);
         return descriptor;
     }
 
@@ -289,20 +209,7 @@ export class EmbedHostLifecycleService {
         return descriptor;
     }
 
-    private _assertChildUnitAvailable(hostUnitId: string, descriptor: IEmbedDescriptor): void {
-        if (!descriptor.childUnitId) {
-            return;
-        }
-
-        const duplicated = this._modelService.getActiveDescriptorsByChildUnit(descriptor.childUnitId).find((item) =>
-            item.hostUnitId !== hostUnitId || item.embedId !== descriptor.embedId
-        );
-        if (duplicated) {
-            throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
-        }
-    }
-
-    private _normalizeHostContext(context: IInsertEmbedBySnapshotCommandParams): Record<string, unknown> | undefined {
+    private _normalizeHostContext(context: IEmbedHostContextNormalizeInput): Record<string, unknown> | undefined {
         const hostContext = normalizeSheetHostContext(context.hostContext);
 
         if (context.hostType === UniverInstanceType.UNIVER_SHEET && context.entry === 'sheets-floating-object') {
@@ -376,17 +283,6 @@ export class EmbedHostLifecycleService {
             // Runtime refresh hooks must not invalidate the committed data mutation.
         }
     }
-}
-
-function normalizeChildSnapshot<TSnapshot>(snapshot: TSnapshot, childUnitId?: string): TSnapshot {
-    if (!childUnitId || typeof snapshot !== 'object' || snapshot === null || Array.isArray(snapshot)) {
-        return snapshot;
-    }
-
-    return {
-        ...snapshot,
-        id: childUnitId,
-    };
 }
 
 function normalizeSheetHostContext(hostContext?: Record<string, unknown>): Record<string, unknown> | undefined {

@@ -18,7 +18,7 @@ import type { ICreateUnitOptions } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedHostAnchorRecord } from '../types/host-anchor';
 import { Inject } from '@univerjs/core';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedModelService, EmbedReferencedUnitManagerService } from '@univerjs/embed';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedModelService, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind } from '@univerjs/embed';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 import { EmbedHostAnchorModelService } from './embed-host-anchor-model.service';
 
@@ -74,17 +74,23 @@ export class EmbedHostRestoreService {
             throw new Error('EMBED_RESTORE_SOURCE_NOT_CANONICAL');
         }
 
-        const materialized = await this._referencedUnitManager.ensure({
+        const handle = this._referencedUnitManager.ensure({
             ref: descriptor.source.ref,
-            hostUnitId: descriptor.hostUnitId,
-            embedId: descriptor.embedId,
+            unitType: descriptor.childType,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: descriptor.hostUnitId,
+                ownerId: descriptor.embedId,
+            },
             createOptions: context.createOptions ?? EMBED_CHILD_CREATE_OPTIONS,
         });
+        const materialized = await handle.loaded;
 
         return {
             ...descriptor,
             source: {
                 kind: 'ref',
+                unitType: descriptor.childType,
                 ref: materialized.ref,
             },
             childUnitId: materialized.unitId,

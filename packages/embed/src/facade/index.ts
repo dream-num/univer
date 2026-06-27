@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
+import './f-enum';
 import './f-univer';
 
-export { FEmbed } from './f-embed';
+export { FEmbed, type ILoadEmbedOptions } from './f-embed';
+export { FEmbedHostSurface, type IFEmbedEnumMixin } from './f-enum';
 export {
+    type FUnitRef,
     FUniverEmbedMixin,
-    type IEmbedRect,
+    type ICreateEmbedHostParams,
+    type ICreateEmbedParams,
     type IFUniverEmbedMixin,
     type IGetEmbedParams,
-    type IInsertBaseAsSheetFloatingParams,
-    type IInsertBaseAsSheetTabParams,
-    type IInsertBaseIntoDocParams,
-    type IInsertDocAsSheetFloatingParams,
-    type IInsertDocAsSheetTabParams,
-    type IInsertSheetIntoDocParams,
-    type IInsertSlideAsSheetFloatingParams,
-    type IInsertSlideAsSheetTabParams,
     type IListEmbedsParams,
+    type ILoadUnitAsyncOptions,
     type IRemoveEmbedParams,
 } from './f-univer';

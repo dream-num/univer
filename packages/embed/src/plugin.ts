@@ -20,7 +20,7 @@ import type { IEmbedCapability, IEmbedGuestContribution } from './types/embed';
 import type { IEmbedHostAdapterContribution } from './types/host-adapter';
 import { ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
-import { CopyEmbedCommand, CreateEmbedCommand, InsertEmbedBySnapshotCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
+import { CopyEmbedCommand, CreateEmbedCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
 import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';
@@ -118,7 +118,6 @@ export class UniverEmbedPlugin extends Plugin {
             SetEmbedHostAnchorRecordMutation,
             RemoveEmbedHostAnchorRecordMutation,
             CreateEmbedCommand,
-            InsertEmbedBySnapshotCommand,
             CopyEmbedCommand,
             RemoveEmbedCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

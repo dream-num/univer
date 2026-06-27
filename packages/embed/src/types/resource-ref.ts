@@ -36,3 +36,5 @@ export interface IResourceRef {
     part?: ResourceRefPart;
     extensions?: Record<string, string | readonly string[]>;
 }
+
+export type ResourceRefInput = IResourceRef | string;

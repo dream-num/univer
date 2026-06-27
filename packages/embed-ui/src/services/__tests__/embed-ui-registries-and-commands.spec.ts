@@ -21,13 +21,12 @@
 import type { IAccessor, Injector } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
-import { EMBED_CHILD_CREATE_OPTIONS } from '@univerjs/embed';
+import { EMBED_CHILD_CREATE_OPTIONS, ReferencedUnitOwnerKind } from '@univerjs/embed';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
     CopyHostEmbedCommand,
     CreateHostEmbedCommand,
-    InsertHostEmbedBySnapshotCommand,
     RemoveHostEmbedCommand,
 } from '../../commands/commands/embed-host-lifecycle.command';
 import {
@@ -228,10 +227,13 @@ describe('embed-ui registries and commands', () => {
         };
         const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
         const referencedUnitManager = {
-            ensure: vi.fn(async () => ({
-                ref,
-                unitId: 'runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_SHEET,
+            ensure: vi.fn(() => ({
+                loaded: Promise.resolve({
+                    ref,
+                    unitId: 'runtime-sheet',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                }),
+                dispose: vi.fn(),
             })),
         };
         const service = new EmbedHostRestoreService(
@@ -244,8 +246,12 @@ describe('embed-ui registries and commands', () => {
         await expect(service.restoreEmbed({ descriptor, hostContext: { restored: true } })).resolves.toBe(restoredDescriptor);
         expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
             ref,
-            hostUnitId: 'host-1',
-            embedId: 'embed-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: 'host-1',
+                ownerId: 'embed-1',
+            },
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         });
         expect(adapter.restoreAnchor).toHaveBeenCalledWith(expect.objectContaining({
@@ -281,10 +287,13 @@ describe('embed-ui registries and commands', () => {
         };
         const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
         const referencedUnitManager = {
-            ensure: vi.fn(async () => ({
-                ref,
-                unitId: 'runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_SHEET,
+            ensure: vi.fn(() => ({
+                loaded: Promise.resolve({
+                    ref,
+                    unitId: 'runtime-sheet',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                }),
+                dispose: vi.fn(),
             })),
         };
         const service = new EmbedHostRestoreService(
@@ -297,8 +306,12 @@ describe('embed-ui registries and commands', () => {
         await expect(service.materializeDescriptor({ descriptor })).resolves.toBe(materializedDescriptor);
         expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
             ref,
-            hostUnitId: 'host-1',
-            embedId: 'embed-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: 'host-1',
+                ownerId: 'embed-1',
+            },
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         });
         expect(model.addDescriptor).toHaveBeenCalledWith('host-1', materializedDescriptor);
@@ -421,11 +434,10 @@ describe('embed-ui registries and commands', () => {
         expect(fullscreen.getSession()).toBeNull();
     });
 
-    it('executes embed host commands and mutations through their services', async () => {
+    it('executes embed host commands and mutations through their services', () => {
         const descriptor = createDescriptor();
         const lifecycle = {
-            createEmbed: vi.fn(async () => descriptor),
-            createEmbedBySnapshot: vi.fn(() => descriptor),
+            createEmbed: vi.fn(() => descriptor),
             copyEmbed: vi.fn(() => ({ ...descriptor, embedId: 'copy' })),
             removeEmbed: vi.fn(() => true),
         };
@@ -443,12 +455,10 @@ describe('embed-ui registries and commands', () => {
             [EmbedHostAnchorModelService, anchorModel],
         ]);
 
-        await expect(CreateHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).resolves.toBe(descriptor);
-        expect(InsertHostEmbedBySnapshotCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(descriptor);
+        expect(CreateHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(descriptor);
         expect(CopyHostEmbedCommand.handler(accessor, { sourceEmbedId: 'embed-1' } as never)).toMatchObject({ embedId: 'copy' });
         expect(RemoveHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(true);
-        await expect(CreateHostEmbedCommand.handler(accessor, undefined)).resolves.toBe(false);
-        expect(InsertHostEmbedBySnapshotCommand.handler(accessor, undefined)).toBe(false);
+        expect(CreateHostEmbedCommand.handler(accessor, undefined)).toBe(false);
         expect(CopyHostEmbedCommand.handler(accessor, undefined)).toBe(false);
         expect(RemoveHostEmbedCommand.handler(accessor, undefined)).toBe(false);
 
@@ -486,12 +496,12 @@ describe('embed-ui registries and commands', () => {
         expect(RemoveEmbedHostAnchorRecordMutation.id).toBe(REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID);
     });
 
-    it('coordinates host lifecycle mutations and undo redo as one transaction', async () => {
+    it('coordinates host lifecycle mutations and undo redo as one transaction', () => {
         const descriptor = createDescriptor();
         const copiedDescriptor = createDescriptor({ embedId: 'copy', hostAnchorId: 'copy-anchor' });
         const store = new Map<string, IEmbedDescriptor>([[`${descriptor.hostUnitId}:${descriptor.embedId}`, descriptor]]);
         const creationService = {
-            prepareCreateEmbed: vi.fn(async () => ({ descriptor })),
+            prepareCreateEmbed: vi.fn(() => ({ descriptor })),
             prepareCopyEmbed: vi.fn(() => copiedDescriptor),
         };
         const modelService = {
@@ -543,14 +553,12 @@ describe('embed-ui registries and commands', () => {
             creationService as never,
             modelService as never,
             {} as never,
-            {} as never,
-            undefined as never,
             adapter as never,
             commandService as never,
             undoRedoService as never
         );
 
-        await expect(service.createEmbed({
+        expect(service.createEmbed({
             embedId: 'embed-1',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
@@ -558,7 +566,7 @@ describe('embed-ui registries and commands', () => {
             entry: 'docs-custom-block',
             source: descriptor.source,
             hostContext: { x: 1 },
-        })).resolves.toBe(descriptor);
+        })).toBe(descriptor);
         expect(adapter.createAnchorPlan).toHaveBeenCalledTimes(2);
         expect(undoRedoService.pushUndoRedo).toHaveBeenLastCalledWith(expect.objectContaining({
             unitID: 'host-1',
@@ -605,19 +613,19 @@ describe('embed-ui registries and commands', () => {
         expect(service.removeEmbed({ hostUnitId: 'host-1', embedId: 'missing' })).toBe(false);
 
         commandService.syncExecuteCommand.mockReturnValueOnce(false);
-        await expect(service.createEmbed({
+        expect(() => service.createEmbed({
             embedId: 'failed',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
             source: descriptor.source,
-        })).rejects.toThrow('EMBED_HOST_LIFECYCLE_MUTATION_FAILED:create-anchor:failed');
+        })).toThrow('EMBED_HOST_LIFECYCLE_MUTATION_FAILED:create-anchor:failed');
     });
 
-    it('does not execute host mutations when ref materialization fails', async () => {
+    it('does not execute host mutations when create preparation fails', () => {
         const descriptor = createDescriptor();
         const creationService = {
-            prepareCreateEmbed: vi.fn(async () => {
+            prepareCreateEmbed: vi.fn(() => {
                 throw new Error('PROVIDER_UNSUPPORTED');
             }),
         };
@@ -634,20 +642,18 @@ describe('embed-ui registries and commands', () => {
             creationService as never,
             {} as never,
             {} as never,
-            {} as never,
-            undefined as never,
             adapter as never,
             commandService as never,
             undoRedoService as never
         );
 
-        await expect(service.createEmbed({
+        expect(() => service.createEmbed({
             embedId: 'embed-1',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
             source: descriptor.source,
-        })).rejects.toThrow('PROVIDER_UNSUPPORTED');
+        })).toThrow('PROVIDER_UNSUPPORTED');
         expect(adapter.createAnchorPlan).toHaveBeenCalledTimes(1);
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
         expect(undoRedoService.pushUndoRedo).not.toHaveBeenCalled();
@@ -821,6 +827,7 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         entry: overrides.entry ?? 'docs-custom-block',
         source: overrides.source ?? {
             kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },
                 unit: { selector: 'child-1', type: 'sheet' },

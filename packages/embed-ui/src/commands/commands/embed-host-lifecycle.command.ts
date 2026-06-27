@@ -17,12 +17,10 @@
 export {
     CopyEmbedCommand as CopyHostEmbedCommand,
     CreateEmbedCommand as CreateHostEmbedCommand,
-    InsertEmbedBySnapshotCommand as InsertHostEmbedBySnapshotCommand,
     RemoveEmbedCommand as RemoveHostEmbedCommand,
 } from '@univerjs/embed';
 export type {
     ICopyEmbedCommandParams as ICopyHostEmbedCommandParams,
     ICreateEmbedCommandParams as ICreateHostEmbedCommandParams,
-    IInsertEmbedBySnapshotCommandParams as IInsertHostEmbedBySnapshotCommandParams,
     IRemoveEmbedCommandParams as IRemoveHostEmbedCommandParams,
 } from '@univerjs/embed';

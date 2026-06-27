@@ -19,13 +19,11 @@ import './global.css';
 export {
     CopyHostEmbedCommand,
     CreateHostEmbedCommand,
-    InsertHostEmbedBySnapshotCommand,
     RemoveHostEmbedCommand,
 } from './commands/commands/embed-host-lifecycle.command';
 export type {
     ICopyHostEmbedCommandParams,
     ICreateHostEmbedCommandParams,
-    IInsertHostEmbedBySnapshotCommandParams,
     IRemoveHostEmbedCommandParams,
 } from './commands/commands/embed-host-lifecycle.command';
 export {

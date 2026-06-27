@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
+import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
-import { ICommandService, Inject, Injector } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { RemoveEmbedCommand } from '@univerjs/embed';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind, RemoveEmbedCommand } from '@univerjs/embed';
+
+export interface ILoadEmbedOptions extends ICreateUnitOptions {
+    signal?: AbortSignal;
+}
 
 /**
  * Facade object for one embed descriptor.
@@ -142,6 +146,42 @@ export class FEmbed extends FBase {
      */
     getDescriptor(): IEmbedDescriptor {
         return { ...this._descriptor };
+    }
+
+    /**
+     * Load this embed's referenced child unit into the current runtime.
+     *
+     * @param options Optional request controls.
+     * @returns A promise resolving to the loaded child unit object in the core runtime.
+     * @example Browser console
+     * ```ts
+     * const embed = univerAPI.listEmbeds()[0];
+     * const childWorkbook = await embed.loadAsync<FWorkbook>();
+     * console.log(childWorkbook.getId());
+     * ```
+     */
+    async loadAsync<TUnit = unknown>(options: ILoadEmbedOptions = {}): Promise<TUnit> {
+        if (this._descriptor.source.kind !== 'ref') {
+            throw new Error('EMBED_SOURCE_NOT_REFERENCE');
+        }
+
+        const { signal, ...createOptions } = options;
+        const handle = this._injector.get(EmbedReferencedUnitManagerService).ensure({
+            ref: this._descriptor.source.ref,
+            unitType: this._descriptor.childType,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: this._descriptor.hostUnitId,
+                ownerId: this._descriptor.embedId,
+            },
+            signal,
+            createOptions: {
+                ...EMBED_CHILD_CREATE_OPTIONS,
+                ...createOptions,
+            },
+        });
+        const record = await handle.loaded;
+        return this._injector.get(IUniverInstanceService).getUnit(record.unitId, record.unitType) as TUnit;
     }
 
     /**

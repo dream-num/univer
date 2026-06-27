@@ -15,9 +15,9 @@
  */
 
 import type { IEmbedDescriptor, IEmbedResource } from '../types/embed';
-import type { IResourceRef } from '../types/resource-ref';
+import type { ResourceRefInput } from '../types/resource-ref';
 import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
-import { getResourceRefKey, normalizeResourceRef } from '../common/resource-ref';
+import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
 import { fromResourceRefUnitType } from '../common/unit-type';
 
 export class EmbedModelService {
@@ -60,22 +60,22 @@ export class EmbedModelService {
         return Object.values(this._resources.get(hostUnitId)?.embeds ?? {});
     }
 
-    getDescriptorsByResourceRef(hostUnitId: string, ref: IResourceRef): IEmbedDescriptor[] {
-        const key = getResourceRefKey(ref);
+    getDescriptorsByResourceRef(hostUnitId: string, ref: ResourceRefInput): IEmbedDescriptor[] {
+        const key = getResourceRefInputKey(ref);
         return Object.values(this._resources.get(hostUnitId)?.embeds ?? {})
-            .filter((descriptor) => getResourceRefKey(this._getDescriptorResourceRef(descriptor)) === key);
+            .filter((descriptor) => getResourceRefInputKey(this._getDescriptorResourceRef(descriptor)) === key);
     }
 
-    getActiveDescriptorsByResourceRef(hostUnitId: string, ref: IResourceRef): IEmbedDescriptor[] {
+    getActiveDescriptorsByResourceRef(hostUnitId: string, ref: ResourceRefInput): IEmbedDescriptor[] {
         return this.getDescriptorsByResourceRef(hostUnitId, ref)
             .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
     }
 
-    countReferencesByResourceRef(hostUnitId: string, ref: IResourceRef): number {
+    countReferencesByResourceRef(hostUnitId: string, ref: ResourceRefInput): number {
         return this.getDescriptorsByResourceRef(hostUnitId, ref).length;
     }
 
-    countActiveReferencesByResourceRef(hostUnitId: string, ref: IResourceRef): number {
+    countActiveReferencesByResourceRef(hostUnitId: string, ref: ResourceRefInput): number {
         return this.getActiveDescriptorsByResourceRef(hostUnitId, ref).length;
     }
 
@@ -158,13 +158,17 @@ export class EmbedModelService {
         const persistableDescriptor = { ...descriptor } as IEmbedDescriptor & { hostContext?: Record<string, unknown> };
         delete persistableDescriptor.hostContext;
 
-        const ref = normalizeResourceRef(descriptor.source.ref);
-        if (ref.file.kind === 'self' && descriptor.childUnitId && descriptor.childUnitId !== ref.unit.selector) {
+        const ref = normalizeResourceRefInput(descriptor.source.ref);
+        const childType = descriptor.childType ?? descriptor.source.unitType;
+        if (childType == null) {
+            throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_REQUIRED');
+        }
+
+        if (typeof ref !== 'string' && ref.file.kind === 'self' && descriptor.childUnitId && descriptor.childUnitId !== ref.unit.selector) {
             throw new Error('EMBED_DESCRIPTOR_CHILD_REF_MISMATCH');
         }
 
-        const refUnitType = fromResourceRefUnitType(ref.unit.type);
-        if (descriptor.childType != null && descriptor.childType !== refUnitType) {
+        if (typeof ref !== 'string' && childType !== fromResourceRefUnitType(ref.unit.type)) {
             throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_MISMATCH');
         }
 
@@ -174,14 +178,15 @@ export class EmbedModelService {
             source: {
                 kind: 'ref',
                 ref,
+                unitType: childType,
             },
-            childUnitId: descriptor.childUnitId ?? (ref.file.kind === 'self' ? ref.unit.selector : undefined),
-            childType: descriptor.childType ?? refUnitType,
+            childUnitId: descriptor.childUnitId ?? (typeof ref !== 'string' && ref.file.kind === 'self' ? ref.unit.selector : undefined),
+            childType,
             lifecycle: descriptor.lifecycle ?? 'active',
         };
     }
 
-    private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): IResourceRef {
+    private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): ResourceRefInput {
         if (descriptor.source.kind !== 'ref') {
             throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
         }

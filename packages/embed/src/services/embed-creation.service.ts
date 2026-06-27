@@ -35,10 +35,10 @@ export class EmbedCreationService {
         // noop
     }
 
-    async prepareCreateEmbed(context: IEmbedCreateContext): Promise<IEmbedCreateResult> {
+    prepareCreateEmbed(context: IEmbedCreateContext): IEmbedCreateResult {
         this._nestedGuard.assertCanCreate(context);
 
-        const resolvedSource = await this._sourceResolver.resolve(context.source, {
+        const resolvedSource = this._sourceResolver.resolve(context.source, {
             hostUnitId: context.hostUnitId,
             embedId: context.embedId,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
@@ -72,8 +72,8 @@ export class EmbedCreationService {
         };
     }
 
-    async createEmbed(context: IEmbedCreateContext): Promise<IEmbedCreateResult> {
-        const result = await this.prepareCreateEmbed(context);
+    createEmbed(context: IEmbedCreateContext): IEmbedCreateResult {
+        const result = this.prepareCreateEmbed(context);
         const { descriptor, resolvedSource } = result;
         this._model.addDescriptor(context.hostUnitId, descriptor);
         return {

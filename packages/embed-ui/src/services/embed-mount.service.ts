@@ -452,12 +452,26 @@ export class EmbedMountService {
         mode: IEmbedRenderScope['mode'],
         scopedInstanceService?: IUniverInstanceService
     ): IDisposable {
+        const canFocusFloatingChild = () => {
+            if (mode !== 'float') {
+                return true;
+            }
+
+            if (!this._injector.has(EmbedFloatingActiveService)) {
+                return false;
+            }
+
+            return this._injector.get(EmbedFloatingActiveService).getStage(descriptor.embedId) === 'stage2';
+        };
         const focusChild = (event?: PointerEvent | FocusEvent) => {
             const target = event?.target instanceof Element ? event.target : null;
             if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]')) {
                 return;
             }
             if (!descriptor.childUnitId || descriptor.childType == null) {
+                return;
+            }
+            if (!canFocusFloatingChild()) {
                 return;
             }
 

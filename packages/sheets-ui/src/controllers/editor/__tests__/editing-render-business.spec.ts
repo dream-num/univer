@@ -51,6 +51,10 @@ function createController() {
         })),
     };
     const controller = Object.create(EditingRenderController.prototype) as any;
+    const formulaBarEditor = {
+        setSelectionRanges: vi.fn(),
+        blur: vi.fn(),
+    };
     controller._editingUnit = 'unit-1';
     controller._lexerTreeBuilder = new LexerTreeBuilder();
     controller._localService = { getCurrentLocale: vi.fn(() => LocaleType.EN_US) };
@@ -64,7 +68,10 @@ function createController() {
         getContextValue: vi.fn(() => false),
     };
     controller._cellEditorManagerService = { setState: vi.fn() };
-    controller._editorService = { isSheetEditor: vi.fn(() => true) };
+    controller._editorService = {
+        isSheetEditor: vi.fn(() => true),
+        getEditor: vi.fn((editorId: string) => editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? formulaBarEditor : null),
+    };
     controller._editorBridgeService = {
         getEditCellState: vi.fn(() => ({
             unitId: 'unit-1',
@@ -117,7 +124,7 @@ function createController() {
     }));
     controller._getEditorSkeleton = vi.fn(() => ({ resetInitialWidth: vi.fn() }));
 
-    return { controller, docModel, workbook, worksheet };
+    return { controller, docModel, formulaBarEditor, workbook, worksheet };
 }
 
 describe('EditingRenderController business methods', () => {
@@ -182,7 +189,7 @@ describe('EditingRenderController business methods', () => {
     });
 
     it('moves the cursor inside the editor and resets editor state on exit', () => {
-        const { controller } = createController();
+        const { controller, formulaBarEditor } = createController();
 
         controller._moveInEditor(KeyCode.ARROW_RIGHT, false);
         controller._moveInEditor(KeyCode.ARROW_UP, true);
@@ -197,5 +204,7 @@ describe('EditingRenderController business methods', () => {
         expect(controller._cellEditorManagerService.setState).toHaveBeenCalledWith({ show: false });
         expect(controller._undoRedoService.clearUndoRedo).toHaveBeenCalledWith(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         expect(controller._undoRedoService.clearUndoRedo).toHaveBeenCalledWith(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        expect(formulaBarEditor.setSelectionRanges).toHaveBeenCalledWith([], false);
+        expect(formulaBarEditor.blur).toHaveBeenCalled();
     });
 });

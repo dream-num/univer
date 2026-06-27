@@ -73,16 +73,18 @@ function createHarness() {
     const disposeShape = { dispose: vi.fn() };
     const showHideShape = { show: vi.fn(), hide: vi.fn() };
     const transformShape = { layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
+    const getSceneObject = vi.fn((key: string) => {
+        if (key === 'unit-1#-#sheet-1#-#drawing-visible') return showHideShape;
+        if (key === 'unit-1#-#sheet-1#-#drawing-transform') return transformShape;
+        if (key === 'unit-1#-#sheet-1#-#drawing-transform-refresh-hidden') return transformShape;
+        return null;
+    });
 
     const scene = {
         getTransformerByCreate: vi.fn(() => transformer),
         getTransformer: vi.fn(() => sceneTransformer),
-        getObject: vi.fn((key: string) => {
-            if (key.includes('drawing-visible')) return showHideShape;
-            if (key.includes('drawing-transform')) return transformShape;
-            return null;
-        }),
-        getObjectIncludeInGroup: vi.fn((_key: string): any => null),
+        getObject: getSceneObject,
+        getObjectIncludeInGroup: vi.fn(getSceneObject),
         fuzzyMathObjects: vi.fn((key: string) => {
             if (key.includes('drawing-z')) return [zIndexShape];
             if (key.includes('drawing-remove')) return [disposeShape];
@@ -103,6 +105,7 @@ function createHarness() {
         ['drawing-b', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 20, top: 0, width: 10, height: 10, angle: 0 } }],
         ['chart-1', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'chart-1', drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 40, top: 0, width: 20, height: 10, angle: 0 } }],
         ['drawing-transform', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform', drawingType: DrawingTypeEnum.DRAWING_IMAGE, behindText: true, hidden: true, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
+        ['drawing-transform-in-group', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform-in-group', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 8, top: 9, width: 10, height: 11, angle: 0 } }],
         ['drawing-transform-refresh-hidden', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform-refresh-hidden', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
         ['drawing-refresh-missing', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 4, top: 5, width: 6, height: 7, angle: 0 } }],
     ]);
@@ -252,6 +255,37 @@ describe('DrawingUpdateController', () => {
         expect(harness.drawingManagerService.addNotification).toHaveBeenCalledWith([
             { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing' },
         ]);
+
+        harness.controller.dispose();
+    });
+
+    it('refreshes drawing transforms for objects inside groups without requesting insertion', () => {
+        const harness = createHarness();
+        const groupedShape = { transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn(), layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX } };
+        const drawingId = 'drawing-transform-in-group';
+        const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId });
+
+        harness.scene.getObjectIncludeInGroup.mockImplementation((key: string) => {
+            if (key === drawingShapeKey) {
+                return groupedShape;
+            }
+            return null;
+        });
+
+        harness.refreshTransform$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId }]);
+
+        expect(groupedShape.transformByState).toHaveBeenCalledWith({
+            left: 8,
+            top: 9,
+            width: 10,
+            height: 11,
+            angle: 0,
+            flipX: false,
+            flipY: false,
+            skewX: 0,
+            skewY: 0,
+        });
+        expect(harness.drawingManagerService.addNotification).not.toHaveBeenCalled();
 
         harness.controller.dispose();
     });

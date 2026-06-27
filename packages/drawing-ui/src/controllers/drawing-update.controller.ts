@@ -62,7 +62,18 @@ interface IDrawingTransformStateWithClipBounds extends ITransformState {
     clipBounds?: Nullable<{ left: number; top: number; width: number; height: number }>;
 }
 
-function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParam): void {
+interface IDrawingRefreshMetadata {
+    hidden?: boolean;
+    behindText?: boolean;
+}
+
+type IDrawingParamWithRefreshMetadata = IDrawingParam & IDrawingRefreshMetadata;
+
+function hasRefreshMetadata(refreshParam: IDrawingSearch): refreshParam is IDrawingSearch & IDrawingRefreshMetadata {
+    return 'hidden' in refreshParam || 'behindText' in refreshParam;
+}
+
+function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParamWithRefreshMetadata): void {
     if (!('hidden' in drawingParam)) {
         return;
     }
@@ -70,15 +81,14 @@ function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParam):
     drawingParam.hidden === true ? shape.hide() : shape.show();
 }
 
-function mergeRefreshMetadata(drawingParam: IDrawingParam, refreshParam: IDrawingSearch): IDrawingParam {
-    const metadata = refreshParam as Partial<IDrawingParam>;
-    if (!('hidden' in metadata) && !('behindText' in metadata)) {
+function mergeRefreshMetadata(drawingParam: IDrawingParam, refreshParam: IDrawingSearch): IDrawingParamWithRefreshMetadata {
+    if (!hasRefreshMetadata(refreshParam)) {
         return drawingParam;
     }
 
     return {
         ...drawingParam,
-        ...metadata,
+        ...refreshParam,
     };
 }
 
@@ -751,7 +761,7 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                    const drawingShape = scene.getObject(drawingShapeKey);
+                    const drawingShape = scene.getObjectIncludeInGroup(drawingShapeKey);
                     const drawingParamWithRefreshMetadata = mergeRefreshMetadata(drawingParam, param);
 
                     if (drawingShape == null) {

@@ -165,6 +165,10 @@ export function EmbedFloatDomRenderer(props: {
             }
         });
     }, [data?.embedId, floatingActiveService, releaseStage2SessionLease]);
+    const runtimeMountGate = resolveFloatRuntimeMountGate(
+        data?.hostUnitId ? embedModelService.getDescriptor(data.hostUnitId, data.embedId) : undefined,
+        stage
+    );
 
     useEffect(() => {
         if (!data?.embedId || stage !== 'stage2') {
@@ -233,7 +237,7 @@ export function EmbedFloatDomRenderer(props: {
         if (!descriptor || !layout || !descriptor.childUnitId || descriptor.childType == null) {
             return undefined;
         }
-        if (shouldDeferSheetFloatRuntimeMount(descriptor, stage)) {
+        if (runtimeMountGate === 'deferred') {
             return undefined;
         }
 
@@ -256,7 +260,7 @@ export function EmbedFloatDomRenderer(props: {
             }
             mountService.unmount(descriptor.embedId);
         };
-    }, [data?.embedId, data?.hostUnitId, embedModelService, mountService, mountVersion, previewService, stage]);
+    }, [data?.embedId, data?.hostUnitId, embedModelService, mountService, mountVersion, previewService, runtimeMountGate]);
 
     useEffect(() => {
         if (!data?.embedId) {
@@ -2021,6 +2025,13 @@ export function shouldDeferSheetFloatRuntimeMount(
         descriptor.childType === UniverInstanceType.UNIVER_SHEET &&
         Boolean(descriptor.sourceMeta?.floating) &&
         stage !== 'stage2';
+}
+
+export function resolveFloatRuntimeMountGate(
+    descriptor: Pick<IEmbedDescriptor, 'hostType' | 'childType' | 'sourceMeta'> | undefined,
+    stage: EmbedFloatingStage
+): 'deferred' | 'ready' {
+    return shouldDeferSheetFloatRuntimeMount(descriptor, stage) ? 'deferred' : 'ready';
 }
 
 function isChildEditorOrPopupRuntimeElement(target: EventTarget | null): boolean {

@@ -241,8 +241,9 @@ test('diff set force string cell', async () => {
         });
 
         activeWorkbook.startEditing();
-        window.univerAPI.getActiveDocument().appendText("'1");
-        activeWorkbook.endEditingAsync(true);
+        const activeDocument = window.univerAPI.getActiveDocument();
+        activeDocument.getBody().getElement(0)?.asParagraph().appendText("'1");
+        await activeWorkbook.endEditingAsync(true);
 
         activeSheet.getRange('I1').setValue({
             v: '001',
@@ -263,6 +264,7 @@ test('diff set force string cell', async () => {
             },
         });
     });
+    await page.waitForTimeout(1000);
 
     const filename = generateSnapshotName('set-force-string-cell');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();

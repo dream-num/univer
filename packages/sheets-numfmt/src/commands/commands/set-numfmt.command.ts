@@ -43,6 +43,7 @@ import {
     SetRangeValuesMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
+import { isAllowedPatternForScientificNotationNumber, isScientificNotationNumericCell } from '../../utils/scientific-notation';
 
 export interface ISetNumfmtCommandParams {
     unitId?: string;
@@ -67,8 +68,17 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
-        const setCells = params.values.filter((value) => !!value.pattern) as ISetCellsNumfmt;
-        const removeCells = params.values.filter((value) => !value.pattern);
+        // Because of precision issues with scientific notation values, filter out some format settings for them here.
+        const values = params.values.filter((value) => {
+            const cell = worksheet.getCellRaw(value.row, value.col);
+            return !isScientificNotationNumericCell(cell) || isAllowedPatternForScientificNotationNumber(value.pattern);
+        });
+        const setCells = values.filter((value) => !!value.pattern) as ISetCellsNumfmt;
+        const removeCells = values.filter((value) => !value.pattern);
+        if (!setCells.length && !removeCells.length) {
+            return false;
+        }
+
         const setRedos = transformCellsToRange(unitId, subUnitId, setCells);
         const removeRedos: IRemoveNumfmtMutationParams = {
             unitId,

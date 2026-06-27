@@ -20,6 +20,7 @@ import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CellValueType, CommandType, ICommandService, isDefaultFormat, IUniverInstanceService, Range } from '@univerjs/core';
 import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
+import { getScientificNotationFormatFromCell, isScientificNotationNumericCell } from '../../utils/scientific-notation';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
 export const SubtractDecimalCommand: ICommand = {
@@ -47,6 +48,10 @@ export const SubtractDecimalCommand: ICommand = {
                 const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
                 if (!numfmtValue) {
                     const cell = target.worksheet.getCellRaw(row, col);
+                    if (isScientificNotationNumericCell(cell)) {
+                        maxDecimals = Math.max(maxDecimals, getDecimalFromPattern(getScientificNotationFormatFromCell(cell)));
+                        return;
+                    }
                     if (!maxDecimals && cell && cell.t === CellValueType.NUMBER && cell.v) {
                         const regResult = /\.(\d*)$/.exec(String(cell.v));
                         if (regResult) {
@@ -72,10 +77,12 @@ export const SubtractDecimalCommand: ICommand = {
             Range.foreach(selection.range, (row, col) => {
                 const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
                 if (isDefaultFormat(numfmtValue?.pattern)) {
+                    const cell = target.worksheet.getCellRaw(row, col);
+                    // General scientific notation numbers switch to scientific format before changing decimals.
                     values.push({
                         row,
                         col,
-                        pattern: defaultPattern,
+                        pattern: isScientificNotationNumericCell(cell) ? setPatternDecimal(getScientificNotationFormatFromCell(cell), decimals) : defaultPattern,
                     });
                 } else {
                     const decimals = getDecimalFromPattern((numfmtValue as INumfmtItemWithCache).pattern);

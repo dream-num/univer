@@ -318,6 +318,23 @@ export function shouldPassThroughFloatDomRuntimeEvents(
     return resolveSheetFloatDomRuntimePolicy(floatDomParam, stage).passThroughRuntimeEvents;
 }
 
+export function shouldUpdateFloatDomLayerOnRuntimeStageChange(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return isEmbedFloatDomData(floatDomParam) && !shouldAutoMountFloatDomRuntime(floatDomParam);
+}
+
+export function shouldForwardSheetHostedEmbedFloatDomEvent(
+    floatDomParam: Pick<IFloatDomData, 'data'>,
+    event: Pick<Event, 'target'>
+): boolean {
+    if (!isSheetHostedEmbedFloatDom(floatDomParam)) {
+        return true;
+    }
+
+    const target = event.target as { closest?: (selector: string) => HTMLElement | null } | null;
+    const runtime = target?.closest?.('[data-embed-float-dom="true"]');
+    return runtime?.dataset?.embedFloatStage !== 'stage2';
+}
+
 export function shouldPassThroughFloatDomActivationEvent(nextStage: ICanvasFloatDomInfo['runtimeStage'] | undefined): boolean {
     return nextStage !== 'stage2';
 }
@@ -987,17 +1004,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         if (info.runtimeStage !== 'stage1') {
             info.runtimeStage = 'stage1';
-            this._canvasFloatDomService.updateFloatDom(id, {
-                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage1'),
-            });
+            if (shouldUpdateFloatDomLayerOnRuntimeStageChange(info.floatDomConfig)) {
+                this._canvasFloatDomService.updateFloatDom(id, {
+                    eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage1'),
+                });
+            }
             return 'stage1';
         }
 
         if (info.runtimeMounted) {
             info.runtimeStage = 'stage2';
-            this._canvasFloatDomService.updateFloatDom(id, {
-                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage2'),
-            });
+            if (shouldUpdateFloatDomLayerOnRuntimeStageChange(info.floatDomConfig)) {
+                this._canvasFloatDomService.updateFloatDom(id, {
+                    eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage2'),
+                });
+            }
             return 'stage2';
         }
 
@@ -1174,9 +1195,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         if (info) {
                             info.runtimeStage = stage;
                             info.runtimeMounted = shouldAutoMountRuntime || stage === 'stage2';
-                            this._canvasFloatDomService.updateFloatDom(drawingId, {
-                                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, stage),
-                            });
+                            if (shouldUpdateFloatDomLayerOnRuntimeStageChange(floatDomParam)) {
+                                this._canvasFloatDomService.updateFloatDom(drawingId, {
+                                    eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, stage),
+                                });
+                            }
                         }
                         const currentRenderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
                         syncFloatDomHostSelectionOnStageEnter(stage, currentRenderObject, rect);
@@ -1189,16 +1212,24 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, 'inactive'),
                         preserveOnFocusChange: shouldPreserveFloatDomOnFocusChange(floatDomParam),
                         onPointerDown: (evt) => {
-                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            }
                         },
                         onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            }
                         },
                         onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            }
                         },
                         onWheel: (evt: WheelEvent) => {
-                            canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                            }
                         },
                         data,
                         props: shouldSyncEmbedRuntimeStage

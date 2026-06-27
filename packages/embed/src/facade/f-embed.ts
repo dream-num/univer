@@ -167,7 +167,7 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      * const childWorkbook = await embed.loadAsync();
      * console.log(childWorkbook.getId());
      * ```
-     * @example TypeScript descriptor read
+     * @example TypeScript descriptor read type fallback
      * ```ts
      * import type { FWorkbook } from '@univerjs/sheets/facade';
      *

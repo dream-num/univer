@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import type { IEmbedHostCopyContext, IEmbedHostCreateContext, IEmbedHostRemoveContext } from '../../services/embed-host-lifecycle.service';
-import type { EmbedHostEntry, IEmbedDescriptor, IEmbedSourceMeta } from '../../types/embed';
+import type { IEmbedDescriptor } from '../../types/embed';
 import { CommandType } from '@univerjs/core';
 import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.service';
 
@@ -24,41 +24,15 @@ export type ICreateEmbedCommandParams = IEmbedHostCreateContext;
 export type ICopyEmbedCommandParams = IEmbedHostCopyContext;
 export type IRemoveEmbedCommandParams = IEmbedHostRemoveContext;
 
-export interface IInsertEmbedBySnapshotCommandParams<TSnapshot = unknown> {
-    hostUnitId: string;
-    hostType: UniverInstanceType;
-    entry: EmbedHostEntry;
-    childType: UniverInstanceType;
-    unitSnapshot: TSnapshot;
-    embedId?: string;
-    childUnitId?: string;
-    hostAnchorId?: string;
-    hostContext?: Record<string, unknown>;
-    sourceMeta?: IEmbedSourceMeta;
-    createUnitOptions?: ICreateUnitOptions;
-}
-
 export const CreateEmbedCommand: ICommand<ICreateEmbedCommandParams, IEmbedDescriptor | false> = {
     id: 'embed.command.create',
-    type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        return accessor.get(EmbedHostLifecycleService).createEmbed(params);
-    },
-};
-
-export const InsertEmbedBySnapshotCommand: ICommand<IInsertEmbedBySnapshotCommandParams, IEmbedDescriptor | false> = {
-    id: 'embed.command.insert-by-snapshot',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         if (!params) {
             return false;
         }
 
-        return accessor.get(EmbedHostLifecycleService).createEmbedBySnapshot(params);
+        return accessor.get(EmbedHostLifecycleService).createEmbed(params);
     },
 };
 

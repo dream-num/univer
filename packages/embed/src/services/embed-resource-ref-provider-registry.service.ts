@@ -15,30 +15,31 @@
  */
 
 import type { ICreateUnitOptions, IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IResourceRef, ResourceRefFile, ResourceRefUnitType } from '../types/resource-ref';
+import type { IReferencedUnitOwner } from '../types/referenced-unit';
+import type { ResourceRefFile, ResourceRefInput, ResourceRefUnitType } from '../types/resource-ref';
 import { toDisposable } from '@univerjs/core';
 
 export type EmbedResourceRefMaterializationProfile = 'embed-child';
 
 export interface IEmbedResourceRefEnsureInput {
-    ref: IResourceRef;
-    hostUnitId?: string;
-    embedId?: string;
-    expectedType: UniverInstanceType;
+    ref: ResourceRefInput;
+    owner?: IReferencedUnitOwner;
+    unitType: UniverInstanceType;
     profile: EmbedResourceRefMaterializationProfile;
     createOptions: ICreateUnitOptions;
 }
 
-export interface IEmbedResourceRefEnsureResult {
+export interface IReferencedUnitLoadResult {
     unitId: string;
     unitType: UniverInstanceType;
 }
 
 export interface IEmbedResourceRefProvider {
-    ensure: (input: IEmbedResourceRefEnsureInput) => IEmbedResourceRefEnsureResult | Promise<IEmbedResourceRefEnsureResult>;
+    ensure: (input: IEmbedResourceRefEnsureInput) => IReferencedUnitLoadResult | Promise<IReferencedUnitLoadResult>;
 }
 
 export interface IEmbedResourceRefProviderMatch {
+    uriReference?: boolean;
     fileKinds?: readonly ResourceRefFile['kind'][];
     uriSchemes?: readonly string[];
     unitTypes?: readonly ResourceRefUnitType[];
@@ -67,8 +68,8 @@ export class EmbedResourceRefProviderRegistryService {
         });
     }
 
-    get(ref: IResourceRef): IEmbedResourceRefProviderRegistration | undefined {
-        const matches = this._registrations.filter((registration) => this._matches(registration.match, ref));
+    get(ref: ResourceRefInput, unitType?: ResourceRefUnitType): IEmbedResourceRefProviderRegistration | undefined {
+        const matches = this._registrations.filter((registration) => this._matches(registration.match, ref, unitType));
         if (matches.length > 1) {
             throw new Error('PROVIDER_CONFLICT');
         }
@@ -80,7 +81,15 @@ export class EmbedResourceRefProviderRegistryService {
         return [...this._registrations];
     }
 
-    private _matches(match: IEmbedResourceRefProviderMatch, ref: IResourceRef): boolean {
+    private _matches(match: IEmbedResourceRefProviderMatch, ref: ResourceRefInput, unitType?: ResourceRefUnitType): boolean {
+        if (typeof ref === 'string') {
+            if (!match.uriReference) {
+                return false;
+            }
+
+            return !match.unitTypes || (unitType !== undefined && match.unitTypes.includes(unitType));
+        }
+
         if (match.fileKinds && !match.fileKinds.includes(ref.file.kind)) {
             return false;
         }

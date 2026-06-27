@@ -43,6 +43,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
+import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
@@ -349,8 +350,16 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
-export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
+export function updateBlockIndex(
+    pages: IDocumentSkeletonPage[],
+    start: number = -1,
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
+) {
     let prePageStartIndex = start;
+    // Real docs declare a classic/modern compatibility mode, so their measured layout column
+    // width can be reused. Embedded editors keep the mode unspecified and must fall back to
+    // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
+    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified';
 
     for (const page of pages) {
         const { sections, skeTables, skeColumnGroups = new Map() } = page;
@@ -474,7 +483,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
-                const measuredColumnWidth = Number.isFinite(column.width) && column.width > 0
+                const measuredColumnWidth = shouldUseLayoutColumnWidth && Number.isFinite(column.width) && column.width > 0
                     ? column.width
                     : maxColumnWidth;
                 column.width = measuredColumnWidth;

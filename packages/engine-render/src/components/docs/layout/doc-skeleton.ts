@@ -1328,7 +1328,7 @@ export class DocumentSkeleton extends Skeleton {
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
             if (sectionType === SectionType.CONTINUOUS && curSkeletonPage != null) {
-                updateBlockIndex(allSkeletonPages);
+                updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
                 this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
             } else if (layoutAnchor == null || curSkeletonPage == null) {
@@ -1379,7 +1379,7 @@ export class DocumentSkeleton extends Skeleton {
             // Calculate page and section position information
             this._iteratorCount = 0;
             removeDupPages(ctx);
-            updateBlockIndex(skeleton.pages);
+            updateBlockIndex(skeleton.pages, -1, ctx.docsConfig.documentCompatibilityPolicy);
             mergeContinuousDuplicatePages(skeleton.pages);
             // Calculate inline drawing position and update.
             updateInlineDrawingCoordsAndBorder(ctx, skeleton.pages);

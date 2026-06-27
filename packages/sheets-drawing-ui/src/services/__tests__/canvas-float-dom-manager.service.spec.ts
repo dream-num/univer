@@ -33,7 +33,7 @@ import { InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingComm
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
     calcSheetFloatDomPosition,
@@ -227,17 +227,24 @@ class TestRenderScene {
         return this;
     }
 
-    removeObject(object: Rect) {
-        this._objects.delete(object.oKey);
+    removeObject(object: Rect | string) {
+        this._objects.delete(typeof object === 'string' ? object : object.oKey);
     }
 
     getObject(key: string) {
-        return this._objects.get(key);
+        const object = this._objects.get(key);
+        return object && !object.isInGroup ? object : undefined;
     }
 
-    // Matches the Scene API used by insertGroupObject().
     getObjectIncludeInGroup(key: string) {
-        return this.getObject(key);
+        for (const item of this._objects.values()) {
+            const child = findChildObject(item, key);
+            if (child) {
+                return child;
+            }
+        }
+
+        return this._objects.get(key);
     }
 
     attachTransformerTo() { }
@@ -248,6 +255,23 @@ class TestRenderScene {
         this._viewport.viewportScrollX = viewportScrollX;
         this._viewport.viewportScrollY = viewportScrollY;
         this.onScrollAfter$.emitEvent({} as never);
+    }
+}
+
+function findChildObject(object: unknown, key: string): Rect | undefined {
+    const getObjects = (object as { getObjects?: () => Rect[] } | undefined)?.getObjects;
+    if (!getObjects) {
+        return;
+    }
+
+    for (const child of getObjects.call(object)) {
+        if (child.oKey === key) {
+            return child;
+        }
+        const nested = findChildObject(child, key);
+        if (nested) {
+            return nested;
+        }
     }
 }
 
@@ -659,6 +683,34 @@ describe('SheetCanvasFloatDomManagerService', () => {
         fixture.manager.removeFloatDom('regular-card');
     });
 
+    it('uses chart data background as the canvas rect fill', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        const chartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            data: { label: 'Revenue', background: '#f5ead7', border: '#111111' },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card')!;
+
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+
+        expect(chartRect?.fill).toBe('#f5ead7');
+        expect(chartRect?.stroke).toBe('#111111');
+
+        chartDom.dispose();
+    });
+
     it('falls back to the default rect after a chart render object factory is disposed', () => {
         const fixture = setup();
         disposables.push(fixture);
@@ -796,7 +848,151 @@ describe('SheetCanvasFloatDomManagerService', () => {
         const groupObject = (fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#group-1') as { getObjects?: () => Array<{ oKey: string }> } | undefined;
 
         expect(chartRect?.oKey).toBe('test#-#sheet1#-#chart-in-group');
+        expect((fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#chart-in-group')).toBeUndefined();
+        expect((fixture.scene as unknown as TestRenderScene).getObjectIncludeInGroup('test#-#sheet1#-#chart-in-group')).toBe(chartRect);
         expect(groupObject?.getObjects?.().map((object) => object.oKey)).toContain('test#-#sheet1#-#chart-in-group');
+    });
+
+    it('updates a grouped chart fill through float dom props for old drawings without a background seed', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Old grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const chartRect = fixture.manager.getFloatDomInfo('chart-in-group')?.rect as Rect | undefined;
+        const makeDirty = vi.spyOn(chartRect!, 'makeDirty');
+
+        fixture.manager.updateFloatDomProps('test', 'sheet1', 'chart-in-group', { fill: '#fff' });
+
+        expect(chartRect?.fill).toBe('#fff');
+        expect(makeDirty).toHaveBeenCalledWith(true);
+        expect((fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#chart-in-group')).toBeUndefined();
+    });
+
+    it('prefers an existing grouped chart child over a top-level runtime duplicate when updating props', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const scene = fixture.scene as unknown as TestRenderScene;
+        const chartKey = 'test#-#sheet1#-#chart-in-group';
+        const groupedChartRect = fixture.manager.getFloatDomInfo('chart-in-group')?.rect as Rect;
+        const duplicate = new Rect(chartKey, {
+            left: 144,
+            top: 96,
+            width: 120,
+            height: 72,
+            fill: '#badbad',
+        });
+        scene.addObject(duplicate);
+
+        expect(scene.getObject(chartKey)).toBe(duplicate);
+
+        fixture.manager.updateFloatDomProps('test', 'sheet1', 'chart-in-group', { fill: '#fff' });
+
+        expect(groupedChartRect.fill).toBe('#fff');
+        expect(duplicate.fill).toBe('#badbad');
+        expect(scene.getObject(chartKey)).toBeUndefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)).toBe(groupedChartRect);
+    });
+
+    it('does not create a top-level duplicate when a grouped chart float dom is added again', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 144, top: 96, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const scene = fixture.scene as unknown as TestRenderScene;
+        const chartKey = 'test#-#sheet1#-#chart-in-group';
+        const groupObject = scene.getObject('test#-#sheet1#-#group-1') as { getObjects?: () => Array<{ oKey: string }> } | undefined;
+        const groupedChildren = groupObject?.getObjects?.().filter((object) => object.oKey === chartKey) ?? [];
+
+        expect(scene.getObject(chartKey)).toBeUndefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)?.isInGroup).toBe(true);
+        expect(groupedChildren).toHaveLength(1);
     });
 
     it('adds a position anchored float dom through the sheet drawing pipeline', async () => {

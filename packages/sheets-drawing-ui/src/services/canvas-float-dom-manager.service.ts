@@ -455,11 +455,14 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
 
                     const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const groupShapeKey = groupId ? getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: groupId }) : undefined;
 
-                    const rectShape = scene.getObject(rectShapeKey);
+                    const rectShape = this._getObjectIncludingGroup(scene, rectShapeKey, groupShapeKey);
 
                     if (rectShape != null) {
+                        this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
                         rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                        this._syncFloatDomRect(drawingId, rectShape);
                         return;
                     }
 
@@ -475,8 +478,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     imageConfig.rotateEnabled = false;
 
                     if (isChart) {
-                        const backgroundColor = data ? (data as Record<string, string>).backgroundColor : 'white';
-                        imageConfig.fill = backgroundColor;
+                        const backgroundColor = this._getChartDataBackground(data);
+                        if (backgroundColor !== undefined) {
+                            imageConfig.fill = backgroundColor;
+                        }
 
                         if (data && (data as Record<string, string>).border) {
                             imageConfig.stroke = (data as Record<string, string>).border;
@@ -574,7 +579,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
                     const { transformer, scene } = renderObject;
-                    const rectShape = scene.getObject(rectShapeKey);
+                    const rectShape = this._getObjectIncludingGroup(scene, rectShapeKey);
                     if (rectShape?.oKey) {
                         transformer.clearControlByIds([rectShape?.oKey]);
                         scene.getTransformer()?.clearSelectedObjects();
@@ -657,11 +662,80 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (info && renderObject) {
             const { scene } = renderObject;
             const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: id });
-            const rectShape = scene.getObject(rectShapeKey);
+            const drawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
+            const groupShapeKey = drawing?.groupId ? getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: drawing.groupId }) : undefined;
+            const rectShape = this._getObjectIncludingGroup(scene, rectShapeKey, groupShapeKey);
             if (rectShape && rectShape instanceof Rect) {
+                this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
                 rectShape.setProps(props);
+                this._syncFloatDomRect(id, rectShape);
             }
         }
+    }
+
+    private _getObjectIncludingGroup(scene: Scene, key: string, groupKey?: string): Nullable<BaseObject> {
+        return this._getChildObjectFromGroup(scene, key, groupKey) ?? scene.getObjectIncludeInGroup?.(key) ?? scene.getObject(key) ?? null;
+    }
+
+    private _getChildObjectFromGroup(scene: Scene, key: string, groupKey?: string): Nullable<BaseObject> {
+        if (!groupKey) {
+            return null;
+        }
+
+        const groupObject = scene.getObjectIncludeInGroup?.(groupKey) ?? scene.getObject(groupKey);
+        return this._findChildObject(groupObject, key);
+    }
+
+    private _findChildObject(object: Nullable<BaseObject>, key: string): Nullable<BaseObject> {
+        if (!object) {
+            return null;
+        }
+
+        const children = object.getObjects();
+        for (const child of children) {
+            if (child.oKey === key) {
+                return child;
+            }
+
+            const nested = this._findChildObject(child, key);
+            if (nested) {
+                return nested;
+            }
+        }
+
+        return null;
+    }
+
+    private _removeTopLevelDuplicateIfGrouped(scene: Scene, key: string, object: BaseObject): void {
+        if (!object.isInGroup) {
+            return;
+        }
+
+        const topLevelObject = scene.getObject(key);
+        if (topLevelObject && topLevelObject !== object) {
+            scene.removeObject(topLevelObject);
+        }
+    }
+
+    private _syncFloatDomRect(id: string, object: BaseObject): void {
+        if (!(object instanceof Rect)) {
+            return;
+        }
+
+        const info = this._domLayerInfoMap.get(id);
+        if (info) {
+            info.rect = object;
+        }
+    }
+
+    private _getChartDataBackground(data?: Serializable): string | undefined {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            return undefined;
+        }
+
+        const record = data as Record<string, unknown>;
+        const background = record.backgroundColor ?? record.background;
+        return typeof background === 'string' ? background : undefined;
     }
 
     private _getPosition(position: IPosition, unitId: string): Nullable<ISheetDrawingPosition> {
@@ -931,11 +1005,14 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
 
             const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+            const groupShapeKey = groupId ? getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: groupId }) : undefined;
 
-            const rectShape = scene.getObject(rectShapeKey);
+            const rectShape = this._getObjectIncludingGroup(scene, rectShapeKey, groupShapeKey);
 
             if (rectShape != null) {
+                this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
                 rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                this._syncFloatDomRect(drawingId, rectShape);
                 return;
             }
 
@@ -950,8 +1027,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
 
             if (isChart) {
-                const backgroundColor = data ? (data as Record<string, string>).backgroundColor : 'white';
-                domConfig.fill = backgroundColor;
+                const backgroundColor = this._getChartDataBackground(data);
+                if (backgroundColor !== undefined) {
+                    domConfig.fill = backgroundColor;
+                }
                 domConfig.rotateEnabled = false;
                 if (data && (data as Record<string, string>).border) {
                     domConfig.stroke = (data as Record<string, string>).border;
@@ -1196,10 +1275,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
             const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-            const rectShape = scene.getObject(rectShapeKey);
+            const rectShape = this._getObjectIncludingGroup(scene, rectShapeKey);
 
             if (rectShape != null) {
+                this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
                 rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                this._syncFloatDomRect(drawingId, rectShape);
                 return;
             }
 

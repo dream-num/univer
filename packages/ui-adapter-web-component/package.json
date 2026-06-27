@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-adapter-web-component",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.1",
     "private": false,
     "description": "Web Component adapter for Univer UI services.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

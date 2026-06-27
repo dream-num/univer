@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.0.0-alpha.1](https://github.com/dream-num/univer/compare/v1.0.0-alpha.0...v1.0.0-alpha.1) (2026-06-27)
+
+### Bug Fixes
+
+* **facade:** fix doc facade ([#7169](https://github.com/dream-num/univer/issues/7169)) ([a140ee0](https://github.com/dream-num/univer/commit/a140ee018b762876e34736b1fc5b9893074d48a1))
+* **fx:** fix fx bar ref range highlight ([#7168](https://github.com/dream-num/univer/issues/7168)) ([f422574](https://github.com/dream-num/univer/commit/f422574a30b7eeca61ae1ad26b78a3094bab788a))
+* **sheets-formula-ui:** fix formula editor ref selections ([#7167](https://github.com/dream-num/univer/issues/7167)) ([1eb9b42](https://github.com/dream-num/univer/commit/1eb9b429782dea4e84308fef45c3efad4d5f51f2))
+* **sheets-ui:** clean up embedded editor state ([#7164](https://github.com/dream-num/univer/issues/7164)) ([c51d6d2](https://github.com/dream-num/univer/commit/c51d6d2b6d00e003a0819f082a171101a9f607c6))
+* **sheets-numfmt:** handle scientific notation formats ([#7163](https://github.com/dream-num/univer/issues/7163)) ([59058cb](https://github.com/dream-num/univer/commit/59058cb0575c49c9eb6bb2d1d906161c791dc7fa))
+* **sheets-ui:** preserve formula clipboard payload on shortcut paste ([#7161](https://github.com/dream-num/univer/issues/7161)) ([d8d1f62](https://github.com/dream-num/univer/commit/d8d1f624a149837d7a198c73e256aed2a277864c))
+* **doc:** layout compatibility ([#7158](https://github.com/dream-num/univer/issues/7158)) ([4088db8](https://github.com/dream-num/univer/commit/4088db83f6e7c1319f836efdd0ca69a8b1136521))
+* **docs:** keep cursor stable at document bounds ([#7149](https://github.com/dream-num/univer/issues/7149)) ([e4c33e1](https://github.com/dream-num/univer/commit/e4c33e15482cbcd6c588b1b78090e5e2e0a7b923))
+* **slides:** fix slide import errs ([#7142](https://github.com/dream-num/univer/issues/7142)) ([cdae784](https://github.com/dream-num/univer/commit/cdae784ede55344f5f2c251be64be82701b72081))
+
+### Features
+
+* support copy and paste across pages ([#7160](https://github.com/dream-num/univer/issues/7160)) ([5f0b473](https://github.com/dream-num/univer/commit/5f0b473caee527bcc6d85a5d289b565de9fe5be1))
+* **ui:** add emoji picker ([#7157](https://github.com/dream-num/univer/issues/7157)) ([0caed26](https://github.com/dream-num/univer/commit/0caed264aca8eeb35d9acf13c72de3b613a83897))
+* add localization support for multiple languages and update locale keys ([#7155](https://github.com/dream-num/univer/issues/7155)) ([80582bb](https://github.com/dream-num/univer/commit/80582bb4e3980bbc1cd6bd26201250a6ad19419f))
+* **docs:** support column group document flow ([#7134](https://github.com/dream-num/univer/issues/7134)) ([570f5d5](https://github.com/dream-num/univer/commit/570f5d59fba379a982cabc589406837efaafa4ac))
+
+### Performance Improvements
+
+* remove redundant collection scans ([#7159](https://github.com/dream-num/univer/issues/7159)) ([2a18de7](https://github.com/dream-num/univer/commit/2a18de765e362dc28328dba8f873465ea08837f4))
+
+### Other Changes (build)
+
+* migrate from release-it to verso ([#7151](https://github.com/dream-num/univer/issues/7151)) ([dcc58de](https://github.com/dream-num/univer/commit/dcc58dea34010f7985952c0cc3115a46961eae68))
+
+### Other Changes (chore)
+
+* update @univerjs/icons ([#7154](https://github.com/dream-num/univer/issues/7154)) ([2b2b766](https://github.com/dream-num/univer/commit/2b2b7664022c0358e806739e8f6d81176a81e6ce))
+* update univer icons ([#7153](https://github.com/dream-num/univer/issues/7153)) ([120ad9a](https://github.com/dream-num/univer/commit/120ad9a926497b23a67364e33f47816bca1706e3))
+
+### Other Changes (ci)
+
+* fix sync-gitee action ([6eb1bc0](https://github.com/dream-num/univer/commit/6eb1bc0cb5027a811c5975cbf67bcf3c7018aeab))
+* skip PR workflows for draft pull requests ([b53aef0](https://github.com/dream-num/univer/commit/b53aef0c40153f8ffe60ef6ef0b9c406c05b789b))
+* update runner types and permissions in workflow files ([#7148](https://github.com/dream-num/univer/issues/7148)) ([0dc521b](https://github.com/dream-num/univer/commit/0dc521b81b28712a57e358cb39d00605df7d0c5a))
+
+### Other Changes (docs)
+
+* update readme ([5c9c9c1](https://github.com/dream-num/univer/commit/5c9c9c16ed84566a01777d10eeb26ec2fb40e942))
+* update README ([a766f6d](https://github.com/dream-num/univer/commit/a766f6db42911b7cf0fbd03925da9f1dfb831172))
+
+### Other Changes (refactor)
+
+* **docs:** refactor document element facade ([#7156](https://github.com/dream-num/univer/issues/7156)) ([67da8f5](https://github.com/dream-num/univer/commit/67da8f5e9a1f9245f8695b3190511c6bef9ab08a))
+
 # [1.0.0-alpha.0](https://github.com/dream-num/univer/compare/v0.25.0...v1.0.0-alpha.0) (2026-06-24)
 
 

@@ -24,6 +24,7 @@ import type {
     IEmbedFloatPreviewProvider,
     IEmbedHostContainerContribution,
     IEmbedPassiveViewportProvider,
+    IEmbedPassiveWheelHandlerContribution,
     IEmbedProductMenuContribution,
     IEmbedReadonlyPreviewProvider,
 } from './types/embed-ui';
@@ -59,6 +60,7 @@ import { EmbedHostRestoreService } from './services/embed-host-restore.service';
 import { EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
 import { EmbedMountService } from './services/embed-mount.service';
 import { EmbedOverlayRootService } from './services/embed-overlay-root.service';
+import { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passive-wheel-handler-registry.service';
 import { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
 import { EmbedProductMenuRegistryService } from './services/embed-product-menu-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
@@ -76,6 +78,7 @@ export interface IUniverEmbedUIPluginConfig {
     floatingMenus?: readonly IEmbedFloatingMenuContribution[];
     previewProviders?: readonly IEmbedFloatPreviewProvider<any>[];
     contentSizeProviders?: readonly IEmbedContentSizeProvider[];
+    passiveWheelHandlers?: readonly IEmbedPassiveWheelHandlerContribution[];
     passiveViewportProviders?: readonly IEmbedPassiveViewportProvider[];
     readonlyPreviewProviders?: readonly IEmbedReadonlyPreviewProvider<any>[];
     useDefaultFloatingMenus?: boolean;
@@ -115,6 +118,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedHostRibbonOverrideController],
             [EmbedMountService],
             [EmbedOverlayRootService],
+            [EmbedPassiveWheelHandlerRegistryService],
             [EmbedPassiveViewportRegistryService],
             [EmbedProductMenuRegistryService],
             [EmbedReadonlyPreviewRegistryService],
@@ -173,6 +177,9 @@ export class UniverEmbedUIPlugin extends Plugin {
             }
         });
 
+        const passiveWheelHandlerRegistry = this._injector.get(EmbedPassiveWheelHandlerRegistryService);
+        (this._config.passiveWheelHandlers ?? []).forEach((handler) => passiveWheelHandlerRegistry.register(handler));
+
         const readonlyPreviewRegistry = this._injector.get(EmbedReadonlyPreviewRegistryService);
         (this._config.readonlyPreviewProviders ?? []).forEach((provider) => {
             if (!readonlyPreviewRegistry.get(provider.childType)) {
@@ -210,6 +217,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedHostRibbonOverrideController],
             [EmbedMountService],
             [EmbedOverlayRootService],
+            [EmbedPassiveWheelHandlerRegistryService],
             [EmbedPassiveViewportRegistryService],
             [EmbedProductMenuRegistryService],
             [EmbedReadonlyPreviewRegistryService],

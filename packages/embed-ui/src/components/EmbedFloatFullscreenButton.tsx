@@ -75,11 +75,11 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
             className={[
                 `univer-absolute univer-right-2 univer-top-2 univer-z-10 univer-inline-flex univer-size-6
                 univer-cursor-pointer univer-appearance-none univer-items-center univer-justify-center
-                univer-rounded-md univer-border-0 univer-bg-gray-900/30 univer-p-0 univer-text-white
-                univer-opacity-70 univer-shadow-sm univer-transition univer-duration-150
-                hover:univer-bg-gray-900/60 hover:univer-opacity-95 hover:univer-shadow-md
-                dark:!univer-bg-gray-100/20 dark:!univer-text-white dark:!univer-shadow-none
-                dark:hover:!univer-bg-gray-100/30`,
+                univer-rounded-md univer-border-0 univer-bg-[rgba(0,0,0,0.15)] univer-p-0 univer-text-white
+                univer-opacity-100 univer-shadow-sm univer-transition univer-duration-150
+                hover:univer-bg-[rgba(0,0,0,0.4)] hover:univer-opacity-100 hover:univer-shadow-md
+                dark:!univer-bg-[rgba(243,244,246,0.22)] dark:!univer-text-gray-900 dark:!univer-shadow-none
+                dark:hover:!univer-bg-[rgba(243,244,246,0.4)]`,
                 className,
             ].filter(Boolean).join(' ')}
             data-embed-float-fullscreen-button="true"

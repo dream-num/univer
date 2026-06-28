@@ -123,6 +123,7 @@ export interface IEmbedHostContainerContribution {
 export interface IEmbedChildViewContribution {
     childType: UniverInstanceType;
     supportedLayouts: EmbedLayout[];
+    beforeDeactivate?: (context: IEmbedChildContainerContext) => void;
     mount?: (context: IEmbedChildContainerContext) => IDisposable | void;
 }
 
@@ -222,6 +223,13 @@ export interface IEmbedPassiveViewportWheelContext extends IEmbedChildContainerC
 
 export interface IEmbedPassiveViewportProvider {
     childType: UniverInstanceType;
+    supportedLayouts?: EmbedLayout[];
+    handleWheel: (context: IEmbedPassiveViewportWheelContext) => boolean | void;
+}
+
+export interface IEmbedPassiveWheelHandlerContribution {
+    childType: UniverInstanceType;
+    order?: number;
     supportedLayouts?: EmbedLayout[];
     handleWheel: (context: IEmbedPassiveViewportWheelContext) => boolean | void;
 }

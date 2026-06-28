@@ -31,7 +31,7 @@ describe('EmbedActivationService', () => {
         const floatingActiveService = {
             activate: vi.fn(),
         };
-        const mountService = { activateSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
+        const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
         const service = new EmbedActivationService(
             univerInstanceService as never,
             focusOwnerService as never,
@@ -84,7 +84,7 @@ describe('EmbedActivationService', () => {
         const floatingActiveService = {
             activate: vi.fn(),
         };
-        const mountService = { activateSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
+        const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
         const service = new EmbedActivationService(
             univerInstanceService as never,
             focusOwnerService as never,
@@ -130,7 +130,7 @@ describe('EmbedActivationService', () => {
         const floatingActiveService = {
             activate: vi.fn(),
         };
-        const mountService = { activateSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
+        const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
         const service = new EmbedActivationService(
             univerInstanceService as never,
             focusOwnerService as never,
@@ -193,8 +193,8 @@ describe('EmbedActivationService', () => {
         };
         const mountService = {
             activateSession: vi.fn(),
+            deactivateFloatingSession: vi.fn(),
             deactivateTabSessions: vi.fn(() => []),
-            setActive: vi.fn(),
         };
         const service = new EmbedActivationService(
             univerInstanceService as never,
@@ -210,7 +210,7 @@ describe('EmbedActivationService', () => {
 
         expect(floatingActiveService.clear).toHaveBeenCalledWith('float-sheet');
         expect(focusOwnerService.clearFocusOwner).toHaveBeenCalledWith('float-sheet');
-        expect(mountService.setActive).toHaveBeenCalledWith('float-sheet', false);
+        expect(mountService.deactivateFloatingSession).toHaveBeenCalledWith('float-sheet');
         expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('host-doc');
         expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('host-doc');
     });
@@ -236,8 +236,8 @@ describe('EmbedActivationService', () => {
         };
         const mountService = {
             activateSession: vi.fn(),
+            deactivateFloatingSession: vi.fn(),
             deactivateTabSessions: vi.fn(() => []),
-            setActive: vi.fn(),
         };
         const service = new EmbedActivationService(
             univerInstanceService as never,
@@ -253,7 +253,7 @@ describe('EmbedActivationService', () => {
 
         expect(floatingActiveService.clear).not.toHaveBeenCalled();
         expect(focusOwnerService.clearFocusOwner).not.toHaveBeenCalled();
-        expect(mountService.setActive).not.toHaveBeenCalled();
+        expect(mountService.deactivateFloatingSession).not.toHaveBeenCalled();
         expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
         expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
     });
@@ -274,8 +274,8 @@ describe('EmbedActivationService', () => {
         };
         const mountService = {
             activateSession: vi.fn(),
+            deactivateFloatingSession: vi.fn(),
             deactivateTabSessions: vi.fn(() => []),
-            setActive: vi.fn(),
         };
         const service = new EmbedActivationService(
             univerInstanceService as never,
@@ -291,7 +291,7 @@ describe('EmbedActivationService', () => {
 
         expect(floatingActiveService.clear).not.toHaveBeenCalled();
         expect(focusOwnerService.clearFocusOwner).not.toHaveBeenCalled();
-        expect(mountService.setActive).not.toHaveBeenCalled();
+        expect(mountService.deactivateFloatingSession).not.toHaveBeenCalled();
         expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
         expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
     });
@@ -314,6 +314,7 @@ describe('EmbedActivationService', () => {
         };
         const mountService = {
             activateSession: vi.fn(),
+            deactivateFloatingSession: vi.fn(),
             deactivateTabSessions: vi.fn(() => [
                 {
                     hostUnitId: 'host-workbook',
@@ -359,6 +360,7 @@ describe('EmbedActivationService', () => {
         };
         const mountService = {
             activateSession: vi.fn(),
+            deactivateFloatingSession: vi.fn(),
             deactivateTabSessions: vi.fn(() => [
                 {
                     hostUnitId: 'host-slide',

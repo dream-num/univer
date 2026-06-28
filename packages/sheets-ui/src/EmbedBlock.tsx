@@ -19,9 +19,10 @@ import type { IEmbedBlockContribution, IEmbedChildContainerContext, IEmbedChildV
 import type { IUniverSheetsUIConfig } from './config/config';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
 import { createEmbedReactRoot, createEmbedRibbonBlockContribution, disposeEmbedReactRoot, EmbedFloatingGeometryService, EmbedRuntimeProviders, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, useConfigValue, useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
+import { SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from './views/editor-container/EditorContainer';
@@ -42,6 +43,7 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
     return {
         childType: UniverInstanceType.UNIVER_SHEET,
         supportedLayouts: ['tab-peer', 'docs-sticky-sheet', 'scroll-contained'],
+        beforeDeactivate: closeEmbeddedSheetCellEditor,
         mount: (context) => {
             const scopedInjector = context.runtimeScope.injector as Injector;
             const rootElement = context.runtimeScope.roots.canvas
@@ -65,6 +67,7 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
                     <SheetEmbedChildOverlay
                         canvasRoot={rootElement}
                         showChrome={shouldShowEmbeddedSheetChrome(context)}
+                        readonly={context.descriptor?.mode === 'readonly'}
                     />
                 </EmbedRuntimeProviders>
             );
@@ -84,6 +87,14 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
             });
         },
     };
+}
+
+function closeEmbeddedSheetCellEditor(context: IEmbedChildContainerContext): void {
+    context.runtimeScope.commandService?.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+        visible: false,
+        eventType: DeviceInputEventType.PointerDown,
+        unitId: context.childUnitId,
+    });
 }
 
 export function shouldShowEmbeddedSheetChrome(context: Pick<IEmbedChildContainerContext, 'renderScope'>): boolean {
@@ -116,7 +127,7 @@ function registerEmbeddedSheetGeometry(context: IEmbedChildContainerContext, con
     });
 }
 
-function SheetEmbedChildOverlay(props: { canvasRoot: HTMLElement; showChrome: boolean }) {
+function SheetEmbedChildOverlay(props: { canvasRoot: HTMLElement; showChrome: boolean; readonly?: boolean }) {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const componentManager = useDependency(ComponentManager);
     const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
@@ -143,9 +154,9 @@ function SheetEmbedChildOverlay(props: { canvasRoot: HTMLElement; showChrome: bo
                     <FormulaBar />
                 </div>
             )}
-            {ShapeTextEditorContainer && <ShapeTextEditorContainer />}
-            {!config?.disableEdit && <EditorContainer />}
-            <AutoFillPopupMenu />
+            {!props.readonly && ShapeTextEditorContainer && <ShapeTextEditorContainer />}
+            {!props.readonly && !config?.disableEdit && <EditorContainer />}
+            {!props.readonly && <AutoFillPopupMenu />}
             {showSheetBar && (
                 <div
                     className="univer-absolute univer-inset-x-0 univer-bottom-0 univer-z-10"

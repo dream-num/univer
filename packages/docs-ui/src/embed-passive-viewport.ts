@@ -17,7 +17,7 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedPassiveViewportProvider } from '@univerjs/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { scrollSceneViewportPassive } from '@univerjs/embed-ui';
+import { EmbedPassiveWheelHandlerRegistryService, scrollSceneViewportPassive } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from './basics/docs-view-key';
 
@@ -25,6 +25,13 @@ export function createDocsPassiveViewportProvider(injector: Injector): IEmbedPas
     return {
         childType: UniverInstanceType.UNIVER_DOC,
         handleWheel: (context) => {
+            const passiveWheelHandlers = injector.has(EmbedPassiveWheelHandlerRegistryService)
+                ? injector.get(EmbedPassiveWheelHandlerRegistryService)
+                : undefined;
+            if (passiveWheelHandlers?.handleWheel(context) === true) {
+                return true;
+            }
+
             if (!injector.has(IRenderManagerService)) {
                 return false;
             }

@@ -266,6 +266,7 @@ export class EmbedMountService {
                 return;
             }
 
+            this._runChildBeforeDeactivate(entry.session);
             entry.setActive(false);
             deactivatedSessions.push(entry.session);
         });
@@ -273,8 +274,38 @@ export class EmbedMountService {
         return deactivatedSessions;
     }
 
+    deactivateFloatingSession(embedId: string): IEmbedMountSession | undefined {
+        const entry = this._sessions.get(embedId);
+        if (!entry || entry.session.layout === 'tab-peer') {
+            return undefined;
+        }
+
+        this._runChildBeforeDeactivate(entry.session);
+        entry.setActive(false);
+
+        return entry.session;
+    }
+
     setActive(embedId: string, active: boolean): void {
         this._sessions.get(embedId)?.setActive(active);
+    }
+
+    private _runChildBeforeDeactivate(session: IEmbedMountSession): void {
+        const context = session.context;
+        if (!context) {
+            return;
+        }
+
+        const contribution = this._childViewRegistry.get(session.childType);
+        if (!contribution?.beforeDeactivate) {
+            return;
+        }
+
+        try {
+            contribution.beforeDeactivate(context);
+        } catch (error) {
+            console.warn('[embed-ui] failed to deactivate embedded child view', error);
+        }
     }
 
     private _resolveLayout(descriptor: IEmbedDescriptor): EmbedLayout {
@@ -585,6 +616,10 @@ export class EmbedMountService {
     }
 
     private _createMountFocusRestorer(descriptor: IEmbedDescriptor): IDisposable {
+        if (descriptor.sourceMeta?.tab && descriptor.sourceMeta.tab.enabled) {
+            return toDisposable(() => {});
+        }
+
         if (!this._injector.has(IUniverInstanceService) || !descriptor.childUnitId) {
             return toDisposable(() => {});
         }

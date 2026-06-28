@@ -232,6 +232,15 @@ export class EmbedInteractionBoundaryService {
         return !ownerDocument || owner.document === ownerDocument;
     }
 
+    closeOwnedFloatingSurfaces(embedId: string | undefined, ownerDocument: Document | undefined): void {
+        if (!embedId || !ownerDocument?.body) {
+            return;
+        }
+
+        const roots = this._collectOwnedFloatingSurfaceRoots(embedId, ownerDocument);
+        roots.forEach((root) => this._dispatchEscapeToFloatingSurface(root, ownerDocument));
+    }
+
     activatePortalScope(embedId: string, ownerDocument: Document | undefined): IDisposable {
         if (!ownerDocument?.body) {
             return toDisposable(() => {});
@@ -287,6 +296,70 @@ export class EmbedInteractionBoundaryService {
                 this._cleanupOrdinaryBodyChromeClaims(latestOwner.embedId, ownerDocument);
             }
         });
+    }
+
+    private _collectOwnedFloatingSurfaceRoots(embedId: string, ownerDocument: Document): HTMLElement[] {
+        const roots = new Set<HTMLElement>();
+        const collect = (element: HTMLElement) => {
+            const root = this._resolveFloatingSurfaceRoot(element);
+            if (!root || !this._isOwnedElement(embedId, root)) {
+                return;
+            }
+
+            roots.add(root);
+        };
+
+        ownerDocument.body
+            .querySelectorAll<HTMLElement>(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`)
+            .forEach(collect);
+        this._roots.get(embedId)?.forEach((root) => {
+            if (!root.isConnected) {
+                return;
+            }
+
+            collect(root);
+            root.querySelectorAll<HTMLElement>('*').forEach(collect);
+        });
+
+        return [...roots].sort((left, right) => {
+            if (left.contains(right)) {
+                return 1;
+            }
+            if (right.contains(left)) {
+                return -1;
+            }
+
+            return 0;
+        });
+    }
+
+    private _resolveFloatingSurfaceRoot(element: HTMLElement): HTMLElement | undefined {
+        if (element.closest('[data-embed-floating-menu="true"]')) {
+            return undefined;
+        }
+
+        if (!this._isUniverPortalTreeElement(element)) {
+            return undefined;
+        }
+
+        return element.closest<HTMLElement>('.univer-popup, .univer-popover, .univer-dropdown, [data-radix-popper-content-wrapper], [data-u-comp="rect-popup"], [role="dialog"], [role="listbox"], [role="menu"], [role="tooltip"]') ?? element;
+    }
+
+    private _dispatchEscapeToFloatingSurface(root: HTMLElement, ownerDocument: Document): void {
+        const view = ownerDocument.defaultView;
+        const target = ownerDocument.activeElement instanceof HTMLElement && root.contains(ownerDocument.activeElement)
+            ? ownerDocument.activeElement
+            : root;
+        const event = view?.KeyboardEvent
+            ? new view.KeyboardEvent('keydown', {
+                key: 'Escape',
+                code: 'Escape',
+                bubbles: true,
+                cancelable: true,
+            })
+            : new Event('keydown', { bubbles: true, cancelable: true });
+
+        target.dispatchEvent(event);
     }
 
     private _isOwnedElement(embedId: string | undefined, element: HTMLElement): boolean {

@@ -16,6 +16,7 @@
 
 import type { IEmbedPassiveViewportProvider } from '../../types/embed-ui';
 import { describe, expect, it, vi } from 'vitest';
+import { EmbedPassiveWheelHandlerRegistryService } from '../embed-passive-wheel-handler-registry.service';
 import { EmbedPassiveViewportRegistryService } from '../embed-passive-viewport-registry.service';
 
 describe('EmbedPassiveViewportRegistryService', () => {
@@ -49,5 +50,63 @@ describe('EmbedPassiveViewportRegistryService', () => {
 
         expect(service.get(2 as never, 'aspect-fit')).toBe(provider);
         expect(service.get(2 as never, 'doc-width-scale')).toBeUndefined();
+    });
+});
+
+describe('EmbedPassiveWheelHandlerRegistryService', () => {
+    it('runs matching handlers by priority until one consumes the wheel', () => {
+        const service = new EmbedPassiveWheelHandlerRegistryService();
+        const lowPriority = vi.fn(() => true);
+        const highPriority = vi.fn(() => undefined);
+        const otherType = vi.fn(() => true);
+        const context = {
+            childType: 2,
+            layout: 'scroll-contained',
+        } as never;
+
+        service.register({
+            childType: 3 as never,
+            handleWheel: otherType,
+            order: 100,
+        });
+        service.register({
+            childType: 2 as never,
+            handleWheel: lowPriority,
+            order: 1,
+        });
+        service.register({
+            childType: 2 as never,
+            handleWheel: highPriority,
+            order: 10,
+        });
+
+        expect(service.handleWheel(context)).toBe(true);
+        expect(highPriority).toHaveBeenCalledTimes(1);
+        expect(lowPriority).toHaveBeenCalledTimes(1);
+        expect(otherType).not.toHaveBeenCalled();
+    });
+
+    it('skips handlers that do not support the current layout', () => {
+        const service = new EmbedPassiveWheelHandlerRegistryService();
+        const unsupported = vi.fn(() => true);
+        const supported = vi.fn(() => true);
+
+        service.register({
+            childType: 2 as never,
+            handleWheel: unsupported,
+            supportedLayouts: ['aspect-fit'],
+        });
+        service.register({
+            childType: 2 as never,
+            handleWheel: supported,
+            supportedLayouts: ['scroll-contained'],
+        });
+
+        expect(service.handleWheel({
+            childType: 2,
+            layout: 'scroll-contained',
+        } as never)).toBe(true);
+        expect(unsupported).not.toHaveBeenCalled();
+        expect(supported).toHaveBeenCalledTimes(1);
     });
 });

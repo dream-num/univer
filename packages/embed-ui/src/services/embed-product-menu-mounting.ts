@@ -22,6 +22,7 @@ import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerP
 import { createElement } from 'react';
 import { map, merge, of } from 'rxjs';
 import { EmbedRuntimeProviders } from '../components/EmbedRuntimeProviders';
+import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
 import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
 export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountContext): IDisposable | undefined {
@@ -33,6 +34,7 @@ export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountConte
     const scoped = createEmbedProductMenuInjector(injector as Injector, {
         childType,
         childUnitId,
+        embedId,
         menuSchema,
         menuTitlePrefix,
         activeRibbonTab,
@@ -55,12 +57,13 @@ export function createEmbedProductMenuInjector(
     params: {
         childType: UniverInstanceType;
         childUnitId?: string;
+        embedId?: string;
         menuSchema?: unknown;
         menuTitlePrefix?: string;
         activeRibbonTab?: string;
     }
 ): { injector: Pick<Injector, 'invoke' | 'get' | 'has'>; ribbonService: IRibbonService; disposable: IDisposable } {
-    const { childType, childUnitId, menuSchema, menuTitlePrefix, activeRibbonTab } = params;
+    const { childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab } = params;
     const instanceService = injector.get(IUniverInstanceService);
     const scopedInstanceService = createScopedEmbedProductInstanceService(instanceService, childType, childUnitId);
     let scopedInjector: Pick<Injector, 'invoke' | 'get' | 'has'>;
@@ -69,6 +72,7 @@ export function createEmbedProductMenuInjector(
         instanceService,
         childType,
         childUnitId,
+        embedId,
         () => scopedInjector
     );
     let menuManager: IMenuManagerService;
@@ -274,6 +278,7 @@ function createScopedEmbedProductCommandService(
     instanceService: IUniverInstanceService,
     childType: UniverInstanceType,
     childUnitId?: string,
+    embedId?: string,
     getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined
 ): ICommandService {
     if (!childUnitId) {
@@ -289,9 +294,7 @@ function createScopedEmbedProductCommandService(
                         instanceService.setCurrentUnitForType(childUnitId);
                         return await target.executeCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
                     } finally {
-                        if (previous) {
-                            instanceService.setCurrentUnitForType(previous.getUnitId());
-                        }
+                        restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
                     }
                 };
             }
@@ -302,9 +305,7 @@ function createScopedEmbedProductCommandService(
                         instanceService.setCurrentUnitForType(childUnitId);
                         return target.syncExecuteCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
                     } finally {
-                        if (previous) {
-                            instanceService.setCurrentUnitForType(previous.getUnitId());
-                        }
+                        restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
                     }
                 };
             }
@@ -312,6 +313,36 @@ function createScopedEmbedProductCommandService(
             return Reflect.get(target, property, receiver);
         },
     });
+}
+
+function restoreEmbedProductMenuCurrentUnit(
+    instanceService: IUniverInstanceService,
+    childUnitId: string,
+    previous: ReturnType<IUniverInstanceService['getCurrentUnitOfType']>,
+    embedId?: string,
+    getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined
+): void {
+    if (shouldKeepEmbedProductMenuChildUnit(embedId, getScopedInjector)) {
+        instanceService.setCurrentUnitForType(childUnitId);
+        instanceService.focusUnit?.(childUnitId);
+        return;
+    }
+
+    if (previous) {
+        instanceService.setCurrentUnitForType(previous.getUnitId());
+    }
+}
+
+function shouldKeepEmbedProductMenuChildUnit(
+    embedId?: string,
+    getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined
+): boolean {
+    const injector = getScopedInjector?.();
+    if (!embedId || !injector?.has(EmbedRuntimeFocusCoordinator)) {
+        return false;
+    }
+
+    return injector.get(EmbedRuntimeFocusCoordinator).hasChildInteractionLease(embedId);
 }
 
 function withEmbedProductMenuExecutionInjector(

@@ -237,6 +237,62 @@ describe('EmbedMountService', () => {
         expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-sheet' });
     });
 
+    it('runs child deactivate hooks before deactivating tab sessions', () => {
+        const hostElement = document.createElement('div');
+        const calls: string[] = [];
+        const beforeDeactivate = vi.fn((context: IEmbedChildContainerContext) => {
+            calls.push(`before:${context.embedId}:${hostElement.dataset.embedRenderScopeActive}`);
+        });
+        const service = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement })),
+            childRegistry: createChildRegistry(vi.fn(), beforeDeactivate),
+        });
+
+        service.mount(createDescriptor({
+            sourceMeta: {
+                floating: false,
+                tab: { enabled: true },
+            },
+        }));
+
+        expect(hostElement.dataset.embedRenderScopeActive).toBe('true');
+        expect(service.deactivateTabSessions('embed-1')).toHaveLength(1);
+        expect(beforeDeactivate).toHaveBeenCalledTimes(1);
+        expect(calls).toEqual(['before:embed-1:true']);
+        expect(hostElement.dataset.embedRenderScopeActive).toBe('false');
+    });
+
+    it('runs child deactivate hooks before deactivating floating sessions', () => {
+        const hostElement = document.createElement('div');
+        const calls: string[] = [];
+        const beforeDeactivate = vi.fn((context: IEmbedChildContainerContext) => {
+            calls.push(`before:${context.embedId}:${hostElement.dataset.embedRenderScopeActive}`);
+        });
+        const focusOwnerService = new EmbedFocusOwnerService();
+        focusOwnerService.setFocusOwner({
+            hostUnitId: 'host-1',
+            embedId: 'embed-1',
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            reason: 'pointer',
+        });
+        const service = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement })),
+            childRegistry: createChildRegistry(vi.fn(), beforeDeactivate),
+            injectorEntries: [
+                [EmbedFocusOwnerService, focusOwnerService],
+            ],
+        });
+
+        service.mount(createDescriptor());
+
+        expect(hostElement.dataset.embedRenderScopeActive).toBe('true');
+        expect(service.deactivateFloatingSession('embed-1')?.embedId).toBe('embed-1');
+        expect(beforeDeactivate).toHaveBeenCalledTimes(1);
+        expect(calls).toEqual(['before:embed-1:true']);
+        expect(hostElement.dataset.embedRenderScopeActive).toBe('false');
+    });
+
     it('mounts tab sessions without activating them until the child receives focus', () => {
         const firstHost = document.createElement('div');
         const secondHost = document.createElement('div');
@@ -328,6 +384,48 @@ describe('EmbedMountService', () => {
         expect(firstHost.hasAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe(false);
     });
 
+    it('does not restore previous focus after tab-peer child mount', () => {
+        vi.useFakeTimers();
+        try {
+            const host = document.createElement('div');
+            let focusedUnitId = 'previous-child';
+            const instanceService = {
+                getFocusedUnit: vi.fn(() => ({ getUnitId: () => focusedUnitId })),
+                focusUnit: vi.fn((unitId: string) => {
+                    focusedUnitId = unitId;
+                }),
+            };
+            const service = createMountService({
+                hostRegistry: createHostRegistry(() => ({ hostElement: host })),
+                childRegistry: createChildRegistry(),
+                injectorEntries: [
+                    [IUniverInstanceService, instanceService],
+                ],
+            });
+
+            service.mount(createDescriptor({
+                embedId: 'tab-1',
+                childUnitId: 'next-child',
+                sourceMeta: {
+                    floating: false,
+                    tab: {
+                        enabled: true,
+                        container: 'sheet-tab',
+                        replaceHostMenu: true,
+                        hideHostFxBar: true,
+                        lockHostRibbon: true,
+                    },
+                },
+            }));
+            focusedUnitId = 'next-child';
+            vi.runAllTimers();
+
+            expect(instanceService.focusUnit).not.toHaveBeenCalledWith('previous-child');
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     it('rejects unresolved, unregistered, duplicate, and host-container-less mounts', () => {
         const hostRegistry = createHostRegistry(() => undefined);
         const childRegistry = createChildRegistry();
@@ -410,11 +508,15 @@ function createHostRegistry(mount: () => IDisposable | { hostElement?: HTMLEleme
     return registry;
 }
 
-function createChildRegistry(mount: (context: IEmbedChildContainerContext) => IDisposable | void = vi.fn()): EmbedChildViewRegistryService {
+function createChildRegistry(
+    mount: (context: IEmbedChildContainerContext) => IDisposable | void = vi.fn(),
+    beforeDeactivate?: (context: IEmbedChildContainerContext) => void
+): EmbedChildViewRegistryService {
     const registry = new EmbedChildViewRegistryService();
     registry.register({
         childType: UniverInstanceType.UNIVER_SHEET,
         supportedLayouts: ['doc-width-scale', 'tab-peer'],
+        beforeDeactivate,
         mount,
     });
     registry.register({

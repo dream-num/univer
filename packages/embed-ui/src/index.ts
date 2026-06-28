@@ -130,6 +130,7 @@ export {
 } from './services/embed-mount.service';
 export { EmbedOverlayRootService } from './services/embed-overlay-root.service';
 export type { IEmbedOverlayRootRegistration } from './services/embed-overlay-root.service';
+export { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passive-wheel-handler-registry.service';
 export { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
 export { createEmbedProductFloatingMenuContributions } from './services/embed-product-floating-menu-contributions';
 export { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from './services/embed-product-menu-mounting';
@@ -221,6 +222,7 @@ export type {
     IEmbedMountSession,
     IEmbedPassiveViewportProvider,
     IEmbedPassiveViewportWheelContext,
+    IEmbedPassiveWheelHandlerContribution,
     IEmbedProductMenuContribution,
     IEmbedProductMenuMountContext,
     IEmbedReadonlyPreviewContext,

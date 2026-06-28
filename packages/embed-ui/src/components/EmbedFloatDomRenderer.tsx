@@ -44,6 +44,7 @@ import {
     EmbedInteractionBoundaryService,
 } from '../services/embed-interaction-boundary.service';
 import { EmbedMountService } from '../services/embed-mount.service';
+import { EmbedPassiveWheelHandlerRegistryService } from '../services/embed-passive-wheel-handler-registry.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
 import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
@@ -122,6 +123,7 @@ export function EmbedFloatDomRenderer(props: {
     const interactionBoundaryService = useDependency(EmbedInteractionBoundaryService);
     const mountService = useDependency(EmbedMountService);
     const restoreService = useDependency(EmbedHostRestoreService);
+    const passiveWheelHandlerRegistry = useDependency(EmbedPassiveWheelHandlerRegistryService);
     const passiveViewportRegistry = useDependency(EmbedPassiveViewportRegistryService);
     const focusCoordinator = useDependency(EmbedRuntimeFocusCoordinator);
     const data = normalizeFloatDomData(props.data);
@@ -138,6 +140,8 @@ export function EmbedFloatDomRenderer(props: {
     const hostScrollSyncOffsetRef = useRef(0);
     const externalHostInteractionUntilRef = useRef(0);
     const geometryInvalidationFramesRef = useRef<FrameHandle[]>([]);
+    const latestStageRef = useRef<EmbedFloatingStage>(stage);
+    latestStageRef.current = stage;
     const releaseStage2SessionLease = useCallback(() => {
         stageSessionLeaseRef.current?.dispose();
         stageSessionLeaseRef.current = undefined;
@@ -328,8 +332,38 @@ export function EmbedFloatDomRenderer(props: {
             (typeof document === 'undefined' ? undefined : document);
         const disposable = interactionBoundaryService.activatePortalScope(data.embedId, ownerDocument);
 
-        return () => disposable.dispose();
+        return () => {
+            if (latestStageRef.current !== 'stage2') {
+                interactionBoundaryService.closeOwnedFloatingSurfaces(data.embedId, ownerDocument);
+            }
+            disposable.dispose();
+        };
     }, [data?.embedId, interactionBoundaryService, stage]);
+
+    useEffect(() => {
+        if (!data?.embedId || stage !== 'stage2') {
+            return undefined;
+        }
+
+        const ownerDocument = containerRef.current?.ownerDocument ??
+            liveRootRef.current?.ownerDocument ??
+            (typeof document === 'undefined' ? undefined : document);
+        const appHeaderbar = ownerDocument?.querySelector<HTMLElement>('[data-u-comp="headerbar"]');
+        if (!appHeaderbar) {
+            return undefined;
+        }
+
+        const disposables = [
+            interactionBoundaryService.registerRoot(data.embedId, appHeaderbar),
+            focusCoordinator.registerElement({
+                embedId: data.embedId,
+                role: 'floating-menu',
+                element: appHeaderbar,
+            }),
+        ];
+
+        return () => disposables.forEach((disposable) => disposable.dispose());
+    }, [data?.embedId, focusCoordinator, interactionBoundaryService, stage]);
 
     useEffect(() => {
         const root = containerRef.current;
@@ -829,7 +863,10 @@ export function EmbedFloatDomRenderer(props: {
                     return;
                 }
             }
-            const useRuntimeDomHorizontalScroll = shouldUseRuntimeDomHorizontalScroll(container, event);
+            const featureHandled = providerContext
+                ? passiveWheelHandlerRegistry.handleWheel(providerContext)
+                : false;
+            const useRuntimeDomHorizontalScroll = !featureHandled && shouldUseRuntimeDomHorizontalScroll(container, event);
             const scrollBleedBeforeChild = useRuntimeDomHorizontalScroll && getHorizontalWheelDelta(event) > 0;
             const scrolledBeforeProvider = scrollBleedBeforeChild ? scrollRuntimeDomElement(event, liveRoot) : false;
             const providerHandled = scrolledBeforeProvider || useRuntimeDomHorizontalScroll
@@ -843,7 +880,7 @@ export function EmbedFloatDomRenderer(props: {
                 (providerHandled || useRuntimeDomHorizontalScroll || forwarded
                     ? false
                     : scrollRuntimeDom(event, liveRoot));
-            if (providerHandled || scrolledBeforeProvider || scrolledBeforeForward || forwarded || scrolled) {
+            if (featureHandled || providerHandled || scrolledBeforeProvider || scrolledBeforeForward || forwarded || scrolled) {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -855,7 +892,7 @@ export function EmbedFloatDomRenderer(props: {
             gate.removeEventListener('wheel', onWheel);
             liveRoot.removeEventListener('wheel', onWheel, { capture: true });
         };
-    }, [data?.embedId, floatingActiveService, geometryService, passiveViewportRegistry, props.onHostWheel, props.syncHostVerticalScroll]);
+    }, [data?.embedId, floatingActiveService, geometryService, passiveViewportRegistry, passiveWheelHandlerRegistry, props.onHostWheel, props.syncHostVerticalScroll]);
 
     useEffect(() => {
         const container = containerRef.current;

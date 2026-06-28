@@ -78,6 +78,10 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         return this._floatMenu;
     }
 
+    hideFloatMenu(): void {
+        this._hideFloatMenu();
+    }
+
     private _registerFloatMenu() {
         this.disposeWithMe(this._componentManager.register(FLOAT_MENU_COMPONENT_KEY, FloatToolbar));
     }

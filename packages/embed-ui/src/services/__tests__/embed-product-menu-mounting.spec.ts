@@ -30,6 +30,7 @@ import {
 import { IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
 import { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from '../embed-product-menu-mounting';
 
 const mocks = vi.hoisted(() => {
@@ -171,6 +172,42 @@ describe('embed product menu mounting', () => {
         disposable.dispose();
     });
 
+    it('keeps the product menu scoped to the child while a float stage child lease is active', async () => {
+        const runtimeFocusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const injector = createInjector({ runtimeFocusCoordinator });
+        const lease = runtimeFocusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+        const { injector: scopedInjector, disposable } = createEmbedProductMenuInjector(injector as unknown as Injector, {
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnitId: 'child-sheet',
+            embedId: 'embed-1',
+            menuSchema: {
+                [MenuManagerPosition.RIBBON]: {
+                    start: { title: 'Start' },
+                },
+            },
+        });
+        const scopedCommandService = scopedInjector.get(ICommandService) as ICommandService;
+
+        await scopedCommandService.executeCommand('command.async');
+        scopedCommandService.syncExecuteCommand('command.sync');
+
+        expect(injector.instanceService.setCurrentUnitForType).toHaveBeenNthCalledWith(1, 'child-sheet');
+        expect(injector.instanceService.setCurrentUnitForType).toHaveBeenNthCalledWith(2, 'child-sheet');
+        expect(injector.instanceService.setCurrentUnitForType).toHaveBeenNthCalledWith(3, 'child-sheet');
+        expect(injector.instanceService.setCurrentUnitForType).toHaveBeenNthCalledWith(4, 'child-sheet');
+        expect(injector.instanceService.focusUnit).toHaveBeenCalledTimes(2);
+        expect(injector.instanceService.focusUnit).toHaveBeenLastCalledWith('child-sheet');
+
+        lease.dispose();
+        disposable.dispose();
+    });
+
     it('falls back to the root services when there is no child unit scope', () => {
         const injector = createInjector({ hasCreateScoped: true });
         const rootMenuManager = injector.get(IMenuManagerService) as MenuManagerService;
@@ -186,7 +223,7 @@ describe('embed product menu mounting', () => {
     });
 });
 
-function createInjector(options: { hasCreateScoped?: boolean } = {}) {
+function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator } = {}) {
     const childUnit = { getUnitId: () => 'child-sheet' };
     const previousUnit = { getUnitId: () => 'previous-sheet' };
     const unitAdded$ = new Subject<unknown>();
@@ -217,6 +254,7 @@ function createInjector(options: { hasCreateScoped?: boolean } = {}) {
         getTypeOfUnitAdded$: vi.fn(() => unitAdded$),
         getTypeOfUnitDisposed$: vi.fn(() => unitDisposed$),
         setCurrentUnitForType: vi.fn(),
+        focusUnit: vi.fn(),
     };
     const localeService = {
         t: vi.fn((key: string) => `translated(${key})`),
@@ -228,6 +266,9 @@ function createInjector(options: { hasCreateScoped?: boolean } = {}) {
         [IConfigService, configService],
         [LocaleService, localeService],
     ]);
+    if (options.runtimeFocusCoordinator) {
+        map.set(EmbedRuntimeFocusCoordinator, options.runtimeFocusCoordinator);
+    }
 
     return {
         unitAdded$,

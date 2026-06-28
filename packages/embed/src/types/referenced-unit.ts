@@ -64,4 +64,7 @@ export interface IReferencedUnitListFilter {
 
 export interface IReferencedUnitManagerService {
     ensure(input: IReferencedUnitEnsureInput): IReferencedUnitHandle;
+    list(filter?: IReferencedUnitListFilter): IReferencedUnitUsageRecord[];
+    getByUnitId(unitId: string): IReferencedUnitUsageRecord | null;
+    findByRef(ref: ResourceRefInput): IReferencedUnitUsageRecord[];
 }

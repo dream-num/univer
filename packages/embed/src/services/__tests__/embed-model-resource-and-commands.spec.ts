@@ -233,7 +233,7 @@ describe('embed guest contributions and providers', () => {
 
     it('registers resource ref providers by deterministic ResourceRef match', () => {
         const registry = new EmbedResourceRefProviderRegistryService();
-        const provider = { ensure: vi.fn() };
+        const provider = createResourceRefProvider();
         const registration = {
             registrationId: 'univer-uri-sheet',
             match: {
@@ -269,7 +269,7 @@ describe('embed guest contributions and providers', () => {
             match: {
                 fileKinds: ['uri'],
             },
-            provider: { ensure: vi.fn() },
+            provider: createResourceRefProvider(),
         });
         expect(() => registry.get({
             file: { kind: 'uri', uri: 'univer://workspace/file-1' },
@@ -277,6 +277,20 @@ describe('embed guest contributions and providers', () => {
         })).toThrow('PROVIDER_CONFLICT');
     });
 });
+
+function createResourceRefProvider() {
+    return {
+        prepare: vi.fn((input: { refKey: string; unitType: UniverInstanceType }) => ({
+            materializationKey: input.refKey,
+            unitId: 'runtime-unit',
+            unitType: input.unitType,
+        })),
+        ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
+            unitId: input.plan.unitId,
+            unitType: input.plan.unitType,
+        })),
+    };
+}
 
 describe('retention and focus services', () => {
     it('reports cleanup candidates only when all references are soft deleted', () => {

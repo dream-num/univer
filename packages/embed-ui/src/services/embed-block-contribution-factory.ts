@@ -52,10 +52,11 @@ export function createEmbedRibbonBlockContribution(options: ICreateEmbedRibbonBl
             float: DEFAULT_EMBED_FLOAT_LAYOUT_POLICY,
             docFlow: DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY,
         },
-        createRibbonOverride: ({ childUnitId, injector }) => {
+        createRibbonOverride: ({ childUnitId, embedId, injector }) => {
             const scoped = createEmbedProductMenuInjector(injector as never, {
                 childType,
                 childUnitId,
+                embedId,
                 menuSchema: resolveEmbedProductRibbonMenuSchema(injector, childType, options.menuSchema),
             });
 

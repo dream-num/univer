@@ -105,7 +105,7 @@ export class EmbedActivationService {
         this._floatingActiveService?.clear(embedId);
         this._focusOwnerService.clearFocusOwner(embedId);
         if (embedId) {
-            this._mountService.setActive(embedId, false);
+            this._mountService.deactivateFloatingSession(embedId);
         }
 
         if (nextHostUnitId) {

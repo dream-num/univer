@@ -15,12 +15,14 @@
  */
 
 import type { IConfigService as IConfigServiceType, Injector } from '@univerjs/core';
-import type { IEmbedBlockContribution, IEmbedChildViewContribution } from '@univerjs/embed-ui';
+import type { IEmbedBlockContribution, IEmbedChildContainerContext, IEmbedChildViewContribution } from '@univerjs/embed-ui';
 import type { IDocFitToWidthOptions, IUniverDocsUIConfig } from './config/config';
 import { IConfigService, UniverInstanceType } from '@univerjs/core';
 import { createEmbedRibbonBlockContribution, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { DocFloatMenuService } from './services/float-menu.service';
+import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 
 const EMBED_DOC_FIT_TO_WIDTH_OPTIONS: IDocFitToWidthOptions = {
     mode: 'fit-width',
@@ -41,6 +43,7 @@ export function createDocsEmbedChildViewContribution(): IEmbedChildViewContribut
     return {
         childType: UniverInstanceType.UNIVER_DOC,
         supportedLayouts: ['tab-peer', 'doc-width-scale', 'scroll-contained'],
+        beforeDeactivate: deactivateEmbeddedDocSelection,
         mount: (context) => {
             if (context.renderScope.mode === 'float') {
                 applyDocsEmbedFitToWidthConfig(context.runtimeScope.injector);
@@ -48,6 +51,16 @@ export function createDocsEmbedChildViewContribution(): IEmbedChildViewContribut
             return mountEmbedRenderChildUnit(context, IRenderManagerService);
         },
     };
+}
+
+function deactivateEmbeddedDocSelection(context: IEmbedChildContainerContext): void {
+    const renderManagerService = context.injector.get(IRenderManagerService);
+    const render = renderManagerService.getRenderById(context.childUnitId);
+    const docSelectionRenderService = render?.with(DocSelectionRenderService);
+
+    render?.with(DocFloatMenuService)?.hideFloatMenu();
+    docSelectionRenderService?.removeAllRanges();
+    docSelectionRenderService?.blur();
 }
 
 function applyDocsEmbedFitToWidthConfig(injector: Injector): void {

@@ -832,4 +832,102 @@ describe('EmbedInteractionBoundaryService', () => {
         appChrome.remove();
         root.remove();
     });
+
+    it('dispatches Escape to owned floating surfaces when closing an embed scope', () => {
+        const service = new EmbedInteractionBoundaryService();
+        const root = document.createElement('div');
+        const popup = document.createElement('div');
+        const option = document.createElement('button');
+        const foreignPopup = document.createElement('div');
+        popup.className = 'univer-popover';
+        foreignPopup.className = 'univer-popover';
+        popup.appendChild(option);
+        document.body.append(root, popup, foreignPopup);
+        const rootDisposable = service.registerRoot('embed-1', root);
+        popup.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        option.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        foreignPopup.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-2');
+        const popupEscape = vi.fn();
+        const optionEscape = vi.fn();
+        const foreignEscape = vi.fn();
+        popup.addEventListener('keydown', (event) => {
+            if ((event as KeyboardEvent).key === 'Escape') {
+                popupEscape();
+            }
+        });
+        option.addEventListener('keydown', (event) => {
+            if ((event as KeyboardEvent).key === 'Escape') {
+                optionEscape();
+            }
+        });
+        foreignPopup.addEventListener('keydown', (event) => {
+            if ((event as KeyboardEvent).key === 'Escape') {
+                foreignEscape();
+            }
+        });
+        option.focus();
+
+        service.closeOwnedFloatingSurfaces('embed-1', document);
+
+        expect(optionEscape).toHaveBeenCalledTimes(1);
+        expect(popupEscape).toHaveBeenCalledTimes(1);
+        expect(foreignEscape).not.toHaveBeenCalled();
+
+        rootDisposable.dispose();
+        popup.remove();
+        foreignPopup.remove();
+        root.remove();
+    });
+
+    it('does not dispatch Escape to root-only app chrome when closing floating surfaces', () => {
+        const service = new EmbedInteractionBoundaryService();
+        const root = document.createElement('div');
+        const headerbar = document.createElement('div');
+        const tab = document.createElement('button');
+        headerbar.setAttribute('data-u-comp', 'headerbar');
+        headerbar.appendChild(tab);
+        document.body.append(root, headerbar);
+        const rootDisposable = service.registerRoot('embed-1', root);
+        const headerDisposable = service.registerRoot('embed-1', headerbar);
+        const escape = vi.fn();
+        headerbar.addEventListener('keydown', (event) => {
+            if ((event as KeyboardEvent).key === 'Escape') {
+                escape();
+            }
+        });
+
+        service.closeOwnedFloatingSurfaces('embed-1', document);
+
+        expect(escape).not.toHaveBeenCalled();
+
+        headerDisposable.dispose();
+        rootDisposable.dispose();
+        headerbar.remove();
+        root.remove();
+    });
+
+    it('does not dispatch Escape to persistent embed floating menus when closing transient surfaces', () => {
+        const service = new EmbedInteractionBoundaryService();
+        const root = document.createElement('div');
+        const menu = document.createElement('div');
+        menu.className = 'univer-slide-embed-floating-menu';
+        menu.setAttribute('data-embed-floating-menu', 'true');
+        menu.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        document.body.append(root, menu);
+        const rootDisposable = service.registerRoot('embed-1', root);
+        const escape = vi.fn();
+        menu.addEventListener('keydown', (event) => {
+            if ((event as KeyboardEvent).key === 'Escape') {
+                escape();
+            }
+        });
+
+        service.closeOwnedFloatingSurfaces('embed-1', document);
+
+        expect(escape).not.toHaveBeenCalled();
+
+        rootDisposable.dispose();
+        menu.remove();
+        root.remove();
+    });
 });

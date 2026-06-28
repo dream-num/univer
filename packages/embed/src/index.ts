@@ -90,7 +90,17 @@ export type {
 } from './services/embed-referenced-unit-api-resolver-registry.service';
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
-export type { EmbedResourceRefMaterializationProfile, IEmbedResourceRefEnsureInput, IEmbedResourceRefProvider, IEmbedResourceRefProviderMatch, IEmbedResourceRefProviderRegistration, IReferencedUnitLoadResult } from './services/embed-resource-ref-provider-registry.service';
+export type {
+    IEmbedResourceRefEnsureInput,
+    IEmbedResourceRefProvider,
+    IEmbedResourceRefProviderMatch,
+    IEmbedResourceRefProviderRegistration,
+    IReferencedUnitLoadResult,
+    IReferencedUnitMaterializationEnsureInput,
+    IReferencedUnitMaterializationPlan,
+    IReferencedUnitMaterializationPrepareInput,
+    IReferencedUnitMaterializationProvider,
+} from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
     EmbedHostEntry,

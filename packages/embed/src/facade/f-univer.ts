@@ -139,7 +139,7 @@ export interface IFUniverEmbedMixin {
      * @returns A promise resolving to the loaded unit facade instance.
      * @example TypeScript
      * ```ts
-     * const workbook = await univerAPI.loadUnitAsync(ref, {
+     * const workbook = await univerAPI.loadUnitAsync<UniverFacadeTypes.FWorkbook>(ref, {
      *     unitType: UniverInstanceType.UNIVER_SHEET,
      * });
      * console.log(workbook.getId());

@@ -202,7 +202,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
             plan: input.plan,
         });
         if (resolved.unitType !== input.plan.unitType) {
-            throw new Error('UNIT_TYPE_MISMATCH');
+            throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
         }
         if (resolved.unitId !== input.plan.unitId) {
             throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
@@ -410,7 +410,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         }
 
         if (plan.unitType !== unitType) {
-            throw new Error('UNIT_TYPE_MISMATCH');
+            throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
         }
     }
 
@@ -425,7 +425,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
 
         const refUnitType = fromResourceRefUnitType(ref.unit.type);
         if (declaredUnitType !== undefined && declaredUnitType !== refUnitType) {
-            throw new Error('UNIT_TYPE_MISMATCH');
+            throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
         }
 
         return refUnitType;

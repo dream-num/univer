@@ -139,6 +139,8 @@ export {
     registerEmbedProductMenuContribution,
 } from './services/embed-product-menu-registry.service';
 export { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
+export { EmbedRuntimePolicyService } from './services/embed-runtime-policy.service';
+export type { IEmbedRuntimeAncestor, IEmbedRuntimeMountDecision, IEmbedRuntimePolicyConfig } from './services/embed-runtime-policy.service';
 export { createEmbedRenderCanvasPreviewProvider } from './services/embed-render-canvas-preview-provider';
 export type { ICreateEmbedRenderCanvasPreviewProviderOptions } from './services/embed-render-canvas-preview-provider';
 export {

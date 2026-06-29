@@ -28,6 +28,7 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
+import { CreateEmbedCommand } from '@univerjs/embed';
 import { IContextMenuService, ILayoutService, IMenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -184,6 +185,12 @@ describe('embed child unit scoped injector', () => {
         expect(commandService.executeCommand).toHaveBeenCalledWith(
             'cmd.async',
             { value: 1 },
+            expect.objectContaining({ [COMMAND_EXECUTION_INJECTOR_KEY]: scopedInjector })
+        );
+        await expect(scopedCommandService.executeCommand(CreateEmbedCommand.id, { embedId: 'nested' })).resolves.toBe(true);
+        expect(commandService.executeCommand).toHaveBeenLastCalledWith(
+            CreateEmbedCommand.id,
+            { embedId: 'nested', parentEmbedId: 'embed-1' },
             expect.objectContaining({ [COMMAND_EXECUTION_INJECTOR_KEY]: scopedInjector })
         );
         expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');

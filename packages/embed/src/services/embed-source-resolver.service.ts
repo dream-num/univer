@@ -45,8 +45,12 @@ export class EmbedSourceResolverService {
             if (typeof ref !== 'string' && fromResourceRefUnitType(ref.unit.type) !== source.unitType) {
                 throw new Error('EMBED_SOURCE_TYPE_MISMATCH');
             }
+            const childUnitId = typeof ref !== 'string' && ref.file.kind === 'self'
+                ? ref.unit.selector
+                : undefined;
 
             return {
+                ...(childUnitId ? { childUnitId } : undefined),
                 childType: source.unitType,
                 source: {
                     kind: 'ref',

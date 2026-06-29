@@ -64,6 +64,7 @@ import { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passiv
 import { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
 import { EmbedProductMenuRegistryService } from './services/embed-product-menu-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
+import { EmbedRuntimePolicyService } from './services/embed-runtime-policy.service';
 import { EmbedRuntimeFocusCoordinator } from './services/embed-runtime-focus-coordinator.service';
 import { EmbedSceneCanvasCaptureService } from './services/embed-scene-canvas-capture.service';
 import { flushPendingEmbedUIContributions } from './services/embed-ui-contribution-register';
@@ -122,6 +123,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedPassiveViewportRegistryService],
             [EmbedProductMenuRegistryService],
             [EmbedReadonlyPreviewRegistryService],
+            [EmbedRuntimePolicyService],
             [EmbedRuntimeFocusCoordinator],
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],
@@ -221,6 +223,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedPassiveViewportRegistryService],
             [EmbedProductMenuRegistryService],
             [EmbedReadonlyPreviewRegistryService],
+            [EmbedRuntimePolicyService],
             [EmbedRuntimeFocusCoordinator],
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],

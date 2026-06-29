@@ -17,7 +17,7 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { MenuItemType } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
-import { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, getStaticMenuSelections, resolveMenuCommandRequest, resolveSheetsFloatingMenuStage, resolveSheetsFloatingToolbarMenuItems } from './EmbedFloatingMenu';
+import { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, getStaticMenuSelections, resolveMenuCommandRequest, resolveSheetsFloatingMenuStage, resolveSheetsFloatingToolbarMenuItems, SHEET_FLOATING_MENU_STYLE_TEXT } from './EmbedFloatingMenu';
 
 describe('sheets embed floating menu', () => {
     it('registers the sheet block toolbar for every supported host entry', () => {
@@ -68,6 +68,13 @@ describe('sheets embed floating menu', () => {
             usesDomFloatingStage: true,
             renderScopeActive: false,
         })).toBe('stage2');
+    });
+
+    it('centers the sheet floating toolbar for float hosts', () => {
+        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('left: 50%;');
+        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('transform: translateX(-50%);');
+        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('[data-embed-fullscreen-menu-slot="true"] .univer-sheet-embed-floating-menu');
+        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('transform: none;');
     });
 
     it('keeps the standard sheet float toolbar order stable', () => {

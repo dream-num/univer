@@ -254,10 +254,32 @@ describe('EmbedSourceResolverService', () => {
     it('declares ref sources without materializing them', () => {
         const instanceService = createInstanceService();
         const resolver = new EmbedSourceResolverService(instanceService as never);
+        const selfRef = {
+            file: { kind: 'self' as const },
+            unit: { selector: 'local-sheet', type: 'sheet' as const },
+        };
         const externalRef = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
+        const relativeRef = {
+            file: { kind: 'relative' as const, path: './book.univer' },
+            unit: { selector: 'relative-sheet', type: 'sheet' as const },
+        };
+
+        expect(resolver.resolve({
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: selfRef,
+        })).toEqual({
+            childUnitId: 'local-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            source: {
+                kind: 'ref',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: selfRef,
+            },
+        });
 
         expect(resolver.resolve({
             kind: 'ref',
@@ -271,6 +293,16 @@ describe('EmbedSourceResolverService', () => {
                 ref: externalRef,
             },
         });
+        expect(resolver.resolve({
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: relativeRef,
+        })).not.toHaveProperty('childUnitId');
+        expect(resolver.resolve({
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: 'string-sheet',
+        })).not.toHaveProperty('childUnitId');
         expect(instanceService.getUnitType).not.toHaveBeenCalled();
     });
 });

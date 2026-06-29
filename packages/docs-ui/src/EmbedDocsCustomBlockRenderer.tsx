@@ -104,6 +104,10 @@ export interface IDocsTableLikeCustomBlockWheelHandlerOptions {
     getMaxScrollLeft?: () => number | undefined;
 }
 
+export interface IDocsTableLikeCustomBlockStage2WheelHandlerOptions extends IDocsTableLikeCustomBlockWheelHandlerOptions {
+    getStage: () => 'inactive' | 'stage1' | 'stage2' | undefined;
+}
+
 export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData } & IEmbedDocsCustomBlockRuntimeProps) {
     ensureEmbedDocsCustomBlockStyles();
 
@@ -114,6 +118,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
     const hostUnitId = data?.hostUnitId;
     const resolvedHostUnitId = hostUnitId ?? univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
     const rootRef = useRef<HTMLDivElement>(null);
+    const liveRef = useRef<HTMLElement | null>(null);
     const [viewport, setViewport] = useState(() => createDefaultDocsTableLikeCustomBlockBleedViewport());
     const viewportRef = useRef(viewport);
     const sheetLike = isSheetLikeDocsCustomBlock(data);
@@ -228,6 +233,27 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
         sheetLike,
     ]);
 
+    useLayoutEffect(() => {
+        const root = rootRef.current;
+        if (!root || !sheetLike) {
+            liveRef.current = null;
+            return undefined;
+        }
+
+        const findLiveRoot = () => {
+            liveRef.current = root.querySelector<HTMLElement>('.univer-embed-float-dom__live');
+        };
+        findLiveRoot();
+
+        const observer = new MutationObserver(findLiveRoot);
+        observer.observe(root, { childList: true, subtree: true });
+
+        return () => {
+            liveRef.current = null;
+            observer.disconnect();
+        };
+    }, [sheetLike]);
+
     const contentHeight = sheetLike
         ? resolveDocsTableLikeCustomBlockRuntimeContentHeight(props.customBlockRenderViewport?.contentHeight)
         : resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1);
@@ -309,6 +335,25 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
         return () => root.removeEventListener('wheel', onWheel, { capture: true });
     }, [scrollHostViewportByWheel, sheetLike]);
 
+    useEffect(() => {
+        const root = rootRef.current;
+        if (!root || !sheetLike) {
+            return undefined;
+        }
+
+        const onWheel = createDocsTableLikeCustomBlockStage2WheelHandler({
+            getLive: () => liveRef.current,
+            getStage: () => root.querySelector<HTMLElement>('[data-embed-float-dom]')?.dataset.embedFloatStage as 'inactive' | 'stage1' | 'stage2' | undefined,
+            getMaxScrollLeft: () => {
+                const maxScrollLeft = viewportRef.current.virtualWidth - viewportRef.current.bleedWidth;
+                return maxScrollLeft > 0 ? maxScrollLeft : undefined;
+            },
+        });
+
+        root.addEventListener('wheel', onWheel, { capture: true, passive: false });
+        return () => root.removeEventListener('wheel', onWheel, { capture: true });
+    }, [sheetLike]);
+
     return (
         <div
             ref={rootRef}
@@ -354,6 +399,18 @@ export function createDocsTableLikeCustomBlockWheelHandler(options: IDocsTableLi
             event.preventDefault();
             event.stopPropagation();
         }
+    };
+}
+
+export function createDocsTableLikeCustomBlockStage2WheelHandler(options: IDocsTableLikeCustomBlockStage2WheelHandlerOptions): (event: WheelEvent) => void {
+    const handleWheel = createDocsTableLikeCustomBlockWheelHandler(options);
+
+    return (event: WheelEvent) => {
+        if (options.getStage() !== 'stage2' || !isDominantHorizontalWheel(event)) {
+            return;
+        }
+
+        handleWheel(event);
     };
 }
 
@@ -419,6 +476,16 @@ function isDominantVerticalWheel(event: WheelEvent): boolean {
     }
 
     return Math.abs(event.deltaY) > Math.abs(event.deltaX);
+}
+
+function isDominantHorizontalWheel(event: WheelEvent): boolean {
+    if (event.ctrlKey || event.metaKey) {
+        return false;
+    }
+
+    const deltaX = event.deltaX || (event.shiftKey ? event.deltaY : 0);
+    const deltaY = event.shiftKey ? 0 : event.deltaY;
+    return Math.abs(deltaX) > Math.abs(deltaY);
 }
 
 function measureRuntimeContentWidth(root: HTMLElement, fallbackWidth: number): number {

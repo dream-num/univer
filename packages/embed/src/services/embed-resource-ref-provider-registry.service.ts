@@ -83,7 +83,7 @@ export class EmbedResourceRefProviderRegistryService {
     get(ref: ResourceRefInput, unitType?: ResourceRefUnitType): IEmbedResourceRefProviderRegistration | undefined {
         const matches = this._registrations.filter((registration) => this._matches(registration.match, ref, unitType));
         if (matches.length > 1) {
-            throw new Error('PROVIDER_CONFLICT');
+            throw new Error('REFERENCED_UNIT_PROVIDER_CONFLICT');
         }
 
         return matches[0];

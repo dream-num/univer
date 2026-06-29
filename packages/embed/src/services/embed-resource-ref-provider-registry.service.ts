@@ -19,22 +19,13 @@ import type { IReferencedUnitOwner } from '../types/referenced-unit';
 import type { ResourceRefFile, ResourceRefInput, ResourceRefUnitType } from '../types/resource-ref';
 import { toDisposable } from '@univerjs/core';
 
-export interface IReferencedUnitMaterializationPrepareInput {
+export interface IEmbedResourceRefEnsureInput {
     ref: ResourceRefInput;
     refKey: string;
     owner?: IReferencedUnitOwner;
     unitType: UniverInstanceType;
     createOptions: ICreateUnitOptions;
-}
-
-export interface IReferencedUnitMaterializationPlan {
-    materializationKey: string;
-    unitId: string;
-    unitType: UniverInstanceType;
-}
-
-export interface IReferencedUnitMaterializationEnsureInput extends IReferencedUnitMaterializationPrepareInput {
-    plan: IReferencedUnitMaterializationPlan;
+    signal?: AbortSignal;
 }
 
 export interface IReferencedUnitLoadResult {
@@ -42,13 +33,9 @@ export interface IReferencedUnitLoadResult {
     unitType: UniverInstanceType;
 }
 
-export interface IReferencedUnitMaterializationProvider {
-    prepare: (input: IReferencedUnitMaterializationPrepareInput) => IReferencedUnitMaterializationPlan;
-    ensure: (input: IReferencedUnitMaterializationEnsureInput) => IReferencedUnitLoadResult | Promise<IReferencedUnitLoadResult>;
+export interface IEmbedResourceRefProvider {
+    ensure: (input: IEmbedResourceRefEnsureInput) => IReferencedUnitLoadResult | Promise<IReferencedUnitLoadResult>;
 }
-
-export type IEmbedResourceRefEnsureInput = IReferencedUnitMaterializationEnsureInput;
-export type IEmbedResourceRefProvider = IReferencedUnitMaterializationProvider;
 
 export interface IEmbedResourceRefProviderMatch {
     uriReference?: boolean;

@@ -126,7 +126,7 @@ export interface IFUniverEmbedMixin {
     /**
      * Load a ResourceRef-targeted unit into the current runtime.
      *
-     * This is the generic facade entry for unit materialization. Embed-specific
+     * This is the generic facade entry for unit load. Embed-specific
      * callers can use {@link FEmbed.loadAsync}, which passes an embed owner.
      *
      * @param ref The resource reference to load. String input supports

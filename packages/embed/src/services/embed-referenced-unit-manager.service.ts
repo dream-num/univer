@@ -32,6 +32,7 @@ import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-t
 import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
 
 interface IReferencedUnitStoredRecord extends IReferencedUnitRecord {
+    state: 'pending' | 'loaded';
     usedBy: IReferencedUnitOwner[];
     usageCounts: Map<string, number>;
 }
@@ -68,7 +69,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
             createOptions,
         });
         const existingRecord = this._records.get(plan.materializationKey);
-        if (existingRecord) {
+        if (existingRecord?.state === 'loaded') {
             const loaded = Promise.resolve(this._recordExisting(existingRecord, owner));
             return this._createHandle(plan.materializationKey, owner, loaded, input.signal);
         }
@@ -150,8 +151,17 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
             return inflight;
         }
 
+        this._recordPending(materializationKey, {
+            ref,
+            unitId: input.plan.unitId,
+            unitType: input.plan.unitType,
+        });
         const promise = this._materialize(ref, provider, input)
-            .then((resolved) => this._recordResolved(materializationKey, resolved));
+            .then((resolved) => this._recordResolved(materializationKey, resolved))
+            .catch((error) => {
+                this._removePendingRecord(materializationKey);
+                throw error;
+            });
 
         this._inflight.set(materializationKey, promise);
         promise.then(
@@ -224,20 +234,54 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
     private _recordResolved(materializationKey: string, resolved: IReferencedUnitRecord): IReferencedUnitRecord {
         const existingRecord = this._records.get(materializationKey);
         if (existingRecord) {
+            if (existingRecord.unitId !== resolved.unitId || existingRecord.unitType !== resolved.unitType) {
+                throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+            }
+
+            existingRecord.state = 'loaded';
             return this._toReferencedUnitRecord(existingRecord);
         }
-        const existingUnitRecord = [...this._records.entries()].find(([recordKey, record]) => recordKey !== materializationKey && record.unitId === resolved.unitId);
-        if (existingUnitRecord) {
-            throw new Error('REFERENCED_UNIT_MATERIALIZATION_UNIT_CONFLICT');
-        }
 
+        this._assertUnitIdAvailable(materializationKey, resolved.unitId);
         const record: IReferencedUnitStoredRecord = {
             ...resolved,
+            state: 'loaded',
             usedBy: [],
             usageCounts: new Map(),
         };
         this._records.set(materializationKey, record);
         return this._toReferencedUnitRecord(record);
+    }
+
+    private _recordPending(materializationKey: string, record: IReferencedUnitRecord): IReferencedUnitRecord {
+        const existingRecord = this._records.get(materializationKey);
+        if (existingRecord) {
+            return this._toReferencedUnitRecord(existingRecord);
+        }
+
+        this._assertUnitIdAvailable(materializationKey, record.unitId);
+        this._records.set(materializationKey, {
+            ...record,
+            state: 'pending',
+            usedBy: [],
+            usageCounts: new Map(),
+        });
+
+        return this._toReferencedUnitRecord(record);
+    }
+
+    private _removePendingRecord(materializationKey: string): void {
+        const record = this._records.get(materializationKey);
+        if (record?.state === 'pending') {
+            this._records.delete(materializationKey);
+        }
+    }
+
+    private _assertUnitIdAvailable(materializationKey: string, unitId: string): void {
+        const existingUnitRecord = [...this._records.entries()].find(([recordKey, record]) => recordKey !== materializationKey && record.unitId === unitId);
+        if (existingUnitRecord) {
+            throw new Error('REFERENCED_UNIT_MATERIALIZATION_UNIT_CONFLICT');
+        }
     }
 
     private _createHandle(materializationKey: string, owner: IReferencedUnitOwner | undefined, materialization: Promise<IReferencedUnitRecord>, signal: AbortSignal | undefined): IReferencedUnitHandle {

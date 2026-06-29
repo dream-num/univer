@@ -310,6 +310,10 @@ describe('EmbedReferencedUnitManagerService', () => {
 
         const first = manager.ensure(input);
         const second = manager.ensure(input);
+        let secondSettled = false;
+        second.loaded.then(() => {
+            secondSettled = true;
+        });
         expect(provider.prepare).toHaveBeenCalledTimes(2);
         expect(provider.ensure).toHaveBeenCalledTimes(1);
         expect(provider.ensure).toHaveBeenCalledWith({
@@ -320,6 +324,14 @@ describe('EmbedReferencedUnitManagerService', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
             plan,
         });
+        expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
+            ref,
+            unitId: 'runtime-sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            usedBy: [],
+        });
+        await Promise.resolve();
+        expect(secondSettled).toBe(false);
 
         resolveProvider({
             unitId: 'runtime-sheet-1',
@@ -392,6 +404,48 @@ describe('EmbedReferencedUnitManagerService', () => {
             unitId: 'runtime-sheet-1',
             unitType: UniverInstanceType.UNIVER_SHEET,
             usedBy: [],
+        });
+    });
+
+    it('exposes the pending record before provider-created unit events can run', async () => {
+        const ref = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet', type: 'sheet' as const },
+        };
+        const plan = {
+            materializationKey: 'referenced-unit:pending-before-create',
+            unitId: 'runtime-sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+        };
+        let manager!: EmbedReferencedUnitManagerService;
+        const provider = {
+            prepare: vi.fn(() => plan),
+            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => {
+                expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
+                    ref,
+                    unitId: 'runtime-sheet-1',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                    usedBy: [],
+                });
+
+                return {
+                    unitId: input.plan.unitId,
+                    unitType: input.plan.unitType,
+                };
+            }),
+        };
+        const providerRegistry = {
+            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
+        };
+        manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+
+        await expect(manager.ensure({
+            ref,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        }).loaded).resolves.toEqual({
+            ref,
+            unitId: 'runtime-sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
         });
     });
 
@@ -625,6 +679,76 @@ describe('EmbedReferencedUnitManagerService', () => {
             ref,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         }).loaded).rejects.toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+    });
+
+    it('removes pending records when provider materialization fails', async () => {
+        const ref = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet', type: 'sheet' as const },
+        };
+        const plan = {
+            materializationKey: 'referenced-unit:rejected',
+            unitId: 'runtime-sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+        };
+        const provider = {
+            prepare: vi.fn(() => plan),
+            ensure: vi.fn(() => Promise.reject(new Error('load failed'))),
+        };
+        const providerRegistry = {
+            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
+        };
+        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const handle = manager.ensure({
+            ref,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        });
+
+        expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
+            ref,
+            unitId: 'runtime-sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            usedBy: [],
+        });
+        await expect(handle.loaded).rejects.toThrow('load failed');
+        expect(manager.getByUnitId('runtime-sheet-1')).toBeNull();
+    });
+
+    it('rejects duplicate local unit ids before provider ensure creates another unit', async () => {
+        const firstRef = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet-1', type: 'sheet' as const },
+        };
+        const secondRef = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet-2', type: 'sheet' as const },
+        };
+        const provider = {
+            prepare: vi.fn((input: { ref: typeof firstRef | typeof secondRef }) => ({
+                materializationKey: `referenced-unit:${input.ref.unit.selector}`,
+                unitId: 'runtime-sheet-1',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            })),
+            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
+                unitId: input.plan.unitId,
+                unitType: input.plan.unitType,
+            })),
+        };
+        const providerRegistry = {
+            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
+        };
+        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+
+        await manager.ensure({
+            ref: firstRef,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        }).loaded;
+
+        expect(() => manager.ensure({
+            ref: secondRef,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toThrow('REFERENCED_UNIT_MATERIALIZATION_UNIT_CONFLICT');
+        expect(provider.ensure).toHaveBeenCalledTimes(1);
     });
 });
 

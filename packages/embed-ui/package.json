@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/embed-ui",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.1",
     "private": false,
     "description": "Cross-unit embed UI registry and host integration foundation for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -274,7 +274,7 @@ describe('embed guest contributions and providers', () => {
         expect(() => registry.get({
             file: { kind: 'uri', uri: 'univer://workspace/file-1' },
             unit: { selector: 'sheet-1', type: 'sheet' },
-        })).toThrow('PROVIDER_CONFLICT');
+        })).toThrow('REFERENCED_UNIT_PROVIDER_CONFLICT');
     });
 });
 

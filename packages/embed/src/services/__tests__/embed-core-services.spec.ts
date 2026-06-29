@@ -654,6 +654,49 @@ describe('EmbedReferencedUnitManagerService', () => {
         }]);
     });
 
+    it('rejects request unit type mismatches with a referenced-unit stable error', () => {
+        const ref = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet', type: 'sheet' as const },
+        };
+        const providerRegistry = {
+            get: vi.fn(),
+        };
+        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+
+        expect(() => manager.ensure({
+            ref,
+            unitType: UniverInstanceType.UNIVER_DOC,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toThrow('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
+        expect(providerRegistry.get).not.toHaveBeenCalled();
+    });
+
+    it('rejects provider plans that do not match the requested unit type', () => {
+        const ref = {
+            file: { kind: 'uri' as const, uri: 'univer://file-1' },
+            unit: { selector: 'remote-sheet', type: 'sheet' as const },
+        };
+        const provider = {
+            prepare: vi.fn(() => ({
+                materializationKey: 'referenced-unit:mismatch',
+                unitId: 'runtime-sheet-1',
+                unitType: UniverInstanceType.UNIVER_DOC,
+            })),
+            ensure: vi.fn(),
+        };
+        const providerRegistry = {
+            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
+        };
+        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+
+        expect(() => manager.ensure({
+            ref,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+        expect(provider.ensure).not.toHaveBeenCalled();
+    });
+
     it('rejects provider results that do not match the materialization plan', async () => {
         const ref = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
@@ -676,6 +719,26 @@ describe('EmbedReferencedUnitManagerService', () => {
         const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
 
         await expect(manager.ensure({
+            ref,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        }).loaded).rejects.toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+
+        const unitTypeMismatchProvider = {
+            prepare: vi.fn(() => ({
+                materializationKey: 'referenced-unit:unit-type-mismatch',
+                unitId: 'planned-runtime-sheet',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            })),
+            ensure: vi.fn(() => ({
+                unitId: 'planned-runtime-sheet',
+                unitType: UniverInstanceType.UNIVER_DOC,
+            })),
+        };
+        const unitTypeMismatchManager = new EmbedReferencedUnitManagerService({
+            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider: unitTypeMismatchProvider })),
+        } as never);
+
+        await expect(unitTypeMismatchManager.ensure({
             ref,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         }).loaded).rejects.toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');

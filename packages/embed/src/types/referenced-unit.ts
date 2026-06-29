@@ -40,10 +40,6 @@ export interface IReferencedUnitRecord {
     unitType: UniverInstanceType;
 }
 
-export interface IReferencedUnitUsageRecord extends IReferencedUnitRecord {
-    usedBy: readonly IReferencedUnitOwner[];
-}
-
 export interface IReferencedUnitHandle {
     readonly loaded: Promise<IReferencedUnitRecord>;
     dispose(): void;
@@ -57,14 +53,6 @@ export interface IReferencedUnitEnsureInput {
     createOptions?: ICreateUnitOptions;
 }
 
-export interface IReferencedUnitListFilter {
-    ref?: ResourceRefInput;
-    owner?: IReferencedUnitOwner;
-}
-
 export interface IReferencedUnitManagerService {
     ensure(input: IReferencedUnitEnsureInput): IReferencedUnitHandle;
-    list(filter?: IReferencedUnitListFilter): IReferencedUnitUsageRecord[];
-    getByUnitId(unitId: string): IReferencedUnitUsageRecord | null;
-    findByRef(ref: ResourceRefInput): IReferencedUnitUsageRecord[];
 }

@@ -280,14 +280,9 @@ describe('embed guest contributions and providers', () => {
 
 function createResourceRefProvider() {
     return {
-        prepare: vi.fn((input: { refKey: string; unitType: UniverInstanceType }) => ({
-            materializationKey: input.refKey,
+        ensure: vi.fn((input: { unitType: UniverInstanceType }) => ({
             unitId: 'runtime-unit',
             unitType: input.unitType,
-        })),
-        ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
-            unitId: input.plan.unitId,
-            unitType: input.plan.unitType,
         })),
     };
 }

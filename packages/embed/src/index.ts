@@ -96,10 +96,6 @@ export type {
     IEmbedResourceRefProviderMatch,
     IEmbedResourceRefProviderRegistration,
     IReferencedUnitLoadResult,
-    IReferencedUnitMaterializationEnsureInput,
-    IReferencedUnitMaterializationPlan,
-    IReferencedUnitMaterializationPrepareInput,
-    IReferencedUnitMaterializationProvider,
 } from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
@@ -143,11 +139,9 @@ export type {
 export type {
     IReferencedUnitEnsureInput,
     IReferencedUnitHandle,
-    IReferencedUnitListFilter,
     IReferencedUnitManagerService,
     IReferencedUnitOwner,
     IReferencedUnitRecord,
-    IReferencedUnitUsageRecord,
 } from './types/referenced-unit';
 export {
     ReferencedUnitOwnerKind,

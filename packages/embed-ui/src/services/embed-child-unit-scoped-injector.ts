@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, IExecutionOptions, IUndoRedoItem, UniverInstanceType } from '@univerjs/core';
+import type { ICreateEmbedCommandParams } from '@univerjs/embed';
 import type { MenuManagerService } from '@univerjs/ui';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import {
@@ -25,6 +26,7 @@ import {
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
+import { CreateEmbedCommand } from '@univerjs/embed';
 import { IContextMenuService, ILayoutService, IMenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
@@ -32,6 +34,7 @@ import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
     EmbedRuntimeFocusCoordinator,
 } from './embed-runtime-focus-coordinator.service';
+import { EmbedRuntimePolicyService } from './embed-runtime-policy.service';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
 export function createEmbedChildUnitScopedInjector(
@@ -116,7 +119,7 @@ export function createEmbedChildUnitScopedInjector(
                     try {
                         instanceService.setCurrentUnitForType(context.childUnitId);
                         instanceService.focusUnit(context.childUnitId);
-                        return await target.executeCommand(args[0], args[1], withScopedExecutionInjector(args[2], scopedInjector));
+                        return await target.executeCommand(args[0], withNestedCreateEmbedGuard(context, args[0], args[1]), withScopedExecutionInjector(args[2], scopedInjector));
                     } finally {
                         if (previous) {
                             instanceService.setCurrentUnitForType(previous.getUnitId());
@@ -132,7 +135,7 @@ export function createEmbedChildUnitScopedInjector(
                     try {
                         instanceService.setCurrentUnitForType(context.childUnitId);
                         instanceService.focusUnit(context.childUnitId);
-                        return target.syncExecuteCommand(args[0], args[1], withScopedExecutionInjector(args[2], scopedInjector));
+                        return target.syncExecuteCommand(args[0], withNestedCreateEmbedGuard(context, args[0], args[1]), withScopedExecutionInjector(args[2], scopedInjector));
                     } finally {
                         if (previous) {
                             instanceService.setCurrentUnitForType(previous.getUnitId());
@@ -149,6 +152,9 @@ export function createEmbedChildUnitScopedInjector(
         [IUniverInstanceService, scopedInstanceService],
         [ICommandService, commandService],
     ]);
+    if (context.injector.has(EmbedRuntimePolicyService)) {
+        scopedOverrides.set(EmbedRuntimePolicyService, context.injector.get(EmbedRuntimePolicyService));
+    }
     const scopedUndoRedoService = createScopedUndoRedoService(context.injector, context.childUnitId);
     if (scopedUndoRedoService) {
         scopedOverrides.set(IUndoRedoService, scopedUndoRedoService);
@@ -178,6 +184,26 @@ function withScopedExecutionInjector(
     const scopedOptions: IExecutionOptions = { ...options };
     scopedOptions[COMMAND_EXECUTION_INJECTOR_KEY] = injector;
     return scopedOptions;
+}
+
+function withNestedCreateEmbedGuard(
+    context: IEmbedChildContainerContext,
+    commandId: string,
+    params: object | undefined
+): object | undefined {
+    if (commandId !== CreateEmbedCommand.id || !params || typeof params !== 'object') {
+        return params;
+    }
+
+    const createParams = params as ICreateEmbedCommandParams;
+    if (createParams.parentEmbedId) {
+        return createParams;
+    }
+
+    return {
+        ...createParams,
+        parentEmbedId: context.embedId,
+    };
 }
 
 function createScopedUndoRedoService(parentInjector: Injector, childUnitId: string): IUndoRedoService | undefined {

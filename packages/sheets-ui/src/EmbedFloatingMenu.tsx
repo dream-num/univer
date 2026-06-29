@@ -89,6 +89,33 @@ import {
 import { SetOnceFormatPainterCommand } from './commands/commands/set-format-painter.command';
 
 const SHEET_FLOATING_MENU_STYLE_ID = 'univer-sheet-embed-floating-menu-styles';
+export const SHEET_FLOATING_MENU_STYLE_TEXT = `
+.univer-sheet-embed-floating-menu {
+    position: absolute;
+    top: var(--univer-embed-floating-menu-top, -36px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    max-width: min(calc(100vw - 72px), 880px);
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+}
+.univer-sheet-embed-floating-menu::-webkit-scrollbar {
+    display: none;
+}
+[data-embed-floating-menu-entry="docs-custom-block"] .univer-sheet-embed-floating-menu {
+    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
+}
+.univer-sheet-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
+    display: none;
+}
+[data-embed-fullscreen-menu-slot="true"] .univer-sheet-embed-floating-menu {
+    position: static;
+    margin: 6px auto;
+    transform: none;
+}
+`;
 const OPEN_NUMFMT_PANEL_MENU_ID = 'sheet.operation.open.numfmt.panel';
 const SMART_TOGGLE_FILTER_MENU_ID = 'sheet.command.smart-toggle-filter';
 type SheetFloatingMenuStage = 'inactive' | 'stage2';
@@ -1046,33 +1073,6 @@ function ensureSheetFloatingMenuStyles(): void {
 
     const style = document.createElement('style');
     style.id = SHEET_FLOATING_MENU_STYLE_ID;
-    style.textContent = `
-.univer-sheet-embed-floating-menu {
-    position: absolute;
-    top: var(--univer-embed-floating-menu-top, -36px);
-    left: 34px;
-    z-index: 30;
-    max-width: min(calc(100vw - 72px), 880px);
-    overflow-x: auto;
-    overflow-y: visible;
-    scrollbar-width: none;
-}
-.univer-sheet-embed-floating-menu::-webkit-scrollbar {
-    display: none;
-}
-[data-embed-floating-menu-entry="docs-custom-block"] .univer-sheet-embed-floating-menu {
-    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
-    left: 50%;
-    transform: translateX(-50%);
-}
-.univer-sheet-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
-    display: none;
-}
-[data-embed-fullscreen-menu-slot="true"] .univer-sheet-embed-floating-menu {
-    position: static;
-    margin: 6px auto;
-    transform: none;
-}
-`;
+    style.textContent = SHEET_FLOATING_MENU_STYLE_TEXT;
     document.head.appendChild(style);
 }

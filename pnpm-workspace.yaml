@@ -1,16 +1,21 @@
 packages:
-    - common/*
-    - examples
-    - mockdata
-    - presets
-    - presets/packages/*
-    - packages/*
-    - tests/*
+  - common/*
+  - examples
+  - mockdata
+  - presets
+  - presets/packages/*
+  - packages/*
+  - tests/*
 publicHoistPattern:
-    - '@storybook/react'
+  - '@storybook/react'
 overrides:
-    '@types/react': 19.2.17
-    '@types/react-dom': 19.2.3
-    basic-ftp: 5.2.0
-    react: 19.2.7
-    react-dom: 19.2.7
+  '@types/react': 19.2.17
+  '@types/react-dom': 19.2.3
+  basic-ftp: 5.2.0
+  react: 19.2.7
+  react-dom: 19.2.7
+allowBuilds:
+  '@parcel/watcher': set this to true or false
+  '@swc/core': set this to true or false
+  esbuild: set this to true or false
+  protobufjs: set this to true or false

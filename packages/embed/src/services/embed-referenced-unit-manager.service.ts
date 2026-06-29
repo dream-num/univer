@@ -17,14 +17,12 @@
 import type {
     IReferencedUnitEnsureInput,
     IReferencedUnitHandle,
-    IReferencedUnitListFilter,
     IReferencedUnitManagerService,
     IReferencedUnitOwner,
     IReferencedUnitRecord,
-    IReferencedUnitUsageRecord,
 } from '../types/referenced-unit';
 import type { ResourceRefInput } from '../types/resource-ref';
-import type { IReferencedUnitMaterializationPlan, IReferencedUnitMaterializationProvider } from './embed-resource-ref-provider-registry.service';
+import type { IEmbedResourceRefProvider } from './embed-resource-ref-provider-registry.service';
 import { Optional, UniverInstanceType } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
@@ -32,7 +30,6 @@ import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-t
 import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
 
 interface IReferencedUnitStoredRecord extends IReferencedUnitRecord {
-    state: 'pending' | 'loaded';
     usedBy: IReferencedUnitOwner[];
     usageCounts: Map<string, number>;
 }
@@ -42,12 +39,7 @@ interface IPreparedReferencedUnitEnsureInput extends IReferencedUnitEnsureInput 
     createOptions: NonNullable<IReferencedUnitEnsureInput['createOptions']>;
 }
 
-interface IPlannedReferencedUnitEnsureInput extends IPreparedReferencedUnitEnsureInput {
-    plan: IReferencedUnitMaterializationPlan;
-}
-
 export class EmbedReferencedUnitManagerService implements IReferencedUnitManagerService {
-    private readonly _inflight = new Map<string, Promise<IReferencedUnitRecord>>();
     private readonly _records = new Map<string, IReferencedUnitStoredRecord>();
 
     constructor(
@@ -61,137 +53,33 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         const unitType = this._resolveUnitType(ref, input.unitType);
         const owner = this._normalizeOwner(input.owner);
         const createOptions = input.createOptions ?? EMBED_CHILD_CREATE_OPTIONS;
-        const { plan, provider } = this._prepareMaterializationPlan(ref, {
+        const provider = this._getProvider(ref, unitType);
+        const loaded = this._ensureProviderRef(ref, provider, {
             ...input,
             ref,
             unitType,
             owner,
             createOptions,
-        });
-        const existingRecord = this._records.get(plan.materializationKey);
-        if (existingRecord?.state === 'loaded') {
-            const loaded = Promise.resolve(this._recordExisting(existingRecord, owner));
-            return this._createHandle(plan.materializationKey, owner, loaded, input.signal);
-        }
-
-        const materialization = this._ensureMaterialization(plan.materializationKey, ref, provider, {
-            ...input,
-            ref,
-            unitType,
-            owner,
-            createOptions,
-            plan,
-        });
-        const loaded = this._recordUsageAfterMaterialization(plan.materializationKey, materialization, owner);
-        return this._createHandle(plan.materializationKey, owner, loaded, input.signal);
+        }).then((record) => this._recordLoaded(record, owner));
+        return this._createHandle(owner, loaded, input.signal);
     }
 
-    list(filter: IReferencedUnitListFilter = {}): IReferencedUnitUsageRecord[] {
-        const refKey = filter.ref ? getResourceRefInputKey(filter.ref) : undefined;
-        const owner = this._normalizeOwner(filter.owner);
-        return [...this._records.values()]
-            .filter((record) => {
-                if (refKey && getResourceRefInputKey(record.ref) !== refKey) {
-                    return false;
-                }
-
-                if (owner && !record.usedBy.some((item) => this._isSameOwner(item, owner))) {
-                    return false;
-                }
-
-                return true;
-            })
-            .map((record) => this._toRecord(record));
-    }
-
-    getByUnitId(unitId: string): IReferencedUnitUsageRecord | null {
-        const record = [...this._records.values()].find((item) => item.unitId === unitId);
-        return record ? this._toRecord(record) : null;
-    }
-
-    findByRef(ref: ResourceRefInput): IReferencedUnitUsageRecord[] {
-        const refKey = getResourceRefInputKey(ref);
-        return [...this._records.values()]
-            .filter((record) => getResourceRefInputKey(record.ref) === refKey)
-            .map((record) => this._toRecord(record));
-    }
-
-    private _prepareMaterializationPlan(
+    private _getProvider(
         ref: ResourceRefInput,
-        input: IPreparedReferencedUnitEnsureInput
-    ): { plan: IReferencedUnitMaterializationPlan; provider: IReferencedUnitMaterializationProvider } {
-        const registration = this._resourceRefProviderRegistry?.get(ref, toResourceRefUnitType(input.unitType));
+        unitType: UniverInstanceType
+    ): IEmbedResourceRefProvider {
+        const registration = this._resourceRefProviderRegistry?.get(ref, toResourceRefUnitType(unitType));
         if (!registration) {
             throw new Error('REFERENCED_UNIT_PROVIDER_NOT_FOUND');
         }
 
-        const plan = registration.provider.prepare({
-            ref,
-            refKey: getResourceRefInputKey(ref),
-            owner: input.owner,
-            unitType: input.unitType,
-            createOptions: input.createOptions,
-        });
-
-        this._assertMaterializationPlan(plan, input.unitType);
-        return {
-            plan,
-            provider: registration.provider,
-        };
-    }
-
-    private _ensureMaterialization(
-        materializationKey: string,
-        ref: ResourceRefInput,
-        provider: IReferencedUnitMaterializationProvider,
-        input: IPlannedReferencedUnitEnsureInput
-    ): Promise<IReferencedUnitRecord> {
-        const inflight = this._inflight.get(materializationKey);
-        if (inflight) {
-            return inflight;
-        }
-
-        this._recordPending(materializationKey, {
-            ref,
-            unitId: input.plan.unitId,
-            unitType: input.plan.unitType,
-        });
-        const promise = this._materialize(ref, provider, input)
-            .then((resolved) => this._recordResolved(materializationKey, resolved))
-            .catch((error) => {
-                this._removePendingRecord(materializationKey);
-                throw error;
-            });
-
-        this._inflight.set(materializationKey, promise);
-        promise.then(
-            () => {
-                if (this._inflight.get(materializationKey) === promise) {
-                    this._inflight.delete(materializationKey);
-                }
-            },
-            () => {
-                if (this._inflight.get(materializationKey) === promise) {
-                    this._inflight.delete(materializationKey);
-                }
-            }
-        );
-
-        return promise;
-    }
-
-    private async _materialize(
-        ref: ResourceRefInput,
-        provider: IReferencedUnitMaterializationProvider,
-        input: IPlannedReferencedUnitEnsureInput
-    ): Promise<IReferencedUnitRecord> {
-        return this._ensureProviderRef(ref, provider, input);
+        return registration.provider;
     }
 
     private async _ensureProviderRef(
         ref: ResourceRefInput,
-        provider: IReferencedUnitMaterializationProvider,
-        input: IPlannedReferencedUnitEnsureInput
+        provider: IEmbedResourceRefProvider,
+        input: IPreparedReferencedUnitEnsureInput
     ): Promise<IReferencedUnitRecord> {
         const resolved = await provider.ensure({
             ref,
@@ -199,119 +87,75 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
             owner: input.owner,
             unitType: input.unitType,
             createOptions: input.createOptions,
-            plan: input.plan,
+            signal: input.signal,
         });
-        if (resolved.unitType !== input.plan.unitType) {
-            throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
-        }
-        if (resolved.unitId !== input.plan.unitId) {
-            throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+        if (resolved.unitType !== input.unitType) {
+            throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
         }
 
         return {
             ref,
             unitId: resolved.unitId,
-            unitType: input.plan.unitType,
+            unitType: resolved.unitType,
         };
     }
 
-    private async _recordUsageAfterMaterialization(materializationKey: string, materialization: Promise<IReferencedUnitRecord>, owner: IReferencedUnitOwner | undefined): Promise<IReferencedUnitRecord> {
-        await materialization;
-        const record = this._records.get(materializationKey);
-        if (!record) {
-            throw new Error('REFERENCED_UNIT_RECORD_NOT_FOUND');
+    private _recordLoaded(record: IReferencedUnitRecord, owner: IReferencedUnitOwner | undefined): IReferencedUnitRecord {
+        if (!owner) {
+            return this._toReferencedUnitRecord(record);
         }
 
-        this._addUsageOwner(record, owner);
-        return this._toReferencedUnitRecord(record);
+        const loadedKey = this._getLoadedKey(record);
+        let stored = this._records.get(loadedKey);
+        if (!stored) {
+            stored = {
+                ...record,
+                usedBy: [],
+                usageCounts: new Map(),
+            };
+            this._records.set(loadedKey, stored);
+        }
+        this._addUsageOwner(stored, owner);
+        return this._toReferencedUnitRecord(stored);
     }
 
-    private _recordExisting(record: IReferencedUnitStoredRecord, owner: IReferencedUnitOwner | undefined): IReferencedUnitRecord {
-        this._addUsageOwner(record, owner);
-        return this._toReferencedUnitRecord(record);
+    private _getLoadedKey(record: IReferencedUnitRecord): string {
+        return JSON.stringify([
+            getResourceRefInputKey(record.ref),
+            record.unitType,
+            record.unitId,
+        ]);
     }
 
-    private _recordResolved(materializationKey: string, resolved: IReferencedUnitRecord): IReferencedUnitRecord {
-        const existingRecord = this._records.get(materializationKey);
-        if (existingRecord) {
-            if (existingRecord.unitId !== resolved.unitId || existingRecord.unitType !== resolved.unitType) {
-                throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+    private _createHandle(owner: IReferencedUnitOwner | undefined, loadedRecord: Promise<IReferencedUnitRecord>, signal: AbortSignal | undefined): IReferencedUnitHandle {
+        let disposed = false;
+        let loadedKey: string | undefined;
+        const tracked = loadedRecord.then((record) => {
+            loadedKey = this._getLoadedKey(record);
+            if (disposed) {
+                this._removeUsageOwner(loadedKey, owner);
             }
 
-            existingRecord.state = 'loaded';
-            return this._toReferencedUnitRecord(existingRecord);
-        }
-
-        this._assertUnitIdAvailable(materializationKey, resolved.unitId);
-        const record: IReferencedUnitStoredRecord = {
-            ...resolved,
-            state: 'loaded',
-            usedBy: [],
-            usageCounts: new Map(),
-        };
-        this._records.set(materializationKey, record);
-        return this._toReferencedUnitRecord(record);
-    }
-
-    private _recordPending(materializationKey: string, record: IReferencedUnitRecord): IReferencedUnitRecord {
-        const existingRecord = this._records.get(materializationKey);
-        if (existingRecord) {
-            return this._toReferencedUnitRecord(existingRecord);
-        }
-
-        this._assertUnitIdAvailable(materializationKey, record.unitId);
-        this._records.set(materializationKey, {
-            ...record,
-            state: 'pending',
-            usedBy: [],
-            usageCounts: new Map(),
+            return record;
         });
 
-        return this._toReferencedUnitRecord(record);
-    }
-
-    private _removePendingRecord(materializationKey: string): void {
-        const record = this._records.get(materializationKey);
-        if (record?.state === 'pending') {
-            this._records.delete(materializationKey);
-        }
-    }
-
-    private _assertUnitIdAvailable(materializationKey: string, unitId: string): void {
-        const existingUnitRecord = [...this._records.entries()].find(([recordKey, record]) => recordKey !== materializationKey && record.unitId === unitId);
-        if (existingUnitRecord) {
-            throw new Error('REFERENCED_UNIT_MATERIALIZATION_UNIT_CONFLICT');
-        }
-    }
-
-    private _createHandle(materializationKey: string, owner: IReferencedUnitOwner | undefined, materialization: Promise<IReferencedUnitRecord>, signal: AbortSignal | undefined): IReferencedUnitHandle {
-        let disposed = false;
         const dispose = () => {
             if (disposed) {
                 return;
             }
 
             disposed = true;
-            this._removeUsageOwner(materializationKey, owner);
+            if (loadedKey) {
+                this._removeUsageOwner(loadedKey, owner);
+            }
         };
 
-        materialization.then(
-            () => {
-                if (disposed) {
-                    this._removeUsageOwner(materializationKey, owner);
-                }
-            },
-            () => {
-                // Materialization failures have no usage edge to release.
-            }
-        );
-
         const loaded = signal
-            ? this._withAbort(materialization, signal).catch((error) => {
+            ? this._withAbort(tracked, signal).catch((error) => {
                 dispose();
                 throw error;
             })
-            : materialization;
+            : tracked;
 
         return {
             loaded,
@@ -356,12 +200,12 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         }
     }
 
-    private _removeUsageOwner(materializationKey: string, owner: IReferencedUnitOwner | undefined): void {
+    private _removeUsageOwner(loadedKey: string, owner: IReferencedUnitOwner | undefined): void {
         if (!owner) {
             return;
         }
 
-        const record = this._records.get(materializationKey);
+        const record = this._records.get(loadedKey);
         if (!record) {
             return;
         }
@@ -375,6 +219,9 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
 
         record.usageCounts.delete(ownerKey);
         record.usedBy = record.usedBy.filter((item) => !this._isSameOwner(item, owner));
+        if (record.usedBy.length === 0) {
+            this._records.delete(loadedKey);
+        }
     }
 
     private _toReferencedUnitRecord(record: IReferencedUnitRecord): IReferencedUnitRecord {
@@ -382,13 +229,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
             ref: record.ref,
             unitId: record.unitId,
             unitType: record.unitType,
-        };
-    }
-
-    private _toRecord(record: IReferencedUnitStoredRecord): IReferencedUnitUsageRecord {
-        return {
-            ...this._toReferencedUnitRecord(record),
-            usedBy: record.usedBy.map((owner) => ({ ...owner })),
         };
     }
 
@@ -402,16 +242,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
 
     private _getOwnerKey(owner: IReferencedUnitOwner): string {
         return JSON.stringify([owner.kind, owner.unitId ?? '', owner.ownerId ?? '']);
-    }
-
-    private _assertMaterializationPlan(plan: IReferencedUnitMaterializationPlan, unitType: UniverInstanceType): void {
-        if (!plan || !plan.materializationKey || !plan.unitId) {
-            throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_INVALID');
-        }
-
-        if (plan.unitType !== unitType) {
-            throw new Error('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
-        }
     }
 
     private _resolveUnitType(ref: ResourceRefInput, declaredUnitType: UniverInstanceType | undefined): UniverInstanceType {

@@ -276,23 +276,16 @@ describe('EmbedSourceResolverService', () => {
 });
 
 describe('EmbedReferencedUnitManagerService', () => {
-    it('deduplicates concurrent materialization for the same embed owner and records usage', async () => {
+    it('calls provider ensure with a single-stage load input and records owner usage', async () => {
         const ref = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
-        let resolveProvider!: (value: IReferencedUnitLoadResult) => void;
-        const providerResult = new Promise<IReferencedUnitLoadResult>((resolve) => {
-            resolveProvider = resolve;
-        });
-        const plan = {
-            materializationKey: 'referenced-unit:embed-1',
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        };
         const provider = {
-            prepare: vi.fn(() => plan),
-            ensure: vi.fn(() => providerResult),
+            ensure: vi.fn((input) => ({
+                unitId: 'runtime-sheet-1',
+                unitType: input.unitType,
+            })),
         };
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
@@ -308,73 +301,21 @@ describe('EmbedReferencedUnitManagerService', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         };
 
-        const first = manager.ensure(input);
-        const second = manager.ensure(input);
-        let secondSettled = false;
-        second.loaded.then(() => {
-            secondSettled = true;
+        const handle = manager.ensure(input);
+        await expect(handle.loaded).resolves.toEqual({
+            ref,
+            unitId: 'runtime-sheet-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
         });
-        expect(provider.prepare).toHaveBeenCalledTimes(2);
-        expect(provider.ensure).toHaveBeenCalledTimes(1);
         expect(provider.ensure).toHaveBeenCalledWith({
             ref,
             refKey: getResourceRefInputKey(ref),
             owner: input.owner,
             unitType: UniverInstanceType.UNIVER_SHEET,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
-            plan,
+            signal: undefined,
         });
-        expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [],
-        });
-        await Promise.resolve();
-        expect(secondSettled).toBe(false);
-
-        resolveProvider({
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        });
-        await expect(Promise.all([first.loaded, second.loaded])).resolves.toEqual([{
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        }, {
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        }]);
-
-        const cached = manager.ensure(input);
-        await expect(cached.loaded).resolves.toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        });
-        expect(provider.ensure).toHaveBeenCalledTimes(1);
-        expect(manager.list({ owner: input.owner })).toEqual([{
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [{
-                kind: ReferencedUnitOwnerKind.Embed,
-                unitId: 'host-doc',
-                ownerId: 'embed-1',
-            }],
-        }]);
-        expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [{
-                kind: ReferencedUnitOwnerKind.Embed,
-                unitId: 'host-doc',
-                ownerId: 'embed-1',
-            }],
-        });
-        expect(manager.findByRef(ref)).toEqual([{
+        expect(getStoredReferencedUnitRecords(manager)).toEqual([{
             ref,
             unitId: 'runtime-sheet-1',
             unitType: UniverInstanceType.UNIVER_SHEET,
@@ -385,84 +326,19 @@ describe('EmbedReferencedUnitManagerService', () => {
             }],
         }]);
 
-        first.dispose();
-        expect(manager.list({ owner: input.owner })).toEqual([{
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [{
-                kind: ReferencedUnitOwnerKind.Embed,
-                unitId: 'host-doc',
-                ownerId: 'embed-1',
-            }],
-        }]);
-        second.dispose();
-        cached.dispose();
-        expect(manager.list({ owner: input.owner })).toEqual([]);
-        expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [],
-        });
+        handle.dispose();
+        expect(getStoredReferencedUnitRecords(manager)).toEqual([]);
     });
 
-    it('exposes the pending record before provider-created unit events can run', async () => {
-        const ref = {
-            file: { kind: 'uri' as const, uri: 'univer://file-1' },
-            unit: { selector: 'remote-sheet', type: 'sheet' as const },
-        };
-        const plan = {
-            materializationKey: 'referenced-unit:pending-before-create',
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        };
-        let manager!: EmbedReferencedUnitManagerService;
-        const provider = {
-            prepare: vi.fn(() => plan),
-            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => {
-                expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
-                    ref,
-                    unitId: 'runtime-sheet-1',
-                    unitType: UniverInstanceType.UNIVER_SHEET,
-                    usedBy: [],
-                });
-
-                return {
-                    unitId: input.plan.unitId,
-                    unitType: input.plan.unitType,
-                };
-            }),
-        };
-        const providerRegistry = {
-            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
-        };
-        manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
-
-        await expect(manager.ensure({
-            ref,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        }).loaded).resolves.toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        });
-    });
-
-    it('materializes the same ResourceRef independently for different embed owners', async () => {
+    it('lets the provider own reuse policy across owners', async () => {
         const ref = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
         const provider = {
-            prepare: vi.fn((input: { owner?: { ownerId?: string }; unitType: UniverInstanceType }) => ({
-                materializationKey: `referenced-unit:${input.owner?.ownerId}`,
-                unitId: `${input.owner?.ownerId}-runtime-sheet`,
+            ensure: vi.fn((input) => ({
+                unitId: input.owner?.ownerId === 'embed-1' ? 'embed-1-runtime-sheet' : 'embed-2-runtime-sheet',
                 unitType: input.unitType,
-            })),
-            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
-                unitId: input.plan.unitId,
-                unitType: input.plan.unitType,
             })),
         };
         const providerRegistry = {
@@ -470,26 +346,26 @@ describe('EmbedReferencedUnitManagerService', () => {
         };
         const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
 
-        await expect(Promise.all([
-            manager.ensure({
-                ref,
-                owner: {
-                    kind: ReferencedUnitOwnerKind.Embed,
-                    unitId: 'host-doc',
-                    ownerId: 'embed-1',
-                },
-                createOptions: EMBED_CHILD_CREATE_OPTIONS,
-            }).loaded,
-            manager.ensure({
-                ref,
-                owner: {
-                    kind: ReferencedUnitOwnerKind.Embed,
-                    unitId: 'host-doc',
-                    ownerId: 'embed-2',
-                },
-                createOptions: EMBED_CHILD_CREATE_OPTIONS,
-            }).loaded,
-        ])).resolves.toEqual([{
+        const first = manager.ensure({
+            ref,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: 'host-doc',
+                ownerId: 'embed-1',
+            },
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        });
+        const second = manager.ensure({
+            ref,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: 'host-doc',
+                ownerId: 'embed-2',
+            },
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        });
+
+        await expect(Promise.all([first.loaded, second.loaded])).resolves.toEqual([{
             ref,
             unitId: 'embed-1-runtime-sheet',
             unitType: UniverInstanceType.UNIVER_SHEET,
@@ -498,9 +374,8 @@ describe('EmbedReferencedUnitManagerService', () => {
             unitId: 'embed-2-runtime-sheet',
             unitType: UniverInstanceType.UNIVER_SHEET,
         }]);
-
         expect(provider.ensure).toHaveBeenCalledTimes(2);
-        expect(manager.list({ ref })).toEqual([{
+        expect(getStoredReferencedUnitRecords(manager)).toEqual([{
             ref,
             unitId: 'embed-1-runtime-sheet',
             unitType: UniverInstanceType.UNIVER_SHEET,
@@ -521,21 +396,15 @@ describe('EmbedReferencedUnitManagerService', () => {
         }]);
     });
 
-    it('uses provider materialization keys to share one local unit across owners', async () => {
+    it('records shared provider results under the same runtime fact', async () => {
         const ref = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
-        const plan = {
-            materializationKey: 'referenced-unit:shared-ref',
-            unitId: 'shared-runtime-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        };
         const provider = {
-            prepare: vi.fn(() => plan),
-            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
-                unitId: input.plan.unitId,
-                unitType: input.plan.unitType,
+            ensure: vi.fn((input) => ({
+                unitId: 'shared-runtime-sheet',
+                unitType: input.unitType,
             })),
         };
         const providerRegistry = {
@@ -543,7 +412,7 @@ describe('EmbedReferencedUnitManagerService', () => {
         };
         const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
 
-        await expect(Promise.all([
+        await Promise.all([
             manager.ensure({
                 ref,
                 owner: {
@@ -562,19 +431,10 @@ describe('EmbedReferencedUnitManagerService', () => {
                 },
                 createOptions: EMBED_CHILD_CREATE_OPTIONS,
             }).loaded,
-        ])).resolves.toEqual([{
-            ref,
-            unitId: 'shared-runtime-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        }, {
-            ref,
-            unitId: 'shared-runtime-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        }]);
+        ]);
 
-        expect(provider.prepare).toHaveBeenCalledTimes(2);
-        expect(provider.ensure).toHaveBeenCalledTimes(1);
-        expect(manager.list({ ref })).toEqual([{
+        expect(provider.ensure).toHaveBeenCalledTimes(2);
+        expect(getStoredReferencedUnitRecords(manager)).toEqual([{
             ref,
             unitId: 'shared-runtime-sheet',
             unitType: UniverInstanceType.UNIVER_SHEET,
@@ -595,13 +455,7 @@ describe('EmbedReferencedUnitManagerService', () => {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
-        const plan = {
-            materializationKey: 'referenced-unit:aborted',
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        };
         const provider = {
-            prepare: vi.fn(() => plan),
             ensure: vi.fn(() => new Promise<IReferencedUnitLoadResult>(() => {
                 // Keep the provider pending so the caller-owned signal decides this handle.
             })),
@@ -620,19 +474,21 @@ describe('EmbedReferencedUnitManagerService', () => {
         abortController.abort();
 
         await expect(handle.loaded).rejects.toThrow('REFERENCED_UNIT_LOAD_ABORTED');
+        expect(provider.ensure).toHaveBeenCalledWith({
+            ref,
+            refKey: getResourceRefInputKey(ref),
+            owner: undefined,
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+            signal: abortController.signal,
+        });
     });
 
-    it('finds string ResourceRef records through canonical locator keys', async () => {
-        const plan = {
-            materializationKey: 'referenced-unit:child-1',
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        };
+    it('loads string ResourceRef records through canonical locator keys', async () => {
         const provider = {
-            prepare: vi.fn(() => plan),
-            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
-                unitId: input.plan.unitId,
-                unitType: input.plan.unitType,
+            ensure: vi.fn((input) => ({
+                unitId: 'runtime-sheet-1',
+                unitType: input.unitType,
             })),
         };
         const providerRegistry = {
@@ -646,12 +502,14 @@ describe('EmbedReferencedUnitManagerService', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         }).loaded;
 
-        expect(manager.findByRef('child-1')).toEqual([{
+        expect(provider.ensure).toHaveBeenCalledWith({
             ref: '#unit=child-1',
-            unitId: 'runtime-sheet-1',
+            refKey: getResourceRefInputKey('#unit=child-1'),
+            owner: undefined,
             unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [],
-        }]);
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+            signal: undefined,
+        });
     });
 
     it('rejects request unit type mismatches with a referenced-unit stable error', () => {
@@ -672,45 +530,15 @@ describe('EmbedReferencedUnitManagerService', () => {
         expect(providerRegistry.get).not.toHaveBeenCalled();
     });
 
-    it('rejects provider plans that do not match the requested unit type', () => {
+    it('rejects provider results that do not match the requested unit type', async () => {
         const ref = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
         const provider = {
-            prepare: vi.fn(() => ({
-                materializationKey: 'referenced-unit:mismatch',
-                unitId: 'runtime-sheet-1',
-                unitType: UniverInstanceType.UNIVER_DOC,
-            })),
-            ensure: vi.fn(),
-        };
-        const providerRegistry = {
-            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
-        };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
-
-        expect(() => manager.ensure({
-            ref,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        })).toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
-        expect(provider.ensure).not.toHaveBeenCalled();
-    });
-
-    it('rejects provider results that do not match the materialization plan', async () => {
-        const ref = {
-            file: { kind: 'uri' as const, uri: 'univer://file-1' },
-            unit: { selector: 'remote-sheet', type: 'sheet' as const },
-        };
-        const provider = {
-            prepare: vi.fn(() => ({
-                materializationKey: 'referenced-unit:mismatch',
-                unitId: 'planned-runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            })),
             ensure: vi.fn(() => ({
                 unitId: 'actual-runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_SHEET,
+                unitType: UniverInstanceType.UNIVER_DOC,
             })),
         };
         const providerRegistry = {
@@ -721,41 +549,15 @@ describe('EmbedReferencedUnitManagerService', () => {
         await expect(manager.ensure({
             ref,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        }).loaded).rejects.toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
-
-        const unitTypeMismatchProvider = {
-            prepare: vi.fn(() => ({
-                materializationKey: 'referenced-unit:unit-type-mismatch',
-                unitId: 'planned-runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            })),
-            ensure: vi.fn(() => ({
-                unitId: 'planned-runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_DOC,
-            })),
-        };
-        const unitTypeMismatchManager = new EmbedReferencedUnitManagerService({
-            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider: unitTypeMismatchProvider })),
-        } as never);
-
-        await expect(unitTypeMismatchManager.ensure({
-            ref,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        }).loaded).rejects.toThrow('REFERENCED_UNIT_MATERIALIZATION_PLAN_MISMATCH');
+        }).loaded).rejects.toThrow('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
     });
 
-    it('removes pending records when provider materialization fails', async () => {
+    it('keeps failed loads out of usage records', async () => {
         const ref = {
             file: { kind: 'uri' as const, uri: 'univer://file-1' },
             unit: { selector: 'remote-sheet', type: 'sheet' as const },
         };
-        const plan = {
-            materializationKey: 'referenced-unit:rejected',
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        };
         const provider = {
-            prepare: vi.fn(() => plan),
             ensure: vi.fn(() => Promise.reject(new Error('load failed'))),
         };
         const providerRegistry = {
@@ -767,51 +569,8 @@ describe('EmbedReferencedUnitManagerService', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         });
 
-        expect(manager.getByUnitId('runtime-sheet-1')).toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            usedBy: [],
-        });
         await expect(handle.loaded).rejects.toThrow('load failed');
-        expect(manager.getByUnitId('runtime-sheet-1')).toBeNull();
-    });
-
-    it('rejects duplicate local unit ids before provider ensure creates another unit', async () => {
-        const firstRef = {
-            file: { kind: 'uri' as const, uri: 'univer://file-1' },
-            unit: { selector: 'remote-sheet-1', type: 'sheet' as const },
-        };
-        const secondRef = {
-            file: { kind: 'uri' as const, uri: 'univer://file-1' },
-            unit: { selector: 'remote-sheet-2', type: 'sheet' as const },
-        };
-        const provider = {
-            prepare: vi.fn((input: { ref: typeof firstRef | typeof secondRef }) => ({
-                materializationKey: `referenced-unit:${input.ref.unit.selector}`,
-                unitId: 'runtime-sheet-1',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            })),
-            ensure: vi.fn((input: { plan: { unitId: string; unitType: UniverInstanceType } }) => ({
-                unitId: input.plan.unitId,
-                unitType: input.plan.unitType,
-            })),
-        };
-        const providerRegistry = {
-            get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
-        };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
-
-        await manager.ensure({
-            ref: firstRef,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        }).loaded;
-
-        expect(() => manager.ensure({
-            ref: secondRef,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        })).toThrow('REFERENCED_UNIT_MATERIALIZATION_UNIT_CONFLICT');
-        expect(provider.ensure).toHaveBeenCalledTimes(1);
+        expect(getStoredReferencedUnitRecords(manager)).toEqual([]);
     });
 });
 
@@ -967,6 +726,22 @@ function createFacadeResolverInjector(registry?: EmbedReferencedUnitFacadeResolv
             return registry;
         }),
     }) as unknown as Pick<Injector, 'get' | 'has'>;
+}
+
+function getStoredReferencedUnitRecords(manager: EmbedReferencedUnitManagerService) {
+    return [...(manager as unknown as {
+        _records: Map<string, {
+            ref: unknown;
+            unitId: string;
+            unitType: UniverInstanceType;
+            usedBy: Array<{ kind: ReferencedUnitOwnerKind; unitId?: string; ownerId?: string }>;
+        }>;
+    })._records.values()].map((record) => ({
+        ref: record.ref,
+        unitId: record.unitId,
+        unitType: record.unitType,
+        usedBy: record.usedBy.map((owner) => ({ ...owner })),
+    }));
 }
 
 function createInstanceService() {

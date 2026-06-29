@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import './f-enum';
-import './f-univer';
+import type { UniverFacadeTypes } from '../index';
+import { describe, expectTypeOf, it } from 'vitest';
 
-export { FEmbed, type ILoadEmbedOptions } from './f-embed';
-export { FEmbedHostSurface, type IFEmbedEnumMixin } from './f-enum';
-export type { UniverFacadeTypes } from './f-types';
-export {
-    type FEmbedSource,
-    type FResolvedUnitFacade,
-    type FUnitFacade,
-    type FUnitRef,
-    FUniverEmbedMixin,
-    type ICreateEmbedHostParams,
-    type ICreateEmbedParams,
-    type IFUniverEmbedMixin,
-    type IGetEmbedParams,
-    type IListEmbedsParams,
-    type ILoadUnitAsyncOptions,
-    type IRemoveEmbedParams,
-    type IUnitFacadeMap,
-} from './f-univer';
+interface IMockWorkbookFacade {
+    getActiveSheet(): unknown;
+}
+
+declare module '@univerjs/embed/facade' {
+    interface IUnitFacadeMap {
+        // UniverInstanceType.UNIVER_SHEET
+        2: IMockWorkbookFacade;
+    }
+}
+
+describe('UniverFacadeTypes', () => {
+    it('maps built-in facade aliases through IUnitFacadeMap augmentation', () => {
+        expectTypeOf<UniverFacadeTypes.FWorkbook>().toEqualTypeOf<IMockWorkbookFacade>();
+    });
+});

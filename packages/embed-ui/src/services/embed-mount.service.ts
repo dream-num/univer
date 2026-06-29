@@ -28,6 +28,7 @@ import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
 import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
 import { EmbedOverlayRootService } from './embed-overlay-root.service';
+import { EmbedRuntimePolicyService } from './embed-runtime-policy.service';
 import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
 import { EmbedSceneCanvasCaptureService } from './embed-scene-canvas-capture.service';
 
@@ -63,6 +64,8 @@ export class EmbedMountService {
         private readonly _sceneCanvasCaptureService: EmbedSceneCanvasCaptureService,
         @IUniverInstanceService
         private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(EmbedRuntimePolicyService)
+        private readonly _runtimePolicyService: EmbedRuntimePolicyService,
         @Inject(Injector)
         private readonly _injector: Injector
     ) {
@@ -87,14 +90,20 @@ export class EmbedMountService {
 
         this._assertChildUnitAvailable(descriptor);
 
+        const runtimeDescriptor = {
+            hostUnitId: descriptor.hostUnitId,
+            embedId: descriptor.embedId,
+            childUnitId: descriptor.childUnitId,
+        };
         const layout = this._resolveLayout(descriptor);
         const hostContribution = this._hostContainerRegistry.get(descriptor.hostType, descriptor.entry);
         if (!hostContribution || !this._hostContainerRegistry.supports(descriptor.hostType, descriptor.entry, layout)) {
             throw new Error('EMBED_MOUNT_HOST_NOT_REGISTERED');
         }
 
+        const mountDecision = this._runtimePolicyService.canMount(runtimeDescriptor);
         const childContribution = this._childViewRegistry.get(descriptor.childType);
-        if (!childContribution?.supportedLayouts.includes(layout)) {
+        if (mountDecision.allowed && !childContribution?.supportedLayouts.includes(layout)) {
             throw new Error('EMBED_MOUNT_CHILD_NOT_REGISTERED');
         }
 
@@ -124,6 +133,14 @@ export class EmbedMountService {
         }
         if (!normalizedHostMountResult.runtimeRoots) {
             disposables.push(ensureEmbedDefaultRuntimeSlots(context.hostElement));
+        }
+
+        if (!mountDecision.allowed) {
+            return this._mountBlockedRuntime(descriptor, layout, context.hostElement, normalizedHostMountResult.runtimeRoots, disposables, mountDecision.reason);
+        }
+        if (!childContribution) {
+            [...disposables].reverse().forEach((disposable) => disposable.dispose());
+            throw new Error('EMBED_MOUNT_CHILD_NOT_REGISTERED');
         }
 
         const { renderScope, disposable: renderScopeDisposable, setActive } = this._createRenderScope(
@@ -165,6 +182,7 @@ export class EmbedMountService {
             disposables.push(childDisposable);
         }
         disposables.push(restoreFocusAfterMount);
+        disposables.push(this._runtimePolicyService.registerMountedRuntime(runtimeDescriptor));
         if (renderScope.mode === 'float') {
             const floatingMenuDisposable = this._mountFloatingMenu(childContext);
             if (floatingMenuDisposable) {
@@ -186,6 +204,43 @@ export class EmbedMountService {
         if (layout !== 'tab-peer') {
             this._initializeFloatingSessionActiveState(descriptor, layout, setActive);
         }
+        return session;
+    }
+
+    private _mountBlockedRuntime(
+        descriptor: IEmbedDescriptor,
+        layout: EmbedLayout,
+        hostElement: HTMLElement,
+        runtimeRoots: IEmbedHostMountResult['runtimeRoots'] | undefined,
+        disposables: IDisposable[],
+        reason: string | undefined
+    ): IEmbedMountSession {
+        const contentRoot = runtimeRoots?.content
+            ?? findEmbedRuntimeSlot(hostElement, EMBED_CONTENT_ROOT_ATTRIBUTE)
+            ?? hostElement;
+        const placeholder = createBlockedRuntimePlaceholder(reason);
+        contentRoot.replaceChildren(placeholder);
+        disposables.push(toDisposable(() => {
+            if (placeholder.parentElement === contentRoot) {
+                placeholder.remove();
+            }
+        }));
+
+        const session: IEmbedMountSession = {
+            hostUnitId: descriptor.hostUnitId,
+            embedId: descriptor.embedId,
+            childUnitId: descriptor.childUnitId!,
+            childType: descriptor.childType!,
+            entry: descriptor.entry,
+            layout,
+            hostElement,
+        };
+        this._sessions.set(descriptor.embedId, {
+            session,
+            disposables,
+            setActive: () => {},
+        });
+
         return session;
     }
 
@@ -705,4 +760,29 @@ function applyRenderScopeActiveState(rootElement: HTMLElement, active: boolean, 
     rootElement.setAttribute('aria-hidden', 'true');
     rootElement.style.display = 'none';
     rootElement.style.pointerEvents = 'none';
+}
+
+function createBlockedRuntimePlaceholder(reason: string | undefined): HTMLElement {
+    const placeholder = document.createElement('div');
+    placeholder.dataset.embedRuntimeBlocked = reason ?? 'nested';
+    placeholder.style.cssText = [
+        'box-sizing:border-box',
+        'width:100%',
+        'height:100%',
+        'min-height:96px',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'padding:16px',
+        'border:1px dashed rgba(99,102,106,.35)',
+        'border-radius:8px',
+        'background:rgba(99,102,106,.06)',
+        'color:rgba(30,34,43,.64)',
+        'font:13px/1.5 sans-serif',
+        'text-align:center',
+    ].join(';');
+    placeholder.textContent = reason === 'cycle'
+        ? 'Nested embed cycle is not supported.'
+        : 'Nested embed is not supported.';
+    return placeholder;
 }

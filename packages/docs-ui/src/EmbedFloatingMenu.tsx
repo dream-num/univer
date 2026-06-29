@@ -16,23 +16,24 @@
 
 import type { IEmbedFloatingActivation, IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { Observable } from 'rxjs';
-import { Injector, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, mountEmbedProductRibbonMenu, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { ICommandService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Button } from '@univerjs/design';
+import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, RemoveHostEmbedCommand, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { DeleteIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { createElement, useEffect, useRef } from 'react';
+import { createElement } from 'react';
 
 const DOCS_FLOATING_MENU_STYLE_ID = 'univer-docs-embed-floating-menu-styles';
 export const DOCS_FLOATING_MENU_STYLE_TEXT = `
 .univer-docs-embed-floating-menu {
     position: absolute;
     top: -36px;
-    left: 34px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 30;
 }
 [data-embed-floating-menu-entry="docs-custom-block"] .univer-docs-embed-floating-menu {
     top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
-    left: 50%;
-    transform: translateX(-50%);
 }
 .univer-docs-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
     display: none;
@@ -64,7 +65,7 @@ function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
         EmbedRuntimeProviders,
         { injector: context.runtimeScope.injector, mountContainer: root, embedId: context.embedId },
         createElement(DocsEmbedFloatingMenu, {
-            childUnitId: context.childUnitId,
+            hostUnitId: context.hostUnitId,
             embedId: context.embedId,
             fullscreen: Boolean(context.renderScope.fullscreen),
             usesDomFloatingStage: context.descriptor.entry !== 'slides-floating-object',
@@ -79,7 +80,7 @@ function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
 }
 
 interface IDocsEmbedFloatingMenuProps {
-    childUnitId: string;
+    hostUnitId: string;
     embedId: string;
     fullscreen: boolean;
     usesDomFloatingStage: boolean;
@@ -88,15 +89,14 @@ interface IDocsEmbedFloatingMenuProps {
 
 function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
     const {
-        childUnitId,
+        hostUnitId,
         embedId,
         fullscreen,
         usesDomFloatingStage,
         renderScopeActive$,
     } = props;
-    const containerRef = useRef<HTMLDivElement | null>(null);
     const renderScopeActive = useObservable(() => renderScopeActive$, false, false, [renderScopeActive$]);
-    const injector = useDependency(Injector);
+    const commandService = useDependency(ICommandService);
     const floatingActiveService = useDependency(EmbedFloatingActiveService);
     const activation = useObservable(
         () => floatingActiveService.active$,
@@ -111,36 +111,37 @@ function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
         usesDomFloatingStage,
         renderScopeActive,
     });
-
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) {
-            return;
-        }
-
-        const disposable = mountEmbedProductRibbonMenu({
-            container,
-            childType: UniverInstanceType.UNIVER_DOC,
-            childUnitId,
-            injector,
-            embedId,
-            menuSchema: undefined,
-            menuTitlePrefix: 'Docs',
-            toolbarOnly: true,
-        });
-
-        return () => disposable?.dispose();
-    }, [childUnitId, injector]);
+    const removeEmbed = () => {
+        void commandService.executeCommand(RemoveHostEmbedCommand.id, { hostUnitId, embedId });
+    };
 
     return (
         <div
-            className="univer-docs-embed-floating-menu"
+            className="
+              univer-docs-embed-floating-menu univer-box-border univer-inline-flex univer-h-8 univer-items-center
+              univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
+              univer-text-gray-900 univer-shadow-lg
+              dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-white
+            "
             data-embed-floating-menu="true"
             data-embed-id={embedId}
             data-embed-float-stage={stage}
             onPointerDown={(event) => event.stopPropagation()}
         >
-            <div ref={containerRef} />
+            <Button
+                type="button"
+                size="small"
+                variant="ghost"
+                className="
+                  univer-size-6 univer-p-0 univer-text-red-500
+                  hover:univer-text-red-600
+                "
+                title="Delete embed block"
+                aria-label="Delete embed block"
+                onClick={removeEmbed}
+            >
+                <DeleteIcon />
+            </Button>
         </div>
     );
 }

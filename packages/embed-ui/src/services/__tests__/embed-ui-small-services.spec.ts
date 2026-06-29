@@ -30,7 +30,7 @@ import {
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,
 } from '../../common/tab-peer-workbench';
-import { shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
+import { resolveChromeAnchorRect, shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
 import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
@@ -39,6 +39,7 @@ import { EmbedHostAnchorModelService } from '../embed-host-anchor-model.service'
 import { EmbedHostMenuOverrideService } from '../embed-host-menu-override.service';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../embed-interaction-boundary.service';
 import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
+import { EmbedRuntimePolicyService } from '../embed-runtime-policy.service';
 import { EmbedUndoBridgeService } from '../embed-undo-bridge.service';
 
 describe('embed-ui small services and controllers', () => {
@@ -178,6 +179,52 @@ describe('embed-ui small services and controllers', () => {
         })).toBe('inactive');
     });
 
+    it('blocks nested embed runtimes through a depth and cycle policy', () => {
+        const policy = new EmbedRuntimePolicyService();
+        expect(policy.canMount({
+            hostUnitId: 'root-host',
+            embedId: 'embed-a',
+            childUnitId: 'child-a',
+        })).toMatchObject({ allowed: true });
+
+        const dispose = policy.registerMountedRuntime({
+            hostUnitId: 'root-host',
+            embedId: 'embed-a',
+            childUnitId: 'child-a',
+        });
+
+        expect(policy.getParentEmbedId('child-a')).toBe('embed-a');
+        expect(policy.canMount({
+            hostUnitId: 'child-a',
+            embedId: 'embed-b',
+            childUnitId: 'child-b',
+        })).toMatchObject({ allowed: false, reason: 'max-depth' });
+        const deeperPolicy = new EmbedRuntimePolicyService({ maxDepth: 2 });
+        deeperPolicy.registerMountedRuntime({
+            hostUnitId: 'root-host',
+            embedId: 'embed-a',
+            childUnitId: 'child-a',
+        });
+        expect(deeperPolicy.canMount({
+            hostUnitId: 'child-a',
+            embedId: 'embed-b',
+            childUnitId: 'child-b',
+        })).toMatchObject({ allowed: true });
+        expect(deeperPolicy.canMount({
+            hostUnitId: 'child-a',
+            embedId: 'embed-cycle',
+            childUnitId: 'root-host',
+        })).toMatchObject({ allowed: false, reason: 'cycle' });
+        expect(policy.canMount({
+            hostUnitId: 'child-a',
+            embedId: 'embed-cycle',
+            childUnitId: 'root-host',
+        })).toMatchObject({ allowed: false, reason: 'cycle' });
+
+        dispose.dispose();
+        expect(policy.getParentEmbedId('child-a')).toBeUndefined();
+    });
+
     it('centralizes float block interaction ownership across inactive stage1 stage2 and doc-block flows', () => {
         expect(resolveEmbedFloatInteractionPolicy({
             stage: 'stage1',
@@ -256,8 +303,37 @@ describe('embed-ui small services and controllers', () => {
 
         syncChromeControlsVisibility(chrome, true, true, 'stage2');
 
+        expect(chrome.querySelector<HTMLElement>('[data-embed-float-fullscreen-button="true"]')?.style.visibility).toBe('hidden');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-float-fullscreen-button="true"]')?.style.pointerEvents).toBe('none');
         expect(chrome.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]')?.style.visibility).toBe('hidden');
         expect(chrome.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]')?.style.pointerEvents).toBe('none');
+
+        syncChromeControlsVisibility(chrome, true, true, 'stage1');
+
+        expect(chrome.querySelector<HTMLElement>('[data-embed-float-fullscreen-button="true"]')?.style.visibility).toBe('');
+        expect(chrome.querySelector<HTMLElement>('[data-embed-float-fullscreen-button="true"]')?.style.pointerEvents).toBe('');
+    });
+
+    it('anchors docs custom block chrome to the runtime content rect', () => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'univer-embed-docs-custom-block';
+        const container = document.createElement('div');
+        const content = document.createElement('div');
+        content.className = 'univer-embed-float-dom__content';
+        container.appendChild(content);
+        wrapper.appendChild(container);
+        document.body.appendChild(wrapper);
+        vi.spyOn(container, 'getBoundingClientRect').mockReturnValue(createRect(100, 40, 500, 320));
+        vi.spyOn(content, 'getBoundingClientRect').mockReturnValue(createRect(130, 92, 440, 240));
+
+        const rect = resolveChromeAnchorRect(container);
+
+        expect(rect.left).toBe(130);
+        expect(rect.top).toBe(92);
+        expect(rect.width).toBe(440);
+        expect(rect.height).toBe(240);
+
+        wrapper.remove();
     });
 
     it('routes child undo redo to host stack when focus owner matches', () => {
@@ -709,3 +785,17 @@ describe('embed-ui small services and controllers', () => {
         emptyController.dispose();
     });
 });
+
+function createRect(left: number, top: number, width: number, height: number): DOMRect {
+    return {
+        x: left,
+        y: top,
+        left,
+        top,
+        right: left + width,
+        bottom: top + height,
+        width,
+        height,
+        toJSON: () => ({}),
+    } as DOMRect;
+}

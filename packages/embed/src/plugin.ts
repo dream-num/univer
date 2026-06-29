@@ -35,6 +35,7 @@ import { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributi
 import { EmbedHostAdapterRegistryService, flushPendingEmbedHostAdapterContributions, registerEmbedHostAdapterContributions } from './services/embed-host-adapter-registry.service';
 import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
 import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
+import { createLocalRuntimeResourceRefProvider } from './services/embed-local-runtime-resource-ref-provider';
 import { EmbedModelService } from './services/embed-model.service';
 import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 import {
@@ -103,6 +104,7 @@ export class UniverEmbedPlugin extends Plugin {
         (this._config.guestContributions ?? []).forEach((contribution) => registerEmbedGuestContribution(this._injector, contribution));
 
         const resourceRefProviderRegistry = this._injector.get(EmbedResourceRefProviderRegistryService);
+        this.disposeWithMe(resourceRefProviderRegistry.register(createLocalRuntimeResourceRefProvider(this._injector)));
         (this._config.resourceRefProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.register(registration)));
 
         const referencedUnitFacadeResolverRegistry = this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService);

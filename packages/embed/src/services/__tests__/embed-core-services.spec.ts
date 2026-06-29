@@ -17,7 +17,7 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedCapability, IEmbedCreateContext, IEmbedDescriptor } from '../../types/embed';
 import type { IReferencedUnitLoadResult } from '../embed-resource-ref-provider-registry.service';
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { getResourceRefInputKey } from '../../common/resource-ref-input';
 import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
@@ -29,6 +29,7 @@ import {
     registerEmbedCapabilities,
 } from '../embed-capability-registry.service';
 import { EmbedCreationService } from '../embed-creation.service';
+import { createLocalRuntimeResourceRefProvider, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID } from '../embed-local-runtime-resource-ref-provider';
 import { EmbedNestedGuardService } from '../embed-nested-guard.service';
 import {
     createDefaultReferencedUnitFacadeResolvers,
@@ -37,6 +38,7 @@ import {
     registerReferencedUnitFacadeResolvers,
 } from '../embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from '../embed-referenced-unit-manager.service';
+import { EmbedResourceRefProviderRegistryService } from '../embed-resource-ref-provider-registry.service';
 import { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from '../embed-source-resolver.service';
 
 describe('EmbedCapabilityRegistryService', () => {
@@ -304,6 +306,97 @@ describe('EmbedSourceResolverService', () => {
             ref: 'string-sheet',
         })).not.toHaveProperty('childUnitId');
         expect(instanceService.getUnitType).not.toHaveBeenCalled();
+    });
+});
+
+describe('createLocalRuntimeResourceRefProvider', () => {
+    it('resolves structured self refs from existing runtime units', () => {
+        const instanceService = createInstanceService();
+        instanceService.getUnit.mockReturnValueOnce({ getUnitId: () => 'child-sheet' });
+        const registration = createLocalRuntimeResourceRefProvider(createLocalRuntimeProviderInjector(instanceService) as Injector);
+        const ref = {
+            file: { kind: 'self' as const },
+            unit: { selector: 'child-sheet', type: 'sheet' as const },
+        };
+
+        expect(registration.registrationId).toBe(LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID);
+        expect(registration.match).toEqual({
+            fileKinds: ['self'],
+            unitTypes: ['sheet', 'doc', 'slide', 'base'],
+        });
+        expect(registration.provider.ensure({
+            ref,
+            refKey: getResourceRefInputKey(ref),
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toEqual({
+            unitId: 'child-sheet',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+        });
+        expect(instanceService.getUnit).toHaveBeenCalledWith('child-sheet', UniverInstanceType.UNIVER_SHEET);
+    });
+
+    it('rejects unsupported refs, missing runtime units, and unit type mismatches', () => {
+        const instanceService = createInstanceService();
+        const provider = createLocalRuntimeResourceRefProvider(createLocalRuntimeProviderInjector(instanceService) as Injector).provider;
+        const selfRef = {
+            file: { kind: 'self' as const },
+            unit: { selector: 'child-sheet', type: 'sheet' as const },
+        };
+
+        expect(() => provider.ensure({
+            ref: {
+                file: { kind: 'uri' as const, uri: 'univer://file-1' },
+                unit: { selector: 'child-sheet', type: 'sheet' as const },
+            },
+            refKey: 'uri-ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toThrow('LOCAL_RUNTIME_RESOURCE_REF_UNSUPPORTED');
+        expect(() => provider.ensure({
+            ref: selfRef,
+            refKey: getResourceRefInputKey(selfRef),
+            unitType: UniverInstanceType.UNIVER_DOC,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toThrow('LOCAL_RUNTIME_RESOURCE_REF_UNIT_TYPE_MISMATCH');
+        expect(() => provider.ensure({
+            ref: selfRef,
+            refKey: getResourceRefInputKey(selfRef),
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toThrow('LOCAL_RUNTIME_RESOURCE_REF_UNIT_NOT_FOUND');
+    });
+
+    it('coexists with uri providers without claiming string locators', () => {
+        const instanceService = createInstanceService();
+        const localRegistration = createLocalRuntimeResourceRefProvider(createLocalRuntimeProviderInjector(instanceService) as Injector);
+        const uriRegistration = {
+            registrationId: 'univer-uri-provider',
+            match: {
+                fileKinds: ['uri' as const],
+                uriSchemes: ['univer'],
+                unitTypes: ['sheet' as const],
+            },
+            provider: {
+                ensure: vi.fn((input) => ({
+                    unitId: 'remote-sheet',
+                    unitType: input.unitType,
+                })),
+            },
+        };
+        const registry = new EmbedResourceRefProviderRegistryService();
+        registry.register(localRegistration);
+        registry.register(uriRegistration);
+
+        expect(registry.get({
+            file: { kind: 'self' },
+            unit: { selector: 'local-sheet', type: 'sheet' },
+        }, 'sheet')).toBe(localRegistration);
+        expect(registry.get({
+            file: { kind: 'uri', uri: 'univer://remote-file' },
+            unit: { selector: 'remote-sheet', type: 'sheet' },
+        }, 'sheet')).toBe(uriRegistration);
+        expect(registry.get('#unit=sheet-1', 'sheet')).toBeUndefined();
     });
 });
 
@@ -758,6 +851,18 @@ function createFacadeResolverInjector(registry?: EmbedReferencedUnitFacadeResolv
             return registry;
         }),
     }) as unknown as Pick<Injector, 'get' | 'has'>;
+}
+
+function createLocalRuntimeProviderInjector(instanceService: ReturnType<typeof createInstanceService>): Pick<Injector, 'get'> {
+    return {
+        get: vi.fn((token: unknown) => {
+            if (token !== IUniverInstanceService) {
+                throw new Error('unexpected token');
+            }
+
+            return instanceService;
+        }),
+    } as unknown as Pick<Injector, 'get'>;
 }
 
 function getStoredReferencedUnitRecords(manager: EmbedReferencedUnitManagerService) {

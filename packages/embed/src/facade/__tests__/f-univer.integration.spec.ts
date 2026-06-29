@@ -24,11 +24,13 @@ import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { UniverEmbedPlugin } from '../../plugin';
+import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
+import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
 import { FEmbedHostSurface } from '../f-enum';
 import '../index';
 
 describe('embed facade runtime integration', () => {
-    it('creates embeds through createEmbed without materializing provider-backed refs', () => {
+    it('creates embeds through createEmbed without materializing provider-backed refs', async () => {
         const univer = createUniver();
         const univerAPI = FUniver.newAPI(univer);
         const hostDoc = univer.createUnit<IDocumentData, UnitModel>(UniverInstanceType.UNIVER_DOC, createDocSnapshot('host-doc'));
@@ -85,6 +87,16 @@ describe('embed facade runtime integration', () => {
                 file: { kind: 'self' },
                 unit: { selector: 'empty-sheet', type: 'sheet' },
             },
+        });
+        const emptySource = emptyEmbed.getDescriptor().source;
+        const emptyRef = emptySource.kind === 'ref' ? emptySource.ref : undefined;
+        await expect(univer.__getInjector().get(EmbedReferencedUnitManagerService).ensure({
+            ref: emptyRef!,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        }).loaded).resolves.toEqual({
+            ref: emptyRef,
+            unitId: 'empty-sheet',
+            unitType: UniverInstanceType.UNIVER_SHEET,
         });
 
         const floatingEmbed = univerAPI.createEmbed({

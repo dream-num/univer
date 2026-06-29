@@ -44,6 +44,7 @@ import {
 } from '../embed-interaction-boundary.service';
 import { EmbedDuplicateChildUnitError, EmbedMountService } from '../embed-mount.service';
 import { EmbedOverlayRootService } from '../embed-overlay-root.service';
+import { EmbedRuntimePolicyService } from '../embed-runtime-policy.service';
 import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
     EmbedRuntimeFocusCoordinator,
@@ -426,6 +427,39 @@ describe('EmbedMountService', () => {
         }
     });
 
+    it('renders a blocked placeholder instead of mounting nested embed runtimes', () => {
+        const hostElement = document.createElement('div');
+        const childMount = vi.fn();
+        const runtimePolicyService = new EmbedRuntimePolicyService();
+        runtimePolicyService.registerMountedRuntime({
+            embedId: 'parent-embed',
+            hostUnitId: 'root-host',
+            childUnitId: 'host-1',
+        });
+        const service = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement })),
+            childRegistry: createChildRegistry(childMount),
+            runtimePolicyService,
+        });
+
+        const session = service.mount(createDescriptor({
+            embedId: 'nested-embed',
+            hostUnitId: 'host-1',
+            childUnitId: 'nested-child',
+        }));
+
+        expect(session).toMatchObject({
+            embedId: 'nested-embed',
+            hostUnitId: 'host-1',
+            childUnitId: 'nested-child',
+        });
+        expect(childMount).not.toHaveBeenCalled();
+        expect(hostElement.querySelector('[data-embed-runtime-blocked="max-depth"]')?.textContent).toBe('Nested embed is not supported.');
+
+        service.unmount('nested-embed');
+        expect(hostElement.querySelector('[data-embed-runtime-blocked]')).toBeNull();
+    });
+
     it('rejects unresolved, unregistered, duplicate, and host-container-less mounts', () => {
         const hostRegistry = createHostRegistry(() => undefined);
         const childRegistry = createChildRegistry();
@@ -476,6 +510,7 @@ function createMountService(options: {
     overlayRootService?: EmbedOverlayRootService;
     instanceService?: Pick<IUniverInstanceService, 'getUnit' | 'getUnitType'>;
     injectorEntries?: Array<[unknown, unknown]>;
+    runtimePolicyService?: EmbedRuntimePolicyService;
 }): EmbedMountService {
     return new EmbedMountService(
         options.hostRegistry,
@@ -483,6 +518,7 @@ function createMountService(options: {
         options.overlayRootService ?? new EmbedOverlayRootService(),
         { registerContext: vi.fn(() => toDisposable(() => {})) } as never,
         (options.instanceService ?? createInstanceService()) as IUniverInstanceService,
+        options.runtimePolicyService ?? new EmbedRuntimePolicyService(),
         createInjector(options.injectorEntries ?? []) as never
     );
 }

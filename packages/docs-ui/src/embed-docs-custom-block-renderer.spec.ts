@@ -21,6 +21,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
     blurHostDocSelectionWhenEmbedRuntimeEntersStage,
+    createDocsTableLikeCustomBlockStage2WheelHandler,
     createDocsTableLikeCustomBlockWheelHandler,
     EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT,
     resolveDocsCustomBlockRuntimeOuterHeight,
@@ -74,6 +75,59 @@ describe('createDocsTableLikeCustomBlockWheelHandler', () => {
 
         expect(live.scrollLeft).toBe(600);
         expect(event.defaultPrevented).toBe(true);
+    });
+});
+
+describe('createDocsTableLikeCustomBlockStage2WheelHandler', () => {
+    it('scrolls the custom block live viewport for stage2 horizontal wheel gestures', () => {
+        const live = createScrollableElement({
+            clientWidth: 300,
+            scrollWidth: 900,
+        });
+        const onWheel = createDocsTableLikeCustomBlockStage2WheelHandler({
+            getLive: () => live,
+            getMaxScrollLeft: () => 210,
+            getStage: () => 'stage2',
+        });
+
+        const event = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 120,
+            deltaY: 4,
+        });
+
+        onWheel(event);
+
+        expect(live.scrollLeft).toBe(120);
+        expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('leaves inactive and vertical wheel gestures to the existing handlers', () => {
+        const live = createScrollableElement({
+            clientWidth: 300,
+            scrollWidth: 900,
+        });
+        const onWheel = createDocsTableLikeCustomBlockStage2WheelHandler({
+            getLive: () => live,
+            getMaxScrollLeft: () => 210,
+            getStage: () => 'inactive',
+        });
+
+        onWheel(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 120,
+            deltaY: 4,
+        }));
+        onWheel(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 4,
+            deltaY: 120,
+        }));
+
+        expect(live.scrollLeft).toBe(0);
     });
 });
 

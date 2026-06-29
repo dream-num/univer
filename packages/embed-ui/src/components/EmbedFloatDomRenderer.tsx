@@ -22,6 +22,7 @@ import type { EmbedRuntimeFocusRole } from '../services/embed-runtime-focus-coor
 import type { EmbedFloatingStage, EmbedInteractionFlow, IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
+import { GripHorizontalIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { resolveEmbedFloatInteractionPolicy } from '../common/embed-float-interaction-policy';
@@ -1425,26 +1426,16 @@ export function EmbedFloatDomRenderer(props: {
                     ref={dragHandleRef}
                     type="button"
                     className={[
-                        'univer-embed-float-dom__drag-handle univer-absolute -univer-top-6 univer-left-0 univer-z-[2] univer-h-3 univer-w-[18px] univer-appearance-none univer-items-center univer-justify-center univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-500 univer-shadow-none dark:!univer-text-gray-300',
+                        'univer-embed-float-dom__drag-handle univer-absolute -univer-top-6 univer-left-0 univer-z-[2] univer-h-4 univer-w-6 univer-appearance-none univer-items-center univer-justify-center univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-500 univer-shadow-none dark:!univer-text-gray-300',
                         showDragHandle ? 'univer-inline-flex univer-cursor-move' : 'univer-hidden',
                     ].filter(Boolean).join(' ')}
                     data-embed-float-drag-handle="true"
                     aria-label="Move embed block"
                 >
-                    <span
+                    <GripHorizontalIcon
                         aria-hidden="true"
-                        className="
-                          univer-grid univer-h-[18px] univer-w-3 univer-rotate-90 univer-grid-cols-2 univer-grid-rows-3
-                          univer-gap-[3px]
-                        "
-                    >
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <span
-                                key={index}
-                                className="univer-block univer-size-1 univer-rounded-full univer-bg-current"
-                            />
-                        ))}
-                    </span>
+                        className="univer-size-[23px] univer-fill-current"
+                    />
                 </button>
             </div>
         </div>
@@ -1524,8 +1515,9 @@ export function syncRuntimeInteractionVisibility(container: HTMLElement, chrome:
 }
 
 export function syncChromeControlsVisibility(chrome: HTMLElement | undefined, visible: boolean, dragHandleVisible: boolean, stage: 'inactive' | 'stage1' | 'stage2'): void {
-    const visibility = visible ? '' : 'hidden';
-    const pointerEvents = visible ? '' : 'none';
+    const allowFullscreenButton = visible && stage !== 'stage2';
+    const fullscreenButtonVisibility = allowFullscreenButton ? '' : 'hidden';
+    const fullscreenButtonPointerEvents = allowFullscreenButton ? '' : 'none';
     const allowDragHandle = dragHandleVisible && stage === 'stage1';
     const dragHandleVisibility = allowDragHandle ? '' : 'hidden';
     const dragHandlePointerEvents = allowDragHandle ? '' : 'none';
@@ -1537,8 +1529,8 @@ export function syncChromeControlsVisibility(chrome: HTMLElement | undefined, vi
         chrome?.querySelector<HTMLElement>('[data-embed-popup-root]'),
     ];
 
-    fullscreenButton?.style.setProperty('visibility', visibility);
-    fullscreenButton?.style.setProperty('pointer-events', pointerEvents);
+    fullscreenButton?.style.setProperty('visibility', fullscreenButtonVisibility);
+    fullscreenButton?.style.setProperty('pointer-events', fullscreenButtonPointerEvents);
     dragHandle?.style.setProperty('visibility', dragHandleVisibility);
     dragHandle?.style.setProperty('pointer-events', dragHandlePointerEvents);
     menuLayers.forEach((control) => {
@@ -1553,8 +1545,8 @@ export function syncChromeControlsVisibility(chrome: HTMLElement | undefined, vi
     });
 }
 
-function resolveChromeAnchorRect(container: HTMLElement): DOMRect {
-    const content = isDocsSheetLikeChrome(container)
+export function resolveChromeAnchorRect(container: HTMLElement): DOMRect {
+    const content = isDocsCustomBlockChrome(container)
         ? container.querySelector<HTMLElement>('.univer-embed-float-dom__content')
         : null;
     const contentRect = content?.getBoundingClientRect();

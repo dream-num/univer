@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
@@ -487,12 +488,18 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-                if (command.id === RichTextEditingMutation.id) {
-                    // To wait the image is rendered.
-                    queueMicrotask(() => {
-                        this._updateDrawingsEditStatus();
-                    });
+                if (command.id !== RichTextEditingMutation.id) {
+                    return;
                 }
+                const params = command.params as Partial<IRichTextEditingMutationParams> | undefined;
+                if (params?.unitId && params.unitId !== this._context.unitId) {
+                    return;
+                }
+
+                // To wait the image is rendered.
+                queueMicrotask(() => {
+                    this._updateDrawingsEditStatus();
+                });
             })
         );
     }

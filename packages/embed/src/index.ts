@@ -52,7 +52,7 @@ export {
     upsertEmbedResourceEntry,
 } from './common/embed-resource';
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
-export { getResourceRefInputKey, normalizeResourceRefInput } from './common/resource-ref-input';
+export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResourceRefInput } from './common/resource-ref-input';
 export { normalizeResourceRefLocator } from './common/resource-ref-locator';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
 export { EmbedResourceController } from './controllers/embed-resource.controller';

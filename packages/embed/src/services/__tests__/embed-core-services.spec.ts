@@ -29,7 +29,7 @@ import {
     registerEmbedCapabilities,
 } from '../embed-capability-registry.service';
 import { EmbedCreationService } from '../embed-creation.service';
-import { createLocalRuntimeResourceRefProvider, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID } from '../embed-local-runtime-resource-ref-provider';
+import { createLocalRuntimeResourceRefProvider, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY } from '../embed-local-runtime-resource-ref-provider';
 import { EmbedNestedGuardService } from '../embed-nested-guard.service';
 import {
     createDefaultReferencedUnitFacadeResolvers,
@@ -310,9 +310,9 @@ describe('EmbedSourceResolverService', () => {
 });
 
 describe('createLocalRuntimeResourceRefProvider', () => {
-    it('resolves structured self refs from existing runtime units', () => {
+    it('resolves self refs and unit locators from existing runtime units', () => {
         const instanceService = createInstanceService();
-        instanceService.getUnit.mockReturnValueOnce({ getUnitId: () => 'child-sheet' });
+        instanceService.getUnit.mockReturnValue({ getUnitId: () => 'child-sheet' });
         const registration = createLocalRuntimeResourceRefProvider(createLocalRuntimeProviderInjector(instanceService) as Injector);
         const ref = {
             file: { kind: 'self' as const },
@@ -321,9 +321,11 @@ describe('createLocalRuntimeResourceRefProvider', () => {
 
         expect(registration.registrationId).toBe(LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID);
         expect(registration.match).toEqual({
+            uriReference: true,
             fileKinds: ['self'],
             unitTypes: ['sheet', 'doc', 'slide', 'base'],
         });
+        expect(registration.priority).toBe(LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY);
         expect(registration.provider.ensure({
             ref,
             refKey: getResourceRefInputKey(ref),
@@ -334,6 +336,26 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             unitType: UniverInstanceType.UNIVER_SHEET,
         });
         expect(instanceService.getUnit).toHaveBeenCalledWith('child-sheet', UniverInstanceType.UNIVER_SHEET);
+
+        expect(registration.provider.ensure({
+            ref: '#unit=child-sheet',
+            refKey: getResourceRefInputKey('#unit=child-sheet'),
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toEqual({
+            unitId: 'child-sheet',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+        });
+        expect(registration.provider.ensure({
+            ref: 'child-sheet',
+            refKey: getResourceRefInputKey('child-sheet'),
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        })).toEqual({
+            unitId: 'child-sheet',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+        });
+        expect(instanceService.getUnit).toHaveBeenCalledTimes(3);
     });
 
     it('rejects unsupported refs, missing runtime units, and unit type mismatches', () => {
@@ -367,16 +389,18 @@ describe('createLocalRuntimeResourceRefProvider', () => {
         })).toThrow('LOCAL_RUNTIME_RESOURCE_REF_UNIT_NOT_FOUND');
     });
 
-    it('coexists with uri providers without claiming string locators', () => {
+    it('lets higher priority providers own shared unit locator rules', () => {
         const instanceService = createInstanceService();
         const localRegistration = createLocalRuntimeResourceRefProvider(createLocalRuntimeProviderInjector(instanceService) as Injector);
         const uriRegistration = {
             registrationId: 'univer-uri-provider',
             match: {
+                uriReference: true,
                 fileKinds: ['uri' as const],
                 uriSchemes: ['univer'],
                 unitTypes: ['sheet' as const],
             },
+            priority: 100,
             provider: {
                 ensure: vi.fn((input) => ({
                     unitId: 'remote-sheet',
@@ -396,7 +420,7 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             file: { kind: 'uri', uri: 'univer://remote-file' },
             unit: { selector: 'remote-sheet', type: 'sheet' },
         }, 'sheet')).toBe(uriRegistration);
-        expect(registry.get('#unit=sheet-1', 'sheet')).toBeUndefined();
+        expect(registry.get('#unit=sheet-1', 'sheet')).toBe(uriRegistration);
     });
 });
 

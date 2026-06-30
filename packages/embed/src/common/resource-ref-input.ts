@@ -28,3 +28,18 @@ export function getResourceRefInputKey(ref: ResourceRefInput): string {
         ? JSON.stringify({ uriReference: normalizedRef })
         : getResourceRefKey(normalizedRef);
 }
+
+export function getResourceRefInputUnitSelector(ref: ResourceRefInput): string {
+    const normalizedRef = normalizeResourceRefInput(ref);
+    if (typeof normalizedRef !== 'string') {
+        return normalizedRef.unit.selector;
+    }
+
+    const params = new URLSearchParams(normalizedRef.slice(1));
+    const unitSelector = params.get('unit');
+    if (!unitSelector) {
+        throw new Error('RESOURCE_REF_LOCATOR_INVALID');
+    }
+
+    return unitSelector;
+}

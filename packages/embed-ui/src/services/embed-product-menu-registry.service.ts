@@ -105,6 +105,7 @@ export class EmbedProductMenuRegistryService {
                     ...context,
                     surface,
                     menuSchema: contribution.menuSchema,
+                    scopedActionServiceTokens: contribution.scopedActionServiceTokens,
                 }))
                 .filter((disposable): disposable is IDisposable => Boolean(disposable));
 
@@ -126,8 +127,15 @@ export class EmbedProductMenuRegistryService {
             ...context,
             surface,
             menuSchema,
+            scopedActionServiceTokens: mergeScopedActionServiceTokens(contributions),
         }) ?? undefined;
     }
+}
+
+function mergeScopedActionServiceTokens(contributions: readonly IEmbedProductMenuContribution[]): IEmbedProductMenuContribution['scopedActionServiceTokens'] {
+    const tokens = contributions.flatMap((contribution) => contribution.scopedActionServiceTokens ?? []);
+
+    return tokens.length ? Array.from(new Set(tokens)) : undefined;
 }
 
 function getContributionSurface(contribution: IEmbedProductMenuContribution): EmbedProductMenuSurface {

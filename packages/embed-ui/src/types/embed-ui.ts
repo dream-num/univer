@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IDisposable, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DependencyIdentifier, ICommandService, IDisposable, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry, EmbedLayout, EmbedMenuBehavior, IEmbedDescriptor, IEmbedLayoutPolicies } from '@univerjs/embed';
 import type { IMenuManagerService, IRibbonService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
@@ -133,6 +133,7 @@ export interface IEmbedProductMenuContribution {
     menuSchema: unknown;
     id?: string;
     order?: number;
+    scopedActionServiceTokens?: readonly DependencyIdentifier<unknown>[];
     mountMenu?: (context: IEmbedProductMenuMountContext) => IDisposable | void;
 }
 
@@ -158,6 +159,7 @@ export interface IEmbedProductMenuMountContext {
     activeRibbonTab?: string;
     headerMenu?: boolean;
     toolbarOnly?: boolean;
+    scopedActionServiceTokens?: readonly DependencyIdentifier<unknown>[];
 }
 
 export interface IEmbedProductRibbonOverride {

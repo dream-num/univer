@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable, IExecutionOptions, Injector, UniverInstanceType } from '@univerjs/core';
+import type { DependencyIdentifier, IAccessor, IDisposable, IExecutionOptions, Injector, UniverInstanceType } from '@univerjs/core';
 import type { IMenuSchema, MenuSchemaType } from '@univerjs/ui';
 import type { IEmbedProductMenuMountContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
@@ -26,7 +26,7 @@ import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.
 import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
 export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountContext): IDisposable | undefined {
-    const { container, portalContainer, injector, childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, headerMenu = false, toolbarOnly } = context;
+    const { container, portalContainer, injector, childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, headerMenu = false, toolbarOnly, scopedActionServiceTokens } = context;
     if (menuSchema != null && typeof menuSchema !== 'object') {
         return undefined;
     }
@@ -38,6 +38,7 @@ export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountConte
         menuSchema,
         menuTitlePrefix,
         activeRibbonTab,
+        scopedActionServiceTokens,
     });
     const root = createEmbedReactRoot(container);
     root.render(createElement(
@@ -61,11 +62,14 @@ export function createEmbedProductMenuInjector(
         menuSchema?: unknown;
         menuTitlePrefix?: string;
         activeRibbonTab?: string;
+        scopedActionServiceTokens?: readonly DependencyIdentifier<unknown>[];
     }
 ): { injector: Pick<Injector, 'invoke' | 'get' | 'has'>; ribbonService: IRibbonService; disposable: IDisposable } {
-    const { childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab } = params;
+    const { childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, scopedActionServiceTokens } = params;
     const instanceService = injector.get(IUniverInstanceService);
     const scopedInstanceService = createScopedEmbedProductInstanceService(instanceService, childType, childUnitId);
+    const actionServiceTokenSet = new Set<DependencyIdentifier<unknown>>(scopedActionServiceTokens ?? []);
+    const actionServiceProxies = new WeakMap<object, unknown>();
     let scopedInjector: Pick<Injector, 'invoke' | 'get' | 'has'>;
     const commandService = createScopedEmbedProductCommandService(
         injector.get(ICommandService),
@@ -105,7 +109,20 @@ export function createEmbedProductMenuInjector(
             return exposedRibbonService;
         }
 
-        return injector.get(identifier);
+        const dependency = injector.get(identifier);
+        if (childUnitId && actionServiceTokenSet.has(identifier as DependencyIdentifier<unknown>)) {
+            return createScopedEmbedProductActionService(
+                dependency,
+                instanceService,
+                childType,
+                childUnitId,
+                embedId,
+                () => scopedInjector,
+                actionServiceProxies
+            );
+        }
+
+        return dependency;
     };
     scopedInjector = {
         has: hasDependency,
@@ -313,6 +330,81 @@ function createScopedEmbedProductCommandService(
             return Reflect.get(target, property, receiver);
         },
     });
+}
+
+function createScopedEmbedProductActionService<T>(
+    service: T,
+    instanceService: IUniverInstanceService,
+    childType: UniverInstanceType,
+    childUnitId: string,
+    embedId?: string,
+    getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined,
+    proxies?: WeakMap<object, unknown>
+): T {
+    if ((typeof service !== 'object' && typeof service !== 'function') || service == null) {
+        return service;
+    }
+
+    const target = service as object;
+    const cached = proxies?.get(target);
+    if (cached) {
+        return cached as T;
+    }
+
+    const proxy = new Proxy(target, {
+        get(rawTarget, property, receiver) {
+            const value = Reflect.get(rawTarget, property, receiver);
+            if (typeof value !== 'function') {
+                return value;
+            }
+
+            return (...args: unknown[]) => runWithEmbedProductMenuChildUnit(
+                instanceService,
+                childType,
+                childUnitId,
+                embedId,
+                getScopedInjector,
+                () => value.apply(rawTarget, args)
+            );
+        },
+    }) as T;
+
+    proxies?.set(target, proxy);
+
+    return proxy;
+}
+
+function runWithEmbedProductMenuChildUnit<T>(
+    instanceService: IUniverInstanceService,
+    childType: UniverInstanceType,
+    childUnitId: string,
+    embedId: string | undefined,
+    getScopedInjector: (() => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined) | undefined,
+    runner: () => T
+): T {
+    const previous = instanceService.getCurrentUnitOfType(childType);
+    let result: T;
+    try {
+        instanceService.setCurrentUnitForType(childUnitId);
+        result = runner();
+    } catch (error) {
+        restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
+        throw error;
+    }
+
+    if (isPromiseLike(result)) {
+        return result.finally(() => {
+            restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
+        }) as T;
+    }
+
+    restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
+
+    return result;
+}
+
+function isPromiseLike(value: unknown): value is Promise<unknown> {
+    return Boolean(value && typeof (value as { finally?: unknown }).finally === 'function');
 }
 
 function restoreEmbedProductMenuCurrentUnit(

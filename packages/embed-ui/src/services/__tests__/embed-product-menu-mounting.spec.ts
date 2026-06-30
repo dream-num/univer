@@ -33,6 +33,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
 import { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from '../embed-product-menu-mounting';
 
+class ProductActionService {}
+
 const mocks = vi.hoisted(() => {
     const render = vi.fn();
     const unmount = vi.fn();
@@ -208,6 +210,46 @@ describe('embed product menu mounting', () => {
         disposable.dispose();
     });
 
+    it('scopes declared product action services to the child unit during method execution', async () => {
+        let injector!: ReturnType<typeof createInjector>;
+        const observedUnitIds: Array<string | undefined> = [];
+        const actionService = {
+            run: vi.fn(() => {
+                observedUnitIds.push(injector.instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId());
+
+                return 'sync-result';
+            }),
+            runAsync: vi.fn(async () => {
+                observedUnitIds.push(injector.instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId());
+
+                return 'async-result';
+            }),
+        };
+        injector = createInjector({
+            extraDependencies: [[ProductActionService, actionService]],
+        });
+        const { injector: scopedInjector, disposable } = createEmbedProductMenuInjector(injector as unknown as Injector, {
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnitId: 'child-sheet',
+            embedId: 'embed-1',
+            scopedActionServiceTokens: [ProductActionService],
+            menuSchema: {
+                [MenuManagerPosition.RIBBON]: {
+                    start: { title: 'Start' },
+                },
+            },
+        });
+        const scopedActionService = scopedInjector.get(ProductActionService) as typeof actionService;
+
+        expect(scopedActionService).not.toBe(actionService);
+        expect(scopedActionService.run()).toBe('sync-result');
+        await expect(scopedActionService.runAsync()).resolves.toBe('async-result');
+        expect(observedUnitIds).toEqual(['child-sheet', 'child-sheet']);
+        expect(injector.instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId()).toBe('previous-sheet');
+
+        disposable.dispose();
+    });
+
     it('falls back to the root services when there is no child unit scope', () => {
         const injector = createInjector({ hasCreateScoped: true });
         const rootMenuManager = injector.get(IMenuManagerService) as MenuManagerService;
@@ -223,9 +265,10 @@ describe('embed product menu mounting', () => {
     });
 });
 
-function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator } = {}) {
+function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator; extraDependencies?: Array<[unknown, unknown]> } = {}) {
     const childUnit = { getUnitId: () => 'child-sheet' };
     const previousUnit = { getUnitId: () => 'previous-sheet' };
+    let currentSheetUnit = previousUnit;
     const unitAdded$ = new Subject<unknown>();
     const unitDisposed$ = new Subject<unknown>();
     const configService = {};
@@ -249,11 +292,14 @@ function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordi
         },
         getUnit: vi.fn((unitId: string) => unitId === 'child-sheet' ? childUnit : null),
         getFocusedUnit: vi.fn(() => previousUnit),
-        getCurrentUnitOfType: vi.fn((type: UniverInstanceType) => type === UniverInstanceType.UNIVER_SHEET ? previousUnit : null),
+        getCurrentUnitOfType: vi.fn((type: UniverInstanceType) => type === UniverInstanceType.UNIVER_SHEET ? currentSheetUnit : null),
         getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject(previousUnit)),
         getTypeOfUnitAdded$: vi.fn(() => unitAdded$),
         getTypeOfUnitDisposed$: vi.fn(() => unitDisposed$),
-        setCurrentUnitForType: vi.fn(),
+        setCurrentUnitForType: vi.fn((unitId: string) => {
+            const next = unitId === 'child-sheet' ? childUnit : unitId === 'previous-sheet' ? previousUnit : currentSheetUnit;
+            currentSheetUnit = next;
+        }),
         focusUnit: vi.fn(),
     };
     const localeService = {
@@ -269,6 +315,9 @@ function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordi
     if (options.runtimeFocusCoordinator) {
         map.set(EmbedRuntimeFocusCoordinator, options.runtimeFocusCoordinator);
     }
+    options.extraDependencies?.forEach(([token, value]) => {
+        map.set(token, value);
+    });
 
     return {
         unitAdded$,

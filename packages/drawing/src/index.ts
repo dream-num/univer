@@ -22,7 +22,6 @@ export { UniverDrawingPlugin } from './plugin';
 export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager-impl.service';
 export type { IDrawingJson1Type, IDrawingJsonUndo1 } from './services/drawing-manager-impl.service';
 export type {
-    IDrawingBatchRemoveOptions,
     IDrawingGroupUpdateParam,
     IDrawingMap,
     IDrawingMapItem,

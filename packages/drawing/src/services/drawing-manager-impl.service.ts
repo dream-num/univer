@@ -17,7 +17,7 @@
 import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import type { Observable } from 'rxjs';
-import type { IDrawingBatchRemoveOptions, IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
 import { DrawingTypeEnum, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
@@ -237,7 +237,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return { undo: invertOp, redo: op, unitId, subUnitId, objects };
     }
 
-    getBatchRemoveOpInOder(removeParams: IDrawingSearch[], options?: IDrawingBatchRemoveOptions<T>): IDrawingJsonUndo1 {
+    getBatchRemoveOpInOder(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
         if (removeParams.length === 0) {
             return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId: '', subUnitId: '', objects: [] };
         }
@@ -252,17 +252,13 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return indexA - indexB;
         });
 
-        return this.getBatchRemoveOp(removeParams, options);
+        return this.getBatchRemoveOp(removeParams);
     }
 
-    private _getExpandedBatchRemoveParams(removeParams: IDrawingSearch[], includeDrawing?: (drawing: T) => boolean): IDrawingSearch[] {
+    private _getExpandedBatchRemoveParams(removeParams: IDrawingSearch[]): IDrawingSearch[] {
         const seenIds = new Set<string>();
         const allToRemove: IDrawingSearch[] = [];
         const addDrawing = (drawing: IDrawingParam) => {
-            if (includeDrawing && !includeDrawing(drawing as T)) {
-                return;
-            }
-
             if (seenIds.has(drawing.drawingId)) {
                 return;
             }
@@ -292,7 +288,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
                 }
             } else if (drawing) {
                 addDrawing(drawing);
-            } else if (!includeDrawing) {
+            } else {
                 addSearch(removeParam);
             }
         });
@@ -300,10 +296,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return allToRemove;
     }
 
-    getBatchRemoveOp(removeParams: IDrawingSearch[], options?: IDrawingBatchRemoveOptions<T>): IDrawingJsonUndo1 {
+    getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
         // Expand group drawings to include all nested group nodes and leaf children.
         // Non-group drawings are kept as-is.
-        const allToRemove = this._getExpandedBatchRemoveParams(removeParams, options?.includeDrawing);
+        const allToRemove = this._getExpandedBatchRemoveParams(removeParams);
         const { unitId, subUnitId } = allToRemove[0] ?? removeParams[0] ?? { unitId: '', subUnitId: '' };
         if (allToRemove.length === 0) {
             return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId, subUnitId, objects: [] };

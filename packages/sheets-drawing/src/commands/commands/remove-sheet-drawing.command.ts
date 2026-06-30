@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { DrawingTypeEnum, IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import {
     CommandType,
-    DrawingTypeEnum,
     ICommandService,
     IUndoRedoService,
     sequenceExecute,
@@ -40,10 +39,6 @@ export interface IDeleteDrawingCommandParams {
     drawings: IDeleteDrawingCommandParam[];
 }
 
-function isSheetDrawingCommandOwned(drawing: IDeleteDrawingCommandParam, explicitDrawingIds: Set<string>): boolean {
-    return drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART || explicitDrawingIds.has(drawing.drawingId);
-}
-
 export const RemoveSheetDrawingCommand: ICommand = {
     id: 'sheet.command.remove-sheet-image',
     type: CommandType.COMMAND,
@@ -56,14 +51,7 @@ export const RemoveSheetDrawingCommand: ICommand = {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
         const { drawings } = params;
-        const explicitDrawingIds = new Set(drawings.map((drawing) => drawing.drawingId));
-        const hasGroupDrawing = drawings.some((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_GROUP);
-        const jsonOp = sheetDrawingService.getBatchRemoveOp(
-            drawings,
-            hasGroupDrawing
-                ? { includeDrawing: (drawing) => isSheetDrawingCommandOwned(drawing as IDeleteDrawingCommandParam, explicitDrawingIds) }
-                : undefined
-        ) as IDrawingJsonUndo1;
+        const jsonOp = sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         if (Array.isArray(objects) && objects.length === 0) {

@@ -110,18 +110,17 @@ describe('UnitDrawingService', () => {
         expect(service.getOldDrawingByParam(createSearch('b'))).toMatchObject(drawingB);
     });
 
-    it('filters drawings after expanding grouped remove operations', () => {
+    it('expands grouped remove operations to include all nested drawing records', () => {
         service.applyJson1(unitId, subUnitId, service.getBatchAddOp([
             createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),
             createDrawing('image-child', { groupId: 'group' }),
             createDrawing('chart-child', { drawingType: DrawingTypeEnum.DRAWING_CHART, groupId: 'group' }),
         ]).redo);
 
-        const removeOp = service.getBatchRemoveOp([createSearch('group')], {
-            includeDrawing: (drawing) => drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART,
-        });
+        const removeOp = service.getBatchRemoveOp([createSearch('group')]);
 
         expect(removeOp.objects).toEqual([
+            createSearch('chart-child'),
             createSearch('image-child'),
             createSearch('group'),
         ]);

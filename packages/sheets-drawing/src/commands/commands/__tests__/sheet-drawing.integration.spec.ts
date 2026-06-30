@@ -171,6 +171,59 @@ describe('sheet drawing integration', () => {
         expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual([]);
     });
 
+    it('removes and restores a grouped drawing graph including chart children', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createGroupSheetDrawing('group-delete'),
+                {
+                    ...createSheetDrawing('image-child'),
+                    groupId: 'group-delete',
+                    transform: createSheetDrawingTransform(),
+                },
+                {
+                    ...createSheetDrawing('chart-child'),
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    groupId: 'group-delete',
+                    transform: createSheetDrawingTransform(),
+                } as ISheetDrawing,
+            ],
+        });
+
+        expect(await commandService.executeCommand(RemoveSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'group-delete',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            }],
+        })).toBe(true);
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        const drawingManagerService = get(IDrawingManagerService);
+        const drawingSearches = ['group-delete', 'image-child', 'chart-child'].map((drawingId) => ({ unitId: 'test', subUnitId: 'sheet1', drawingId }));
+
+        drawingSearches.forEach((drawingSearch) => {
+            expect(sheetDrawingService.getDrawingByParam(drawingSearch)).toBeUndefined();
+            expect(drawingManagerService.getDrawingByParam(drawingSearch)).toBeUndefined();
+        });
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual([]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-delete' })).toMatchObject({
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+        });
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'image-child' })).toMatchObject({
+            groupId: 'group-delete',
+        });
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'chart-child' })).toMatchObject({
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+            groupId: 'group-delete',
+        });
+    });
+
     it('updates an existing drawing through the real command pipeline', async () => {
         await commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
@@ -400,7 +453,7 @@ describe('sheet drawing integration', () => {
         expect(get(IDrawingManagerService).getDrawingOrder('test', copiedSheetId)).toHaveLength(1);
     });
 
-    it('copies grouped sheet-owned drawings with the same group id map while leaving chart copying to chart owner', async () => {
+    it('copies grouped drawing records with the same group id map', async () => {
         await commandService.executeCommand(SetWorksheetActivateCommand.id, {
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -435,18 +488,21 @@ describe('sheet drawing integration', () => {
         const copiedDrawings = Object.values(get(ISheetDrawingService).getDrawingData('test', copiedSheetId));
         const copiedGroup = copiedDrawings.find((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_GROUP);
         const copiedImage = copiedDrawings.find((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE);
+        const copiedChart = copiedDrawings.find((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_CHART);
 
         expect(copiedDrawings.map((drawing) => drawing.drawingType).sort()).toEqual([
+            DrawingTypeEnum.DRAWING_CHART,
             DrawingTypeEnum.DRAWING_IMAGE,
             DrawingTypeEnum.DRAWING_GROUP,
         ].sort());
         expect(copiedGroup?.drawingId).not.toBe('group-copy');
         expect(copiedImage?.drawingId).not.toBe('image-child');
+        expect(copiedChart?.drawingId).not.toBe('chart-child');
         expect(copiedImage?.groupId).toBe(copiedGroup?.drawingId);
-        expect(copiedDrawings.some((drawing) => drawing.drawingId === 'chart-child' || drawing.drawingType === DrawingTypeEnum.DRAWING_CHART)).toBe(false);
+        expect(copiedChart?.groupId).toBe(copiedGroup?.drawingId);
     });
 
-    it('does not include grouped chart children in sheet-owned remove sheet mutations', async () => {
+    it('includes grouped chart children in remove sheet drawing record mutations', async () => {
         await commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
             drawings: [
@@ -473,8 +529,7 @@ describe('sheet drawing integration', () => {
         const removeObjects = (removeMutation?.params as { objects?: Array<{ drawingId: string }>; type?: DrawingApplyType } | undefined)?.objects ?? [];
 
         expect((removeMutation?.params as { type?: DrawingApplyType } | undefined)?.type).toBe(DrawingApplyType.REMOVE);
-        expect(removeObjects.map((object) => object.drawingId)).toEqual(['image-child', 'group-remove']);
-        expect(removeObjects.map((object) => object.drawingId)).not.toContain('chart-child');
+        expect(removeObjects.map((object) => object.drawingId)).toEqual(['chart-child', 'image-child', 'group-remove']);
     });
 
     it('removes and restores sheet drawings when a worksheet is deleted and undone', async () => {

@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
-import { Disposable, DrawingTypeEnum, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -30,10 +30,6 @@ import { ClearSheetDrawingTransformerOperation } from '../commands/operations/cl
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
-
-function isSheetDrawingOwned(drawing: ISheetDrawing): boolean {
-    return drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART;
-}
 
 function getDrawingsInOrder(drawingData: Record<string, ISheetDrawing>, drawingOrder: string[]): ISheetDrawing[] {
     const visited = new Set<string>();
@@ -146,7 +142,7 @@ export class SheetsDrawingLoadController extends Disposable {
                             return { redos: [], undos: [] };
                         }
 
-                        const jsonOp = this._sheetDrawingService.getBatchRemoveOp(drawings, { includeDrawing: isSheetDrawingOwned }) as IDrawingJsonUndo1;
+                        const jsonOp = this._sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
                         const { unitId: jsonOpUnitId, subUnitId: jsonOpSubUnitId, undo, redo, objects } = jsonOp;
 
                         if (Array.isArray(objects) && objects.length === 0) {
@@ -194,7 +190,7 @@ export class SheetsDrawingLoadController extends Disposable {
                             sourceSubUnitId: subUnitId,
                             targetSubUnitId,
                         });
-                        const drawings = copyPlan.drawings.filter(isSheetDrawingOwned);
+                        const drawings = copyPlan.drawings;
 
                         if (drawings.length === 0) {
                             return { redos: [], undos: [] };

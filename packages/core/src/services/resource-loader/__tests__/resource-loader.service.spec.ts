@@ -28,8 +28,10 @@ describe('ResourceLoaderService', () => {
     let sheetAdded$: Subject<unknown>;
     let docAdded$: Subject<unknown>;
     let slideAdded$: Subject<unknown>;
+    let baseAdded$: Subject<unknown>;
     let sheetDisposed$: Subject<unknown>;
     let docDisposed$: Subject<unknown>;
+    let baseDisposed$: Subject<unknown>;
     let slideDisposed$: Subject<unknown>;
     let resourceManagerService: {
         getAllResourceHooks: ReturnType<typeof vi.fn>;
@@ -50,8 +52,10 @@ describe('ResourceLoaderService', () => {
         sheetAdded$ = new Subject();
         docAdded$ = new Subject();
         slideAdded$ = new Subject();
+        baseAdded$ = new Subject();
         sheetDisposed$ = new Subject();
         docDisposed$ = new Subject();
+        baseDisposed$ = new Subject();
         slideDisposed$ = new Subject();
         resourceManagerService = {
             getAllResourceHooks: vi.fn(() => []),
@@ -65,11 +69,13 @@ describe('ResourceLoaderService', () => {
             getTypeOfUnitAdded$: vi.fn((type) => {
                 if (type === UniverInstanceType.UNIVER_SHEET) return sheetAdded$;
                 if (type === UniverInstanceType.UNIVER_DOC) return docAdded$;
+                if (type === UniverInstanceType.UNIVER_BASE) return baseAdded$;
                 return slideAdded$;
             }),
             getTypeOfUnitDisposed$: vi.fn((type) => {
                 if (type === UniverInstanceType.UNIVER_SHEET) return sheetDisposed$;
                 if (type === UniverInstanceType.UNIVER_DOC) return docDisposed$;
+                if (type === UniverInstanceType.UNIVER_BASE) return baseDisposed$;
                 return slideDisposed$;
             }),
             getUnit: vi.fn(),
@@ -107,6 +113,19 @@ describe('ResourceLoaderService', () => {
 
         expect(resourceManagerService.loadResources).toHaveBeenCalledWith('book-1', [{ name: 'sheet-plugin', data: '{}' }]);
         expect(resourceManagerService.unloadResources).toHaveBeenCalledWith('book-1', UniverInstanceType.UNIVER_SHEET);
+    });
+
+    it('loads resources when a base unit is added and unloads them when disposed', () => {
+        const base = {
+            getUnitId: () => 'base-1',
+            getSnapshot: () => ({ resources: [{ name: 'base-plugin', data: '{}' }] }),
+        };
+
+        baseAdded$.next({ unit: base });
+        baseDisposed$.next(base);
+
+        expect(resourceManagerService.loadResources).toHaveBeenCalledWith('base-1', [{ name: 'base-plugin', data: '{}' }]);
+        expect(resourceManagerService.unloadResources).toHaveBeenCalledWith('base-1', UniverInstanceType.UNIVER_BASE);
     });
 
     it('saves a unit snapshot with current plugin resources', () => {

@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { Dependency, Injector } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, Injector } from '@univerjs/core';
 import { LifecycleService, LifecycleStages, registerDependencies, touchDependencies } from '@univerjs/core';
 import { SheetCanvasFloatDomManagerService } from '../../services/canvas-float-dom-manager.service';
 
 export const SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES: Dependency[] = [
+    [SheetCanvasFloatDomManagerService],
+];
+
+const SHEETS_DRAWING_FLOATING_HOST_TOUCH_DEPENDENCIES: [DependencyIdentifier<unknown>][] = [
     [SheetCanvasFloatDomManagerService],
 ];
 
@@ -29,17 +33,17 @@ export function registerSheetsDrawingFloatingHostCapability(injector: Injector):
 
 function touchSheetsDrawingFloatingHostCapabilityWhenReady(injector: Injector): void {
     if (!injector.has(LifecycleService)) {
-        touchDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES);
+        touchDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_TOUCH_DEPENDENCIES);
         return;
     }
 
     const lifecycleService = injector.get(LifecycleService);
     if (lifecycleService.stage >= LifecycleStages.Ready) {
-        touchDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES);
+        touchDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_TOUCH_DEPENDENCIES);
         return;
     }
 
     void lifecycleService.onStage(LifecycleStages.Ready).then(() => {
-        touchDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES);
+        touchDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_TOUCH_DEPENDENCIES);
     });
 }

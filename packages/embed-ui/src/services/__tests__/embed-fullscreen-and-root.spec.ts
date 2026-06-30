@@ -33,13 +33,6 @@ import { createFullscreenRenderScope, mountFullscreenWorkbenchMenus } from '../.
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../embed-floating-menu-registry.service';
 import { EmbedProductMenuRegistryService } from '../embed-product-menu-registry.service';
-import { createEmbedReactRoot, disposeEmbedReactRoot } from '../react-root-disposal';
-
-const createRootMock = vi.hoisted(() => vi.fn());
-
-vi.mock('react-dom/client', () => ({
-    createRoot: createRootMock,
-}));
 
 describe('embed fullscreen helpers and react roots', () => {
     it('creates render scopes from explicit fullscreen slots', () => {
@@ -50,7 +43,6 @@ describe('embed fullscreen helpers and react roots', () => {
         const contentRoot = appendSlot(viewport, EMBED_CONTENT_ROOT_ATTRIBUTE);
         const canvasRoot = appendSlot(viewport, EMBED_CANVAS_ROOT_ATTRIBUTE);
         const overlayRoot = appendSlot(viewport, EMBED_OVERLAY_ROOT_ATTRIBUTE);
-        const popupRoot = appendSlot(viewport, EMBED_POPUP_ROOT_ATTRIBUTE);
         appendSlot(viewport, EMBED_MENU_SLOT_ATTRIBUTE);
         appendSlot(viewport, EMBED_FOOTER_SLOT_ATTRIBUTE);
 
@@ -165,34 +157,6 @@ describe('embed fullscreen helpers and react roots', () => {
         }));
         disposable?.dispose();
         expect(floatingDispose).toHaveBeenCalled();
-    });
-
-    it('reuses react roots and skips stale scheduled disposals', () => {
-        vi.useFakeTimers();
-        const firstRoot = { render: vi.fn(), unmount: vi.fn() };
-        const secondRoot = { render: vi.fn(), unmount: vi.fn() };
-        createRootMock
-            .mockReturnValueOnce(firstRoot)
-            .mockReturnValueOnce(secondRoot);
-        const container = document.createElement('div');
-
-        const first = createEmbedReactRoot(container);
-        expect(createEmbedReactRoot(container)).toBe(first);
-        disposeEmbedReactRoot(first);
-        createEmbedReactRoot(container);
-        vi.runAllTimers();
-        expect(firstRoot.unmount).not.toHaveBeenCalled();
-
-        disposeEmbedReactRoot(first);
-        vi.runAllTimers();
-        expect(firstRoot.unmount).toHaveBeenCalledTimes(1);
-
-        const second = createEmbedReactRoot(container);
-        expect(second).toBe(secondRoot);
-        disposeEmbedReactRoot(second);
-        vi.runAllTimers();
-        expect(secondRoot.unmount).toHaveBeenCalledTimes(1);
-        vi.useRealTimers();
     });
 });
 

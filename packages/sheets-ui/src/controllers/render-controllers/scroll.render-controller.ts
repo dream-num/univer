@@ -253,7 +253,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 // NOT same as SetScrollRelativeCommand. that was exec in sheetRenderController
                 this._commandService.executeCommand(ScrollCommand.id, {
                     unitId: this._context.unitId,
-                    sheetId: sheetObject.worksheet.getSheetId(),
+                    sheetId: skeleton.getLocation()[1],
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,

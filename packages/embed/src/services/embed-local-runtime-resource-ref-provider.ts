@@ -18,23 +18,29 @@ import type { Injector, UniverInstanceType } from '@univerjs/core';
 import type { ResourceRefInput } from '../types/resource-ref';
 import type { IEmbedResourceRefProviderRegistration } from './embed-resource-ref-provider-registry.service';
 import { IUniverInstanceService } from '@univerjs/core';
+import { getResourceRefInputUnitSelector } from '../common/resource-ref-input';
 import { toResourceRefUnitType } from '../common/unit-type';
 
 export const LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID = 'local-runtime-resource-ref-provider';
+export const LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY = -100;
 
 export function createLocalRuntimeResourceRefProvider(injector: Injector): IEmbedResourceRefProviderRegistration {
     return {
         registrationId: LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID,
         match: {
+            uriReference: true,
             fileKinds: ['self'],
             unitTypes: ['sheet', 'doc', 'slide', 'base'],
         },
+        priority: LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY,
         provider: {
             ensure: (input) => {
                 assertLocalRuntimeRef(input.ref);
-                assertLocalRuntimeRefUnitType(input.ref, input.unitType);
+                if (typeof input.ref !== 'string') {
+                    assertLocalRuntimeRefUnitType(input.ref, input.unitType);
+                }
 
-                const unit = injector.get(IUniverInstanceService).getUnit(input.ref.unit.selector, input.unitType);
+                const unit = injector.get(IUniverInstanceService).getUnit(getResourceRefInputUnitSelector(input.ref), input.unitType);
                 if (!unit) {
                     throw new Error('LOCAL_RUNTIME_RESOURCE_REF_UNIT_NOT_FOUND');
                 }
@@ -48,8 +54,8 @@ export function createLocalRuntimeResourceRefProvider(injector: Injector): IEmbe
     };
 }
 
-function assertLocalRuntimeRef(ref: ResourceRefInput): asserts ref is Exclude<ResourceRefInput, string> {
-    if (typeof ref === 'string' || ref.file.kind !== 'self') {
+function assertLocalRuntimeRef(ref: ResourceRefInput): asserts ref is ResourceRefInput {
+    if (typeof ref !== 'string' && ref.file.kind !== 'self') {
         throw new Error('LOCAL_RUNTIME_RESOURCE_REF_UNSUPPORTED');
     }
 }

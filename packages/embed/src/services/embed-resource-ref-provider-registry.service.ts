@@ -47,6 +47,7 @@ export interface IEmbedResourceRefProviderMatch {
 export interface IEmbedResourceRefProviderRegistration {
     registrationId: string;
     match: IEmbedResourceRefProviderMatch;
+    priority?: number;
     provider: IEmbedResourceRefProvider;
 }
 
@@ -69,11 +70,17 @@ export class EmbedResourceRefProviderRegistryService {
 
     get(ref: ResourceRefInput, unitType?: ResourceRefUnitType): IEmbedResourceRefProviderRegistration | undefined {
         const matches = this._registrations.filter((registration) => this._matches(registration.match, ref, unitType));
-        if (matches.length > 1) {
+        if (matches.length === 0) {
+            return undefined;
+        }
+
+        const maxPriority = Math.max(...matches.map((registration) => registration.priority ?? 0));
+        const topMatches = matches.filter((registration) => (registration.priority ?? 0) === maxPriority);
+        if (topMatches.length > 1) {
             throw new Error('REFERENCED_UNIT_PROVIDER_CONFLICT');
         }
 
-        return matches[0];
+        return topMatches[0];
     }
 
     list(): IEmbedResourceRefProviderRegistration[] {

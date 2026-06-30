@@ -841,7 +841,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return `${rectShapeKey}${FLOAT_DOM_PREVIEW_OBJECT_SUFFIX}`;
     }
 
-    private _syncPreviewObjectTransform(previewObject: BaseObject | null | undefined, rect: BaseObject): void {
+    private _syncPreviewObjectTransform(previewObject: Nullable<BaseObject>, rect: BaseObject): void {
         previewObject?.transformByState({
             left: rect.left,
             top: rect.top,

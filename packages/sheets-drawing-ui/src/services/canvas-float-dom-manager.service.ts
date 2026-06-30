@@ -22,7 +22,7 @@ import type { IFloatDomData, IInsertDrawingCommandParams, ISheetDrawingPosition,
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
-import { insertGroupObject } from '@univerjs/drawing-ui';
+import { disposeDrawingRenderObject, insertGroupObject } from '@univerjs/drawing-ui';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
@@ -889,7 +889,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         info.dispose.dispose();
         const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
         if (renderObject) {
-            renderObject.scene.removeObject(info.rect);
+            const { scene, transformer } = renderObject;
+            if (disposeDrawingRenderObject(scene, { unitId, subUnitId, drawingId: id })) {
+                transformer.clearControlByIds([info.rect.oKey]);
+                scene.getTransformer()?.clearSelectedObjects();
+            }
         }
 
         if (removeDrawing) {

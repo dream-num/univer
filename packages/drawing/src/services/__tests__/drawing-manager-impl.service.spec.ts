@@ -17,6 +17,7 @@
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
 import { BooleanNumber, DrawingTypeEnum, Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createDrawingCopyPlan, getOrCreateDrawingCopyPlan } from '../../utils/drawing-group';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
@@ -107,6 +108,78 @@ describe('UnitDrawingService', () => {
 
         expect(service.getDrawingByParam(createSearch('b'))).toBeUndefined();
         expect(service.getOldDrawingByParam(createSearch('b'))).toMatchObject(drawingB);
+    });
+
+    it('filters drawings after expanding grouped remove operations', () => {
+        service.applyJson1(unitId, subUnitId, service.getBatchAddOp([
+            createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),
+            createDrawing('image-child', { groupId: 'group' }),
+            createDrawing('chart-child', { drawingType: DrawingTypeEnum.DRAWING_CHART, groupId: 'group' }),
+        ]).redo);
+
+        const removeOp = service.getBatchRemoveOp([createSearch('group')], {
+            includeDrawing: (drawing) => drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART,
+        });
+
+        expect(removeOp.objects).toEqual([
+            createSearch('image-child'),
+            createSearch('group'),
+        ]);
+    });
+
+    it('creates one copy id map for group children and chart drawings', () => {
+        let nextId = 0;
+        const plan = createDrawingCopyPlan([
+            createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),
+            createDrawing('image-child', { groupId: 'group' }),
+            createDrawing('chart-child', { drawingType: DrawingTypeEnum.DRAWING_CHART, groupId: 'group' }),
+        ], {
+            unitId,
+            sourceSubUnitId: subUnitId,
+            targetSubUnitId: 'copied-sheet',
+            generateId: () => `copy-${nextId++}`,
+        });
+
+        expect(plan.idMap.size).toBe(3);
+        expect(plan.idMap.get('group')).toBe('copy-0');
+        expect(plan.idMap.get('image-child')).toBe('copy-1');
+        expect(plan.idMap.get('chart-child')).toBe('copy-2');
+        expect(plan.drawings).toEqual([
+            expect.objectContaining({ drawingId: 'copy-0', subUnitId: 'copied-sheet' }),
+            expect.objectContaining({ drawingId: 'copy-1', groupId: 'copy-0', subUnitId: 'copied-sheet' }),
+            expect.objectContaining({ drawingId: 'copy-2', groupId: 'copy-0', subUnitId: 'copied-sheet' }),
+        ]);
+    });
+
+    it('extends a cached copy plan when a later caller provides more drawing graph nodes', () => {
+        let nextId = 0;
+        const copyContext = new Map<string, unknown>();
+        const options = {
+            unitId,
+            sourceSubUnitId: subUnitId,
+            targetSubUnitId: 'copied-sheet',
+            generateId: () => `copy-${nextId++}`,
+        };
+        const chart = createDrawing('chart-child', { drawingType: DrawingTypeEnum.DRAWING_CHART, groupId: 'group' });
+        const firstPlan = getOrCreateDrawingCopyPlan(copyContext, [chart], options);
+
+        expect(firstPlan.drawings[0].groupId).toBeUndefined();
+
+        const extendedPlan = getOrCreateDrawingCopyPlan(copyContext, [
+            createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),
+            createDrawing('image-child', { groupId: 'group' }),
+            chart,
+        ], options);
+
+        expect(extendedPlan).toBe(firstPlan);
+        expect(extendedPlan.idMap.get('chart-child')).toBe('copy-0');
+        expect(extendedPlan.idMap.get('group')).toBe('copy-1');
+        expect(extendedPlan.idMap.get('image-child')).toBe('copy-2');
+        expect(extendedPlan.drawings).toEqual([
+            expect.objectContaining({ drawingId: 'copy-1', subUnitId: 'copied-sheet' }),
+            expect.objectContaining({ drawingId: 'copy-2', groupId: 'copy-1', subUnitId: 'copied-sheet' }),
+            expect.objectContaining({ drawingId: 'copy-0', groupId: 'copy-1', subUnitId: 'copied-sheet' }),
+        ]);
     });
 
     it('should manage focus, refresh and visibility notifications', () => {

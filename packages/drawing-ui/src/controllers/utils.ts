@@ -22,9 +22,24 @@ import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group } from '@univerjs/engine-render';
 import { resolveDrawingUIRotateEnabled } from '../utils/rotate-enabled';
 
+export function getDrawingRenderObject(scene: Scene, drawingSearch: IDrawingSearch): BaseObject | null {
+    const key = getDrawingShapeKeyByDrawingSearch(drawingSearch);
+    return scene.getObjectIncludeInGroup(key) ?? null;
+}
+
+export function disposeDrawingRenderObject(scene: Scene, drawingSearch: IDrawingSearch): boolean {
+    const object = getDrawingRenderObject(scene, drawingSearch);
+
+    if (object == null) {
+        return false;
+    }
+
+    object.dispose();
+    return true;
+}
+
 function getRenderObjectForDrawing(scene: Scene, drawing: IDrawingParam): BaseObject | null {
-    const key = getDrawingShapeKeyByDrawingSearch(drawing);
-    return scene.getObjectIncludeInGroup?.(key) ?? scene.getObject(key) ?? null;
+    return getDrawingRenderObject(scene, drawing);
 }
 
 export function syncGroupRotateEnabled(

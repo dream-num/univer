@@ -22,6 +22,7 @@ export { UniverDrawingPlugin } from './plugin';
 export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager-impl.service';
 export type { IDrawingJson1Type, IDrawingJsonUndo1 } from './services/drawing-manager-impl.service';
 export type {
+    IDrawingBatchRemoveOptions,
     IDrawingGroupUpdateParam,
     IDrawingMap,
     IDrawingMapItem,
@@ -35,6 +36,8 @@ export type {
 export { IDrawingManagerService } from './services/drawing-manager.service';
 export { ImageIoService } from './services/image-io-impl.service';
 export { URLImageService } from './services/url-image.service';
+export { createDrawingCopyPlan, DRAWING_COPY_CONTEXT_KEY, DRAWING_GROUPABLE_TYPES, getOrCreateDrawingCopyPlan, isGroupableDrawingType } from './utils/drawing-group';
+export type { ICreateDrawingCopyPlanOptions, IDrawingCopyPlan } from './utils/drawing-group';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { resolveDrawingRotateEnabled } from './utils/rotate-enabled';

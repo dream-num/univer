@@ -77,6 +77,7 @@ function createHarness() {
         if (key === 'unit-1#-#sheet-1#-#drawing-visible') return showHideShape;
         if (key === 'unit-1#-#sheet-1#-#drawing-transform') return transformShape;
         if (key === 'unit-1#-#sheet-1#-#drawing-transform-refresh-hidden') return transformShape;
+        if (key === 'unit-1#-#sheet-1#-#drawing-remove') return disposeShape;
         return null;
     });
 
@@ -243,6 +244,29 @@ describe('DrawingUpdateController', () => {
 
         harness.remove$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-remove' }]);
         expect(harness.disposeShape.dispose).toHaveBeenCalledTimes(1);
+
+        harness.controller.dispose();
+    });
+
+    it('disposes grouped drawing children through grouped scene lookup on remove notifications', () => {
+        const harness = createHarness();
+        const groupedShape = { dispose: vi.fn() };
+        const drawingId = 'drawing-remove-in-group';
+        const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId });
+
+        harness.scene.getObjectIncludeInGroup.mockImplementation((key: string) => {
+            if (key === drawingShapeKey) {
+                return groupedShape;
+            }
+            return null;
+        });
+        harness.scene.fuzzyMathObjects.mockClear();
+
+        harness.remove$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId }]);
+
+        expect(groupedShape.dispose).toHaveBeenCalledTimes(1);
+        expect(harness.scene.getTransformer().clearSelectedObjects).toHaveBeenCalledTimes(1);
+        expect(harness.scene.fuzzyMathObjects).not.toHaveBeenCalled();
 
         harness.controller.dispose();
     });

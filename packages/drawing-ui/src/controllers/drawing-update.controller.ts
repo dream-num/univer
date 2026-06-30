@@ -48,7 +48,7 @@ import { AlignType, SetDrawingAlignOperation } from '../commands/operations/draw
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ensureDrawingRenderLayer } from '../services/drawing-render.service';
 import { getUpdateParams } from '../utils/get-update-params';
-import { getCurrentUnitInfo, insertGroupObject, syncGroupRotateEnabled } from './utils';
+import { disposeDrawingRenderObject, getCurrentUnitInfo, insertGroupObject, syncGroupRotateEnabled } from './utils';
 
 interface IDrawingTransformCache {
     unitId: string;
@@ -677,15 +677,7 @@ export class DrawingUpdateController extends Disposable {
                     }
                     const { scene } = renderObject;
 
-                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-
-                    const drawingShapes = scene.fuzzyMathObjects(drawingShapeKey, true);
-
-                    if (drawingShapes.length > 0) {
-                        for (const drawingShape of drawingShapes) {
-                            drawingShape.dispose();
-                        }
-
+                    if (disposeDrawingRenderObject(scene, { unitId, subUnitId, drawingId })) {
                         scene.getTransformer()?.clearSelectedObjects();
                     }
                 });

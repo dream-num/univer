@@ -18,11 +18,12 @@ import type { ICommandService, Injector, Univer } from '@univerjs/core';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
 import { ArrangeTypeEnum, DrawingTypeEnum, ImageSourceType, IUniverInstanceService, UndoCommand } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
+import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
 import { resolveSheetDrawingRotateEnabled } from '../../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../../mutations/set-drawing-apply.mutation';
 import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../set-drawing-arrange.command';
@@ -397,6 +398,83 @@ describe('sheet drawing integration', () => {
         });
         expect(copiedDrawings[0].drawingId).not.toBe('drawing-3');
         expect(get(IDrawingManagerService).getDrawingOrder('test', copiedSheetId)).toHaveLength(1);
+    });
+
+    it('copies grouped sheet-owned drawings with the same group id map while leaving chart copying to chart owner', async () => {
+        await commandService.executeCommand(SetWorksheetActivateCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        });
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createGroupSheetDrawing('group-copy'),
+                {
+                    ...createSheetDrawing('image-child'),
+                    groupId: 'group-copy',
+                    transform: createSheetDrawingTransform(),
+                },
+                {
+                    ...createSheetDrawing('chart-child'),
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    groupId: 'group-copy',
+                    transform: createSheetDrawingTransform(),
+                } as ISheetDrawing,
+            ],
+        });
+
+        expect(commandService.syncExecuteCommand(CopySheetCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        })).toBe(true);
+
+        const workbook = get(IUniverInstanceService).getUniverSheetInstance('test')!;
+        const copiedSheetId = workbook.getSheets()
+            .map((sheet) => sheet.getSheetId())
+            .find((sheetId) => sheetId !== 'sheet1' && sheetId !== 'sheet2')!;
+        const copiedDrawings = Object.values(get(ISheetDrawingService).getDrawingData('test', copiedSheetId));
+        const copiedGroup = copiedDrawings.find((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_GROUP);
+        const copiedImage = copiedDrawings.find((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE);
+
+        expect(copiedDrawings.map((drawing) => drawing.drawingType).sort()).toEqual([
+            DrawingTypeEnum.DRAWING_IMAGE,
+            DrawingTypeEnum.DRAWING_GROUP,
+        ].sort());
+        expect(copiedGroup?.drawingId).not.toBe('group-copy');
+        expect(copiedImage?.drawingId).not.toBe('image-child');
+        expect(copiedImage?.groupId).toBe(copiedGroup?.drawingId);
+        expect(copiedDrawings.some((drawing) => drawing.drawingId === 'chart-child' || drawing.drawingType === DrawingTypeEnum.DRAWING_CHART)).toBe(false);
+    });
+
+    it('does not include grouped chart children in sheet-owned remove sheet mutations', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createGroupSheetDrawing('group-remove'),
+                {
+                    ...createSheetDrawing('image-child'),
+                    groupId: 'group-remove',
+                    transform: createSheetDrawingTransform(),
+                },
+                {
+                    ...createSheetDrawing('chart-child'),
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    groupId: 'group-remove',
+                    transform: createSheetDrawingTransform(),
+                } as ISheetDrawing,
+            ],
+        });
+
+        const intercepted = get(SheetInterceptorService).onCommandExecute({
+            id: RemoveSheetCommand.id,
+            params: { unitId: 'test', subUnitId: 'sheet1' },
+        });
+        const removeMutation = intercepted.redos.find((mutation) => mutation.id === SetDrawingApplyMutation.id);
+        const removeObjects = (removeMutation?.params as { objects?: Array<{ drawingId: string }>; type?: DrawingApplyType } | undefined)?.objects ?? [];
+
+        expect((removeMutation?.params as { type?: DrawingApplyType } | undefined)?.type).toBe(DrawingApplyType.REMOVE);
+        expect(removeObjects.map((object) => object.drawingId)).toEqual(['image-child', 'group-remove']);
+        expect(removeObjects.map((object) => object.drawingId)).not.toContain('chart-child');
     });
 
     it('removes and restores sheet drawings when a worksheet is deleted and undone', async () => {

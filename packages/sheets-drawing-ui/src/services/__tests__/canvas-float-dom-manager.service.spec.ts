@@ -186,8 +186,8 @@ class TestRenderScene {
     readonly canvasEvents: string[] = [];
     readonly onScrollAfter$ = new EventSubject();
     private readonly _transformer = {
-        clearControlByIds: () => undefined,
-        clearSelectedObjects: () => undefined,
+        clearControlByIds: vi.fn(),
+        clearSelectedObjects: vi.fn(),
     };
 
     constructor(private readonly _viewport: {
@@ -223,6 +223,7 @@ class TestRenderScene {
     }
 
     addObject(object: Rect): this {
+        object.parent = this as never;
         this._objects.set(object.oKey, object);
         return this;
     }
@@ -851,6 +852,54 @@ describe('SheetCanvasFloatDomManagerService', () => {
         expect((fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#chart-in-group')).toBeUndefined();
         expect((fixture.scene as unknown as TestRenderScene).getObjectIncludeInGroup('test#-#sheet1#-#chart-in-group')).toBe(chartRect);
         expect(groupObject?.getObjects?.().map((object) => object.oKey)).toContain('test#-#sheet1#-#chart-in-group');
+    });
+
+    it('removes grouped active chart float dom runtime state and render object', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+        const scene = fixture.scene as unknown as TestRenderScene;
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const chartKey = 'test#-#sheet1#-#chart-in-group';
+        const groupObject = scene.getObject('test#-#sheet1#-#group-1') as { getObjects?: () => Array<{ oKey: string }> } | undefined;
+
+        expect(fixture.manager.getFloatDomInfo('chart-in-group')).toBeDefined();
+        expect(findFloatDom(canvasFloatDomService, 'chart-in-group')).toBeDefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)).toBeDefined();
+
+        fixture.manager.removeFloatDom('chart-in-group');
+
+        expect(fixture.manager.getFloatDomInfo('chart-in-group')).toBeUndefined();
+        expect(findFloatDom(canvasFloatDomService, 'chart-in-group')).toBeUndefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)).toBeUndefined();
+        expect(scene.getObject(chartKey)).toBeUndefined();
+        expect(groupObject?.getObjects?.().map((object) => object.oKey)).not.toContain(chartKey);
+        expect(scene.getTransformer().clearControlByIds).toHaveBeenCalledWith([chartKey]);
+        expect(scene.getTransformer().clearSelectedObjects).toHaveBeenCalled();
     });
 
     it('updates a grouped chart fill through float dom props for old drawings without a background seed', async () => {

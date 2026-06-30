@@ -17,13 +17,13 @@
 import type { IDrawingParam, IOperation } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { CommandType, DrawingTypeEnum, generateRandomId } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { DRAWING_GROUPABLE_TYPES, IDrawingManagerService, isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 /**
  * Now only support grouping images, shapes, charts, and groups.
  */
-export const DRAWING_GROUP_TYPES = [DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_CHART, DrawingTypeEnum.DRAWING_GROUP];
+export const DRAWING_GROUP_TYPES = DRAWING_GROUPABLE_TYPES;
 
 export interface IDrawingGroupOperationParams {
     drawings?: IDrawingParam[];
@@ -42,7 +42,7 @@ export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> 
         const drawings = params.drawings || drawingManagerService.getFocusDrawings();
 
         if (drawings.length < 2) return false;
-        if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) return false;
+        if (!drawings.every((drawing) => isGroupableDrawingType(drawing.drawingType))) return false;
 
         const { unitId, subUnitId } = drawings[0];
 

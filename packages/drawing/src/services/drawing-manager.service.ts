@@ -53,6 +53,10 @@ export interface IDrawingVisibleParam extends IDrawingSearch {
     visible: boolean;
 }
 
+export interface IDrawingBatchRemoveOptions<T extends IDrawingParam = IDrawingParam> {
+    includeDrawing?: (drawing: T) => boolean;
+}
+
 /**
  * Responsible for operations related to drawing additions, deletions, and modifications,
  * including observers, events, broadcasting, and generating operations.
@@ -77,7 +81,7 @@ export interface IUnitNormalDrawingService<T extends IDrawingParam> {
     visibleNotification(visibleParams: IDrawingVisibleParam[]): void;
 
     getBatchAddOp(insertParams: T[]): unknown;
-    getBatchRemoveOp(removeParams: IDrawingSearch[]): unknown;
+    getBatchRemoveOp(removeParams: IDrawingSearch[], options?: IDrawingBatchRemoveOptions<T>): unknown;
     getBatchUpdateOp(updateParams: T[]): unknown;
 
     featurePluginUpdateNotification(updateParams: T[]): void;

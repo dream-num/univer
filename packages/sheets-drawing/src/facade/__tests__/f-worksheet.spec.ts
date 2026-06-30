@@ -29,6 +29,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
+import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { FWorksheetDrawingMixin } from '../f-worksheet';
 
@@ -69,21 +70,27 @@ describe('FWorksheetDrawingMixin group drawings', () => {
             .toEqual(['drawing-1', 'drawing-2']);
     });
 
-    it('does not group unsupported drawing types', () => {
+    it('groups chart drawings through the facade and disables group rotation', () => {
         const drawings = [
             createDrawing('drawing-1', 10),
             createDrawing('chart-1', 80, DrawingTypeEnum.DRAWING_CHART),
         ];
         const commandService = injector.get(ICommandService);
+        const sheetDrawingService = injector.get(ISheetDrawingService);
         const fWorksheet = createFacade(injector);
 
         expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings })).toBe(true);
 
         const groupId = fWorksheet.groupDrawings(['drawing-1', 'chart-1'], 'group-1');
+        const groupDrawing = sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' });
 
-        expect(groupId).toBeNull();
-        expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(false);
-        expect(fWorksheet.isDrawingGrouped('chart-1')).toBe(false);
+        expect(groupId).toBe('group-1');
+        expect(groupDrawing?.drawingType).toBe(DrawingTypeEnum.DRAWING_GROUP);
+        expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);
+        expect(fWorksheet.isDrawingGrouped('chart-1')).toBe(true);
+        expect(fWorksheet.getDrawingGroupChildren('group-1').map((drawing: ISheetDrawing) => drawing.drawingId).sort())
+            .toEqual(['chart-1', 'drawing-1']);
+        expect(resolveSheetDrawingRotateEnabled(groupDrawing!, sheetDrawingService)).toBe(false);
     });
 
     it('supports undo and redo for group and ungroup facade operations', async () => {

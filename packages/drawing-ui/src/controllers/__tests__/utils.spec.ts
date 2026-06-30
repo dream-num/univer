@@ -18,7 +18,7 @@ import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { DrawingGroupObject, Group } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
-import { getCurrentUnitInfo, insertGroupObject } from '../utils';
+import { disposeDrawingRenderObject, getCurrentUnitInfo, getDrawingRenderObject, insertGroupObject } from '../utils';
 
 const { MockGroup } = vi.hoisted(() => {
     class HoistedMockGroup {
@@ -210,5 +210,30 @@ describe('drawing controller utils', () => {
             current: sheet,
         });
         expect(Group).toBeDefined();
+    });
+
+    it('looks up and disposes grouped render objects through grouped scene lookup only', () => {
+        const renderObject = { oKey: 'group-child', dispose: vi.fn() };
+        const scene = {
+            getObject: vi.fn(() => ({ oKey: 'top-level-child' })),
+            getObjectIncludeInGroup: vi.fn(() => renderObject),
+        };
+        const drawingSearch = { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'child-1' };
+
+        expect(getDrawingRenderObject(scene as never, drawingSearch)).toBe(renderObject);
+        expect(disposeDrawingRenderObject(scene as never, drawingSearch)).toBe(true);
+        expect(renderObject.dispose).toHaveBeenCalledTimes(1);
+        expect(scene.getObject).not.toHaveBeenCalled();
+    });
+
+    it('does not fall back to top-level scene lookup when grouped lookup misses', () => {
+        const scene = {
+            getObject: vi.fn(() => ({ oKey: 'top-level-child', dispose: vi.fn() })),
+            getObjectIncludeInGroup: vi.fn(() => null),
+        };
+
+        expect(getDrawingRenderObject(scene as never, { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'child-1' })).toBeNull();
+        expect(disposeDrawingRenderObject(scene as never, { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'child-1' })).toBe(false);
+        expect(scene.getObject).not.toHaveBeenCalled();
     });
 });

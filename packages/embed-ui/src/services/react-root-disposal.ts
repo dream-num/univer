@@ -14,31 +14,37 @@
  * limitations under the License.
  */
 
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
+import type { ReactElement } from 'react';
+import { render, unmount } from '@univerjs/design';
 
-const rootsByContainer = new WeakMap<Element, Root>();
-const containersByRoot = new WeakMap<Root, Element>();
-const rootVersions = new WeakMap<Root, number>();
+export interface IEmbedReactRoot {
+    render: (node: ReactElement) => void;
+}
 
-export function createEmbedReactRoot(container: Element): Root {
+const rootsByContainer = new WeakMap<Element, IEmbedReactRoot>();
+const containersByRoot = new WeakMap<IEmbedReactRoot, Element>();
+const rootVersions = new WeakMap<IEmbedReactRoot, number>();
+
+export function createEmbedReactRoot(container: Element): IEmbedReactRoot {
     const existing = rootsByContainer.get(container);
     if (existing) {
         rootVersions.set(existing, (rootVersions.get(existing) ?? 0) + 1);
         return existing;
     }
 
-    const root = createRoot(container);
+    const root: IEmbedReactRoot = {
+        render: (node) => render(node, container),
+    };
     rootsByContainer.set(container, root);
     containersByRoot.set(root, container);
     rootVersions.set(root, 0);
     return root;
 }
 
-export function disposeEmbedReactRoot(root: Root): void {
+export function disposeEmbedReactRoot(root: IEmbedReactRoot): void {
     const container = containersByRoot.get(root);
     const version = rootVersions.get(root) ?? 0;
-    const unmount = () => {
+    const dispose = () => {
         if (container && rootsByContainer.get(container) !== root) {
             return;
         }
@@ -50,7 +56,9 @@ export function disposeEmbedReactRoot(root: Root): void {
             containersByRoot.delete(root);
         }
         rootVersions.delete(root);
-        root.unmount();
+        if (container) {
+            unmount(container);
+        }
     };
-    globalThis.setTimeout(unmount, 0);
+    globalThis.setTimeout(dispose, 0);
 }

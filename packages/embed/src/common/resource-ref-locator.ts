@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+import type { ParsedResourceRef } from '../types/resource-ref';
+
 const BARE_LOCAL_UNIT_ID_PATTERN = /^[A-Za-z0-9_.-]+$/;
 const INVALID_PERCENT_ESCAPE_PATTERN = /%(?![0-9A-Fa-f]{2})/;
 
 export function normalizeResourceRefLocator(locator: string): string {
+    return parseResourceRefLocator(locator).canonicalRef;
+}
+
+export function parseResourceRefLocator(locator: string): ParsedResourceRef {
     if (!locator || locator.trim() !== locator) {
         throw new Error('RESOURCE_REF_LOCATOR_INVALID');
     }
@@ -27,13 +33,13 @@ export function normalizeResourceRefLocator(locator: string): string {
     }
 
     if (BARE_LOCAL_UNIT_ID_PATTERN.test(locator)) {
-        return formatUnitLocator(locator);
+        return createAnchorUnitRef(locator);
     }
 
     throw new Error('RESOURCE_REF_LOCATOR_UNSUPPORTED');
 }
 
-function parseAnchorLocator(locator: string): string {
+function parseAnchorLocator(locator: string): ParsedResourceRef {
     const fragment = locator.slice(1);
     if (!fragment) {
         throw new Error('RESOURCE_REF_LOCATOR_INVALID');
@@ -41,7 +47,7 @@ function parseAnchorLocator(locator: string): string {
 
     const pairs = fragment.split('&').map(parseFragmentPair);
     if (pairs.length === 1 && pairs[0][0] === 'unit') {
-        return formatUnitLocator(pairs[0][1]);
+        return createAnchorUnitRef(pairs[0][1]);
     }
 
     throw new Error('RESOURCE_REF_LOCATOR_UNSUPPORTED');
@@ -60,11 +66,19 @@ function parseFragmentPair(pair: string): [string, string] {
 }
 
 function decodeFragmentComponent(value: string): string {
+    return decodeLocatorComponent(value);
+}
+
+function decodeLocatorComponent(value: string): string {
     if (INVALID_PERCENT_ESCAPE_PATTERN.test(value)) {
         throw new Error('RESOURCE_REF_LOCATOR_INVALID');
     }
 
-    return decodeURIComponent(value);
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        throw new Error('RESOURCE_REF_LOCATOR_INVALID');
+    }
 }
 
 function formatUnitLocator(unitSelector: string): string {
@@ -73,4 +87,12 @@ function formatUnitLocator(unitSelector: string): string {
     }
 
     return `#unit=${encodeURIComponent(unitSelector)}`;
+}
+
+function createAnchorUnitRef(unitSelector: string): ParsedResourceRef {
+    return {
+        canonicalRef: formatUnitLocator(unitSelector),
+        unitSelector,
+        params: new Map([['unit', unitSelector]]),
+    };
 }

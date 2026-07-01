@@ -16,6 +16,13 @@
 
 export type ResourceRefUnitType = 'sheet' | 'doc' | 'slide' | 'base';
 
+export interface ParsedResourceRef {
+    canonicalRef: string;
+    scheme?: string;
+    unitSelector?: string;
+    params: ReadonlyMap<string, string>;
+}
+
 export type ResourceRefFile =
     | { kind: 'self' }
     | { kind: 'relative'; path: string }

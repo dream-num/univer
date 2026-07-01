@@ -978,17 +978,15 @@ describe('misc document commands', () => {
     it('deletes the current paragraph through rich text editing', async () => {
         ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
         commandService = get(ICommandService);
-        commandService.registerCommand(DeleteCurrentParagraphCommand);
+        expect(DeleteCurrentParagraphCommand).toMatchObject({
+            multi: true,
+            name: DeleteCurrentParagraphCommand.id,
+        });
+        commandService.registerMultipleCommand(DeleteCurrentParagraphCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(2);
 
-        expect(await commandService.executeCommand(DeleteCurrentParagraphCommand.id)).toEqual(expect.objectContaining({
-            unitId: 'test-doc',
-            textRanges: [expect.objectContaining({
-                startOffset: 2,
-                endOffset: 2,
-            })],
-        }));
+        expect(await commandService.executeCommand(DeleteCurrentParagraphCommand.id)).toBe(true);
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('Body\r\n');

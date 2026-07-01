@@ -49,7 +49,7 @@ function createController(options: { cancelResize?: boolean; sheetEditor?: boole
     const controller = new DocEditorBridgeController(
         { unitId: 'editor-1' } as never,
         {
-            getUniverDocInstance: vi.fn(() => ({
+            getUnit: vi.fn(() => ({
                 getSnapshot: () => ({
                     documentStyle: {
                         marginTop: 10,

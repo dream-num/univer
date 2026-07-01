@@ -44,18 +44,18 @@ describe('FDocument', () => {
     });
 
     it('edits document text through body and paragraph operations', () => {
-        expect(document.getBody().insertText(6, 'Univer')).toBe(true);
+        expect(document.insertText(6, 'Univer')).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello,Univer\r\n');
 
         univer.dispose();
         createDocumentFacade();
-        expect(document.getBody().getElement(0)!.asParagraph().setText('HeDocso,')).toBe(true);
+        expect(document.getParagraphs()[0].setText('HeDocso,')).toBe(true);
         expect(document.save().body?.dataStream).toBe('HeDocso,\r\n');
 
         univer.dispose();
         createDocumentFacade();
-        expect(document.getBody().appendParagraph('Line 1').getText()).toBe('Line 1');
-        expect(document.getBody().appendParagraph('Line 2').getText()).toBe('Line 2');
+        expect(document.appendParagraph('Line 1').getText()).toBe('Line 1');
+        expect(document.appendParagraph('Line 2').getText()).toBe('Line 2');
         expect(document.save().body?.dataStream).toBe('Hello,\rLine 1\rLine 2\r\n');
     });
 
@@ -104,21 +104,20 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Hello,One\r\n');
     });
 
-    it('preserves paragraph ids in saved snapshots and body wrappers', () => {
+    it('preserves paragraph ids in saved snapshots and paragraph facades', () => {
         univer.dispose();
         createDocumentFacade(createSimpleDocument());
 
         const savedParagraphs = document.save().body?.paragraphs;
-        const body = document.getBody();
-        const paragraph = body.getElement(0)!.asParagraph();
+        const paragraph = document.getParagraphs()[0];
 
         expect(savedParagraphs?.map((item) => item.paragraphId)).toEqual(['para_alpha', 'para_beta', 'para_gamma']);
         expect(savedParagraphs?.map((item) => item.startIndex)).toEqual([5, 10, 16]);
-        expect(paragraph.getParagraphId()).toBe('para_alpha');
+        expect(paragraph.getId()).toBe('para_alpha');
         expect(paragraph.getText()).toBe('Alpha');
     });
 
-    it('keeps caller-provided paragraph ids when creating a body facade', () => {
+    it('keeps caller-provided paragraph ids when creating paragraph facades', () => {
         univer.dispose();
         createDocumentFacade(createDocumentData('doc-with-ids', {
             dataStream: 'Legacy\r\n',
@@ -126,9 +125,26 @@ describe('FDocument', () => {
             sectionBreaks: [{ startIndex: 7 }],
         }));
 
-        const paragraph = document.getBody().getElement(0)!.asParagraph();
+        const paragraph = document.getParagraphs()[0];
 
-        expect(paragraph.getParagraphId()).toBe('para_fixture_26');
+        expect(paragraph.getId()).toBe('para_fixture_26');
         expect(document.save().body?.paragraphs?.[0].paragraphId).toBe('para_fixture_26');
+    });
+
+    it('preserves an editable empty paragraph when deleting past the end of an empty document', () => {
+        univer.dispose();
+        createDocumentFacade(createDocumentData('empty-doc', {
+            dataStream: '\r\n',
+            paragraphs: [{ startIndex: 0, paragraphId: 'para_empty' }],
+            sectionBreaks: [{ startIndex: 1 }],
+        }));
+
+        document.deleteRange({ startOffset: 0, endOffset: 5 });
+        const paragraph = document.insertParagraph(0, 'Document title');
+        expect(paragraph.appendText(' suffix')).toBe(true);
+
+        expect(document.save().body?.dataStream).toBe('Document title suffix\r\r\n');
+        expect(document.save().body?.paragraphs?.map((item) => item.startIndex)).toEqual([21, 22]);
+        expect(document.getParagraphs()[0].getText()).toBe('Document title suffix');
     });
 });

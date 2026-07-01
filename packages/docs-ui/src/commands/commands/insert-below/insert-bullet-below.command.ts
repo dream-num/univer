@@ -45,8 +45,8 @@ export const InsertBulletBelowCommand: ICommand<IInsertBulletBelowCommandParams>
             return false;
         }
         const segment = docDataModel.getSelfOrHeaderFooterModel(textRanges[0].segmentId);
-        const paragraphs = segment.getBody()?.paragraphs ?? [];
-        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraphs = segment?.getBody()?.paragraphs ?? [];
+        const dataStream = segment?.getBody()?.dataStream ?? '';
         const currentParagraph = BuildTextUtils.range.getParagraphsInRange(textRanges[0], paragraphs, dataStream)[0];
         if (!currentParagraph) {
             return false;

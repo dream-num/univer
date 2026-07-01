@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICommandInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     CommandType,
@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     JSONX,
     ObjectRelativeFromV,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -42,7 +43,7 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return false;

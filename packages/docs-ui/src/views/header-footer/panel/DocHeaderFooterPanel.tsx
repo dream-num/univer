@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import type { LocaleKey } from '../../../locale/types';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
@@ -26,9 +27,9 @@ export const DocHeaderFooterPanel = () => {
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const documentDataModel = univerInstanceService.getCurrentUniverDocInstance()!;
+    const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
     const unitId = documentDataModel.getUnitId()!;
-    const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+    const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
 
     const viewModel = docSkeletonManagerService!.getViewModel();
     const [isEditHeaderFooter, setIsEditHeaderFooter] = useState(true);

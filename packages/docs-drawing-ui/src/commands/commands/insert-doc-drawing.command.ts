@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';
 import {
@@ -26,6 +26,7 @@ import {
     JSONX,
     TextX,
     TextXActionType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomBlockIdsInSelections } from '@univerjs/docs-ui';
@@ -48,7 +49,7 @@ export const InsertDocDrawingCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (documentDataModel == null) {
             return false;
         }
@@ -71,7 +72,7 @@ export const InsertDocDrawingCommand: ICommand = {
 
         const { drawings } = params;
         const { collapsed, startOffset, segmentId = '' } = targetTextRange;
-        const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (body == null) {
             return false;

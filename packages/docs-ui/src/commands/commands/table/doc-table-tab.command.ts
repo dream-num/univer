@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, Nullable } from '@univerjs/core';
 import type { IOffsets } from './table';
-import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getCommandSkeleton } from '../../util';
 import { DocTableInsertRowCommand } from './doc-table-insert.command';
@@ -39,7 +39,7 @@ export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!docDataModel) {
             return false;
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDeleteDrawingCommandParams } from './interfaces';
@@ -27,6 +27,7 @@ import {
     MemoryCursor,
     TextX,
     TextXActionType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -43,7 +44,7 @@ export const RemoveDocDrawingCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (params == null || documentDataModel == null) {
             return false;
@@ -57,7 +58,7 @@ export const RemoveDocDrawingCommand: ICommand = {
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
-        const customBlocks = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks ?? [];
+        const customBlocks = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customBlocks ?? [];
         const removeCustomBlocks = removeDrawings
             .map((drawing) => customBlocks.find((customBlock) => customBlock.blockId === drawing.drawingId))
             .filter((block) => !!block)

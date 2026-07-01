@@ -43,7 +43,7 @@ export const DocLinkPopup = () => {
 
     const { unitId, linkId, segmentId, startIndex, endIndex } = currentPopup;
     const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-    const body = doc?.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const body = doc?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK && range.startIndex === startIndex && range.endIndex === endIndex);
 
     if (!link) {

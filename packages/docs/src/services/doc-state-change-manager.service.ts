@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import type { IDocStateChangeInfo, IDocStateChangeParams } from './doc-state-emit.service';
-import { createIdentifier, ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, Optional, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
+import { createIdentifier, ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, Optional, RedoCommandId, RxDisposable, UndoCommandId, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocStateEmitService } from './doc-state-emit.service';
 
@@ -83,7 +83,7 @@ export class DocStateChangeManagerService extends RxDisposable {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command) => {
                 if (command.id === UndoCommandId || command.id === RedoCommandId) {
-                    const univerDoc = this._univerInstanceService.getCurrentUniverDocInstance();
+                    const univerDoc = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                     if (univerDoc == null) {
                         return;
                     }

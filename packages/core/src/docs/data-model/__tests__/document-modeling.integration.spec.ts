@@ -173,11 +173,6 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
         expect(model.zoomRatio).toBe(1.5);
         expect(model.getDisabled()).toBe(true);
 
-        const headerModel = model.getSelfOrHeaderFooterModel('header1');
-        const footerModel = model.getSelfOrHeaderFooterModel('footer1');
-        expect(headerModel.getUnitId()).toBe(model.getUnitId());
-        expect(footerModel.getUnitId()).toBe(model.getUnitId());
-
         const richText = RichTextBuilder.create(RichTextBuilder.newEmptyData());
         richText
             .insertText('Hello')

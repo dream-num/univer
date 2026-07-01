@@ -409,7 +409,7 @@ describe('DocDrawingTransformerController business methods', () => {
             drawingId: 'drawing-inline',
         }));
         controller._univerInstanceService = {
-            getUniverDocInstance: vi.fn(() => ({
+            getUnit: vi.fn(() => ({
                 getSnapshot: () => ({
                     drawings: {
                         'drawing-inline': inlineDrawing,

@@ -336,18 +336,20 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.change$.next(this.change$.value + 1);
     }
 
-    getSelfOrHeaderFooterModel(segmentId?: string) {
-        if (segmentId != null) {
-            if (this.headerModelMap.has(segmentId)) {
-                return this.headerModelMap.get(segmentId)!;
-            }
-
-            if (this.footerModelMap.has(segmentId)) {
-                return this.footerModelMap.get(segmentId)!;
-            }
+    getSelfOrHeaderFooterModel(segmentId?: string): DocumentDataModel | null {
+        if (segmentId === null || segmentId === undefined || segmentId === '') {
+            return this;
         }
 
-        return this as DocumentDataModel;
+        if (this.headerModelMap.has(segmentId)) {
+            return this.headerModelMap.get(segmentId)!;
+        }
+
+        if (this.footerModelMap.has(segmentId)) {
+            return this.footerModelMap.get(segmentId)!;
+        }
+
+        return null;
     }
 
     override getUnitId() {

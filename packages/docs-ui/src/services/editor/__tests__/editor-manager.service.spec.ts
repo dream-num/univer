@@ -35,6 +35,7 @@ import {
     LocalUndoRedoService,
     ThemeService,
     UniverInstanceService,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
@@ -264,7 +265,7 @@ describe('EditorService', () => {
 
         service.focus('editor-1');
         expect(service.getFocusId()).toBe('editor-1');
-        expect(univerInstanceService.getCurrentUniverDocInstance()?.getUnitId()).toBe('editor-1');
+        expect(univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId()).toBe('editor-1');
         expect(editorFocused).toBe(1);
         expect(focusRanges).toEqual([{ startOffset: 3, endOffset: 3 }]);
         expect(service.getEditor()).toBe(service.getEditor('editor-1'));

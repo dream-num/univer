@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type {
     IRichTextEditingMutationParams,
 } from '@univerjs/docs';
@@ -32,6 +32,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
@@ -129,8 +130,9 @@ export class FormulaEditorController extends RxDisposable {
 
             if (isFocusButHidden) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
-                    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                const formulaEditorDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+                    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                    UniverInstanceType.UNIVER_DOC
                 );
 
                 const visibleState = this._editorBridgeService.isVisible();
@@ -194,8 +196,9 @@ export class FormulaEditorController extends RxDisposable {
         this.disposeWithMe(combineLatest([this._formulaEditorManagerService.position$, addFormulaBar$]).subscribe(([position]) => {
             if (!position) return this._clearScheduledCallback();
             const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-            const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
-                DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+            const formulaEditorDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+                DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                UniverInstanceType.UNIVER_DOC
             );
 
             if (editorObject == null || formulaEditorDataModel == null) return this._clearScheduledCallback();
@@ -222,8 +225,9 @@ export class FormulaEditorController extends RxDisposable {
         const skeleton = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
         const editorObject = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
-        const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
-            DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+        const formulaEditorDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+            DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            UniverInstanceType.UNIVER_DOC
         );
 
         if (skeleton == null || position == null || editorObject == null || formulaEditorDataModel == null) {

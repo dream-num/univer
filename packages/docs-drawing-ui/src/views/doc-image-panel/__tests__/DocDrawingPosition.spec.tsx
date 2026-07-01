@@ -114,6 +114,7 @@ class TestDocSkeletonManagerService {
     getViewModel() {
         return {
             getEditArea: () => DocumentEditArea.BODY,
+            reset: () => undefined,
         };
     }
 }
@@ -150,11 +151,11 @@ class TestRenderManagerService {
         this._render = render;
     }
 
-    getRenderUnitById(_unitId: string) {
-        return this._render;
-    }
+    private _getRender() {
+        if (this._render == null) {
+            return null;
+        }
 
-    getRenderById(_unitId: string) {
         return {
             ...(this._render as object),
             scene: this._scene,
@@ -170,6 +171,14 @@ class TestRenderManagerService {
                 throw new Error(`Unexpected render dependency: ${String(token)}`);
             },
         };
+    }
+
+    getRenderUnitById(_unitId: string) {
+        return this._getRender();
+    }
+
+    getRenderById(_unitId: string) {
+        return this._getRender();
     }
 }
 

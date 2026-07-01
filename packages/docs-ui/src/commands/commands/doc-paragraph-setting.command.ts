@@ -44,8 +44,8 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
         const unitId = docDataModel.getUnitId();
 
         const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const allParagraphs = segment.getBody()?.paragraphs ?? [];
-        const dataStream = segment.getBody()?.dataStream ?? '';
+        const allParagraphs = segment?.getBody()?.paragraphs ?? [];
+        const dataStream = segment?.getBody()?.dataStream ?? '';
         const paragraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, allParagraphs, dataStream) ?? [];
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {

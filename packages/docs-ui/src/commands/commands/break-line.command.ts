@@ -107,7 +107,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const { horizontalLine } = params ?? {};
         const { segmentId } = activeTextRange;
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '').getBody();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '')?.getBody();
 
         if (docDataModel == null || originBody == null) {
             return false;

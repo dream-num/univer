@@ -134,7 +134,7 @@ export const DocTableInsertRowCommand: ICommand<IDocTableInsertRowCommandParams>
         const { segmentId } = rangeInfo;
 
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || body == null) {
             return false;
@@ -241,8 +241,8 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
 
         const { segmentId } = rangeInfo;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || body == null) {
             return false;

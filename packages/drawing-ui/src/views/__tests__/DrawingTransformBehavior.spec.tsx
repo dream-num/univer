@@ -266,6 +266,46 @@ describe('DrawingTransform behavior', () => {
         expect(renderManagerService.transformer.notificationCount).toBe(1);
     });
 
+    it('disables rotation input for chart drawings', () => {
+        const drawing = {
+            ...createDrawing('chart-1'),
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+        };
+
+        const rendered = renderWithRediContext(univer.__getInjector(), drawing);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(inputInField(container, 'drawing-ui.image-panel.transform.rotate').disabled).toBe(true);
+    });
+
+    it('disables rotation input for groups containing chart drawings', () => {
+        const group = {
+            ...createDrawing('group-1'),
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+        };
+        const chart = {
+            ...createDrawing('chart-child'),
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+            groupId: 'group-1',
+        };
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    [group.drawingId]: group,
+                    [chart.drawingId]: chart,
+                },
+                order: [group.drawingId, chart.drawingId],
+            },
+        });
+
+        const rendered = renderWithRediContext(univer.__getInjector(), group);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(inputInField(container, 'drawing-ui.image-panel.transform.rotate').disabled).toBe(true);
+    });
+
     it('clamps negative position inputs to the canvas origin', async () => {
         const drawing = createDrawing('image-1');
         const updates: IDrawingParam[][] = [];

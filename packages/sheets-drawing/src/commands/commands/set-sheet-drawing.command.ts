@@ -41,10 +41,6 @@ function hasIncomingAngle(drawing: Partial<ISheetDrawing>): boolean {
 type NullableAngleState = { angle?: number } | null | undefined | void;
 
 function preserveAngle<T extends { angle?: number }>(incoming: T, current: NullableAngleState): T {
-    if (incoming.angle === undefined) {
-        return incoming;
-    }
-
     const currentAngle = (current as { angle?: number } | null | undefined)?.angle;
     const next = { ...((current ?? {}) as object), ...incoming } as T;
     if (currentAngle === undefined) {

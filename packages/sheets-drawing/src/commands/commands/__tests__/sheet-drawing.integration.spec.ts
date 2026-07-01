@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandService, Injector, Univer } from '@univerjs/core';
+import type { Injector, Univer } from '@univerjs/core';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
-import { ArrangeTypeEnum, DrawingTypeEnum, ImageSourceType, IUniverInstanceService, UndoCommand } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, ImageSourceType, IUndoRedoService, IUniverInstanceService, UndoCommand } from '@univerjs/core';
+import { DRAWING_COPY_CONTEXT_KEY, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
 import { resolveSheetDrawingRotateEnabled } from '../../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../../services/sheet-drawing.service';
@@ -426,6 +426,53 @@ describe('sheet drawing integration', () => {
         expect(Object.prototype.hasOwnProperty.call(restoredChart.axisAlignSheetTransform, 'angle')).toBe(false);
     });
 
+    it('keeps angle updates unchanged when the current drawing is missing', () => {
+        const commandServiceMock = { syncExecuteCommand: vi.fn(() => true) };
+        const undoRedoServiceMock = { pushUndoRedo: vi.fn() };
+        const sheetDrawingServiceMock = {
+            getDrawingByParam: vi.fn(() => undefined),
+            getBatchUpdateOp: vi.fn((drawings: ISheetDrawing[]) => ({
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                undo: null,
+                redo: null,
+                objects: drawings.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })),
+            })),
+        };
+        const sheetInterceptorServiceMock = {
+            onCommandExecute: vi.fn(() => ({ redos: [], undos: [] })),
+        };
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'missing-chart',
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+            transform: { angle: 45 },
+        };
+        const accessor = {
+            get: vi.fn((token) => {
+                if (token === ICommandService) return commandServiceMock;
+                if (token === IUndoRedoService) return undoRedoServiceMock;
+                if (token === ISheetDrawingService) return sheetDrawingServiceMock;
+                if (token === SheetInterceptorService) return sheetInterceptorServiceMock;
+                throw new Error('unexpected dependency');
+            }),
+        };
+
+        expect(SetSheetDrawingCommand.handler(accessor as never, {
+            unitId: 'test',
+            drawings: [drawing],
+        })).toBe(true);
+        expect(sheetDrawingServiceMock.getBatchUpdateOp).toHaveBeenCalledWith([drawing]);
+        expect(sheetInterceptorServiceMock.onCommandExecute).toHaveBeenCalledWith({
+            id: SetSheetDrawingCommand.id,
+            params: {
+                unitId: 'test',
+                drawings: [drawing],
+            },
+        });
+    });
+
     it('arranges drawing order through the real command pipeline', async () => {
         await commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
@@ -587,6 +634,63 @@ describe('sheet drawing integration', () => {
 
         expect((removeMutation?.params as { type?: DrawingApplyType } | undefined)?.type).toBe(DrawingApplyType.REMOVE);
         expect(removeObjects.map((object) => object.drawingId)).toEqual(['chart-child', 'image-child', 'group-remove']);
+    });
+
+    it('copies drawing records that are missing from drawing order after ordered records', () => {
+        const sheetDrawingService = get(ISheetDrawingService);
+        sheetDrawingService.registerDrawingData('test', {
+            sheet1: {
+                data: {
+                    ordered: createSheetDrawing('ordered'),
+                    unordered: createSheetDrawing('unordered'),
+                },
+                order: ['ordered'],
+            },
+        });
+        const copyContext = new Map<string, unknown>();
+
+        const intercepted = get(SheetInterceptorService).onCommandExecute({
+            id: CopySheetCommand.id,
+            params: {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                targetSubUnitId: 'copied-sheet',
+                copyContext,
+            },
+        });
+        const insertMutation = intercepted.redos.find((mutation) => mutation.id === SetDrawingApplyMutation.id);
+        const copiedObjects = (insertMutation?.params as { objects?: Array<{ drawingId: string; subUnitId: string }> } | undefined)?.objects ?? [];
+        const copyPlan = copyContext.get(DRAWING_COPY_CONTEXT_KEY) as { drawings: Array<ISheetDrawing & { source?: string }> };
+
+        expect(copyPlan.drawings.map((drawing) => drawing.source)).toEqual([
+            'https://example.com/ordered.png',
+            'https://example.com/unordered.png',
+        ]);
+        expect(copiedObjects.map((drawing) => drawing.drawingId)).toEqual(copyPlan.drawings.map((drawing) => drawing.drawingId));
+        expect(copiedObjects.map((drawing) => drawing.subUnitId)).toEqual(['copied-sheet', 'copied-sheet']);
+    });
+
+    it('does not create remove sheet mutations when batch remove resolves no objects', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [createSheetDrawing('empty-remove-guard')],
+        });
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        const getBatchRemoveOpSpy = vi.spyOn(sheetDrawingService, 'getBatchRemoveOp').mockReturnValue({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            undo: null,
+            redo: null,
+            objects: [],
+        });
+
+        expect(get(SheetInterceptorService).onCommandExecute({
+            id: RemoveSheetCommand.id,
+            params: { unitId: 'test', subUnitId: 'sheet1' },
+        })).toMatchObject({ redos: [], undos: [] });
+
+        getBatchRemoveOpSpy.mockRestore();
     });
 
     it('does not create sheet lifecycle mutations when the source sheet has no drawings', () => {

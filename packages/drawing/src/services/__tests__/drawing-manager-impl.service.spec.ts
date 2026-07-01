@@ -16,7 +16,7 @@
 
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
 import { BooleanNumber, DrawingTypeEnum, Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDrawingCopyPlan, getOrCreateDrawingCopyPlan, isGroupableDrawingType } from '../../utils/drawing-group';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 
@@ -134,6 +134,31 @@ describe('UnitDrawingService', () => {
         });
     });
 
+    it('deduplicates expanded remove params for grouped, normal, and missing drawings', () => {
+        service.applyJson1(unitId, subUnitId, service.getBatchAddOp([
+            createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),
+            createDrawing('image'),
+        ]).redo);
+        vi.spyOn(service, 'getDrawingsByGroupNested').mockReturnValue(null);
+
+        const expanded = (service as unknown as {
+            _getExpandedBatchRemoveParams: (removeParams: IDrawingSearch[]) => IDrawingSearch[];
+        })._getExpandedBatchRemoveParams([
+            createSearch('group'),
+            createSearch('group'),
+            createSearch('image'),
+            createSearch('image'),
+            createSearch('missing'),
+            createSearch('missing'),
+        ]);
+
+        expect(expanded).toEqual([
+            createSearch('group'),
+            createSearch('image'),
+            createSearch('missing'),
+        ]);
+    });
+
     it('creates one copy id map for group children and chart drawings', () => {
         let nextId = 0;
         const plan = createDrawingCopyPlan([
@@ -156,6 +181,30 @@ describe('UnitDrawingService', () => {
             expect.objectContaining({ drawingId: 'copy-1', groupId: 'copy-0', subUnitId: 'copied-sheet' }),
             expect.objectContaining({ drawingId: 'copy-2', groupId: 'copy-0', subUnitId: 'copied-sheet' }),
         ]);
+    });
+
+    it('keeps copied drawing unchanged when the id map cannot resolve its current id', () => {
+        let readCount = 0;
+        const dynamicDrawing = {
+            ...createDrawing('registered-id'),
+            get drawingId() {
+                readCount += 1;
+                return readCount <= 2 ? 'registered-id' : 'unmapped-id';
+            },
+        } as IDrawingParam;
+
+        const plan = createDrawingCopyPlan([dynamicDrawing], {
+            unitId,
+            sourceSubUnitId: subUnitId,
+            targetSubUnitId: 'copied-sheet',
+            generateId: () => 'copy-0',
+        });
+
+        expect(plan.idMap.get('registered-id')).toBe('copy-0');
+        expect(plan.drawings[0]).toEqual(expect.objectContaining({
+            drawingId: 'unmapped-id',
+            subUnitId,
+        }));
     });
 
     it('creates uncached copy plans and reuses cached complete copy plans', () => {

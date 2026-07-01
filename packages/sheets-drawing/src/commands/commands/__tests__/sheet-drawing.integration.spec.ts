@@ -88,6 +88,11 @@ function createSheetDrawingTransform(angle = 0) {
     };
 }
 
+function withoutAngle<T extends { angle?: number }>(value: T): Omit<T, 'angle'> {
+    const { angle: _angle, ...rest } = value;
+    return rest;
+}
+
 function createGroupSheetDrawing(drawingId: string, angle = 0): ISheetDrawing {
     const drawing = createSheetDrawing(drawingId);
 
@@ -169,6 +174,13 @@ describe('sheet drawing integration', () => {
         expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-2' })).toBeUndefined();
         expect(drawingManagerService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-2' })).toBeUndefined();
         expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual([]);
+    });
+
+    it('skips remove sheet drawing when no drawing objects are resolved', async () => {
+        expect(await commandService.executeCommand(RemoveSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [],
+        })).toBe(false);
     });
 
     it('removes and restores a grouped drawing graph including chart children', async () => {
@@ -369,6 +381,51 @@ describe('sheet drawing integration', () => {
         });
     });
 
+    it('drops incoming angles for non-rotatable drawings when current angle is absent', async () => {
+        const drawing = createSheetDrawing('chart-without-angle');
+        const chart = {
+            ...drawing,
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+            transform: withoutAngle(createSheetDrawingTransform()),
+            sheetTransform: withoutAngle(drawing.sheetTransform),
+            axisAlignSheetTransform: withoutAngle(drawing.axisAlignSheetTransform),
+        } as ISheetDrawing;
+
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [chart],
+        });
+
+        expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'chart-without-angle',
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                transform: createSheetDrawingTransform(45),
+                sheetTransform: {
+                    ...drawing.sheetTransform,
+                    angle: 45,
+                },
+                axisAlignSheetTransform: {
+                    ...drawing.axisAlignSheetTransform,
+                    angle: 45,
+                },
+            }],
+        })).toBe(true);
+
+        const restoredChart = get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'chart-without-angle',
+        })!;
+
+        expect(Object.prototype.hasOwnProperty.call(restoredChart.transform ?? {}, 'angle')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(restoredChart.sheetTransform, 'angle')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(restoredChart.axisAlignSheetTransform, 'angle')).toBe(false);
+    });
+
     it('arranges drawing order through the real command pipeline', async () => {
         await commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
@@ -530,6 +587,33 @@ describe('sheet drawing integration', () => {
 
         expect((removeMutation?.params as { type?: DrawingApplyType } | undefined)?.type).toBe(DrawingApplyType.REMOVE);
         expect(removeObjects.map((object) => object.drawingId)).toEqual(['chart-child', 'image-child', 'group-remove']);
+    });
+
+    it('does not create sheet lifecycle mutations when the source sheet has no drawings', () => {
+        const sheetInterceptorService = get(SheetInterceptorService);
+
+        expect(sheetInterceptorService.onCommandExecute({
+            id: RemoveSheetCommand.id,
+            params: { unitId: 'test', subUnitId: 'sheet2' },
+        })).toMatchObject({ redos: [], undos: [] });
+
+        expect(sheetInterceptorService.onCommandExecute({
+            id: CopySheetCommand.id,
+            params: {
+                unitId: 'test',
+                subUnitId: 'sheet2',
+            },
+        })).toMatchObject({ redos: [], undos: [] });
+
+        expect(sheetInterceptorService.onCommandExecute({
+            id: CopySheetCommand.id,
+            params: {
+                unitId: 'test',
+                subUnitId: 'sheet2',
+                targetSubUnitId: 'copied-empty-sheet',
+                copyContext: new Map<string, unknown>(),
+            },
+        })).toMatchObject({ redos: [], undos: [] });
     });
 
     it('removes and restores sheet drawings when a worksheet is deleted and undone', async () => {

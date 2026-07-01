@@ -72,4 +72,23 @@ describe('drawing transform rotation controls', () => {
         }]);
         expect(notifyChange).toHaveBeenCalledTimes(1);
     });
+
+    it('ignores null rotation updates even when rotation is enabled', () => {
+        const setRotation = vi.fn();
+        const emitUpdate = vi.fn();
+        const notifyChange = vi.fn();
+        const handleRotationChange = createDrawingTransformRotationChangeHandler({
+            rotateEnabled: true,
+            drawingParam,
+            setRotation,
+            emitUpdate,
+            notifyChange,
+        });
+
+        handleRotationChange(null);
+
+        expect(setRotation).not.toHaveBeenCalled();
+        expect(emitUpdate).not.toHaveBeenCalled();
+        expect(notifyChange).not.toHaveBeenCalled();
+    });
 });

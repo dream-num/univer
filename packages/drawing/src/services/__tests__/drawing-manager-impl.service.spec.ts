@@ -17,7 +17,7 @@
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
 import { BooleanNumber, DrawingTypeEnum, Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createDrawingCopyPlan, getOrCreateDrawingCopyPlan } from '../../utils/drawing-group';
+import { createDrawingCopyPlan, getOrCreateDrawingCopyPlan, isGroupableDrawingType } from '../../utils/drawing-group';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
@@ -126,6 +126,14 @@ describe('UnitDrawingService', () => {
         ]);
     });
 
+    it('keeps batch remove operations stable for empty drawing inputs', () => {
+        expect(service.getBatchRemoveOp([])).toMatchObject({
+            unitId: '',
+            subUnitId: '',
+            objects: [],
+        });
+    });
+
     it('creates one copy id map for group children and chart drawings', () => {
         let nextId = 0;
         const plan = createDrawingCopyPlan([
@@ -148,6 +156,49 @@ describe('UnitDrawingService', () => {
             expect.objectContaining({ drawingId: 'copy-1', groupId: 'copy-0', subUnitId: 'copied-sheet' }),
             expect.objectContaining({ drawingId: 'copy-2', groupId: 'copy-0', subUnitId: 'copied-sheet' }),
         ]);
+    });
+
+    it('creates uncached copy plans and reuses cached complete copy plans', () => {
+        let nextId = 0;
+        const options = {
+            unitId,
+            sourceSubUnitId: subUnitId,
+            targetSubUnitId: 'copied-sheet',
+            generateId: () => `copy-${nextId++}`,
+        };
+        const child = createDrawing('child', { groupId: 'missing-group' });
+        const uncachedPlan = getOrCreateDrawingCopyPlan(undefined, [child], options);
+
+        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_TABLE)).toBe(false);
+        expect(uncachedPlan.drawings[0]).toEqual(expect.objectContaining({
+            drawingId: 'copy-0',
+            subUnitId: 'copied-sheet',
+        }));
+        expect(uncachedPlan.drawings[0].groupId).toBeUndefined();
+
+        const copyContext = new Map<string, unknown>();
+        const cachedPlan = getOrCreateDrawingCopyPlan(copyContext, [child], options);
+
+        expect(getOrCreateDrawingCopyPlan(copyContext, [child], options)).toBe(cachedPlan);
+    });
+
+    it('extends a cached copy plan with the default id generator when no generator is provided', () => {
+        const options = {
+            unitId,
+            sourceSubUnitId: subUnitId,
+            targetSubUnitId: 'copied-sheet',
+        };
+        const copyContext = new Map<string, unknown>();
+        const firstPlan = getOrCreateDrawingCopyPlan(copyContext, [createDrawing('child-1')], options);
+
+        const extendedPlan = getOrCreateDrawingCopyPlan(copyContext, [
+            createDrawing('child-1'),
+            createDrawing('child-2'),
+        ], options);
+
+        expect(extendedPlan).toBe(firstPlan);
+        expect(extendedPlan.idMap.has('child-2')).toBe(true);
+        expect(extendedPlan.drawings.map((drawing) => drawing.subUnitId)).toEqual(['copied-sheet', 'copied-sheet']);
     });
 
     it('extends a cached copy plan when a later caller provides more drawing graph nodes', () => {

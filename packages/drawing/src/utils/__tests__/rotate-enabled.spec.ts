@@ -88,4 +88,20 @@ describe('resolveDrawingRotateEnabled', () => {
             isKnownNonRotatableType: (drawingType) => drawingType === DrawingTypeEnum.DRAWING_CHART,
         })).toBe(false);
     });
+
+    it('keeps cyclic group graphs rotatable instead of recursing forever', () => {
+        const group = createGroup('group');
+
+        expect(resolveDrawingRotateEnabled(group, {
+            getChildren: () => [group],
+        })).toBe(true);
+    });
+
+    it('uses render object transformer config as a runtime rotation guard', () => {
+        const shape = createDrawing('shape');
+
+        expect(resolveDrawingRotateEnabled(shape, {
+            getRenderObject: () => ({ transformerConfig: { rotateEnabled: false } }),
+        })).toBe(false);
+    });
 });

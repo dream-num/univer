@@ -106,4 +106,60 @@ describe('FBase', () => {
         expect(initLog.get(manual)).toEqual(['a:true']);
         expect(manual.steps).toEqual(['mark:manual']);
     });
+
+    it('should copy initialable accessor descriptors without invoking getters during extend', () => {
+        const accessLog: string[] = [];
+        const initLog = new WeakMap<object, string[]>();
+
+        class AccessorInitialable extends FBaseInitialable {
+            value = 'instance';
+
+            constructor(@Inject(Injector) injector: IInjector) {
+                super(injector);
+            }
+        }
+
+        class AccessorSourceA {
+            _initialize(injector: IInjector) {
+                const current = initLog.get(this) ?? [];
+                current.push(`a:${Boolean(injector)}`);
+                initLog.set(this, current);
+            }
+
+            get marker() {
+                const instance = this as unknown as AccessorInitialable;
+                accessLog.push(`get:${instance.value}`);
+                return instance.value;
+            }
+
+            set marker(value: string) {
+                const instance = this as unknown as AccessorInitialable;
+                accessLog.push(`set:${value}`);
+                instance.value = value;
+            }
+        }
+
+        class AccessorSourceB {
+            _initialize() {
+                const current = initLog.get(this) ?? [];
+                current.push('b');
+                initLog.set(this, current);
+            }
+        }
+
+        AccessorInitialable.extend(AccessorSourceA);
+        AccessorInitialable.extend(AccessorSourceB);
+
+        expect(accessLog).toEqual([]);
+        expect(typeof Object.getOwnPropertyDescriptor(AccessorInitialable.prototype, 'marker')?.get).toBe('function');
+
+        const injector = new Injector();
+        const instance = injector.createInstance(AccessorInitialable) as AccessorInitialable & { marker: string };
+
+        expect(initLog.get(instance)).toEqual(['a:true', 'b']);
+        expect(instance.marker).toBe('instance');
+        instance.marker = 'updated';
+        expect(instance.marker).toBe('updated');
+        expect(accessLog).toEqual(['get:instance', 'set:updated', 'get:updated']);
+    });
 });

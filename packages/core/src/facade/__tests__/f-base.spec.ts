@@ -162,4 +162,37 @@ describe('FBase', () => {
         expect(instance.marker).toBe('updated');
         expect(accessLog).toEqual(['get:instance', 'set:updated', 'get:updated']);
     });
+
+    it('should fall back to assignment when an extension property descriptor is unavailable', () => {
+        class FallbackInitialable extends FBaseInitialable {
+            value = 'fallback';
+
+            constructor(@Inject(Injector) injector: IInjector) {
+                super(injector);
+            }
+        }
+
+        const legacySource = {
+            prototype: new Proxy({}, {
+                ownKeys: () => ['legacy'],
+                getOwnPropertyDescriptor: () => undefined,
+                get: (_target, key) => {
+                    if (key !== 'legacy') {
+                        return undefined;
+                    }
+
+                    return function (this: FallbackInitialable) {
+                        return `legacy:${this.value}`;
+                    };
+                },
+            }),
+        };
+
+        FallbackInitialable.extend(legacySource);
+
+        const injector = new Injector();
+        const instance = injector.createInstance(FallbackInitialable) as FallbackInitialable & { legacy: () => string };
+
+        expect(instance.legacy()).toBe('legacy:fallback');
+    });
 });

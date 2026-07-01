@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
 import { EmbedCapabilityRegistryService, EmbedGuestContributionRegistryService } from '@univerjs/embed';
 import { describe, expect, it, vi } from 'vitest';
 import { createDocsEmbedEmptySnapshot, registerDocsEmbedGuestContribution, registerDocsEmbedHostCapabilities } from './embed-guest';
@@ -50,31 +50,15 @@ describe('docs embed guest', () => {
         ]);
     });
 
-    it('registers docs guest creation when instance service is available', () => {
+    it('registers docs guest marker', () => {
         const guestRegistry = new EmbedGuestContributionRegistryService();
-        const createUnit = vi.fn(() => ({ getUnitId: () => 'doc-child' }));
         registerDocsEmbedGuestContribution(createInjector([
             [EmbedGuestContributionRegistryService, guestRegistry],
-            [IUniverInstanceService, { createUnit }],
         ]) as never);
 
-        const contribution = guestRegistry.get(UniverInstanceType.UNIVER_DOC);
-        expect(contribution).toBeDefined();
-        expect(contribution?.createEmptyUnit!({ id: 'doc-child' }, { from: 'embed' } as never)).toEqual({
-            unitId: 'doc-child',
-            unitType: UniverInstanceType.UNIVER_DOC,
+        expect(guestRegistry.get(UniverInstanceType.UNIVER_DOC)).toEqual({
+            childType: UniverInstanceType.UNIVER_DOC,
         });
-        expect(createUnit).toHaveBeenCalledWith(
-            UniverInstanceType.UNIVER_DOC,
-            expect.objectContaining({ id: 'doc-child' }),
-            { from: 'embed' }
-        );
-
-        const emptyRegistry = new EmbedGuestContributionRegistryService();
-        registerDocsEmbedGuestContribution(createInjector([
-            [EmbedGuestContributionRegistryService, emptyRegistry],
-        ]) as never);
-        expect(emptyRegistry.list()).toEqual([]);
     });
 });
 

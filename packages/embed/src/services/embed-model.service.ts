@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import type { IEmbedDescriptor, IEmbedResource } from '../types/embed';
+import type { IEmbedDescriptor, IEmbedResource, IEmbedStoredDescriptor } from '../types/embed';
 import type { ResourceRefInput } from '../types/resource-ref';
 import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
 import { fromResourceRefUnitType } from '../common/unit-type';
 
+type IEmbedRuntimeResource = Omit<IEmbedResource, 'embeds'> & { embeds: Record<string, IEmbedDescriptor> };
+
 export class EmbedModelService {
-    private readonly _resources = new Map<string, IEmbedResource>();
+    private readonly _resources = new Map<string, IEmbedRuntimeResource>();
 
     addDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): void {
         const now = Date.now();
-        const normalizedDescriptor = this._normalizeDescriptor(hostUnitId, descriptor);
+        const normalizedDescriptor = this._normalizeDescriptor(hostUnitId, descriptor, { preserveRuntimeChildUnitId: true });
         this._assertActiveChildUnitAvailable(normalizedDescriptor);
         const resource = this._ensureResource(hostUnitId);
         resource.embeds[normalizedDescriptor.embedId] = {
@@ -104,7 +106,7 @@ export class EmbedModelService {
     }
 
     serializeUnit(unitId: string): IEmbedResource {
-        return this._cloneResource(this._resources.get(unitId) ?? this._createResource());
+        return this._toPersistedResource(this._resources.get(unitId) ?? this._createResource());
     }
 
     loadUnit(unitId: string, resource: IEmbedResource): void {
@@ -113,7 +115,7 @@ export class EmbedModelService {
             normalizedResource.embeds[embedId] = this._normalizeDescriptor(unitId, {
                 ...descriptor,
                 embedId,
-            });
+            }, { preserveRuntimeChildUnitId: false });
         }
         this._assertResourceHasNoDuplicateActiveChildUnits(normalizedResource);
         for (const descriptor of Object.values(normalizedResource.embeds)) {
@@ -129,37 +131,42 @@ export class EmbedModelService {
 
     parseJson(json: string): IEmbedResource {
         if (!json) {
-            return this._createResource();
+            return this._toPersistedResource(this._createResource());
         }
 
         const parsed = JSON.parse(json) as Partial<IEmbedResource>;
-        const resource = {
+        const resource: IEmbedRuntimeResource = {
             ...createEmptyEmbedResource(),
             embeds: Object.fromEntries(Object.entries(parsed.embeds ?? {}).map(([embedId, descriptor]) => [
                 embedId,
                 this._normalizeDescriptor(descriptor.hostUnitId, {
                     ...descriptor,
                     embedId,
-                }),
+                }, { preserveRuntimeChildUnitId: false }),
             ])),
         };
         this._assertResourceHasNoDuplicateActiveChildUnits(resource);
-        return resource;
+        return this._toPersistedResource(resource);
     }
 
     toJson(unitId: string): string {
         return JSON.stringify(this.serializeUnit(unitId));
     }
 
-    private _normalizeDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): IEmbedDescriptor {
-        if (descriptor.source.kind !== 'ref') {
+    private _normalizeDescriptor(
+        hostUnitId: string,
+        descriptor: IEmbedDescriptor,
+        options: { preserveRuntimeChildUnitId?: boolean } = {}
+    ): IEmbedDescriptor {
+        const legacyDescriptor = descriptor as IEmbedDescriptor & { source?: unknown; hostContext?: Record<string, unknown> };
+        if (legacyDescriptor.source !== undefined) {
             throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
         }
-        const persistableDescriptor = { ...descriptor } as IEmbedDescriptor & { hostContext?: Record<string, unknown> };
-        delete persistableDescriptor.hostContext;
+        const normalizedDescriptor = { ...descriptor } as IEmbedDescriptor & { hostContext?: Record<string, unknown> };
+        delete normalizedDescriptor.hostContext;
 
-        const ref = normalizeResourceRefInput(descriptor.source.ref);
-        const childType = descriptor.childType ?? descriptor.source.unitType;
+        const ref = normalizeResourceRefInput(descriptor.ref);
+        const childType = descriptor.childType;
         if (childType == null) {
             throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_REQUIRED');
         }
@@ -173,25 +180,35 @@ export class EmbedModelService {
         }
 
         return {
-            ...persistableDescriptor,
+            ...normalizedDescriptor,
             hostUnitId,
-            source: {
-                kind: 'ref',
-                ref,
-                unitType: childType,
-            },
-            childUnitId: descriptor.childUnitId ?? (typeof ref !== 'string' && ref.file.kind === 'self' ? ref.unit.selector : undefined),
+            ref,
+            childUnitId: options.preserveRuntimeChildUnitId
+                ? descriptor.childUnitId ?? (typeof ref !== 'string' && ref.file.kind === 'self' ? ref.unit.selector : undefined)
+                : undefined,
             childType,
             lifecycle: descriptor.lifecycle ?? 'active',
         };
     }
 
     private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): ResourceRefInput {
-        if (descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
-        }
+        return descriptor.ref;
+    }
 
-        return descriptor.source.ref;
+    private _toPersistedResource(resource: IEmbedRuntimeResource): IEmbedResource {
+        return {
+            ...this._cloneResource(resource),
+            embeds: Object.fromEntries(Object.entries(resource.embeds).map(([embedId, descriptor]) => [
+                embedId,
+                this._toPersistedDescriptor(descriptor),
+            ])),
+        };
+    }
+
+    private _toPersistedDescriptor(descriptor: IEmbedDescriptor): IEmbedStoredDescriptor {
+        const persisted = { ...descriptor } as IEmbedDescriptor & { childUnitId?: string };
+        delete persisted.childUnitId;
+        return persisted;
     }
 
     private _assertActiveChildUnitAvailable(descriptor: IEmbedDescriptor, replacingUnitId?: string): void {
@@ -215,7 +232,7 @@ export class EmbedModelService {
         }
     }
 
-    private _assertResourceHasNoDuplicateActiveChildUnits(resource: IEmbedResource): void {
+    private _assertResourceHasNoDuplicateActiveChildUnits(resource: IEmbedRuntimeResource): void {
         const activeByChildUnit = new Map<string, IEmbedDescriptor>();
         for (const descriptor of Object.values(resource.embeds)) {
             if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
@@ -231,7 +248,7 @@ export class EmbedModelService {
         }
     }
 
-    private _ensureResource(unitId: string): IEmbedResource {
+    private _ensureResource(unitId: string): IEmbedRuntimeResource {
         let resource = this._resources.get(unitId);
         if (!resource) {
             resource = this._createResource();
@@ -241,11 +258,11 @@ export class EmbedModelService {
         return resource;
     }
 
-    private _createResource(): IEmbedResource {
+    private _createResource(): IEmbedRuntimeResource {
         return createEmptyEmbedResource();
     }
 
-    private _cloneResource(resource: IEmbedResource): IEmbedResource {
+    private _cloneResource(resource: IEmbedRuntimeResource): IEmbedRuntimeResource {
         return cloneEmbedResource(resource);
     }
 }

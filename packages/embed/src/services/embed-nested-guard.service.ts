@@ -31,11 +31,9 @@ export class EmbedNestedGuardService {
             throw new Error('NESTED_EMBED_NOT_SUPPORTED');
         }
 
-        const childType = context.source.kind === 'empty'
-            ? context.source.unitType
-            : undefined;
+        const childType = context.source.unitType;
 
-        if (childType && !this._capabilityRegistry.getCapability({
+        if (!this._capabilityRegistry.getCapability({
             hostType: context.hostType,
             childType,
             entry: context.entry,

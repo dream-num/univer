@@ -162,7 +162,7 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      *         unitId: hostWorkbookId,
      *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
      *     },
-     *     content: { kind: 'ref', unitType: UniverInstanceType.UNIVER_SHEET, ref },
+     *     content: { unitType: UniverInstanceType.UNIVER_SHEET, ref },
      * });
      * const childWorkbook = await embed.loadAsync();
      * console.log(childWorkbook.getId());
@@ -181,13 +181,9 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      * ```
      */
     async loadAsync<TLoadFacade = TUnitFacade>(options: ILoadEmbedOptions = {}): Promise<TLoadFacade> {
-        if (this._descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_SOURCE_NOT_REFERENCE');
-        }
-
         const { signal, ...createOptions } = options;
         const handle = this._injector.get(EmbedReferencedUnitManagerService).ensure({
-            ref: this._descriptor.source.ref,
+            ref: this._descriptor.ref,
             unitType: this._descriptor.childType,
             owner: {
                 kind: ReferencedUnitOwnerKind.Embed,

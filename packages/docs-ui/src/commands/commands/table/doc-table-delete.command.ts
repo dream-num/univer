@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton } from '../../util';
 import { getDeleteColumnsActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams, getRangeInfoFromRanges } from './table';
@@ -44,8 +44,8 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
 
         const { segmentId } = rangeInfo;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || body == null) {
             return false;
@@ -147,8 +147,8 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
 
         const { segmentId } = rangeInfo;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || body == null) {
             return false;
@@ -261,8 +261,8 @@ export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandPar
 
         const { segmentId } = rangeInfo;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || body == null) {
             return false;

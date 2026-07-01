@@ -98,10 +98,6 @@ export interface IUniverInstanceService {
 
     /** @deprecated */
     getUniverSheetInstance(unitId: string): Nullable<Workbook>;
-    /** @deprecated */
-    getUniverDocInstance(unitId: string): Nullable<DocumentDataModel>;
-    /** @deprecated */
-    getCurrentUniverDocInstance(): Nullable<DocumentDataModel>;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
@@ -223,14 +219,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const unit = this._getUnitById(id)?.[0] as Nullable<T>;
         if (type && unit?.type !== type) return null;
         return unit;
-    }
-
-    getCurrentUniverDocInstance(): Nullable<DocumentDataModel> {
-        return this.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC) as Nullable<DocumentDataModel>;
-    }
-
-    getUniverDocInstance(unitId: string): Nullable<DocumentDataModel> {
-        return this.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
     }
 
     getUniverSheetInstance(unitId: string): Nullable<Workbook> {

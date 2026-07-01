@@ -148,13 +148,13 @@ function getHeaderFooterMenuHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
             const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
 
             subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
         });
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return subscriber.next(true);
@@ -196,7 +196,7 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
                 return;
             }
 
-            const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+            const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
             if (docDataModel == null) {
                 subscriber.next(true);
@@ -1126,7 +1126,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
                 return;
             }
 
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
             if (docDataModel == null) {
                 return;
             }
@@ -1137,7 +1137,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
             if (range) {
                 const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
 
-                const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '');
+                const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc?.getBody()?.paragraphs ?? [], doc?.getBody()?.dataStream ?? '');
                 let listType: string | undefined;
                 if (paragraphs.every((p) => {
                     if (!listType) {
@@ -1347,7 +1347,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     }
 
     const { segmentId } = activeRange;
-    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
     if (body == null) {
         return {
@@ -1375,7 +1375,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
 
-    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     const docRanges = textSelectionService.getDocRanges();
     const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
@@ -1386,7 +1386,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
 
     const { startOffset, segmentId } = activeRange;
 
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs;
 
     if (paragraphs == null) {
         return;

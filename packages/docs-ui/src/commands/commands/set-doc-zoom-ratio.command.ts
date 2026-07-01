@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDocZoomRatioOperationParams } from '../operations/set-doc-zoom-ratio.operation';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     SetDocZoomRatioOperation,
     SetDocZoomRatioUndoMutationFactory,
@@ -36,30 +36,26 @@ export const SetDocZoomRatioCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let documentId = univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
-        if (!documentId) return false;
+        const { zoomRatio = 1, documentId } = params || {};
 
-        let zoomRatio = 1;
+        const docDatModel = documentId
+            ? univerInstanceService.getUnit<DocumentDataModel>(documentId, UniverInstanceType.UNIVER_DOC)
+            : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!docDatModel) return false;
 
-        if (params) {
-            documentId = params.documentId ?? documentId;
-            zoomRatio = params.zoomRatio ?? zoomRatio;
-        }
-
-        const workbook = univerInstanceService.getUniverDocInstance(documentId);
-        if (!workbook) return false;
+        const unitId = docDatModel.getUnitId();
 
         const setZoomRatioMutationParams: ISetDocZoomRatioOperationParams = {
             zoomRatio,
-            unitId: documentId,
+            unitId,
         };
 
         const undoMutationParams = SetDocZoomRatioUndoMutationFactory(accessor, setZoomRatioMutationParams);
-        const result = commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, setZoomRatioMutationParams);
+        const result = commandService.syncExecuteCommand<ISetDocZoomRatioOperationParams>(SetDocZoomRatioOperation.id, setZoomRatioMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: documentId,
+                unitID: unitId,
                 undoMutations: [{ id: SetDocZoomRatioOperation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetDocZoomRatioOperation.id, params: setZoomRatioMutationParams }],
             });

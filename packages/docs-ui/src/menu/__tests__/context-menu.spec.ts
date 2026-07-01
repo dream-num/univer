@@ -85,7 +85,7 @@ function createTableMenuHarness(options: {
         textSelection$: selection$,
     };
     const univerInstanceService = {
-        getCurrentUniverDocInstance: () => ({
+        getCurrentUnitOfType: () => ({
             getSelfOrHeaderFooterModel: () => ({
                 getBody: () => ({
                     tables: [{ endIndex: 30, startIndex: 10, tableId: 'table-1' }],

@@ -99,12 +99,12 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+            const documentModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
             if (!documentModel) return;
 
             this._updateTimer = window.setTimeout(() => {
                 const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-                const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
+                const sheetRenderer = currentSheet && this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
                 const zoomRatio = !this._isSheetEditor ? getDocEffectiveZoomRatio(documentModel) : sheetRenderer?.scene.scaleX || 1;
 
                 this.updateViewZoom(zoomRatio, false);
@@ -163,7 +163,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(
             // hold ctrl & mousewheel ---> zoom
             scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                const documentModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                 if (!documentModel) {
                     return;
                 }

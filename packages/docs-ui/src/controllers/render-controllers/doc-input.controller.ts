@@ -74,7 +74,10 @@ export class DocInputController extends Disposable implements IRenderModule {
             const { segmentId } = activeRange;
 
             const docDataModel = this._context.unit;
-            const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!;
+            const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+            if (!originBody) {
+                return;
+            }
 
             // Insert content's style should follow the text style of the current position.
             const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();

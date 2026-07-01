@@ -74,7 +74,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!documentDataModel) {
         return false;
     }
-    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) {
         return false;
     }

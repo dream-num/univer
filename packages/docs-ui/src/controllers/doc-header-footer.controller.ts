@@ -314,8 +314,8 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             }
 
             const unitId = unit.getUnitId();
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-            if (this._editorService.isEditor(unitId) || this._instanceSrv.getUniverDocInstance(unitId) == null) {
+            const currentRender = this._renderManagerService.getRenderUnitById(unitId);
+            if (this._editorService.isEditor(unitId) || this._instanceSrv.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC) == null) {
                 return;
             }
 

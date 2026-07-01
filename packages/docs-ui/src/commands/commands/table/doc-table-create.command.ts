@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraph, ISectionBreak, ITextRun, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, ISectionBreak, ITextRun, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, createParagraphId, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, createParagraphId, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../../basics/paragraph';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
@@ -78,6 +78,26 @@ export function normalizeTableInsertOffset(body: { dataStream: string }, startOf
     return startOffset === 0 && body.dataStream[0] === DataStreamTreeTokenType.PARAGRAPH ? 1 : startOffset;
 }
 
+export function canInsertTableAtOffset(body: Pick<IDocumentBody, 'tables' | 'blockRanges' | 'customBlocks'>, offset: number): boolean {
+    return !(
+        isOffsetInTableRange(body.tables, offset) ||
+        isOffsetInIndexRange(body.blockRanges, offset) ||
+        isOffsetOnPointRange(body.customBlocks, offset)
+    );
+}
+
+function isOffsetInTableRange(ranges: Array<{ startIndex: number; endIndex: number }> | undefined, offset: number): boolean {
+    return Boolean(ranges?.some((range) => range.startIndex <= offset && offset < range.endIndex));
+}
+
+function isOffsetInIndexRange(ranges: Array<{ startIndex: number; endIndex: number }> | undefined, offset: number): boolean {
+    return Boolean(ranges?.some((range) => range.startIndex <= offset && offset <= range.endIndex));
+}
+
+function isOffsetOnPointRange(ranges: Array<{ startIndex: number }> | undefined, offset: number): boolean {
+    return Boolean(ranges?.some((range) => range.startIndex === offset));
+}
+
 /**
  * The command to create a table at cursor point.
  */
@@ -93,7 +113,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -110,7 +130,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         }
         const segmentId = contentInsertRange?.segmentId ?? activeRange?.segmentId ?? '';
         const segmentPage = activeRange?.segmentPage;
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (body == null) {
             return false;
         }
@@ -123,6 +143,9 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             return false;
         }
         const startOffset = normalizeTableInsertOffset(body, contentInsertRange?.startOffset ?? activeRange!.startOffset);
+        if (!canInsertTableAtOffset(body, startOffset)) {
+            return false;
+        }
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);

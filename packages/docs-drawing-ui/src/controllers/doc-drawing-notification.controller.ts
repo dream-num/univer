@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
@@ -27,6 +27,7 @@ import {
     JSONX,
     RedoCommand,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { getDocDrawingRenderOrder, IDocDrawingService } from '@univerjs/docs-drawing';
@@ -182,14 +183,14 @@ export class DocDrawingAddRemoveController extends Disposable {
                     return;
                 }
 
-                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
+                const unitId = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
                 const focusedDrawings = this._drawingManagerService.getFocusDrawings();
 
                 if (unitId == null || focusedDrawings.length === 0) {
                     return;
                 }
 
-                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
                 const scene = renderObject?.scene;
                 if (scene == null) {
                     return false;
@@ -238,7 +239,7 @@ export class DocDrawingAddRemoveController extends Disposable {
     }
 
     private _updateDrawingsOrder(unitId: string) {
-        const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null) {
             return;

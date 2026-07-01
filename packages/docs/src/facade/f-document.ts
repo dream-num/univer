@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IFDocumentTextRange } from './utils';
 import {
     ICommandService,
     Inject,
@@ -25,7 +26,14 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { FDocumentBody } from './f-document-body';
+import { FDocumentParagraph } from './f-document-paragraph';
+import { buildPlainTextInsertBody, replaceBodyRange } from './utils';
+
+export interface IFDocumentParagraphQuery {
+    text?: string;
+    paragraphId?: string;
+    segmentId?: string;
+}
 
 /**
  * Facade API object bounded to a document. It provides a set of methods to interact with the document.
@@ -48,43 +56,44 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Get the document data model of the document.
+     * @param {string} segmentId The segment id used to get the header/footer data model. Defaults to an empty string for the document data model of the document.
      * @returns {DocumentDataModel} The document data model.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const documentDataModel = fDocument.getDocumentDataModel();
-     * console.log(documentDataModel);
+     * console.log(fDocument.getDocumentDataModel());
+     * console.log(fDocument.getDocumentDataModel('header-01')); // Get the header data model
+     * console.log(fDocument.getDocumentDataModel('footer-01')); // Get the footer data model
      * ```
      */
-    getDocumentDataModel(): DocumentDataModel {
-        return this._documentDataModel;
+    getDocumentDataModel(segmentId: string = ''): DocumentDataModel {
+        const documentDataModel = this._documentDataModel.getSelfOrHeaderFooterModel(segmentId);
+        if (!documentDataModel) {
+            throw new Error(segmentId === '' ? 'Document data model is not found.' : `Document data model is not found in the segment: ${segmentId}`);
+        }
+        return documentDataModel;
     }
 
     /**
-     * Get the document body facade.
-     *
-     * The returned body facade provides synchronous Google Docs-like element APIs
-     * for reading and editing top-level document body elements. Paragraph elements
-     * use their persisted `paragraphId` values. Persisted elements, such as tables
-     * and custom blocks, use their existing ids.
-     *
-     * @returns {FDocumentBody} The document body API instance.
+     * Get the document body or header/footer body by the segment id.
+     * The main body has an empty segment id.
+     * The header and footer body have their respective segment ids.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {IDocumentBody} The document body.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * console.log(fDocumentBody.getBody());
-     *
-     * const element = fDocumentBody.getElement(0);
-     * if (element.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   paragraph.appendText(' updated');
-     *   console.log(paragraph.getText());
-     * }
+     * console.log(fDocument.getBody()); // Get the main body
+     * console.log(fDocument.getBody('header-01')); // Get the header body
+     * console.log(fDocument.getBody('footer-01')); // Get the footer body
      * ```
      */
-    getBody(): FDocumentBody {
-        return this._injector.createInstance(FDocumentBody, this._documentDataModel, this._injector);
+    getBody(segmentId: string = ''): IDocumentBody {
+        const body = this._documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        if (!body) {
+            throw new Error(segmentId === '' ? 'Body is not found in the document.' : `Body is not found in the segment: ${segmentId}`);
+        }
+        return body;
     }
 
     override dispose(): void {
@@ -97,8 +106,7 @@ export class FDocument extends FBaseInitialable {
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const unitId = fDocument.getId();
-     * console.log(unitId);
+     * console.log(fDocument.getId());
      * ```
      */
     getId(): string {
@@ -111,8 +119,7 @@ export class FDocument extends FBaseInitialable {
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const name = fDocument.getName();
-     * console.log(name);
+     * console.log(fDocument.getName());
      * ```
      */
     getName(): string {
@@ -161,5 +168,236 @@ export class FDocument extends FBaseInitialable {
     redo(): boolean {
         this._univerInstanceService.focusUnit(this.id);
         return this._commandService.syncExecuteCommand(RedoCommand.id);
+    }
+
+    /**
+     * Insert plain text at a document body offset.
+     * @param {number} index The zero-based insertion offset.
+     * @param {string} text The plain text to insert.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {boolean} `true` if the edit was applied.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * fDocument.insertText(0, 'Hello ');
+     * ```
+     */
+    insertText(index: number, text: string, segmentId: string = ''): boolean {
+        return replaceBodyRange(
+            {
+                startOffset: index,
+                endOffset: index,
+                segmentId,
+            },
+            buildPlainTextInsertBody(text),
+            this._documentDataModel,
+            this._injector
+        );
+    }
+
+    /**
+     * Get all paragraphs in the document body or header/footer body by the segment id.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph[]} An array of paragraph facade instances.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraphs = fDocument.getParagraphs();
+     * console.log(paragraphs);
+     * ```
+     */
+    getParagraphs(segmentId: string = ''): FDocumentParagraph[] {
+        const { paragraphs = [] } = this.getBody(segmentId);
+        return paragraphs.map((paragraph) => this._createFDocumentParagraph(paragraph.paragraphId, segmentId));
+    }
+
+    /**
+     * Get a paragraph by its paragraph id and segment id.
+     * @param {string} paragraphId The paragraph id.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph | null} The paragraph facade instance, or `null` if the paragraph is not found.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.getParagraph('paragraph-01');
+     * console.log(paragraph);
+     * ```
+     */
+    getParagraph(paragraphId: string, segmentId: string = ''): FDocumentParagraph | null {
+        const { paragraphs = [] } = this.getBody(segmentId);
+        const paragraph = paragraphs.find((paragraph) => paragraph.paragraphId === paragraphId);
+        if (!paragraph) {
+            return null;
+        }
+        return this._createFDocumentParagraph(paragraphId, segmentId);
+    }
+
+    /**
+     * Find a paragraph by its text content and segment id.
+     * @param {string} text The text content to search for.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph | null} The paragraph facade instance, or `null` if the paragraph is not found.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.findParagraphByText('Hello');
+     * console.log(paragraph);
+     * ```
+     */
+    findParagraphByText(text: string, segmentId: string = ''): FDocumentParagraph | null {
+        return this.findParagraphs({ text, segmentId })[0] || null;
+    }
+
+    /**
+     * Find paragraphs by a query object, which can include text content, paragraph id, and segment id.
+     * @param {string | IFDocumentParagraphQuery} query The query object or text content to search for.
+     * @returns {FDocumentParagraph[]} An array of paragraph facade instances that match the query.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraphsWithText = fDocument.findParagraphs('Hello');
+     * const paragraphsWithId = fDocument.findParagraphs({ paragraphId: 'paragraph-01' });
+     * const paragraphsWithSegment = fDocument.findParagraphs({ segmentId: 'header-01' });
+     * console.log(paragraphsWithText, paragraphsWithId, paragraphsWithSegment);
+     * ```
+     */
+    findParagraphs(query: string | IFDocumentParagraphQuery): FDocumentParagraph[] {
+        const normalized = typeof query === 'string' ? { text: query } : query;
+        const { text, paragraphId, segmentId = '' } = normalized;
+
+        return this.getParagraphs(segmentId).filter((paragraph) => {
+            if (paragraphId && paragraph.getId() !== paragraphId) {
+                return false;
+            }
+
+            if (text && !paragraph.getText().includes(text)) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    /**
+     * Insert a plain-text paragraph before the paragraph at the given paragraph index.
+     * @param {number} index The zero-based paragraph insertion index.
+     * @param {string} text The paragraph text. Defaults to an empty paragraph.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph} The inserted paragraph facade instance.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.insertParagraph(0, 'Document title');
+     * paragraph.appendText(' suffix');
+     * ```
+     */
+    insertParagraph(index: number, text: string = '', segmentId: string = ''): FDocumentParagraph {
+        const offset = this._getParagraphInsertOffset(index, segmentId);
+        const result = replaceBodyRange(
+            {
+                startOffset: offset,
+                endOffset: offset,
+                segmentId,
+            },
+            buildPlainTextInsertBody(`${text}\r`),
+            this._documentDataModel,
+            this._injector
+        );
+
+        if (!result) {
+            throw new Error('Failed to insert paragraph.');
+        }
+
+        const { paragraphs = [] } = this.getBody(segmentId);
+        const paragraph = paragraphs[index];
+        if (!paragraph) {
+            throw new Error('Failed to insert paragraph.');
+        }
+
+        return this._createFDocumentParagraph(paragraph.paragraphId, segmentId);
+    }
+
+    /**
+     * Append a plain-text paragraph at the end of the body.
+     * @param {string} text The paragraph text. Defaults to an empty paragraph.
+     * @returns {FDocumentParagraph} The appended paragraph wrapper.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.appendParagraph('Summary');
+     * console.log(paragraph.getText());
+     * ```
+     */
+    appendParagraph(text: string = '', segmentId: string = ''): FDocumentParagraph {
+        const { paragraphs = [] } = this.getBody(segmentId);
+        return this.insertParagraph(paragraphs.length, text, segmentId);
+    }
+
+    /**
+     * Delete a range from the body.
+     * @param {IFDocumentTextRange} range The text range to delete.
+     * @returns {boolean} `true` if the range was deleted.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * fDocument.deleteRange({ startOffset: 0, endOffset: 5 });
+     * ```
+     */
+    deleteRange(range: IFDocumentTextRange): boolean {
+        const normalizedRange = this._normalizeDeleteRange(range);
+        if (normalizedRange.startOffset >= normalizedRange.endOffset) {
+            return false;
+        }
+
+        return replaceBodyRange(
+            normalizedRange,
+            {
+                dataStream: '',
+            },
+            this._documentDataModel,
+            this._injector
+        );
+    }
+
+    private _createFDocumentParagraph(paragraphId: string, segmentId: string = ''): FDocumentParagraph {
+        return this._injector.createInstance(
+            FDocumentParagraph,
+            this,
+            paragraphId,
+            segmentId,
+            this._injector
+        );
+    }
+
+    private _normalizeDeleteRange(range: IFDocumentTextRange): IFDocumentTextRange {
+        const body = this.getBody(range.segmentId);
+        const protectedEndOffset = body.dataStream.endsWith('\r\n')
+            ? Math.max(0, body.dataStream.length - 2)
+            : body.dataStream.length;
+        const endOffset = Math.min(Math.max(range.endOffset, 0), protectedEndOffset);
+
+        return {
+            ...range,
+            startOffset: Math.min(Math.max(range.startOffset, 0), endOffset),
+            endOffset,
+        };
+    }
+
+    private _getParagraphInsertOffset(index: number, segmentId: string = ''): number {
+        if (index <= 0) {
+            return 0;
+        }
+
+        const { dataStream, paragraphs = [] } = this.getBody(segmentId);
+
+        if (paragraphs.length === 0) {
+            return Math.max(0, dataStream.length - 1);
+        }
+
+        if (index >= paragraphs.length) {
+            return paragraphs[paragraphs.length - 1].startIndex + 1;
+        }
+
+        return paragraphs[index - 1].startIndex + 1;
     }
 }

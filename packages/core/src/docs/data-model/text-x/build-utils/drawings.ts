@@ -20,8 +20,8 @@ import type { DocumentDataModel } from '../../document-data-model';
 import type { JSONXActions } from '../../json-x/json-x';
 import { createParagraphId } from '../../../paragraph-id';
 import { JSONX } from '../../json-x/json-x';
-import { TextXActionType } from '../action-types';
 import { DataStreamTreeTokenType } from '../../types';
+import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { getRichTextEditPath } from '../utils';
 import { deleteSelectionTextX } from './text-x-utils';
@@ -62,7 +62,7 @@ export const addDrawing = (param: IAddDrawingParam) => {
     const textX = new TextX();
     const jsonX = JSONX.getInstance();
     const rawActions: JSONXActions = [];
-    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
     if (!body) {
         return false;

@@ -17,9 +17,7 @@
 import './f-univer';
 
 export { FDocument } from './f-document';
-export { FDocumentBlockRange } from './f-document-block-range';
-export { FDocumentBody, type IFDocumentTextRange } from './f-document-body';
-export { FDocumentCustomBlock } from './f-document-custom-block';
-export { FDocumentElement } from './f-document-element';
-export { FDocumentParagraph } from './f-document-paragraph';
-export { FDocumentTable } from './f-document-table';
+export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
+export type { IFDocumentParagraphInfo } from './f-document-paragraph';
+export type { IFDocumentTextRange } from './utils';
+export { stripBlockTokens } from './utils';

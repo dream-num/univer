@@ -67,7 +67,7 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
         }
 
         const activeRange = docSelectionManagerService.getActiveTextRange();
-        const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '').getBody();
+        const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '')?.getBody();
 
         if (originBody == null) {
             return false;
@@ -153,7 +153,7 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { range, segmentId, unitId, direction, len = 1 } = params;
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (docDataModel == null || body == null) {
             return false;
         }
@@ -230,7 +230,7 @@ export const UpdateTextCommand: ICommand<IUpdateTextCommandParams> = {
         const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return false;

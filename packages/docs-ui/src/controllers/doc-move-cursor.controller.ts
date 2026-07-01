@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
 import type {
     DocumentSkeleton,
     IDocumentSkeletonCached,
@@ -38,6 +38,7 @@ import {
     Inject,
     IUniverInstanceService,
     RANGE_DIRECTION,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentSkeletonPageType, IRenderManagerService, LineType } from '@univerjs/engine-render';
@@ -117,7 +118,7 @@ export class DocMoveCursorController extends Disposable {
     private _handleShiftMoveSelection(direction: Direction, granularity: DocCursorMoveGranularity = 'character') {
         const activeRange = this._textSelectionManagerService.getActiveTextRange();
         const allRanges = this._textSelectionManagerService.getTextRanges()!;
-        const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return;
         }
@@ -176,7 +177,7 @@ export class DocMoveCursorController extends Disposable {
             : rangeDirection === RANGE_DIRECTION.FORWARD
                 ? endOffset
                 : startOffset;
-        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody();
+        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId)?.getBody();
 
         if (body == null) {
             return;
@@ -315,7 +316,7 @@ export class DocMoveCursorController extends Disposable {
     private _handleMoveCursor(direction: Direction, granularity: DocCursorMoveGranularity = 'character') {
         const activeRange = this._textSelectionManagerService.getActiveTextRange();
         const allRanges = this._textSelectionManagerService.getTextRanges();
-        const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -331,7 +332,7 @@ export class DocMoveCursorController extends Disposable {
         const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
         const normalizedSegmentId = segmentId ?? '';
         const normalizedSegmentPage = segmentPage ?? -1;
-        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody();
+        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId)?.getBody();
 
         if (body == null) {
             return;

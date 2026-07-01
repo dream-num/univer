@@ -168,11 +168,11 @@ describe('UniverInstanceService', () => {
 
         const replacement = new DocumentDataModel(createDocData('doc-unit'));
         service.changeDoc(doc.getUnitId(), replacement);
-        expect(service.getUniverDocInstance('doc-unit')).toBe(replacement);
+        expect(service.getUnit('doc-unit')).toBe(replacement);
 
         expect(service.disposeUnit('doc-unit')).toBe(true);
         expect(disposed).toEqual(['doc-unit']);
-        expect(service.getCurrentUniverDocInstance()).toBeNull();
+        expect(service.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)).toBeNull();
         expect(service.getFocusedUnit()).toBeUndefined();
         expect(service.disposeUnit('missing')).toBe(false);
     });

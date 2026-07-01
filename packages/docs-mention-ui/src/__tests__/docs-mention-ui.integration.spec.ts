@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDisposable, IDocumentData, Univer } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDisposable, IDocumentData, Univer } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
-import { awaitTime, CustomRangeType, Direction, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { awaitTime, CustomRangeType, Direction, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     DocSelectionManagerService,
     InsertTextCommand,
@@ -241,7 +241,7 @@ describe('docs-mention-ui integration', () => {
         await awaitTime(0);
 
         const documentBody = testBed.get(IUniverInstanceService)
-            .getCurrentUniverDocInstance()
+            .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             ?.getBody();
 
         expect(documentBody?.dataStream).toBe('Hello @Alice\r\n');
@@ -293,7 +293,7 @@ describe('docs-mention-ui integration', () => {
         await awaitTime(0);
 
         const docBody = testBed.get(IUniverInstanceService)
-            .getCurrentUniverDocInstance()
+            .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             ?.getBody();
         expect(docBody?.dataStream).toBe('Hello @Alice\r\n');
         expect(docBody?.customRanges).toEqual([]);

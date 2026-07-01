@@ -309,7 +309,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     private _getCurrentEditorUnitId() {
-        const current = this._univerInstanceService.getCurrentUniverDocInstance()!;
+        const current = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
         return current.getUnitId();
     }
 

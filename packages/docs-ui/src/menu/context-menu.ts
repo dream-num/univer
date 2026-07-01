@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
@@ -81,8 +81,8 @@ function notInTableSubscriber(subscriber: Subscriber<boolean>, docSelectionManag
             return;
         }
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.tables;
 
         if (tables && tables.length) {
             if (tables.some((table) => {

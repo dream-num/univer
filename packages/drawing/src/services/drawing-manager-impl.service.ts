@@ -255,11 +255,25 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return this.getBatchRemoveOp(removeParams);
     }
 
-    getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
-        // Expand group drawings to include all nested group nodes and leaf children.
-        // Non-group drawings are kept as-is.
+    private _getExpandedBatchRemoveParams(removeParams: IDrawingSearch[]): IDrawingSearch[] {
         const seenIds = new Set<string>();
         const allToRemove: IDrawingSearch[] = [];
+        const addDrawing = (drawing: IDrawingParam) => {
+            if (seenIds.has(drawing.drawingId)) {
+                return;
+            }
+
+            seenIds.add(drawing.drawingId);
+            allToRemove.push({ unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawingId: drawing.drawingId });
+        };
+        const addSearch = (search: IDrawingSearch) => {
+            if (seenIds.has(search.drawingId)) {
+                return;
+            }
+
+            seenIds.add(search.drawingId);
+            allToRemove.push(search);
+        };
         removeParams.forEach((removeParam) => {
             const drawing = this.getDrawingByParam(removeParam);
             if (drawing?.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
@@ -267,22 +281,29 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
                 if (nested) {
                     const { flatChildren, groups } = nested;
                     [...(flatChildren ?? []), ...groups].forEach((d) => {
-                        if (!seenIds.has(d.drawingId)) {
-                            seenIds.add(d.drawingId);
-                            allToRemove.push({ unitId: d.unitId, subUnitId: d.subUnitId, drawingId: d.drawingId });
-                        }
+                        addDrawing(d);
                     });
-                } else if (!seenIds.has(removeParam.drawingId)) {
-                    seenIds.add(removeParam.drawingId);
-                    allToRemove.push(removeParam);
+                } else {
+                    addDrawing(drawing);
                 }
-            } else if (!seenIds.has(removeParam.drawingId)) {
-                seenIds.add(removeParam.drawingId);
-                allToRemove.push(removeParam);
+            } else if (drawing) {
+                addDrawing(drawing);
+            } else {
+                addSearch(removeParam);
             }
         });
 
-        const { unitId, subUnitId } = allToRemove[0] ?? removeParams[0];
+        return allToRemove;
+    }
+
+    getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
+        // Expand group drawings to include all nested group nodes and leaf children.
+        // Non-group drawings are kept as-is.
+        const allToRemove = this._getExpandedBatchRemoveParams(removeParams);
+        const { unitId, subUnitId } = allToRemove[0] ?? removeParams[0] ?? { unitId: '', subUnitId: '' };
+        if (allToRemove.length === 0) {
+            return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId, subUnitId, objects: [] };
+        }
 
         // Sort ascending by order index so that, with the unshift trick below,
         // composition applies removals from highest index to lowest (back-to-front).

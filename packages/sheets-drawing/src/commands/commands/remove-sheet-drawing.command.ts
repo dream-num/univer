@@ -54,6 +54,10 @@ export const RemoveSheetDrawingCommand: ICommand = {
         const jsonOp = sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
+        if (Array.isArray(objects) && objects.length === 0) {
+            return false;
+        }
+
         const intercepted = sheetInterceptorService.onCommandExecute({ id: RemoveSheetDrawingCommand.id, params });
         const redoMutations = [
             ...(intercepted.preRedos ?? []),

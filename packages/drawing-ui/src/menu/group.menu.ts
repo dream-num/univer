@@ -18,12 +18,11 @@ import type { IAccessor, IDrawingParam } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { DrawingTypeEnum } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { IDrawingManagerService, isGroupableDrawingType } from '@univerjs/drawing';
 import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import {
     CancelDrawingGroupOperation,
-    DRAWING_GROUP_TYPES,
     SetDrawingGroupOperation,
 } from '../commands/operations/drawing-group.operation';
 
@@ -45,7 +44,7 @@ function getMenuStateByDrawingFocusChangedObservable$(
                     return subscriber.next(true);
                 }
 
-                if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) {
+                if (!drawings.every((drawing) => isGroupableDrawingType(drawing.drawingType))) {
                     return subscriber.next(true);
                 }
             } else if (type === 'unGroup') {
@@ -57,7 +56,7 @@ function getMenuStateByDrawingFocusChangedObservable$(
                 }
             } else {
                 // If there are drawings that cannot be grouped or ungrouped, hide the context menu
-                if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) {
+                if (!drawings.every((drawing) => isGroupableDrawingType(drawing.drawingType))) {
                     return subscriber.next(true);
                 }
             }

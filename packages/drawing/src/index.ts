@@ -35,7 +35,11 @@ export type {
 export { IDrawingManagerService } from './services/drawing-manager.service';
 export { ImageIoService } from './services/image-io-impl.service';
 export { URLImageService } from './services/url-image.service';
+export { createDrawingCopyPlan, DRAWING_COPY_CONTEXT_KEY, DRAWING_GROUPABLE_TYPES, getOrCreateDrawingCopyPlan, isGroupableDrawingType } from './utils/drawing-group';
+export type { ICreateDrawingCopyPlanOptions, IDrawingCopyPlan } from './utils/drawing-group';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
+export { resolveDrawingRotateEnabled } from './utils/rotate-enabled';
+export type { IDrawingRotateEnabledResolverOptions } from './utils/rotate-enabled';
 export { IImageIoService, ImageSourceType, ImageUploadStatusType } from '@univerjs/core';
 export type { IImageIoServiceParam } from '@univerjs/core';

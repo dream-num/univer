@@ -72,6 +72,7 @@ function createController(options?: { openFiles?: unknown[] }) {
                 to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
         })),
+        getDrawingsByGroup: vi.fn(() => []),
         focusDrawing: vi.fn(),
     };
     const selectionManagerService = {
@@ -195,6 +196,7 @@ describe('SheetDrawingUpdateController', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'image-1',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             transform: { left: 10, top: 20, width: 30, height: 40 },
         };
 
@@ -234,6 +236,51 @@ describe('SheetDrawingUpdateController', () => {
         expect((controller as any)._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, true);
         expect((controller as any)._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, false);
         expect(sheetDrawingService.focusDrawing).toHaveBeenLastCalledWith([]);
+
+        controller.dispose();
+    });
+
+    it('does not persist derived group rotateEnabled before grouping', () => {
+        const {
+            controller,
+            commandService,
+            featurePluginGroupUpdate$,
+        } = createController();
+        const parent = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'group-1',
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            transform: { left: 0, top: 0, width: 80, height: 40 },
+        };
+        const children = [
+            {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawingId: 'image-1',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                transform: { left: 10, top: 20, width: 30, height: 40 },
+            },
+            {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawingId: 'chart-1',
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                transform: { left: 40, top: 20, width: 30, height: 40 },
+            },
+        ];
+
+        featurePluginGroupUpdate$.next([{ parent, children }]);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(GroupSheetDrawingCommand.id, [
+            expect.objectContaining({
+                parent: expect.objectContaining({
+                    drawingId: 'group-1',
+                }),
+            }),
+        ]);
+        const groupCommandParams = commandService.executeCommand.mock.calls.find(([commandId]) => commandId === GroupSheetDrawingCommand.id)?.[1] as any[];
+        expect(Object.prototype.hasOwnProperty.call(groupCommandParams[0].parent.transform ?? {}, 'rotateEnabled')).toBe(false);
 
         controller.dispose();
     });

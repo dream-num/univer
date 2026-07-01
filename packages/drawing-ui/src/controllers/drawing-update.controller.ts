@@ -48,7 +48,7 @@ import { AlignType, SetDrawingAlignOperation } from '../commands/operations/draw
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ensureDrawingRenderLayer } from '../services/drawing-render.service';
 import { getUpdateParams } from '../utils/get-update-params';
-import { getCurrentUnitInfo, insertGroupObject } from './utils';
+import { disposeDrawingRenderObject, getCurrentUnitInfo, insertGroupObject, syncGroupRotateEnabled } from './utils';
 
 interface IDrawingTransformCache {
     unitId: string;
@@ -62,7 +62,18 @@ interface IDrawingTransformStateWithClipBounds extends ITransformState {
     clipBounds?: Nullable<{ left: number; top: number; width: number; height: number }>;
 }
 
-function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParam): void {
+interface IDrawingRefreshMetadata {
+    hidden?: boolean;
+    behindText?: boolean;
+}
+
+type IDrawingParamWithRefreshMetadata = IDrawingParam & IDrawingRefreshMetadata;
+
+function hasRefreshMetadata(refreshParam: IDrawingSearch): refreshParam is IDrawingSearch & IDrawingRefreshMetadata {
+    return 'hidden' in refreshParam || 'behindText' in refreshParam;
+}
+
+function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParamWithRefreshMetadata): void {
     if (!('hidden' in drawingParam)) {
         return;
     }
@@ -70,15 +81,14 @@ function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParam):
     drawingParam.hidden === true ? shape.hide() : shape.show();
 }
 
-function mergeRefreshMetadata(drawingParam: IDrawingParam, refreshParam: IDrawingSearch): IDrawingParam {
-    const metadata = refreshParam as Partial<IDrawingParam>;
-    if (!('hidden' in metadata) && !('behindText' in metadata)) {
+function mergeRefreshMetadata(drawingParam: IDrawingParam, refreshParam: IDrawingSearch): IDrawingParamWithRefreshMetadata {
+    if (!hasRefreshMetadata(refreshParam)) {
         return drawingParam;
     }
 
     return {
         ...drawingParam,
-        ...metadata,
+        ...refreshParam,
     };
 }
 
@@ -276,6 +286,7 @@ export class DrawingUpdateController extends Disposable {
         scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
         group.addObjects(...objects);
+        syncGroupRotateEnabled(group, parent, scene, this._drawingManagerService, children);
         if (parent.groupBaseBound) {
             group.setBaseBound(parent.groupBaseBound);
         }
@@ -666,15 +677,7 @@ export class DrawingUpdateController extends Disposable {
                     }
                     const { scene } = renderObject;
 
-                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-
-                    const drawingShapes = scene.fuzzyMathObjects(drawingShapeKey, true);
-
-                    if (drawingShapes.length > 0) {
-                        for (const drawingShape of drawingShapes) {
-                            drawingShape.dispose();
-                        }
-
+                    if (disposeDrawingRenderObject(scene, { unitId, subUnitId, drawingId })) {
                         scene.getTransformer()?.clearSelectedObjects();
                     }
                 });
@@ -750,7 +753,7 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                    const drawingShape = scene.getObject(drawingShapeKey);
+                    const drawingShape = scene.getObjectIncludeInGroup(drawingShapeKey);
                     const drawingParamWithRefreshMetadata = mergeRefreshMetadata(drawingParam, param);
 
                     if (drawingShape == null) {

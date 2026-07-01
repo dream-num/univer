@@ -35,6 +35,8 @@ export interface IEmbedDescriptorMaterializeContext {
 }
 
 export class EmbedHostRestoreService {
+    private readonly _materializeTasks = new Map<string, Promise<IEmbedDescriptor>>();
+
     constructor(
         @Inject(EmbedModelService) private readonly _modelService: EmbedModelService,
         @Inject(EmbedHostAdapterRegistryService) private readonly _hostAdapterRegistry: EmbedHostAdapterRegistryService,
@@ -45,13 +47,34 @@ export class EmbedHostRestoreService {
     }
 
     async materializeDescriptor(context: IEmbedDescriptorMaterializeContext): Promise<IEmbedDescriptor> {
-        const descriptor = await this._materializeDescriptor(context);
-        this._modelService.addDescriptor(descriptor.hostUnitId, descriptor);
-        return this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId)!;
+        const readyDescriptor = this._getMaterializedDescriptor(context.descriptor);
+        if (readyDescriptor) {
+            this._modelService.addDescriptor(readyDescriptor.hostUnitId, readyDescriptor);
+            return this._modelService.getDescriptor(readyDescriptor.hostUnitId, readyDescriptor.embedId)!;
+        }
+
+        const key = this._getMaterializeTaskKey(context.descriptor);
+        const pending = this._materializeTasks.get(key);
+        if (pending) {
+            return pending;
+        }
+
+        let task: Promise<IEmbedDescriptor>;
+        task = this._materializeDescriptor(context).then((descriptor) => {
+            this._modelService.addDescriptor(descriptor.hostUnitId, descriptor);
+            return this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId)!;
+        }).finally(() => {
+            if (this._materializeTasks.get(key) === task) {
+                this._materializeTasks.delete(key);
+            }
+        });
+
+        this._materializeTasks.set(key, task);
+        return task;
     }
 
-    async restoreEmbed(context: IEmbedHostRestoreContext): Promise<IEmbedDescriptor> {
-        const descriptor = await this._materializeDescriptor(context);
+    restoreEmbed(context: IEmbedHostRestoreContext): IEmbedDescriptor {
+        const descriptor = context.descriptor;
         const record = context.hostAnchorRecord ?? this._hostAdapterRegistry.restoreAnchor({
             embedId: descriptor.embedId,
             hostUnitId: descriptor.hostUnitId,
@@ -70,12 +93,8 @@ export class EmbedHostRestoreService {
 
     private async _materializeDescriptor(context: IEmbedDescriptorMaterializeContext): Promise<IEmbedDescriptor> {
         const descriptor = context.descriptor;
-        if (descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_RESTORE_SOURCE_NOT_CANONICAL');
-        }
-
         const handle = this._referencedUnitManager.ensure({
-            ref: descriptor.source.ref,
+            ref: descriptor.ref,
             unitType: descriptor.childType,
             owner: {
                 kind: ReferencedUnitOwnerKind.Embed,
@@ -88,13 +107,26 @@ export class EmbedHostRestoreService {
 
         return {
             ...descriptor,
-            source: {
-                kind: 'ref',
-                unitType: descriptor.childType,
-                ref: materialized.ref,
-            },
+            ref: materialized.ref,
             childUnitId: materialized.unitId,
             childType: materialized.unitType,
         };
+    }
+
+    private _getMaterializedDescriptor(descriptor: IEmbedDescriptor): IEmbedDescriptor | undefined {
+        const stored = this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId);
+        if (stored?.childUnitId && stored.childType != null) {
+            return stored;
+        }
+
+        if (descriptor.childUnitId && descriptor.childType != null) {
+            return descriptor;
+        }
+
+        return undefined;
+    }
+
+    private _getMaterializeTaskKey(descriptor: IEmbedDescriptor): string {
+        return JSON.stringify([descriptor.hostUnitId, descriptor.embedId]);
     }
 }

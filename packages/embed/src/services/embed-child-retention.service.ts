@@ -82,10 +82,6 @@ export class EmbedChildRetentionService {
     }
 
     private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): ResourceRefInput {
-        if (descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
-        }
-
-        return descriptor.source.ref;
+        return descriptor.ref;
     }
 }

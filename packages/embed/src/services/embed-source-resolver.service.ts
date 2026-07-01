@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
 import type { EmbedSource, IEmbedResolvedSource } from '../types/embed';
-import { generateRandomId, IUniverInstanceService, Optional, PluginService } from '@univerjs/core';
+import type { ICreateUnitOptions } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { normalizeResourceRefInput } from '../common/resource-ref-input';
-import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
-import { EmbedGuestContributionRegistryService } from './embed-guest-contribution-registry.service';
+import { fromResourceRefUnitType } from '../common/unit-type';
 
 export { EMBED_CHILD_CREATE_OPTIONS };
 
@@ -31,79 +29,18 @@ export interface IEmbedSourceResolveContext {
 }
 
 export class EmbedSourceResolverService {
-    constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Optional(EmbedGuestContributionRegistryService) private readonly _guestContributionRegistry?: EmbedGuestContributionRegistryService,
-        @Optional(PluginService) private readonly _pluginService?: PluginService
-    ) {
-        // noop
-    }
-
-    resolve(source: EmbedSource, context: IEmbedSourceResolveContext = {}): IEmbedResolvedSource {
-        if (source.kind === 'ref') {
-            const ref = normalizeResourceRefInput(source.ref);
-            if (typeof ref !== 'string' && fromResourceRefUnitType(ref.unit.type) !== source.unitType) {
-                throw new Error('EMBED_SOURCE_TYPE_MISMATCH');
-            }
-            const childUnitId = typeof ref !== 'string' && ref.file.kind === 'self'
-                ? ref.unit.selector
-                : undefined;
-
-            return {
-                ...(childUnitId ? { childUnitId } : undefined),
-                childType: source.unitType,
-                source: {
-                    kind: 'ref',
-                    ref,
-                    unitType: source.unitType,
-                },
-            };
+    resolve(source: EmbedSource, _context: IEmbedSourceResolveContext = {}): IEmbedResolvedSource {
+        const ref = normalizeResourceRefInput(source.ref);
+        if (typeof ref !== 'string' && fromResourceRefUnitType(ref.unit.type) !== source.unitType) {
+            throw new Error('EMBED_SOURCE_TYPE_MISMATCH');
         }
-
-        const createOptions = context.createOptions ?? EMBED_CHILD_CREATE_OPTIONS;
-        const creationConfig = this._normalizeEmptyCreationConfig(source.creationConfig);
-        const guestContribution = this._getGuestContribution(source.unitType);
-        const created = guestContribution?.createEmptyUnit?.(creationConfig, createOptions);
-        const child = created
-            ? null
-            : this._univerInstanceService.createUnit(source.unitType, creationConfig, createOptions);
-        const childUnitId = created?.unitId ?? child!.getUnitId();
-        const childType = created?.unitType ?? source.unitType;
-        if (childType !== source.unitType) {
-            throw new Error('EMPTY_SOURCE_TYPE_MISMATCH');
-        }
-
+        const childUnitId = typeof ref !== 'string' && ref.file.kind === 'self'
+            ? ref.unit.selector
+            : undefined;
         return {
-            childUnitId,
-            childType,
-            source: {
-                kind: 'ref',
-                unitType: childType,
-                ref: {
-                    file: { kind: 'self' },
-                    unit: {
-                        selector: childUnitId,
-                        type: toResourceRefUnitType(childType),
-                    },
-                },
-            },
-        };
-    }
-
-    private _getGuestContribution(unitType: UniverInstanceType) {
-        let guestContribution = this._guestContributionRegistry?.get(unitType);
-        if (!guestContribution) {
-            this._pluginService?.startPluginsForType(unitType);
-            guestContribution = this._guestContributionRegistry?.get(unitType);
-        }
-
-        return guestContribution;
-    }
-
-    private _normalizeEmptyCreationConfig(config?: Record<string, unknown>): Record<string, unknown> {
-        return {
-            ...config,
-            id: typeof config?.id === 'string' ? config.id : `embed_${generateRandomId(10)}`,
+            ...(childUnitId ? { childUnitId } : undefined),
+            childType: source.unitType,
+            ref,
         };
     }
 }

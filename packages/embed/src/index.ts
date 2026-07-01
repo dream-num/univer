@@ -53,7 +53,7 @@ export {
 } from './common/embed-resource';
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
 export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResourceRefInput } from './common/resource-ref-input';
-export { normalizeResourceRefLocator } from './common/resource-ref-locator';
+export { normalizeResourceRefLocator, parseResourceRefLocator } from './common/resource-ref-locator';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
 export { EmbedResourceController } from './controllers/embed-resource.controller';
 export { UniverEmbedPlugin } from './plugin';
@@ -118,6 +118,7 @@ export type {
     IEmbedResolvedSource,
     IEmbedResource,
     IEmbedSourceMeta,
+    IEmbedStoredDescriptor,
     IEmbedTabConfig,
 } from './types/embed';
 export {
@@ -149,6 +150,7 @@ export {
 export type {
     IResourceRef,
     IResourceRefUnit,
+    ParsedResourceRef,
     ResourceRefFile,
     ResourceRefInput,
     ResourceRefPart,

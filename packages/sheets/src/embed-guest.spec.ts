@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, UniverInstanceType } from '@univerjs/core';
 import { EmbedCapabilityRegistryService, EmbedGuestContributionRegistryService } from '@univerjs/embed';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsEmbedEmptySnapshot, registerSheetsEmbedGuestContribution, registerSheetsEmbedHostCapabilities } from './embed-guest';
@@ -63,31 +63,15 @@ describe('sheets embed guest', () => {
         ]);
     });
 
-    it('registers sheets guest creation when instance service is available', () => {
+    it('registers sheets guest marker', () => {
         const guestRegistry = new EmbedGuestContributionRegistryService();
-        const createUnit = vi.fn(() => ({ getUnitId: () => 'sheet-child' }));
         registerSheetsEmbedGuestContribution(createInjector([
             [EmbedGuestContributionRegistryService, guestRegistry],
-            [IUniverInstanceService, { createUnit }],
         ]) as never);
 
-        const contribution = guestRegistry.get(UniverInstanceType.UNIVER_SHEET);
-        expect(contribution).toBeDefined();
-        expect(contribution?.createEmptyUnit!({ id: 'sheet-child' }, { from: 'embed' } as never)).toEqual({
-            unitId: 'sheet-child',
-            unitType: UniverInstanceType.UNIVER_SHEET,
+        expect(guestRegistry.get(UniverInstanceType.UNIVER_SHEET)).toEqual({
+            childType: UniverInstanceType.UNIVER_SHEET,
         });
-        expect(createUnit).toHaveBeenCalledWith(
-            UniverInstanceType.UNIVER_SHEET,
-            expect.objectContaining({ id: 'sheet-child' }),
-            { from: 'embed' }
-        );
-
-        const emptyRegistry = new EmbedGuestContributionRegistryService();
-        registerSheetsEmbedGuestContribution(createInjector([
-            [EmbedGuestContributionRegistryService, emptyRegistry],
-        ]) as never);
-        expect(emptyRegistry.list()).toEqual([]);
     });
 });
 

@@ -192,70 +192,8 @@ describe('EmbedReferencedUnitFacadeResolverRegistryService', () => {
 });
 
 describe('EmbedSourceResolverService', () => {
-    it('creates an empty child unit through the default unit service', async () => {
-        const instanceService = createInstanceService();
-        const resolver = new EmbedSourceResolverService(instanceService as never);
-
-        const resolved = await resolver.resolve({
-            kind: 'empty',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            creationConfig: { id: 'sheet-child', name: 'Sheet Child' },
-        });
-
-        expect(instanceService.createUnit).toHaveBeenCalledWith(
-            UniverInstanceType.UNIVER_SHEET,
-            { id: 'sheet-child', name: 'Sheet Child' },
-            EMBED_CHILD_CREATE_OPTIONS
-        );
-        expect(resolved).toEqual({
-            childUnitId: 'sheet-child',
-            childType: UniverInstanceType.UNIVER_SHEET,
-            source: {
-                kind: 'ref',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-                ref: {
-                    file: { kind: 'self' },
-                    unit: { selector: 'sheet-child', type: 'sheet' },
-                },
-            },
-        });
-    });
-
-    it('uses guest contributions and starts plugins lazily for empty child units', async () => {
-        const instanceService = createInstanceService();
-        const contribution = {
-            createEmptyUnit: vi.fn(() => ({
-                unitId: 'doc-child',
-                unitType: UniverInstanceType.UNIVER_DOC,
-            })),
-        };
-        const registry = {
-            get: vi.fn()
-                .mockReturnValueOnce(undefined)
-                .mockReturnValueOnce(contribution),
-        };
-        const pluginService = {
-            startPluginsForType: vi.fn(),
-        };
-        const resolver = new EmbedSourceResolverService(instanceService as never, registry as never, pluginService as never);
-
-        const resolved = await resolver.resolve({
-            kind: 'empty',
-            unitType: UniverInstanceType.UNIVER_DOC,
-        });
-
-        expect(pluginService.startPluginsForType).toHaveBeenCalledWith(UniverInstanceType.UNIVER_DOC);
-        expect(contribution.createEmptyUnit).toHaveBeenCalledWith(
-            expect.objectContaining({ id: expect.stringMatching(/^embed_/) }),
-            EMBED_CHILD_CREATE_OPTIONS
-        );
-        expect(instanceService.createUnit).not.toHaveBeenCalled();
-        expect(resolved.childUnitId).toBe('doc-child');
-    });
-
     it('declares ref sources without materializing them', () => {
-        const instanceService = createInstanceService();
-        const resolver = new EmbedSourceResolverService(instanceService as never);
+        const resolver = new EmbedSourceResolverService();
         const selfRef = {
             file: { kind: 'self' as const },
             unit: { selector: 'local-sheet', type: 'sheet' as const },
@@ -270,42 +208,41 @@ describe('EmbedSourceResolverService', () => {
         };
 
         expect(resolver.resolve({
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: selfRef,
         })).toEqual({
             childUnitId: 'local-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
-            source: {
-                kind: 'ref',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-                ref: selfRef,
-            },
+            ref: selfRef,
         });
 
         expect(resolver.resolve({
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: externalRef,
         })).toEqual({
             childType: UniverInstanceType.UNIVER_SHEET,
-            source: {
-                kind: 'ref',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-                ref: externalRef,
-            },
+            ref: externalRef,
         });
         expect(resolver.resolve({
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: relativeRef,
         })).not.toHaveProperty('childUnitId');
         expect(resolver.resolve({
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: 'string-sheet',
         })).not.toHaveProperty('childUnitId');
-        expect(instanceService.getUnitType).not.toHaveBeenCalled();
+    });
+
+    it('rejects refs whose unit type does not match the declared child type', () => {
+        const resolver = new EmbedSourceResolverService();
+
+        expect(() => resolver.resolve({
+            unitType: UniverInstanceType.UNIVER_DOC,
+            ref: {
+                file: { kind: 'self' },
+                unit: { selector: 'local-sheet', type: 'sheet' },
+            },
+        })).toThrow('EMBED_SOURCE_TYPE_MISMATCH');
     });
 });
 
@@ -333,7 +270,6 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         })).toEqual({
             unitId: 'child-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
         });
         expect(instanceService.getUnit).toHaveBeenCalledWith('child-sheet', UniverInstanceType.UNIVER_SHEET);
 
@@ -344,7 +280,6 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         })).toEqual({
             unitId: 'child-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
         });
         expect(registration.provider.ensure({
             ref: 'child-sheet',
@@ -353,7 +288,6 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         })).toEqual({
             unitId: 'child-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
         });
         expect(instanceService.getUnit).toHaveBeenCalledTimes(3);
     });
@@ -404,7 +338,6 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             provider: {
                 ensure: vi.fn((input) => ({
                     unitId: 'remote-sheet',
-                    unitType: input.unitType,
                 })),
             },
         };
@@ -420,7 +353,7 @@ describe('createLocalRuntimeResourceRefProvider', () => {
             file: { kind: 'uri', uri: 'univer://remote-file' },
             unit: { selector: 'remote-sheet', type: 'sheet' },
         }, 'sheet')).toBe(uriRegistration);
-        expect(registry.get('#unit=sheet-1', 'sheet')).toBe(uriRegistration);
+        expect(registry.get('#unit=sheet-1', 'sheet')).toBe(localRegistration);
     });
 });
 
@@ -433,13 +366,12 @@ describe('EmbedReferencedUnitManagerService', () => {
         const provider = {
             ensure: vi.fn((input) => ({
                 unitId: 'runtime-sheet-1',
-                unitType: input.unitType,
             })),
         };
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
         const input = {
             ref,
             owner: {
@@ -487,13 +419,12 @@ describe('EmbedReferencedUnitManagerService', () => {
         const provider = {
             ensure: vi.fn((input) => ({
                 unitId: input.owner?.ownerId === 'embed-1' ? 'embed-1-runtime-sheet' : 'embed-2-runtime-sheet',
-                unitType: input.unitType,
             })),
         };
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
 
         const first = manager.ensure({
             ref,
@@ -553,13 +484,12 @@ describe('EmbedReferencedUnitManagerService', () => {
         const provider = {
             ensure: vi.fn((input) => ({
                 unitId: 'shared-runtime-sheet',
-                unitType: input.unitType,
             })),
         };
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
 
         await Promise.all([
             manager.ensure({
@@ -612,7 +542,7 @@ describe('EmbedReferencedUnitManagerService', () => {
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
         const abortController = new AbortController();
 
         const handle = manager.ensure({
@@ -637,13 +567,12 @@ describe('EmbedReferencedUnitManagerService', () => {
         const provider = {
             ensure: vi.fn((input) => ({
                 unitId: 'runtime-sheet-1',
-                unitType: input.unitType,
             })),
         };
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { uriReference: true }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
 
         await manager.ensure({
             ref: '#unit=child-1',
@@ -669,7 +598,7 @@ describe('EmbedReferencedUnitManagerService', () => {
         const providerRegistry = {
             get: vi.fn(),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
 
         expect(() => manager.ensure({
             ref,
@@ -687,13 +616,12 @@ describe('EmbedReferencedUnitManagerService', () => {
         const provider = {
             ensure: vi.fn(() => ({
                 unitId: 'actual-runtime-sheet',
-                unitType: UniverInstanceType.UNIVER_DOC,
             })),
         };
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService(UniverInstanceType.UNIVER_DOC) as never, providerRegistry as never);
 
         await expect(manager.ensure({
             ref,
@@ -712,7 +640,7 @@ describe('EmbedReferencedUnitManagerService', () => {
         const providerRegistry = {
             get: vi.fn(() => ({ registrationId: 'uri-provider', match: { fileKinds: ['uri'] }, provider })),
         };
-        const manager = new EmbedReferencedUnitManagerService(providerRegistry as never);
+        const manager = new EmbedReferencedUnitManagerService(createReferencedUnitInstanceService() as never, providerRegistry as never);
         const handle = manager.ensure({
             ref,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
@@ -724,11 +652,16 @@ describe('EmbedReferencedUnitManagerService', () => {
 });
 
 describe('EmbedNestedGuardService', () => {
-    it('rejects nested embeds and unsupported empty child capabilities', () => {
+    it('rejects nested embeds and unsupported ref child capabilities', () => {
         const capabilityRegistry = {
             getCapability: vi.fn()
                 .mockReturnValueOnce(undefined)
-                .mockReturnValueOnce(createCapability()),
+                .mockReturnValueOnce(createCapability({
+                    childType: UniverInstanceType.UNIVER_SLIDE,
+                }))
+                .mockReturnValueOnce(createCapability({
+                    childType: UniverInstanceType.UNIVER_DOC,
+                })),
         };
         const guard = new EmbedNestedGuardService(capabilityRegistry as never);
 
@@ -739,21 +672,26 @@ describe('EmbedNestedGuardService', () => {
         expect(() => guard.assertCanCreate({
             ...createCreateContext(),
             source: {
-                kind: 'empty',
                 unitType: UniverInstanceType.UNIVER_SLIDE,
+                ref: {
+                    file: { kind: 'self' },
+                    unit: { selector: 'child-slide', type: 'slide' },
+                },
             },
         })).toThrow('EMBED_CAPABILITY_NOT_SUPPORTED');
         expect(() => guard.assertCanCreate({
             ...createCreateContext(),
             source: {
-                kind: 'empty',
                 unitType: UniverInstanceType.UNIVER_SLIDE,
+                ref: {
+                    file: { kind: 'self' },
+                    unit: { selector: 'child-slide', type: 'slide' },
+                },
             },
         })).not.toThrow();
         expect(() => guard.assertCanCreate({
             ...createCreateContext(),
             source: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_DOC,
                 ref: {
                     file: { kind: 'self' },
@@ -771,7 +709,7 @@ describe('EmbedCreationService', () => {
         const creationService = new EmbedCreationService(
             model as never,
             { getCapability: vi.fn(() => createCapability()) } as never,
-            { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, source: descriptor.source })) } as never,
+            { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, ref: descriptor.ref })) } as never,
             { assertCanCreate: vi.fn() } as never
         );
         const context = createCreateContext();
@@ -819,7 +757,7 @@ describe('EmbedCreationService', () => {
         expect(() => new EmbedCreationService(
             createModel() as never,
             { getCapability: vi.fn(() => undefined) } as never,
-            { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, source: descriptor.source })) } as never,
+            { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, ref: descriptor.ref })) } as never,
             { assertCanCreate: vi.fn() } as never
         ).prepareCreateEmbed(createCreateContext())).toThrow('EMBED_CAPABILITY_NOT_SUPPORTED');
 
@@ -832,7 +770,7 @@ describe('EmbedCreationService', () => {
         expect(() => new EmbedCreationService(
             model as never,
             { getCapability: vi.fn(() => createCapability()) } as never,
-            { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, source: descriptor.source })) } as never,
+            { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, ref: descriptor.ref })) } as never,
             { assertCanCreate: vi.fn() } as never
         ).prepareCreateEmbed(createCreateContext())).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
     });
@@ -905,6 +843,12 @@ function getStoredReferencedUnitRecords(manager: EmbedReferencedUnitManagerServi
     }));
 }
 
+function createReferencedUnitInstanceService(unitType = UniverInstanceType.UNIVER_SHEET) {
+    return {
+        getUnitType: vi.fn(() => unitType),
+    };
+}
+
 function createInstanceService() {
     return {
         createUnit: vi.fn((type: UniverInstanceType, config: Record<string, unknown>) => ({
@@ -924,7 +868,6 @@ function createCreateContext(): IEmbedCreateContext {
         hostAnchorId: 'anchor-1',
         entry: 'docs-custom-block',
         source: {
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },
@@ -956,13 +899,9 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostType: overrides.hostType ?? UniverInstanceType.UNIVER_DOC,
         hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
         entry: overrides.entry ?? 'docs-custom-block',
-        source: overrides.source ?? {
-            kind: 'ref',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'child-sheet', type: 'sheet' },
-            },
+        ref: overrides.ref ?? {
+            file: { kind: 'self' },
+            unit: { selector: 'child-sheet', type: 'sheet' },
         },
         childUnitId: overrides.childUnitId ?? 'child-sheet',
         childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,

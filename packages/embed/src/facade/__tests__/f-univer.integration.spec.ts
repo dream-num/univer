@@ -47,6 +47,7 @@ describe('embed facade runtime integration', () => {
                 context: { index: 1 },
             },
             content: {
+                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref: {
                     file: { kind: 'uri', uri: 'univer://remote-file' },
@@ -57,12 +58,15 @@ describe('embed facade runtime integration', () => {
         expect(remoteRefEmbed.getHostType()).toBe(UniverInstanceType.UNIVER_DOC);
         expect(remoteRefEmbed.getChildType()).toBe(UniverInstanceType.UNIVER_SHEET);
         expect(remoteRefEmbed.getChildUnitId()).toBeUndefined();
-        expect(remoteRefEmbed.getDescriptor().ref).toEqual({
-            file: { kind: 'uri', uri: 'univer://remote-file' },
-            unit: { selector: 'remote-sheet', type: 'sheet' },
+        expect(remoteRefEmbed.getDescriptor().source).toEqual({
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: {
+                file: { kind: 'uri', uri: 'univer://remote-file' },
+                unit: { selector: 'remote-sheet', type: 'sheet' },
+            },
         });
 
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, createSheetSnapshot('empty-sheet'));
         const emptyEmbed = univerAPI.createEmbed({
             embedId: 'empty-sheet-embed',
             host: {
@@ -70,19 +74,22 @@ describe('embed facade runtime integration', () => {
                 surface: FEmbedHostSurface.DocBlock,
             },
             content: {
+                kind: 'empty',
                 unitType: UniverInstanceType.UNIVER_SHEET,
-                ref: {
-                    file: { kind: 'self' },
-                    unit: { selector: 'empty-sheet', type: 'sheet' },
-                },
+                creationConfig: createSheetSnapshot('empty-sheet') as unknown as Record<string, unknown>,
             },
         });
         expect(emptyEmbed.getChildUnitId()).toBe('empty-sheet');
-        expect(emptyEmbed.getDescriptor().ref).toEqual({
-            file: { kind: 'self' },
-            unit: { selector: 'empty-sheet', type: 'sheet' },
+        expect(emptyEmbed.getDescriptor().source).toEqual({
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: {
+                file: { kind: 'self' },
+                unit: { selector: 'empty-sheet', type: 'sheet' },
+            },
         });
-        const emptyRef = emptyEmbed.getDescriptor().ref;
+        const emptySource = emptyEmbed.getDescriptor().source;
+        const emptyRef = emptySource.kind === 'ref' ? emptySource.ref : undefined;
         await expect(univer.__getInjector().get(EmbedReferencedUnitManagerService).ensure({
             ref: emptyRef!,
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
@@ -100,6 +107,7 @@ describe('embed facade runtime integration', () => {
                 context: { rect: { x: 10, y: 20, width: 480, height: 320 } },
             },
             content: {
+                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_DOC,
                 ref: {
                     file: { kind: 'uri', uri: 'univer://remote-doc' },

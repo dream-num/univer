@@ -47,6 +47,7 @@ export function createLocalRuntimeResourceRefProvider(injector: Injector): IEmbe
 
                 return {
                     unitId: unit.getUnitId(),
+                    unitType: input.unitType,
                 };
             },
         },

@@ -23,7 +23,7 @@ import type {
 } from '../types/referenced-unit';
 import type { ResourceRefInput } from '../types/resource-ref';
 import type { IEmbedResourceRefProvider } from './embed-resource-ref-provider-registry.service';
-import { IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
+import { Optional, UniverInstanceType } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
@@ -43,7 +43,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
     private readonly _records = new Map<string, IReferencedUnitStoredRecord>();
 
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Optional(EmbedResourceRefProviderRegistryService) private readonly _resourceRefProviderRegistry?: EmbedResourceRefProviderRegistryService
     ) {
         // noop
@@ -90,12 +89,14 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
             createOptions: input.createOptions,
             signal: input.signal,
         });
-        this._assertProviderResultUnitType(resolved.unitId, input.unitType);
+        if (resolved.unitType !== input.unitType) {
+            throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
+        }
 
         return {
             ref,
             unitId: resolved.unitId,
-            unitType: input.unitType,
+            unitType: resolved.unitType,
         };
     }
 
@@ -258,11 +259,5 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         }
 
         return refUnitType;
-    }
-
-    private _assertProviderResultUnitType(unitId: string, unitType: UniverInstanceType): void {
-        if (this._univerInstanceService.getUnitType(unitId) !== unitType) {
-            throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
-        }
     }
 }

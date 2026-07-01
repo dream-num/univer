@@ -745,7 +745,11 @@ describe('embed-ui small services and controllers', () => {
             entry: 'docs-custom-block',
             childUnitId: 'child-1',
             childType: UniverInstanceType.UNIVER_SHEET,
-            ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'sheet' } },
+            source: {
+                kind: 'ref',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'sheet' } },
+            },
             mode: 'interactive',
             sourceMeta: {
                 floating: false,

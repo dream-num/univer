@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, Injector } from '@univerjs/core';
+import type { ICreateUnitOptions, IDocumentData, Injector } from '@univerjs/core';
 import type { IEmbedCapability } from '@univerjs/embed';
-import { DocumentDataModel, DocumentFlavor, UniverInstanceType } from '@univerjs/core';
+import { DocumentDataModel, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { registerEmbedCapabilities, registerEmbedGuestContribution } from '@univerjs/embed';
 
 const DOCS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
@@ -54,8 +54,14 @@ export function registerDocsEmbedHostCapabilities(injector: Injector): void {
 }
 
 export function registerDocsEmbedGuestContribution(injector: Injector): void {
+    if (!injector.has(IUniverInstanceService)) {
+        return;
+    }
+
+    const univerInstanceService = injector.get(IUniverInstanceService);
     registerEmbedGuestContribution(injector, {
         childType: UniverInstanceType.UNIVER_DOC,
+        createEmptyUnit: (config, options) => createDocsEmbedEmptyUnit(univerInstanceService, config, options),
     });
 }
 
@@ -72,4 +78,21 @@ export function createDocsEmbedEmptySnapshot(config: Record<string, unknown> = {
             documentFlavor: DocumentFlavor.MODERN,
         },
     } as IDocumentData;
+}
+
+function createDocsEmbedEmptyUnit(
+    univerInstanceService: IUniverInstanceService,
+    config: Record<string, unknown> | undefined,
+    options: ICreateUnitOptions | undefined
+) {
+    const unit = univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
+        UniverInstanceType.UNIVER_DOC,
+        createDocsEmbedEmptySnapshot(config),
+        options
+    );
+
+    return {
+        unitId: unit.getUnitId(),
+        unitType: UniverInstanceType.UNIVER_DOC,
+    };
 }

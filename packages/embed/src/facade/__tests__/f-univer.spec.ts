@@ -17,7 +17,7 @@
 import type { IEmbedDescriptor } from '../../types/embed';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { CreateEmbedCommand, type ICreateEmbedCommandParams, RemoveEmbedCommand } from '../../commands/commands/embed.command';
+import { CreateEmbedCommand, RemoveEmbedCommand } from '../../commands/commands/embed.command';
 import { EmbedModelService } from '../../services/embed-model.service';
 import { EmbedReferencedUnitFacadeResolverRegistryService } from '../../services/embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
@@ -40,6 +40,7 @@ describe('embed facade', () => {
                 context: { index: 2 },
             },
             content: {
+                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref,
             },
@@ -54,6 +55,7 @@ describe('embed facade', () => {
             requestedHostAnchorId: 'anchor-1',
             entry: FEmbedHostSurface.DocBlock,
             source: {
+                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref,
             },
@@ -73,6 +75,7 @@ describe('embed facade', () => {
                 surface: FEmbedHostSurface.DocBlock,
             },
             content: {
+                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref: createRef(),
             },
@@ -110,7 +113,7 @@ describe('embed facade', () => {
         const descriptor = createDescriptor();
         const workbookFacade = { getId: vi.fn(() => 'child-1') };
         const { api, facadeResolverRegistry, referencedUnitManager } = createFacade([descriptor], workbookFacade);
-        const ref = descriptor.ref;
+        const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
         expect(ref).toBeDefined();
 
         await expect(api.loadUnitAsync(ref!, { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
@@ -191,7 +194,7 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
             hostUnitId?: string;
             hostType?: UniverInstanceType;
             entry?: IEmbedDescriptor['entry'];
-            source?: ICreateEmbedCommandParams['source'];
+            source?: IEmbedDescriptor['source'];
         }) => id === RemoveEmbedCommand.id
             ? true
             : ({
@@ -201,8 +204,12 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
                 hostAnchorId: 'anchor-1',
                 entry: params.entry ?? 'docs-custom-block',
                 childUnitId: 'child-1',
-                childType: params.source?.unitType ?? UniverInstanceType.UNIVER_SHEET,
-                ref: params.source?.ref ?? createRef(),
+                childType: UniverInstanceType.UNIVER_SHEET,
+                source: params.source ?? {
+                    kind: 'ref',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                    ref: createRef(),
+                },
             })),
     };
     const model = {
@@ -267,7 +274,11 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostType: UniverInstanceType.UNIVER_DOC,
         hostAnchorId: 'anchor-1',
         entry: 'docs-custom-block',
-        ref: createRef(),
+        source: {
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: createRef(),
+        },
         childUnitId: 'child-1',
         childType: UniverInstanceType.UNIVER_SHEET,
         lifecycle: 'active',

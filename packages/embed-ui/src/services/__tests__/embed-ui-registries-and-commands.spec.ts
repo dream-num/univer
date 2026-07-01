@@ -202,7 +202,6 @@ describe('embed-ui registries and commands', () => {
         const descriptor = createDescriptor({
             hostAnchorId: 'anchor-1',
             hostUnitId: 'host-1',
-            childUnitId: undefined,
         });
         const restoredDescriptor = {
             ...descriptor,
@@ -226,8 +225,16 @@ describe('embed-ui registries and commands', () => {
         const anchorModel = {
             setAnchor: vi.fn(),
         };
+        const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
         const referencedUnitManager = {
-            ensure: vi.fn(),
+            ensure: vi.fn(() => ({
+                loaded: Promise.resolve({
+                    ref,
+                    unitId: 'runtime-sheet',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                }),
+                dispose: vi.fn(),
+            })),
         };
         const service = new EmbedHostRestoreService(
             model as never,
@@ -236,14 +243,23 @@ describe('embed-ui registries and commands', () => {
             referencedUnitManager as never
         );
 
-        expect(service.restoreEmbed({ descriptor, hostContext: { restored: true } })).toBe(restoredDescriptor);
-        expect(referencedUnitManager.ensure).not.toHaveBeenCalled();
+        await expect(service.restoreEmbed({ descriptor, hostContext: { restored: true } })).resolves.toBe(restoredDescriptor);
+        expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
+            ref,
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            owner: {
+                kind: ReferencedUnitOwnerKind.Embed,
+                unitId: 'host-1',
+                ownerId: 'embed-1',
+            },
+            createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        });
         expect(adapter.restoreAnchor).toHaveBeenCalledWith(expect.objectContaining({
-            descriptor,
+            descriptor: restoredDescriptor,
             hostAnchorId: 'anchor-1',
             hostContext: { restored: true },
         }));
-        expect(model.addDescriptor).toHaveBeenCalledWith('host-1', descriptor);
+        expect(model.addDescriptor).toHaveBeenCalledWith('host-1', restoredDescriptor);
         expect(anchorModel.setAnchor).toHaveBeenCalledWith(expect.objectContaining({
             hostAnchorId: 'anchor-1',
         }));
@@ -253,7 +269,6 @@ describe('embed-ui registries and commands', () => {
         const descriptor = createDescriptor({
             hostAnchorId: 'anchor-1',
             hostUnitId: 'host-1',
-            childUnitId: undefined,
         });
         const materializedDescriptor = {
             ...descriptor,
@@ -262,9 +277,7 @@ describe('embed-ui registries and commands', () => {
         };
         const model = {
             addDescriptor: vi.fn(),
-            getDescriptor: vi.fn()
-                .mockReturnValueOnce(undefined)
-                .mockReturnValue(materializedDescriptor),
+            getDescriptor: vi.fn(() => materializedDescriptor),
         };
         const adapter = {
             restoreAnchor: vi.fn(),
@@ -272,7 +285,7 @@ describe('embed-ui registries and commands', () => {
         const anchorModel = {
             setAnchor: vi.fn(),
         };
-        const ref = descriptor.ref;
+        const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
         const referencedUnitManager = {
             ensure: vi.fn(() => ({
                 loaded: Promise.resolve({
@@ -302,134 +315,6 @@ describe('embed-ui registries and commands', () => {
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
         });
         expect(model.addDescriptor).toHaveBeenCalledWith('host-1', materializedDescriptor);
-        expect(adapter.restoreAnchor).not.toHaveBeenCalled();
-        expect(anchorModel.setAnchor).not.toHaveBeenCalled();
-    });
-
-    it('reuses model materialized descriptors without loading the provider again', async () => {
-        const descriptor = createDescriptor({
-            hostAnchorId: 'anchor-1',
-            hostUnitId: 'host-1',
-            childUnitId: undefined,
-        });
-        const materializedDescriptor = {
-            ...descriptor,
-            childUnitId: 'runtime-sheet',
-            childType: UniverInstanceType.UNIVER_SHEET,
-        };
-        const model = {
-            addDescriptor: vi.fn(),
-            getDescriptor: vi.fn(() => materializedDescriptor),
-        };
-        const adapter = {
-            restoreAnchor: vi.fn(),
-        };
-        const anchorModel = {
-            setAnchor: vi.fn(),
-        };
-        const referencedUnitManager = {
-            ensure: vi.fn(),
-        };
-        const service = new EmbedHostRestoreService(
-            model as never,
-            adapter as never,
-            anchorModel as never,
-            referencedUnitManager as never
-        );
-
-        await expect(service.materializeDescriptor({ descriptor })).resolves.toBe(materializedDescriptor);
-        expect(referencedUnitManager.ensure).not.toHaveBeenCalled();
-        expect(model.addDescriptor).toHaveBeenCalledWith('host-1', materializedDescriptor);
-        expect(adapter.restoreAnchor).not.toHaveBeenCalled();
-        expect(anchorModel.setAnchor).not.toHaveBeenCalled();
-    });
-
-    it('reuses pending materialize tasks for the same embed', async () => {
-        const descriptor = createDescriptor({
-            hostAnchorId: 'anchor-1',
-            hostUnitId: 'host-1',
-            childUnitId: undefined,
-        });
-        const materializedDescriptor = {
-            ...descriptor,
-            childUnitId: 'runtime-sheet',
-            childType: UniverInstanceType.UNIVER_SHEET,
-        };
-        const model = {
-            addDescriptor: vi.fn(),
-            getDescriptor: vi.fn()
-                .mockReturnValueOnce(undefined)
-                .mockReturnValueOnce(undefined)
-                .mockReturnValue(materializedDescriptor),
-        };
-        const adapter = {
-            restoreAnchor: vi.fn(),
-        };
-        const anchorModel = {
-            setAnchor: vi.fn(),
-        };
-        let resolveLoaded!: (value: { ref: typeof descriptor.ref; unitId: string; unitType: UniverInstanceType }) => void;
-        const loaded = new Promise<{ ref: typeof descriptor.ref; unitId: string; unitType: UniverInstanceType }>((resolve) => {
-            resolveLoaded = resolve;
-        });
-        const referencedUnitManager = {
-            ensure: vi.fn(() => ({
-                loaded,
-                dispose: vi.fn(),
-            })),
-        };
-        const service = new EmbedHostRestoreService(
-            model as never,
-            adapter as never,
-            anchorModel as never,
-            referencedUnitManager as never
-        );
-
-        const first = service.materializeDescriptor({ descriptor });
-        const second = service.materializeDescriptor({ descriptor });
-        expect(referencedUnitManager.ensure).toHaveBeenCalledTimes(1);
-
-        resolveLoaded({
-            ref: descriptor.ref,
-            unitId: 'runtime-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        });
-
-        await expect(Promise.all([first, second])).resolves.toEqual([materializedDescriptor, materializedDescriptor]);
-        expect(model.addDescriptor).toHaveBeenCalledTimes(1);
-        expect(adapter.restoreAnchor).not.toHaveBeenCalled();
-        expect(anchorModel.setAnchor).not.toHaveBeenCalled();
-    });
-
-    it('reuses runtime materialized descriptors without loading the provider again', async () => {
-        const descriptor = createDescriptor({
-            hostAnchorId: 'anchor-1',
-            hostUnitId: 'host-1',
-            childUnitId: 'runtime-sheet',
-        });
-        const model = {
-            addDescriptor: vi.fn(),
-            getDescriptor: vi.fn(() => descriptor),
-        };
-        const adapter = {
-            restoreAnchor: vi.fn(),
-        };
-        const anchorModel = {
-            setAnchor: vi.fn(),
-        };
-        const referencedUnitManager = {
-            ensure: vi.fn(),
-        };
-        const service = new EmbedHostRestoreService(
-            model as never,
-            adapter as never,
-            anchorModel as never,
-            referencedUnitManager as never
-        );
-
-        await expect(service.materializeDescriptor({ descriptor })).resolves.toBe(descriptor);
-        expect(referencedUnitManager.ensure).not.toHaveBeenCalled();
-        expect(model.addDescriptor).toHaveBeenCalledWith('host-1', descriptor);
         expect(adapter.restoreAnchor).not.toHaveBeenCalled();
         expect(anchorModel.setAnchor).not.toHaveBeenCalled();
     });
@@ -679,7 +564,7 @@ describe('embed-ui registries and commands', () => {
             hostType: UniverInstanceType.UNIVER_DOC,
             requestedHostAnchorId: 'anchor-1',
             entry: 'docs-custom-block',
-            source: createRefSource(descriptor),
+            source: descriptor.source,
             hostContext: { x: 1 },
         })).toBe(descriptor);
         expect(adapter.createAnchorPlan).toHaveBeenCalledTimes(2);
@@ -733,7 +618,7 @@ describe('embed-ui registries and commands', () => {
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
-            source: createRefSource(descriptor),
+            source: descriptor.source,
         })).toThrow('EMBED_HOST_LIFECYCLE_MUTATION_FAILED:create-anchor:failed');
     });
 
@@ -767,7 +652,7 @@ describe('embed-ui registries and commands', () => {
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
-            source: createRefSource(descriptor),
+            source: descriptor.source,
         })).toThrow('PROVIDER_UNSUPPORTED');
         expect(adapter.createAnchorPlan).toHaveBeenCalledTimes(1);
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
@@ -940,11 +825,15 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostType: overrides.hostType ?? UniverInstanceType.UNIVER_DOC,
         hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
         entry: overrides.entry ?? 'docs-custom-block',
-        ref: overrides.ref ?? {
-            file: { kind: 'self' },
-            unit: { selector: 'child-1', type: 'sheet' },
+        source: overrides.source ?? {
+            kind: 'ref',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: {
+                file: { kind: 'self' },
+                unit: { selector: 'child-1', type: 'sheet' },
+            },
         },
-        childUnitId: Object.prototype.hasOwnProperty.call(overrides, 'childUnitId') ? overrides.childUnitId : 'child-1',
+        childUnitId: overrides.childUnitId ?? 'child-1',
         childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,
         mode: overrides.mode ?? 'interactive',
         sourceMeta: overrides.sourceMeta ?? {
@@ -958,12 +847,5 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         lifecycle: overrides.lifecycle ?? 'active',
         createdAt: overrides.createdAt,
         updatedAt: overrides.updatedAt,
-    };
-}
-
-function createRefSource(descriptor: IEmbedDescriptor) {
-    return {
-        ref: descriptor.ref,
-        unitType: descriptor.childType,
     };
 }

@@ -285,9 +285,9 @@ function createEmbedMount(
             hostType: UniverInstanceType.UNIVER_SHEET,
             entry: 'sheets-sheet-tab',
             hostAnchorId: 'anchor-1',
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'child-1', type: 'doc' },
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_DOC,
             },
             childUnitId: 'child-1',
             childType: UniverInstanceType.UNIVER_DOC,
@@ -321,9 +321,9 @@ function createEmbedMount(
                 hostType: UniverInstanceType.UNIVER_SHEET,
                 entry: 'sheets-sheet-tab',
                 hostAnchorId: 'anchor-1',
-                ref: {
-                    file: { kind: 'self' },
-                    unit: { selector: 'child-1', type: 'doc' },
+                source: {
+                    kind: 'empty',
+                    unitType: UniverInstanceType.UNIVER_DOC,
                 },
                 childUnitId: 'child-1',
                 childType: UniverInstanceType.UNIVER_DOC,

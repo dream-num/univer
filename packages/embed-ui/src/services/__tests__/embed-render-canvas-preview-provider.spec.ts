@@ -132,6 +132,5 @@ function createDescriptor() {
         hostAnchorId: 'anchor-1',
         childUnitId: 'child-1',
         childType: UniverInstanceType.UNIVER_DOC,
-        ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'doc' } },
     } as any;
 }

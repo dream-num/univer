@@ -48,9 +48,9 @@ describe('EmbedActivationService', () => {
             hostType: UniverInstanceType.UNIVER_SHEET,
             entry: 'sheets-floating-object',
             hostAnchorId: 'drawing-1',
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'child-doc', type: 'doc' },
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_DOC,
             },
             childUnitId: 'child-doc',
             childType: UniverInstanceType.UNIVER_DOC,
@@ -101,9 +101,9 @@ describe('EmbedActivationService', () => {
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
             hostAnchorId: 'drawing-1',
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'child-sheet', type: 'sheet' },
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SHEET,
             },
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
@@ -147,9 +147,9 @@ describe('EmbedActivationService', () => {
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
             hostAnchorId: 'drawing-1',
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'child-sheet', type: 'sheet' },
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SHEET,
             },
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
@@ -386,9 +386,9 @@ describe('EmbedActivationService', () => {
             hostType: UniverInstanceType.UNIVER_SLIDE,
             entry: 'slides-page-list-block',
             hostAnchorId: 'slide-page-1',
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'sheet-tab-child', type: 'sheet' },
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SHEET,
             },
             childUnitId: 'sheet-tab-child',
             childType: UniverInstanceType.UNIVER_SHEET,

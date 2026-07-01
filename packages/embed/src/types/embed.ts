@@ -101,9 +101,15 @@ export interface IEmbedCapability {
 }
 
 export type EmbedSource =
-    {
+    | {
+        kind: 'ref';
         ref: ResourceRefInput;
         unitType: UniverInstanceType;
+    }
+    | {
+        kind: 'empty';
+        unitType: UniverInstanceType;
+        creationConfig?: Record<string, unknown>;
     };
 
 export interface IEmbedFloatingConfig {
@@ -135,7 +141,7 @@ export interface IEmbedDescriptor {
     hostType: UniverInstanceType;
     entry: EmbedHostEntry;
     hostAnchorId: string;
-    ref: ResourceRefInput;
+    source: EmbedSource;
     childUnitId?: string;
     childType: UniverInstanceType;
     mode?: 'readonly' | 'interactive';
@@ -145,11 +151,9 @@ export interface IEmbedDescriptor {
     updatedAt?: number;
 }
 
-export type IEmbedStoredDescriptor = Omit<IEmbedDescriptor, 'childUnitId'>;
-
 export interface IEmbedResource {
     version: 1;
-    embeds: Record<string, IEmbedStoredDescriptor>;
+    embeds: Record<string, IEmbedDescriptor>;
 }
 
 export interface IEmbeddedFocusOwner {
@@ -163,7 +167,7 @@ export interface IEmbeddedFocusOwner {
 export interface IEmbedResolvedSource {
     childUnitId?: string;
     childType: UniverInstanceType;
-    ref: ResourceRefInput;
+    source: EmbedSource;
 }
 
 export interface IEmbedCreateContext {
@@ -186,4 +190,8 @@ export interface IEmbedCreateResult {
 
 export interface IEmbedGuestContribution {
     childType: UniverInstanceType;
+    createEmptyUnit?: (config?: Record<string, unknown>, options?: ICreateUnitOptions) => {
+        unitId: string;
+        unitType?: UniverInstanceType;
+    };
 }

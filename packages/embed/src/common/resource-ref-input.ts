@@ -16,10 +16,10 @@
 
 import type { ResourceRefInput } from '../types/resource-ref';
 import { getResourceRefKey, normalizeResourceRef } from './resource-ref';
-import { parseResourceRefLocator } from './resource-ref-locator';
+import { normalizeResourceRefLocator } from './resource-ref-locator';
 
 export function normalizeResourceRefInput(ref: ResourceRefInput): ResourceRefInput {
-    return typeof ref === 'string' ? parseResourceRefLocator(ref).canonicalRef : normalizeResourceRef(ref);
+    return typeof ref === 'string' ? normalizeResourceRefLocator(ref) : normalizeResourceRef(ref);
 }
 
 export function getResourceRefInputKey(ref: ResourceRefInput): string {
@@ -35,7 +35,8 @@ export function getResourceRefInputUnitSelector(ref: ResourceRefInput): string {
         return normalizedRef.unit.selector;
     }
 
-    const unitSelector = parseResourceRefLocator(normalizedRef).unitSelector;
+    const params = new URLSearchParams(normalizedRef.slice(1));
+    const unitSelector = params.get('unit');
     if (!unitSelector) {
         throw new Error('RESOURCE_REF_LOCATOR_INVALID');
     }

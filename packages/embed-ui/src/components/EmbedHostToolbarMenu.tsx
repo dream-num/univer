@@ -125,6 +125,7 @@ function EmbedFullscreenSurface() {
             childType: descriptor.childType,
         };
         const { runtimeScope, disposable: runtimeScopeDisposable } = createEmbedChildRuntimeScope(childContextBase, () => {});
+        // eslint-disable-next-line react/set-state-in-effect
         setRuntimeParts({
             embedId: descriptor.embedId,
             injector: runtimeScope.injector,
@@ -153,8 +154,8 @@ function EmbedFullscreenSurface() {
                 return;
             }
 
-            runtimeScope.instanceService.setCurrentUnitForType(descriptor.childUnitId!);
-            runtimeScope.instanceService.focusUnit(descriptor.childUnitId!);
+            runtimeScope.instanceService?.setCurrentUnitForType(descriptor.childUnitId!);
+            runtimeScope.instanceService?.focusUnit(descriptor.childUnitId!);
             activationService.activateFullscreen(descriptor);
         };
         activateFullscreenRuntime();

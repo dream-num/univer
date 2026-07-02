@@ -35,7 +35,7 @@ export interface IReferencedUnitOwner {
 }
 
 export interface IReferencedUnitRecord {
-    ref: ResourceRefInput;
+    ref: string;
     unitId: string;
     unitType: UniverInstanceType;
 }

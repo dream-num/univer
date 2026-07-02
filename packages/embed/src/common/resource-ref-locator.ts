@@ -14,63 +14,11 @@
  * limitations under the License.
  */
 
-const BARE_LOCAL_UNIT_ID_PATTERN = /^[A-Za-z0-9_.-]+$/;
-const INVALID_PERCENT_ESCAPE_PATTERN = /%(?![0-9A-Fa-f]{2})/;
+import { formatResourceRef, parseResourceRef } from './resource-ref-uri';
 
 export function normalizeResourceRefLocator(locator: string): string {
     if (!locator || locator.trim() !== locator) {
         throw new Error('RESOURCE_REF_LOCATOR_INVALID');
     }
-
-    if (locator.startsWith('#')) {
-        return parseAnchorLocator(locator);
-    }
-
-    if (BARE_LOCAL_UNIT_ID_PATTERN.test(locator)) {
-        return formatUnitLocator(locator);
-    }
-
-    throw new Error('RESOURCE_REF_LOCATOR_UNSUPPORTED');
-}
-
-function parseAnchorLocator(locator: string): string {
-    const fragment = locator.slice(1);
-    if (!fragment) {
-        throw new Error('RESOURCE_REF_LOCATOR_INVALID');
-    }
-
-    const pairs = fragment.split('&').map(parseFragmentPair);
-    if (pairs.length === 1 && pairs[0][0] === 'unit') {
-        return formatUnitLocator(pairs[0][1]);
-    }
-
-    throw new Error('RESOURCE_REF_LOCATOR_UNSUPPORTED');
-}
-
-function parseFragmentPair(pair: string): [string, string] {
-    const separatorIndex = pair.indexOf('=');
-    if (separatorIndex <= 0) {
-        throw new Error('RESOURCE_REF_LOCATOR_INVALID');
-    }
-
-    return [
-        decodeFragmentComponent(pair.slice(0, separatorIndex)),
-        decodeFragmentComponent(pair.slice(separatorIndex + 1)),
-    ];
-}
-
-function decodeFragmentComponent(value: string): string {
-    if (INVALID_PERCENT_ESCAPE_PATTERN.test(value)) {
-        throw new Error('RESOURCE_REF_LOCATOR_INVALID');
-    }
-
-    return decodeURIComponent(value);
-}
-
-function formatUnitLocator(unitSelector: string): string {
-    if (!unitSelector) {
-        throw new Error('RESOURCE_REF_LOCATOR_INVALID');
-    }
-
-    return `#unit=${encodeURIComponent(unitSelector)}`;
+    return formatResourceRef(parseResourceRef(locator));
 }

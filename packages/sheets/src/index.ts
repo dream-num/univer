@@ -503,7 +503,7 @@ export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers
 export { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 export { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
-export { createSheetsEmbedEmptySnapshot, registerSheetsEmbedGuestContribution, registerSheetsEmbedHostCapabilities } from './embed-guest';
+export { createSheetsEmbedEmptySnapshot, registerSheetsEmbedHostCapabilities } from './embed-guest';
 export { RangeProtectionRenderModel } from './models/range-protection-render.model';
 export type { ICellPermission } from './models/range-protection-render.model';
 export { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from './models/range-protection-rule.model';

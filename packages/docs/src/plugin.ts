@@ -32,7 +32,7 @@ import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
-import { registerDocsEmbedGuestContribution, registerDocsEmbedHostCapabilities } from './embed-guest';
+import { registerDocsEmbedHostCapabilities } from './embed-guest';
 import { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 import { DocContentInsertService } from './services/doc-content-insert.service';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
@@ -63,7 +63,6 @@ export class UniverDocsPlugin extends Plugin {
 
     override onStarting(): void {
         registerDocsEmbedHostCapabilities(this._injector);
-        registerDocsEmbedGuestContribution(this._injector);
 
         this._initializeDependencies();
         this._initializeCommands();

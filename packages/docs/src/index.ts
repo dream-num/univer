@@ -27,7 +27,7 @@ export type { IRichTextEditingMutationParams } from './commands/mutations/core-e
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';
-export { createDocsEmbedEmptySnapshot, registerDocsEmbedGuestContribution, registerDocsEmbedHostCapabilities } from './embed-guest';
+export { createDocsEmbedEmptySnapshot, registerDocsEmbedHostCapabilities } from './embed-guest';
 export { UniverDocsPlugin } from './plugin';
 export { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 export type { DocBlockMoveTransformer, DocBlockMoveValidator, IDocBlockMoveResult, IDocBlockMoveTransformContext, IDocBlockMoveValidationContext } from './services/doc-block-move-validator.service';

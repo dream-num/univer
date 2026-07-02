@@ -47,7 +47,7 @@ export class EmbedChildRetentionService {
     listCleanupCandidates(hostUnitId: string): IEmbedChildRetentionState[] {
         const grouped = new Map<string, { ref: ResourceRefInput; descriptors: IEmbedDescriptor[] }>();
         for (const descriptor of this._modelService.getDescriptors(hostUnitId)) {
-            const ref = this._getDescriptorResourceRef(descriptor);
+            const ref = descriptor.source.ref;
             const key = getResourceRefInputKey(ref);
             const group = grouped.get(key);
             if (group) {
@@ -81,11 +81,4 @@ export class EmbedChildRetentionService {
         };
     }
 
-    private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): ResourceRefInput {
-        if (descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
-        }
-
-        return descriptor.source.ref;
-    }
 }

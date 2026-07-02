@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
+import type { UniverInstanceType } from '@univerjs/core';
 import type { ResourceRefInput } from './resource-ref';
 
 export const EmbedHostEntryEnum = {
@@ -100,17 +100,11 @@ export interface IEmbedCapability {
     nestedEmbed: false;
 }
 
-export type EmbedSource =
-    | {
-        kind: 'ref';
-        ref: ResourceRefInput;
-        unitType: UniverInstanceType;
-    }
-    | {
-        kind: 'empty';
-        unitType: UniverInstanceType;
-        creationConfig?: Record<string, unknown>;
-    };
+export interface EmbedSource {
+    ref: ResourceRefInput;
+    unitType: UniverInstanceType;
+    creationConfig?: Record<string, unknown>;
+}
 
 export interface IEmbedFloatingConfig {
     enabled?: boolean;
@@ -186,12 +180,4 @@ export interface IEmbedCreateContext {
 export interface IEmbedCreateResult {
     descriptor: IEmbedDescriptor;
     resolvedSource: IEmbedResolvedSource;
-}
-
-export interface IEmbedGuestContribution {
-    childType: UniverInstanceType;
-    createEmptyUnit?: (config?: Record<string, unknown>, options?: ICreateUnitOptions) => {
-        unitId: string;
-        unitType?: UniverInstanceType;
-    };
 }

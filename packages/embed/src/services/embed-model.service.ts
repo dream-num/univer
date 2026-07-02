@@ -18,6 +18,7 @@ import type { IEmbedDescriptor, IEmbedResource } from '../types/embed';
 import type { ResourceRefInput } from '../types/resource-ref';
 import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
+import { parseResourceRef } from '../common/resource-ref-uri';
 import { fromResourceRefUnitType } from '../common/unit-type';
 
 export class EmbedModelService {
@@ -104,14 +105,14 @@ export class EmbedModelService {
     }
 
     serializeUnit(unitId: string): IEmbedResource {
-        return this._cloneResource(this._resources.get(unitId) ?? this._createResource());
+        return this._cloneResource(this._toPersistedResource(this._resources.get(unitId) ?? this._createResource()));
     }
 
     loadUnit(unitId: string, resource: IEmbedResource): void {
         const normalizedResource = this._createResource();
         for (const [embedId, descriptor] of Object.entries(resource.embeds ?? {})) {
             normalizedResource.embeds[embedId] = this._normalizeDescriptor(unitId, {
-                ...descriptor,
+                ...this._toPersistedDescriptor(descriptor),
                 embedId,
             });
         }
@@ -138,7 +139,7 @@ export class EmbedModelService {
             embeds: Object.fromEntries(Object.entries(parsed.embeds ?? {}).map(([embedId, descriptor]) => [
                 embedId,
                 this._normalizeDescriptor(descriptor.hostUnitId, {
-                    ...descriptor,
+                    ...this._toPersistedDescriptor(descriptor),
                     embedId,
                 }),
             ])),
@@ -152,23 +153,17 @@ export class EmbedModelService {
     }
 
     private _normalizeDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): IEmbedDescriptor {
-        if (descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
-        }
         const persistableDescriptor = { ...descriptor } as IEmbedDescriptor & { hostContext?: Record<string, unknown> };
         delete persistableDescriptor.hostContext;
 
-        const ref = normalizeResourceRefInput(descriptor.source.ref);
         const childType = descriptor.childType ?? descriptor.source.unitType;
         if (childType == null) {
             throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_REQUIRED');
         }
+        const ref = normalizeResourceRefInput(descriptor.source.ref);
+        const parsedRef = parseResourceRef(ref);
 
-        if (typeof ref !== 'string' && ref.file.kind === 'self' && descriptor.childUnitId && descriptor.childUnitId !== ref.unit.selector) {
-            throw new Error('EMBED_DESCRIPTOR_CHILD_REF_MISMATCH');
-        }
-
-        if (typeof ref !== 'string' && childType !== fromResourceRefUnitType(ref.unit.type)) {
+        if (childType !== fromResourceRefUnitType(parsedRef.unit.type)) {
             throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_MISMATCH');
         }
 
@@ -176,21 +171,17 @@ export class EmbedModelService {
             ...persistableDescriptor,
             hostUnitId,
             source: {
-                kind: 'ref',
                 ref,
                 unitType: childType,
+                ...(descriptor.source.creationConfig === undefined ? undefined : { creationConfig: descriptor.source.creationConfig }),
             },
-            childUnitId: descriptor.childUnitId ?? (typeof ref !== 'string' && ref.file.kind === 'self' ? ref.unit.selector : undefined),
+            childUnitId: descriptor.childUnitId,
             childType,
             lifecycle: descriptor.lifecycle ?? 'active',
         };
     }
 
     private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): ResourceRefInput {
-        if (descriptor.source.kind !== 'ref') {
-            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
-        }
-
         return descriptor.source.ref;
     }
 
@@ -247,5 +238,21 @@ export class EmbedModelService {
 
     private _cloneResource(resource: IEmbedResource): IEmbedResource {
         return cloneEmbedResource(resource);
+    }
+
+    private _toPersistedResource(resource: IEmbedResource): IEmbedResource {
+        return {
+            version: resource.version,
+            embeds: Object.fromEntries(Object.entries(resource.embeds).map(([embedId, descriptor]) => [
+                embedId,
+                this._toPersistedDescriptor(descriptor),
+            ])),
+        };
+    }
+
+    private _toPersistedDescriptor(descriptor: IEmbedDescriptor): IEmbedDescriptor {
+        const persisted = { ...descriptor };
+        delete persisted.childUnitId;
+        return persisted;
     }
 }

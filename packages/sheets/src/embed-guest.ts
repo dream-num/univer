@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, Injector, IWorkbookData, IWorksheetData, Workbook } from '@univerjs/core';
+import type { Injector, IWorkbookData, IWorksheetData } from '@univerjs/core';
 import type { IEmbedCapability } from '@univerjs/embed';
-import { BooleanNumber, generateRandomId, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { registerEmbedCapabilities, registerEmbedGuestContribution } from '@univerjs/embed';
+import { BooleanNumber, generateRandomId, LocaleType, UniverInstanceType } from '@univerjs/core';
+import { registerEmbedCapabilities } from '@univerjs/embed';
 import pkg from '../package.json';
 
 const SHEETS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
@@ -94,18 +94,6 @@ export function registerSheetsEmbedHostCapabilities(injector: Injector): void {
     registerEmbedCapabilities(injector, SHEETS_HOST_EMBED_CAPABILITIES);
 }
 
-export function registerSheetsEmbedGuestContribution(injector: Injector): void {
-    if (!injector.has(IUniverInstanceService)) {
-        return;
-    }
-
-    const univerInstanceService = injector.get(IUniverInstanceService);
-    registerEmbedGuestContribution(injector, {
-        childType: UniverInstanceType.UNIVER_SHEET,
-        createEmptyUnit: (config, options) => createSheetsEmbedEmptyUnit(univerInstanceService, config, options),
-    });
-}
-
 export function createSheetsEmbedEmptySnapshot(config: Record<string, unknown> = {}): IWorkbookData {
     const unitId = typeof config.id === 'string' ? config.id : `embed_sheet_${generateRandomId(8)}`;
     const sheetId = typeof config.sheetId === 'string' ? config.sheetId : `${unitId}_sheet_1`;
@@ -158,22 +146,5 @@ function createSheetsEmbedDefaultWorksheet(sheetId: string, name: string): IWork
             hidden: BooleanNumber.FALSE,
         },
         rightToLeft: BooleanNumber.FALSE,
-    };
-}
-
-function createSheetsEmbedEmptyUnit(
-    univerInstanceService: IUniverInstanceService,
-    config: Record<string, unknown> | undefined,
-    options: ICreateUnitOptions | undefined
-) {
-    const unit = univerInstanceService.createUnit<IWorkbookData, Workbook>(
-        UniverInstanceType.UNIVER_SHEET,
-        createSheetsEmbedEmptySnapshot(config),
-        options
-    );
-
-    return {
-        unitId: unit.getUnitId(),
-        unitType: UniverInstanceType.UNIVER_SHEET,
     };
 }

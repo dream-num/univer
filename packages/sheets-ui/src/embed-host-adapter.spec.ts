@@ -19,7 +19,7 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
+import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed';
 import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/sheets';
 import { DrawingApplyType, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';

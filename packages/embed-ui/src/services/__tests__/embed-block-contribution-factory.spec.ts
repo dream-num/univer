@@ -86,6 +86,7 @@ describe('createEmbedRibbonBlockContribution', () => {
         });
         expect(contribution.layoutPolicy?.tab).toBeDefined();
         expect(contribution.layoutPolicy?.float).toBeDefined();
+        expect(contribution.layoutPolicy?.float?.ribbon).toBe('host');
         expect(contribution.layoutPolicy?.docFlow).toBeDefined();
         expect(contribution.createRibbonOverride).toBeDefined();
     });

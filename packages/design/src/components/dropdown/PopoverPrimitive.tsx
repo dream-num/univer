@@ -21,6 +21,8 @@ import { borderClassName, scrollbarClassName } from '../../helper/class-utilitie
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
+const EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
+
 function PopoverPrimitive({
     ...props
 }: ComponentProps<typeof Root>) {
@@ -38,6 +40,8 @@ function PopoverContent({
     align = 'center',
     sideOffset = 4,
     container,
+    onFocusOutside,
+    onInteractOutside,
     ...props
 }: ComponentProps<typeof Content> & { container?: HTMLElement | null }) {
     const { mountContainer } = useContext(ConfigContext);
@@ -48,6 +52,14 @@ function PopoverContent({
                 data-slot="popover-content"
                 align={align}
                 sideOffset={sideOffset}
+                onFocusOutside={(event) => {
+                    onFocusOutside?.(event);
+                    keepSameEmbedBoundaryPopoverOpen(event);
+                }}
+                onInteractOutside={(event) => {
+                    onInteractOutside?.(event);
+                    keepSameEmbedBoundaryPopoverOpen(event);
+                }}
                 className={clsx(
                     `
                       univer-outline-hidden
@@ -72,6 +84,27 @@ function PopoverContent({
             />
         </Portal>
     );
+}
+
+function keepSameEmbedBoundaryPopoverOpen(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }): void {
+    const owner = getEmbedBoundaryOwner(event.currentTarget);
+    if (!owner) {
+        return;
+    }
+
+    if (getEmbedBoundaryOwner(event.target) === owner) {
+        event.preventDefault();
+    }
+}
+
+function getEmbedBoundaryOwner(target: EventTarget | null): string | undefined {
+    if (!(target instanceof HTMLElement)) {
+        return undefined;
+    }
+
+    return target.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ??
+        target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ??
+        undefined;
 }
 
 function PopoverAnchor({

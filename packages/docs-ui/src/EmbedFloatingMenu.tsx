@@ -17,33 +17,12 @@
 import type { IEmbedFloatingActivation, IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { Observable } from 'rxjs';
 import { ICommandService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { Button } from '@univerjs/design';
-import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, RemoveHostEmbedCommand, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { Button, clsx } from '@univerjs/design';
+import { RemoveEmbedCommand } from '@univerjs/embed';
+import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import { DeleteIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { createElement } from 'react';
-
-const DOCS_FLOATING_MENU_STYLE_ID = 'univer-docs-embed-floating-menu-styles';
-export const DOCS_FLOATING_MENU_STYLE_TEXT = `
-.univer-docs-embed-floating-menu {
-    position: absolute;
-    top: -36px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 30;
-}
-[data-embed-floating-menu-entry="docs-custom-block"] .univer-docs-embed-floating-menu {
-    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
-}
-.univer-docs-embed-floating-menu:not([data-embed-float-stage="stage2"]) {
-    display: none;
-}
-[data-embed-fullscreen-menu-slot="true"] .univer-docs-embed-floating-menu {
-    position: static;
-    margin: 6px auto;
-    transform: none;
-}
-`;
 
 export function createDocsFloatingMenuContributions(): IEmbedFloatingMenuContribution[] {
     return createEmbedProductFloatingMenuContributions({
@@ -53,8 +32,6 @@ export function createDocsFloatingMenuContributions(): IEmbedFloatingMenuContrib
 }
 
 function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
-    ensureDocsFloatingMenuStyles();
-
     const root = resolveEmbedFloatingMenuRoot(context);
     const menu = document.createElement('div');
     menu.setAttribute('data-embed-floating-menu-entry', context.descriptor.entry);
@@ -67,6 +44,7 @@ function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
         createElement(DocsEmbedFloatingMenu, {
             hostUnitId: context.hostUnitId,
             embedId: context.embedId,
+            entry: context.descriptor.entry,
             fullscreen: Boolean(context.renderScope.fullscreen),
             usesDomFloatingStage: context.descriptor.entry !== 'slides-floating-object',
             renderScopeActive$: context.renderScope.active$,
@@ -82,6 +60,7 @@ function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
 interface IDocsEmbedFloatingMenuProps {
     hostUnitId: string;
     embedId: string;
+    entry: string;
     fullscreen: boolean;
     usesDomFloatingStage: boolean;
     renderScopeActive$: Observable<boolean>;
@@ -91,6 +70,7 @@ function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
     const {
         hostUnitId,
         embedId,
+        entry,
         fullscreen,
         usesDomFloatingStage,
         renderScopeActive$,
@@ -112,17 +92,12 @@ function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
         renderScopeActive,
     });
     const removeEmbed = () => {
-        void commandService.executeCommand(RemoveHostEmbedCommand.id, { hostUnitId, embedId });
+        void commandService.executeCommand(RemoveEmbedCommand.id, { hostUnitId, embedId });
     };
 
     return (
         <div
-            className="
-              univer-docs-embed-floating-menu univer-box-border univer-inline-flex univer-h-8 univer-items-center
-              univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
-              univer-text-gray-900 univer-shadow-lg
-              dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-white
-            "
+            className={resolveDocsFloatingMenuClassName({ entry, fullscreen, stage })}
             data-embed-floating-menu="true"
             data-embed-id={embedId}
             data-embed-float-stage={stage}
@@ -156,13 +131,23 @@ export function resolveDocsFloatingMenuStage(params: {
     return resolveCommonEmbedFloatingMenuStage(params);
 }
 
-function ensureDocsFloatingMenuStyles(): void {
-    if (typeof document === 'undefined' || document.getElementById(DOCS_FLOATING_MENU_STYLE_ID)) {
-        return;
-    }
+export function resolveDocsFloatingMenuClassName(params: {
+    entry: string;
+    fullscreen: boolean;
+    stage: 'inactive' | 'stage2';
+}): string {
+    const { entry, fullscreen, stage } = params;
 
-    const style = document.createElement('style');
-    style.id = DOCS_FLOATING_MENU_STYLE_ID;
-    style.textContent = DOCS_FLOATING_MENU_STYLE_TEXT;
-    document.head.appendChild(style);
+    return clsx(`
+      univer-docs-embed-floating-menu univer-box-border univer-inline-flex univer-h-8 univer-items-center
+      univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
+      univer-text-gray-900 univer-shadow-lg
+      dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-white
+    `, {
+        'univer-hidden': stage !== 'stage2',
+        'univer-static univer-mx-auto univer-my-1.5 univer-translate-x-0': fullscreen,
+        'univer-absolute univer-left-1/2 univer-z-[30] -univer-translate-x-1/2': !fullscreen,
+        '-univer-top-9': !fullscreen && entry !== 'docs-custom-block',
+        'univer-top-[calc(var(--univer-embed-docs-block-floating-menu-inset-top,52px)*-1)]': !fullscreen && entry === 'docs-custom-block',
+    });
 }

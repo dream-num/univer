@@ -27,66 +27,10 @@ import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-rat
 import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
+import './embed-docs-custom-block.css';
 
 const SHEET_LIKE_CUSTOM_BLOCK_DEFAULT_CONTENT_HEIGHT = 480;
 const DOCS_CUSTOM_BLOCK_FLOATING_MENU_INSET_TOP = 52;
-export const EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT = `
-.univer-embed-docs-custom-block {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: visible;
-}
-.univer-embed-docs-custom-block .univer-embed-float-dom__content {
-    top: var(--univer-embed-docs-block-floating-menu-inset-top, 52px);
-    height: calc(100% - var(--univer-embed-docs-block-floating-menu-inset-top, 52px));
-}
-.univer-embed-docs-custom-block .univer-docs-embed-floating-menu,
-.univer-embed-docs-custom-block .univer-sheet-embed-floating-menu,
-.univer-embed-docs-custom-block .univer-base-embed-floating-menu,
-.univer-embed-docs-custom-block .univer-slide-embed-floating-menu {
-    top: calc(var(--univer-embed-docs-block-floating-menu-inset-top, 52px) * -1);
-    left: 50%;
-    transform: translateX(-50%);
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] {
-    contain: layout style;
-    height: var(--univer-embed-docs-block-outer-height, 100%);
-    min-height: var(--univer-embed-docs-block-outer-height, 100%);
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content {
-    left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
-    width: var(--univer-embed-docs-block-bleed-width, 100%);
-    height: var(--univer-embed-docs-block-viewport-height, 100%);
-    overflow: hidden;
-    transform: translateY(var(--univer-embed-docs-scroll-offset, 0px));
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content::after {
-    border: 0;
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live::before {
-    display: none;
-    width: var(--univer-embed-docs-block-virtual-width, 100%);
-    height: var(--univer-embed-docs-block-content-height, 1px);
-    pointer-events: none;
-    content: '';
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-canvas,
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-content {
-    left: var(--univer-embed-docs-block-bleed-left, 0px);
-    width: var(--univer-embed-docs-block-bleed-width, 100%);
-    height: var(--univer-embed-docs-block-viewport-height, 100%);
-    min-height: var(--univer-embed-docs-block-viewport-height, 100%);
-}
-`;
 
 export interface IEmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
@@ -109,8 +53,6 @@ export interface IDocsTableLikeCustomBlockStage2WheelHandlerOptions extends IDoc
 }
 
 export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData } & IEmbedDocsCustomBlockRuntimeProps) {
-    ensureEmbedDocsCustomBlockStyles();
-
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -520,15 +462,4 @@ function collectElementContentWidth(element: HTMLElement | null, candidates: num
             childRect.right - elementRect.left
         );
     }
-}
-
-function ensureEmbedDocsCustomBlockStyles(): void {
-    if (typeof document === 'undefined' || document.getElementById('univer-embed-docs-custom-block-styles')) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = 'univer-embed-docs-custom-block-styles';
-    style.textContent = EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT;
-    document.head.appendChild(style);
 }

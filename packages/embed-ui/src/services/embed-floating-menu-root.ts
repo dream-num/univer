@@ -21,7 +21,12 @@ export function resolveEmbedFloatingMenuRoot(context: Pick<IEmbedFloatingMenuMou
         return context.runtimeScope.roots.menuSlot;
     }
 
-    return context.runtimeScope.roots.overlay
+    const overlayRoot = context.runtimeScope.roots.overlay
         ?? context.renderScope.overlayRoot
         ?? context.renderScope.rootElement;
+    const chromeRoot = overlayRoot.parentElement?.classList.contains('univer-embed-float-dom__chrome')
+        ? overlayRoot.parentElement
+        : undefined;
+
+    return chromeRoot ?? overlayRoot;
 }

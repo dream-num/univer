@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { EmbedHostAnchorModelService } from '../services/embed-host-anchor-model.service';
+import { EmbedHostAnchorModelService } from '@univerjs/embed';
 
 const EMBED_HOST_ANCHOR_HOST_TYPES = [
     UniverInstanceType.UNIVER_DOC,

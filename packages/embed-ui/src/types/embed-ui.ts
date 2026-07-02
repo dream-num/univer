@@ -19,13 +19,6 @@ import type { EmbedHostEntry, EmbedLayout, EmbedMenuBehavior, IEmbedDescriptor, 
 import type { IMenuManagerService, IRibbonService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 
-export type {
-    IEmbedHostAdapterContribution,
-    IEmbedHostAnchorContext,
-    IEmbedHostAnchorMutationPlan,
-    IEmbedHostAnchorRemoveMutationPlan,
-} from '@univerjs/embed';
-
 export interface IEmbedContainerContext {
     descriptor: IEmbedDescriptor;
     layout: EmbedLayout;
@@ -159,12 +152,15 @@ export interface IEmbedProductMenuMountContext {
     activeRibbonTab?: string;
     headerMenu?: boolean;
     toolbarOnly?: boolean;
+    ribbonHeaderClassName?: string;
     scopedActionServiceTokens?: readonly DependencyIdentifier<unknown>[];
 }
 
 export interface IEmbedProductRibbonOverride {
     mode?: EmbedHostChromeMode;
     ribbonService: IRibbonService;
+    injector?: Pick<Injector, 'get' | 'has' | 'invoke'>;
+    portalContainer?: HTMLElement | null;
     placeholderTitle?: string;
     hideToolbar?: boolean;
     disposable?: IDisposable;
@@ -268,7 +264,8 @@ export interface IEmbedHostMenuOverride {
     childUnitId: string;
     childType: UniverInstanceType;
     entry: EmbedHostEntry;
-    reason: 'tab-active';
+    reason: 'tab-active' | 'float-stage2';
+    portalContainer?: HTMLElement | null;
     hideHostFxBar?: boolean;
     lockHostRibbon?: boolean;
 }

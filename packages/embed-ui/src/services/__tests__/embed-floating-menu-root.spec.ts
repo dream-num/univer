@@ -66,4 +66,21 @@ describe('resolveEmbedFloatingMenuRoot', () => {
             },
         } as any)).toBe(rootElement);
     });
+
+    it('mounts normal float menus as chrome children when the overlay is inside float chrome', () => {
+        const chrome = document.createElement('div');
+        chrome.className = 'univer-embed-float-dom__chrome univer-pointer-events-none';
+        const overlay = document.createElement('div');
+        overlay.style.pointerEvents = 'none';
+        chrome.appendChild(overlay);
+
+        expect(resolveEmbedFloatingMenuRoot({
+            renderScope: { fullscreen: false, rootElement: document.createElement('div') } as any,
+            runtimeScope: {
+                roots: {
+                    overlay,
+                },
+            },
+        } as any)).toBe(chrome);
+    });
 });

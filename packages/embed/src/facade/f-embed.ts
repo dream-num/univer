@@ -19,7 +19,7 @@ import type { FUniver } from '@univerjs/core/facade';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitFacadeResolverRegistryService, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind, RemoveEmbedCommand } from '@univerjs/embed';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind, RemoveEmbedCommand } from '@univerjs/embed';
 
 export interface ILoadEmbedOptions extends ICreateUnitOptions {
     signal?: AbortSignal;
@@ -197,11 +197,11 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
             },
         });
         const record = await handle.loaded;
-        return this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService).resolve<TLoadFacade>({
+        return this._injector.get(EmbedReferencedUnitApiResolverRegistryService).resolve<TLoadFacade>({
             unitId: record.unitId,
             unitType: record.unitType,
             injector: this._injector,
-            univerAPI: this._univerAPI,
+            api: this._univerAPI,
         });
     }
 

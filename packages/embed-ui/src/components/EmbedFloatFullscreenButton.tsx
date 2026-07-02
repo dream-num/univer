@@ -19,6 +19,7 @@ import { EmbedModelService } from '@univerjs/embed';
 import { FullscreenIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef } from 'react';
+import { EmbedActivationService } from '../services/embed-activation.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
 
 export interface IEmbedFloatFullscreenButtonProps {
@@ -32,6 +33,7 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
     const { hostUnitId, embedId, className, title = 'Fullscreen' } = props;
     const buttonRef = useRef<HTMLButtonElement>(null);
     const embedModelService = useDependency(EmbedModelService);
+    const activationService = useDependency(EmbedActivationService);
     const fullscreenService = useDependency(EmbedFullscreenService);
 
     const enterFullscreen = useCallback((event: Event | MouseEvent<HTMLButtonElement>) => {
@@ -44,10 +46,11 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
         enterEmbedFullscreen({
             hostUnitId,
             embedId,
+            activationService,
             embedModelService,
             fullscreenService,
         });
-    }, [embedId, embedModelService, fullscreenService, hostUnitId]);
+    }, [activationService, embedId, embedModelService, fullscreenService, hostUnitId]);
 
     useEffect(() => {
         const button = buttonRef.current;
@@ -56,7 +59,6 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
         }
 
         const stopPointerDown = (event: PointerEvent) => {
-            event.preventDefault();
             event.stopPropagation();
         };
 
@@ -94,6 +96,7 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
 export function enterEmbedFullscreen(params: {
     hostUnitId: string;
     embedId: string;
+    activationService?: Pick<EmbedActivationService, 'clearFloating'>;
     embedModelService: Pick<EmbedModelService, 'getDescriptor'>;
     fullscreenService: Pick<EmbedFullscreenService, 'enter'>;
 }): boolean {
@@ -102,6 +105,7 @@ export function enterEmbedFullscreen(params: {
         return false;
     }
 
+    params.activationService?.clearFloating(params.embedId, params.hostUnitId);
     params.fullscreenService.enter(descriptor);
     return true;
 }

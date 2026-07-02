@@ -24,6 +24,7 @@ import { ComponentManager, useConfigValue, useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { CellPopupManagerService } from './services/cell-popup-manager.service';
 import { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from './views/editor-container/EditorContainer';
 import { FormulaBar } from './views/formula-bar/FormulaBar';
@@ -95,6 +96,9 @@ function closeEmbeddedSheetCellEditor(context: IEmbedChildContainerContext): voi
         eventType: DeviceInputEventType.PointerDown,
         unitId: context.childUnitId,
     });
+    if (context.runtimeScope.injector.has(CellPopupManagerService)) {
+        context.runtimeScope.injector.get(CellPopupManagerService).hidePopupsForUnit(context.childUnitId);
+    }
 }
 
 export function shouldShowEmbeddedSheetChrome(context: Pick<IEmbedChildContainerContext, 'renderScope'>): boolean {
@@ -130,7 +134,7 @@ function registerEmbeddedSheetGeometry(context: IEmbedChildContainerContext, con
 function SheetEmbedChildOverlay(props: { canvasRoot: HTMLElement; showChrome: boolean; readonly?: boolean }) {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const componentManager = useDependency(ComponentManager);
-    const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
+    const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
     const showFormulaBar = props.showChrome && config?.formulaBar !== false;
     const footerConfig = config?.footer;
     const showSheetBar = props.showChrome && footerConfig !== false && (typeof footerConfig !== 'object' || footerConfig.sheetBar !== false);

@@ -16,7 +16,8 @@
 
 import type { Injector } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { createEmbedRenderCanvasPreviewProvider, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
+import { EmbedHostAdapterRegistryService, EmbedHostAnchorModelService } from '@univerjs/embed';
+import { createEmbedRenderCanvasPreviewProvider, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostContainerRegistryService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';

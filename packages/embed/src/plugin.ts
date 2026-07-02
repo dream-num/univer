@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IReferencedUnitFacadeResolverRegistration } from './services/embed-referenced-unit-api-resolver-registry.service';
+import type { IReferencedUnitApiResolverRegistration } from './services/embed-referenced-unit-api-resolver-registry.service';
 import type { IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
 import type { IEmbedCapability } from './types/embed';
 import type { IEmbedHostAdapterContribution } from './types/host-adapter';
@@ -38,10 +38,10 @@ import { createLocalRuntimeResourceRefProvider } from './services/embed-local-ru
 import { EmbedModelService } from './services/embed-model.service';
 import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 import {
-    createDefaultReferencedUnitFacadeResolvers,
-    EmbedReferencedUnitFacadeResolverRegistryService,
-    flushPendingReferencedUnitFacadeResolvers,
-    registerReferencedUnitFacadeResolvers,
+    createDefaultReferencedUnitApiResolvers,
+    EmbedReferencedUnitApiResolverRegistryService,
+    flushPendingReferencedUnitApiResolvers,
+    registerReferencedUnitApiResolvers,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
@@ -52,9 +52,11 @@ export interface IUniverEmbedPluginConfig {
     capabilities?: readonly IEmbedCapability[];
     hostAdapters?: readonly IEmbedHostAdapterContribution[];
     resourceRefProviderRegistrations?: readonly IEmbedResourceRefProviderRegistration[];
-    referencedUnitFacadeResolvers?: readonly IReferencedUnitFacadeResolverRegistration[];
+    referencedUnitApiResolvers?: readonly IReferencedUnitApiResolverRegistration[];
 }
 
+// This core embed plugin intentionally has no product plugin dependencies.
+// Host/product integrations are contributed by docs/sheets/slides/base plugins.
 export class UniverEmbedPlugin extends Plugin {
     static override pluginName = EMBED_PLUGIN_NAME;
     static override packageName = pkg.name;
@@ -79,7 +81,7 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedHostLifecycleService],
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
-            [EmbedReferencedUnitFacadeResolverRegistryService],
+            [EmbedReferencedUnitApiResolverRegistryService],
             [EmbedReferencedUnitManagerService],
             [EmbedSourceResolverService],
             [EmbedNestedGuardService],
@@ -101,10 +103,10 @@ export class UniverEmbedPlugin extends Plugin {
         this.disposeWithMe(resourceRefProviderRegistry.register(createLocalRuntimeResourceRefProvider(this._injector)));
         (this._config.resourceRefProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.register(registration)));
 
-        const referencedUnitFacadeResolverRegistry = this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService);
-        referencedUnitFacadeResolverRegistry.registerMany(createDefaultReferencedUnitFacadeResolvers()).forEach((disposable) => this.disposeWithMe(disposable));
-        flushPendingReferencedUnitFacadeResolvers(this._injector);
-        registerReferencedUnitFacadeResolvers(this._injector, this._config.referencedUnitFacadeResolvers ?? []);
+        const referencedUnitApiResolverRegistry = this._injector.get(EmbedReferencedUnitApiResolverRegistryService);
+        referencedUnitApiResolverRegistry.registerMany(createDefaultReferencedUnitApiResolvers()).forEach((disposable) => this.disposeWithMe(disposable));
+        flushPendingReferencedUnitApiResolvers(this._injector);
+        registerReferencedUnitApiResolvers(this._injector, this._config.referencedUnitApiResolvers ?? []);
 
         touchDependencies(this._injector, [
             [EmbedModelService],
@@ -114,7 +116,7 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedHostLifecycleService],
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
-            [EmbedReferencedUnitFacadeResolverRegistryService],
+            [EmbedReferencedUnitApiResolverRegistryService],
             [EmbedReferencedUnitManagerService],
             [EmbedSourceResolverService],
             [EmbedCreationService],

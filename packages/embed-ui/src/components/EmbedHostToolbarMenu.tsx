@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, Injector as IInjector, UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
 import type { LocaleKey } from '../locale/types';
+import type { EmbedRuntimeFocusRole } from '../services/embed-runtime-focus-coordinator.service';
 import type { IEmbedChildContainerContext, IEmbedFullscreenSession, IEmbedRenderScope } from '../types/embed-ui';
 import { Injector, LocaleService, toDisposable } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { EmbedModelService } from '@univerjs/embed';
 import { FullscreenIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { CanvasPopup, ContextMenu, Sidebar, useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { of } from 'rxjs';
@@ -36,14 +37,18 @@ import {
     ensureEmbedDefaultRuntimeSlots,
     findEmbedRuntimeSlot,
 } from '../common/embed-runtime-slots';
+import { EmbedActivationService } from '../services/embed-activation.service';
 import { EmbedBlockRegistryService } from '../services/embed-block-registry.service';
 import { createEmbedChildRuntimeScope } from '../services/embed-child-runtime-scope';
 import { EmbedChildViewRegistryService } from '../services/embed-child-view-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../services/embed-floating-menu-registry.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
+import { EmbedInteractionBoundaryService } from '../services/embed-interaction-boundary.service';
 import { mountEmbedProductRibbonMenu } from '../services/embed-product-menu-mounting';
 import { EmbedProductMenuRegistryService } from '../services/embed-product-menu-registry.service';
+import { EmbedRuntimeFocusCoordinator } from '../services/embed-runtime-focus-coordinator.service';
 import { EmbedHostChromeMode } from '../types/embed-ui';
+import { EmbedRuntimeProviders } from './EmbedRuntimeProviders';
 
 export function EmbedHostToolbarMenu() {
     return <EmbedFullscreenSurface />;
@@ -52,13 +57,17 @@ export function EmbedHostToolbarMenu() {
 function EmbedFullscreenSurface() {
     const injector = useDependency(Injector);
     const localeService = useDependency(LocaleService);
+    const activationService = useDependency(EmbedActivationService);
     const fullscreenService = useDependency(EmbedFullscreenService);
     const menuRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const popupRef = useRef<HTMLDivElement>(null);
+    const sidebarRef = useRef<HTMLDivElement>(null);
+    const rightSidebarRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
     const [session, setSession] = useState<IEmbedFullscreenSession | null>(() => fullscreenService.getSession());
+    const [runtimeParts, setRuntimeParts] = useState<IEmbedFullscreenRuntimeParts | null>(null);
 
     useEffect(() => {
         const subscription = fullscreenService.session$.subscribe(setSession);
@@ -69,8 +78,10 @@ function EmbedFullscreenSurface() {
         const viewport = viewportRef.current;
         const menuSlot = menuContentRef.current;
         const popupSlot = popupRef.current;
+        const sidebarSlot = sidebarRef.current;
+        const rightSidebarSlot = rightSidebarRef.current;
         const footerSlot = footerRef.current;
-        if (!session || !viewport || !menuSlot || !popupSlot || !footerSlot) {
+        if (!session || !viewport || !menuSlot || !popupSlot || !sidebarSlot || !rightSidebarSlot || !footerSlot) {
             return undefined;
         }
 
@@ -114,10 +125,41 @@ function EmbedFullscreenSurface() {
             childType: descriptor.childType,
         };
         const { runtimeScope, disposable: runtimeScopeDisposable } = createEmbedChildRuntimeScope(childContextBase, () => {});
+        setRuntimeParts({
+            embedId: descriptor.embedId,
+            injector: runtimeScope.injector,
+            sourceInjector: injector,
+            popupContainer: runtimeScope.roots.popup,
+            rightSidebarContainer: rightSidebarSlot,
+        });
         const childContext: IEmbedChildContainerContext = {
             ...childContextBase,
             runtimeScope,
         };
+        const runtimeOwnershipDisposable = registerFullscreenRuntimeOwnership({
+            injector,
+            descriptor,
+            renderScope,
+            menuRoot: menuRef.current,
+            menuSlot,
+            popupSlot,
+            sidebarSlot,
+            rightSidebarSlot,
+            footerSlot,
+        });
+        const activateFullscreenRuntime = (event?: PointerEvent | FocusEvent) => {
+            const target = event?.target instanceof Element ? event.target : null;
+            if (target?.closest('[data-embed-fullscreen-close="true"], [data-embed-fullscreen-menu="true"], [data-embed-fullscreen-popup-root="true"]')) {
+                return;
+            }
+
+            runtimeScope.instanceService.setCurrentUnitForType(descriptor.childUnitId!);
+            runtimeScope.instanceService.focusUnit(descriptor.childUnitId!);
+            activationService.activateFullscreen(descriptor);
+        };
+        activateFullscreenRuntime();
+        viewport.addEventListener('pointerdown', activateFullscreenRuntime, { capture: true });
+        viewport.addEventListener('focusin', activateFullscreenRuntime);
         const disposable = contribution.mount?.(childContext);
         const menuDisposable = mountFullscreenWorkbenchMenus({
             injector,
@@ -128,11 +170,16 @@ function EmbedFullscreenSurface() {
         viewport.dataset.embedFullscreenStatus = 'mounted';
 
         return () => {
+            setRuntimeParts(null);
             scheduleFullscreenCleanupAfterUnmount(() => {
+                viewport.removeEventListener('pointerdown', activateFullscreenRuntime, { capture: true });
+                viewport.removeEventListener('focusin', activateFullscreenRuntime);
                 menuDisposable?.dispose();
                 disposable?.dispose();
+                runtimeOwnershipDisposable.dispose();
                 runtimeScopeDisposable.dispose();
                 runtimeSlotsDisposable.dispose();
+                activationService.clearFullscreen(descriptor);
                 delete viewport.dataset.embedFullscreenStatus;
                 delete viewport.dataset.embedId;
                 delete viewport.dataset.embedHostEntry;
@@ -143,7 +190,7 @@ function EmbedFullscreenSurface() {
                 fullscreenService.notifyExited(session);
             });
         };
-    }, [fullscreenService, injector, session]);
+    }, [activationService, fullscreenService, injector, session]);
 
     if (!session) {
         return null;
@@ -157,7 +204,7 @@ function EmbedFullscreenSurface() {
     return createPortal(
         <div
             className="
-              univer-fixed univer-inset-0 univer-z-[9999] univer-grid univer-grid-rows-[auto_minmax(0,1fr)_auto]
+              univer-fixed univer-inset-0 univer-z-[1070] univer-grid univer-grid-rows-[auto_minmax(0,1fr)_auto]
               univer-bg-white univer-text-gray-900
               dark:!univer-bg-gray-800 dark:!univer-text-white
             "
@@ -208,17 +255,14 @@ function EmbedFullscreenSurface() {
                 </div>
                 <div
                     ref={menuContentRef}
-                    className="
-                      univer-min-w-0
-                      [&_[data-u-comp=ribbon-header-menu]]:univer-box-border
-                      [&_[data-u-comp=ribbon-header-menu]]:univer-px-24
-                    "
+                    className="univer-min-w-0"
                     data-embed-fullscreen-menu-slot="true"
                     {...{ [EMBED_MENU_SLOT_ATTRIBUTE]: 'true' }}
                 />
             </div>
             <div className="univer-flex univer-min-h-0 univer-min-w-0 univer-overflow-hidden" data-embed-fullscreen-body="true">
                 <div
+                    ref={sidebarRef}
                     className="
                       univer-relative univer-z-[2] univer-min-h-0 univer-flex-none univer-bg-white
                       empty:univer-hidden
@@ -235,6 +279,16 @@ function EmbedFullscreenSurface() {
                       dark:!univer-bg-gray-900
                     "
                     data-embed-fullscreen-viewport="true"
+                />
+                <div
+                    ref={rightSidebarRef}
+                    className="
+                      univer-relative univer-z-[2] univer-min-h-0 univer-flex-none univer-bg-white
+                      empty:univer-hidden
+                      dark:!univer-bg-gray-800
+                    "
+                    data-embed-fullscreen-right-sidebar-slot="true"
+                    data-embed-id={session.embedId}
                 />
             </div>
             <div
@@ -256,8 +310,49 @@ function EmbedFullscreenSurface() {
                 data-embed-fullscreen-popup-root="true"
                 {...{ [EMBED_POPUP_ROOT_ATTRIBUTE]: 'true' }}
             />
+            {runtimeParts && <EmbedFullscreenWorkbenchParts {...runtimeParts} />}
         </div>,
         document.body
+    );
+}
+
+interface IEmbedFullscreenRuntimeParts {
+    embedId: string;
+    injector: IInjector;
+    sourceInjector: IInjector;
+    popupContainer: HTMLElement;
+    rightSidebarContainer: HTMLElement;
+}
+
+export function EmbedFullscreenWorkbenchParts(props: IEmbedFullscreenRuntimeParts) {
+    const { embedId, injector, sourceInjector, popupContainer, rightSidebarContainer } = props;
+
+    return (
+        <>
+            {createPortal(
+                <>
+                    <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
+                        <ContextMenu />
+                        <CanvasPopup />
+                    </EmbedRuntimeProviders>
+                    <EmbedRuntimeProviders injector={sourceInjector} mountContainer={popupContainer} embedId={embedId}>
+                        <CanvasPopup />
+                    </EmbedRuntimeProviders>
+                </>,
+                popupContainer
+            )}
+            {createPortal(
+                <aside data-u-comp="right-sidebar" className="univer-z-[2] univer-flex univer-h-full">
+                    <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
+                        <Sidebar />
+                    </EmbedRuntimeProviders>
+                    <EmbedRuntimeProviders injector={sourceInjector} mountContainer={popupContainer} embedId={embedId}>
+                        <Sidebar />
+                    </EmbedRuntimeProviders>
+                </aside>,
+                rightSidebarContainer
+            )}
+        </>
     );
 }
 
@@ -315,6 +410,112 @@ export function createFullscreenRenderScope(
     };
 }
 
+export function registerFullscreenRuntimeOwnership(params: {
+    injector: Injector;
+    descriptor: IEmbedDescriptor;
+    renderScope: IEmbedRenderScope;
+    menuRoot: HTMLElement | null;
+    menuSlot: HTMLElement;
+    popupSlot: HTMLElement;
+    sidebarSlot: HTMLElement;
+    rightSidebarSlot: HTMLElement;
+    footerSlot: HTMLElement;
+}): IDisposable {
+    const { injector, descriptor, renderScope, menuRoot, menuSlot, popupSlot, sidebarSlot, rightSidebarSlot, footerSlot } = params;
+    const disposables: IDisposable[] = [];
+    const embedId = descriptor.embedId;
+
+    if (injector.has(EmbedRuntimeFocusCoordinator)) {
+        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
+        disposables.push(focusCoordinator.registerRuntimeScope({
+            embedId,
+            hostUnitId: descriptor.hostUnitId,
+            childUnitId: descriptor.childUnitId,
+            childType: descriptor.childType,
+        }));
+        if (descriptor.childUnitId) {
+            disposables.push(focusCoordinator.acquireLease({
+                embedId,
+                role: 'child-session',
+                owner: 'fullscreen-runtime',
+                hostUnitId: descriptor.hostUnitId,
+                childUnitId: descriptor.childUnitId,
+                childType: descriptor.childType,
+            }));
+        }
+
+        collectFullscreenRuntimeElements({
+            renderScope,
+            menuRoot,
+            menuSlot,
+            popupSlot,
+            sidebarSlot,
+            rightSidebarSlot,
+            footerSlot,
+        }).forEach(({ element, role }) => {
+            disposables.push(focusCoordinator.registerElement({
+                embedId,
+                element,
+                role,
+            }));
+        });
+    }
+
+    if (injector.has(EmbedInteractionBoundaryService)) {
+        const interactionBoundaryService = injector.get(EmbedInteractionBoundaryService);
+        collectFullscreenRuntimeElements({
+            renderScope,
+            menuRoot,
+            menuSlot,
+            popupSlot,
+            sidebarSlot,
+            rightSidebarSlot,
+            footerSlot,
+        }).forEach(({ element }) => {
+            disposables.push(interactionBoundaryService.registerRoot(embedId, element));
+        });
+        disposables.push(interactionBoundaryService.activatePortalScope(embedId, renderScope.rootElement.ownerDocument));
+    }
+
+    return toDisposable(() => {
+        [...disposables].reverse().forEach((disposable) => disposable.dispose());
+    });
+}
+
+function collectFullscreenRuntimeElements(params: {
+    renderScope: IEmbedRenderScope;
+    menuRoot: HTMLElement | null;
+    menuSlot: HTMLElement;
+    popupSlot: HTMLElement;
+    sidebarSlot: HTMLElement;
+    rightSidebarSlot: HTMLElement;
+    footerSlot: HTMLElement;
+}): Array<{ element: HTMLElement; role: EmbedRuntimeFocusRole }> {
+    const { renderScope, menuRoot, menuSlot, popupSlot, sidebarSlot, rightSidebarSlot, footerSlot } = params;
+    const elements: Array<{ element: HTMLElement | null | undefined; role: EmbedRuntimeFocusRole }> = [
+        { element: renderScope.rootElement, role: 'runtime' },
+        { element: renderScope.contentRoot, role: 'runtime' },
+        { element: renderScope.canvasRoot, role: 'runtime' },
+        { element: renderScope.overlayRoot, role: 'runtime' },
+        { element: menuRoot, role: 'floating-menu' },
+        { element: menuSlot, role: 'floating-menu' },
+        { element: footerSlot, role: 'floating-menu' },
+        { element: sidebarSlot, role: 'child-popup' },
+        { element: rightSidebarSlot, role: 'child-popup' },
+        { element: popupSlot, role: 'child-popup' },
+    ];
+    const seen = new Set<HTMLElement>();
+
+    return elements.flatMap(({ element, role }) => {
+        if (!element || seen.has(element)) {
+            return [];
+        }
+
+        seen.add(element);
+        return [{ element, role }];
+    });
+}
+
 export function mountFullscreenWorkbenchMenus(params: {
     injector: Injector;
     descriptor: IEmbedDescriptor;
@@ -348,12 +549,13 @@ function mountFullscreenProductRibbon(params: {
         const productMenuDisposable = params.injector.get(EmbedProductMenuRegistryService).mountMenu({
             container: params.menuContainer,
             portalContainer: params.childContext.runtimeScope.roots.popup,
-            injector: params.injector,
+            injector: params.childContext.runtimeScope.injector,
             childType: params.descriptor.childType,
             childUnitId: params.descriptor.childUnitId,
             embedId: params.descriptor.embedId,
             surface: 'ribbon',
             headerMenu: true,
+            ribbonHeaderClassName: 'univer-box-border univer-px-24',
         });
         if (productMenuDisposable) {
             return productMenuDisposable;
@@ -363,12 +565,13 @@ function mountFullscreenProductRibbon(params: {
     return mountEmbedProductRibbonMenu({
         container: params.menuContainer,
         portalContainer: params.childContext.runtimeScope.roots.popup,
-        injector: params.injector,
+        injector: params.childContext.runtimeScope.injector,
         childType: params.descriptor.childType,
         childUnitId: params.descriptor.childUnitId,
         embedId: params.descriptor.embedId,
         menuSchema: undefined,
         headerMenu: true,
+        ribbonHeaderClassName: 'univer-box-border univer-px-24',
     });
 }
 

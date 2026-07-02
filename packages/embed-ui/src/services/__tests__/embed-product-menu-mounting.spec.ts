@@ -21,8 +21,13 @@
 import type { Injector } from '@univerjs/core';
 import {
     COMMAND_EXECUTION_INJECTOR_KEY,
+    FOCUSING_DOC,
+    FOCUSING_SHEET,
+    FOCUSING_SLIDE,
+    FOCUSING_UNIT,
     ICommandService,
     IConfigService,
+    IContextService,
     IUniverInstanceService,
     LocaleService,
     UniverInstanceType,
@@ -30,8 +35,8 @@ import {
 import { IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
 import { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from '../embed-product-menu-mounting';
+import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
 
 class ProductActionService {}
 
@@ -174,6 +179,32 @@ describe('embed product menu mounting', () => {
         disposable.dispose();
     });
 
+    it('scopes product menu focus context to the child product type', () => {
+        const injector = createInjector();
+        const { injector: scopedInjector, disposable } = createEmbedProductMenuInjector(injector as unknown as Injector, {
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnitId: 'child-sheet',
+            menuSchema: {
+                [MenuManagerPosition.RIBBON]: {
+                    start: { title: 'Start' },
+                },
+            },
+        });
+        const contextService = scopedInjector.get(IContextService) as IContextService;
+        const values: boolean[] = [];
+
+        contextService.subscribeContextValue$(FOCUSING_SHEET).subscribe((value) => values.push(value)).unsubscribe();
+
+        expect(contextService.getContextValue(FOCUSING_UNIT)).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_SHEET)).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_DOC)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_SLIDE)).toBe(false);
+        expect(contextService.getContextValue('CUSTOM_ROOT_CONTEXT')).toBe(true);
+        expect(values).toEqual([true]);
+
+        disposable.dispose();
+    });
+
     it('keeps the product menu scoped to the child while a float stage child lease is active', async () => {
         const runtimeFocusCoordinator = new EmbedRuntimeFocusCoordinator();
         const injector = createInjector({ runtimeFocusCoordinator });
@@ -271,9 +302,11 @@ function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordi
     let currentSheetUnit = previousUnit;
     const unitAdded$ = new Subject<unknown>();
     const unitDisposed$ = new Subject<unknown>();
-    const configService = {};
+    const configService = {
+        getConfig: vi.fn(() => undefined),
+    };
     const rootMenuManager = options.hasCreateScoped
-        ? new MenuManagerService({} as Injector, configService as IConfigService)
+        ? new MenuManagerService({} as Injector, configService as unknown as IConfigService)
         : {
             menuChanged$: new Subject<void>(),
             mergeMenu: vi.fn(),
@@ -284,6 +317,12 @@ function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordi
     const commandService = {
         executeCommand: vi.fn(async () => true),
         syncExecuteCommand: vi.fn(() => true),
+    };
+    const contextService = {
+        contextChanged$: new Subject<Record<string, boolean>>(),
+        getContextValue: vi.fn((key: string) => key === 'CUSTOM_ROOT_CONTEXT'),
+        setContextValue: vi.fn(),
+        subscribeContextValue$: vi.fn((key: string) => new BehaviorSubject(key === 'CUSTOM_ROOT_CONTEXT')),
     };
     const instanceService = {
         focused$: new BehaviorSubject(previousUnit),
@@ -308,6 +347,7 @@ function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordi
     const map = new Map<unknown, unknown>([
         [IUniverInstanceService, instanceService],
         [ICommandService, commandService],
+        [IContextService, contextService],
         [IMenuManagerService, rootMenuManager],
         [IConfigService, configService],
         [LocaleService, localeService],
@@ -326,6 +366,7 @@ function createInjector(options: { hasCreateScoped?: boolean; runtimeFocusCoordi
             ['child-sheet', childUnit],
             ['previous-sheet', previousUnit],
         ]),
+        contextService,
         commandService,
         instanceService,
         has: vi.fn((token: unknown) => map.has(token)),

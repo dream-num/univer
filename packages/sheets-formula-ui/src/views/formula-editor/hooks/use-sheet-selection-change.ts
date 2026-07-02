@@ -104,15 +104,75 @@ export function getLastFormulaSelection(selections: IRange[]): IRange | undefine
     return selections[selections.length - 1];
 }
 
+export interface ISelectionChangeDuplicateEndGuard<TSelection> {
+    shouldSkip(selections: TSelection[], isEnd: boolean): boolean;
+    reset(): void;
+}
+
+export function getFormulaSelectionIdentityKey(selection: unknown): string {
+    const item = selection as Partial<IRange> & { range?: Partial<IRange>; rangeWithCoord?: Partial<IRange> };
+    const range = item.rangeWithCoord ?? item.range ?? item;
+    return [
+        range.startRow ?? '',
+        range.endRow ?? '',
+        range.startColumn ?? '',
+        range.endColumn ?? '',
+    ].join(':');
+}
+
+export function isSameFormulaSelection(first: unknown, second: unknown): boolean {
+    return getFormulaSelectionIdentityKey(first) === getFormulaSelectionIdentityKey(second);
+}
+
+const SHARED_SELECTION_CHANGE_DUPLICATE_END_GUARDS = new Map<string, ISelectionChangeDuplicateEndGuard<IRange>>();
+
+export function getSharedSelectionChangeDuplicateEndGuard(key: string): ISelectionChangeDuplicateEndGuard<IRange> {
+    let guard = SHARED_SELECTION_CHANGE_DUPLICATE_END_GUARDS.get(key);
+    if (!guard) {
+        guard = createSelectionChangeDuplicateEndGuard<IRange>();
+        SHARED_SELECTION_CHANGE_DUPLICATE_END_GUARDS.set(key, guard);
+    }
+
+    return guard;
+}
+
+export function createSelectionChangeDuplicateEndGuard<TSelection>(): ISelectionChangeDuplicateEndGuard<TSelection> {
+    let lastTransientSelectionsKey: string | undefined;
+    const getSelectionsKey = (selections: TSelection[]) => selections.map(getFormulaSelectionIdentityKey).join('|');
+
+    return {
+        shouldSkip(selections, isEnd) {
+            const selectionsKey = getSelectionsKey(selections);
+            if (selectionsKey === lastTransientSelectionsKey) {
+                return true;
+            }
+
+            if (isEnd) {
+                lastTransientSelectionsKey = undefined;
+                return false;
+            }
+
+            lastTransientSelectionsKey = selectionsKey;
+            return false;
+        },
+        reset() {
+            lastTransientSelectionsKey = undefined;
+        },
+    };
+}
+
 export function createSelectionChangeHandler<TSelection>(opts: {
     initialSelectionsCount: number;
     onSelectionsChange: (selections: TSelection[], isEnd: boolean, isCtrlAddMode?: boolean) => void;
+    duplicateEndGuard?: ISelectionChangeDuplicateEndGuard<TSelection>;
 }) {
     let prevSelectionsCount = opts.initialSelectionsCount;
     let pendingCtrlAddCount = 0;
+    const duplicateEndGuard = opts.duplicateEndGuard ?? createSelectionChangeDuplicateEndGuard<TSelection>();
 
     return (selections: TSelection[], isEnd: boolean, options?: { initial?: boolean }) => {
-        if (options?.initial && selections.length <= opts.initialSelectionsCount) {
+        if (options?.initial) {
+            // Ignore the BehaviorSubject replay when subscribing; real user selections arrive through later move events.
             return;
         }
 
@@ -123,9 +183,15 @@ export function createSelectionChangeHandler<TSelection>(opts: {
         const isCtrlAddMode = !options?.initial && prevSelectionsCount > 0 && selections.length > prevSelectionsCount;
         if (isCtrlAddMode && !isEnd) {
             pendingCtrlAddCount = selections.length;
+            duplicateEndGuard.reset();
             return;
         }
         const shouldApplyPendingCtrlAdd = isEnd && selections.length === pendingCtrlAddCount;
+        if (duplicateEndGuard.shouldSkip(selections, isEnd)) {
+            prevSelectionsCount = selections.length;
+            pendingCtrlAddCount = 0;
+            return;
+        }
 
         if (isEnd) {
             prevSelectionsCount = selections.length;
@@ -157,10 +223,6 @@ export function replaceFormulaControlSelection(
 }
 
 export function getInitialFormulaReferenceSelectionCount(renderSelectionCount: number, formulaReferenceCount: number, selectingType?: FormulaSelectingType): number {
-    if (selectingType === FormulaSelectingType.NEED_ADD && formulaReferenceCount === 0) {
-        return 0;
-    }
-
     return Math.max(renderSelectionCount, formulaReferenceCount);
 }
 
@@ -194,6 +256,7 @@ export const useSheetSelectionChange = (
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
+    const duplicateEndGuard = useMemo(() => getSharedSelectionChangeDuplicateEndGuard(`${unitId}:${subUnitId}`), [subUnitId, unitId]);
     // eslint-disable-next-line complexity
     const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
@@ -336,6 +399,10 @@ export const useSheetSelectionChange = (
             );
             const handleSelectionsChange = createSelectionChangeHandler<ISelectionWithCoord>({
                 initialSelectionsCount,
+                duplicateEndGuard: {
+                    shouldSkip: (selections, isEnd) => duplicateEndGuard.shouldSkip(selections.map((i) => i.rangeWithCoord), isEnd),
+                    reset: duplicateEndGuard.reset,
+                },
                 onSelectionsChange: (selections, isEnd, isCtrlAddMode) => {
                     onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
                 },
@@ -438,9 +505,15 @@ export const useSheetSelectionChange = (
                         const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
                         const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
                         if (isAdd) {
+                            if (selections.length > 0 && isSameFormulaSelection(selections[selections.length - 1], range)) {
+                                return;
+                            }
                             selections.push(range);
                         } else {
                             selections[selections.length - 1] = range;
+                        }
+                        if (duplicateEndGuard.shouldSkip(selections, true)) {
+                            return;
                         }
                         onSelectionsChange(selections, true);
                     }
@@ -451,7 +524,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, editor, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
+    }, [commandService, duplicateEndGuard, editor, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
 
     useEffect(() => {
         if (!editor) {

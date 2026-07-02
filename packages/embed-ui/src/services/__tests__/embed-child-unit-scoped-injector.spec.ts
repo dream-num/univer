@@ -29,7 +29,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { CreateEmbedCommand } from '@univerjs/embed';
-import { IContextMenuService, ILayoutService, IMenuManagerService } from '@univerjs/ui';
+import { ICanvasPopupService, IContextMenuService, ILayoutService, IMenuManagerService, ISidebarService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from '../embed-child-unit-scoped-injector';
@@ -382,6 +382,102 @@ describe('embed child unit scoped injector', () => {
 
         expect(scopedLayoutService?.rootContainerElement).toBe((childContext as IEmbedChildContainerContext).renderScope.rootElement);
         expect(scopedLayoutService?.getContentElement()).toBe((childContext as IEmbedChildContainerContext).renderScope.contentRoot);
+    });
+
+    it('keeps fullscreen context menu, canvas popup, and sidebar services local to the child runtime', () => {
+        const childUnit = createUnit('child-sheet');
+        const parentContextMenuService = {
+            disabled: false,
+            visible: false,
+            enable: vi.fn(),
+            disable: vi.fn(),
+            triggerContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+            registerContextMenuHandler: vi.fn(),
+        };
+        const parentPopupService = {
+            addPopup: vi.fn(),
+            removePopup: vi.fn(),
+            removeAll: vi.fn(),
+            popups$: new BehaviorSubject([]),
+            popups: [],
+            activePopupId: null,
+        };
+        const parentSidebarService = {
+            visible: false,
+            options: {},
+            sidebarOptions$: new Subject(),
+            scrollEvent$: new Subject(),
+            open: vi.fn(),
+            close: vi.fn(),
+            setWidth: vi.fn(),
+            getContainer: vi.fn(),
+            setContainer: vi.fn(),
+        };
+        const parentInjector = createParentInjector([
+            [IUniverInstanceService, {
+                getUnit: vi.fn(() => childUnit),
+                getCurrentUnitOfType: vi.fn(() => childUnit),
+                getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject(childUnit)),
+                setCurrentUnitForType: vi.fn(),
+                getFocusedUnit: vi.fn(() => childUnit),
+                focused$: new Subject<string | null>(),
+                focusUnit: vi.fn(),
+            }],
+            [ICommandService, {
+                executeCommand: vi.fn(async () => true),
+                syncExecuteCommand: vi.fn(() => true),
+            }],
+            [IContextMenuService, parentContextMenuService],
+            [ICanvasPopupService, parentPopupService],
+            [ISidebarService, parentSidebarService],
+        ]);
+        const childContext = createChildContext(parentInjector as unknown as Injector);
+        childContext.renderScope.fullscreen = true;
+        const scopedInjector = createEmbedChildUnitScopedInjector(childContext);
+
+        const scopedContextMenuService = scopedInjector?.get(IContextMenuService) as typeof parentContextMenuService;
+        const contextHandler = {
+            handleContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+            get visible() {
+                return false;
+            },
+        };
+        scopedContextMenuService.registerContextMenuHandler(contextHandler);
+        scopedContextMenuService.triggerContextMenu({ stopPropagation: vi.fn() } as never, 'menu', {
+            injector: parentInjector as unknown as Injector,
+        });
+        expect(contextHandler.handleContextMenu).toHaveBeenCalledWith(expect.any(Object), 'menu', {
+            injector: scopedInjector,
+        });
+        expect(parentContextMenuService.triggerContextMenu).not.toHaveBeenCalled();
+        expect(parentContextMenuService.registerContextMenuHandler).not.toHaveBeenCalled();
+
+        const scopedPopupService = scopedInjector?.get(ICanvasPopupService) as typeof parentPopupService;
+        const popupId = scopedPopupService.addPopup({
+            anchorRect$: new BehaviorSubject({ left: 0, right: 1, top: 0, bottom: 1 }),
+            canvasElement: document.createElement('canvas'),
+            componentKey: 'embed-test-popup',
+            unitId: 'child-sheet',
+            subUnitId: 'sheet-1',
+        } as never);
+        expect(scopedPopupService.popups).toHaveLength(1);
+        scopedPopupService.removePopup(popupId);
+        expect(scopedPopupService.popups).toHaveLength(0);
+        expect(parentPopupService.addPopup).not.toHaveBeenCalled();
+
+        const scopedSidebarService = scopedInjector?.get(ISidebarService) as unknown as {
+            visible: boolean;
+            options: { id?: string };
+            open: (params: { id: string }) => { dispose: () => void };
+        };
+        const sidebarDisposable = scopedSidebarService.open({ id: 'fullscreen-sidebar' });
+        expect(scopedSidebarService.visible).toBe(true);
+        expect(scopedSidebarService.options.id).toBe('fullscreen-sidebar');
+        sidebarDisposable.dispose();
+        expect(scopedSidebarService.visible).toBe(false);
+        expect(parentSidebarService.open).not.toHaveBeenCalled();
     });
 
     it('supports standalone scoped injector overrides, child creation, and disposal pruning', () => {

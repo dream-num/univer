@@ -18,12 +18,12 @@
  * @vitest-environment jsdom
  */
 
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
     blurHostDocSelectionWhenEmbedRuntimeEntersStage,
     createDocsTableLikeCustomBlockStage2WheelHandler,
     createDocsTableLikeCustomBlockWheelHandler,
-    EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT,
     resolveDocsCustomBlockRuntimeOuterHeight,
     resolveDocsCustomBlockRuntimeViewportHeight,
     resolveDocsTableLikeCustomBlockRuntimeContentHeight,
@@ -167,21 +167,23 @@ describe('resolveDocsCustomBlockRuntimeOuterHeight', () => {
     });
 });
 
-describe('EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT', () => {
+describe('docs custom block CSS', () => {
+    const css = readFileSync('packages/docs-ui/src/embed-docs-custom-block.css', 'utf8');
+
     it('centers every product floating menu above docs custom block containers', () => {
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-docs-embed-floating-menu');
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-sheet-embed-floating-menu');
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-base-embed-floating-menu');
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('.univer-slide-embed-floating-menu');
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('left: 50%');
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('transform: translateX(-50%)');
+        expect(css).toContain('.univer-docs-embed-floating-menu');
+        expect(css).toContain('.univer-sheet-embed-floating-menu');
+        expect(css).toContain('.univer-base-embed-floating-menu');
+        expect(css).toContain('.univer-slide-embed-floating-menu');
+        expect(css).toContain('left: 50%');
+        expect(css).toContain('transform: translateX(-50%)');
     });
 
     it('removes the embed content border only for sheet-like docs custom blocks', () => {
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain(
+        expect(css).toContain(
             '.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content::after'
         );
-        expect(EMBED_DOCS_CUSTOM_BLOCK_STYLE_TEXT).toContain('border: 0');
+        expect(css).toContain('border: 0');
     });
 });
 

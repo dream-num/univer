@@ -64,6 +64,41 @@ describe('sheets embed register', () => {
         expect(clearTab).toHaveBeenCalledWith('embed-1');
     });
 
+    it('renders sheet-tab materialize errors in the tab host', async () => {
+        const descriptor = {
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            hostAnchorId: 'anchor-1',
+            entry: 'sheets-sheet-tab',
+        };
+        const hostElement = document.createElement('div');
+        hostElement.setAttribute('data-embed-sheets-sheet-tab-host', 'anchor-1');
+        document.body.appendChild(hostElement);
+        const mount = vi.fn();
+        const materializeDescriptor = vi.fn(() => Promise.reject(new Error('load failed')));
+        const service = createSheetsEmbedRuntimeService({
+            embedModelService: { getDescriptor: vi.fn(() => descriptor) } as any,
+            mountService: { mount, unmount: vi.fn() } as any,
+            activationService: { activateTab: vi.fn(), clearTab: vi.fn() } as any,
+            restoreService: { materializeDescriptor } as any,
+        });
+
+        const disposable = service.mountSheetTab({
+            hostUnitId: 'host-1',
+            hostAnchorId: 'anchor-1',
+            embedId: 'embed-1',
+        });
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(mount).not.toHaveBeenCalled();
+        expect(hostElement.textContent).toContain('load failed');
+
+        disposable?.dispose();
+        hostElement.remove();
+    });
+
     it('forwards embed preview updates to the host floating anchor preview cache', () => {
         const previewUpdated$ = new Subject<any>();
         const setPreview = vi.fn();

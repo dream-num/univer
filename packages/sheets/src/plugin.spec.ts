@@ -15,11 +15,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { registerSheetsEmbedGuestContribution, registerSheetsEmbedHostCapabilities } from './embed-guest';
+import { registerSheetsEmbedHostCapabilities } from './embed-guest';
 import { UniverSheetsPlugin } from './plugin';
 
 vi.mock('./embed-guest', () => ({
-    registerSheetsEmbedGuestContribution: vi.fn(),
     registerSheetsEmbedHostCapabilities: vi.fn(),
 }));
 
@@ -35,7 +34,6 @@ describe('UniverSheetsPlugin embed boundary', () => {
         plugin.onStarting();
 
         expect(registerSheetsEmbedHostCapabilities).toHaveBeenCalledWith(injector);
-        expect(registerSheetsEmbedGuestContribution).toHaveBeenCalledWith(injector);
     });
 });
 

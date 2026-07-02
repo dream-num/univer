@@ -177,7 +177,6 @@ function createDescriptor() {
         childUnitId: 'child-1',
         childType: UniverInstanceType.UNIVER_SHEET,
         source: {
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },

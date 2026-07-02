@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, Injector } from '@univerjs/core';
-import type { IEmbedDescriptor, IEmbedGuestContribution } from '../../types/embed';
+import type { IEmbedDescriptor } from '../../types/embed';
 import type { IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../../types/host-adapter';
 import type { IEmbedHostAnchorRecord } from '../../types/host-anchor';
 import type { IResourceRef, ResourceRefInput } from '../../types/resource-ref';
@@ -35,15 +35,11 @@ import {
     SetEmbedHostAnchorRecordMutation,
 } from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { assertResourceRef, getResourceRefKey, normalizeResourceRef } from '../../common/resource-ref';
+import { formatResourceRef, parseResourceRef } from '../../common/resource-ref-uri';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../../common/unit-type';
 import { EmbedChildRetentionService } from '../embed-child-retention.service';
 import { EmbedCreationService } from '../embed-creation.service';
 import { EmbedFocusOwnerService } from '../embed-focus-owner.service';
-import {
-    EmbedGuestContributionRegistryService,
-    flushPendingEmbedGuestContributions,
-    registerEmbedGuestContribution,
-} from '../embed-guest-contribution-registry.service';
 import { EmbedHostAdapterRegistryService } from '../embed-host-adapter-registry.service';
 import { EmbedHostAnchorModelService } from '../embed-host-anchor-model.service';
 import { EmbedHostLifecycleService } from '../embed-host-lifecycle.service';
@@ -116,6 +112,16 @@ describe('resource refs', () => {
         expect(fromResourceRefUnitType('base')).toBe(UniverInstanceType.UNIVER_BASE);
         expect(() => toResourceRefUnitType(UniverInstanceType.UNRECOGNIZED)).toThrow('UNSUPPORTED_UNIT_TYPE');
         expect(() => fromResourceRefUnitType('unknown' as never)).toThrow('UNSUPPORTED_UNIT_TYPE');
+
+        expect(parseResourceRef('#unit=sheet-1&type=sheet')).toEqual({
+            file: { kind: 'self' },
+            unit: { selector: 'sheet-1', type: 'sheet' },
+        });
+        expect(formatResourceRef({
+            file: { kind: 'self' },
+            unit: { selector: 'sheet-1', type: 'sheet' },
+        })).toBe('#unit=sheet-1&type=sheet');
+        expect(() => parseResourceRef('#unit=sheet-1')).toThrow('MISSING_TYPE');
     });
 });
 
@@ -128,13 +134,15 @@ describe('EmbedModelService', () => {
 
         expect(model.getDescriptor('host-1', 'embed-1')).toMatchObject({
             hostUnitId: 'host-1',
-            childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
             lifecycle: 'active',
+            source: {
+                ref: '#unit=child-sheet&type=sheet',
+            },
         });
         expect(model.getDescriptor('host-1', 'embed-1')).not.toHaveProperty('hostContext');
         expect(model.getActiveDescriptors('host-1')).toHaveLength(1);
-        expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(1);
+        expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(0);
         expect(model.countReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(1);
         expect(model.countActiveReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(1);
 
@@ -153,47 +161,80 @@ describe('EmbedModelService', () => {
         expect(model.getDescriptors('host-1')).toEqual([]);
     });
 
-    it('stores external resource refs with distinct runtime child units', () => {
+    it('stores canonical self resource refs', () => {
         const model = new EmbedModelService();
         const descriptor = createDescriptor({
             source: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
-                ref: {
-                    file: { kind: 'uri', uri: 'univer://workspace/file-1' },
-                    unit: { selector: 'remote-sheet', type: 'sheet' },
-                },
+                creationConfig: { id: 'child-sheet', name: 'Embedded Sheet' },
+                ref: '#unit=child-sheet&type=sheet',
             },
-            childUnitId: 'runtime-sheet',
+            childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
         });
 
         model.addDescriptor('host-1', descriptor);
 
         expect(model.getDescriptor('host-1', 'embed-1')).toMatchObject({
-            source: descriptor.source,
-            childUnitId: 'runtime-sheet',
+            source: {
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                creationConfig: { id: 'child-sheet', name: 'Embedded Sheet' },
+                ref: '#unit=child-sheet&type=sheet',
+            },
+            childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
         });
         expect(model.countReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(1);
-        expect(model.getActiveDescriptorsByChildUnit('runtime-sheet')).toHaveLength(1);
+        expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(1);
+        expect(model.serializeUnit('host-1').embeds['embed-1']).not.toHaveProperty('childUnitId');
+    });
+
+    it('allows materialized child units to differ from self ref selectors', () => {
+        const model = new EmbedModelService();
+        const descriptor = createDescriptor({
+            source: {
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: '#unit=fixture-key&type=sheet',
+            },
+            childUnitId: 'runtime-child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        model.addDescriptor('host-1', descriptor);
+
+        expect(model.getDescriptor('host-1', 'embed-1')).toMatchObject({
+            source: {
+                ref: '#unit=fixture-key&type=sheet',
+            },
+            childUnitId: 'runtime-child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
     });
 
     it('rejects non-canonical sources, mismatches, and duplicate active child units', () => {
         const model = new EmbedModelService();
 
-        expect(() => model.addDescriptor('host-1', { ...createDescriptor(), source: { kind: 'empty', unitType: UniverInstanceType.UNIVER_SHEET } } as never)).toThrow('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
-        expect(() => model.addDescriptor('host-1', createDescriptor({ childUnitId: 'other' }))).toThrow('EMBED_DESCRIPTOR_CHILD_REF_MISMATCH');
+        expect(() => model.addDescriptor('host-1', { ...createDescriptor(), source: { unitType: UniverInstanceType.UNIVER_SHEET } } as never)).toThrow('RESOURCE_REF_INVALID');
         expect(() => model.addDescriptor('host-1', createDescriptor({ childType: UniverInstanceType.UNIVER_DOC }))).toThrow('EMBED_DESCRIPTOR_CHILD_TYPE_MISMATCH');
 
-        model.addDescriptor('host-1', createDescriptor());
-        expect(() => model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-2', hostAnchorId: 'anchor-2' }))).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
-        expect(() => model.loadUnit('host-2', {
+        model.addDescriptor('host-1', createDescriptor({ childUnitId: 'runtime-child-sheet' }));
+        expect(() => model.addDescriptor('host-1', createDescriptor({
+            embedId: 'embed-2',
+            hostAnchorId: 'anchor-2',
+            childUnitId: 'runtime-child-sheet',
+        }))).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        model.loadUnit('host-2', {
             version: 1,
             embeds: {
-                'embed-3': createDescriptor({ embedId: 'embed-3', hostUnitId: 'host-2', hostAnchorId: 'anchor-3' }),
+                'embed-3': createDescriptor({
+                    embedId: 'embed-3',
+                    hostUnitId: 'host-2',
+                    hostAnchorId: 'anchor-3',
+                    childUnitId: 'runtime-child-sheet',
+                }),
             },
-        })).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        });
+        expect(model.getDescriptor('host-2', 'embed-3')?.childUnitId).toBeUndefined();
 
         model.loadUnit('host-2', {
             version: 1,
@@ -203,34 +244,17 @@ describe('EmbedModelService', () => {
         });
         expect(model.getDescriptors('host-2')).toHaveLength(1);
 
-        expect(() => model.parseJson(JSON.stringify({
+        expect(Object.values(model.parseJson(JSON.stringify({
             embeds: {
                 a: createDescriptor({ embedId: 'a', hostAnchorId: 'a' }),
                 b: createDescriptor({ embedId: 'b', hostAnchorId: 'b' }),
             },
-        }))).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        })).embeds).map((descriptor) => descriptor.childUnitId)).toEqual([undefined, undefined]);
         expect(model.parseJson('')).toEqual({ version: 1, embeds: {} });
     });
 });
 
-describe('embed guest contributions and providers', () => {
-    it('queues guest contributions until registry exists', () => {
-        const contribution = createGuestContribution(UniverInstanceType.UNIVER_DOC);
-        const pendingInjector = createInjector(undefined);
-
-        registerEmbedGuestContribution(pendingInjector, contribution);
-        registerEmbedGuestContribution(pendingInjector, contribution);
-        flushPendingEmbedGuestContributions(pendingInjector);
-
-        const registry = new EmbedGuestContributionRegistryService();
-        const injector = createInjector(registry, pendingInjector);
-
-        flushPendingEmbedGuestContributions(injector);
-        expect(registry.list()).toEqual([contribution]);
-        expect(registry.get(UniverInstanceType.UNIVER_DOC)).toBe(contribution);
-        expect(() => registry.register(contribution)).toThrow('already registered');
-    });
-
+describe('embed resource ref providers', () => {
     it('registers resource ref providers by deterministic ResourceRef match', () => {
         const registry = new EmbedResourceRefProviderRegistryService();
         const provider = createResourceRefProvider();
@@ -305,7 +329,7 @@ describe('retention and focus services', () => {
             totalReferences: 1,
             activeReferences: 0,
             softDeletedReferences: 1,
-            childUnitIds: ['child-sheet'],
+            childUnitIds: [],
             shouldDisposeNow: false,
             eligibleForCleanup: true,
         });
@@ -419,7 +443,6 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
         entry: overrides.entry ?? 'docs-custom-block',
         source: overrides.source ?? {
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },
@@ -441,26 +464,6 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         createdAt: overrides.createdAt,
         updatedAt: overrides.updatedAt,
     };
-}
-
-function createGuestContribution(childType: UniverInstanceType): IEmbedGuestContribution {
-    return {
-        childType,
-        createEmptyUnit: vi.fn(),
-    };
-}
-
-function createInjector(registry?: EmbedGuestContributionRegistryService, key: object = {}): Pick<Injector, 'get' | 'has'> {
-    return Object.assign(key, {
-        has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedGuestContributionRegistryService),
-        get: vi.fn((token: unknown) => {
-            if (!registry || token !== EmbedGuestContributionRegistryService) {
-                throw new Error('unexpected token');
-            }
-
-            return registry;
-        }),
-    }) as unknown as Pick<Injector, 'get' | 'has'>;
 }
 
 function createCommandAccessor(
@@ -623,9 +626,5 @@ function createTestRemoveAnchorPlan(
 }
 
 function getDescriptorRef(descriptor: IEmbedDescriptor): ResourceRefInput {
-    if (descriptor.source.kind !== 'ref') {
-        throw new Error('test descriptor must use a ref source');
-    }
-
     return descriptor.source.ref;
 }

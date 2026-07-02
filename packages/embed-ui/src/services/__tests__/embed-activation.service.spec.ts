@@ -49,9 +49,9 @@ describe('EmbedActivationService', () => {
             entry: 'sheets-floating-object',
             hostAnchorId: 'drawing-1',
             source: {
-                kind: 'empty',
-                unitType: UniverInstanceType.UNIVER_DOC,
-            },
+unitType: UniverInstanceType.UNIVER_DOC,
+ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'doc' } },
+},
             childUnitId: 'child-doc',
             childType: UniverInstanceType.UNIVER_DOC,
         });
@@ -102,9 +102,9 @@ describe('EmbedActivationService', () => {
             entry: 'docs-custom-block',
             hostAnchorId: 'drawing-1',
             source: {
-                kind: 'empty',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            },
+unitType: UniverInstanceType.UNIVER_SHEET,
+ref: { file: { kind: 'self' }, unit: { selector: 'child-sheet', type: 'sheet' } },
+},
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
         }, 'stage2');
@@ -148,9 +148,9 @@ describe('EmbedActivationService', () => {
             entry: 'docs-custom-block',
             hostAnchorId: 'drawing-1',
             source: {
-                kind: 'empty',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            },
+unitType: UniverInstanceType.UNIVER_SHEET,
+ref: { file: { kind: 'self' }, unit: { selector: 'child-sheet', type: 'sheet' } },
+},
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
         });
@@ -387,9 +387,9 @@ describe('EmbedActivationService', () => {
             entry: 'slides-page-list-block',
             hostAnchorId: 'slide-page-1',
             source: {
-                kind: 'empty',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            },
+unitType: UniverInstanceType.UNIVER_SHEET,
+ref: { file: { kind: 'self' }, unit: { selector: 'child-sheet', type: 'sheet' } },
+},
             childUnitId: 'sheet-tab-child',
             childType: UniverInstanceType.UNIVER_SHEET,
         });

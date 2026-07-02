@@ -746,7 +746,6 @@ describe('embed-ui small services and controllers', () => {
             childUnitId: 'child-1',
             childType: UniverInstanceType.UNIVER_SHEET,
             source: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'sheet' } },
             },

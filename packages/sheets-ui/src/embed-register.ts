@@ -122,20 +122,28 @@ export function createSheetsEmbedRuntimeService(params: {
 
             let disposed = false;
             let mounted = false;
+            let errorElement: HTMLElement | undefined;
             void params.restoreService.materializeDescriptor({ descriptor }).then((materializedDescriptor) => {
                 if (disposed) {
                     return;
                 }
 
+                errorElement?.remove();
+                errorElement = undefined;
                 params.mountService.mount(materializedDescriptor);
                 params.activationService.activateTab(materializedDescriptor);
                 mounted = true;
             }).catch((error) => {
-                throw error;
+                if (disposed) {
+                    return;
+                }
+
+                errorElement = renderSheetsSheetTabEmbedError(hostAnchorId, error);
             });
 
             return toDisposable(() => {
                 disposed = true;
+                errorElement?.remove();
                 if (mounted) {
                     params.mountService.unmount(embedId);
                 }
@@ -146,6 +154,32 @@ export function createSheetsEmbedRuntimeService(params: {
             params.activationService.clearTab(embedId);
         },
     };
+}
+
+function renderSheetsSheetTabEmbedError(hostAnchorId: string, error: unknown): HTMLElement | undefined {
+    const hostElement = querySheetsSheetTabHostElement(hostAnchorId);
+    if (!hostElement) {
+        return undefined;
+    }
+
+    const element = document.createElement('div');
+    element.dataset.embedSheetsSheetTabError = 'true';
+    element.style.padding = '12px';
+    element.style.color = '#b91c1c';
+    element.style.fontSize = '13px';
+    element.textContent = error instanceof Error && error.message
+        ? error.message
+        : 'Failed to load embedded sheet.';
+    hostElement.replaceChildren(element);
+    return element;
+}
+
+function querySheetsSheetTabHostElement(hostAnchorId: string): HTMLElement | null {
+    return document.querySelector<HTMLElement>(`[data-embed-sheets-sheet-tab-host="${escapeSheetsSheetTabHostAttribute(hostAnchorId)}"]`);
+}
+
+function escapeSheetsSheetTabHostAttribute(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 export function wireSheetsFloatPreviewBridge(params: {

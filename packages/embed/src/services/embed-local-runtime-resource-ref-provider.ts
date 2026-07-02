@@ -19,6 +19,7 @@ import type { ResourceRefInput } from '../types/resource-ref';
 import type { IEmbedResourceRefProviderRegistration } from './embed-resource-ref-provider-registry.service';
 import { IUniverInstanceService } from '@univerjs/core';
 import { getResourceRefInputUnitSelector } from '../common/resource-ref-input';
+import { parseResourceRef } from '../common/resource-ref-uri';
 import { toResourceRefUnitType } from '../common/unit-type';
 
 export const LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID = 'local-runtime-resource-ref-provider';
@@ -36,9 +37,7 @@ export function createLocalRuntimeResourceRefProvider(injector: Injector): IEmbe
         provider: {
             ensure: (input) => {
                 assertLocalRuntimeRef(input.ref);
-                if (typeof input.ref !== 'string') {
-                    assertLocalRuntimeRefUnitType(input.ref, input.unitType);
-                }
+                assertLocalRuntimeRefUnitType(input.ref, input.unitType);
 
                 const unit = injector.get(IUniverInstanceService).getUnit(getResourceRefInputUnitSelector(input.ref), input.unitType);
                 if (!unit) {
@@ -55,13 +54,15 @@ export function createLocalRuntimeResourceRefProvider(injector: Injector): IEmbe
 }
 
 function assertLocalRuntimeRef(ref: ResourceRefInput): asserts ref is ResourceRefInput {
-    if (typeof ref !== 'string' && ref.file.kind !== 'self') {
+    const parsedRef = typeof ref === 'string' ? parseResourceRef(ref) : ref;
+    if (parsedRef.file.kind !== 'self') {
         throw new Error('LOCAL_RUNTIME_RESOURCE_REF_UNSUPPORTED');
     }
 }
 
-function assertLocalRuntimeRefUnitType(ref: Exclude<ResourceRefInput, string>, unitType: UniverInstanceType): void {
-    if (ref.unit.type !== toResourceRefUnitType(unitType)) {
+function assertLocalRuntimeRefUnitType(ref: ResourceRefInput, unitType: UniverInstanceType): void {
+    const parsedRef = typeof ref === 'string' ? parseResourceRef(ref) : ref;
+    if (parsedRef.unit.type !== toResourceRefUnitType(unitType)) {
         throw new Error('LOCAL_RUNTIME_RESOURCE_REF_UNIT_TYPE_MISMATCH');
     }
 }

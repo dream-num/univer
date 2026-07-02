@@ -651,7 +651,7 @@ function NumberFormatDropdown(props: {
     }
 
     const title = getLocalizedMenuTitle(props.menuItem, localeService, 'sheets-numfmt-ui.title');
-    const label = typeof value === 'string' && value ? value : localeService.t('sheets-numfmt-ui.general');
+    const label = typeof value === 'string' && value ? value : 'General';
 
     return (
         <Tooltip

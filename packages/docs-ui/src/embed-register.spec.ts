@@ -15,7 +15,8 @@
  */
 
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedPassiveViewportRegistryService, EmbedProductMenuRegistryService, EmbedReadonlyPreviewRegistryService, flushPendingEmbedUIContributions } from '@univerjs/embed-ui';
+import { EmbedHostAdapterRegistryService, EmbedHostAnchorModelService } from '@univerjs/embed';
+import { EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostContainerRegistryService, EmbedPassiveViewportRegistryService, EmbedProductMenuRegistryService, EmbedReadonlyPreviewRegistryService, flushPendingEmbedUIContributions } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';

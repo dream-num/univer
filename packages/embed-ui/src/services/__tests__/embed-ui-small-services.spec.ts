@@ -19,7 +19,7 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { EmbedFocusOwnerService } from '@univerjs/embed';
+import { EmbedFocusOwnerService, EmbedHostAnchorModelService } from '@univerjs/embed';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { resolveEmbedFloatInteractionPolicy } from '../../common/embed-float-interaction-policy';
@@ -35,7 +35,6 @@ import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-a
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
 import { EmbedFloatingActiveService } from '../embed-floating-active.service';
-import { EmbedHostAnchorModelService } from '../embed-host-anchor-model.service';
 import { EmbedHostMenuOverrideService } from '../embed-host-menu-override.service';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../embed-interaction-boundary.service';
 import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
@@ -432,6 +431,24 @@ describe('embed-ui small services and controllers', () => {
         editorRoot.remove();
     });
 
+    it('notifies runtime focus changes for child editor leases', () => {
+        const service = new EmbedRuntimeFocusCoordinator();
+        const changes: void[] = [];
+        const subscription = service.runtimeFocusChanged$.subscribe((value) => changes.push(value));
+
+        const lease = service.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-editor',
+            owner: 'shape-text-editor',
+            hostUnitId: 'host-slide',
+            childUnitId: 'child-slide',
+        });
+        lease.dispose();
+
+        expect(changes).toHaveLength(2);
+        subscription.unsubscribe();
+    });
+
     it('centralizes host suppression while allowing the active child runtime to keep handling events', () => {
         const service = new EmbedRuntimeFocusCoordinator();
         const childRoot = document.createElement('div');
@@ -590,6 +607,66 @@ describe('embed-ui small services and controllers', () => {
 
         runtimeLease.dispose();
         runtimeScope.dispose();
+    });
+
+    it('resolves active child sessions by interaction priority before recency', () => {
+        const service = new EmbedRuntimeFocusCoordinator();
+        const tabLease = service.acquireLease({
+            embedId: 'embed-tab',
+            role: 'child-session',
+            owner: 'tab-peer-runtime',
+            hostUnitId: 'host-slide',
+            childUnitId: 'tab-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-tab');
+
+        const fullscreenLease = service.acquireLease({
+            embedId: 'embed-fullscreen',
+            role: 'child-session',
+            owner: 'fullscreen-runtime',
+            hostUnitId: 'host-slide',
+            childUnitId: 'fullscreen-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-fullscreen');
+
+        const stage2Lease = service.acquireLease({
+            embedId: 'embed-stage2',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+            hostUnitId: 'host-slide',
+            childUnitId: 'stage2-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-fullscreen');
+
+        fullscreenLease.dispose();
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-stage2');
+
+        const newerStage2Lease = service.acquireLease({
+            embedId: 'embed-stage2-newer',
+            role: 'child-session',
+            owner: 'doc-block-stage2-runtime',
+            hostUnitId: 'host-slide',
+            childUnitId: 'stage2-newer-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-stage2-newer');
+
+        newerStage2Lease.dispose();
+        stage2Lease.dispose();
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-tab');
+
+        tabLease.dispose();
+
+        expect(service.resolveActiveChildSessionRuntimeScope()).toBeUndefined();
     });
 
     it('registers child interaction elements by embed id', () => {

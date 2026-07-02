@@ -15,11 +15,12 @@
  */
 
 import type { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
-import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRecord, IEmbedHostAnchorRemoveMutationPlan, IEmbedHostContainerContribution } from '@univerjs/embed-ui';
+import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRecord, IEmbedHostAnchorRemoveMutationPlan } from '@univerjs/embed';
+import type { IEmbedHostContainerContribution } from '@univerjs/embed-ui';
 import type { IRenderManagerService } from '@univerjs/engine-render';
 import type { EmbedDocsCustomBlockInteractionMode } from './embed-host-anchor';
 import { UniverInstanceType } from '@univerjs/core';
-import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
+import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed';
 import { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation } from './embed-host-anchor';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 

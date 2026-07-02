@@ -100,6 +100,37 @@ describe('createSheetsEmbedChildViewContribution', () => {
         } as unknown as IEmbedChildContainerContext)).toBe(false);
     });
 
+    it('closes cell editors and cell popups before deactivating an embedded sheet', async () => {
+        const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
+        const { CellPopupManagerService } = await import('./services/cell-popup-manager.service');
+        const commandService = { syncExecuteCommand: vi.fn() };
+        const cellPopupManagerService = { hidePopupsForUnit: vi.fn() };
+        const injector = {
+            has: (identifier: unknown) => identifier === CellPopupManagerService,
+            get: (identifier: unknown) => {
+                if (identifier === CellPopupManagerService) {
+                    return cellPopupManagerService;
+                }
+                throw new Error('Unexpected dependency');
+            },
+        };
+        const contribution = createSheetsEmbedChildViewContribution();
+
+        contribution.beforeDeactivate?.({
+            childUnitId: 'sheet-embed-unit',
+            runtimeScope: {
+                commandService,
+                injector,
+            },
+        } as unknown as IEmbedChildContainerContext);
+
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+            visible: false,
+            unitId: 'sheet-embed-unit',
+        }));
+        expect(cellPopupManagerService.hidePopupsForUnit).toHaveBeenCalledWith('sheet-embed-unit');
+    });
+
     it('registers tab-peer sheet geometry against the embedded content root', async () => {
         const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
         const { EmbedFloatingGeometryService } = await import('@univerjs/embed-ui');

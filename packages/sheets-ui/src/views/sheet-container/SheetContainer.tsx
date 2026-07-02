@@ -128,9 +128,8 @@ export function RenderSheetContent() {
     const injector = useDependency(Injector);
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
 
-    // Attempt to retrieve the registered ShapeTextEditorContainer
-    // We use a string key to avoid hard dependency on sheets-shape-ui
-    const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
+    // We use string keys to avoid a hard dependency on sheets-shape-ui.
+    const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
 
     useEffect(() => {
         if (!workbook || activeEmbedTab || activeWorkbookEmbeddedRender) {

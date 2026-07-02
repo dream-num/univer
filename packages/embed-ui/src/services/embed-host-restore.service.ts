@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
+import type { IEmbedDescriptor, IEmbedHostAnchorRecord } from '@univerjs/embed';
 import type { ICreateUnitOptions } from '@univerjs/core';
-import type { IEmbedDescriptor } from '@univerjs/embed';
-import type { IEmbedHostAnchorRecord } from '../types/host-anchor';
-import { Inject, IUniverInstanceService } from '@univerjs/core';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedModelService, EmbedReferencedUnitManagerService, getResourceRefInputKey, ReferencedUnitOwnerKind } from '@univerjs/embed';
-import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
-import { EmbedHostAnchorModelService } from './embed-host-anchor-model.service';
+import { Inject, IUniverInstanceService, Optional } from '@univerjs/core';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedModelService, EmbedReferencedUnitManagerService, getResourceRefInputKey, ReferencedUnitOwnerKind } from '@univerjs/embed';
+import { EmbedChildProductPluginRegistryService } from './embed-child-product-plugin-registry.service';
 
 export interface IEmbedHostRestoreContext {
     descriptor: IEmbedDescriptor;
@@ -42,7 +40,8 @@ export class EmbedHostRestoreService {
         @Inject(EmbedHostAdapterRegistryService) private readonly _hostAdapterRegistry: EmbedHostAdapterRegistryService,
         @Inject(EmbedHostAnchorModelService) private readonly _anchorModelService: EmbedHostAnchorModelService,
         @Inject(EmbedReferencedUnitManagerService) private readonly _referencedUnitManager: EmbedReferencedUnitManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Optional(EmbedChildProductPluginRegistryService) private readonly _childProductPluginRegistry?: EmbedChildProductPluginRegistryService
     ) {
         // noop
     }
@@ -109,7 +108,7 @@ export class EmbedHostRestoreService {
         });
         const materialized = await handle.loaded;
 
-        return {
+        const materializedDescriptor: IEmbedDescriptor = {
             ...descriptor,
             source: {
                 unitType: descriptor.childType,
@@ -119,6 +118,15 @@ export class EmbedHostRestoreService {
             childUnitId: materialized.unitId,
             childType: materialized.unitType,
         };
+
+        await this._childProductPluginRegistry?.prepare({
+            childUnitId: materialized.unitId,
+            childType: materializedDescriptor.childType,
+            descriptor: materializedDescriptor,
+            restoreUnitId: materializedDescriptor.hostUnitId,
+        });
+
+        return materializedDescriptor;
     }
 
     private _getLoadedDescriptor(descriptor: IEmbedDescriptor): IEmbedDescriptor | undefined {

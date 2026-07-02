@@ -720,6 +720,15 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 continue;
             }
 
+            this._runtimeService.setCurrent(
+                tree.row,
+                tree.column,
+                tree.rowCount,
+                tree.columnCount,
+                tree.subUnitId,
+                tree.unitId
+            );
+
             const node = this._getTreeNode(tree);
             tree.isDirty = this._includeTree(tree, node);
 
@@ -731,15 +740,6 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             if (tree.isVirtual) {
                 continue;
             }
-
-            this._runtimeService.setCurrent(
-                tree.row,
-                tree.column,
-                tree.rowCount,
-                tree.columnCount,
-                tree.subUnitId,
-                tree.unitId
-            );
 
             const rangeList = await this._getRangeListByNode({
                 node,
@@ -1095,14 +1095,6 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     private async _calculateAddressFunctionRuntimeData(treeDependencyCache: RTree, preCalculateTreeList: IFormulaDependencyTree[]) {
         while (preCalculateTreeList.length > 0) {
             const tree = preCalculateTreeList.pop()!;
-            const node = this._getTreeNode(tree);
-            const nodeData = {
-                node,
-                refOffsetX: tree.refOffsetX,
-                refOffsetY: tree.refOffsetY,
-            };
-
-            await this._calculateAddressFunction(treeDependencyCache, tree);
 
             this._runtimeService.setCurrent(
                 tree.row,
@@ -1112,6 +1104,15 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.subUnitId,
                 tree.unitId
             );
+
+            const node = this._getTreeNode(tree);
+            const nodeData = {
+                node,
+                refOffsetX: tree.refOffsetX,
+                refOffsetY: tree.refOffsetY,
+            };
+
+            await this._calculateAddressFunction(treeDependencyCache, tree);
 
             let value: FunctionVariantType;
             if (this._interpreter.checkAsyncNode(nodeData.node)) {

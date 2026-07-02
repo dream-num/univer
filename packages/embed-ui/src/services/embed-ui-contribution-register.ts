@@ -15,12 +15,12 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import { EmbedHostAdapterRegistryService } from '@univerjs/embed';
 import { EmbedBlockRegistryService } from './embed-block-registry.service';
 import { EmbedChildViewRegistryService } from './embed-child-view-registry.service';
 import { EmbedContentSizeRegistryService } from './embed-content-size-registry.service';
 import { EmbedFloatPreviewService } from './embed-float-preview.service';
 import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry.service';
-import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
 import { EmbedPassiveViewportRegistryService } from './embed-passive-viewport-registry.service';
 import { EmbedProductMenuRegistryService } from './embed-product-menu-registry.service';

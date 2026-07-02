@@ -15,18 +15,19 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { CommandType, Direction, DisposableCollection, ICommandService } from '@univerjs/core';
+import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
 import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { FormulaSelectingType } from './use-formula-selection';
 
 // eslint-disable-next-line max-lines-per-function
 export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
+    const operationNamespace = useMemo(() => generateRandomId(4), []);
     const shouldMoveSelectionRef = useRef(shouldMoveSelection);
     shouldMoveSelectionRef.current = shouldMoveSelection;
     const onMoveInEditorRef = useRef(onMoveInEditor);
@@ -38,8 +39,15 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
             return;
         }
         const editorId = editor.getEditorId();
-        const operationId = `sheet.formula-embedding-editor.${editorId}`;
+        const operationId = `sheet.formula-embedding-editor.${editorId}.${operationNamespace}`;
         const d = new DisposableCollection();
+        const shouldHandleShortcut = () => {
+            try {
+                return editor.docSelectionRenderService.isFocusing;
+            } catch {
+                return false;
+            }
+        };
         const handleMoveInEditor = (keycode: KeyCode, metaKey?: MetaKeys) => {
             if (onMoveInEditorRef.current) {
                 onMoveInEditorRef.current(keycode, metaKey);
@@ -140,7 +148,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
             return {
                 id: operationId,
                 binding: metaKey ? keyCode | metaKey : keyCode,
-                preconditions: () => true,
+                preconditions: shouldHandleShortcut,
                 priority: 900,
                 staticParameters: {
                     eventType: DeviceInputEventType.Keyboard,
@@ -155,5 +163,5 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
         return () => {
             d.dispose();
         };
-    }, [commandService, editor, isNeed, shortcutService]);
+    }, [commandService, editor, isNeed, operationNamespace, shortcutService]);
 };

@@ -182,4 +182,29 @@ export class CellPopupManagerService extends Disposable {
             subUnitMap.realDeleteValue(row, col);
         }
     }
+
+    hidePopupsForUnit(unitId: string, subUnitId?: string): void {
+        const unitMap = this._cellPopupMap.get(unitId);
+        if (!unitMap) {
+            return;
+        }
+
+        const targets: Array<{ subUnitId: string; row: number; col: number }> = [];
+        const subUnitEntries = subUnitId
+            ? [[subUnitId, unitMap.get(subUnitId)]]
+            : [...unitMap.entries()];
+
+        subUnitEntries.forEach(([currentSubUnitId, subUnitMap]) => {
+            subUnitMap?.forValue((row, col) => {
+                targets.push({ subUnitId: currentSubUnitId, row, col });
+            });
+        });
+
+        targets.forEach((target) => this.hidePopup(unitId, target.subUnitId, target.row, target.col));
+        if (subUnitId) {
+            unitMap.delete(subUnitId);
+        } else {
+            this._cellPopupMap.delete(unitId);
+        }
+    }
 }

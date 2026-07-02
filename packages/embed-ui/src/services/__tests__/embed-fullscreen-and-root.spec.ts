@@ -29,10 +29,19 @@ import {
     EMBED_OVERLAY_ROOT_ATTRIBUTE,
     EMBED_POPUP_ROOT_ATTRIBUTE,
 } from '../../common/embed-runtime-slots';
-import { createFullscreenRenderScope, mountFullscreenWorkbenchMenus } from '../../components/EmbedHostToolbarMenu';
+import { createFullscreenRenderScope, mountFullscreenWorkbenchMenus, registerFullscreenRuntimeOwnership } from '../../components/EmbedHostToolbarMenu';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../embed-floating-menu-registry.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '../embed-interaction-boundary.service';
 import { EmbedProductMenuRegistryService } from '../embed-product-menu-registry.service';
+import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
+import { createEmbedReactRoot, disposeEmbedReactRoot } from '../react-root-disposal';
+
+const createRootMock = vi.hoisted(() => vi.fn());
+
+vi.mock('react-dom/client', () => ({
+    createRoot: createRootMock,
+}));
 
 describe('embed fullscreen helpers and react roots', () => {
     it('creates render scopes from explicit fullscreen slots', () => {
@@ -84,6 +93,64 @@ describe('embed fullscreen helpers and react roots', () => {
         });
 
         expect(scope.popupRoot).toBe(popupRoot);
+    });
+
+    it('registers fullscreen runtime ownership as a child session', () => {
+        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const interactionBoundaryService = new EmbedInteractionBoundaryService();
+        const injector = createInjector([
+            [EmbedRuntimeFocusCoordinator, focusCoordinator],
+            [EmbedInteractionBoundaryService, interactionBoundaryService],
+        ]);
+        const viewport = document.createElement('div');
+        const menuRoot = document.createElement('div');
+        const menuSlot = document.createElement('div');
+        const popupSlot = document.createElement('div');
+        const sidebarSlot = document.createElement('div');
+        const rightSidebarSlot = document.createElement('div');
+        const footerSlot = document.createElement('div');
+        const menuButton = document.createElement('button');
+        menuSlot.appendChild(menuButton);
+        document.body.append(viewport, menuRoot);
+        menuRoot.appendChild(menuSlot);
+        const renderScope = createFullscreenRenderScope(createDescriptor() as never, 'fixed-ratio' as never, {
+            viewport,
+            menuSlot,
+            popupSlot,
+            footerSlot,
+        });
+
+        const disposable = registerFullscreenRuntimeOwnership({
+            injector: injector as never,
+            descriptor: createDescriptor() as never,
+            renderScope,
+            menuRoot,
+            menuSlot,
+            popupSlot,
+            sidebarSlot,
+            rightSidebarSlot,
+            footerSlot,
+        });
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(true);
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()).toMatchObject({
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            childUnitId: 'child-1',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+        expect(focusCoordinator.shouldSuppressHostInteraction('host-1')).toBe(true);
+        expect(focusCoordinator.containsElement('embed-1', menuButton)).toBe(true);
+        expect(menuSlot.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+
+        disposable.dispose();
+
+        expect(focusCoordinator.hasChildInteractionLease('embed-1')).toBe(false);
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()).toBeUndefined();
+        expect(menuSlot.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBeNull();
+
+        viewport.remove();
+        menuRoot.remove();
     });
 
     it('prefers registered fullscreen ribbon menus and disposes them', () => {

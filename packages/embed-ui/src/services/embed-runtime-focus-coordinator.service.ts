@@ -57,6 +57,7 @@ interface IEmbedRuntimeFocusLease {
     childUnitId?: string;
     childType?: UniverInstanceType;
     associatedChildUnitIds?: string[];
+    sequence: number;
 }
 
 interface IEmbedRuntimeScope {
@@ -69,6 +70,7 @@ export class EmbedRuntimeFocusCoordinator {
     private readonly _leases = new Map<string, Set<IEmbedRuntimeFocusLease>>();
     private readonly _elements = new Map<string, Set<HTMLElement>>();
     private readonly _runtimeScopes = new Map<string, IEmbedRuntimeScope>();
+    private _leaseSequence = 0;
     readonly runtimeFocusChanged$ = new Subject<void>();
 
     acquireLease(options: IEmbedRuntimeFocusLeaseOptions): IDisposable {
@@ -79,6 +81,7 @@ export class EmbedRuntimeFocusCoordinator {
             childUnitId: options.childUnitId,
             childType: options.childType,
             associatedChildUnitIds: options.associatedChildUnitIds,
+            sequence: ++this._leaseSequence,
         };
         let leases = this._leases.get(options.embedId);
         if (!leases) {
@@ -87,7 +90,7 @@ export class EmbedRuntimeFocusCoordinator {
         }
 
         leases.add(lease);
-        if (lease.role === 'child-session') {
+        if (lease.role !== 'runtime') {
             this._notifyRuntimeFocusChanged();
         }
 
@@ -96,7 +99,7 @@ export class EmbedRuntimeFocusCoordinator {
             if (leases?.size === 0) {
                 this._leases.delete(options.embedId);
             }
-            if (lease.role === 'child-session') {
+            if (lease.role !== 'runtime') {
                 this._notifyRuntimeFocusChanged();
             }
         });
@@ -232,20 +235,28 @@ export class EmbedRuntimeFocusCoordinator {
     }
 
     resolveActiveChildSessionRuntimeScope(): IEmbedRuntimeScopeRegistration | undefined {
+        let best: { embedId: string; lease: IEmbedRuntimeFocusLease; priority: number } | undefined;
         for (const [embedId, leases] of this._leases) {
             for (const lease of leases) {
-                if (lease.role === 'child-session' && lease.childUnitId) {
-                    return {
-                        embedId,
-                        hostUnitId: lease.hostUnitId,
-                        childUnitId: lease.childUnitId,
-                        childType: lease.childType,
-                    };
+                if (lease.role !== 'child-session' || !lease.childUnitId) {
+                    continue;
+                }
+
+                const priority = this._getChildSessionPriority(lease);
+                if (!best || priority > best.priority || (priority === best.priority && lease.sequence > best.lease.sequence)) {
+                    best = { embedId, lease, priority };
                 }
             }
         }
 
-        return undefined;
+        return best
+            ? {
+                embedId: best.embedId,
+                hostUnitId: best.lease.hostUnitId,
+                childUnitId: best.lease.childUnitId,
+                childType: best.lease.childType,
+            }
+            : undefined;
     }
 
     isChildUnitRuntimeEvent(unitId: string | undefined, target: EventTarget | null | undefined, event?: Event): boolean {
@@ -361,6 +372,22 @@ export class EmbedRuntimeFocusCoordinator {
 
     private _isBlockingRole(role: EmbedRuntimeFocusRole): boolean {
         return role !== 'runtime';
+    }
+
+    private _getChildSessionPriority(lease: IEmbedRuntimeFocusLease): number {
+        if (lease.owner === 'fullscreen-runtime') {
+            return 30;
+        }
+
+        if (lease.owner === 'stage2-runtime' || lease.owner === 'doc-block-stage2-runtime') {
+            return 20;
+        }
+
+        if (lease.owner === 'tab-peer-runtime') {
+            return 10;
+        }
+
+        return 0;
     }
 
     private _isOwnedBoundaryElement(embedId: string, target: HTMLElement): boolean {

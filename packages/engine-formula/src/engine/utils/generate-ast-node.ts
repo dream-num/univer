@@ -43,12 +43,12 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
 
     const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService) || checkIsChangedBySuperTable(unitId, formulaString, currentConfigService);
 
-    if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService)) {
+    if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService, unitId)) {
         // astNode.setRefOffset(refOffsetX, refOffsetY);
         return astNode;
     }
 
-    const lexerNode = lexer.treeBuilder(formulaString);
+    const lexerNode = lexer.treeBuilder(formulaString, true, unitId);
 
     if (ERROR_TYPE_SET.has(lexerNode as ErrorType)) {
         return ErrorNode.create(lexerNode as ErrorType);
@@ -128,9 +128,9 @@ function getDirtySuperTableReferencePattern(unitSuperTableMap: IDirtyStringMap):
     return tableReferencePattern;
 }
 
-function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormulaCurrentConfigService) {
+function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormulaCurrentConfigService, unitId: string) {
     const definedNameMap = currentConfigService.getDirtyDefinedNameMap();
-    const executeUnitId = currentConfigService.getExecuteUnitId();
+    const executeUnitId = unitId;
     if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
         const names = Object.keys(definedNameMap[executeUnitId]!);
         for (let i = 0, len = names.length; i < len; i++) {
@@ -150,7 +150,7 @@ export function includeDefinedName(tree: IFormulaDependencyTree, node: Nullable<
      */
     // const node = tree.nodeData?.node;
     if (node != null) {
-        const dirtyDefinedName = isDirtyDefinedForNode(node, currentConfigService);
+        const dirtyDefinedName = isDirtyDefinedForNode(node, currentConfigService, tree.unitId);
         if (dirtyDefinedName) {
             return true;
         }

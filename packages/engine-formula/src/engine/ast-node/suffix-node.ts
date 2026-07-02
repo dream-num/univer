@@ -108,7 +108,7 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const lexerNode = this._lexer.treeBuilder(formulaString);
+        const lexerNode = this._lexer.treeBuilder(formulaString, true, unitId);
 
         return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */

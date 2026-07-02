@@ -334,7 +334,7 @@ export class EmbedInteractionBoundaryService {
     }
 
     private _resolveFloatingSurfaceRoot(element: HTMLElement): HTMLElement | undefined {
-        if (element.closest('[data-embed-floating-menu="true"]')) {
+        if (element.closest('[data-embed-floating-menu="true"], [data-embed-floating-menu-popup="true"]')) {
             return undefined;
         }
 

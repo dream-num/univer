@@ -17,7 +17,7 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { MenuItemType } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
-import { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, getStaticMenuSelections, resolveMenuCommandRequest, resolveSheetsFloatingMenuStage, resolveSheetsFloatingToolbarMenuItems, SHEET_FLOATING_MENU_STYLE_TEXT } from './EmbedFloatingMenu';
+import { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, getStaticMenuSelections, resolveMenuCommandRequest, resolveSheetsFloatingMenuClassName, resolveSheetsFloatingMenuStage, resolveSheetsFloatingToolbarMenuItems } from './EmbedFloatingMenu';
 
 describe('sheets embed floating menu', () => {
     it('registers the sheet block toolbar for every supported host entry', () => {
@@ -71,10 +71,35 @@ describe('sheets embed floating menu', () => {
     });
 
     it('centers the sheet floating toolbar for float hosts', () => {
-        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('left: 50%;');
-        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('transform: translateX(-50%);');
-        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('[data-embed-fullscreen-menu-slot="true"] .univer-sheet-embed-floating-menu');
-        expect(SHEET_FLOATING_MENU_STYLE_TEXT).toContain('transform: none;');
+        const floatingClassName = resolveSheetsFloatingMenuClassName({
+            entry: 'sheets-floating-object',
+            fullscreen: false,
+            stage: 'stage2',
+        });
+        expect(floatingClassName).toContain('univer-left-1/2');
+        expect(floatingClassName).toContain('-univer-translate-x-1/2');
+        expect(floatingClassName).toContain('univer-pointer-events-auto');
+        expect(floatingClassName).toContain('univer-top-[var(--univer-embed-floating-menu-top,-36px)]');
+
+        const fullscreenClassName = resolveSheetsFloatingMenuClassName({
+            entry: 'sheets-floating-object',
+            fullscreen: true,
+            stage: 'stage2',
+        });
+        expect(fullscreenClassName).toContain('univer-static');
+        expect(fullscreenClassName).toContain('univer-mx-auto');
+        expect(fullscreenClassName).not.toContain('-univer-translate-x-1/2');
+    });
+
+    it('uses the docs custom block inset and hides inactive sheet menus', () => {
+        const className = resolveSheetsFloatingMenuClassName({
+            entry: 'docs-custom-block',
+            fullscreen: false,
+            stage: 'inactive',
+        });
+
+        expect(className).toContain('univer-hidden');
+        expect(className).toContain('univer-top-[calc(var(--univer-embed-docs-block-floating-menu-inset-top,52px)*-1)]');
     });
 
     it('keeps the standard sheet float toolbar order stable', () => {

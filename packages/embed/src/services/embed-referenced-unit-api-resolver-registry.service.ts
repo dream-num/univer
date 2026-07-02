@@ -17,27 +17,27 @@
 import type { IDisposable, Injector } from '@univerjs/core';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
 
-const PENDING_REFERENCED_UNIT_FACADE_RESOLVERS = new WeakMap<object, IReferencedUnitFacadeResolverRegistration[]>();
+const PENDING_REFERENCED_UNIT_API_RESOLVERS = new WeakMap<object, IReferencedUnitApiResolverRegistration[]>();
 
-export interface IReferencedUnitFacadeResolveContext {
+export interface IReferencedUnitApiResolveContext {
     unitId: string;
     unitType: UniverInstanceType;
     injector: Injector;
-    univerAPI: unknown;
+    api: unknown;
 }
 
-export interface IReferencedUnitFacadeResolverRegistration<TFacade = unknown> {
+export interface IReferencedUnitApiResolverRegistration<TApi = unknown> {
     registrationId: string;
     unitType: UniverInstanceType;
-    resolve: (context: IReferencedUnitFacadeResolveContext) => TFacade | null | undefined;
+    resolve: (context: IReferencedUnitApiResolveContext) => TApi | null | undefined;
 }
 
-export class EmbedReferencedUnitFacadeResolverRegistryService {
-    private readonly _registrations: IReferencedUnitFacadeResolverRegistration[] = [];
+export class EmbedReferencedUnitApiResolverRegistryService {
+    private readonly _registrations: IReferencedUnitApiResolverRegistration[] = [];
 
-    register(registration: IReferencedUnitFacadeResolverRegistration): IDisposable {
+    register(registration: IReferencedUnitApiResolverRegistration): IDisposable {
         if (this._registrations.some((item) => item.registrationId === registration.registrationId)) {
-            throw new Error(`Referenced unit facade resolver already registered: ${registration.registrationId}`);
+            throw new Error(`Referenced unit API resolver already registered: ${registration.registrationId}`);
         }
 
         this._registrations.push(registration);
@@ -49,53 +49,53 @@ export class EmbedReferencedUnitFacadeResolverRegistryService {
         });
     }
 
-    registerMany(registrations: readonly IReferencedUnitFacadeResolverRegistration[]): IDisposable[] {
+    registerMany(registrations: readonly IReferencedUnitApiResolverRegistration[]): IDisposable[] {
         return registrations.map((registration) => this.register(registration));
     }
 
-    resolve<TFacade = unknown>(context: IReferencedUnitFacadeResolveContext): TFacade {
+    resolve<TApi = unknown>(context: IReferencedUnitApiResolveContext): TApi {
         const registrations = this._registrations.filter((registration) => registration.unitType === context.unitType);
         if (registrations.length > 1) {
-            throw new Error('REFERENCED_UNIT_FACADE_RESOLVER_CONFLICT');
+            throw new Error('REFERENCED_UNIT_API_RESOLVER_CONFLICT');
         }
 
         const registration = registrations[0];
         if (!registration) {
-            throw new Error('REFERENCED_UNIT_FACADE_UNAVAILABLE');
+            throw new Error('REFERENCED_UNIT_API_UNAVAILABLE');
         }
 
-        const facade = registration.resolve(context);
-        if (!facade) {
-            throw new Error('REFERENCED_UNIT_FACADE_UNAVAILABLE');
+        const api = registration.resolve(context);
+        if (!api) {
+            throw new Error('REFERENCED_UNIT_API_UNAVAILABLE');
         }
 
-        return facade as TFacade;
+        return api as TApi;
     }
 
-    list(): IReferencedUnitFacadeResolverRegistration[] {
+    list(): IReferencedUnitApiResolverRegistration[] {
         return [...this._registrations];
     }
 }
 
-export function createDefaultReferencedUnitFacadeResolvers(): IReferencedUnitFacadeResolverRegistration[] {
+export function createDefaultReferencedUnitApiResolvers(): IReferencedUnitApiResolverRegistration[] {
     return [{
-        registrationId: 'univer.sheet.workbook.facade',
+        registrationId: 'univer.sheet.workbook.api',
         unitType: UniverInstanceType.UNIVER_SHEET,
-        resolve: ({ univerAPI, unitId }) => getFacadeMethod(univerAPI, 'getWorkbook')?.(unitId),
+        resolve: ({ api, unitId }) => getApiMethod(api, 'getWorkbook')?.(unitId),
     }, {
-        registrationId: 'univer.doc.document.facade',
+        registrationId: 'univer.doc.document.api',
         unitType: UniverInstanceType.UNIVER_DOC,
-        resolve: ({ univerAPI, unitId }) => getFacadeMethod(univerAPI, 'getDocument')?.(unitId),
+        resolve: ({ api, unitId }) => getApiMethod(api, 'getDocument')?.(unitId),
     }];
 }
 
-export function registerReferencedUnitFacadeResolvers(
+export function registerReferencedUnitApiResolvers(
     injector: Pick<Injector, 'get' | 'has'>,
-    registrations: readonly IReferencedUnitFacadeResolverRegistration[]
+    registrations: readonly IReferencedUnitApiResolverRegistration[]
 ): void {
     const uniqueRegistrations = uniqueByRegistrationId(registrations);
-    if (injector.has(EmbedReferencedUnitFacadeResolverRegistryService)) {
-        const registry = injector.get(EmbedReferencedUnitFacadeResolverRegistryService);
+    if (injector.has(EmbedReferencedUnitApiResolverRegistryService)) {
+        const registry = injector.get(EmbedReferencedUnitApiResolverRegistryService);
         uniqueRegistrations.forEach((registration) => {
             if (!registry.list().some((item) => item.registrationId === registration.registrationId)) {
                 registry.register(registration);
@@ -105,36 +105,36 @@ export function registerReferencedUnitFacadeResolvers(
     }
 
     const key = injector as object;
-    const pending = PENDING_REFERENCED_UNIT_FACADE_RESOLVERS.get(key) ?? [];
+    const pending = PENDING_REFERENCED_UNIT_API_RESOLVERS.get(key) ?? [];
     uniqueRegistrations.forEach((registration) => {
         if (!pending.some((item) => item.registrationId === registration.registrationId)) {
             pending.push(registration);
         }
     });
-    PENDING_REFERENCED_UNIT_FACADE_RESOLVERS.set(key, pending);
+    PENDING_REFERENCED_UNIT_API_RESOLVERS.set(key, pending);
 }
 
-export function flushPendingReferencedUnitFacadeResolvers(injector: Pick<Injector, 'get' | 'has'>): void {
-    if (!injector.has(EmbedReferencedUnitFacadeResolverRegistryService)) {
+export function flushPendingReferencedUnitApiResolvers(injector: Pick<Injector, 'get' | 'has'>): void {
+    if (!injector.has(EmbedReferencedUnitApiResolverRegistryService)) {
         return;
     }
 
-    const pending = PENDING_REFERENCED_UNIT_FACADE_RESOLVERS.get(injector as object);
+    const pending = PENDING_REFERENCED_UNIT_API_RESOLVERS.get(injector as object);
     if (!pending?.length) {
         return;
     }
 
-    const registry = injector.get(EmbedReferencedUnitFacadeResolverRegistryService);
+    const registry = injector.get(EmbedReferencedUnitApiResolverRegistryService);
     pending.forEach((registration) => {
         if (!registry.list().some((item) => item.registrationId === registration.registrationId)) {
             registry.register(registration);
         }
     });
-    PENDING_REFERENCED_UNIT_FACADE_RESOLVERS.delete(injector as object);
+    PENDING_REFERENCED_UNIT_API_RESOLVERS.delete(injector as object);
 }
 
-function uniqueByRegistrationId(registrations: readonly IReferencedUnitFacadeResolverRegistration[]): IReferencedUnitFacadeResolverRegistration[] {
-    const result: IReferencedUnitFacadeResolverRegistration[] = [];
+function uniqueByRegistrationId(registrations: readonly IReferencedUnitApiResolverRegistration[]): IReferencedUnitApiResolverRegistration[] {
+    const result: IReferencedUnitApiResolverRegistration[] = [];
     registrations.forEach((registration) => {
         if (!result.some((item) => item.registrationId === registration.registrationId)) {
             result.push(registration);
@@ -143,7 +143,7 @@ function uniqueByRegistrationId(registrations: readonly IReferencedUnitFacadeRes
     return result;
 }
 
-function getFacadeMethod(api: unknown, methodName: string): ((unitId: string) => unknown | null | undefined) | undefined {
+function getApiMethod(api: unknown, methodName: string): ((unitId: string) => unknown | null | undefined) | undefined {
     const method = (api as Record<string, unknown>)[methodName];
     return typeof method === 'function' ? method.bind(api) as (unitId: string) => unknown | null | undefined : undefined;
 }

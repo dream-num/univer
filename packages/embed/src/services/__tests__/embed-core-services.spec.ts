@@ -33,10 +33,10 @@ import { EmbedCreationService } from '../embed-creation.service';
 import { createLocalRuntimeResourceRefProvider, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_ID, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY } from '../embed-local-runtime-resource-ref-provider';
 import { EmbedNestedGuardService } from '../embed-nested-guard.service';
 import {
-    createDefaultReferencedUnitFacadeResolvers,
-    EmbedReferencedUnitFacadeResolverRegistryService,
-    flushPendingReferencedUnitFacadeResolvers,
-    registerReferencedUnitFacadeResolvers,
+    createDefaultReferencedUnitApiResolvers,
+    EmbedReferencedUnitApiResolverRegistryService,
+    flushPendingReferencedUnitApiResolvers,
+    registerReferencedUnitApiResolvers,
 } from '../embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from '../embed-referenced-unit-manager.service';
 import { EmbedResourceRefProviderRegistryService } from '../embed-resource-ref-provider-registry.service';
@@ -117,42 +117,42 @@ describe('EmbedCapabilityRegistryService', () => {
     });
 });
 
-describe('EmbedReferencedUnitFacadeResolverRegistryService', () => {
-    it('resolves first-party facade instances through registered facade APIs', () => {
+describe('EmbedReferencedUnitApiResolverRegistryService', () => {
+    it('resolves first-party API instances through registered APIs', () => {
         const workbookFacade = { getId: vi.fn(() => 'workbook-1') };
         const documentFacade = { getId: vi.fn(() => 'doc-1') };
         const univerAPI = {
             getWorkbook: vi.fn(() => workbookFacade),
             getDocument: vi.fn(() => documentFacade),
         };
-        const registry = new EmbedReferencedUnitFacadeResolverRegistryService();
-        registry.registerMany(createDefaultReferencedUnitFacadeResolvers());
+        const registry = new EmbedReferencedUnitApiResolverRegistryService();
+        registry.registerMany(createDefaultReferencedUnitApiResolvers());
 
         expect(registry.resolve({
             unitId: 'workbook-1',
             unitType: UniverInstanceType.UNIVER_SHEET,
             injector: {} as Injector,
-            univerAPI,
+            api: univerAPI,
         })).toBe(workbookFacade);
         expect(registry.resolve({
             unitId: 'doc-1',
             unitType: UniverInstanceType.UNIVER_DOC,
             injector: {} as Injector,
-            univerAPI,
+            api: univerAPI,
         })).toBe(documentFacade);
         expect(univerAPI.getWorkbook).toHaveBeenCalledWith('workbook-1');
         expect(univerAPI.getDocument).toHaveBeenCalledWith('doc-1');
     });
 
-    it('rejects missing and conflicting facade resolvers with stable errors', () => {
-        const registry = new EmbedReferencedUnitFacadeResolverRegistryService();
+    it('rejects missing and conflicting API resolvers with stable errors', () => {
+        const registry = new EmbedReferencedUnitApiResolverRegistryService();
 
         expect(() => registry.resolve({
             unitId: 'slide-1',
             unitType: UniverInstanceType.UNIVER_SLIDE,
             injector: {} as Injector,
-            univerAPI: {},
-        })).toThrow('REFERENCED_UNIT_FACADE_UNAVAILABLE');
+            api: {},
+        })).toThrow('REFERENCED_UNIT_API_UNAVAILABLE');
 
         registry.register({
             registrationId: 'sheet-a',
@@ -169,25 +169,25 @@ describe('EmbedReferencedUnitFacadeResolverRegistryService', () => {
             unitId: 'sheet-1',
             unitType: UniverInstanceType.UNIVER_SHEET,
             injector: {} as Injector,
-            univerAPI: {},
-        })).toThrow('REFERENCED_UNIT_FACADE_RESOLVER_CONFLICT');
+            api: {},
+        })).toThrow('REFERENCED_UNIT_API_RESOLVER_CONFLICT');
     });
 
-    it('queues facade resolvers until the registry service is available', () => {
+    it('queues API resolvers until the registry service is available', () => {
         const registration = {
-            registrationId: 'base-facade',
+            registrationId: 'base-api',
             unitType: UniverInstanceType.UNIVER_BASE,
             resolve: vi.fn(() => ({ id: 'base-1' })),
         };
-        const pendingInjector = createFacadeResolverInjector(undefined);
+        const pendingInjector = createApiResolverInjector(undefined);
 
-        registerReferencedUnitFacadeResolvers(pendingInjector, [registration, registration]);
-        flushPendingReferencedUnitFacadeResolvers(pendingInjector);
+        registerReferencedUnitApiResolvers(pendingInjector, [registration, registration]);
+        flushPendingReferencedUnitApiResolvers(pendingInjector);
 
-        const registry = new EmbedReferencedUnitFacadeResolverRegistryService();
-        const injector = createFacadeResolverInjector(registry, pendingInjector);
+        const registry = new EmbedReferencedUnitApiResolverRegistryService();
+        const injector = createApiResolverInjector(registry, pendingInjector);
 
-        flushPendingReferencedUnitFacadeResolvers(injector);
+        flushPendingReferencedUnitApiResolvers(injector);
         expect(registry.list()).toEqual([registration]);
     });
 });
@@ -689,11 +689,11 @@ function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key
     }) as unknown as Pick<Injector, 'get' | 'has'>;
 }
 
-function createFacadeResolverInjector(registry?: EmbedReferencedUnitFacadeResolverRegistryService, key: object = {}): Pick<Injector, 'get' | 'has'> {
+function createApiResolverInjector(registry?: EmbedReferencedUnitApiResolverRegistryService, key: object = {}): Pick<Injector, 'get' | 'has'> {
     return Object.assign(key, {
-        has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedReferencedUnitFacadeResolverRegistryService),
+        has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedReferencedUnitApiResolverRegistryService),
         get: vi.fn((token: unknown) => {
-            if (!registry || token !== EmbedReferencedUnitFacadeResolverRegistryService) {
+            if (!registry || token !== EmbedReferencedUnitApiResolverRegistryService) {
                 throw new Error('unexpected token');
             }
 

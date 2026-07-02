@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@un
 import { describe, expect, it, vi } from 'vitest';
 import { CreateEmbedCommand, RemoveEmbedCommand } from '../../commands/commands/embed.command';
 import { EmbedModelService } from '../../services/embed-model.service';
-import { EmbedReferencedUnitFacadeResolverRegistryService } from '../../services/embed-referenced-unit-api-resolver-registry.service';
+import { EmbedReferencedUnitApiResolverRegistryService } from '../../services/embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
 import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
@@ -118,7 +118,7 @@ describe('embed facade', () => {
             unitId: 'child-1',
             unitType: UniverInstanceType.UNIVER_SHEET,
             injector: expect.any(Object),
-            univerAPI: api,
+            api,
         });
         expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
             ref,
@@ -133,7 +133,7 @@ describe('embed facade', () => {
             unitId: 'child-1',
             unitType: UniverInstanceType.UNIVER_SHEET,
             injector: expect.any(Object),
-            univerAPI: api,
+            api,
         });
         expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
             ref,
@@ -243,7 +243,7 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
             if (token === EmbedReferencedUnitManagerService) {
                 return referencedUnitManager;
             }
-            if (token === EmbedReferencedUnitFacadeResolverRegistryService) {
+            if (token === EmbedReferencedUnitApiResolverRegistryService) {
                 return facadeResolverRegistry;
             }
             throw new Error('Unexpected token');

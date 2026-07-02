@@ -332,7 +332,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     private _setDefinedNamesForFunction() {
-        const editorUnitId = this._currentConfigService.getExecuteUnitId();
+        const editorUnitId = this._runtimeService.currentUnitId;
         if (editorUnitId == null) {
             return;
         }

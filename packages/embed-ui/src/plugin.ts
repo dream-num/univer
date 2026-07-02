@@ -16,6 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IEmbedHostAdapterContribution } from '@univerjs/embed';
+import type { IEmbedChildProductPluginContribution } from './services/embed-child-product-plugin-registry.service';
 import type {
     IEmbedBlockContribution,
     IEmbedChildViewContribution,
@@ -36,7 +37,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UniverEmbedPlugin } from '@univerjs/embed';
+import { EmbedHostAdapterRegistryService, UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
@@ -45,6 +46,7 @@ import { EmbedHostAnchorCleanupController } from './controllers/embed-host-ancho
 import { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribbon-override.controller';
 import { EmbedActivationService } from './services/embed-activation.service';
 import { EmbedBlockRegistryService } from './services/embed-block-registry.service';
+import { EmbedChildProductPluginRegistryService } from './services/embed-child-product-plugin-registry.service';
 import { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
 import { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 import { createDefaultEmbedFloatingMenuContributions } from './services/embed-default-floating-menu';
@@ -53,19 +55,18 @@ import { EmbedFloatingActiveService } from './services/embed-floating-active.ser
 import { EmbedFloatingGeometryService } from './services/embed-floating-geometry.service';
 import { EmbedFloatingMenuRegistryService } from './services/embed-floating-menu-registry.service';
 import { EmbedFullscreenService } from './services/embed-fullscreen.service';
-import { EmbedHostAdapterRegistryService } from './services/embed-host-adapter-registry.service';
 import { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
 import { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
 import { EmbedHostRestoreService } from './services/embed-host-restore.service';
 import { EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
 import { EmbedMountService } from './services/embed-mount.service';
 import { EmbedOverlayRootService } from './services/embed-overlay-root.service';
-import { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passive-wheel-handler-registry.service';
 import { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
-import { EmbedProductMenuRegistryService } from './services/embed-product-menu-registry.service';
+import { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passive-wheel-handler-registry.service';
+import { EmbedProductMenuRegistryService, flushPendingEmbedProductMenuContributions } from './services/embed-product-menu-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
-import { EmbedRuntimePolicyService } from './services/embed-runtime-policy.service';
 import { EmbedRuntimeFocusCoordinator } from './services/embed-runtime-focus-coordinator.service';
+import { EmbedRuntimePolicyService } from './services/embed-runtime-policy.service';
 import { EmbedSceneCanvasCaptureService } from './services/embed-scene-canvas-capture.service';
 import { flushPendingEmbedUIContributions } from './services/embed-ui-contribution-register';
 import { EmbedUndoBridgeService } from './services/embed-undo-bridge.service';
@@ -82,6 +83,7 @@ export interface IUniverEmbedUIPluginConfig {
     passiveWheelHandlers?: readonly IEmbedPassiveWheelHandlerContribution[];
     passiveViewportProviders?: readonly IEmbedPassiveViewportProvider[];
     readonlyPreviewProviders?: readonly IEmbedReadonlyPreviewProvider<any>[];
+    childProductPlugins?: readonly IEmbedChildProductPluginContribution[];
     useDefaultFloatingMenus?: boolean;
     useDefaultHostToolbar?: boolean;
 }
@@ -104,6 +106,7 @@ export class UniverEmbedUIPlugin extends Plugin {
         ([
             [EmbedHostContainerRegistryService],
             [EmbedHostRestoreService],
+            [EmbedChildProductPluginRegistryService],
             [EmbedActivationService],
             [EmbedChildViewRegistryService],
             [EmbedBlockRegistryService],
@@ -130,6 +133,7 @@ export class UniverEmbedUIPlugin extends Plugin {
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
         flushPendingEmbedUIContributions(this._injector);
+        flushPendingEmbedProductMenuContributions(this._injector);
 
         const hostAdapterRegistry = this._injector.get(EmbedHostAdapterRegistryService);
         (this._config.hostAdapters ?? []).forEach((contribution) => {
@@ -161,6 +165,9 @@ export class UniverEmbedUIPlugin extends Plugin {
 
         const productMenuRegistry = this._injector.get(EmbedProductMenuRegistryService);
         (this._config.productMenus ?? []).forEach((contribution) => productMenuRegistry.register(contribution));
+
+        const childProductPluginRegistry = this._injector.get(EmbedChildProductPluginRegistryService);
+        (this._config.childProductPlugins ?? []).forEach((contribution) => childProductPluginRegistry.register(contribution));
 
         const previewService = this._injector.get(EmbedFloatPreviewService);
         (this._config.previewProviders ?? []).forEach((provider) => previewService.registerProvider(provider));
@@ -206,6 +213,7 @@ export class UniverEmbedUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [EmbedHostContainerRegistryService],
             [EmbedHostRestoreService],
+            [EmbedChildProductPluginRegistryService],
             [EmbedActivationService],
             [EmbedChildViewRegistryService],
             [EmbedBlockRegistryService],

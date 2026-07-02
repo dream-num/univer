@@ -2706,9 +2706,6 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../drawing
       '@univerjs/embed':
         specifier: workspace:*
         version: link:../embed

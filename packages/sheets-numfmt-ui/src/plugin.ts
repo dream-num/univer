@@ -31,7 +31,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import pkg from '../package.json';
-import { defaultPluginConfig } from './config/config';
+import { defaultPluginConfig, SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { NumfmtRepeatLastActionController } from './controllers/numfmt-repeat-last-action.controller';
@@ -65,7 +65,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig('sheets-numfmt-ui.config', rest);
+        this._configService.setConfig(SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

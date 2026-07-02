@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-export { UI_ADAPTER_VUE3_PLUGIN_CONFIG_KEY } from './config/config';
-export type { IUniverVue3AdapterConfig } from './config/config';
-export { UniverVue3AdapterPlugin } from './plugin';
+export const UI_ADAPTER_VUE3_PLUGIN_CONFIG_KEY = 'ui-adapter-vue3.config';
+
+export const configSymbol = Symbol(UI_ADAPTER_VUE3_PLUGIN_CONFIG_KEY);
+
+export interface IUniverVue3AdapterConfig {}
+
+export const defaultPluginConfig: IUniverVue3AdapterConfig = {};

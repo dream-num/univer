@@ -15,9 +15,11 @@
  */
 
 import type { IComponent } from '@univerjs/ui';
-import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
+import type { IUniverWebComponentAdapterConfig } from './config/config';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
+import { defaultPluginConfig, UI_ADAPTER_WEB_COMPONENT_PLUGIN_CONFIG_KEY } from './config/config';
 
 /**
  * The plugin that allows Univer to use web components as UI components.
@@ -29,11 +31,19 @@ export class UniverWebComponentAdapterPlugin extends Plugin {
     static override version = pkg.version;
 
     constructor(
-        private readonly _config = {},
+        private readonly _config: Partial<IUniverWebComponentAdapterConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager
     ) {
         super();
+
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(UI_ADAPTER_WEB_COMPONENT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

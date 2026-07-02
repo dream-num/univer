@@ -16,10 +16,20 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsThreadCommentConfig } from './config/config';
-import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import pkg from '../package.json';
-import { defaultPluginConfig } from './config/config';
+import { defaultPluginConfig, SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentResourceController } from './controllers/sheets-thread-comment-resource.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
@@ -35,9 +45,17 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsThreadCommentConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @Inject(ICommandService) protected _commandService: ICommandService
+        @Inject(ICommandService) protected _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

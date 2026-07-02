@@ -218,7 +218,7 @@ export class EmbedHostLifecycleService {
             }
 
             const subUnitId = getActiveSheetId(this._univerInstanceService, context.hostUnitId);
-            return subUnitId ? { ...(hostContext ?? {}), subUnitId } : hostContext;
+            return subUnitId ? { ...hostContext, subUnitId } : hostContext;
         }
 
         if (context.hostType === UniverInstanceType.UNIVER_SLIDE && context.entry === 'slides-floating-object') {
@@ -227,7 +227,7 @@ export class EmbedHostLifecycleService {
             }
 
             const subUnitId = getActiveSlidePageId(this._univerInstanceService, context.hostUnitId);
-            return subUnitId ? { ...(hostContext ?? {}), subUnitId } : hostContext;
+            return subUnitId ? { ...hostContext, subUnitId } : hostContext;
         }
 
         return hostContext;

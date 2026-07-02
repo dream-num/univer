@@ -25,6 +25,9 @@ export interface IBaseToolbarButtonProps {
     /** Semantic DOM style */
     style?: React.CSSProperties;
 
+    title?: string;
+    'aria-label'?: string;
+
     /**
      * Disabled state of button
      * @default false

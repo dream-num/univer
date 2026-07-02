@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentSkeletonPage } from '../../../../../../basics/i-document-skeleton-cached';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -1620,9 +1621,8 @@ describe('linebreaking', () => {
 
         expect(sheet.height).toBe(19004);
         expect(base.height).toBe(5156);
-        expect(sheet.aTop).toBeLessThan(sheet.height);
-        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
-        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+        expect(slide.height).toBe(405);
+        expectDrawingInDocumentFlowOrder(pages, ['b1', 'b2', 'b3']);
     });
 
     it('keeps consecutive measured top-bottom custom blocks in document-flow order on finite pages', () => {
@@ -1682,10 +1682,8 @@ describe('linebreaking', () => {
         expect(sheet.height).toBe(19004);
         expect(base.height).toBe(5156);
         expect(slide.height).toBe(405);
-        expect(sheet.aTop).toBeLessThan(sheet.height);
-        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
         expect(slide.aTop).toBeGreaterThanOrEqual(slideLine.top);
-        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+        expectDrawingInDocumentFlowOrder(pages, ['b1', 'b2', 'b3']);
     });
 
     it('does not collapse adjacent top-bottom custom blocks in the same paragraph', () => {
@@ -1799,8 +1797,13 @@ describe('linebreaking', () => {
         const base = drawings.find((drawing) => drawing.drawingId === 'b2')!;
         const slide = drawings.find((drawing) => drawing.drawingId === 'b3')!;
 
-        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
-        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+        expect(sheet.height).toBe(19004);
+        expect(base.height).toBe(5156);
+        expect(slide.height).toBe(405);
+        expect(sheet.aTop).not.toBe(19040);
+        expect(base.aTop).not.toBe(5204);
+        expect(slide.aTop).not.toBe(465);
+        expectDrawingInDocumentFlowOrder(pages, ['b1', 'b2', 'b3']);
     });
 
     it('moves measured top-bottom custom block with preceding document-flow content', () => {
@@ -1862,6 +1865,52 @@ function createTopBottomDrawing(drawingId: string, width: number, height: number
             size: { width, height },
         },
     };
+}
+
+function expectDrawingInDocumentFlowOrder(pages: IDocumentSkeletonPage[], drawingIds: string[]) {
+    const positions = drawingIds.map((drawingId) => getDrawingLinePosition(pages, drawingId));
+
+    for (let i = 1; i < positions.length; i++) {
+        expect(compareDocumentFlowPosition(positions[i - 1], positions[i])).toBeLessThan(0);
+    }
+}
+
+function getDrawingLinePosition(pages: IDocumentSkeletonPage[], drawingId: string) {
+    for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+        const page = pages[pageIndex];
+        for (let sectionIndex = 0; sectionIndex < page.sections.length; sectionIndex++) {
+            const section = page.sections[sectionIndex];
+            for (let columnIndex = 0; columnIndex < section.columns.length; columnIndex++) {
+                const column = section.columns[columnIndex];
+                for (let lineIndex = 0; lineIndex < column.lines.length; lineIndex++) {
+                    const line = column.lines[lineIndex];
+                    for (let divideIndex = 0; divideIndex < line.divides.length; divideIndex++) {
+                        const divide = line.divides[divideIndex];
+                        const glyphIndex = divide.glyphGroup.findIndex((glyph) => glyph.drawingId === drawingId);
+                        if (glyphIndex > -1) {
+                            return { columnIndex, divideIndex, glyphIndex, lineIndex, pageIndex, sectionIndex };
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    throw new Error(`Missing custom block glyph for drawing "${drawingId}"`);
+}
+
+function compareDocumentFlowPosition(
+    a: ReturnType<typeof getDrawingLinePosition>,
+    b: ReturnType<typeof getDrawingLinePosition>
+) {
+    return (
+        a.pageIndex - b.pageIndex ||
+        a.sectionIndex - b.sectionIndex ||
+        a.columnIndex - b.columnIndex ||
+        a.lineIndex - b.lineIndex ||
+        a.divideIndex - b.divideIndex ||
+        a.glyphIndex - b.glyphIndex
+    );
 }
 
 function createStaleTopBottomSkeleton(drawingId: string, drawingOrigin: unknown, aTop: number, height: number) {

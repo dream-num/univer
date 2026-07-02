@@ -35,7 +35,6 @@ import { EmbedFloatingMenuRegistryService } from '../embed-floating-menu-registr
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '../embed-interaction-boundary.service';
 import { EmbedProductMenuRegistryService } from '../embed-product-menu-registry.service';
 import { EmbedRuntimeFocusCoordinator } from '../embed-runtime-focus-coordinator.service';
-import { createEmbedReactRoot, disposeEmbedReactRoot } from '../react-root-disposal';
 
 const createRootMock = vi.hoisted(() => vi.fn());
 

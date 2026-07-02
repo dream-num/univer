@@ -100,11 +100,13 @@ export interface IEmbedCapability {
     nestedEmbed: false;
 }
 
-export interface EmbedSource {
+export interface IEmbedSource {
     ref: ResourceRefInput;
     unitType: UniverInstanceType;
     creationConfig?: Record<string, unknown>;
 }
+
+export type EmbedSource = IEmbedSource;
 
 export interface IEmbedFloatingConfig {
     enabled?: boolean;

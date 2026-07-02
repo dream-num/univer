@@ -819,12 +819,13 @@ describe('embed-ui registries and commands', () => {
             [EmbedHostAdapterRegistryService, new EmbedHostAdapterRegistryService()],
             [EmbedChildProductPluginRegistryService, registry],
         ]) as unknown as Injector;
+        const configService = { setConfig: vi.fn() };
 
         const plugin = new UniverEmbedUIPlugin({
             childProductPlugins: [contribution],
             useDefaultFloatingMenus: false,
             useDefaultHostToolbar: false,
-        }, injector);
+        }, injector, configService as never);
 
         plugin.onStarting();
 

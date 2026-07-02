@@ -15,17 +15,15 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IReferencedUnitApiResolverRegistration } from './services/embed-referenced-unit-api-resolver-registry.service';
-import type { IEmbedResourceRefProviderRegistration } from './services/embed-resource-ref-provider-registry.service';
-import type { IEmbedCapability } from './types/embed';
-import type { IEmbedHostAdapterContribution } from './types/host-adapter';
-import { ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import type { IUniverEmbedPluginConfig } from './config/config';
+import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import { CopyEmbedCommand, CreateEmbedCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
 import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';
 import { EMBED_PLUGIN_NAME } from './common/const';
+import { defaultPluginConfig, EMBED_PLUGIN_CONFIG_KEY } from './config/config';
 import { EmbedResourceController } from './controllers/embed-resource.controller';
 import { createDefaultEmbedCapabilities, EmbedCapabilityRegistryService, flushPendingEmbedCapabilities } from './services/embed-capability-registry.service';
 import { EmbedChildRetentionService } from './services/embed-child-retention.service';
@@ -47,14 +45,6 @@ import { EmbedReferencedUnitManagerService } from './services/embed-referenced-u
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 import { EmbedSourceResolverService } from './services/embed-source-resolver.service';
 
-export interface IUniverEmbedPluginConfig {
-    useDefaultCapabilities?: boolean;
-    capabilities?: readonly IEmbedCapability[];
-    hostAdapters?: readonly IEmbedHostAdapterContribution[];
-    resourceRefProviderRegistrations?: readonly IEmbedResourceRefProviderRegistration[];
-    referencedUnitApiResolvers?: readonly IReferencedUnitApiResolverRegistration[];
-}
-
 // This core embed plugin intentionally has no product plugin dependencies.
 // Host/product integrations are contributed by docs/sheets/slides/base plugins.
 export class UniverEmbedPlugin extends Plugin {
@@ -64,11 +54,14 @@ export class UniverEmbedPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
-        private readonly _config: IUniverEmbedPluginConfig = {},
+        private readonly _config: Partial<IUniverEmbedPluginConfig> = defaultPluginConfig,
         @Inject(Injector) protected override readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+        const { ...rest } = merge({}, defaultPluginConfig, this._config);
+        this._configService.setConfig(EMBED_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

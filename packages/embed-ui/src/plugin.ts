@@ -15,24 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IEmbedHostAdapterContribution } from '@univerjs/embed';
-import type { IEmbedChildProductPluginContribution } from './services/embed-child-product-plugin-registry.service';
-import type {
-    IEmbedBlockContribution,
-    IEmbedChildViewContribution,
-    IEmbedContentSizeProvider,
-    IEmbedFloatingMenuContribution,
-    IEmbedFloatPreviewProvider,
-    IEmbedHostContainerContribution,
-    IEmbedPassiveViewportProvider,
-    IEmbedPassiveWheelHandlerContribution,
-    IEmbedProductMenuContribution,
-    IEmbedReadonlyPreviewProvider,
-} from './types/embed-ui';
+import type { IUniverEmbedUIPluginConfig } from './config/config';
 import {
     DependentOn,
+    IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
     touchDependencies,
     UniverInstanceType,
@@ -42,6 +31,7 @@ import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
 import { EmbedHostToolbarMenu } from './components/EmbedHostToolbarMenu';
+import { defaultPluginConfig, EMBED_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { EmbedHostAnchorCleanupController } from './controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribbon-override.controller';
 import { EmbedActivationService } from './services/embed-activation.service';
@@ -71,23 +61,6 @@ import { EmbedSceneCanvasCaptureService } from './services/embed-scene-canvas-ca
 import { flushPendingEmbedUIContributions } from './services/embed-ui-contribution-register';
 import { EmbedUndoBridgeService } from './services/embed-undo-bridge.service';
 
-export interface IUniverEmbedUIPluginConfig {
-    hostAdapters?: readonly IEmbedHostAdapterContribution[];
-    hostContainers?: readonly IEmbedHostContainerContribution[];
-    childViews?: readonly IEmbedChildViewContribution[];
-    blocks?: readonly IEmbedBlockContribution[];
-    productMenus?: readonly IEmbedProductMenuContribution[];
-    floatingMenus?: readonly IEmbedFloatingMenuContribution[];
-    previewProviders?: readonly IEmbedFloatPreviewProvider<any>[];
-    contentSizeProviders?: readonly IEmbedContentSizeProvider[];
-    passiveWheelHandlers?: readonly IEmbedPassiveWheelHandlerContribution[];
-    passiveViewportProviders?: readonly IEmbedPassiveViewportProvider[];
-    readonlyPreviewProviders?: readonly IEmbedReadonlyPreviewProvider<any>[];
-    childProductPlugins?: readonly IEmbedChildProductPluginContribution[];
-    useDefaultFloatingMenus?: boolean;
-    useDefaultHostToolbar?: boolean;
-}
-
 @DependentOn(UniverEmbedPlugin)
 export class UniverEmbedUIPlugin extends Plugin {
     static override pluginName = EMBED_UI_PLUGIN_NAME;
@@ -96,10 +69,13 @@ export class UniverEmbedUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
-        private readonly _config: IUniverEmbedUIPluginConfig = {},
-        @Inject(Injector) protected override readonly _injector: Injector
+        private readonly _config: Partial<IUniverEmbedUIPluginConfig> = defaultPluginConfig,
+        @Inject(Injector) protected override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+        const { ...rest } = merge({}, defaultPluginConfig, this._config);
+        this._configService.setConfig(EMBED_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {

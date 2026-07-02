@@ -56,9 +56,10 @@ export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResou
 export { normalizeResourceRefLocator } from './common/resource-ref-locator';
 export { formatResourceRef, parseResourceRef } from './common/resource-ref-uri';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
+export { defaultPluginConfig as defaultEmbedPluginConfig, EMBED_PLUGIN_CONFIG_KEY } from './config/config';
+export type { EmbedProductPluginConfig, IUniverEmbedPluginConfig } from './config/config';
 export { EmbedResourceController } from './controllers/embed-resource.controller';
 export { UniverEmbedPlugin } from './plugin';
-export type { IUniverEmbedPluginConfig } from './plugin';
 export { createDefaultEmbedCapabilities, createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService, flushPendingEmbedCapabilities, registerEmbedCapabilities } from './services/embed-capability-registry.service';
 export { EmbedChildRetentionService } from './services/embed-child-retention.service';
 export type { IEmbedChildRetentionState } from './services/embed-child-retention.service';

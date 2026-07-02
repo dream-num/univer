@@ -327,6 +327,14 @@ export function resolveSheetsFloatingMenuStage(params: {
     return resolveCommonEmbedFloatingMenuStage(params);
 }
 
+const FONT_FAMILY_OPTIONS = [
+    { label: 'Default', value: 'Default' },
+    { label: 'Arial', value: 'Arial' },
+    { label: 'Times New Roman', value: 'Times New Roman' },
+    { label: 'Courier New', value: 'Courier New' },
+    { label: 'Microsoft YaHei', value: 'Microsoft YaHei' },
+];
+
 export function resolveSheetsFloatingMenuClassName(params: {
     entry: string;
     fullscreen: boolean;
@@ -376,6 +384,7 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
         return () => subscription.unsubscribe();
     }, [menuManagerService]);
     const resolvedMenuItems = useMemo(() => {
+        void menuVersion;
         return resolveSheetsFloatingToolbarMenuItems(menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON));
     }, [menuManagerService, menuVersion]);
     const visibleToolbarItemIds = useMemo(() => {
@@ -506,14 +515,6 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
     );
 }
 
-const FONT_FAMILY_OPTIONS = [
-    { label: 'Default', value: 'Default' },
-    { label: 'Arial', value: 'Arial' },
-    { label: 'Times New Roman', value: 'Times New Roman' },
-    { label: 'Courier New', value: 'Courier New' },
-    { label: 'Microsoft YaHei', value: 'Microsoft YaHei' },
-];
-
 const SHEET_FLOATING_TOOLBAR_SELECTOR_CLASS = 'univer-gap-1 univer-px-1.5 univer-text-sm';
 const SHEET_FLOATING_TOOLBAR_PANEL_BUTTON_CLASS = 'univer-size-7';
 const SHEET_FLOATING_TOOLBAR_ICON_BUTTON_CLASS = 'univer-text-sm';
@@ -611,9 +612,13 @@ function useMenuItemRuntimeState(item: IMenuItem | undefined): {
     const [value, setValue] = useState<unknown>(undefined);
 
     useEffect(() => {
+        // eslint-disable-next-line react/set-state-in-effect
         setHidden(false);
+        // eslint-disable-next-line react/set-state-in-effect
         setDisabled(false);
+        // eslint-disable-next-line react/set-state-in-effect
         setActivated(false);
+        // eslint-disable-next-line react/set-state-in-effect
         setValue(undefined);
 
         if (!item) {

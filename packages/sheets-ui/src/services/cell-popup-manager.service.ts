@@ -190,7 +190,7 @@ export class CellPopupManagerService extends Disposable {
         }
 
         const targets: Array<{ subUnitId: string; row: number; col: number }> = [];
-        const subUnitEntries = subUnitId
+        const subUnitEntries: Array<[string, ObjectMatrix<ICellPopupCache> | undefined]> = subUnitId
             ? [[subUnitId, unitMap.get(subUnitId)]]
             : [...unitMap.entries()];
 

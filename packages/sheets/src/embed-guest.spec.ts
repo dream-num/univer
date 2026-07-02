@@ -62,7 +62,6 @@ describe('sheets embed guest', () => {
             { childType: UniverInstanceType.UNIVER_SLIDE, entry: 'sheets-sheet-tab', layout: 'tab-peer', mode: 'tab' },
         ]);
     });
-
 });
 
 function createInjector(entries: Array<[unknown, unknown]>) {

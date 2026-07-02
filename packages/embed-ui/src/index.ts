@@ -130,8 +130,8 @@ export {
 } from './services/embed-mount.service';
 export { EmbedOverlayRootService } from './services/embed-overlay-root.service';
 export type { IEmbedOverlayRootRegistration } from './services/embed-overlay-root.service';
-export { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passive-wheel-handler-registry.service';
 export { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
+export { EmbedPassiveWheelHandlerRegistryService } from './services/embed-passive-wheel-handler-registry.service';
 export { createEmbedProductFloatingMenuContributions } from './services/embed-product-floating-menu-contributions';
 export { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from './services/embed-product-menu-mounting';
 export {
@@ -139,8 +139,6 @@ export {
     registerEmbedProductMenuContribution,
 } from './services/embed-product-menu-registry.service';
 export { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
-export { EmbedRuntimePolicyService } from './services/embed-runtime-policy.service';
-export type { IEmbedRuntimeAncestor, IEmbedRuntimeMountDecision, IEmbedRuntimePolicyConfig } from './services/embed-runtime-policy.service';
 export { createEmbedRenderCanvasPreviewProvider } from './services/embed-render-canvas-preview-provider';
 export type { ICreateEmbedRenderCanvasPreviewProviderOptions } from './services/embed-render-canvas-preview-provider';
 export {
@@ -161,6 +159,8 @@ export type {
     IEmbedRuntimeFocusElementRegistration,
     IEmbedRuntimeFocusLeaseOptions,
 } from './services/embed-runtime-focus-coordinator.service';
+export { EmbedRuntimePolicyService } from './services/embed-runtime-policy.service';
+export type { IEmbedRuntimeAncestor, IEmbedRuntimeMountDecision, IEmbedRuntimePolicyConfig } from './services/embed-runtime-policy.service';
 export {
     EMBED_CHILD_UNIT_ID_ATTRIBUTE,
     EMBED_FLOAT_DOM_ATTRIBUTE,

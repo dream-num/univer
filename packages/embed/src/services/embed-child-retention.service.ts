@@ -80,5 +80,4 @@ export class EmbedChildRetentionService {
             eligibleForCleanup: descriptors.length > 0 && activeReferences === 0,
         };
     }
-
 }

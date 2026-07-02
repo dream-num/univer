@@ -143,34 +143,6 @@ export { SheetsScrollRenderController } from './controllers/render-controllers/s
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export type { ITelemetryData } from './controllers/render-controllers/sheet.render-controller';
 export {
-    createEmbedSheetsFloatingDrawing,
-    createEmbedSheetsFloatingDrawingFromDescriptor,
-    createEmbedSheetsFloatingObjectData,
-    getEmbedSheetsFloatingObjectData,
-    type IEmbedSheetsFloatingObjectData,
-    type IEmbedSheetsFloatingObjectParams,
-    isEmbedSheetsFloatingDrawing,
-} from './embed-floating-anchor';
-export {
-    createSheetsFloatingObjectHostAdapterContribution,
-    createSheetsFloatingObjectHostContainerContribution,
-    createSheetsSheetTabHostAdapterContribution,
-    createSheetsSheetTabHostContainerContribution,
-    EMBED_SHEETS_FLOATING_COMPONENT_KEY,
-} from './embed-host-adapter';
-export { registerSheetsEmbedProductMenus } from './embed-product-menu';
-export { registerSheetsEmbedUIContributions } from './embed-register';
-export {
-    createEmbedSheetsTabCustomData,
-    createEmbedSheetsTabSnapshot,
-    createEmbedSheetsTabSnapshotFromDescriptor,
-    EMBED_SHEETS_TAB_CUSTOM_KEY,
-    getEmbedSheetsTabCustomData,
-    type IEmbedSheetsTabCustomData,
-    type IEmbedSheetsTabSnapshotParams,
-    isEmbedSheetsTabSnapshot,
-} from './embed-tab-anchor';
-export {
     whenFormulaEditorActivated,
     whenSheetEditorActivated,
     whenSheetEditorFocused,
@@ -185,8 +157,22 @@ export {
 } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
+export { createEmbedSheetsFloatingDrawing, createEmbedSheetsFloatingDrawingFromDescriptor, createEmbedSheetsFloatingObjectData, getEmbedSheetsFloatingObjectData, isEmbedSheetsFloatingDrawing } from './embed-floating-anchor';
+export type { IEmbedSheetsFloatingObjectData, IEmbedSheetsFloatingObjectParams } from './embed-floating-anchor';
+export {
+    createSheetsFloatingObjectHostAdapterContribution,
+    createSheetsFloatingObjectHostContainerContribution,
+    createSheetsSheetTabHostAdapterContribution,
+    createSheetsSheetTabHostContainerContribution,
+    EMBED_SHEETS_FLOATING_COMPONENT_KEY,
+} from './embed-host-adapter';
+export { registerSheetsEmbedProductMenus } from './embed-product-menu';
+export { registerSheetsEmbedUIContributions } from './embed-register';
+export { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot, createEmbedSheetsTabSnapshotFromDescriptor, EMBED_SHEETS_TAB_CUSTOM_KEY, getEmbedSheetsTabCustomData, isEmbedSheetsTabSnapshot } from './embed-tab-anchor';
+export type { IEmbedSheetsTabCustomData, IEmbedSheetsTabSnapshotParams } from './embed-tab-anchor';
 export { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './EmbedBlock';
-export { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, type SheetFloatingToolbarItem } from './EmbedFloatingMenu';
+export { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems } from './EmbedFloatingMenu';
+export type { SheetFloatingToolbarItem } from './EmbedFloatingMenu';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export {
     COPY_SPECIAL_MENU_ID,

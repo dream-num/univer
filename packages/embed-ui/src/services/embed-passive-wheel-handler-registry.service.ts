@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IEmbedPassiveWheelHandlerContribution, IEmbedPassiveViewportWheelContext } from '../types/embed-ui';
+import type { IEmbedPassiveViewportWheelContext, IEmbedPassiveWheelHandlerContribution } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
 export class EmbedPassiveWheelHandlerRegistryService {

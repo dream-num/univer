@@ -31,7 +31,7 @@ import {
     TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { consumeContentInsertRange, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface ISetParagraphNamedStyleCommandParams {
     value: NamedStyleType;
@@ -101,14 +101,6 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         return Boolean(result);
     },
 };
-
-function consumeContentInsertRange(accessor: IAccessor, unitId: string) {
-    try {
-        return accessor.get(DocContentInsertService).consumeInsertRange(unitId);
-    } catch {
-        return null;
-    }
-}
 
 function insertNamedStyleParagraph(
     accessor: IAccessor,

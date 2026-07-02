@@ -112,7 +112,7 @@ interface IDocExpandedSelectionState {
 }
 
 export class DocParagraphMenuService extends Disposable implements IRenderModule {
-    private _paragrahMenu: {
+    private _paragraphMenu: {
         paragraph: IMutiPageParagraphBound;
         target: IDocBlockMenuTarget;
         blockRange?: IDocumentBlockRange;
@@ -129,11 +129,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _slashMenuRequestNonce = 0;
 
     get activeParagraph() {
-        return this._paragrahMenu?.paragraph;
+        return this._paragraphMenu?.paragraph;
     }
 
     get activeTarget() {
-        return this._paragrahMenu?.target ?? null;
+        return this._paragraphMenu?.target ?? null;
     }
 
     setBlockMenuDragging(isDragging: boolean) {
@@ -163,7 +163,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     private _isCursorInActiveParagraph() {
-        if (!this._paragrahMenu) {
+        if (!this._paragraphMenu) {
             return false;
         }
 
@@ -174,8 +174,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
         if (
             !activeTextRange?.collapsed ||
-            activeTextRange.startOffset < this._paragrahMenu.paragraph.paragraphStart ||
-            activeTextRange.startOffset > this._paragrahMenu.paragraph.paragraphEnd
+            activeTextRange.startOffset < this._paragraphMenu.paragraph.paragraphStart ||
+            activeTextRange.startOffset > this._paragraphMenu.paragraph.paragraphEnd
         ) {
             return false;
         }
@@ -223,8 +223,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     setParagraphMenuActive(active: boolean) {
-        if (this._paragrahMenu) {
-            this._paragrahMenu.active = active;
+        if (this._paragraphMenu) {
+            this._paragraphMenu.active = active;
         }
     }
 
@@ -251,7 +251,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                     return;
                 }
 
-                if (this._paragrahMenu?.target.kind === DocumentBlockType.TABLE) {
+                if (this._paragraphMenu?.target.kind === DocumentBlockType.TABLE) {
                     return;
                 }
 
@@ -265,7 +265,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 !this._floatMenuService.floatMenu &&
                 !this._context.unit.getDisabled()
             ) {
-                if (this._paragrahMenu?.active) {
+                if (this._paragraphMenu?.active) {
                     return;
                 }
 
@@ -302,7 +302,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe(({ textRanges, rectRanges }) => {
             const selectionState = this._getExpandedSelectionState([...textRanges, ...rectRanges]);
-            if (selectionState.hasExpandedTextRange || (selectionState.hasRectRange && this._paragrahMenu?.target.kind !== DocumentBlockType.TABLE)) {
+            if (selectionState.hasExpandedTextRange || (selectionState.hasRectRange && this._paragraphMenu?.target.kind !== DocumentBlockType.TABLE)) {
                 this.hideParagraphMenu(true);
             }
         }));
@@ -314,7 +314,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
 
             lastScrollY = e.scrollY;
-            if (this._paragrahMenu?.blockRange) {
+            if (this._paragraphMenu?.blockRange) {
                 return;
             }
             if (this._isBlockMenuDragging) {
@@ -429,7 +429,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _getSlashMenuParagraph(config: IEditorInputConfig): IMutiPageParagraphBound | null {
         const activeRange = this._getCollapsedTextRange(config);
         const offset = activeRange?.startOffset;
-        const activeParagraph = this._paragrahMenu?.paragraph ?? null;
+        const activeParagraph = this._paragraphMenu?.paragraph ?? null;
 
         if (activeParagraph && offset != null && offset >= activeParagraph.paragraphStart && offset <= activeParagraph.paragraphEnd) {
             return activeParagraph;
@@ -478,7 +478,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             return;
         }
 
-        if (this._paragrahMenu?.target.key === target.key) {
+        if (this._paragraphMenu?.target.key === target.key) {
             return;
         }
 
@@ -521,7 +521,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             this._context.unitId
         );
 
-        this._paragrahMenu = {
+        this._paragraphMenu = {
             paragraph: targetParagraph,
             target,
             blockRange,
@@ -565,7 +565,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             return;
         }
 
-        if (this._paragrahMenu?.target.key === target.key) {
+        if (this._paragraphMenu?.target.key === target.key) {
             return;
         }
 
@@ -595,7 +595,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             this._context.unitId
         );
 
-        this._paragrahMenu = {
+        this._paragraphMenu = {
             paragraph,
             target,
             disposable,
@@ -605,7 +605,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     private _shouldKeepCurrentCellMenuForTable(table: ICustomTable): boolean {
-        const target = this._paragrahMenu?.target;
+        const target = this._paragraphMenu?.target;
         if (!target || target.kind === DocumentBlockType.TABLE || !target.cellRange) {
             return false;
         }
@@ -665,9 +665,9 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             return;
         }
 
-        if (this._paragrahMenu && ((this._paragrahMenu.disposable.canDispose() || force))) {
-            this._paragrahMenu.disposable.dispose();
-            this._paragrahMenu = null;
+        if (this._paragraphMenu && ((this._paragraphMenu.disposable.canDispose() || force))) {
+            this._paragraphMenu.disposable.dispose();
+            this._paragraphMenu = null;
             this._isSlashMenuActive = false;
             this._slashMenuRequest$.next(null);
             this._activeTarget$.next(null);

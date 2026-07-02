@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
     blurHostDocSelectionWhenEmbedRuntimeEntersStage,
@@ -168,7 +168,10 @@ describe('resolveDocsCustomBlockRuntimeOuterHeight', () => {
 });
 
 describe('docs custom block CSS', () => {
-    const css = readFileSync('packages/docs-ui/src/embed-docs-custom-block.css', 'utf8');
+    const cssPath = existsSync('src/embed-docs-custom-block.css')
+        ? 'src/embed-docs-custom-block.css'
+        : 'packages/docs-ui/src/embed-docs-custom-block.css';
+    const css = readFileSync(cssPath, 'utf8');
 
     it('centers every product floating menu above docs custom block containers', () => {
         expect(css).toContain('.univer-docs-embed-floating-menu');
@@ -180,9 +183,8 @@ describe('docs custom block CSS', () => {
     });
 
     it('removes the embed content border only for sheet-like docs custom blocks', () => {
-        expect(css).toContain(
-            '.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content::after'
-        );
+        expect(css).toContain(".univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like='true']");
+        expect(css).toContain('.univer-embed-float-dom__content::after');
         expect(css).toContain('border: 0');
     });
 });

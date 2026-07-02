@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
-import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, divideXClassName, Dropdown } from '@univerjs/design';
 import { MoreVerticalIcon } from '@univerjs/icons';
-import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
-import { useDependency, useObservable } from '../../../utils/di';
+import { RediProvider, useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ClassicMenu } from './ribbon-menu/ClassicMenu';
 import { DefaultMenu } from './ribbon-menu/DefaultMenu';
@@ -37,10 +37,11 @@ interface IRibbonProps {
     headerMenuComponents?: Set<ComponentType>;
     headerMenu?: boolean;
     toolbarOnly?: boolean;
+    headerClassName?: string;
 }
 
 export function Ribbon(props: IRibbonProps) {
-    const { ribbonType, headerMenuComponents, headerMenu = true, toolbarOnly = false } = props;
+    const { ribbonType, headerMenuComponents, headerMenu = true, toolbarOnly = false, headerClassName } = props;
 
     const defaultRibbonService = useDependency(IRibbonService);
     const ribbonOverrideService = useDependency(IRibbonOverrideService);
@@ -218,11 +219,19 @@ export function Ribbon(props: IRibbonProps) {
         );
     }, [activeGroup.allGroups, fakeToolbarVisible]);
 
-    return (
+    const embedRibbonOverrideAttributes = ribbonOverride
+        ? {
+            'data-embed-ribbon-override': 'true',
+            'data-embed-id': ribbonOverride.id,
+        }
+        : {};
+
+    const content = (
         <>
             <div
                 data-u-comp="ribbon-header-menu"
-                className={clsx('univer-relative univer-select-none', {
+                {...embedRibbonOverrideAttributes}
+                className={clsx('univer-relative univer-select-none', headerClassName, {
                     'univer-hidden': toolbarOnly,
                     'univer-h-9': !toolbarOnly && (ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0)),
                 })}
@@ -272,6 +281,7 @@ export function Ribbon(props: IRibbonProps) {
 
             {!hideToolbar && (
                 <div
+                    {...embedRibbonOverrideAttributes}
                     className={clsx(`
                       univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
                       univer-text-sm
@@ -370,5 +380,35 @@ export function Ribbon(props: IRibbonProps) {
             {/* fake toolbar */}
             {fakeToolbar}
         </>
+    );
+
+    return (
+        <RibbonOverrideRuntimeProvider override={ribbonOverride}>
+            {content}
+        </RibbonOverrideRuntimeProvider>
+    );
+}
+
+function RibbonOverrideRuntimeProvider(props: {
+    override: ReturnType<IRibbonOverrideService['getOverride']>;
+    children: ReactNode;
+}) {
+    const { override, children } = props;
+    const config = useContext(ConfigContext);
+
+    if (!override?.injector) {
+        return children;
+    }
+
+    return (
+        <RediProvider value={{ injector: override.injector as never }}>
+            <ConfigProvider
+                locale={config.locale}
+                direction={config.direction}
+                mountContainer={override.portalContainer ?? config.mountContainer}
+            >
+                {children}
+            </ConfigProvider>
+        </RediProvider>
     );
 }

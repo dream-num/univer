@@ -1268,6 +1268,9 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
+      '@univerjs/embed':
+        specifier: workspace:*
+        version: link:../embed
       '@univerjs/embed-ui':
         specifier: workspace:*
         version: link:../embed-ui

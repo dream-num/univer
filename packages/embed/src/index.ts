@@ -79,14 +79,14 @@ export type {
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 export {
-    createDefaultReferencedUnitFacadeResolvers,
-    EmbedReferencedUnitFacadeResolverRegistryService,
-    flushPendingReferencedUnitFacadeResolvers,
-    registerReferencedUnitFacadeResolvers,
+    createDefaultReferencedUnitApiResolvers,
+    EmbedReferencedUnitApiResolverRegistryService,
+    flushPendingReferencedUnitApiResolvers,
+    registerReferencedUnitApiResolvers,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
 export type {
-    IReferencedUnitFacadeResolveContext,
-    IReferencedUnitFacadeResolverRegistration,
+    IReferencedUnitApiResolveContext,
+    IReferencedUnitApiResolverRegistration,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';

@@ -45,8 +45,8 @@ import {
     EmbedInteractionBoundaryService,
 } from '../services/embed-interaction-boundary.service';
 import { EmbedMountService } from '../services/embed-mount.service';
-import { EmbedPassiveWheelHandlerRegistryService } from '../services/embed-passive-wheel-handler-registry.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
+import { EmbedPassiveWheelHandlerRegistryService } from '../services/embed-passive-wheel-handler-registry.service';
 import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
     EmbedRuntimeFocusCoordinator,
@@ -64,6 +64,7 @@ const EMBED_FLOAT_DOM_RECT_CACHE = new Map<HTMLElement, IEmbedFloatDomRectCache>
 const EMBED_STAGE2_FOCUS_OWNER = 'stage2-runtime';
 const EMBED_DOC_BLOCK_STAGE2_FOCUS_OWNER = 'doc-block-stage2-runtime';
 const EMBED_STAGE2_RUNTIME_FOCUS_OWNERS = [EMBED_STAGE2_FOCUS_OWNER, EMBED_DOC_BLOCK_STAGE2_FOCUS_OWNER];
+const EMBED_FLOAT_CHROME_CONTROL_SELECTOR = '[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"], [data-embed-floating-menu-popup="true"], [data-embed-ribbon-override="true"]';
 
 interface IEmbedFloatDomRectCache {
     left: number;
@@ -394,6 +395,7 @@ export function EmbedFloatDomRenderer(props: {
                 return;
             }
 
+            activationService.clearFloating(data.embedId, data.hostUnitId);
             mountService.unmount(data.embedId);
             if (fullscreenRemountFrameRef.current != null) {
                 cancelFrame(fullscreenRemountFrameRef.current);
@@ -422,7 +424,7 @@ export function EmbedFloatDomRenderer(props: {
                 fullscreenRemountFrameRef.current = undefined;
             }
         };
-    }, [data?.embedId, fullscreenService, mountService]);
+    }, [activationService, data?.embedId, data?.hostUnitId, fullscreenService, mountService]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -635,7 +637,7 @@ export function EmbedFloatDomRenderer(props: {
                 !target ||
                 container.contains(target) ||
                 chrome?.contains(target) ||
-                target.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]') ||
+                target.closest(EMBED_FLOAT_CHROME_CONTROL_SELECTOR) ||
                 focusCoordinator.containsElement(data.embedId, target, event) ||
                 interactionBoundaryService.contains(data.embedId, target, event) ||
                 externalHostInteraction ||
@@ -666,7 +668,7 @@ export function EmbedFloatDomRenderer(props: {
                 !isHostFocusSurface(target) ||
                 container.contains(target) ||
                 chrome?.contains(target) ||
-                target.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]') ||
+                target.closest(EMBED_FLOAT_CHROME_CONTROL_SELECTOR) ||
                 focusCoordinator.containsElement(data.embedId, target, event) ||
                 interactionBoundaryService.contains(data.embedId, target, event)
             ) {
@@ -719,7 +721,7 @@ export function EmbedFloatDomRenderer(props: {
                 return;
             }
             const target = event.target as HTMLElement | null;
-            if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]')) {
+            if (target?.closest(EMBED_FLOAT_CHROME_CONTROL_SELECTOR)) {
                 return;
             }
 
@@ -786,12 +788,12 @@ export function EmbedFloatDomRenderer(props: {
                 return;
             }
             if (currentStage === 'stage1') {
-                activationService.activateFloating(descriptor, 'stage2');
+                activationService.activateFloating(descriptor, 'stage2', { portalContainer: popupRootRef.current });
                 return;
             }
             if (interactionFlow === 'doc-block') {
                 acquireStage2SessionLease();
-                activationService.activateFloating(descriptor, 'stage2');
+                activationService.activateFloating(descriptor, 'stage2', { portalContainer: popupRootRef.current });
                 releaseStage2SessionLeaseIfActivationDoesNotStick();
                 return;
             }
@@ -1001,7 +1003,7 @@ export function EmbedFloatDomRenderer(props: {
                 }
 
                 acquireStage2SessionLease();
-                activationService.activateFloating(descriptor, 'stage2');
+                activationService.activateFloating(descriptor, 'stage2', { portalContainer: popupRootRef.current });
                 releaseStage2SessionLeaseIfActivationDoesNotStick();
             }
             if (isChildEditorOrPopupRuntimeElement(event.target)) {
@@ -1467,18 +1469,23 @@ function isPointInsideFloatBlock(container: HTMLElement, event: PointerEvent): b
 }
 
 function isPointInsideDocsSheetLikeFloatBlock(container: HTMLElement, event: PointerEvent): boolean {
+    const embedId = container.dataset.embedId;
     const runtimeRects = [
         container.querySelector<HTMLElement>('.univer-embed-float-dom__live-canvas')?.getBoundingClientRect(),
         container.querySelector<HTMLElement>('.univer-embed-float-dom__live-content')?.getBoundingClientRect(),
     ].filter((rect): rect is DOMRect => !!rect && rect.width > 0 && rect.height > 0);
-    const chrome = document.querySelector<HTMLElement>(`.univer-embed-float-dom__chrome[data-embed-id="${container.dataset.embedId}"]`);
+    const chrome = document.querySelector<HTMLElement>(`.univer-embed-float-dom__chrome[data-embed-id="${embedId}"]`);
     const chromeControlRects = [
         chrome?.querySelector<HTMLElement>('[data-embed-floating-menu="true"]')?.getBoundingClientRect(),
         chrome?.querySelector<HTMLElement>('[data-embed-float-fullscreen-button]')?.getBoundingClientRect(),
         chrome?.querySelector<HTMLElement>('[data-embed-float-drag-handle="true"]')?.getBoundingClientRect(),
     ].filter((rect): rect is DOMRect => !!rect && rect.width > 0 && rect.height > 0);
+    const floatingMenuPopupRects = Array.from(document.querySelectorAll<HTMLElement>('[data-embed-floating-menu-popup="true"]'))
+        .filter((element) => element.dataset.embedId === embedId)
+        .map((element) => element.getBoundingClientRect())
+        .filter((rect): rect is DOMRect => rect.width > 0 && rect.height > 0);
 
-    return [...runtimeRects, ...chromeControlRects].some((rect) =>
+    return [...runtimeRects, ...chromeControlRects, ...floatingMenuPopupRects].some((rect) =>
         event.clientX >= rect.left &&
         event.clientX <= rect.right &&
         event.clientY >= rect.top &&

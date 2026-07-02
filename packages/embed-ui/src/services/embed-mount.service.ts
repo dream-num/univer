@@ -28,8 +28,8 @@ import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
 import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
 import { EmbedOverlayRootService } from './embed-overlay-root.service';
-import { EmbedRuntimePolicyService } from './embed-runtime-policy.service';
 import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
+import { EmbedRuntimePolicyService } from './embed-runtime-policy.service';
 import { EmbedSceneCanvasCaptureService } from './embed-scene-canvas-capture.service';
 
 export const EMBED_DUPLICATE_CHILD_UNIT_ERROR_CODE = 'EMBED_DUPLICATE_CHILD_UNIT';
@@ -51,6 +51,11 @@ export class EmbedMountService {
         session: IEmbedMountSession;
         disposables: IDisposable[];
         setActive: (active: boolean) => void;
+    }>();
+
+    private readonly _tabFocusLeases = new Map<string, {
+        hostUnitId: string;
+        disposable: IDisposable;
     }>();
 
     constructor(
@@ -270,6 +275,7 @@ export class EmbedMountService {
             return;
         }
 
+        this._releaseTabPeerFocusLease(embedId);
         [...current.disposables].reverse().forEach((disposable) => disposable.dispose());
         this._sessions.delete(embedId);
     }
@@ -322,6 +328,7 @@ export class EmbedMountService {
             }
 
             this._runChildBeforeDeactivate(entry.session);
+            this._releaseTabPeerFocusLease(entry.session.embedId);
             entry.setActive(false);
             deactivatedSessions.push(entry.session);
         });
@@ -551,7 +558,7 @@ export class EmbedMountService {
         };
         const focusChild = (event?: PointerEvent | FocusEvent) => {
             const target = event?.target instanceof Element ? event.target : null;
-            if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]')) {
+            if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"], [data-embed-floating-menu-popup="true"], [data-embed-ribbon-override="true"]')) {
                 return;
             }
             if (!descriptor.childUnitId || descriptor.childType == null) {
@@ -647,6 +654,7 @@ export class EmbedMountService {
     }
 
     private _focusTabPeerSession(session: IEmbedMountSession): void {
+        this._activateTabPeerFocusLease(session);
         if (this._injector.has(IUniverInstanceService)) {
             const instanceService = this._injector.get(IUniverInstanceService);
             instanceService.setCurrentUnitForType(session.childUnitId);
@@ -668,6 +676,50 @@ export class EmbedMountService {
                 reason: 'keyboard',
             });
         }
+    }
+
+    private _activateTabPeerFocusLease(session: IEmbedMountSession): void {
+        if (!this._injector.has(EmbedRuntimeFocusCoordinator)) {
+            return;
+        }
+
+        this._releaseTabPeerFocusLeasesForHost(session.hostUnitId, session.embedId);
+        this._releaseTabPeerFocusLease(session.embedId);
+
+        const focusCoordinator = this._injector.get(EmbedRuntimeFocusCoordinator);
+        const disposable = focusCoordinator.acquireLease({
+            embedId: session.embedId,
+            role: 'child-session',
+            owner: 'tab-peer-runtime',
+            hostUnitId: session.hostUnitId,
+            childUnitId: session.childUnitId,
+            childType: session.childType,
+        });
+        this._tabFocusLeases.set(session.embedId, {
+            hostUnitId: session.hostUnitId,
+            disposable,
+        });
+    }
+
+    private _releaseTabPeerFocusLeasesForHost(hostUnitId: string, exceptEmbedId?: string): void {
+        [...this._tabFocusLeases.entries()].forEach(([embedId, lease]) => {
+            if (embedId === exceptEmbedId || lease.hostUnitId !== hostUnitId) {
+                return;
+            }
+
+            lease.disposable.dispose();
+            this._tabFocusLeases.delete(embedId);
+        });
+    }
+
+    private _releaseTabPeerFocusLease(embedId: string): void {
+        const lease = this._tabFocusLeases.get(embedId);
+        if (!lease) {
+            return;
+        }
+
+        lease.disposable.dispose();
+        this._tabFocusLeases.delete(embedId);
     }
 
     private _createMountFocusRestorer(descriptor: IEmbedDescriptor): IDisposable {

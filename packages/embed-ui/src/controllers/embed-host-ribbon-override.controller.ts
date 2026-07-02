@@ -68,6 +68,8 @@ export class EmbedHostRibbonOverrideController extends Disposable {
                 this._ribbonOverrideService.activate({
                     id: override.embedId,
                     ribbonService: ribbonOverride.ribbonService,
+                    injector: ribbonOverride.injector,
+                    portalContainer: ribbonOverride.portalContainer ?? override.portalContainer,
                     placeholderTitle: ribbonOverride.placeholderTitle,
                     hideToolbar: ribbonOverride.hideToolbar,
                 });

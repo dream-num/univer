@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, IAccessor, IDisposable, IExecutionOptions, Injector, UniverInstanceType } from '@univerjs/core';
+import type { DependencyIdentifier, IAccessor, IDisposable, IExecutionOptions, Injector } from '@univerjs/core';
 import type { IMenuSchema, MenuSchemaType } from '@univerjs/ui';
 import type { IEmbedProductMenuMountContext } from '../types/embed-ui';
-import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { COMMAND_EXECUTION_INJECTOR_KEY, FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, ICommandService, IConfigService, IContextService, IUniverInstanceService, LocaleService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, Ribbon } from '@univerjs/ui';
 import { createElement } from 'react';
 import { map, merge, of } from 'rxjs';
@@ -26,7 +26,7 @@ import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.
 import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
 export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountContext): IDisposable | undefined {
-    const { container, portalContainer, injector, childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, headerMenu = false, toolbarOnly, scopedActionServiceTokens } = context;
+    const { container, portalContainer, injector, childType, childUnitId, embedId, menuSchema, menuTitlePrefix, activeRibbonTab, headerMenu = false, toolbarOnly, ribbonHeaderClassName, scopedActionServiceTokens } = context;
     if (menuSchema != null && typeof menuSchema !== 'object') {
         return undefined;
     }
@@ -44,7 +44,7 @@ export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountConte
     root.render(createElement(
         EmbedRuntimeProviders,
         { injector: scoped.injector as Injector, mountContainer: portalContainer ?? container, embedId },
-        createElement(Ribbon, { ribbonType: 'classic', headerMenu, toolbarOnly })
+        createElement(Ribbon, { ribbonType: 'classic', headerMenu, toolbarOnly, headerClassName: ribbonHeaderClassName })
     ));
 
     return toDisposable(() => {
@@ -79,6 +79,9 @@ export function createEmbedProductMenuInjector(
         embedId,
         () => scopedInjector
     );
+    const contextService = childUnitId && injector.has(IContextService)
+        ? createScopedEmbedProductContextService(injector.get(IContextService), childType)
+        : undefined;
     let menuManager: IMenuManagerService;
     let menuManagerDisposable: IDisposable | undefined;
     const ribbonServiceRef: { current?: DesktopRibbonService } = {};
@@ -87,6 +90,7 @@ export function createEmbedProductMenuInjector(
         if (
             identifier === IUniverInstanceService ||
             identifier === ICommandService ||
+            (identifier === IContextService && contextService) ||
             identifier === IMenuManagerService ||
             identifier === IRibbonService
         ) {
@@ -101,6 +105,9 @@ export function createEmbedProductMenuInjector(
         }
         if (identifier === ICommandService) {
             return commandService;
+        }
+        if (identifier === IContextService && contextService) {
+            return contextService;
         }
         if (identifier === IMenuManagerService) {
             return menuManager;
@@ -288,6 +295,56 @@ function createScopedEmbedProductInstanceService(
             return Reflect.get(target, property, receiver);
         },
     });
+}
+
+function createScopedEmbedProductContextService(
+    contextService: IContextService,
+    childType: UniverInstanceType
+): IContextService {
+    return new Proxy(contextService, {
+        get(target, property, receiver) {
+            if (property === 'getContextValue') {
+                return (key: string) => {
+                    const value = getScopedEmbedProductFocusContextValue(key, childType);
+                    return value ?? target.getContextValue(key);
+                };
+            }
+            if (property === 'subscribeContextValue$') {
+                return (key: string) => {
+                    const value = getScopedEmbedProductFocusContextValue(key, childType);
+                    return value == null ? target.subscribeContextValue$(key) : of(value);
+                };
+            }
+
+            return Reflect.get(target, property, receiver);
+        },
+    });
+}
+
+function getScopedEmbedProductFocusContextValue(key: string, childType: UniverInstanceType): boolean | undefined {
+    if (key === FOCUSING_UNIT) {
+        return true;
+    }
+
+    if (key === FOCUSING_SHEET || key === FOCUSING_DOC || key === FOCUSING_SLIDE) {
+        return key === getFocusContextKeyByUnitType(childType);
+    }
+
+    return undefined;
+}
+
+function getFocusContextKeyByUnitType(childType: UniverInstanceType): string | undefined {
+    if (childType === UniverInstanceType.UNIVER_SHEET) {
+        return FOCUSING_SHEET;
+    }
+    if (childType === UniverInstanceType.UNIVER_DOC) {
+        return FOCUSING_DOC;
+    }
+    if (childType === UniverInstanceType.UNIVER_SLIDE) {
+        return FOCUSING_SLIDE;
+    }
+
+    return undefined;
 }
 
 function createScopedEmbedProductCommandService(

@@ -27,7 +27,7 @@ import type {
 import type { FEmbedHostSurface } from './f-enum';
 import { generateRandomId, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitFacadeResolverRegistryService, EmbedReferencedUnitManagerService, normalizeResourceRefLocator } from '@univerjs/embed';
+import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitManagerService, normalizeResourceRefLocator } from '@univerjs/embed';
 import { FEmbed } from './f-embed';
 
 export interface ICreateEmbedHostParams {
@@ -226,11 +226,11 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
             createOptions,
         });
         const record = await handle.loaded;
-        return this._injector.get(EmbedReferencedUnitFacadeResolverRegistryService).resolve<FResolvedUnitFacade<TUnitFacade, TUnitType>>({
+        return this._injector.get(EmbedReferencedUnitApiResolverRegistryService).resolve<FResolvedUnitFacade<TUnitFacade, TUnitType>>({
             unitId: record.unitId,
             unitType: record.unitType,
             injector: this._injector,
-            univerAPI: this,
+            api: this,
         });
     }
 

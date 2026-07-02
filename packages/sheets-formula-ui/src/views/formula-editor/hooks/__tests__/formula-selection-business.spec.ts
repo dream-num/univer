@@ -22,7 +22,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { focusFormulaEditor, hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, shouldSkipFormulaEditorMouseUpFocus } from '../use-focus';
 import { FormulaSelectingType, resolveFormulaSelectionCursorIndex, resolveFormulaSelectionDataStream, resolveFormulaSelectionWorkbook, shouldSkipReferenceEditingByPointer } from '../use-formula-selection';
 import { buildTextRuns, calcHighlightRanges } from '../use-highlight';
-import { createSelectionChangeHandler, getInitialFormulaReferenceSelectionCount, getLastFormulaSelection, getSelectionsForFormulaRefUpdate, prepareSelectionChangeContext, replaceFormulaControlSelection } from '../use-sheet-selection-change';
+import { createSelectionChangeDuplicateEndGuard, createSelectionChangeHandler, getInitialFormulaReferenceSelectionCount, getLastFormulaSelection, getSelectionsForFormulaRefUpdate, getSharedSelectionChangeDuplicateEndGuard, isSameFormulaSelection, prepareSelectionChangeContext, replaceFormulaControlSelection } from '../use-sheet-selection-change';
 
 function range(row: number, col: number, sheetId = 'sheet1', unitId = 'unit1') {
     return {
@@ -209,7 +209,7 @@ describe('formula selection update helpers', () => {
         expect(onSelectionsChange).toHaveBeenLastCalledWith([range(3, 3)], false, false);
     });
 
-    it('keeps the first user-created formula reference when no initial reference selection exists', () => {
+    it('ignores replayed initial formula references when no initial reference selection exists', () => {
         const onSelectionsChange = vi.fn();
         const handler = createSelectionChangeHandler({
             initialSelectionsCount: 0,
@@ -218,7 +218,7 @@ describe('formula selection update helpers', () => {
 
         handler([range(7, 5)], true, { initial: true });
 
-        expect(onSelectionsChange).toHaveBeenCalledWith([range(7, 5)], true, false);
+        expect(onSelectionsChange).not.toHaveBeenCalled();
     });
 
     it('uses the formula text end as the insertion context when the embedded editor selection is temporarily empty', () => {
@@ -270,11 +270,80 @@ describe('formula selection update helpers', () => {
         expect(onSelectionsChange).toHaveBeenCalledTimes(1);
     });
 
+    it('does not reapply the same click-created formula reference on selection end', () => {
+        const onSelectionsChange = vi.fn();
+        const handler = createSelectionChangeHandler({
+            initialSelectionsCount: 0,
+            onSelectionsChange,
+        });
+
+        handler([range(7, 5)], false);
+        handler([range(7, 5)], true);
+
+        expect(onSelectionsChange).toHaveBeenCalledWith([range(7, 5)], false, false);
+        expect(onSelectionsChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reapply the same click-created formula reference while selection is still moving', () => {
+        const onSelectionsChange = vi.fn();
+        const handler = createSelectionChangeHandler({
+            initialSelectionsCount: 0,
+            onSelectionsChange,
+        });
+
+        handler([range(7, 5)], false);
+        handler([range(7, 5)], false);
+
+        expect(onSelectionsChange).toHaveBeenCalledWith([range(7, 5)], false, false);
+        expect(onSelectionsChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('dedupes the same formula reference when selection end is reported by another source', () => {
+        const duplicateEndGuard = createSelectionChangeDuplicateEndGuard();
+        const onSelectionsChange = vi.fn();
+        const handler = createSelectionChangeHandler({
+            initialSelectionsCount: 0,
+            duplicateEndGuard,
+            onSelectionsChange,
+        });
+        const selectedRange = range(7, 5);
+        const renderedRange = { ...selectedRange, startX: 10, endX: 20, startY: 30, endY: 40 };
+
+        handler([renderedRange], false);
+        if (!duplicateEndGuard.shouldSkip([selectedRange], true)) {
+            onSelectionsChange([selectedRange], true);
+        }
+
+        expect(onSelectionsChange).toHaveBeenCalledWith([renderedRange], false, false);
+        expect(onSelectionsChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('matches formula selections by range identity instead of render coordinates', () => {
+        expect(isSameFormulaSelection(
+            { ...range(7, 5), startX: 10, endX: 20 },
+            range(7, 5, 'other-sheet', 'other-unit')
+        )).toBe(true);
+        expect(isSameFormulaSelection(
+            { ...range(7, 5), startX: 10, endX: 20 },
+            range(7, 6)
+        )).toBe(false);
+    });
+
+    it('shares duplicate formula selection guards across paired formula editors', () => {
+        const guardFromCellEditor = getSharedSelectionChangeDuplicateEndGuard('unit1:sheet1:test');
+        const guardFromFormulaBar = getSharedSelectionChangeDuplicateEndGuard('unit1:sheet1:test');
+
+        expect(guardFromCellEditor.shouldSkip([range(7, 5)], false)).toBe(false);
+        expect(guardFromFormulaBar.shouldSkip([range(7, 5)], false)).toBe(true);
+
+        guardFromCellEditor.reset();
+    });
+
     it('counts only rendered formula reference controls and parsed formula references as initial references', () => {
         expect(getInitialFormulaReferenceSelectionCount(0, 0)).toBe(0);
         expect(getInitialFormulaReferenceSelectionCount(0, 2)).toBe(2);
         expect(getInitialFormulaReferenceSelectionCount(1, 0)).toBe(1);
-        expect(getInitialFormulaReferenceSelectionCount(1, 0, FormulaSelectingType.NEED_ADD)).toBe(0);
+        expect(getInitialFormulaReferenceSelectionCount(1, 0, FormulaSelectingType.NEED_ADD)).toBe(1);
         expect(getInitialFormulaReferenceSelectionCount(1, 1, FormulaSelectingType.NEED_ADD)).toBe(1);
     });
 

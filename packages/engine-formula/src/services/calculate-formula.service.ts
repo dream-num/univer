@@ -75,7 +75,7 @@ export interface ICalculateFormulaService {
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
     stopFormulaExecution(): void;
-    calculate(formulaString: string, transformSuffix?: boolean): void;
+    calculate(formulaString: string, transformSuffix?: boolean, unitId?: string): void;
     executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData): Promise<IFormulaExecuteResultMap>;
     getAllDependencyJson(rowData?: IUnitRowData): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number, rowData?: IUnitRowData): Promise<IFormulaDependencyTreeFullJson | undefined>;
@@ -298,6 +298,16 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         const treeCount = treeList.length;
         while (treeList.length > 0) {
             const tree = treeList.pop()!;
+
+            this._runtimeService.setCurrent(
+                tree.row,
+                tree.column,
+                tree.rowCount,
+                tree.columnCount,
+                tree.subUnitId,
+                tree.unitId
+            );
+
             const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
             const nodeData = {
                 node,
@@ -337,15 +347,6 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     return;
                 }
             }
-
-            this._runtimeService.setCurrent(
-                tree.row,
-                tree.column,
-                tree.rowCount,
-                tree.columnCount,
-                tree.subUnitId,
-                tree.unitId
-            );
 
             let value: FunctionVariantType;
 
@@ -497,10 +498,11 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return result;
     }
 
-    async calculate(formulaString: string) {
+    async calculate(formulaString: string, transformSuffix = true, unitId?: string) {
         // TODO how to observe @alex
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this._lexer.treeBuilder(formulaString);
+        const executeUnitId = unitId || this._runtimeService.currentUnitId || this._currentConfigService.getExecuteUnitId();
+        const lexerNode = this._lexer.treeBuilder(formulaString, transformSuffix, executeUnitId);
 
         if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
             return;

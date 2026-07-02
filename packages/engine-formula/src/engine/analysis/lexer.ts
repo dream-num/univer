@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { Disposable, Inject } from '@univerjs/core';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -28,13 +29,13 @@ export class Lexer extends Disposable {
         super();
     }
 
-    treeBuilder(formulaString: string, transformSuffix = true) {
+    treeBuilder(formulaString: string, transformSuffix = true, unitId?: Nullable<string>) {
         if (this._definedNamesService.getAllDefinedNamesIsEmpty()) {
             return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix);
         }
 
         return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, {
-            unitId: this._formulaCurrentConfigService.getExecuteUnitId(),
+            unitId: unitId ?? this._formulaCurrentConfigService.getExecuteUnitId(),
             getValueByName: this._definedNamesService.getValueByName.bind(this._definedNamesService),
             getDirtyDefinedNameMap: this._formulaCurrentConfigService.getDirtyDefinedNameMap.bind(this._formulaCurrentConfigService),
             getSheetName: this._formulaCurrentConfigService.getSheetName.bind(this._formulaCurrentConfigService),

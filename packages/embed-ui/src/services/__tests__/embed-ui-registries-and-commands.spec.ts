@@ -21,22 +21,22 @@
 import type { IAccessor, Injector } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
-import { EMBED_CHILD_CREATE_OPTIONS, ReferencedUnitOwnerKind } from '@univerjs/embed';
-import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
 import {
-    CopyHostEmbedCommand,
-    CreateHostEmbedCommand,
-    RemoveHostEmbedCommand,
-} from '../../commands/commands/embed-host-lifecycle.command';
-import {
+    CopyEmbedCommand,
+    CreateEmbedCommand,
+    CreateEmbedHostAnchorMutation,
+    EMBED_CHILD_CREATE_OPTIONS,
+    EmbedHostAdapterRegistryService,
+    EmbedHostAnchorModelService,
+    EmbedHostLifecycleService,
+    ReferencedUnitOwnerKind,
+    RemoveEmbedCommand,
+    RemoveEmbedHostAnchorMutation,
     RemoveEmbedHostAnchorRecordMutation,
     SetEmbedHostAnchorRecordMutation,
-} from '../../commands/mutations/embed-host-anchor-record.mutation';
-import {
-    CreateEmbedHostAnchorMutation,
-    RemoveEmbedHostAnchorMutation,
-} from '../../commands/mutations/embed-host-anchor.mutation';
+} from '@univerjs/embed';
+import { Subject } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 import {
     CREATE_EMBED_HOST_ANCHOR_MUTATION_ID,
     REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID,
@@ -52,19 +52,18 @@ import {
     EMBED_POPUP_ROOT_ATTRIBUTE,
     ensureEmbedDefaultRuntimeSlots,
 } from '../../common/embed-runtime-slots';
+import { UniverEmbedUIPlugin } from '../../plugin';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
+import { EmbedChildProductPluginRegistryService } from '../embed-child-product-plugin-registry.service';
 import { createEmbedChildRuntimeScope } from '../embed-child-runtime-scope';
 import { EmbedChildViewRegistryService } from '../embed-child-view-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../embed-floating-menu-registry.service';
 import { EmbedFullscreenService } from '../embed-fullscreen.service';
-import { EmbedHostAdapterRegistryService } from '../embed-host-adapter-registry.service';
-import { EmbedHostAnchorModelService } from '../embed-host-anchor-model.service';
 import { EmbedHostContainerRegistryService } from '../embed-host-container-registry.service';
-import { EmbedHostLifecycleService } from '../embed-host-lifecycle.service';
 import { EmbedHostMenuOverrideService } from '../embed-host-menu-override.service';
 import { EmbedHostRestoreService } from '../embed-host-restore.service';
 import { EmbedOverlayRootService } from '../embed-overlay-root.service';
-import { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution } from '../embed-product-menu-registry.service';
+import { EmbedProductMenuRegistryService, flushPendingEmbedProductMenuContributions, registerEmbedProductMenuContribution } from '../embed-product-menu-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from '../embed-readonly-preview-registry.service';
 
 describe('embed-ui registries and commands', () => {
@@ -298,12 +297,16 @@ describe('embed-ui registries and commands', () => {
         const instanceService = {
             getUnitType: vi.fn(() => UniverInstanceType.UNRECOGNIZED),
         };
+        const childProductPlugins = {
+            prepare: vi.fn(async () => {}),
+        };
         const service = new EmbedHostRestoreService(
             model as never,
             adapter as never,
             anchorModel as never,
             referencedUnitManager as never,
-            instanceService as never
+            instanceService as never,
+            childProductPlugins as unknown as EmbedChildProductPluginRegistryService
         );
 
         await expect(service.materializeDescriptor({ descriptor })).resolves.toBe(materializedDescriptor);
@@ -316,6 +319,12 @@ describe('embed-ui registries and commands', () => {
                 ownerId: 'embed-1',
             },
             createOptions: EMBED_CHILD_CREATE_OPTIONS,
+        });
+        expect(childProductPlugins.prepare).toHaveBeenCalledWith({
+            childUnitId: 'runtime-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            descriptor: materializedDescriptor,
+            restoreUnitId: 'host-1',
         });
         expect(model.addDescriptor).toHaveBeenCalledWith('host-1', materializedDescriptor);
         expect(adapter.restoreAnchor).not.toHaveBeenCalled();
@@ -464,12 +473,19 @@ describe('embed-ui registries and commands', () => {
         });
 
         expect(() => menuOverride.activate({ ...tabDescriptor, childUnitId: undefined }, 'tab-active')).toThrow('CHILD_NOT_RESOLVED');
-        expect(() => menuOverride.activate(createDescriptor(), 'float-active' as never)).toThrow('TAB_REQUIRED');
+        expect(() => menuOverride.activate(createDescriptor(), 'float-active' as never)).toThrow('UNSUPPORTED_REASON');
         expect(menuOverride.activate(tabDescriptor, 'tab-active', { layoutPolicy: { ribbon: 'child' } as never })).toBeNull();
         const override = menuOverride.activate(tabDescriptor, 'tab-active', { allowPlaceholder: true });
         expect(override).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-1', hideHostFxBar: true });
         menuOverride.clear('other');
         expect(menuOverride.getOverride()).toBe(override);
+        menuOverride.clear('embed-1');
+        expect(menuOverride.getOverride()).toBeNull();
+
+        expect(menuOverride.activate(createDescriptor(), 'float-stage2', { layoutPolicy: { ribbon: 'hidden' } })).toBeNull();
+        const floatingOverride = menuOverride.activate(createDescriptor(), 'float-stage2', { layoutPolicy: { ribbon: 'host' } });
+        expect(floatingOverride).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-1', reason: 'float-stage2' });
+        expect(floatingOverride?.hideHostFxBar).toBeUndefined();
         menuOverride.clear('embed-1');
         expect(menuOverride.getOverride()).toBeNull();
 
@@ -489,7 +505,7 @@ describe('embed-ui registries and commands', () => {
         expect(fullscreen.getSession()).toBeNull();
     });
 
-    it('executes embed host commands and mutations through their services', () => {
+    it('executes embed commands and host anchor mutations through their services', () => {
         const descriptor = createDescriptor();
         const lifecycle = {
             createEmbed: vi.fn(() => descriptor),
@@ -510,12 +526,12 @@ describe('embed-ui registries and commands', () => {
             [EmbedHostAnchorModelService, anchorModel],
         ]);
 
-        expect(CreateHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(descriptor);
-        expect(CopyHostEmbedCommand.handler(accessor, { sourceEmbedId: 'embed-1' } as never)).toMatchObject({ embedId: 'copy' });
-        expect(RemoveHostEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(true);
-        expect(CreateHostEmbedCommand.handler(accessor, undefined)).toBe(false);
-        expect(CopyHostEmbedCommand.handler(accessor, undefined)).toBe(false);
-        expect(RemoveHostEmbedCommand.handler(accessor, undefined)).toBe(false);
+        expect(CreateEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(descriptor);
+        expect(CopyEmbedCommand.handler(accessor, { sourceEmbedId: 'embed-1' } as never)).toMatchObject({ embedId: 'copy' });
+        expect(RemoveEmbedCommand.handler(accessor, { embedId: 'embed-1' } as never)).toBe(true);
+        expect(CreateEmbedCommand.handler(accessor, undefined)).toBe(false);
+        expect(CopyEmbedCommand.handler(accessor, undefined)).toBe(false);
+        expect(RemoveEmbedCommand.handler(accessor, undefined)).toBe(false);
 
         const mutationParams = {
             embedId: 'embed-1',
@@ -722,11 +738,18 @@ describe('embed-ui registries and commands', () => {
         const secondMount = vi.fn(() => toDisposable(secondMountDispose));
         const injector = createAccessor([[EmbedProductMenuRegistryService, registry]]) as Pick<Injector, 'get' | 'has'>;
 
-        expect(registerEmbedProductMenuContribution({ has: vi.fn(() => false), get: vi.fn() }, {
+        const pendingInjector = { has: vi.fn(() => false), get: vi.fn() } as unknown as Pick<Injector, 'get' | 'has'>;
+        const pendingDisposable = registerEmbedProductMenuContribution(pendingInjector, {
             childType: UniverInstanceType.UNIVER_SHEET,
             id: 'missing',
             menuSchema: {},
-        })).toBeUndefined();
+        });
+        expect(pendingDisposable).toBeDefined();
+        pendingDisposable?.dispose();
+        pendingInjector.has = vi.fn(() => true);
+        pendingInjector.get = vi.fn(() => registry);
+        flushPendingEmbedProductMenuContributions(pendingInjector);
+        expect(registry.getAll(UniverInstanceType.UNIVER_SHEET)).toHaveLength(0);
         expect(registerEmbedProductMenuContribution(injector, {
             childType: UniverInstanceType.UNIVER_SHEET,
             id: 'sheet-ribbon',
@@ -783,6 +806,29 @@ describe('embed-ui registries and commands', () => {
         disposable?.dispose();
         expect(firstMountDispose).toHaveBeenCalled();
         expect(secondMountDispose).toHaveBeenCalled();
+    });
+
+    it('registers child product plugin contributions from embed ui plugin config', () => {
+        const registry = new EmbedChildProductPluginRegistryService(createAccessor([]) as never);
+        const contribution = {
+            id: 'sheets-full',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            plugins: [],
+        };
+        const injector = createMutableInjector([
+            [EmbedHostAdapterRegistryService, new EmbedHostAdapterRegistryService()],
+            [EmbedChildProductPluginRegistryService, registry],
+        ]) as unknown as Injector;
+
+        const plugin = new UniverEmbedUIPlugin({
+            childProductPlugins: [contribution],
+            useDefaultFloatingMenus: false,
+            useDefaultHostToolbar: false,
+        }, injector);
+
+        plugin.onStarting();
+
+        expect(registry.getAll(UniverInstanceType.UNIVER_SHEET)).toEqual([contribution]);
     });
 
     it('registers floating menus with exact and fallback lookup', () => {
@@ -863,14 +909,46 @@ function createAccessor(entries: Array<[unknown, unknown]>): IAccessor {
     const map = new Map(entries);
     return {
         has: (token: unknown) => map.has(token),
-        get: (token: unknown) => {
+        get: ((token: unknown) => {
             if (!map.has(token)) {
                 throw new Error(`unexpected token: ${String(token)}`);
             }
 
             return map.get(token);
-        },
+        }) as never,
     } as IAccessor;
+}
+
+function createMutableInjector(entries: Array<[unknown, unknown]>): Pick<Injector, 'add' | 'get' | 'has'> {
+    const map = new Map(entries);
+    return {
+        add: (dependency: unknown) => {
+            const token = Array.isArray(dependency) ? dependency[0] : dependency;
+            if (!map.has(token)) {
+                map.set(token, createMutableDependencyValue(token));
+            }
+        },
+        has: (token: unknown) => map.has(token),
+        get: ((token: unknown) => {
+            if (!map.has(token)) {
+                throw new Error(`unexpected token: ${String(token)}`);
+            }
+
+            return map.get(token);
+        }) as never,
+    };
+}
+
+function createMutableDependencyValue(token: unknown): unknown {
+    if (typeof token === 'function') {
+        try {
+            return new (token as new () => unknown)();
+        } catch {
+            return {};
+        }
+    }
+
+    return {};
 }
 
 function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {

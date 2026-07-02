@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedHostMenuOverride } from '../types/embed-ui';
-import { Inject, IUniverInstanceService, Optional } from '@univerjs/core';
-import { EmbedFocusOwnerService } from '@univerjs/embed';
+import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, IContextService, Inject, IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
+import { EmbedFocusOwnerService, EmbedHostAdapterRegistryService } from '@univerjs/embed';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 import { EmbedBlockRegistryService } from './embed-block-registry.service';
 import { EmbedFloatingActiveService } from './embed-floating-active.service';
-import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 import { EmbedHostMenuOverrideService } from './embed-host-menu-override.service';
 import { EmbedMountService } from './embed-mount.service';
+
+export interface IEmbedFloatingActivationOptions {
+    portalContainer?: HTMLElement | null;
+}
 
 export class EmbedActivationService {
     private readonly _previousChildCurrentUnits = new Map<string, { childType: UniverInstanceType; unitId?: string }>();
@@ -36,7 +38,8 @@ export class EmbedActivationService {
         @Inject(EmbedHostMenuOverrideService) private readonly _menuOverrideService: EmbedHostMenuOverrideService,
         @Inject(EmbedMountService) private readonly _mountService: EmbedMountService,
         @Optional(EmbedBlockRegistryService) private readonly _blockRegistry?: EmbedBlockRegistryService,
-        @Optional(EmbedFloatingActiveService) private readonly _floatingActiveService?: EmbedFloatingActiveService
+        @Optional(EmbedFloatingActiveService) private readonly _floatingActiveService?: EmbedFloatingActiveService,
+        @Optional(IContextService) private readonly _contextService?: IContextService
     ) {
         // noop
     }
@@ -60,7 +63,7 @@ export class EmbedActivationService {
         });
     }
 
-    activateFloating(descriptor: IEmbedDescriptor, stage?: 'stage1' | 'stage2'): void {
+    activateFloating(descriptor: IEmbedDescriptor, stage?: 'stage1' | 'stage2', options: IEmbedFloatingActivationOptions = {}): void {
         this._assertResolvedChild(descriptor);
         this._focusOwnerService.setFocusOwner({
             hostUnitId: descriptor.hostUnitId,
@@ -83,11 +86,40 @@ export class EmbedActivationService {
         if (stage === 'stage2') {
             this._univerInstanceService.setCurrentUnitForType(descriptor.childUnitId!);
             this._univerInstanceService.focusUnit(descriptor.childUnitId!);
+            const contribution = this._blockRegistry?.get(descriptor.childType!);
+            this._menuOverrideService.activate(descriptor, 'float-stage2', {
+                layoutPolicy: contribution?.layoutPolicy?.float,
+                allowPlaceholder: contribution?.hostChromeMode === EmbedHostChromeMode.TITLE_ONLY || contribution?.hostHeaderMode === 'placeholder',
+                portalContainer: options.portalContainer,
+            });
         }
     }
 
-    focusFloatingRuntime(descriptor: IEmbedDescriptor): void {
-        this.activateFloating(descriptor, 'stage2');
+    focusFloatingRuntime(descriptor: IEmbedDescriptor, options: IEmbedFloatingActivationOptions = {}): void {
+        this.activateFloating(descriptor, 'stage2', options);
+    }
+
+    activateFullscreen(descriptor: IEmbedDescriptor): void {
+        this._assertResolvedChild(descriptor);
+        this._focusOwnerService.setFocusOwner({
+            hostUnitId: descriptor.hostUnitId,
+            embedId: descriptor.embedId,
+            childUnitId: descriptor.childUnitId!,
+            childType: descriptor.childType!,
+            reason: 'pointer',
+        });
+        this._focusUnit(descriptor.childUnitId!, descriptor.childType!);
+    }
+
+    clearFullscreen(descriptor: IEmbedDescriptor): void {
+        const owner = this._focusOwnerService.getFocusOwner();
+        if (owner?.embedId && owner.embedId !== descriptor.embedId) {
+            return;
+        }
+
+        this._focusOwnerService.clearFocusOwner(descriptor.embedId);
+        this._univerInstanceService.setCurrentUnitForType(descriptor.hostUnitId);
+        this._univerInstanceService.focusUnit(descriptor.hostUnitId);
     }
 
     clearFloating(embedId?: string, hostUnitId?: string): void {
@@ -97,13 +129,14 @@ export class EmbedActivationService {
         }
         const getActive = (this._floatingActiveService as { getActive?: () => ReturnType<EmbedFloatingActiveService['getActive']> } | undefined)?.getActive;
         const active = typeof getActive === 'function' ? getActive.call(this._floatingActiveService) : null;
-        if (embedId && !owner && active?.embedId !== embedId) {
+        if (embedId && !owner && active?.embedId !== embedId && !hostUnitId) {
             return;
         }
         const nextHostUnitId = hostUnitId ?? owner?.hostUnitId ?? active?.hostUnitId;
 
         this._floatingActiveService?.clear(embedId);
         this._focusOwnerService.clearFocusOwner(embedId);
+        this._menuOverrideService.clear(embedId);
         if (embedId) {
             this._mountService.deactivateFloatingSession(embedId);
         }
@@ -170,6 +203,33 @@ export class EmbedActivationService {
         return getAllUnitsForType?.call(this._univerInstanceService, type)
             ?.find((unit) => unit.getUnitId() !== excludedUnitId)
             ?.getUnitId();
+    }
+
+    private _focusUnit(unitId: string, unitType: UniverInstanceType): void {
+        const getCurrentUnitOfType = (this._univerInstanceService as unknown as {
+            getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
+        }).getCurrentUnitOfType;
+        const getFocusedUnit = (this._univerInstanceService as unknown as {
+            getFocusedUnit?: () => { getUnitId: () => string } | null | undefined;
+        }).getFocusedUnit;
+
+        if (
+            typeof getCurrentUnitOfType !== 'function' ||
+            getCurrentUnitOfType.call(this._univerInstanceService, unitType)?.getUnitId() !== unitId
+        ) {
+            this._univerInstanceService.setCurrentUnitForType(unitId);
+        }
+        if (
+            typeof getFocusedUnit !== 'function' ||
+            getFocusedUnit.call(this._univerInstanceService)?.getUnitId() !== unitId
+        ) {
+            this._univerInstanceService.focusUnit(unitId);
+        }
+
+        this._contextService?.setContextValue(FOCUSING_UNIT, true);
+        this._contextService?.setContextValue(FOCUSING_DOC, unitType === UniverInstanceType.UNIVER_DOC);
+        this._contextService?.setContextValue(FOCUSING_SHEET, unitType === UniverInstanceType.UNIVER_SHEET);
+        this._contextService?.setContextValue(FOCUSING_SLIDE, unitType === UniverInstanceType.UNIVER_SLIDE);
     }
 
     private _assertResolvedChild(descriptor: IEmbedDescriptor): void {

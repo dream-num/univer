@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IExecutionOptions, IUndoRedoItem, UniverInstanceType } from '@univerjs/core';
+import type { IAccessor, IDisposable, IExecutionOptions, IUndoRedoItem, UniverInstanceType } from '@univerjs/core';
 import type { ICreateEmbedCommandParams } from '@univerjs/embed';
 import type { MenuManagerService } from '@univerjs/ui';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
@@ -27,7 +27,16 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { CreateEmbedCommand } from '@univerjs/embed';
-import { IContextMenuService, ILayoutService, IMenuManagerService } from '@univerjs/ui';
+import {
+    CanvasPopupService,
+    ContextMenuService,
+    DesktopSidebarService,
+    ICanvasPopupService,
+    IContextMenuService,
+    ILayoutService,
+    IMenuManagerService,
+    ISidebarService,
+} from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
 import {
@@ -165,13 +174,36 @@ export function createEmbedChildUnitScopedInjector(
     if (scopedMenuManagerService) {
         scopedInjector.add([IMenuManagerService, { useValue: scopedMenuManagerService }]);
     }
-    const scopedContextMenuService = createScopedContextMenuService(context.injector, scopedInjector);
-    if (scopedContextMenuService) {
-        scopedInjector.add([IContextMenuService, { useValue: scopedContextMenuService }]);
+    const ownedFullscreenServices: IDisposable[] = [];
+    if (context.renderScope.fullscreen) {
+        const fullscreenContextMenuService = createFullscreenContextMenuService(scopedInjector);
+        const fullscreenPopupService = new CanvasPopupService();
+        const fullscreenSidebarService = new DesktopSidebarService();
+        scopedInjector.add([IContextMenuService, { useValue: fullscreenContextMenuService }]);
+        scopedInjector.add([ICanvasPopupService, { useValue: fullscreenPopupService }]);
+        scopedInjector.add([ISidebarService, { useValue: fullscreenSidebarService }]);
+        ownedFullscreenServices.push(fullscreenContextMenuService, fullscreenPopupService, fullscreenSidebarService);
+    } else {
+        const scopedContextMenuService = createScopedContextMenuService(context.injector, scopedInjector);
+        if (scopedContextMenuService) {
+            scopedInjector.add([IContextMenuService, { useValue: scopedContextMenuService }]);
+        }
     }
     const scopedLayoutService = createScopedLayoutService(context.injector, context);
     if (scopedLayoutService) {
         scopedInjector.add([ILayoutService, { useValue: scopedLayoutService }]);
+    }
+    if (ownedFullscreenServices.length) {
+        const disposeScopedInjector = scopedInjector.dispose.bind(scopedInjector);
+        let disposed = false;
+        scopedInjector.dispose = () => {
+            if (disposed) {
+                return;
+            }
+            disposed = true;
+            ownedFullscreenServices.forEach((service) => service.dispose());
+            disposeScopedInjector();
+        };
     }
 
     return scopedInjector;
@@ -624,6 +656,34 @@ function createScopedContextMenuService(parentInjector: Injector, scopedInjector
         triggerContextMenu,
         hideContextMenu: () => contextMenuService.hideContextMenu(),
         registerContextMenuHandler: (handler) => contextMenuService.registerContextMenuHandler(handler),
+    };
+}
+
+function createFullscreenContextMenuService(scopedInjector: Injector): IContextMenuService & IDisposable {
+    const contextMenuService = new ContextMenuService();
+    const triggerContextMenu: IContextMenuService['triggerContextMenu'] = (event, menuType, context) => {
+        contextMenuService.triggerContextMenu(event, menuType, {
+            ...context,
+            injector: scopedInjector,
+        });
+    };
+
+    return {
+        get disabled() {
+            return contextMenuService.disabled;
+        },
+        set disabled(value: boolean) {
+            contextMenuService.disabled = value;
+        },
+        get visible() {
+            return contextMenuService.visible;
+        },
+        enable: () => contextMenuService.enable(),
+        disable: () => contextMenuService.disable(),
+        triggerContextMenu,
+        hideContextMenu: () => contextMenuService.hideContextMenu(),
+        registerContextMenuHandler: (handler) => contextMenuService.registerContextMenuHandler(handler),
+        dispose: () => contextMenuService.dispose(),
     };
 }
 

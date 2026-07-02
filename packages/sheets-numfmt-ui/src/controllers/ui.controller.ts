@@ -170,9 +170,12 @@ export class SheetNumfmtUIController extends Disposable {
     };
 
     private _forceUpdate(unitId?: string): void {
-        const renderUnit = this._renderManagerService.getRenderById(
-            unitId ?? this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        );
+        const resolvedUnitId = unitId ?? this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+        if (!resolvedUnitId) {
+            return;
+        }
+
+        const renderUnit = this._renderManagerService.getRenderById(resolvedUnitId);
 
         renderUnit?.with(SheetSkeletonManagerService).reCalculate();
         renderUnit?.mainComponent?.makeDirty();

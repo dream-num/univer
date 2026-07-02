@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedActivationService } from '../embed-activation.service';
@@ -85,17 +86,19 @@ describe('EmbedActivationService', () => {
             activate: vi.fn(),
         };
         const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
+        const menuOverrideService = { activate: vi.fn(), clear: vi.fn() };
+        const blockRegistry = { get: vi.fn(() => ({ layoutPolicy: { float: { ribbon: 'host' } } })) };
         const service = new EmbedActivationService(
             univerInstanceService as never,
             focusOwnerService as never,
             { activateAnchor: vi.fn() } as never,
-            { activate: vi.fn(), clear: vi.fn() } as never,
+            menuOverrideService as never,
             mountService as never,
-            undefined,
+            blockRegistry as never,
             floatingActiveService as never
         );
 
-        service.activateFloating({
+        const descriptor: IEmbedDescriptor = {
             embedId: 'float-sheet',
             hostUnitId: 'host-doc',
             hostType: UniverInstanceType.UNIVER_DOC,
@@ -107,7 +110,9 @@ describe('EmbedActivationService', () => {
             },
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
-        }, 'stage2');
+        };
+
+        service.activateFloating(descriptor, 'stage2');
 
         expect(floatingActiveService.activate).toHaveBeenCalledWith({
             hostUnitId: 'host-doc',
@@ -116,6 +121,10 @@ describe('EmbedActivationService', () => {
         }, 'stage2');
         expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
         expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
+        expect(menuOverrideService.activate).toHaveBeenCalledWith(descriptor, 'float-stage2', {
+            layoutPolicy: { ribbon: 'host' },
+            allowPlaceholder: false,
+        });
     });
 
     it('focuses the child unit when a floating runtime enters interactive stage2', () => {
@@ -170,6 +179,106 @@ describe('EmbedActivationService', () => {
         }, 'stage2');
         expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
         expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
+    });
+
+    it('focuses the child unit for fullscreen runtimes without activating floating state', () => {
+        const univerInstanceService = {
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'host-doc' })),
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'host-doc' })),
+            setCurrentUnitForType: vi.fn(),
+            focusUnit: vi.fn(),
+        };
+        const focusOwnerService = {
+            setFocusOwner: vi.fn(),
+            clearFocusOwner: vi.fn(),
+        };
+        const floatingActiveService = {
+            activate: vi.fn(),
+        };
+        const menuOverrideService = { activate: vi.fn(), clear: vi.fn() };
+        const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
+        const contextService = { setContextValue: vi.fn() };
+        const service = new EmbedActivationService(
+            univerInstanceService as never,
+            focusOwnerService as never,
+            { activateAnchor: vi.fn() } as never,
+            menuOverrideService as never,
+            mountService as never,
+            undefined,
+            floatingActiveService as never,
+            contextService as never
+        );
+
+        service.activateFullscreen({
+            embedId: 'float-sheet',
+            hostUnitId: 'host-doc',
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
+            hostAnchorId: 'drawing-1',
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            },
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(focusOwnerService.setFocusOwner).toHaveBeenCalledWith({
+            hostUnitId: 'host-doc',
+            embedId: 'float-sheet',
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            reason: 'pointer',
+        });
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
+        expect(contextService.setContextValue).toHaveBeenCalledWith(expect.any(String), true);
+        expect(floatingActiveService.activate).not.toHaveBeenCalled();
+        expect(menuOverrideService.activate).not.toHaveBeenCalled();
+        expect(mountService.activateSession).not.toHaveBeenCalled();
+    });
+
+    it('restores host focus when clearing a fullscreen runtime', () => {
+        const univerInstanceService = {
+            setCurrentUnitForType: vi.fn(),
+            focusUnit: vi.fn(),
+        };
+        const focusOwnerService = {
+            getFocusOwner: vi.fn(() => ({
+                hostUnitId: 'host-doc',
+                embedId: 'float-sheet',
+                childUnitId: 'child-sheet',
+                childType: UniverInstanceType.UNIVER_SHEET,
+                reason: 'pointer' as const,
+            })),
+            setFocusOwner: vi.fn(),
+            clearFocusOwner: vi.fn(),
+        };
+        const service = new EmbedActivationService(
+            univerInstanceService as never,
+            focusOwnerService as never,
+            { activateAnchor: vi.fn() } as never,
+            { activate: vi.fn(), clear: vi.fn() } as never,
+            { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) } as never
+        );
+
+        service.clearFullscreen({
+            embedId: 'float-sheet',
+            hostUnitId: 'host-doc',
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
+            hostAnchorId: 'drawing-1',
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            },
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(focusOwnerService.clearFocusOwner).toHaveBeenCalledWith('float-sheet');
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('host-doc');
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('host-doc');
     });
 
     it('clears floating activation and restores host focus', () => {
@@ -258,7 +367,7 @@ describe('EmbedActivationService', () => {
         expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
     });
 
-    it('does not restore host focus when clearing an inactive floating embed', () => {
+    it('restores explicit host focus when clearing a floating embed without active ownership', () => {
         const univerInstanceService = {
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
@@ -289,11 +398,11 @@ describe('EmbedActivationService', () => {
 
         service.clearFloating('inactive-sheet', 'host-workbook');
 
-        expect(floatingActiveService.clear).not.toHaveBeenCalled();
-        expect(focusOwnerService.clearFocusOwner).not.toHaveBeenCalled();
-        expect(mountService.deactivateFloatingSession).not.toHaveBeenCalled();
-        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
-        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+        expect(floatingActiveService.clear).toHaveBeenCalledWith('inactive-sheet');
+        expect(focusOwnerService.clearFocusOwner).toHaveBeenCalledWith('inactive-sheet');
+        expect(mountService.deactivateFloatingSession).toHaveBeenCalledWith('inactive-sheet');
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('host-workbook');
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('host-workbook');
     });
 
     it('deactivates tab sessions and restores the host when clearing a tab', () => {

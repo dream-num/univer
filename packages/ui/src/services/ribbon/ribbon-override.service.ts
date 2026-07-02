@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IRibbonService } from './ribbon.service';
 import { createIdentifier, Disposable } from '@univerjs/core';
@@ -22,6 +23,8 @@ import { BehaviorSubject } from 'rxjs';
 export interface IRibbonOverride {
     id: string;
     ribbonService: IRibbonService;
+    injector?: Pick<Injector, 'get' | 'has' | 'invoke'>;
+    portalContainer?: HTMLElement | null;
     placeholderTitle?: string;
     hideToolbar?: boolean;
 }

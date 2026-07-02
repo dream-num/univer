@@ -17,15 +17,18 @@
 import type { IDisposable, Injector, UniverInstanceType } from '@univerjs/core';
 import type { EmbedProductMenuSurface, IEmbedProductMenuContribution, IEmbedProductMenuMountContext } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
-import { MenuManagerPosition, RibbonPosition } from '@univerjs/ui';
+import { MenuManagerPosition, RibbonDataGroup, RibbonFormulasGroup, RibbonInsertGroup, RibbonOthersGroup, RibbonPosition, RibbonStartGroup, RibbonViewGroup } from '@univerjs/ui';
 import { mountEmbedProductRibbonMenu } from './embed-product-menu-mounting';
+
+const PENDING_PRODUCT_MENU_CONTRIBUTIONS = new WeakMap<object, Map<string, { contribution: IEmbedProductMenuContribution; index: number }>>();
+let nextPendingProductMenuIndex = 0;
 
 export function registerEmbedProductMenuContribution(
     injector: Pick<Injector, 'get' | 'has'>,
     contribution: IEmbedProductMenuContribution
 ): IDisposable | undefined {
     if (!injector.has(EmbedProductMenuRegistryService)) {
-        return undefined;
+        return registerPendingEmbedProductMenuContribution(injector, contribution);
     }
 
     const registry = injector.get(EmbedProductMenuRegistryService);
@@ -37,6 +40,49 @@ export function registerEmbedProductMenuContribution(
     }
 
     return registry.register(contribution);
+}
+
+export function flushPendingEmbedProductMenuContributions(injector: Pick<Injector, 'get' | 'has'>): void {
+    if (!injector.has(EmbedProductMenuRegistryService)) {
+        return;
+    }
+
+    const pending = PENDING_PRODUCT_MENU_CONTRIBUTIONS.get(injector as object);
+    if (!pending?.size) {
+        return;
+    }
+
+    [...pending.values()]
+        .sort((left, right) => left.index - right.index)
+        .forEach(({ contribution }) => registerEmbedProductMenuContribution(injector, contribution));
+    PENDING_PRODUCT_MENU_CONTRIBUTIONS.delete(injector as object);
+}
+
+function registerPendingEmbedProductMenuContribution(
+    injector: Pick<Injector, 'get' | 'has'>,
+    contribution: IEmbedProductMenuContribution
+): IDisposable {
+    const item = { contribution, index: nextPendingProductMenuIndex++ };
+    const key = getPendingProductMenuContributionKey(contribution, item.index);
+    const injectorKey = injector as object;
+    const pending = PENDING_PRODUCT_MENU_CONTRIBUTIONS.get(injectorKey) ?? new Map<string, { contribution: IEmbedProductMenuContribution; index: number }>();
+    pending.set(key, item);
+    PENDING_PRODUCT_MENU_CONTRIBUTIONS.set(injectorKey, pending);
+
+    return toDisposable(() => {
+        const current = PENDING_PRODUCT_MENU_CONTRIBUTIONS.get(injectorKey);
+        if (current?.get(key) === item) {
+            current.delete(key);
+        }
+    });
+}
+
+function getPendingProductMenuContributionKey(contribution: IEmbedProductMenuContribution, index: number): string {
+    const surface = getContributionSurface(contribution);
+
+    return contribution.id
+        ? `${contribution.childType}:${surface}:${contribution.id}`
+        : `${contribution.childType}:${surface}:anonymous:${index}`;
 }
 
 export class EmbedProductMenuRegistryService {
@@ -163,13 +209,14 @@ function normalizeRibbonMenuSchema(schema: unknown): unknown {
 
     const ribbonPositionKeys = new Set<string>(Object.values(RibbonPosition));
     const ribbonEntries = Object.entries(schema).filter(([key]) => ribbonPositionKeys.has(key));
-    if (!ribbonEntries.length) {
+    const ribbonGroupEntries = Object.entries(schema).filter(([key]) => getRibbonGroupParent(key));
+    if (!ribbonEntries.length && !ribbonGroupEntries.length) {
         return schema;
     }
 
     const result: Record<string, unknown> = {};
     Object.entries(schema).forEach(([key, value]) => {
-        if (!ribbonPositionKeys.has(key)) {
+        if (!ribbonPositionKeys.has(key) && !getRibbonGroupParent(key)) {
             result[key] = cloneMenuSchema(value);
         }
     });
@@ -182,9 +229,37 @@ function normalizeRibbonMenuSchema(schema: unknown): unknown {
             ? mergeMenuSchema(ribbonRoot[key], value)
             : cloneMenuSchema(value);
     });
+    ribbonGroupEntries.forEach(([key, value]) => {
+        const ribbonPosition = getRibbonGroupParent(key);
+        if (!ribbonPosition) {
+            return;
+        }
+
+        const ribbonPositionRoot = isPlainObject(ribbonRoot[ribbonPosition])
+            ? ribbonRoot[ribbonPosition] as Record<string, unknown>
+            : {};
+
+        ribbonPositionRoot[key] = key in ribbonPositionRoot
+            ? mergeMenuSchema(ribbonPositionRoot[key], value)
+            : cloneMenuSchema(value);
+        ribbonRoot[ribbonPosition] = ribbonPositionRoot;
+    });
     result[MenuManagerPosition.RIBBON] = ribbonRoot;
 
     return result;
+}
+
+const RIBBON_GROUP_PARENT_ENTRIES: Array<[readonly string[], RibbonPosition]> = [
+    [Object.values(RibbonStartGroup), RibbonPosition.START],
+    [Object.values(RibbonInsertGroup), RibbonPosition.INSERT],
+    [Object.values(RibbonFormulasGroup), RibbonPosition.FORMULAS],
+    [Object.values(RibbonDataGroup), RibbonPosition.DATA],
+    [Object.values(RibbonViewGroup), RibbonPosition.VIEW],
+    [Object.values(RibbonOthersGroup), RibbonPosition.OTHERS],
+];
+
+function getRibbonGroupParent(key: string): RibbonPosition | undefined {
+    return RIBBON_GROUP_PARENT_ENTRIES.find(([groups]) => groups.includes(key))?.[1];
 }
 
 function mergeMenuSchema(target: unknown, source: unknown): unknown {

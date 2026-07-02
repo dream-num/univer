@@ -17,9 +17,9 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedProductMenuContribution } from '../../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { MenuManagerPosition, RibbonPosition } from '@univerjs/ui';
+import { MenuManagerPosition, RibbonDataGroup, RibbonInsertGroup, RibbonPosition } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
-import { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution } from '../embed-product-menu-registry.service';
+import { EmbedProductMenuRegistryService, flushPendingEmbedProductMenuContributions, registerEmbedProductMenuContribution } from '../embed-product-menu-registry.service';
 
 describe('EmbedProductMenuRegistryService', () => {
     it('merges ribbon menu schemas by order', () => {
@@ -99,6 +99,60 @@ describe('EmbedProductMenuRegistryService', () => {
         });
     });
 
+    it('normalizes top-level ribbon groups before merging with ribbon-root schemas', () => {
+        const service = new EmbedProductMenuRegistryService();
+
+        service.register({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            order: 0,
+            menuSchema: {
+                [MenuManagerPosition.RIBBON]: {
+                    [RibbonPosition.DATA]: {
+                        title: 'Data',
+                        [RibbonDataGroup.RULES]: {
+                            order: 1,
+                            filter: { order: 0 },
+                        },
+                    },
+                    [RibbonPosition.INSERT]: {
+                        title: 'Insert',
+                    },
+                },
+            },
+        });
+        service.register({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            order: 10,
+            menuSchema: {
+                [RibbonDataGroup.RULES]: {
+                    dataValidation: { order: 1 },
+                },
+                [RibbonInsertGroup.MEDIA]: {
+                    chart: { order: 0 },
+                },
+            },
+        });
+
+        expect(service.getMergedMenuSchema(UniverInstanceType.UNIVER_SHEET)).toEqual({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.DATA]: {
+                    title: 'Data',
+                    [RibbonDataGroup.RULES]: {
+                        order: 1,
+                        filter: { order: 0 },
+                        dataValidation: { order: 1 },
+                    },
+                },
+                [RibbonPosition.INSERT]: {
+                    title: 'Insert',
+                    [RibbonInsertGroup.MEDIA]: {
+                        chart: { order: 0 },
+                    },
+                },
+            },
+        });
+    });
+
     it('keeps menu surfaces isolated', () => {
         const service = new EmbedProductMenuRegistryService();
 
@@ -143,6 +197,45 @@ describe('EmbedProductMenuRegistryService', () => {
         expect(service.getAll(UniverInstanceType.UNIVER_SHEET)).toHaveLength(0);
     });
 
+    it('keeps product menu contributions pending until the embed menu registry is ready', () => {
+        const service = new EmbedProductMenuRegistryService();
+        const contribution: IEmbedProductMenuContribution = {
+            id: 'docs-table',
+            childType: UniverInstanceType.UNIVER_DOC,
+            menuSchema: { tabs: { insert: true } },
+        };
+        const injector = createMutableRegistryInjector();
+
+        const disposable = registerEmbedProductMenuContribution(injector, contribution);
+
+        expect(disposable).toBeDefined();
+        expect(service.getAll(UniverInstanceType.UNIVER_DOC)).toHaveLength(0);
+
+        injector.service = service;
+        flushPendingEmbedProductMenuContributions(injector);
+
+        expect(service.getAll(UniverInstanceType.UNIVER_DOC)).toHaveLength(1);
+        expect(service.getMergedMenuSchema(UniverInstanceType.UNIVER_DOC)).toEqual({ tabs: { insert: true } });
+    });
+
+    it('does not flush disposed pending product menu contributions', () => {
+        const service = new EmbedProductMenuRegistryService();
+        const contribution: IEmbedProductMenuContribution = {
+            id: 'docs-table',
+            childType: UniverInstanceType.UNIVER_DOC,
+            menuSchema: { tabs: { insert: true } },
+        };
+        const injector = createMutableRegistryInjector();
+
+        const disposable = registerEmbedProductMenuContribution(injector, contribution);
+        disposable?.dispose();
+
+        injector.service = service;
+        flushPendingEmbedProductMenuContributions(injector);
+
+        expect(service.getAll(UniverInstanceType.UNIVER_DOC)).toHaveLength(0);
+    });
+
     it('mounts every custom menu contribution for the requested surface', () => {
         const service = new EmbedProductMenuRegistryService();
         const firstDispose = vi.fn();
@@ -184,4 +277,20 @@ function createRegistryInjector(service: EmbedProductMenuRegistryService): Pick<
             return service;
         },
     } as Pick<Injector, 'get' | 'has'>;
+}
+
+function createMutableRegistryInjector(): Pick<Injector, 'get' | 'has'> & { service?: EmbedProductMenuRegistryService } {
+    return {
+        service: undefined,
+        has(token: unknown) {
+            return token === EmbedProductMenuRegistryService && Boolean(this.service);
+        },
+        get(token: unknown) {
+            if (token !== EmbedProductMenuRegistryService || !this.service) {
+                throw new Error('unexpected token');
+            }
+
+            return this.service;
+        },
+    } as Pick<Injector, 'get' | 'has'> & { service?: EmbedProductMenuRegistryService };
 }

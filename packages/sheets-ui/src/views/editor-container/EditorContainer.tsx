@@ -110,6 +110,38 @@ function isEmbedRuntimeInteractiveElement(element: HTMLElement): boolean {
     return role === 'child-editor' || role === 'child-popup' || role === 'floating-menu';
 }
 
+function shouldPreserveEmbedPopupFocus(embedId: string | undefined, ownerDocument: Document): boolean {
+    if (!embedId) {
+        return false;
+    }
+
+    const activeElement = ownerDocument.activeElement;
+    if (!(activeElement instanceof HTMLElement)) {
+        return false;
+    }
+
+    const ownerElement = activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
+    if (!ownerElement) {
+        return false;
+    }
+
+    const role = activeElement.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
+        activeElement.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+
+    return role === 'child-popup' || role === 'floating-menu';
+}
+
+function isEmbedRuntimeEditorOrPopup(target: EventTarget | null | undefined): boolean {
+    if (!(target instanceof HTMLElement)) {
+        return false;
+    }
+
+    const role = target.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
+        target.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+
+    return role === 'child-editor' || role === 'child-popup' || role === 'floating-menu';
+}
+
 /**
  * Cell editor container.
  * @returns the rendered cell editor container.
@@ -225,6 +257,14 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
         const focusEditor = () => {
+            const ownerDocument = rootRef.current?.ownerDocument ?? document;
+            const scope = rootRef.current
+                ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
+                : resolveActiveEmbedRuntimeDomScope(ownerDocument);
+            if (shouldPreserveEmbedPopupFocus(scope?.embedId, ownerDocument)) {
+                return;
+            }
+
             const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
 
@@ -254,13 +294,17 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
         const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
         const focusedUnitId = instanceService.getFocusedUnit()?.getUnitId();
-        const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
         const rootRuntimeScope = resolveEmbedRuntimeDomScope(rootRef.current);
-        const editorUnitRuntimeScope = [editState?.unitId, visible.unitId, focusedUnitId]
+        const unitRuntimeScope = [editState?.unitId, visible.unitId, focusedUnitId]
             .map((unitId) => focusCoordinator.resolveRuntimeScopeByChildUnitId(unitId))
             .find((resolvedScope) => resolvedScope != null);
-        const explicitRuntimeScope = rootRuntimeScope ?? editorUnitRuntimeScope;
-        if (activeSessionScope && explicitRuntimeScope && explicitRuntimeScope.embedId !== activeSessionScope.embedId) {
+        if (rootRuntimeScope && unitRuntimeScope && rootRuntimeScope.embedId !== unitRuntimeScope.embedId) {
+            return undefined;
+        }
+
+        const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
+        const explicitRuntimeScope = unitRuntimeScope ?? rootRuntimeScope;
+        if (activeSessionScope && rootRuntimeScope && !unitRuntimeScope && rootRuntimeScope.embedId !== activeSessionScope.embedId) {
             return undefined;
         }
 
@@ -330,6 +374,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             focusCoordinator,
         });
         const focusHiddenEditor = () => {
+            if (shouldPreserveEmbedPopupFocus(activeSessionScope.embedId, ownerDocument)) {
+                return;
+            }
+
             const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
             if (!docSelectionRenderService?.isFocusing) {
@@ -340,16 +388,28 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         };
         let retryFrame = 0;
         let finalRetryFrame = 0;
+        let pointerRetryFrame = 0;
 
         focusHiddenEditor();
         retryFrame = requestAnimationFrame(() => {
             focusHiddenEditor();
             finalRetryFrame = requestAnimationFrame(focusHiddenEditor);
         });
+        const refocusHiddenEditorAfterRuntimePointer = (event: PointerEvent) => {
+            if (!focusCoordinator.isChildUnitRuntimeEvent(childUnitId, event.target, event) || isEmbedRuntimeEditorOrPopup(event.target)) {
+                return;
+            }
+
+            cancelAnimationFrame(pointerRetryFrame);
+            pointerRetryFrame = requestAnimationFrame(focusHiddenEditor);
+        };
+        ownerDocument.addEventListener('pointerdown', refocusHiddenEditorAfterRuntimePointer, true);
 
         return () => {
             cancelAnimationFrame(retryFrame);
             cancelAnimationFrame(finalRetryFrame);
+            cancelAnimationFrame(pointerRetryFrame);
+            ownerDocument.removeEventListener('pointerdown', refocusHiddenEditorAfterRuntimePointer, true);
             portalRegistration.dispose();
         };
     }, [editorService, injector, instanceService, runtimeFocusRevision, visible?.visible]);

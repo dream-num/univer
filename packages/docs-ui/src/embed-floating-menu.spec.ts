@@ -16,7 +16,7 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createDocsFloatingMenuContributions, DOCS_FLOATING_MENU_STYLE_TEXT, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';
+import { createDocsFloatingMenuContributions, resolveDocsFloatingMenuClassName, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';
 
 describe('createDocsFloatingMenuContributions', () => {
     it('registers docs floating menus for doc, sheet, and slide hosts', () => {
@@ -95,11 +95,35 @@ describe('createDocsFloatingMenuContributions', () => {
     });
 });
 
-describe('DOCS_FLOATING_MENU_STYLE_TEXT', () => {
-    it('centers the docs block floating menu above the embed container without changing fullscreen layout', () => {
-        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('left: 50%');
-        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('transform: translateX(-50%)');
-        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('[data-embed-fullscreen-menu-slot="true"] .univer-docs-embed-floating-menu');
-        expect(DOCS_FLOATING_MENU_STYLE_TEXT).toContain('position: static');
+describe('resolveDocsFloatingMenuClassName', () => {
+    it('centers the floating menu with Tailwind classes and keeps fullscreen in normal flow', () => {
+        const floatingClassName = resolveDocsFloatingMenuClassName({
+            entry: 'sheets-floating-object',
+            fullscreen: false,
+            stage: 'stage2',
+        });
+        expect(floatingClassName).toContain('univer-left-1/2');
+        expect(floatingClassName).toContain('-univer-translate-x-1/2');
+        expect(floatingClassName).toContain('-univer-top-9');
+
+        const fullscreenClassName = resolveDocsFloatingMenuClassName({
+            entry: 'sheets-floating-object',
+            fullscreen: true,
+            stage: 'stage2',
+        });
+        expect(fullscreenClassName).toContain('univer-static');
+        expect(fullscreenClassName).toContain('univer-mx-auto');
+        expect(fullscreenClassName).not.toContain('-univer-translate-x-1/2');
+    });
+
+    it('uses the docs custom block inset variable and hides inactive menus', () => {
+        const className = resolveDocsFloatingMenuClassName({
+            entry: 'docs-custom-block',
+            fullscreen: false,
+            stage: 'inactive',
+        });
+
+        expect(className).toContain('univer-hidden');
+        expect(className).toContain('univer-top-[calc(var(--univer-embed-docs-block-floating-menu-inset-top,52px)*-1)]');
     });
 });

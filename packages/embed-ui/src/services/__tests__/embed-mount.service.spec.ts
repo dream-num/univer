@@ -44,11 +44,11 @@ import {
 } from '../embed-interaction-boundary.service';
 import { EmbedDuplicateChildUnitError, EmbedMountService } from '../embed-mount.service';
 import { EmbedOverlayRootService } from '../embed-overlay-root.service';
-import { EmbedRuntimePolicyService } from '../embed-runtime-policy.service';
 import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
     EmbedRuntimeFocusCoordinator,
 } from '../embed-runtime-focus-coordinator.service';
+import { EmbedRuntimePolicyService } from '../embed-runtime-policy.service';
 
 describe('EmbedMountService', () => {
     it('mounts floating sessions, wires focus bridge, floating menu, and disposes in reverse order', () => {
@@ -365,6 +365,7 @@ describe('EmbedMountService', () => {
         expect(instanceService.focusUnit).not.toHaveBeenCalled();
         expect(contextService.setContextValue).not.toHaveBeenCalled();
         expect(focusOwnerService.getFocusOwner()).toBeNull();
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()).toBeUndefined();
         firstChildInput.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
         expect(popupPortal.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('tab-1');
         expect(popupPortal.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-popup');
@@ -374,10 +375,28 @@ describe('EmbedMountService', () => {
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SLIDE, false);
         expect(firstHost.dataset.embedRenderScopeActive).toBe('true');
         expect(secondHost.dataset.embedRenderScopeActive).toBe('false');
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()).toEqual({
+            embedId: 'tab-1',
+            hostUnitId: 'host-1',
+            childUnitId: 'child-1',
+            childType: UniverInstanceType.UNIVER_DOC,
+        });
+
+        secondHost.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        expect(firstHost.dataset.embedRenderScopeActive).toBe('false');
+        expect(secondHost.dataset.embedRenderScopeActive).toBe('true');
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()).toEqual({
+            embedId: 'tab-2',
+            hostUnitId: 'host-1',
+            childUnitId: 'child-2',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
 
         expect(service.deactivateTabSessions('tab-1')).toEqual([firstSession]);
         expect(firstHost.dataset.embedRenderScopeActive).toBe('false');
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('tab-2');
         expect(service.deactivateTabSessions()).toEqual([firstSession, secondSession]);
+        expect(focusCoordinator.resolveActiveChildSessionRuntimeScope()).toBeUndefined();
         service.unmount('tab-1');
         expect(focusCoordinator.isChildUnitRuntimeEvent('child-1', firstChildInput)).toBe(false);
         expect(interactionBoundaryService.contains('tab-1', firstChildInput)).toBe(false);

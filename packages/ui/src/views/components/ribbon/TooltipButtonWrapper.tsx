@@ -46,6 +46,8 @@ const ToolbarDropdownContext = createContext<{
     setOpenDropdownKey: (key: string | null) => void;
 } | null>(null);
 
+const EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
+
 export interface ITooltipWrapperRef {
     el: HTMLSpanElement | null;
 }
@@ -103,6 +105,14 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         el: spanRef.current,
     }));
 
+    const content = (
+        <span ref={spanRef}>
+            <TooltipWrapperContext.Provider value={contextValue}>
+                {children}
+            </TooltipWrapperContext.Provider>
+        </span>
+    );
+
     return tooltipProps.title
         ? (
             <Tooltip
@@ -110,20 +120,10 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
                 onVisibleChange={handleChangeTooltipVisible}
                 {...tooltipProps}
             >
-                <span ref={spanRef}>
-                    <TooltipWrapperContext.Provider value={contextValue}>
-                        {children}
-                    </TooltipWrapperContext.Provider>
-                </span>
+                {content}
             </Tooltip>
         )
-        : (
-            <span ref={spanRef}>
-                <TooltipWrapperContext.Provider value={contextValue}>
-                    {children}
-                </TooltipWrapperContext.Provider>
-            </span>
-        );
+        : content;
 });
 
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
@@ -242,6 +242,10 @@ export function DropdownMenuWrapper({
 
     function handleVisibleChange(visible: boolean) {
         setDropdownVisible(visible);
+    }
+
+    function handleEmbedBoundaryFocusOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
+        keepDropdownOpenForSameEmbedBoundary(event);
     }
 
     function handleOptionSelect(option: IValueOption) {
@@ -372,6 +376,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onFocusOutside={handleEmbedBoundaryFocusOutside}
+                onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
                 {children}
             </DropdownMenu>
@@ -420,9 +426,32 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onFocusOutside={handleEmbedBoundaryFocusOutside}
+                onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
                 {children}
             </DropdownMenu>
         );
     }
+}
+
+function keepDropdownOpenForSameEmbedBoundary(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }): void {
+    const owner = getEmbedBoundaryOwner(event.currentTarget);
+    if (!owner) {
+        return;
+    }
+
+    if (getEmbedBoundaryOwner(event.target) === owner) {
+        event.preventDefault();
+    }
+}
+
+function getEmbedBoundaryOwner(target: EventTarget | null): string | undefined {
+    if (!(target instanceof HTMLElement)) {
+        return undefined;
+    }
+
+    return target.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ??
+        target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ??
+        undefined;
 }

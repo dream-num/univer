@@ -276,6 +276,7 @@ describe('DrawingUpdateController', () => {
 
         harness.refreshTransform$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing' }]);
 
+        expect(harness.drawingManagerService.addNotification).toHaveBeenCalledTimes(1);
         expect(harness.drawingManagerService.addNotification).toHaveBeenCalledWith([
             { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing' },
         ]);

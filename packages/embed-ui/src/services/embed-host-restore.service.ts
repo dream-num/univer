@@ -17,7 +17,7 @@
 import type { ICreateUnitOptions } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedHostAnchorRecord } from '../types/host-anchor';
-import { IUniverInstanceService, Inject } from '@univerjs/core';
+import { Inject, IUniverInstanceService } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS, EmbedModelService, EmbedReferencedUnitManagerService, getResourceRefInputKey, ReferencedUnitOwnerKind } from '@univerjs/embed';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 import { EmbedHostAnchorModelService } from './embed-host-anchor-model.service';

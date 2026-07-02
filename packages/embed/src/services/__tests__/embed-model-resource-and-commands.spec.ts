@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Injector } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import type { IEmbedDescriptor } from '../../types/embed';
 import type { IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../../types/host-adapter';
 import type { IEmbedHostAnchorRecord } from '../../types/host-anchor';

@@ -61,6 +61,7 @@ class TestRenderManagerService {
         getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
         style: { width: '1000px' },
     };
+
     popupInjector = new Injector();
     getInjector = vi.fn(() => this.popupInjector);
     readonly onTransformChange$ = new EventSubject();

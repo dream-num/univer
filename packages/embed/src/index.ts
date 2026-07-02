@@ -52,9 +52,9 @@ export {
     upsertEmbedResourceEntry,
 } from './common/embed-resource';
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
-export { formatResourceRef, parseResourceRef } from './common/resource-ref-uri';
 export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResourceRefInput } from './common/resource-ref-input';
 export { normalizeResourceRefLocator } from './common/resource-ref-locator';
+export { formatResourceRef, parseResourceRef } from './common/resource-ref-uri';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
 export { EmbedResourceController } from './controllers/embed-resource.controller';
 export { UniverEmbedPlugin } from './plugin';

@@ -747,7 +747,7 @@ describe('embed-ui registries and commands', () => {
         expect(pendingDisposable).toBeDefined();
         pendingDisposable?.dispose();
         pendingInjector.has = vi.fn(() => true);
-        pendingInjector.get = vi.fn(() => registry);
+        pendingInjector.get = vi.fn(() => registry) as never;
         flushPendingEmbedProductMenuContributions(pendingInjector);
         expect(registry.getAll(UniverInstanceType.UNIVER_SHEET)).toHaveLength(0);
         expect(registerEmbedProductMenuContribution(injector, {

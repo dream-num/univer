@@ -216,8 +216,8 @@ describe('EmbedActivationService', () => {
             entry: 'docs-custom-block',
             hostAnchorId: 'drawing-1',
             source: {
-                kind: 'empty',
                 unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: { file: { kind: 'self' }, unit: { selector: 'child-sheet', type: 'sheet' } },
             },
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
@@ -269,8 +269,8 @@ describe('EmbedActivationService', () => {
             entry: 'docs-custom-block',
             hostAnchorId: 'drawing-1',
             source: {
-                kind: 'empty',
                 unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: { file: { kind: 'self' }, unit: { selector: 'child-sheet', type: 'sheet' } },
             },
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,

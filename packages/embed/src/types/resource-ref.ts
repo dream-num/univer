@@ -14,27 +14,49 @@
  * limitations under the License.
  */
 
-export type ResourceRefUnitType = 'sheet' | 'doc' | 'slide' | 'base';
-
 export type ResourceRefFile =
     | { kind: 'self' }
     | { kind: 'relative'; path: string }
     | { kind: 'uri'; uri: string };
 
-export interface IResourceRefUnit {
-    selector: string;
+export type ResourceRefUnitType = 'sheet' | 'doc' | 'slide' | 'base';
+
+export type ResourceRefUnitSelector = string;
+
+export interface ResourceRefUnit {
+    selector: ResourceRefUnitSelector;
     type: ResourceRefUnitType;
 }
+
+export type IResourceRefUnit = ResourceRefUnit;
+
+export type ResourceRefPartKind = 'sheet' | 'range';
 
 export type ResourceRefPart =
     | { kind: 'sheet'; sheetName: string; sheetId?: string }
     | { kind: 'range'; ref: string; sheetName: string; range: string; sheetId?: string };
 
-export interface IResourceRef {
+export type ResourceRefExtensionValue = string | readonly string[];
+
+export interface ResourceRef {
     file: ResourceRefFile;
-    unit: IResourceRefUnit;
+    unit: ResourceRefUnit;
     part?: ResourceRefPart;
-    extensions?: Record<string, string | readonly string[]>;
+    extensions?: Readonly<Record<string, ResourceRefExtensionValue>>;
 }
 
-export type ResourceRefInput = IResourceRef | string;
+export type IResourceRef = ResourceRef;
+
+export interface ParseResourceRefOptions {
+    mode?: 'strict' | 'lenient';
+}
+
+export interface ValidateResourceRefOptions {
+    mode?: 'strict' | 'lenient';
+}
+
+export interface FormatResourceRefOptions {
+    preserveExtensions?: boolean;
+}
+
+export type ResourceRefInput = ResourceRef | string;

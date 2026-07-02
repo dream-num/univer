@@ -129,12 +129,8 @@ export interface IFUniverEmbedMixin {
      * This is the generic facade entry for unit load. Embed-specific
      * callers can use {@link FEmbed.loadAsync}, which passes an embed owner.
      *
-     * @param ref The resource reference to load. String input supports
-     * first-version URI reference locators: `#unit=<unitId>` and bare `unitId`
-     * normalized to `#unit=<unitId>`; other ResourceRef locator forms are
-     * rejected as unsupported until the full locator grammar is implemented.
-     * String locators require `options.unitType` because the locator and the
-     * render unit type are separate concepts.
+     * @param ref The resource reference to load. String input supports canonical
+     * self unit ResourceRefs like `#unit=<unitId>&type=sheet`.
      * @param options Optional request controls.
      * @returns A promise resolving to the loaded unit facade instance.
      * @example TypeScript
@@ -222,9 +218,6 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
     ): Promise<FResolvedUnitFacade<TUnitFacade, TUnitType>> {
         const { signal, unitType, ...createOptions } = options;
         const normalizedRef = this._normalizeLoadUnitRef(ref);
-        if (typeof normalizedRef === 'string' && (unitType === undefined || unitType === UniverInstanceType.UNRECOGNIZED)) {
-            throw new Error('RESOURCE_REF_UNIT_TYPE_REQUIRED');
-        }
 
         const handle = this._injector.get(EmbedReferencedUnitManagerService).ensure({
             ref: normalizedRef,

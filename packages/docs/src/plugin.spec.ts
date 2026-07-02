@@ -15,11 +15,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { registerDocsEmbedGuestContribution, registerDocsEmbedHostCapabilities } from './embed-guest';
+import { registerDocsEmbedHostCapabilities } from './embed-guest';
 import { UniverDocsPlugin } from './plugin';
 
 vi.mock('./embed-guest', () => ({
-    registerDocsEmbedGuestContribution: vi.fn(),
     registerDocsEmbedHostCapabilities: vi.fn(),
 }));
 
@@ -35,7 +34,6 @@ describe('UniverDocsPlugin embed boundary', () => {
         plugin.onStarting();
 
         expect(registerDocsEmbedHostCapabilities).toHaveBeenCalledWith(injector);
-        expect(registerDocsEmbedGuestContribution).toHaveBeenCalledWith(injector);
     });
 });
 

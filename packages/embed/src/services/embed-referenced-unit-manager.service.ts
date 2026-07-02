@@ -21,11 +21,11 @@ import type {
     IReferencedUnitOwner,
     IReferencedUnitRecord,
 } from '../types/referenced-unit';
-import type { ResourceRefInput } from '../types/resource-ref';
 import type { IEmbedResourceRefProvider } from './embed-resource-ref-provider-registry.service';
 import { Optional, UniverInstanceType } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
+import { parseResourceRef } from '../common/resource-ref-uri';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
 import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
 
@@ -65,7 +65,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
     }
 
     private _getProvider(
-        ref: ResourceRefInput,
+        ref: string,
         unitType: UniverInstanceType
     ): IEmbedResourceRefProvider {
         const registration = this._resourceRefProviderRegistry?.get(ref, toResourceRefUnitType(unitType));
@@ -77,7 +77,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
     }
 
     private async _ensureProviderRef(
-        ref: ResourceRefInput,
+        ref: string,
         provider: IEmbedResourceRefProvider,
         input: IPreparedReferencedUnitEnsureInput
     ): Promise<IReferencedUnitRecord> {
@@ -244,17 +244,9 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         return JSON.stringify([owner.kind, owner.unitId ?? '', owner.ownerId ?? '']);
     }
 
-    private _resolveUnitType(ref: ResourceRefInput, declaredUnitType: UniverInstanceType | undefined): UniverInstanceType {
-        if (typeof ref === 'string') {
-            if (declaredUnitType === undefined || declaredUnitType === UniverInstanceType.UNRECOGNIZED) {
-                throw new Error('RESOURCE_REF_UNIT_TYPE_REQUIRED');
-            }
-
-            return declaredUnitType;
-        }
-
-        const refUnitType = fromResourceRefUnitType(ref.unit.type);
-        if (declaredUnitType !== undefined && declaredUnitType !== refUnitType) {
+    private _resolveUnitType(ref: string, declaredUnitType: UniverInstanceType | undefined): UniverInstanceType {
+        const refUnitType = fromResourceRefUnitType(parseResourceRef(normalizeResourceRefInput(ref)).unit.type);
+        if (declaredUnitType !== undefined && declaredUnitType !== UniverInstanceType.UNRECOGNIZED && declaredUnitType !== refUnitType) {
             throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
         }
 

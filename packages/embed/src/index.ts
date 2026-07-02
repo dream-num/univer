@@ -52,6 +52,7 @@ export {
     upsertEmbedResourceEntry,
 } from './common/embed-resource';
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
+export { formatResourceRef, parseResourceRef } from './common/resource-ref-uri';
 export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResourceRefInput } from './common/resource-ref-input';
 export { normalizeResourceRefLocator } from './common/resource-ref-locator';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
@@ -63,7 +64,6 @@ export { EmbedChildRetentionService } from './services/embed-child-retention.ser
 export type { IEmbedChildRetentionState } from './services/embed-child-retention.service';
 export { EmbedCreationService } from './services/embed-creation.service';
 export { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
-export { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
 export {
     EmbedHostAdapterRegistryService,
     flushPendingEmbedHostAdapterContributions,
@@ -112,7 +112,6 @@ export type {
     IEmbeddedFocusOwner,
     IEmbedDescriptor,
     IEmbedFloatingConfig,
-    IEmbedGuestContribution,
     IEmbedLayoutPolicies,
     IEmbedLayoutPolicy,
     IEmbedResolvedSource,

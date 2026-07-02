@@ -24,8 +24,6 @@ import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { UniverEmbedPlugin } from '../../plugin';
-import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
-import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
 import { FEmbedHostSurface } from '../f-enum';
 import '../index';
 
@@ -47,56 +45,16 @@ describe('embed facade runtime integration', () => {
                 context: { index: 1 },
             },
             content: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
-                ref: {
-                    file: { kind: 'uri', uri: 'univer://remote-file' },
-                    unit: { selector: 'remote-sheet', type: 'sheet' },
-                },
+                ref: '#unit=remote-sheet&type=sheet',
             },
         });
         expect(remoteRefEmbed.getHostType()).toBe(UniverInstanceType.UNIVER_DOC);
         expect(remoteRefEmbed.getChildType()).toBe(UniverInstanceType.UNIVER_SHEET);
         expect(remoteRefEmbed.getChildUnitId()).toBeUndefined();
         expect(remoteRefEmbed.getDescriptor().source).toEqual({
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
-            ref: {
-                file: { kind: 'uri', uri: 'univer://remote-file' },
-                unit: { selector: 'remote-sheet', type: 'sheet' },
-            },
-        });
-
-        const emptyEmbed = univerAPI.createEmbed({
-            embedId: 'empty-sheet-embed',
-            host: {
-                unitId: hostDoc.getUnitId(),
-                surface: FEmbedHostSurface.DocBlock,
-            },
-            content: {
-                kind: 'empty',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-                creationConfig: createSheetSnapshot('empty-sheet') as unknown as Record<string, unknown>,
-            },
-        });
-        expect(emptyEmbed.getChildUnitId()).toBe('empty-sheet');
-        expect(emptyEmbed.getDescriptor().source).toEqual({
-            kind: 'ref',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-            ref: {
-                file: { kind: 'self' },
-                unit: { selector: 'empty-sheet', type: 'sheet' },
-            },
-        });
-        const emptySource = emptyEmbed.getDescriptor().source;
-        const emptyRef = emptySource.kind === 'ref' ? emptySource.ref : undefined;
-        await expect(univer.__getInjector().get(EmbedReferencedUnitManagerService).ensure({
-            ref: emptyRef!,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        }).loaded).resolves.toEqual({
-            ref: emptyRef,
-            unitId: 'empty-sheet',
-            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: '#unit=remote-sheet&type=sheet',
         });
 
         const floatingEmbed = univerAPI.createEmbed({
@@ -107,12 +65,8 @@ describe('embed facade runtime integration', () => {
                 context: { rect: { x: 10, y: 20, width: 480, height: 320 } },
             },
             content: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_DOC,
-                ref: {
-                    file: { kind: 'uri', uri: 'univer://remote-doc' },
-                    unit: { selector: 'remote-doc', type: 'doc' },
-                },
+                ref: '#unit=remote-doc&type=doc',
             },
         });
         expect(floatingEmbed.getHostType()).toBe(UniverInstanceType.UNIVER_SHEET);
@@ -120,8 +74,8 @@ describe('embed facade runtime integration', () => {
         expect(floatingEmbed.getChildType()).toBe(UniverInstanceType.UNIVER_DOC);
         expect(floatingEmbed.getChildUnitId()).toBeUndefined();
 
-        expect(univerAPI.listEmbeds()).toHaveLength(3);
-        expect(univerAPI.listEmbeds({ hostUnitId: hostDoc.getUnitId() })).toHaveLength(2);
+        expect(univerAPI.listEmbeds()).toHaveLength(2);
+        expect(univerAPI.listEmbeds({ hostUnitId: hostDoc.getUnitId() })).toHaveLength(1);
         expect(univerAPI.listEmbeds({ hostUnitId: hostWorkbook.getUnitId() })).toHaveLength(1);
 
         for (const embed of univerAPI.listEmbeds()) {

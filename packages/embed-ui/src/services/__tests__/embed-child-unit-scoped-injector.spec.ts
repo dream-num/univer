@@ -533,7 +533,6 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
         entry: overrides.entry ?? 'docs-custom-block',
         source: overrides.source ?? {
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },

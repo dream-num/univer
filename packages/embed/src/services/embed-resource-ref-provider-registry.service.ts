@@ -18,9 +18,10 @@ import type { ICreateUnitOptions, IDisposable, UniverInstanceType } from '@unive
 import type { IReferencedUnitOwner } from '../types/referenced-unit';
 import type { ResourceRefFile, ResourceRefInput, ResourceRefUnitType } from '../types/resource-ref';
 import { toDisposable } from '@univerjs/core';
+import { parseResourceRef } from '../common/resource-ref-uri';
 
 export interface IEmbedResourceRefEnsureInput {
-    ref: ResourceRefInput;
+    ref: string;
     refKey: string;
     owner?: IReferencedUnitOwner;
     unitType: UniverInstanceType;
@@ -93,7 +94,7 @@ export class EmbedResourceRefProviderRegistryService {
                 return false;
             }
 
-            return !match.unitTypes || (unitType !== undefined && match.unitTypes.includes(unitType));
+            return this._matches(match, parseResourceRef(ref), unitType);
         }
 
         if (match.fileKinds && !match.fileKinds.includes(ref.file.kind)) {

@@ -85,9 +85,9 @@ function createContext(
         entry: 'sheets-sheet-tab',
         hostAnchorId: 'anchor-1',
         source: {
-            kind: 'empty',
-            unitType: UniverInstanceType.UNIVER_DOC,
-        },
+unitType: UniverInstanceType.UNIVER_DOC,
+ref: { file: { kind: 'self' }, unit: { selector: 'child-1', type: 'doc' } },
+},
         childUnitId: 'child-1',
         childType: UniverInstanceType.UNIVER_DOC,
         sourceMeta: {

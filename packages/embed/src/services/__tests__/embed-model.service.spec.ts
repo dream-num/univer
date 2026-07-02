@@ -66,16 +66,18 @@ describe('EmbedModelService child unit uniqueness', () => {
         expect(() => model.restoreDescriptor('host-1', 'embed-1')).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
     });
 
-    it('rejects loading a resource with duplicate active child units', () => {
+    it('drops runtime child unit state when loading a persisted resource', () => {
         const model = new EmbedModelService();
 
-        expect(() => model.loadUnit('host-1', {
+        model.loadUnit('host-1', {
             version: 1,
             embeds: {
                 'embed-1': createDescriptor({ embedId: 'embed-1', hostAnchorId: 'anchor-1' }),
                 'embed-2': createDescriptor({ embedId: 'embed-2', hostAnchorId: 'anchor-2' }),
             },
-        })).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        });
+
+        expect(model.getDescriptors('host-1').map((descriptor) => descriptor.childUnitId)).toEqual([undefined, undefined]);
     });
 });
 
@@ -88,7 +90,6 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
         entry: overrides.entry ?? 'docs-custom-block',
         source: overrides.source ?? {
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: {
                 file: { kind: 'self' },

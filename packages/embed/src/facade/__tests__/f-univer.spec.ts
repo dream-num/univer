@@ -40,7 +40,6 @@ describe('embed facade', () => {
                 context: { index: 2 },
             },
             content: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref,
             },
@@ -55,7 +54,6 @@ describe('embed facade', () => {
             requestedHostAnchorId: 'anchor-1',
             entry: FEmbedHostSurface.DocBlock,
             source: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref,
             },
@@ -75,7 +73,6 @@ describe('embed facade', () => {
                 surface: FEmbedHostSurface.DocBlock,
             },
             content: {
-                kind: 'ref',
                 unitType: UniverInstanceType.UNIVER_SHEET,
                 ref: createRef(),
             },
@@ -113,7 +110,7 @@ describe('embed facade', () => {
         const descriptor = createDescriptor();
         const workbookFacade = { getId: vi.fn(() => 'child-1') };
         const { api, facadeResolverRegistry, referencedUnitManager } = createFacade([descriptor], workbookFacade);
-        const ref = descriptor.source.kind === 'ref' ? descriptor.source.ref : undefined;
+        const ref = descriptor.source.ref;
         expect(ref).toBeDefined();
 
         await expect(api.loadUnitAsync(ref!, { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
@@ -158,18 +155,17 @@ describe('embed facade', () => {
         const workbookFacade = { getId: vi.fn(() => 'child-1') };
         const { api, referencedUnitManager, univerInstanceService } = createFacade(undefined, workbookFacade);
 
-        await expect(api.loadUnitAsync('#unit=child-1', { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
+        await expect(api.loadUnitAsync('#unit=child-1&type=sheet', { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
         expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
-            ref: '#unit=child-1',
+            ref: '#unit=child-1&type=sheet',
             unitType: UniverInstanceType.UNIVER_SHEET,
             signal: undefined,
             createOptions: {},
         });
-
-        await expect(api.loadUnitAsync('child-1', { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
+        await expect(api.loadUnitAsync('#unit=child-1&type=sheet')).resolves.toBe(workbookFacade);
         expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
-            ref: '#unit=child-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
+            ref: '#unit=child-1&type=sheet',
+            unitType: undefined,
             signal: undefined,
             createOptions: {},
         });
@@ -179,10 +175,11 @@ describe('embed facade', () => {
     it('rejects unsupported and invalid string locators before manager ensure', async () => {
         const { api, referencedUnitManager } = createFacade();
 
-        await expect(api.loadUnitAsync('univer://remote-workbook#unit=child-1')).rejects.toThrow('RESOURCE_REF_LOCATOR_UNSUPPORTED');
-        await expect(api.loadUnitAsync('#unit=child-1&range=A1')).rejects.toThrow('RESOURCE_REF_LOCATOR_UNSUPPORTED');
-        await expect(api.loadUnitAsync('#unit=')).rejects.toThrow('RESOURCE_REF_LOCATOR_INVALID');
-        await expect(api.loadUnitAsync('#unit=child-1')).rejects.toThrow('RESOURCE_REF_UNIT_TYPE_REQUIRED');
+        await expect(api.loadUnitAsync('univer://remote-workbook#unit=child-1')).rejects.toThrow('INVALID_URI_REFERENCE');
+        await expect(api.loadUnitAsync('#unit=child-1&range=A1')).rejects.toThrow('INVALID_FRAGMENT_SYNTAX');
+        await expect(api.loadUnitAsync('#unit=')).rejects.toThrow('INVALID_FRAGMENT_SYNTAX');
+        await expect(api.loadUnitAsync('child-1', { unitType: UniverInstanceType.UNIVER_SHEET })).rejects.toThrow('INVALID_URI_REFERENCE');
+        await expect(api.loadUnitAsync('#unit=child-1')).rejects.toThrow('MISSING_TYPE');
         expect(referencedUnitManager.ensure).not.toHaveBeenCalled();
     });
 });
@@ -206,7 +203,6 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
                 childUnitId: 'child-1',
                 childType: UniverInstanceType.UNIVER_SHEET,
                 source: params.source ?? {
-                    kind: 'ref',
                     unitType: UniverInstanceType.UNIVER_SHEET,
                     ref: createRef(),
                 },
@@ -275,7 +271,6 @@ function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDesc
         hostAnchorId: 'anchor-1',
         entry: 'docs-custom-block',
         source: {
-            kind: 'ref',
             unitType: UniverInstanceType.UNIVER_SHEET,
             ref: createRef(),
         },

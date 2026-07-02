@@ -19,7 +19,7 @@ import { Inject } from '@univerjs/core';
 import { createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService } from './embed-capability-registry.service';
 import { EmbedModelService } from './embed-model.service';
 import { EmbedNestedGuardService } from './embed-nested-guard.service';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './embed-source-resolver.service';
+import { EmbedSourceResolverService } from './embed-source-resolver.service';
 
 export class EmbedCreationService {
     constructor(
@@ -38,11 +38,7 @@ export class EmbedCreationService {
     prepareCreateEmbed(context: IEmbedCreateContext): IEmbedCreateResult {
         this._nestedGuard.assertCanCreate(context);
 
-        const resolvedSource = this._sourceResolver.resolve(context.source, {
-            hostUnitId: context.hostUnitId,
-            embedId: context.embedId,
-            createOptions: EMBED_CHILD_CREATE_OPTIONS,
-        });
+        const resolvedSource = this._sourceResolver.resolve(context.source);
         const capability = this._capabilityRegistry.getCapability({
             hostType: context.hostType,
             childType: resolvedSource.childType,

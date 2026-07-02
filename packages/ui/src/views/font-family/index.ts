@@ -14,5 +14,9 @@
  * limitations under the License.
  */
 
-export { FontFamily } from './FontFamily';
-export { FontFamilyItem } from './FontFamilyItem';
+export { FONT_FAMILY_COMPONENT, FontFamily } from './FontFamily';
+export type { IFontFamilyProps } from './FontFamily';
+export { FontFamilyDropdown } from './FontFamilyDropdown';
+export type { IFontFamilyDropdownProps } from './FontFamilyDropdown';
+export { FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem } from './FontFamilyItem';
+export type { IFontFamilyItemProps } from './FontFamilyItem';

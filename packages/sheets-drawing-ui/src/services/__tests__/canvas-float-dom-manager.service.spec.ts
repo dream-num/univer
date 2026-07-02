@@ -1366,7 +1366,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         }, 'chart-card')!;
 
         const regularRect = fixture.manager.getFloatDomInfo('regular-card')?.rect;
-        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect as { fill?: string; stroke?: string } | undefined;
 
         expect(regularRect).toBeInstanceOf(Rect);
         expect(regularRect).not.toBeInstanceOf(TestChartRect);

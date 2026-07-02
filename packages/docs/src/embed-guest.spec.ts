@@ -49,7 +49,6 @@ describe('docs embed guest', () => {
             { childType: UniverInstanceType.UNIVER_SLIDE, entry: 'docs-custom-block', layout: 'aspect-fit', mode: 'float' },
         ]);
     });
-
 });
 
 function createInjector(entries: Array<[unknown, unknown]>) {

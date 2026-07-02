@@ -152,20 +152,8 @@ export {
     createDocsCustomBlockHostAdapterContribution,
     createDocsCustomBlockHostContainerContribution,
 } from './embed-host-adapter';
-export {
-    createDocsCustomBlockInsertMutation,
-    createDocsCustomBlockRemoveMutation,
-    createEmbedDocsCustomBlockData,
-    createInsertCustomBlockActions,
-    createRemoveCustomBlockActions,
-    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
-    type IDocsCustomBlockLayoutViewport,
-    type IDocsCustomBlockMutationParams,
-    type IDocsCustomBlockRenderViewportParams,
-    type IEmbedDocsCustomBlockData,
-    isSheetLikeDocsCustomBlockChildType,
-    resolveDocsCustomBlockRenderViewport,
-} from './embed-host-anchor';
+export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockRenderViewport } from './embed-host-anchor';
+export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockMutationParams, IDocsCustomBlockRenderViewportParams, IEmbedDocsCustomBlockData } from './embed-host-anchor';
 export { registerDocsEmbedProductMenus } from './embed-product-menu';
 export { registerDocsEmbedUIContributions } from './embed-register';
 export { createDocsFloatingMenuContributions, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';

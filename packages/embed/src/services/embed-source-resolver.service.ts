@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedSource, IEmbedResolvedSource } from '../types/embed';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { normalizeResourceRefInput } from '../common/resource-ref-input';

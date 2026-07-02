@@ -293,7 +293,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
             const glyphNode = skeleton?.findNodeByCharIndex(paragraph[0].startIndex);
             const divideNode = glyphNode?.parent;
             const lineNode = divideNode?.parent;
-            const metrics = getLineSpacingMetrics(lineNode as any);
+            const metrics = getLineSpacingMetrics(lineNode);
             const nextStoredLineSpacing = convertLineSpacingForRuleChange(
                 convertDisplayLineSpacingToStoredValue(lineSpacing, spacingRule),
                 spacingRule,

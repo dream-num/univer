@@ -106,13 +106,6 @@ const LIST_ICON_MAP: Partial<Record<PresetListType, string>> = {
     [PresetListType.CHECK_LIST_CHECKED]: 'TodoListDoubleIcon',
 };
 
-interface IDocSelectionRangeLike {
-    collapsed?: boolean;
-    endOffset?: number;
-    rangeType?: string;
-    startOffset?: number;
-}
-
 interface IDocExpandedSelectionState {
     hasExpandedTextRange: boolean;
     hasRectRange: boolean;
@@ -190,7 +183,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         return true;
     }
 
-    private _getExpandedSelectionState(ranges: readonly IDocSelectionRangeLike[]): IDocExpandedSelectionState {
+    private _getExpandedSelectionState(ranges: readonly ITextRangeWithStyle[]): IDocExpandedSelectionState {
         return ranges.reduce<IDocExpandedSelectionState>((state, range) => {
             if (range.rangeType === DOC_RANGE_TYPE.RECT) {
                 state.hasRectRange = true;
@@ -216,7 +209,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         });
     }
 
-    private _hasExpandedSelectionRanges(ranges: readonly IDocSelectionRangeLike[]) {
+    private _hasExpandedSelectionRanges(ranges: readonly ITextRangeWithStyle[]) {
         const state = this._getExpandedSelectionState(ranges);
         return state.hasExpandedTextRange || state.hasRectRange;
     }

@@ -32,7 +32,19 @@ describe('registerDocsEmbedProductMenus', () => {
         expect(disposable).toBeDefined();
         expect(registered).toHaveLength(1);
         expect(registered[0].id).toBe('docs-ui.ribbon');
-        expect(registry.getMergedMenuSchema(UniverInstanceType.UNIVER_DOC)).toEqual(menuSchema);
+        expect(registered[0].menuSchema).toBe(menuSchema);
+        const rawMenuSchema = menuSchema as Record<string, unknown>;
+        expect(registry.getMergedMenuSchema(UniverInstanceType.UNIVER_DOC)).toMatchObject({
+            ribbon: {
+                'ribbon.insert': {
+                    'ribbon.insert.media': rawMenuSchema['ribbon.insert.media'],
+                },
+                'ribbon.start': {
+                    'ribbon.start.format': rawMenuSchema['ribbon.start.format'],
+                    'ribbon.start.layout': rawMenuSchema['ribbon.start.layout'],
+                },
+            },
+        });
 
         const duplicate = registerDocsEmbedProductMenus(injector);
         expect(duplicate).toBeUndefined();

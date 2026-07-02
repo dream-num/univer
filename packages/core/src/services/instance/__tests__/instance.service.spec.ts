@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../../../shared/types';
 import type { IWorkbookData } from '../../../sheets/typedef';
 import type { Workbook } from '../../../sheets/workbook';
 import type { IDocumentData } from '../../../types/interfaces/i-document-data';
@@ -221,7 +222,7 @@ describe('UniverInstanceService', () => {
     it('does not rebroadcast unchanged current or focused units', () => {
         const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
         const currentIds: Array<string | null> = [];
-        const focusedIds: Array<string | null> = [];
+        const focusedIds: Array<Nullable<string>> = [];
         service.getCurrentTypeOfUnit$<WorkbookModel>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
             currentIds.push(unit?.getUnitId() ?? null);
         });

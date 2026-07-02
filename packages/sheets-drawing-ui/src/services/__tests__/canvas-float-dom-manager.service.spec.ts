@@ -372,6 +372,16 @@ function expectLayout(layout: IFloatDomLayout, expected: IFloatDomLayout): void 
 function createService(drawing: unknown) {
     const dispose = vi.fn();
     const removeObject = vi.fn();
+    const disposeRenderObject = vi.fn();
+    const transformer = {
+        clearControlByIds: vi.fn(),
+        clearSelectedObjects: vi.fn(),
+    };
+    const renderObject = {
+        id: 'rect-1',
+        oKey: 'rect-1',
+        dispose: disposeRenderObject,
+    };
     const syncExecuteCommand = vi.fn(() => true);
     const getDrawingByParam = vi.fn(() => drawing);
     const getBatchRemoveOp = vi.fn(() => ({
@@ -387,17 +397,22 @@ function createService(drawing: unknown) {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             dispose: { dispose },
-            rect: { id: 'rect-1' },
+            rect: renderObject,
         }],
     ]);
     service._drawingManagerService = { getDrawingByParam };
     service._commandService = { syncExecuteCommand };
     service._sheetDrawingService = { getBatchRemoveOp };
     service._getSceneAndTransformerByDrawingSearch = vi.fn(() => ({
-        scene: { removeObject },
+        scene: {
+            getObjectIncludeInGroup: vi.fn(() => renderObject),
+            getTransformer: vi.fn(() => transformer),
+            removeObject,
+        },
+        transformer,
     }));
 
-    return { service, dispose, removeObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp };
+    return { service, dispose, disposeRenderObject, removeObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp, transformer };
 }
 
 describe('SheetCanvasFloatDomManagerService', () => {
@@ -933,12 +948,14 @@ describe('SheetCanvasFloatDomManagerService', () => {
             subUnitId: 'sheet-1',
             drawingId: 'float-dom-1',
         };
-        const { service, dispose, removeObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp } = createService(drawing);
+        const { service, dispose, disposeRenderObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp, transformer } = createService(drawing);
 
         service.removeFloatDom('float-dom-1');
 
         expect(dispose).toHaveBeenCalledTimes(1);
-        expect(removeObject).toHaveBeenCalledWith({ id: 'rect-1' });
+        expect(disposeRenderObject).toHaveBeenCalledTimes(1);
+        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['rect-1']);
+        expect(transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
         expect(getDrawingByParam).toHaveBeenCalledWith({
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
@@ -956,12 +973,14 @@ describe('SheetCanvasFloatDomManagerService', () => {
     });
 
     it('removes runtime-only float doms directly', () => {
-        const { service, dispose, removeObject, syncExecuteCommand } = createService(null);
+        const { service, dispose, disposeRenderObject, syncExecuteCommand, transformer } = createService(null);
 
         service.removeFloatDom('float-dom-1');
 
         expect(dispose).toHaveBeenCalledTimes(1);
-        expect(removeObject).toHaveBeenCalledWith({ id: 'rect-1' });
+        expect(disposeRenderObject).toHaveBeenCalledTimes(1);
+        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['rect-1']);
+        expect(transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
         expect(syncExecuteCommand).not.toHaveBeenCalled();
         expect(service.getFloatDomInfo('float-dom-1')).toBeUndefined();
     });
@@ -1413,7 +1432,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
             height: 72,
         }, 'chart-card')!;
 
-        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect as unknown as { fill?: string; stroke?: string } | undefined;
 
         expect(chartRect?.fill).toBe('#f5ead7');
         expect(chartRect?.stroke).toBe('#111111');

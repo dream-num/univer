@@ -169,6 +169,8 @@ export interface ICreateUnitRequest {
     table?:
     | ISheetTable
     | undefined;
+    /** two types: traditional and modern, default is modern */
+    docType?: string | undefined;
     /** used for integration with customer system */
     idempotencyKey?:
     | string

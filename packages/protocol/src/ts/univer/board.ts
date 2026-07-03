@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-export enum UniverType {
-    UNIVER_UNKNOWN = 0,
-    UNIVER_DOC = 1,
-    UNIVER_SHEET = 2,
-    UNIVER_SLIDE = 3,
-    UNIVER_PROJECT = 4,
-    UNIVER_BASE = 5,
-    UNIVER_BOARD = 6,
-    UNRECOGNIZED = -1,
+import type { IResource } from './resource';
+
+export interface IBoardMeta {
+    unitID: string;
+    rev: number;
+    creator: string;
+    name: string;
+    resources: IResource[];
+    /** The original meta data in JSON format. */
+    originalMeta: Uint8Array;
 }

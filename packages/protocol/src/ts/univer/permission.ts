@@ -105,6 +105,8 @@ export enum UnitObject {
     SelectRange = 3,
     Document = 4,
     Slide = 5,
+    Base = 6,
+    Board = 7,
     UNRECOGNIZED = -1,
 }
 

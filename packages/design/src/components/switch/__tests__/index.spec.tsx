@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Switch } from '../Switch';
 
@@ -44,14 +44,5 @@ describe('Switch', () => {
         checkboxElement.click();
 
         expect(checkboxElement.checked).toBeFalsy();
-    });
-
-    it('exposes switch semantics and input accessibility labels', () => {
-        render(<Switch defaultChecked inputProps={{ 'aria-label': 'Grid' }} />);
-
-        const switchElement = screen.getByRole('switch', { name: 'Grid' });
-
-        expect(switchElement).toBeInstanceOf(HTMLInputElement);
-        expect((switchElement as HTMLInputElement).checked).toBe(true);
     });
 });

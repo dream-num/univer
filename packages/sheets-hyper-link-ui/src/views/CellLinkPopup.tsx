@@ -19,7 +19,7 @@ import type { LocaleKey } from '../locale/types';
 import type { IHyperLinkPopup } from '../services/popup.service';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
-import { AllBorderIcon, CopyIcon, LinkIcon, UnlinkIcon, WriteIcon, XlsxMultiIcon } from '@univerjs/icons';
+import { AllBorderIcon, CopyIcon, LinkIcon, SheetsMultiIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import {
     CancelHyperLinkCommand,
     CancelRichHyperLinkCommand,
@@ -36,7 +36,7 @@ import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
 const iconsMap = {
     [SheetHyperLinkType.URL]: <LinkIcon />,
-    [SheetHyperLinkType.SHEET]: <XlsxMultiIcon className="univer-text-green-500" />,
+    [SheetHyperLinkType.SHEET]: <SheetsMultiIcon className="univer-text-green-500" />,
     [SheetHyperLinkType.RANGE]: <AllBorderIcon />,
     [SheetHyperLinkType.DEFINE_NAME]: <AllBorderIcon />,
     [SheetHyperLinkType.INVALID]: <AllBorderIcon />,

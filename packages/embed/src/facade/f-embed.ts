@@ -159,7 +159,6 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      * ```ts
      * const hostUnitId = 'host-unit-id';
      * const hostSheetId = 'host-sheet-id';
-     * const anotherUnitId = 'another-unit-id';
      *
      * const embed = univerAPI.createEmbed<UniverFacadeTypes.FDocument>({
      *     embedId: 'doc-in-sheet',
@@ -176,7 +175,7 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      *     },
      *     content: {
      *         unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC,
-     *         ref: `#unit=${anotherUnitId}&type=doc`,
+     *         ref: '#unit=another-unit-id&type=doc',
      *     },
      * });
      *

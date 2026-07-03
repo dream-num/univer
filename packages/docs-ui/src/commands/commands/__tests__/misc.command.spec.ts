@@ -318,8 +318,13 @@ function createCenteredEmptyParagraphDoc(): IDocumentData {
 }
 
 function createHeaderFooterDoc(): IDocumentData {
+    const doc = createBaseDoc();
     return {
-        ...createBaseDoc(),
+        ...doc,
+        documentStyle: {
+            ...doc.documentStyle!,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        },
         headers: {},
         footers: {},
     };

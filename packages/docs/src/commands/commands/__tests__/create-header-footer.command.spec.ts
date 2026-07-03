@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import { DocumentFlavor, ICommandService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createTestBed } from '../../../facade/__tests__/create-test-bed';
+import { createDocumentData, createTestBed } from '../../../facade/__tests__/create-test-bed';
 import { CreateHeaderFooterCommand, HeaderFooterType } from '../create-header-footer.command';
 
 describe('CreateHeaderFooterCommand', () => {
@@ -24,7 +24,15 @@ describe('CreateHeaderFooterCommand', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        testBed = createTestBed();
+        const documentData = createDocumentData('test', {
+            dataStream: 'Hello,\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_19' }],
+        });
+        documentData.documentStyle = {
+            ...documentData.documentStyle,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        };
+        testBed = createTestBed(documentData);
         commandService = testBed.get(ICommandService);
     });
 

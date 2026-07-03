@@ -16,7 +16,7 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { ICommandService, IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, ICommandService, IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
 import { InsertTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
@@ -149,6 +149,17 @@ describe('FDocument', () => {
     });
 
     it('ensures header and footer segments independently', () => {
+        univer.dispose();
+        const documentData = createDocumentData('classic-doc', {
+            dataStream: 'Hello,\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_header_footer' }],
+        });
+        documentData.documentStyle = {
+            ...documentData.documentStyle,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        };
+        createDocumentFacade(documentData);
+
         const headerId = document.ensurePageHeader();
         let snapshot = document.save();
 

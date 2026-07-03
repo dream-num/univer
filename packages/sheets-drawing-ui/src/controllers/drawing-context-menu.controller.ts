@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { DrawingTypeEnum, IDrawingParam, Nullable, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
+import { IDrawingContextMenuService } from '../services/drawing-context-menu.service';
 
 export class DrawingContextMenuController extends RxDisposable {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IDrawingContextMenuService private readonly _drawingContextMenuService: IDrawingContextMenuService
     ) {
         super();
 
@@ -58,14 +60,33 @@ export class DrawingContextMenuController extends RxDisposable {
             const selectedObjects = transformer.getSelectedObjectMap();
             if (selectedObjects.size === 0) return;
 
+            const drawings: IDrawingParam[] = [];
             for (const object of selectedObjects.values()) {
                 const oKey = object.oKey;
                 const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
 
                 if (!drawingParam) return;
+
+                drawings.push(drawingParam);
             }
 
-            this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.DRAWING);
+            this._contextMenuService.triggerContextMenu(event, this._getContextMenuPosition(drawings));
         }));
+    }
+
+    private _getContextMenuPosition(drawings: IDrawingParam[]): string {
+        if (drawings.length !== 1) {
+            return ContextMenuPosition.DRAWING;
+        }
+
+        const [drawing] = drawings;
+
+        return this._drawingContextMenuService.getContextMenuPosition({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+            drawingType: drawing.drawingType as DrawingTypeEnum,
+            drawing,
+        }) ?? ContextMenuPosition.DRAWING;
     }
 }

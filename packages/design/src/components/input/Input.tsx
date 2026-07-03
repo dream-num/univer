@@ -18,9 +18,10 @@ import type { VariantProps } from 'class-variance-authority';
 import type { InputHTMLAttributes } from 'react';
 import { CloseIcon } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
@@ -86,6 +87,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         inputStyle,
         ...props
     }, ref) => {
+        const { direction } = useContext(ConfigContext);
+
         const handleClear = (e: React.MouseEvent) => {
             e.stopPropagation();
             onChange?.('');
@@ -123,9 +126,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             if (allowClear && !(slot && slotRef.current)) setPaddingRight(26);
         }, []); // only enough for init, otherwise it works again when you click it
 
-        const mergedInputStyle = paddingRight > 0
-            ? { ...inputStyle, paddingRight }
-            : inputStyle;
+        const shouldOmitDefaultPaddingRight = direction === 'rtl' && paddingRight === 0;
+        const mergedInputStyle = shouldOmitDefaultPaddingRight
+            ? inputStyle
+            : { ...inputStyle, paddingRight };
 
         return (
             <div

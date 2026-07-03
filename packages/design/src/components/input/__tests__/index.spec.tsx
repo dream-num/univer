@@ -16,6 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Input } from '../Input';
 
 afterEach(cleanup);
@@ -136,8 +137,18 @@ describe('Input', () => {
         expect(input.style.paddingRight).toBe('26px');
     });
 
-    it('should not override default right padding when no trailing content exists', () => {
+    it('should preserve ltr right padding compatibility when no trailing content exists', () => {
         const { container } = render(<Input />);
+        const input = container.querySelector('input') as HTMLInputElement;
+        expect(input.style.paddingRight).toBe('0px');
+    });
+
+    it('should not override rtl right padding when no trailing content exists', () => {
+        const { container } = render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <Input />
+            </ConfigProvider>
+        );
         const input = container.querySelector('input') as HTMLInputElement;
         expect(input.style.paddingRight).toBe('');
     });

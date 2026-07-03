@@ -264,7 +264,7 @@ export function Dialog(props: IDialogProps) {
         onCancel,
     } = props;
 
-    const { locale } = useContext(ConfigContext);
+    const { locale, mountContainer, direction } = useContext(ConfigContext);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -336,6 +336,8 @@ export function Dialog(props: IDialogProps) {
                         : {}),
                 }}
                 closable={closable}
+                mountContainer={mountContainer}
+                dir={direction}
                 onClickClose={handleClickClose}
                 onEscapeKeyDown={(e) => {
                     if (keyboard) {

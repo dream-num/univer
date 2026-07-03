@@ -18,6 +18,7 @@ import type { ComponentProps } from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { ColorInput } from '../ColorInput';
 import { ColorPicker } from '../ColorPicker';
 import { ColorSpectrum } from '../ColorSpectrum';
@@ -46,6 +47,16 @@ describe('ColorPicker', () => {
 
         expect(container.querySelector('[data-u-comp="color-picker"]')).toBeTruthy();
         expect(container.querySelectorAll('[data-u-comp="color-picker-presets"] button').length).toBeGreaterThan(0);
+    });
+
+    it('should apply rtl direction to the picker content', () => {
+        const { container } = render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <ColorPicker />
+            </ConfigProvider>
+        );
+
+        expect(container.querySelector('[data-u-comp="color-picker"]')?.getAttribute('dir')).toBe('rtl');
     });
 
     it('should call onChange when color changes', () => {

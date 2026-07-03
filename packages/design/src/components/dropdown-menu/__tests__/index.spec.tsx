@@ -16,6 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { DropdownMenu } from '../DropdownMenu';
 import '@testing-library/jest-dom/vitest';
 
@@ -170,6 +171,18 @@ describe('DropdownMenu', () => {
         expect(onItemSelect).toHaveBeenCalled();
         expect(onCheckboxSelect).toHaveBeenCalledWith('c1');
         expect(onRadioSelect).toHaveBeenCalledWith('b');
+    });
+
+    it('should preserve rtl direction on portal content', () => {
+        render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <DropdownMenu open items={[{ type: 'item' as const, children: 'Item 1' }]}>
+                    <button type="button">Trigger</button>
+                </DropdownMenu>
+            </ConfigProvider>
+        );
+
+        expect(document.querySelector('[role="menu"]')).toHaveAttribute('dir', 'rtl');
     });
 
     it('should throw when radio option misses value', () => {

@@ -48,6 +48,39 @@ export interface ISheetBarMenuItem {
     sheetId?: string;
 }
 
+export function SheetBarMenuItemContent(props: { item: ISheetBarMenuItem }) {
+    const { item } = props;
+
+    return (
+        <div
+            className={`
+              univer-relative univer-box-border univer-overflow-hidden univer-truncate univer-pl-6
+              rtl:univer-pl-0 rtl:univer-pr-6
+            `}
+        >
+            {(item.selected || item.hidden) && (
+                <span
+                    className={`
+                      univer-absolute univer-left-1 univer-top-0.5
+                      rtl:univer-left-auto rtl:univer-right-1
+                    `}
+                >
+                    {item.selected && <CheckMarkIcon className="univer-size-4 univer-text-primary-600" />}
+                    {item.hidden && <EyelashIcon className="univer-size-4 univer-text-gray-400" />}
+                </span>
+            )}
+
+            <span
+                className={clsx({
+                    'univer-text-primary-600': item.selected,
+                })}
+            >
+                {item.label}
+            </span>
+        </div>
+    );
+}
+
 export function SheetBarMenu() {
     const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
     const [visible, setVisible] = useState(false);
@@ -131,24 +164,7 @@ export function SheetBarMenu() {
 
     const items: IDropdownMenuProps['items'] = useMemo(() => menu.map((item) => ({
         type: 'item',
-        children: (
-            <div className="univer-relative univer-box-border univer-overflow-hidden univer-truncate univer-pl-6">
-                {(item.selected || item.hidden) && (
-                    <span className="univer-absolute univer-left-1 univer-top-0.5">
-                        {item.selected && <CheckMarkIcon className="univer-size-4 univer-text-primary-600" />}
-                        {item.hidden && <EyelashIcon className="univer-size-4 univer-text-gray-400" />}
-                    </span>
-                )}
-
-                <span
-                    className={clsx({
-                        'univer-text-primary-600': item.selected,
-                    })}
-                >
-                    {item.label}
-                </span>
-            </div>
-        ),
+        children: <SheetBarMenuItemContent item={item} />,
         onSelect: () => {
             handleClick(item);
         },

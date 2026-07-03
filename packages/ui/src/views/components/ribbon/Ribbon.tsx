@@ -37,6 +37,8 @@ interface IRibbonProps {
     headerMenu?: boolean;
 }
 
+export const ribbonToolbarDividerClassName = clsx(divideXClassName, 'rtl:univer-divide-x-reverse');
+
 export function Ribbon(props: IRibbonProps) {
     const { ribbonType, headerMenuComponents, headerMenu = true } = props;
 
@@ -165,7 +167,7 @@ export function Ribbon(props: IRibbonProps) {
                   univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
                 `, {
                     'univer-hidden': !fakeToolbarVisible,
-                }, divideXClassName, borderBottomClassName)}
+                }, ribbonToolbarDividerClassName, borderBottomClassName)}
             >
                 {activeGroup.allGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
                     <Fragment key={groupItem.key}>
@@ -252,7 +254,7 @@ export function Ribbon(props: IRibbonProps) {
                 <div
                     data-u-comp="ribbon-toolbar"
                     ref={containerRef}
-                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
+                    className={clsx('univer-flex univer-overflow-hidden', ribbonToolbarDividerClassName, {
                         'univer-justify-center': ribbonType === 'classic',
                     })}
                     role="toolbar"

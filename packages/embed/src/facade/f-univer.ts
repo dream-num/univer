@@ -88,6 +88,35 @@ export interface IFUniverEmbedMixin {
      *
      * @param params Embed creation parameters.
      * @returns The created embed facade.
+     * @example TypeScript
+     * ```ts
+     * const target = univerAPI.getActiveSheet();
+     * if (!target) {
+     *     throw new Error('No active sheet');
+     * }
+     *
+     * const embed = univerAPI.createEmbed<UniverFacadeTypes.FWorkbook>({
+     *     embedId: 'sales-sheet-embed',
+     *     host: {
+     *         unitId: target.workbook.getId(),
+     *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
+     *         context: {
+     *             subUnitId: target.worksheet.getSheetId(),
+     *             left: 80,
+     *             top: 80,
+     *             width: 640,
+     *             height: 360,
+     *         },
+     *     },
+     *     content: {
+     *         unitType: univerAPI.Enum.UniverInstanceType.UNIVER_SHEET,
+     *         ref: '#unit=remote-sheet&type=sheet',
+     *     },
+     * });
+     *
+     * const childWorkbook = await embed.loadAsync();
+     * console.log(childWorkbook.getId());
+     * ```
      */
     createEmbed<TUnitFacade = never, TChildType extends UniverInstanceType = UniverInstanceType>(
         params: ICreateEmbedParams<TChildType>
@@ -100,6 +129,19 @@ export interface IFUniverEmbedMixin {
      * @param params.hostUnitId The host unit id that owns the embed.
      * @param params.embedId The embed id to remove.
      * @returns `true` when the remove command succeeds.
+     * @example TypeScript
+     * ```ts
+     * const target = univerAPI.getActiveSheet();
+     * if (!target) {
+     *     throw new Error('No active sheet');
+     * }
+     *
+     * const removed = univerAPI.removeEmbed({
+     *     hostUnitId: target.workbook.getId(),
+     *     embedId: 'sales-sheet-embed',
+     * });
+     * console.log(removed);
+     * ```
      */
     removeEmbed(params: IRemoveEmbedParams): boolean;
 
@@ -110,6 +152,19 @@ export interface IFUniverEmbedMixin {
      * @param params.hostUnitId The host unit id that owns the embed.
      * @param params.embedId The embed id to read.
      * @returns The embed facade, or `null` when it does not exist.
+     * @example TypeScript
+     * ```ts
+     * const target = univerAPI.getActiveSheet();
+     * if (!target) {
+     *     throw new Error('No active sheet');
+     * }
+     *
+     * const embed = univerAPI.getEmbed({
+     *     hostUnitId: target.workbook.getId(),
+     *     embedId: 'sales-sheet-embed',
+     * });
+     * console.log(embed?.getDescriptor());
+     * ```
      */
     getEmbed(params: IGetEmbedParams): FEmbed<unknown> | null;
 
@@ -120,6 +175,18 @@ export interface IFUniverEmbedMixin {
      * @param params.hostUnitId Optional host unit id. When omitted, all active
      * embeds in the local runtime are returned.
      * @returns Active embed facades.
+     * @example TypeScript
+     * ```ts
+     * const target = univerAPI.getActiveSheet();
+     * if (!target) {
+     *     throw new Error('No active sheet');
+     * }
+     *
+     * const embeds = univerAPI.listEmbeds({ hostUnitId: target.workbook.getId() });
+     * for (const embed of embeds) {
+     *     console.log(embed.getId(), embed.getChildType());
+     * }
+     * ```
      */
     listEmbeds(params?: IListEmbedsParams): Array<FEmbed<unknown>>;
 
@@ -136,14 +203,14 @@ export interface IFUniverEmbedMixin {
      * @example TypeScript
      * ```ts
      * const workbook = await univerAPI.loadUnitAsync<UniverFacadeTypes.FWorkbook>(ref, {
-     *     unitType: UniverInstanceType.UNIVER_SHEET,
+     *     unitType: univerAPI.Enum.UniverInstanceType.UNIVER_SHEET,
      * });
      * console.log(workbook.getId());
      * ```
      * @example JavaScript
      * ```js
      * const workbook = await univerAPI.loadUnitAsync(ref, {
-     *     unitType: UniverInstanceType.UNIVER_SHEET,
+     *     unitType: univerAPI.Enum.UniverInstanceType.UNIVER_SHEET,
      * });
      * console.log(workbook.getId());
      * ```

@@ -25,9 +25,10 @@ import type {
     ResourceRefInput,
 } from '@univerjs/embed';
 import type { FEmbedHostSurface } from './f-enum';
-import { generateRandomId, UniverInstanceType } from '@univerjs/core';
+import { generateRandomId, IReferencedUnitManagerService, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitManagerService, normalizeResourceRefLocator } from '@univerjs/embed';
+import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitApiResolverRegistryService, normalizeResourceRefLocator } from '@univerjs/embed';
+import { EmbedError, EmbedErrorCode } from '../common/error';
 import { FEmbed } from './f-embed';
 
 export interface ICreateEmbedHostParams {
@@ -167,7 +168,9 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
     ): FEmbed<FResolvedUnitFacade<TUnitFacade, TChildType>> {
         const hostType = this._univerInstanceService.getUnitType(params.host.unitId);
         if (hostType === UniverInstanceType.UNRECOGNIZED) {
-            throw new Error('EMBED_HOST_UNIT_NOT_FOUND');
+            throw new EmbedError(EmbedErrorCode.HostUnitNotFound, {
+                hostUnitId: params.host.unitId,
+            });
         }
 
         const descriptor = this._commandService.syncExecuteCommand<ICreateEmbedCommandParams, IEmbedDescriptor | false>(
@@ -185,7 +188,10 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
             }
         );
         if (!descriptor) {
-            throw new Error('EMBED_CREATE_FAILED');
+            throw new EmbedError(EmbedErrorCode.CreateFailed, {
+                hostUnitId: params.host.unitId,
+                embedId: params.embedId,
+            });
         }
 
         return this._toFEmbed<FResolvedUnitFacade<TUnitFacade, TChildType>>(descriptor);
@@ -219,13 +225,14 @@ export class FUniverEmbedMixin extends FUniver implements IFUniverEmbedMixin {
         const { signal, unitType, ...createOptions } = options;
         const normalizedRef = this._normalizeLoadUnitRef(ref);
 
-        const handle = this._injector.get(EmbedReferencedUnitManagerService).ensure({
-            ref: normalizedRef,
-            unitType,
-            signal,
-            createOptions,
-        });
-        const record = await handle.loaded;
+        const record = await this._injector.get(IReferencedUnitManagerService).ensure(
+            normalizedRef,
+            {
+                unitType,
+                signal,
+                createOptions,
+            }
+        );
         return this._injector.get(EmbedReferencedUnitApiResolverRegistryService).resolve<FResolvedUnitFacade<TUnitFacade, TUnitType>>({
             unitId: record.unitId,
             unitType: record.unitType,

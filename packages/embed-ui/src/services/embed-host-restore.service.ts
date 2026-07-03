@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IEmbedDescriptor, IEmbedHostAnchorRecord } from '@univerjs/embed';
 import type { ICreateUnitOptions } from '@univerjs/core';
-import { Inject, IUniverInstanceService, Optional } from '@univerjs/core';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedModelService, EmbedReferencedUnitManagerService, getResourceRefInputKey, ReferencedUnitOwnerKind } from '@univerjs/embed';
-import { EmbedChildProductPluginRegistryService } from './embed-child-product-plugin-registry.service';
+import type { IEmbedDescriptor, IEmbedDescriptorMaterializeContext, IEmbedHostAnchorRecord } from '@univerjs/embed';
+import { Inject } from '@univerjs/core';
+import { EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedModelService, EmbedReferencedUnitMaterializeService } from '@univerjs/embed';
+
+export type { IEmbedDescriptorMaterializeContext } from '@univerjs/embed';
 
 export interface IEmbedHostRestoreContext {
     descriptor: IEmbedDescriptor;
@@ -27,29 +28,18 @@ export interface IEmbedHostRestoreContext {
     createOptions?: ICreateUnitOptions;
 }
 
-export interface IEmbedDescriptorMaterializeContext {
-    descriptor: IEmbedDescriptor;
-    createOptions?: ICreateUnitOptions;
-}
-
 export class EmbedHostRestoreService {
-    private readonly _materializingDescriptors = new Map<string, Promise<IEmbedDescriptor>>();
-
     constructor(
         @Inject(EmbedModelService) private readonly _modelService: EmbedModelService,
+        @Inject(EmbedReferencedUnitMaterializeService) private readonly _materializeService: EmbedReferencedUnitMaterializeService,
         @Inject(EmbedHostAdapterRegistryService) private readonly _hostAdapterRegistry: EmbedHostAdapterRegistryService,
-        @Inject(EmbedHostAnchorModelService) private readonly _anchorModelService: EmbedHostAnchorModelService,
-        @Inject(EmbedReferencedUnitManagerService) private readonly _referencedUnitManager: EmbedReferencedUnitManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Optional(EmbedChildProductPluginRegistryService) private readonly _childProductPluginRegistry?: EmbedChildProductPluginRegistryService
+        @Inject(EmbedHostAnchorModelService) private readonly _anchorModelService: EmbedHostAnchorModelService
     ) {
         // noop
     }
 
     async materializeDescriptor(context: IEmbedDescriptorMaterializeContext): Promise<IEmbedDescriptor> {
-        const descriptor = await this._materializeDescriptor(context);
-        this._modelService.addDescriptor(descriptor.hostUnitId, descriptor);
-        return this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId)!;
+        return this._materializeService.materializeDescriptor(context);
     }
 
     async restoreEmbed(context: IEmbedHostRestoreContext): Promise<IEmbedDescriptor> {
@@ -68,88 +58,5 @@ export class EmbedHostRestoreService {
         this._anchorModelService.setAnchor(record);
 
         return this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId)!;
-    }
-
-    private async _materializeDescriptor(context: IEmbedDescriptorMaterializeContext): Promise<IEmbedDescriptor> {
-        const descriptor = context.descriptor;
-        const loadedDescriptor = this._getLoadedDescriptor(descriptor);
-        if (loadedDescriptor) {
-            return loadedDescriptor;
-        }
-
-        const key = this._getMaterializeKey(descriptor);
-        const pending = this._materializingDescriptors.get(key);
-        if (pending) {
-            return pending;
-        }
-
-        const materializing = this._loadDescriptor(context);
-        this._materializingDescriptors.set(key, materializing);
-        const cleanup = () => {
-            if (this._materializingDescriptors.get(key) === materializing) {
-                this._materializingDescriptors.delete(key);
-            }
-        };
-        materializing.then(cleanup, cleanup);
-        return materializing;
-    }
-
-    private async _loadDescriptor(context: IEmbedDescriptorMaterializeContext): Promise<IEmbedDescriptor> {
-        const descriptor = context.descriptor;
-        const handle = this._referencedUnitManager.ensure({
-            ref: descriptor.source.ref,
-            unitType: descriptor.childType,
-            owner: {
-                kind: ReferencedUnitOwnerKind.Embed,
-                unitId: descriptor.hostUnitId,
-                ownerId: descriptor.embedId,
-            },
-            createOptions: context.createOptions ?? EMBED_CHILD_CREATE_OPTIONS,
-        });
-        const materialized = await handle.loaded;
-
-        const materializedDescriptor: IEmbedDescriptor = {
-            ...descriptor,
-            source: {
-                unitType: descriptor.childType,
-                ref: materialized.ref,
-                ...(descriptor.source.creationConfig === undefined ? undefined : { creationConfig: descriptor.source.creationConfig }),
-            },
-            childUnitId: materialized.unitId,
-            childType: materialized.unitType,
-        };
-
-        await this._childProductPluginRegistry?.prepare({
-            childUnitId: materialized.unitId,
-            childType: materializedDescriptor.childType,
-            descriptor: materializedDescriptor,
-            restoreUnitId: materializedDescriptor.hostUnitId,
-        });
-
-        return materializedDescriptor;
-    }
-
-    private _getLoadedDescriptor(descriptor: IEmbedDescriptor): IEmbedDescriptor | undefined {
-        const current = this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId) ?? descriptor;
-        if (!current.childUnitId || current.childType == null) {
-            return undefined;
-        }
-
-        // childUnitId is a runtime materialization result. It is loaded only
-        // after that unit exists in the current runtime.
-        if (this._univerInstanceService.getUnitType(current.childUnitId) !== current.childType) {
-            throw new Error('EMBED_MATERIALIZED_CHILD_UNIT_NOT_LOADED');
-        }
-
-        return current;
-    }
-
-    private _getMaterializeKey(descriptor: IEmbedDescriptor): string {
-        return JSON.stringify([
-            descriptor.hostUnitId,
-            descriptor.embedId,
-            descriptor.childType,
-            getResourceRefInputKey(descriptor.source.ref),
-        ]);
     }
 }

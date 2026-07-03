@@ -15,32 +15,43 @@
  */
 
 import type {
-    IReferencedUnitEnsureInput,
-    IReferencedUnitHandle,
+    IDisposable,
+    IReferencedUnitEnsureOptions,
     IReferencedUnitManagerService,
     IReferencedUnitOwner,
-    IReferencedUnitRecord,
-} from '../types/referenced-unit';
-import type { IEmbedResourceRefProvider } from './embed-resource-ref-provider-registry.service';
-import { Optional, UniverInstanceType } from '@univerjs/core';
+    IReferencedUnitReadDataOptions,
+    IReferencedUnitReadDataResult,
+    IReferencedUnitRuntimeRecord,
+    ResourceRef,
+    ResourceRefInput,
+} from '@univerjs/core';
+import type { IEmbedResourceRefUnitProvider } from './embed-resource-ref-provider-registry.service';
+import { formatResourceRef, getResourceRefUnitKey, normalizeResourceRefInput, Optional, ReferencedUnitDataType, ReferencedUnitError, ReferencedUnitErrorCode, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
-import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
-import { parseResourceRef } from '../common/resource-ref-uri';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
 import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
 
-interface IReferencedUnitStoredRecord extends IReferencedUnitRecord {
-    usedBy: IReferencedUnitOwner[];
-    usageCounts: Map<string, number>;
+interface IReferencedUnitLoadState {
+    readonly unitLoadKey: string;
+    readonly ref: ResourceRef;
+    readonly token: symbol;
+    providerLoadPromise: Promise<IReferencedUnitRuntimeRecord>;
+    record?: IReferencedUnitRuntimeRecord;
 }
 
-interface IPreparedReferencedUnitEnsureInput extends IReferencedUnitEnsureInput {
-    unitType: UniverInstanceType;
-    createOptions: NonNullable<IReferencedUnitEnsureInput['createOptions']>;
+interface IReferencedUnitClaimState {
+    readonly owner: IReferencedUnitOwner;
+    readonly ownerKey: string;
+    readonly unitId: string;
+    readonly token: symbol;
 }
 
 export class EmbedReferencedUnitManagerService implements IReferencedUnitManagerService {
-    private readonly _records = new Map<string, IReferencedUnitStoredRecord>();
+    private readonly _loadStates = new Map<string, IReferencedUnitLoadState>();
+    private readonly _loadStatesByRuntimeUnitId = new Map<string, Set<IReferencedUnitLoadState>>();
+    private readonly _ownerClaims = new Map<string, IReferencedUnitClaimState>();
+    private readonly _unitClaims = new Map<string, IReferencedUnitClaimState>();
+    private readonly _usageCounts = new Map<string, number>();
 
     constructor(
         @Optional(EmbedResourceRefProviderRegistryService) private readonly _resourceRefProviderRegistry?: EmbedResourceRefProviderRegistryService
@@ -48,119 +59,243 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         // noop
     }
 
-    ensure(input: IReferencedUnitEnsureInput): IReferencedUnitHandle {
-        const ref = normalizeResourceRefInput(input.ref);
-        const unitType = this._resolveUnitType(ref, input.unitType);
-        const owner = this._normalizeOwner(input.owner);
-        const createOptions = input.createOptions ?? EMBED_CHILD_CREATE_OPTIONS;
-        const provider = this._getProvider(ref, unitType);
-        const loaded = this._ensureProviderRef(ref, provider, {
-            ...input,
+    ensure(refInput: ResourceRefInput, options: IReferencedUnitEnsureOptions = {}): Promise<IReferencedUnitRuntimeRecord> {
+        const ref = normalizeResourceRefInput(refInput);
+        const unitType = this._resolveUnitType(ref, options.unitType);
+        const unitLoadKey = this._getUnitLoadKey(ref, unitType);
+        const existingState = this._loadStates.get(unitLoadKey);
+        if (existingState) {
+            return this._withOptionalAbort(existingState.providerLoadPromise, options.signal);
+        }
+
+        const provider = this._getUnitProvider(ref, unitType);
+        const state = this._createLoadState({
             ref,
             unitType,
+            unitLoadKey,
+            provider,
+            createOptions: options.createOptions ?? EMBED_CHILD_CREATE_OPTIONS,
+            signal: options.signal,
+        });
+
+        return this._withOptionalAbort(state.providerLoadPromise, options.signal);
+    }
+
+    claimUnit(ownerInput: IReferencedUnitOwner, unitId: string): IDisposable {
+        const owner = this._normalizeOwner(ownerInput);
+        const ownerKey = this._getOwnerKey(owner);
+        const existingOwnerClaim = this._ownerClaims.get(ownerKey);
+        if (existingOwnerClaim) {
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.OwnerConflict, {
+                existingOwner: existingOwnerClaim.owner,
+                nextOwner: owner,
+                existingUnitId: existingOwnerClaim.unitId,
+                unitId,
+            });
+        }
+
+        const existingUnitClaim = this._unitClaims.get(unitId);
+        if (existingUnitClaim) {
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.OwnerConflict, {
+                existingOwner: existingUnitClaim.owner,
+                nextOwner: owner,
+                unitId,
+            });
+        }
+
+        const claim: IReferencedUnitClaimState = {
             owner,
-            createOptions,
-        }).then((record) => this._recordLoaded(record, owner));
-        return this._createHandle(owner, loaded, input.signal);
-    }
-
-    private _getProvider(
-        ref: string,
-        unitType: UniverInstanceType
-    ): IEmbedResourceRefProvider {
-        const registration = this._resourceRefProviderRegistry?.get(ref, toResourceRefUnitType(unitType));
-        if (!registration) {
-            throw new Error('REFERENCED_UNIT_PROVIDER_NOT_FOUND');
-        }
-
-        return registration.provider;
-    }
-
-    private async _ensureProviderRef(
-        ref: string,
-        provider: IEmbedResourceRefProvider,
-        input: IPreparedReferencedUnitEnsureInput
-    ): Promise<IReferencedUnitRecord> {
-        const resolved = await provider.ensure({
-            ref,
-            refKey: getResourceRefInputKey(ref),
-            owner: input.owner,
-            unitType: input.unitType,
-            createOptions: input.createOptions,
-            signal: input.signal,
-        });
-        if (resolved.unitType !== input.unitType) {
-            throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
-        }
-
-        return {
-            ref,
-            unitId: resolved.unitId,
-            unitType: resolved.unitType,
+            ownerKey,
+            unitId,
+            token: Symbol(ownerKey),
         };
-    }
+        this._ownerClaims.set(ownerKey, claim);
+        this._unitClaims.set(unitId, claim);
 
-    private _recordLoaded(record: IReferencedUnitRecord, owner: IReferencedUnitOwner | undefined): IReferencedUnitRecord {
-        if (!owner) {
-            return this._toReferencedUnitRecord(record);
-        }
-
-        const loadedKey = this._getLoadedKey(record);
-        let stored = this._records.get(loadedKey);
-        if (!stored) {
-            stored = {
-                ...record,
-                usedBy: [],
-                usageCounts: new Map(),
-            };
-            this._records.set(loadedKey, stored);
-        }
-        this._addUsageOwner(stored, owner);
-        return this._toReferencedUnitRecord(stored);
-    }
-
-    private _getLoadedKey(record: IReferencedUnitRecord): string {
-        return JSON.stringify([
-            getResourceRefInputKey(record.ref),
-            record.unitType,
-            record.unitId,
-        ]);
-    }
-
-    private _createHandle(owner: IReferencedUnitOwner | undefined, loadedRecord: Promise<IReferencedUnitRecord>, signal: AbortSignal | undefined): IReferencedUnitHandle {
         let disposed = false;
-        let loadedKey: string | undefined;
-        const tracked = loadedRecord.then((record) => {
-            loadedKey = this._getLoadedKey(record);
-            if (disposed) {
-                this._removeUsageOwner(loadedKey, owner);
-            }
-
-            return record;
-        });
-
-        const dispose = () => {
+        return toDisposable(() => {
             if (disposed) {
                 return;
             }
 
             disposed = true;
-            if (loadedKey) {
-                this._removeUsageOwner(loadedKey, owner);
+            this._releaseClaim(claim);
+        });
+    }
+
+    async readData(refInput: ResourceRefInput, options: IReferencedUnitReadDataOptions = {}): Promise<IReferencedUnitReadDataResult> {
+        const ref = normalizeResourceRefInput(refInput);
+        if (!ref.part || ref.part.kind !== 'range') {
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.MissingDataSelector, { ref });
+        }
+
+        const unitType = this._resolveUnitType(ref, undefined);
+        const registration = this._resourceRefProviderRegistry?.getDataProvider(ref, ref.unit.type);
+        if (!registration) {
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.ProviderMissing, {
+                capability: 'data',
+                ref,
+                unitType,
+            });
+        }
+
+        return registration.provider.readData({
+            ref,
+            unitType,
+            dataType: ReferencedUnitDataType.RANGE,
+            selector: ref.part,
+            signal: options.signal,
+        });
+    }
+
+    addUsage(fromUnitId: string, toUnitId: string, count = 1): IDisposable {
+        const key = this._getUsageKey(fromUnitId, toUnitId);
+        this._usageCounts.set(key, (this._usageCounts.get(key) ?? 0) + count);
+
+        let disposed = false;
+        return toDisposable(() => {
+            if (disposed) {
+                return;
             }
-        };
 
-        const loaded = signal
-            ? this._withAbort(tracked, signal).catch((error) => {
-                dispose();
-                throw error;
+            disposed = true;
+            const current = this._usageCounts.get(key) ?? 0;
+            const next = current - count;
+            if (next <= 0) {
+                this._usageCounts.delete(key);
+                return;
+            }
+
+            this._usageCounts.set(key, next);
+        });
+    }
+
+    releaseUnit(unitId: string): void {
+        for (const claim of [...this._ownerClaims.values()]) {
+            if (claim.unitId === unitId || claim.owner.unitId === unitId) {
+                this._releaseClaim(claim);
+            }
+        }
+
+        for (const [key] of [...this._usageCounts]) {
+            const [fromUnitId, toUnitId] = JSON.parse(key) as [string, string];
+            if (fromUnitId === unitId || toUnitId === unitId) {
+                this._usageCounts.delete(key);
+            }
+        }
+
+        for (const state of [...this._loadStates.values()]) {
+            if (state.record?.unitId === unitId) {
+                this._removeLoadState(state);
+            }
+        }
+    }
+
+    private _getUnitProvider(ref: ResourceRef, unitType: UniverInstanceType): IEmbedResourceRefUnitProvider {
+        const registration = this._resourceRefProviderRegistry?.getUnitProvider(ref, toResourceRefUnitType(unitType));
+        if (!registration) {
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.ProviderMissing, {
+                capability: 'unit',
+                ref,
+                unitType,
+            });
+        }
+
+        return registration.provider;
+    }
+
+    private _createLoadState(input: {
+        ref: ResourceRef;
+        unitType: UniverInstanceType;
+        unitLoadKey: string;
+        provider: IEmbedResourceRefUnitProvider;
+        createOptions: NonNullable<IReferencedUnitEnsureOptions['createOptions']>;
+        signal?: AbortSignal;
+    }): IReferencedUnitLoadState {
+        const state: IReferencedUnitLoadState = {
+            unitLoadKey: input.unitLoadKey,
+            ref: input.ref,
+            token: Symbol(input.unitLoadKey),
+            providerLoadPromise: Promise.resolve(null as never),
+        };
+        this._addLoadState(state);
+        state.providerLoadPromise = Promise.resolve()
+            .then(() => input.provider.ensureUnit({
+                ref: input.ref,
+                unitType: input.unitType,
+                createOptions: input.createOptions,
+                signal: input.signal,
+            }))
+            .then((result) => {
+                if (result.unitType !== input.unitType) {
+                    throw new ReferencedUnitError(ReferencedUnitErrorCode.UnitTypeMismatch, {
+                        expected: input.unitType,
+                        actual: result.unitType,
+                    });
+                }
+
+                const record = {
+                    ref: this._formatUnitRef(input.ref),
+                    unitId: result.unitId,
+                    unitType: result.unitType,
+                };
+                if (this._loadStates.get(state.unitLoadKey) === state) {
+                    state.record = record;
+                    this._addRuntimeUnitLoadState(record.unitId, state);
+                }
+                return record;
             })
-            : tracked;
+            .catch((error) => {
+                this._removeLoadState(state);
+                throw error;
+            });
+        return state;
+    }
 
-        return {
-            loaded,
-            dispose,
-        };
+    private _addLoadState(state: IReferencedUnitLoadState): void {
+        this._loadStates.set(state.unitLoadKey, state);
+    }
+
+    private _removeLoadState(state: IReferencedUnitLoadState): void {
+        if (this._loadStates.get(state.unitLoadKey) === state) {
+            this._loadStates.delete(state.unitLoadKey);
+        }
+
+        if (state.record) {
+            const states = this._loadStatesByRuntimeUnitId.get(state.record.unitId);
+            states?.delete(state);
+            if (states?.size === 0) {
+                this._loadStatesByRuntimeUnitId.delete(state.record.unitId);
+            }
+        }
+    }
+
+    private _addRuntimeUnitLoadState(unitId: string, state: IReferencedUnitLoadState): void {
+        let states = this._loadStatesByRuntimeUnitId.get(unitId);
+        if (!states) {
+            states = new Set();
+            this._loadStatesByRuntimeUnitId.set(unitId, states);
+        }
+
+        states.add(state);
+    }
+
+    private _releaseClaim(claim: IReferencedUnitClaimState): void {
+        if (this._ownerClaims.get(claim.ownerKey)?.token === claim.token) {
+            this._ownerClaims.delete(claim.ownerKey);
+        }
+
+        if (this._unitClaims.get(claim.unitId)?.token === claim.token) {
+            this._unitClaims.delete(claim.unitId);
+        }
+    }
+
+    private _withOptionalAbort<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
+        if (!signal) {
+            return promise;
+        }
+
+        return this._withAbort(promise, signal);
     }
 
     private _withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
@@ -188,68 +323,38 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         });
     }
 
-    private _addUsageOwner(record: IReferencedUnitStoredRecord, owner: IReferencedUnitOwner | undefined): void {
-        if (!owner) {
-            return;
-        }
-
-        const ownerKey = this._getOwnerKey(owner);
-        record.usageCounts.set(ownerKey, (record.usageCounts.get(ownerKey) ?? 0) + 1);
-        if (!record.usedBy.some((item) => this._isSameOwner(item, owner))) {
-            record.usedBy.push(owner);
-        }
-    }
-
-    private _removeUsageOwner(loadedKey: string, owner: IReferencedUnitOwner | undefined): void {
-        if (!owner) {
-            return;
-        }
-
-        const record = this._records.get(loadedKey);
-        if (!record) {
-            return;
-        }
-
-        const ownerKey = this._getOwnerKey(owner);
-        const count = record.usageCounts.get(ownerKey) ?? 0;
-        if (count > 1) {
-            record.usageCounts.set(ownerKey, count - 1);
-            return;
-        }
-
-        record.usageCounts.delete(ownerKey);
-        record.usedBy = record.usedBy.filter((item) => !this._isSameOwner(item, owner));
-        if (record.usedBy.length === 0) {
-            this._records.delete(loadedKey);
-        }
-    }
-
-    private _toReferencedUnitRecord(record: IReferencedUnitRecord): IReferencedUnitRecord {
-        return {
-            ref: record.ref,
-            unitId: record.unitId,
-            unitType: record.unitType,
-        };
-    }
-
-    private _normalizeOwner(owner: IReferencedUnitOwner | undefined): IReferencedUnitOwner | undefined {
-        return owner ? { ...owner } : undefined;
-    }
-
-    private _isSameOwner(left: IReferencedUnitOwner, right: IReferencedUnitOwner): boolean {
-        return left.kind === right.kind && left.unitId === right.unitId && left.ownerId === right.ownerId;
+    private _normalizeOwner(owner: IReferencedUnitOwner): IReferencedUnitOwner {
+        return { ...owner };
     }
 
     private _getOwnerKey(owner: IReferencedUnitOwner): string {
-        return JSON.stringify([owner.kind, owner.unitId ?? '', owner.ownerId ?? '']);
+        return JSON.stringify([owner.kind, owner.unitId, owner.ownerId]);
     }
 
-    private _resolveUnitType(ref: string, declaredUnitType: UniverInstanceType | undefined): UniverInstanceType {
-        const refUnitType = fromResourceRefUnitType(parseResourceRef(normalizeResourceRefInput(ref)).unit.type);
+    private _getUnitLoadKey(ref: ResourceRef, unitType: UniverInstanceType): string {
+        return JSON.stringify([getResourceRefUnitKey(ref), unitType]);
+    }
+
+    private _getUsageKey(fromUnitId: string, toUnitId: string): string {
+        return JSON.stringify([fromUnitId, toUnitId]);
+    }
+
+    private _resolveUnitType(ref: ResourceRef, declaredUnitType: UniverInstanceType | undefined): UniverInstanceType {
+        const refUnitType = fromResourceRefUnitType(ref.unit.type);
         if (declaredUnitType !== undefined && declaredUnitType !== UniverInstanceType.UNRECOGNIZED && declaredUnitType !== refUnitType) {
-            throw new Error('REFERENCED_UNIT_UNIT_TYPE_MISMATCH');
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.UnitTypeMismatch, {
+                expected: declaredUnitType,
+                actual: refUnitType,
+            });
         }
 
         return refUnitType;
+    }
+
+    private _formatUnitRef(ref: ResourceRef): string {
+        return formatResourceRef({
+            file: ref.file,
+            unit: ref.unit,
+        });
     }
 }

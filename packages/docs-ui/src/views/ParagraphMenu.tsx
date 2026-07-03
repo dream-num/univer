@@ -384,6 +384,23 @@ export function getParagraphMenuResolvedCommand(option: IValueOption, targetRang
     }, targetRange);
 }
 
+export function getParagraphMenuCommandParams(
+    commandId: string | undefined,
+    commandParams: Record<string, unknown> | undefined,
+    target: IDocBlockMenuTarget | null | undefined,
+    unitId: string
+): Record<string, unknown> | undefined {
+    if (commandId !== DeleteCurrentParagraphCommand.id || target?.kind !== 'blockRange' || !target.blockRange) {
+        return commandParams;
+    }
+
+    return {
+        ...(commandParams ?? {}),
+        unitId,
+        blockRange: target.blockRange,
+    };
+}
+
 function getParagraphMenuType(target: IDocBlockMenuTarget | null | undefined, emptyMode: boolean): string {
     if (target?.kind === 'table') {
         return DOC_TABLE_BLOCK_MENU_ID;
@@ -1021,7 +1038,12 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             await executeResolvedCommand({
                 ...option,
                 commandId,
-                params: commandParams as Record<string, unknown> | undefined,
+                params: getParagraphMenuCommandParams(
+                    commandId,
+                    commandParams as Record<string, unknown> | undefined,
+                    latestTarget,
+                    popup.unitId
+                ),
             }, getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
         } finally {
             restoreTextRanges(previousTextRanges);

@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
-import type { ICustomComponentProps } from '../../services/menu/menu';
+import type { IAccessor } from '@univerjs/core';
+import { DocContentInsertService } from '../services/doc-content-insert.service';
 
-export interface IFontFamilyProps extends ICustomComponentProps<string> {
-    id: string;
-
-    value: string;
-
-    disabled$?: Observable<boolean>;
+export function consumeContentInsertRange(accessor: IAccessor, unitId: string) {
+    try {
+        return accessor.get(DocContentInsertService).consumeInsertRange(unitId);
+    } catch {
+        return null;
+    }
 }
-
-export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';
-
-export const FONT_FAMILY_ITEM_COMPONENT = 'UI_FONT_FAMILY_ITEM_COMPONENT';

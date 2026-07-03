@@ -165,6 +165,30 @@ describe('paragraph build utils', () => {
         expect(body.paragraphs?.[2].bullet?.nestingLevel).toBe(1);
     });
 
+    it('should set bullets with an explicit list id', () => {
+        const doc = createDocModel();
+        const body = doc.getBody()!;
+        const thirdParagraph = body.paragraphs![2] as IParagraph;
+
+        const textX = setParagraphBullet({
+            paragraphs: [thirdParagraph],
+            listType: PresetListType.ORDER_LIST,
+            listId: 'agent-list-id',
+            document: doc,
+        });
+
+        if (textX === false) {
+            throw new Error('Expected setParagraphBullet to return TextX actions');
+        }
+
+        TextX.apply(body, textX.serialize());
+
+        expect(body.paragraphs?.[2].bullet).toMatchObject({
+            listId: 'agent-list-id',
+            listType: PresetListType.ORDER_LIST,
+        });
+    });
+
     it('should set paragraph styles across selected ranges and optionally add text runs', () => {
         const doc = createDocModel();
         const body = doc.getBody()!;

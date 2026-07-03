@@ -40,6 +40,7 @@ import {
     TextX,
     TextXActionType,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
@@ -102,8 +103,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (docDataModel == null || originBody == null) {
             return false;
         }
@@ -261,7 +262,7 @@ function getCutActionsFromTextRanges(
     docDataModel: DocumentDataModel,
     segmentId: string
 ) {
-    const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
     const textX = new TextX();
     const jsonX = JSONX.getInstance();
@@ -339,7 +340,7 @@ function getCutActionsFromRectRanges(
     segmentId: string
 ): JSONXActions {
     const rawActions: JSONXActions = [];
-    const segmentBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const segmentBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
     if (segmentBody == null) {
         return rawActions;
@@ -498,16 +499,12 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const unitId = univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
-        if (!unitId) {
-            return false;
-        }
-
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
 
+        const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
 
         if (docSkeletonManagerService == null) {

@@ -83,15 +83,15 @@ export class DocAutoFormatService extends Disposable {
         const unit = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = this._textSelectionManagerService.getDocRanges();
         const selection = docRanges.find((range) => range.isActive) ?? docRanges[0];
+        const documentDataModel = unit?.getSelfOrHeaderFooterModel(selection?.segmentId ?? '');
 
-        if (unit && selection) {
-            const doc = unit.getSelfOrHeaderFooterModel(selection.segmentId);
+        if (unit && selection && documentDataModel) {
             const context: IAutoFormatContext = {
-                unit: doc,
+                unit: documentDataModel,
                 selection,
                 isBody: !selection.segmentId,
-                paragraphs: BuildTextUtils.range.getParagraphsInRange(selection, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? ''),
-                customRanges: BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, doc.getBody()?.customRanges ?? []),
+                paragraphs: BuildTextUtils.range.getParagraphsInRange(selection, documentDataModel.getBody()?.paragraphs ?? [], documentDataModel.getBody()?.dataStream ?? ''),
+                customRanges: BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, documentDataModel.getBody()?.customRanges ?? []),
                 commandId: id,
                 commandParams: params,
             };

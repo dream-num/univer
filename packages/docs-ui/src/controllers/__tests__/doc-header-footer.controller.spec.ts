@@ -89,10 +89,11 @@ function createController(options: {
         } as never,
         {
             getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject({ getUnitId: () => 'doc-1' })),
-            getUniverDocInstance: vi.fn(() => unit),
+            getUnit: vi.fn(() => unit),
         } as never,
         {
             getRenderById: vi.fn(() => ({ mainComponent: document })),
+            getRenderUnitById: vi.fn(() => ({ mainComponent: document })),
         } as never,
         {
             getViewModel: vi.fn(() => viewModel),

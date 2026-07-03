@@ -16,6 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import '@testing-library/jest-dom/vitest';
@@ -85,5 +86,25 @@ describe('ButtonGroup', () => {
             </ButtonGroup>
         );
         expect(container.querySelector('.univer-grid-flow-row')).toBeNull();
+    });
+
+    it('mirrors horizontal edge styles in RTL', () => {
+        const { container } = render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <ButtonGroup orientation="horizontal">
+                    <Button>btn1</Button>
+                    <Button>btn2</Button>
+                </ButtonGroup>
+            </ConfigProvider>
+        );
+
+        const buttons = container.querySelectorAll('[data-u-comp="button"]');
+
+        expect(buttons[0].className).toContain('!univer-rounded-l-none');
+        expect(buttons[0].className).not.toContain('!univer-rounded-r-none');
+        expect(buttons[1].className).toContain('!univer-rounded-r-none');
+        expect(buttons[1].className).toContain('!univer-border-r-0');
+        expect(buttons[1].className).not.toContain('!univer-rounded-l-none');
+        expect(buttons[1].className).not.toContain('!univer-border-l-0');
     });
 });

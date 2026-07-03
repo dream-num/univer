@@ -38,6 +38,7 @@ const toolbarButtonSelectorRootVariants = cva(
       univer-h-6 univer-cursor-pointer univer-items-center univer-rounded univer-pr-5 univer-text-sm
       univer-transition-colors
       hover:univer-bg-gray-100
+      rtl:univer-pl-5 rtl:univer-pr-0
       dark:hover:!univer-bg-gray-700
     `,
     {
@@ -61,6 +62,7 @@ const toolbarButtonSelectorMainVariants = cva(
       univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full univer-items-center
       univer-rounded-l univer-px-1 univer-transition-colors
       hover:univer-bg-gray-200
+      rtl:univer-rounded-l-none rtl:univer-rounded-r
       dark:hover:!univer-bg-gray-600
     `,
     {
@@ -96,6 +98,7 @@ const toolbarButtonSelectorTriggerVariants = cva(
       univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex
       univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-rounded-r univer-transition-colors
       hover:univer-bg-gray-200
+      rtl:univer-left-0 rtl:univer-right-auto rtl:univer-rounded-l rtl:univer-rounded-r-none
       dark:hover:!univer-bg-gray-600
     `,
     {

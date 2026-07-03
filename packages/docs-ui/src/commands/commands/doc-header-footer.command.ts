@@ -25,6 +25,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
@@ -157,8 +158,8 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const { unitId, segmentId, createType, headerFooterProps } = params;
-        const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = docSkeletonManagerService?.getViewModel();
 
         if (docDataModel == null || docViewModel == null) {

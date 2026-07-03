@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     BuildTextUtils,
@@ -27,6 +27,7 @@ import {
     MemoryCursor,
     TextX,
     TextXActionType,
+    UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -48,7 +49,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
 
         const { alignType } = params;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -60,8 +61,8 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
 
         const segmentId = allRanges[0].segmentId;
         const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const paragraphs = segment.getBody()?.paragraphs ?? [];
-        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraphs = segment?.getBody()?.paragraphs ?? [];
+        const dataStream = segment?.getBody()?.dataStream ?? '';
 
         if (paragraphs == null) {
             return false;

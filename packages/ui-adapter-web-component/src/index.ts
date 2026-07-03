@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+export { UI_ADAPTER_WEB_COMPONENT_PLUGIN_CONFIG_KEY } from './config/config';
+export type { IUniverWebComponentAdapterConfig } from './config/config';
 export { UniverWebComponentAdapterPlugin } from './plugin';

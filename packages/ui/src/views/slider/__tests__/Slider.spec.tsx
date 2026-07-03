@@ -20,7 +20,7 @@
 
 import type { ISliderProps } from '../Slider';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector } from '@univerjs/core';
+import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager, IconManager } from '../../../common';
 import { RediProvider } from '../../../utils/di';
@@ -35,12 +35,14 @@ describe('Slider', () => {
         cleanup();
     });
 
-    function renderSlider(props: SliderTestProps = {}) {
+    function renderSlider(props: SliderTestProps = {}, direction: 'ltr' | 'rtl' = 'ltr') {
         const injector = new Injector([
             [ILogService, { useClass: DesktopLogService }],
+            [LocaleService],
             [ComponentManager],
             [IconManager],
         ]);
+        injector.get(LocaleService).setDirection(direction);
         const { onChange = () => {}, ...sliderProps } = props;
 
         return render(
@@ -126,6 +128,23 @@ describe('Slider', () => {
 
         fireEvent.pointerUp(window);
         expect(changes).toEqual([10, 300]);
+    });
+
+    it('maps dragging from right to left in rtl', () => {
+        const changes: number[] = [];
+        const { container, getByRole } = renderSlider({ onChange: (value) => changes.push(value) }, 'rtl');
+        const track = getTrack(container);
+        const handle = getByRole('slider');
+        defineTrackRect(track);
+
+        fireEvent.pointerDown(track, { clientX: 200 });
+        expect(handle.getAttribute('aria-valuenow')).toBe('0');
+
+        fireEvent.pointerMove(window, { clientX: 0 });
+        expect(handle.getAttribute('aria-valuenow')).toBe('400');
+
+        fireEvent.pointerUp(window);
+        expect(changes).toEqual([400]);
     });
 
     it('steps down, resets, and steps up with the toolbar buttons', () => {

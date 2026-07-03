@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -416,7 +416,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     private _getDocumentBodyInRanges(sliceType: SliceBodyType, ranges?: ITextRangeWithStyle[]) {
-        const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const allRanges = ranges ?? this._docSelectionManagerService.getDocRanges();
 
         const results: IDocumentData['body'][] = [];
@@ -455,7 +455,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
             const deleteRange = { startOffset, endOffset, collapsed };
 
-            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
+            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
             if (docBody == null) {
                 continue;
             }

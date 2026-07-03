@@ -35,7 +35,7 @@ export interface ISwitchParagraphBulletParams {
 export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
     const { paragraphs: currentParagraphs, segmentId, document: docDataModel } = params;
     let listType = params.listType;
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs ?? [];
     const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType.indexOf(listType) === 0);
 
     const ID_LENGTH = 6;
@@ -120,7 +120,7 @@ export interface IToggleChecklistParagraphParams {
 
 export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams) => {
     const { paragraphIndex, segmentId, document: docDataModel } = params;
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs;
     if (paragraphs == null) {
         return false;
     }
@@ -174,20 +174,21 @@ export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams
 export interface ISetParagraphBulletParams {
     paragraphs: IParagraph[];
     listType: string;
+    listId?: string;
     segmentId?: string;
     document: DocumentDataModel;
 }
 
 export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
-    const { paragraphs: currentParagraphs, listType, segmentId, document: docDataModel } = params;
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+    const { paragraphs: currentParagraphs, listType, listId: explicitListId, segmentId, document: docDataModel } = params;
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs;
 
     if (paragraphs == null) {
         return false;
     }
 
     const ID_LENGTH = 6;
-    const listId = generateRandomId(ID_LENGTH);
+    const listId = explicitListId ?? generateRandomId(ID_LENGTH);
 
     const memoryCursor = new MemoryCursor();
 
@@ -337,8 +338,8 @@ export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
         textX: _textX,
     } = params;
     const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-    const paragraphs = segment.getBody()?.paragraphs ?? [];
-    const dataStream = segment.getBody()?.dataStream ?? '';
+    const paragraphs = segment?.getBody()?.paragraphs ?? [];
+    const dataStream = segment?.getBody()?.dataStream ?? '';
     const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs, dataStream);
     const memoryCursor = new MemoryCursor();
     if (cursor) {

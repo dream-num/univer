@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
@@ -26,6 +26,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -60,7 +61,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     const { unitId } = drawingParam;
 
-    const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
     const documentFlavor = documentDataModel?.getSnapshot().documentStyle.documentFlavor;
 
@@ -251,17 +252,17 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         }
 
         const { drawingId, unitId } = focusDrawings[0];
-        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
-        const skeleton = renderManagerService.getRenderById(unitId)
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const skeleton = renderManagerService.getRenderUnitById(unitId)
             ?.with(DocSkeletonManagerService)
             .getSkeleton();
 
-        const docSelectionRenderService = renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+        const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
 
         const segmentId = docSelectionRenderService?.getSegment();
         const segmentPage = docSelectionRenderService?.getSegmentPage();
 
-        const drawing = documentDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
+        const drawing = documentDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
 
         if (drawing == null || skeleton == null || docSelectionRenderService == null) {
             return;

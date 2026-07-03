@@ -165,7 +165,7 @@ export class TextRange implements IDocRange {
             .getViewModel()
             .getDataModel()
             .getSelfOrHeaderFooterModel(this._segmentId)
-            .getBody();
+            ?.getBody();
 
         if (startOffset == null || body == null) {
             return startOffset;
@@ -183,7 +183,7 @@ export class TextRange implements IDocRange {
             .getViewModel()
             .getDataModel()
             .getSelfOrHeaderFooterModel(this._segmentId)
-            .getBody();
+            ?.getBody();
 
         if (endOffset == null || body == null) {
             return endOffset;

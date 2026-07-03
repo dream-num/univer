@@ -43,8 +43,12 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
             return false;
         }
 
-        const oldBody = getBodySlice(doc.getSelfOrHeaderFooterModel(segmentId).getBody()!, currentSelection.startOffset!, currentSelection.endOffset!);
-        const textRun = oldBody.textRuns?.[0];
+        const oldBody = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        if (!oldBody) {
+            return false;
+        }
+
+        const textRun = getBodySlice(oldBody, currentSelection.startOffset!, currentSelection.endOffset!).textRuns?.[0];
         if (textRun) {
             textRun.ed = params.label.length + 1;
         }

@@ -53,7 +53,7 @@ class TestMenuManagerService {
 }
 
 class TestLocaleService {
-    readonly direction$ = new BehaviorSubject<'ltr'>('ltr');
+    readonly direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
 
     t(key: string): string {
         return `translated:${key}`;
@@ -97,8 +97,13 @@ function createContextMenuInjector() {
     return injector;
 }
 
-function renderWithDependencies(element: ReactElement, menuMap: Record<string, IMenuSchema[]>) {
+function renderWithDependencies(
+    element: ReactElement,
+    menuMap: Record<string, IMenuSchema[]>,
+    setupInjector?: (injector: Injector) => void
+) {
     const injector = createContextMenuInjector();
+    setupInjector?.(injector);
     const menuManagerService = injector.get(IMenuManagerService) as unknown as TestMenuManagerService;
 
     Object.entries(menuMap).forEach(([position, menus]) => menuManagerService.setMenus(position, menus));
@@ -465,6 +470,72 @@ describe('ContextMenuPanel', () => {
             vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 10);
         });
         expect(screen.getByText('translated:docs-ui.fillColor')).not.toBeNull();
+    });
+
+    it('opens submenus to the left by default in rtl when there is enough space', async () => {
+        renderWithDependencies(
+            <ContextMenuPanel menuType="submenu-root" />,
+            {
+                'submenu-root': [
+                    {
+                        key: 'insert',
+                        order: 0,
+                        item: {
+                            id: 'insert',
+                            type: MenuItemType.SUBITEMS,
+                            title: 'docs-ui.insert',
+                            tooltip: 'docs-ui.insert',
+                        },
+                    },
+                ],
+                insert: [
+                    createButtonItem('insert-row', {
+                        title: 'docs-ui.insertRow',
+                        tooltip: 'docs-ui.insertRow',
+                    }),
+                ],
+            },
+            (injector) => {
+                (injector.get(LocaleService) as unknown as TestLocaleService).direction$.next('rtl');
+            }
+        );
+
+        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insert' });
+        const insertWrapper = insertButton.parentElement as HTMLElement;
+        insertWrapper.getBoundingClientRect = () => ({
+            bottom: 140,
+            height: 40,
+            left: 300,
+            right: 420,
+            top: 100,
+            width: 120,
+            x: 300,
+            y: 100,
+            toJSON: () => ({}),
+        });
+
+        act(() => {
+            fireEvent.mouseEnter(insertWrapper);
+        });
+
+        const submenu = document.querySelector(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`) as HTMLElement;
+        submenu.getBoundingClientRect = () => ({
+            bottom: 220,
+            height: 120,
+            left: 0,
+            right: 160,
+            top: 100,
+            width: 160,
+            x: 0,
+            y: 100,
+            toJSON: () => ({}),
+        });
+
+        await nextFrame();
+
+        expect(submenu.style.left).toBe('142px');
+        expect(submenu.style.paddingRight).toBe('20px');
+        expect(submenu.style.paddingLeft).toBe('0px');
     });
 
     it('keeps row navigation on the same visual row until the row boundary', () => {

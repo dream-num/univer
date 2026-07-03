@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
@@ -37,8 +37,8 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
 
             if (activeRange) {
                 const { segmentId, startOffset, endOffset } = activeRange;
-                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-                const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
+                const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.tables;
 
                 if (tables && tables.length) {
                     if (tables.some((table) => {

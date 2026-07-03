@@ -74,8 +74,8 @@ export const useCurrentParagraph = () => {
     const segmentId = docRanges[0].segmentId;
 
     const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-    const paragraphs = segment.getBody()?.paragraphs ?? [];
-    const dataStream = segment.getBody()?.dataStream ?? '';
+    const paragraphs = segment?.getBody()?.paragraphs ?? [];
+    const dataStream = segment?.getBody()?.dataStream ?? '';
     const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs, dataStream) ?? [];
 
     return currentParagraphs;
@@ -92,7 +92,7 @@ export const useCurrentSections = (currentParagraphs: IParagraph[]) => {
 
     const segmentId = docRanges[0].segmentId;
 
-    const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
+    const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.sectionBreaks ?? [];
     const currentSectionBreaks = currentParagraphs
         .map((item) => findNearestSectionBreak(item.startIndex, sectionBreaks))
         .reduce((a, b, index, list) => {
@@ -293,7 +293,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
             const glyphNode = skeleton?.findNodeByCharIndex(paragraph[0].startIndex);
             const divideNode = glyphNode?.parent;
             const lineNode = divideNode?.parent;
-            const metrics = getLineSpacingMetrics(lineNode as any);
+            const metrics = getLineSpacingMetrics(lineNode);
             const nextStoredLineSpacing = convertLineSpacingForRuleChange(
                 convertDisplayLineSpacingToStoredValue(lineSpacing, spacingRule),
                 spacingRule,

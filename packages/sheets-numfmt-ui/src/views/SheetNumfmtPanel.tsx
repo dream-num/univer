@@ -140,8 +140,13 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
                 </div>
             </div>
 
-            <div className="univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end">
-                <Button onClick={handleCancel} className="univer-mr-3">
+            <div
+                className="
+                  univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end univer-gap-2
+                  rtl:univer-flex-row-reverse
+                "
+            >
+                <Button onClick={handleCancel}>
                     {localeService.t<LocaleKey>('sheets-numfmt-ui.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleConfirm}>

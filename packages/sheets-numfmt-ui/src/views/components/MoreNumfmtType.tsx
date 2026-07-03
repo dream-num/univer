@@ -26,7 +26,7 @@ import {
     SetNumfmtCommand,
     SheetsNumfmtCellContentController,
 } from '@univerjs/sheets-numfmt';
-import { ILayoutService, useDependency } from '@univerjs/ui';
+import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { MENU_OPTIONS } from '../../menu/menu';
@@ -47,6 +47,7 @@ export function Options() {
     const localeService = useDependency(LocaleService);
     const layoutService = useDependency(ILayoutService);
     const sheetsNumfmtCellContentController = useDependency(SheetsNumfmtCellContentController);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const setNumfmt = (pattern: string | null) => {
@@ -90,7 +91,7 @@ export function Options() {
     const defaultValue = 1220;
 
     return (
-        <div className="univer-grid univer-gap-1 univer-p-1.5">
+        <div dir={direction} className="univer-grid univer-gap-1 univer-p-1.5">
             {menuOptions.map((item, index) => {
                 if (item === '|') {
                     return <Separator key={index} />;

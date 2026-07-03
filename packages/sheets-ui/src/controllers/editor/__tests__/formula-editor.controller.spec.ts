@@ -69,7 +69,7 @@ function createController() {
     };
     controller._univerInstanceService = {
         setCurrentUnitForType: vi.fn(),
-        getUniverDocInstance: vi.fn(() => formulaDoc),
+        getUnit: vi.fn(() => formulaDoc),
     };
     controller._editorBridgeService = { isVisible: vi.fn(() => ({ visible: false })) };
     controller._commandService = { syncExecuteCommand: vi.fn() };

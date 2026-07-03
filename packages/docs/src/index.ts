@@ -46,3 +46,4 @@ export {
     deleteCustomRangeFactory,
 } from './utils/custom-range-factory';
 export { replaceSelectionFactory } from './utils/replace-selection-factory';
+export { consumeContentInsertRange } from './utils/util';

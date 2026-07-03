@@ -22,6 +22,7 @@ import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.serv
 import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { describe, expect, it } from 'vitest';
+import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand } from '../../commands/commands/paragraph-align.command';
@@ -29,6 +30,7 @@ import { H2HeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/
 import { DOC_PARAGRAPH_T_EDIT_MENU_ID, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
 import {
     getParagraphFormattingRange,
+    getParagraphMenuCommandParams,
     getParagraphMenuCommandTargetRange,
     getParagraphMenuHiddenItemIds,
     getParagraphMenuResolvedCommand,
@@ -171,6 +173,26 @@ describe('ParagraphMenu command behavior', () => {
 
         expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).toContain('docs-callout.command.insert');
         expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).not.toContain('docs-quote.command.insert');
+    });
+
+    it('adds block range context to current paragraph delete commands', () => {
+        const blockRange = {
+            blockId: 'code-1',
+            blockType: DocumentBlockRangeType.CODE,
+            startIndex: 20,
+            endIndex: 45,
+        };
+
+        expect(getParagraphMenuCommandParams(
+            DeleteCurrentParagraphCommand.id,
+            { source: 'menu' },
+            blockTarget(blockRange),
+            'doc-1'
+        )).toEqual({
+            source: 'menu',
+            unitId: 'doc-1',
+            blockRange,
+        });
     });
 
     it('strips block paragraph styles when unwrapping block ranges', () => {

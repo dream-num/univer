@@ -42,8 +42,8 @@ function createController() {
     };
     const controller = new DocDrawingAddRemoveController(
         {
-            getCurrentUniverDocInstance: vi.fn(() => ({ getUnitId: () => 'doc-1' })),
-            getUniverDocInstance: vi.fn(() => ({
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'doc-1' })),
+            getUnit: vi.fn(() => ({
                 getSnapshot: () => ({
                     drawings: {
                         'drawing-1': {
@@ -71,7 +71,10 @@ function createController() {
         } as never,
         drawingManagerService as never,
         docDrawingService as never,
-        { getRenderById: vi.fn(() => ({ scene: { getTransformerByCreate: () => ({ refreshControls }) } })) } as never
+        {
+            getRenderById: vi.fn(() => ({ scene: { getTransformerByCreate: () => ({ refreshControls }) } })),
+            getRenderUnitById: vi.fn(() => ({ scene: { getTransformerByCreate: () => ({ refreshControls }) } })),
+        } as never
     );
 
     return { controller, beforeHandlers, executedHandlers, drawingManagerService, docDrawingService, refreshControls };

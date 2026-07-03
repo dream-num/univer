@@ -23,12 +23,12 @@ export type ResourceRefUnitType = 'sheet' | 'doc' | 'slide' | 'base';
 
 export type ResourceRefUnitSelector = string;
 
-export interface ResourceRefUnit {
+export interface IResourceRefUnit {
     selector: ResourceRefUnitSelector;
     type: ResourceRefUnitType;
 }
 
-export type IResourceRefUnit = ResourceRefUnit;
+export type ResourceRefUnit = IResourceRefUnit;
 
 export type ResourceRefPartKind = 'sheet' | 'range';
 
@@ -38,26 +38,32 @@ export type ResourceRefPart =
 
 export type ResourceRefExtensionValue = string | readonly string[];
 
-export interface ResourceRef {
+export interface IResourceRef {
     file: ResourceRefFile;
     unit: ResourceRefUnit;
     part?: ResourceRefPart;
     extensions?: Readonly<Record<string, ResourceRefExtensionValue>>;
 }
 
-export type IResourceRef = ResourceRef;
+export type ResourceRef = IResourceRef;
 
-export interface ParseResourceRefOptions {
+export interface IParseResourceRefOptions {
     mode?: 'strict' | 'lenient';
 }
 
-export interface ValidateResourceRefOptions {
+export type ParseResourceRefOptions = IParseResourceRefOptions;
+
+export interface IValidateResourceRefOptions {
     mode?: 'strict' | 'lenient';
 }
 
-export interface FormatResourceRefOptions {
+export type ValidateResourceRefOptions = IValidateResourceRefOptions;
+
+export interface IFormatResourceRefOptions {
     preserveExtensions?: boolean;
 }
+
+export type FormatResourceRefOptions = IFormatResourceRefOptions;
 
 export type ResourceRefInput = ResourceRef | string;
 

@@ -202,9 +202,10 @@ describe('SheetsScrollRenderController', () => {
         const testBed = createRenderTestBed({
             dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
         });
-        const { context, viewportMap } = testBed;
+        const { context, viewportMap, sheet } = testBed;
         const commandService = testBed.get(ICommandService);
         const executeSpy = vi.spyOn(commandService, 'executeCommand');
+        const worksheet = sheet.getActiveSheet();
 
         const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
         const viewMain = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN) as any;
@@ -224,6 +225,8 @@ describe('SheetsScrollRenderController', () => {
 
         viewMain.onScrollByBar$.emit({ isTrigger: true, viewportScrollX: 250, viewportScrollY: 45 }, {});
         expect(executeSpy).toHaveBeenCalledWith(ScrollCommand.id, {
+            unitId: sheet.getUnitId(),
+            sheetId: worksheet.getSheetId(),
             sheetViewStartRow: 2,
             sheetViewStartColumn: 2,
             offsetX: 50,
@@ -292,6 +295,8 @@ describe('SheetsScrollRenderController', () => {
 
         expect(controller.scrollToCell(5, 7, 300)).toBe(true);
         expect(syncSpy).toHaveBeenCalledWith(ScrollCommand.id, {
+            unitId: sheet.getUnitId(),
+            sheetId: worksheet.getSheetId(),
             sheetViewStartRow: 3,
             sheetViewStartColumn: 6,
             offsetX: 0,

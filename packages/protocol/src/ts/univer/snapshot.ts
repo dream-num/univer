@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IBoardMeta } from './board';
 import type { UniverType } from './constants/univer';
 import type { IDocumentMeta } from './doc';
 import type { ISlideMeta } from './slide';
@@ -27,6 +28,7 @@ export interface ISnapshot {
     workbook: IWorkbookMeta | undefined;
     doc: IDocumentMeta | undefined;
     slide: ISlideMeta | undefined;
+    board: IBoardMeta | undefined;
 }
 
 export interface ITableInfo {

@@ -76,6 +76,8 @@ export interface ICreateUnitRequest {
     /** Other meta for other types of univer. */
     initialSheets: IInitialSheet[];
     workbookDataJson: string;
+    /** two types: traditional and modern, default is modern */
+    docType?: string | undefined;
 }
 
 export interface ICreateUnitResponse {

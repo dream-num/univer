@@ -1184,8 +1184,11 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             const rightLeft = menuItemRect.right - submenuOverlapOffset;
             const leftLeft = menuItemRect.left - submenuRect.width + submenuOverlapOffset;
 
-            const useLeft = rightLeft + submenuRect.width + menuViewportPadding > window.innerWidth
-                && leftLeft >= menuViewportPadding;
+            const hasLeftSpace = leftLeft >= menuViewportPadding;
+            const hasRightSpace = rightLeft + submenuRect.width + menuViewportPadding <= window.innerWidth;
+            const useLeft = direction === 'rtl'
+                ? hasLeftSpace || !hasRightSpace
+                : !hasRightSpace && hasLeftSpace;
             const left = useLeft ? leftLeft : rightLeft;
             setSubmenuPlacement(useLeft ? 'left' : 'right');
 
@@ -1207,7 +1210,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             window.removeEventListener('resize', updateSubmenuPosition);
             window.removeEventListener('scroll', updateSubmenuPosition, true);
         };
-    }, [submenuVisible, hasSelectionSubmenu, hasSubItemSubmenu]);
+    }, [direction, submenuVisible, hasSelectionSubmenu, hasSubItemSubmenu]);
 
     const hiddenById = (menuItem.id != null && hiddenItemIds.includes(menuItem.id)) || hiddenItemIds.includes(menuKey);
 

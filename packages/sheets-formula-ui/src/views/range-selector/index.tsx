@@ -173,7 +173,12 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             mask={false}
             maskClosable={false}
             footer={(
-                <footer className="univer-flex univer-gap-2">
+                <footer
+                    className="
+                      univer-flex univer-gap-2
+                      rtl:univer-flex-row-reverse
+                    "
+                >
                     <Button onClick={onClose}>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}</Button>
                     <Button
                         variant="primary"
@@ -201,7 +206,10 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 {ranges.map((text, index) => (
                     <div
                         key={index}
-                        className="univer-mb-2 univer-flex univer-items-center univer-gap-4"
+                        className="
+                          univer-mb-2 univer-flex univer-items-center univer-gap-4
+                          rtl:univer-flex-row-reverse
+                        "
                     >
                         <Input
                             className={clsx('univer-w-full', {

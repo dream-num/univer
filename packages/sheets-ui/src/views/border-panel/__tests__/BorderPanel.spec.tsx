@@ -17,6 +17,7 @@
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
 import { BorderStyleTypes, BorderType, Univer } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
 import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -46,7 +47,7 @@ class TestState {
     }
 }
 
-function renderPanel(value: IBorderInfo) {
+function renderPanel(value: IBorderInfo, direction: 'ltr' | 'rtl' = 'ltr') {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([BorderStyleManagerService]);
@@ -60,10 +61,12 @@ function renderPanel(value: IBorderInfo) {
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector }}>
-                <BorderPanel
-                    value={value}
-                    onChange={(nextValue) => TestState.changes.push(nextValue)}
-                />
+                <ConfigProvider mountContainer={document.body} direction={direction}>
+                    <BorderPanel
+                        value={value}
+                        onChange={(nextValue) => TestState.changes.push(nextValue)}
+                    />
+                </ConfigProvider>
             </RediContext.Provider>
         );
     });
@@ -76,6 +79,10 @@ function renderPanel(value: IBorderInfo) {
             univer.dispose();
         },
     };
+}
+
+function hasClassToken(element: HTMLElement, token: string): boolean {
+    return element.className.split(/\s+/).includes(token);
 }
 
 describe('BorderPanel', () => {
@@ -104,6 +111,24 @@ describe('BorderPanel', () => {
                 activeBorderType: true,
             },
         ]);
+        rendered.dispose();
+    });
+
+    it('keeps color and line dropdown icon order compatible with rtl', () => {
+        const rendered = renderPanel({
+            type: BorderType.ALL,
+            color: '#123456',
+            style: BorderStyleTypes.THIN,
+            activeBorderType: true,
+        }, 'rtl');
+
+        expect(rendered.container.querySelector('section')?.getAttribute('dir')).toBe('rtl');
+        const dropdownButtons = rendered.container.querySelectorAll('button');
+
+        expect(dropdownButtons).toHaveLength(2);
+        dropdownButtons.forEach((button) => {
+            expect(hasClassToken(button, 'rtl:univer-flex-row-reverse')).toBe(false);
+        });
         rendered.dispose();
     });
 });

@@ -116,7 +116,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 </div>
             )}
 
-            <div className="univer-mt-4 univer-flex univer-justify-end">
+            <div className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
                 <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.cancel')}</Button>
                 <Button
                     variant="primary"
@@ -130,7 +130,6 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                             range: selectedRange,
                         });
                     }}
-                    className="univer-ml-2"
                 >
                     {localeService.t<LocaleKey>('sheets-table-ui.confirm')}
                 </Button>

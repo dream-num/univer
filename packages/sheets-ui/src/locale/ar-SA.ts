@@ -289,8 +289,8 @@ const locale: typeof enUS = {
             copied: 'تم النسخ',
         },
         shortcut: {
-            'sheet-view': 'Sheet View',
-            'sheet-edit': 'Sheet Edit',
+            'sheet-view': 'عرض الورقة',
+            'sheet-edit': 'تحرير الورقة',
             sheet: {
                 'zoom-in': 'تكبير',
                 'zoom-out': 'تصغير',

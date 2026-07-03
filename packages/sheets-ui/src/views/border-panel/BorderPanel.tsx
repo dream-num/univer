@@ -18,10 +18,11 @@ import type { IBorderData, Nullable } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
 import { BorderStyleTypes } from '@univerjs/core';
-import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
+import { clsx, ColorPicker, ConfigContext, Dropdown, Separator } from '@univerjs/design';
 import { CheckMarkIcon, MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
 import { IconManager, useDependency } from '@univerjs/ui';
+import { useContext } from 'react';
 import { BorderLine } from './border-line/BorderLine';
 import { BORDER_LINE_CHILDREN } from './interface';
 
@@ -96,6 +97,7 @@ export function BorderPanel(props: IBorderPanelProps) {
     const iconManager = useDependency(IconManager);
     const borderStyleManagerService = useDependency(BorderStyleManagerService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
+    const { direction } = useContext(ConfigContext);
 
     const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('bd');
     const color = isAllValuesSame ? getBorderColor(currentValue as Nullable<IBorderData>) : undefined;
@@ -117,7 +119,7 @@ export function BorderPanel(props: IBorderPanelProps) {
     }
 
     return (
-        <section className="univer-box-border univer-grid univer-gap-2 univer-p-1.5">
+        <section dir={direction} className="univer-box-border univer-grid univer-gap-2 univer-p-1.5">
             <div
                 className={`
                   univer-box-border univer-grid univer-grid-cols-5 univer-gap-2 univer-text-gray-600

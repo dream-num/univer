@@ -41,7 +41,7 @@ export interface IColorPickerProps {
 export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
     if (!isBrowser) return null;
 
-    const { locale } = useContext(ConfigContext);
+    const { direction, locale } = useContext(ConfigContext);
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
@@ -103,6 +103,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
     return (
         <div
             data-u-comp="color-picker"
+            dir={direction}
             className="univer-cursor-default univer-space-y-2 univer-rounded-lg"
             onClick={(e) => e.stopPropagation()}
         >

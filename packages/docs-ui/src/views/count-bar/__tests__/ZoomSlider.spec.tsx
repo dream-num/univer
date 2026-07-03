@@ -30,6 +30,7 @@ import {
     ILogService,
     Injector,
     IUniverInstanceService,
+    LocaleService,
     UniverInstanceService,
 } from '@univerjs/core';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
@@ -53,6 +54,7 @@ function createZoomSliderTestBed() {
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([LocaleService]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
 

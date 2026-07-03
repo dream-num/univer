@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IDisposable, IReferencedUnitOwner } from '@univerjs/core';
+import type { ICreateUnitOptions, IDisposable } from '@univerjs/core';
 import type { IEmbedDescriptor } from '../types/embed';
-import { Inject, IReferencedUnitManagerService, IUniverInstanceService, ReferencedUnitOwnerKind } from '@univerjs/core';
+import { Inject, IReferencedUnitManagerService, IUniverInstanceService } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { EmbedError, EmbedErrorCode } from '../common/error';
 import { getResourceRefInputKey } from '../common/resource-ref-input';
 import { EmbedModelService } from './embed-model.service';
-import { EmbedReferencedUnitClaimService } from './embed-referenced-unit-claim.service';
+import { EmbedUnitLeasePolicyService } from './embed-unit-lease-policy.service';
+import { EmbedUnitLeaseService } from './embed-unit-lease.service';
 
 export interface IEmbedDescriptorMaterializeContext {
     descriptor: IEmbedDescriptor;
@@ -39,7 +40,8 @@ export class EmbedReferencedUnitMaterializeService {
 
     constructor(
         @Inject(EmbedModelService) private readonly _modelService: EmbedModelService,
-        @Inject(EmbedReferencedUnitClaimService) private readonly _referencedUnitClaimService: EmbedReferencedUnitClaimService,
+        @Inject(EmbedUnitLeaseService) private readonly _unitLeaseService: EmbedUnitLeaseService,
+        @Inject(EmbedUnitLeasePolicyService) private readonly _unitLeasePolicyService: EmbedUnitLeasePolicyService,
         @Inject(IReferencedUnitManagerService) private readonly _referencedUnitManager: IReferencedUnitManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -50,7 +52,7 @@ export class EmbedReferencedUnitMaterializeService {
         const loadedState = this._getLoadedDescriptorState(context.descriptor);
         if (loadedState) {
             if (loadedState.stored) {
-                this._claimMaterializedDescriptor(loadedState.descriptor);
+                this._leaseMaterializedDescriptor(loadedState.descriptor);
                 return loadedState.descriptor;
             }
 
@@ -99,28 +101,35 @@ export class EmbedReferencedUnitMaterializeService {
     }
 
     private _commitMaterializedDescriptor(descriptor: IEmbedDescriptor): IEmbedDescriptor {
-        let claimDisposable: IDisposable | undefined;
+        let leaseDisposable: IDisposable | undefined;
         try {
-            claimDisposable = this._claimMaterializedDescriptor(descriptor);
+            leaseDisposable = this._leaseMaterializedDescriptor(descriptor);
             this._modelService.addDescriptor(descriptor.hostUnitId, descriptor);
             return this._modelService.getDescriptor(descriptor.hostUnitId, descriptor.embedId)!;
         } catch (error) {
-            claimDisposable?.dispose();
+            leaseDisposable?.dispose();
             throw error;
         }
     }
 
-    private _claimMaterializedDescriptor(descriptor: IEmbedDescriptor): IDisposable | undefined {
-        if (!descriptor.childUnitId) {
+    private _leaseMaterializedDescriptor(descriptor: IEmbedDescriptor): IDisposable | undefined {
+        if (!descriptor.childUnitId || descriptor.childType == null) {
+            return undefined;
+        }
+        if (this._unitLeasePolicyService.getPolicy() !== 'exclusive') {
             return undefined;
         }
 
         const owner = this._getDescriptorOwner(descriptor);
-        if (this._referencedUnitClaimService.hasClaim(owner, descriptor.childUnitId)) {
+        if (this._unitLeaseService.hasLease(owner, descriptor.childUnitId)) {
             return undefined;
         }
 
-        return this._referencedUnitClaimService.claim(owner, descriptor.childUnitId);
+        return this._unitLeaseService.acquire({
+            ...owner,
+            childUnitId: descriptor.childUnitId,
+            childType: descriptor.childType,
+        });
     }
 
     private _getLoadedDescriptorState(descriptor: IEmbedDescriptor): ILoadedEmbedDescriptorState | undefined {
@@ -154,11 +163,10 @@ export class EmbedReferencedUnitMaterializeService {
         ]);
     }
 
-    private _getDescriptorOwner(descriptor: IEmbedDescriptor): IReferencedUnitOwner {
+    private _getDescriptorOwner(descriptor: IEmbedDescriptor): { hostUnitId: string; embedId: string } {
         return {
-            kind: ReferencedUnitOwnerKind.Embed,
-            unitId: descriptor.hostUnitId,
-            ownerId: descriptor.embedId,
+            hostUnitId: descriptor.hostUnitId,
+            embedId: descriptor.embedId,
         };
     }
 }

@@ -20,7 +20,6 @@ import type { IEmbedResourceRefDataProvider, IEmbedResourceRefUnitProvider, IRef
 import { parseResourceRef, ReferencedUnitDataType, ReferencedUnitErrorCode, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { formatResourceRef } from '../../common/resource-ref-uri';
-import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
 import {
     createDefaultEmbedCapabilities,
     createDefaultEmbedSourceMeta,
@@ -323,67 +322,6 @@ describe('EmbedReferencedUnitManagerService', () => {
         }]);
     });
 
-    it('claims a loaded runtime unit for an embed owner', async () => {
-        const ref = '#unit=remote-sheet&type=sheet';
-        const provider: IEmbedResourceRefUnitProvider = {
-            ensureUnit: vi.fn((input) => ({
-                unitId: 'runtime-sheet-1',
-                unitType: input.unitType,
-            })),
-        };
-        const manager = createReferencedUnitManager(provider);
-
-        const record = await manager.ensure(ref, { createOptions: EMBED_CHILD_CREATE_OPTIONS });
-        const disposable = manager.claimUnit({
-            kind: ReferencedUnitOwnerKind.Embed,
-            unitId: 'host-doc',
-            ownerId: 'embed-1',
-        }, record.unitId);
-
-        expect(record).toEqual({
-            ref,
-            unitId: 'runtime-sheet-1',
-            unitType: UniverInstanceType.UNIVER_SHEET,
-        });
-        expect(provider.ensureUnit).toHaveBeenCalledTimes(1);
-        disposable.dispose();
-    });
-
-    it('rejects duplicate claims for one runtime unit', async () => {
-        const ref = '#unit=remote-sheet&type=sheet';
-        const provider: IEmbedResourceRefUnitProvider = {
-            ensureUnit: vi.fn((input) => ({
-                unitId: 'shared-runtime-sheet',
-                unitType: input.unitType,
-            })),
-        };
-        const manager = createReferencedUnitManager(provider);
-        const record = await manager.ensure(ref, { createOptions: EMBED_CHILD_CREATE_OPTIONS });
-
-        manager.claimUnit({ kind: ReferencedUnitOwnerKind.Embed, unitId: 'host-doc', ownerId: 'embed-1' }, record.unitId);
-        expect(() => manager.claimUnit({ kind: ReferencedUnitOwnerKind.Embed, unitId: 'host-doc', ownerId: 'embed-2' }, record.unitId))
-            .toThrow(ReferencedUnitErrorCode.OwnerConflict);
-        expect(provider.ensureUnit).toHaveBeenCalledTimes(1);
-    });
-
-    it('releases claims through their disposable', async () => {
-        const ref = '#unit=remote-sheet&type=sheet';
-        const provider: IEmbedResourceRefUnitProvider = {
-            ensureUnit: vi.fn((input) => ({
-                unitId: 'shared-runtime-sheet',
-                unitType: input.unitType,
-            })),
-        };
-        const manager = createReferencedUnitManager(provider);
-        const record = await manager.ensure(ref, { createOptions: EMBED_CHILD_CREATE_OPTIONS });
-        const owner = { kind: ReferencedUnitOwnerKind.Embed, unitId: 'host-doc', ownerId: 'embed-1' } as const;
-
-        const disposable = manager.claimUnit(owner, record.unitId);
-        expect(() => manager.claimUnit(owner, record.unitId)).toThrow(ReferencedUnitErrorCode.OwnerConflict);
-        disposable.dispose();
-        expect(() => manager.claimUnit(owner, record.unitId)).not.toThrow();
-    });
-
     it('rejects aborted load promises with a load-scoped stable error', async () => {
         const ref = '#unit=remote-sheet&type=sheet';
         const provider: IEmbedResourceRefUnitProvider = {
@@ -529,7 +467,7 @@ describe('EmbedCreationService', () => {
         expect(model.softDeleteDescriptor).toHaveBeenCalledWith('host-doc', 'embed-1');
     });
 
-    it('rejects unsupported capabilities and duplicate child units', async () => {
+    it('rejects unsupported capabilities and leaves child unit ownership to materialization', async () => {
         const descriptor = createDescriptor();
         expect(() => new EmbedCreationService(
             createModel() as never,
@@ -549,7 +487,8 @@ describe('EmbedCreationService', () => {
             { getCapability: vi.fn(() => createCapability()) } as never,
             { resolve: vi.fn(() => ({ childUnitId: descriptor.childUnitId, childType: descriptor.childType, source: descriptor.source })) } as never,
             { assertCanCreate: vi.fn() } as never
-        ).prepareCreateEmbed(createCreateContext())).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        ).prepareCreateEmbed(createCreateContext())).not.toThrow();
+        expect(model.getActiveDescriptorsByChildUnit).not.toHaveBeenCalled();
     });
 });
 

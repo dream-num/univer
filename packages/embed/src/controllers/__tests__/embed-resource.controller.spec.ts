@@ -32,9 +32,15 @@ describe('EmbedResourceController', () => {
                 return disposable;
             }),
         } as unknown as IResourceManagerService;
+        const referencedUnitManager = {
+            releaseUnit: vi.fn(),
+        };
         const model = new EmbedModelService();
+        const unitLeaseService = {
+            releaseUnit: vi.fn(),
+        };
 
-        const controller = new EmbedResourceController(resourceManager, model);
+        const controller = new EmbedResourceController(resourceManager, referencedUnitManager as never, model, unitLeaseService as never);
 
         expect(resourceManager.registerPluginResource).toHaveBeenCalledTimes(1);
         expect(registered).toMatchObject({
@@ -54,6 +60,8 @@ describe('EmbedResourceController', () => {
         });
         expect(registered?.toJson?.('host-1')).toBe(JSON.stringify({ version: 1, embeds: {} }));
         registered?.onUnLoad?.('host-1');
+        expect(unitLeaseService.releaseUnit).toHaveBeenCalledWith('host-1');
+        expect(referencedUnitManager.releaseUnit).toHaveBeenCalledWith('host-1');
 
         controller.dispose();
         expect(disposable.dispose).toHaveBeenCalledTimes(1);

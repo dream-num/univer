@@ -15,15 +15,18 @@
  */
 
 import type { IEmbedResource } from '../types/embed';
-import { Disposable, Inject, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IReferencedUnitManagerService, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
 import { EMBED_RESOURCE_PLUGIN_NAME } from '../common/const';
 import { EmbedModelService } from '../services/embed-model.service';
+import { EmbedUnitLeaseService } from '../services/embed-unit-lease.service';
 
 export class EmbedResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
+        @Inject(IReferencedUnitManagerService) private readonly _referencedUnitManagerService: IReferencedUnitManagerService,
         @Inject(EmbedModelService)
-        private readonly _embedModelService: EmbedModelService
+        private readonly _embedModelService: EmbedModelService,
+        @Inject(EmbedUnitLeaseService) private readonly _unitLeaseService: EmbedUnitLeaseService
     ) {
         super();
 
@@ -42,7 +45,13 @@ export class EmbedResourceController extends Disposable {
             toJson: (unitId) => this._embedModelService.toJson(unitId),
             parseJson: (json) => this._embedModelService.parseJson(json),
             onLoad: (unitId, resource) => this._embedModelService.loadUnit(unitId, resource),
-            onUnLoad: (unitId) => this._embedModelService.unloadUnit(unitId),
+            onUnLoad: (unitId) => this._unloadUnit(unitId),
         }));
+    }
+
+    private _unloadUnit(unitId: string): void {
+        this._embedModelService.unloadUnit(unitId);
+        this._unitLeaseService.releaseUnit(unitId);
+        this._referencedUnitManagerService.releaseUnit(unitId);
     }
 }

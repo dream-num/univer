@@ -189,6 +189,17 @@ describe('EmbedModelService', () => {
         expect(model.serializeUnit('host-1').embeds['embed-1']).not.toHaveProperty('childUnitId');
     });
 
+    it('releases unit leases when descriptors or host units leave the model', () => {
+        const unitLeaseService = {
+            release: vi.fn(),
+        };
+        const model = new EmbedModelService(unitLeaseService as never);
+        model.addDescriptor('host-1', createDescriptor());
+
+        model.softDeleteDescriptor('host-1', 'embed-1');
+        expect(unitLeaseService.release).toHaveBeenCalledWith({ hostUnitId: 'host-1', embedId: 'embed-1' });
+    });
+
     it('allows materialized child units to differ from self ref selectors', () => {
         const model = new EmbedModelService();
         const descriptor = createDescriptor({
@@ -211,18 +222,20 @@ describe('EmbedModelService', () => {
         });
     });
 
-    it('rejects non-canonical sources, mismatches, and duplicate active child units', () => {
+    it('rejects non-canonical sources and type mismatches without owning child unit uniqueness', () => {
         const model = new EmbedModelService();
 
         expect(() => model.addDescriptor('host-1', { ...createDescriptor(), source: { unitType: UniverInstanceType.UNIVER_SHEET } } as never)).toThrow('RESOURCE_REF_INVALID');
         expect(() => model.addDescriptor('host-1', createDescriptor({ childType: UniverInstanceType.UNIVER_DOC }))).toThrow('EMBED_DESCRIPTOR_CHILD_TYPE_MISMATCH');
 
         model.addDescriptor('host-1', createDescriptor({ childUnitId: 'runtime-child-sheet' }));
-        expect(() => model.addDescriptor('host-1', createDescriptor({
+        model.addDescriptor('host-1', createDescriptor({
             embedId: 'embed-2',
             hostAnchorId: 'anchor-2',
             childUnitId: 'runtime-child-sheet',
-        }))).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        }));
+        expect(model.getActiveDescriptorsByChildUnit('runtime-child-sheet')).toHaveLength(2);
+
         model.loadUnit('host-2', {
             version: 1,
             embeds: {

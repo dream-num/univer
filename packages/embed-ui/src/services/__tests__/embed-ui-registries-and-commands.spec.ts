@@ -28,6 +28,7 @@ import {
     EmbedHostAdapterRegistryService,
     EmbedHostAnchorModelService,
     EmbedHostLifecycleService,
+    EmbedUnitLeasePolicyService,
     RemoveEmbedCommand,
     RemoveEmbedHostAnchorMutation,
     RemoveEmbedHostAnchorRecordMutation,
@@ -770,8 +771,12 @@ describe('embed-ui registries and commands', () => {
         const injector = createMutableInjector([
             [EmbedHostAdapterRegistryService, new EmbedHostAdapterRegistryService()],
             [EmbedChildProductPluginRegistryService, registry],
+            [EmbedUnitLeasePolicyService, new EmbedUnitLeasePolicyService()],
         ]) as unknown as Injector;
-        const configService = { setConfig: vi.fn() };
+        const configService = {
+            getConfig: vi.fn(() => ({})),
+            setConfig: vi.fn(),
+        };
 
         const plugin = new UniverEmbedUIPlugin({
             childProductPlugins: [contribution],
@@ -782,6 +787,28 @@ describe('embed-ui registries and commands', () => {
         plugin.onStarting();
 
         expect(registry.getAll(UniverInstanceType.UNIVER_SHEET)).toEqual([contribution]);
+    });
+
+    it('enables exclusive embed unit lease policy from embed ui plugin', () => {
+        const registry = new EmbedChildProductPluginRegistryService(createAccessor([]) as never);
+        const unitLeasePolicyService = new EmbedUnitLeasePolicyService();
+        const injector = createMutableInjector([
+            [EmbedHostAdapterRegistryService, new EmbedHostAdapterRegistryService()],
+            [EmbedChildProductPluginRegistryService, registry],
+            [EmbedUnitLeasePolicyService, unitLeasePolicyService],
+        ]) as unknown as Injector;
+        const configService = {
+            setConfig: vi.fn(),
+        };
+
+        const plugin = new UniverEmbedUIPlugin({
+            useDefaultFloatingMenus: false,
+            useDefaultHostToolbar: false,
+        }, injector, configService as never);
+
+        plugin.onStarting();
+
+        expect(unitLeasePolicyService.getPolicy()).toBe('exclusive');
     });
 
     it('registers floating menus with exact and fallback lookup', () => {

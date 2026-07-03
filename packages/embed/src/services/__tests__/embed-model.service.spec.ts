@@ -19,29 +19,27 @@ import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { EmbedModelService } from '../embed-model.service';
 
-describe('EmbedModelService child unit uniqueness', () => {
-    it('rejects duplicate active child units in one host resource', () => {
+describe('EmbedModelService child unit references', () => {
+    it('stores duplicate active child units in one host resource', () => {
         const model = new EmbedModelService();
 
         model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-1', hostAnchorId: 'anchor-1' }));
+        model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-2', hostAnchorId: 'anchor-2' }));
 
-        expect(() => {
-            model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-2', hostAnchorId: 'anchor-2' }));
-        }).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(2);
     });
 
-    it('rejects duplicate active child units across host resources', () => {
+    it('stores duplicate active child units across host resources', () => {
         const model = new EmbedModelService();
 
         model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-1', hostAnchorId: 'anchor-1' }));
+        model.addDescriptor('host-2', createDescriptor({
+            embedId: 'embed-2',
+            hostUnitId: 'host-2',
+            hostAnchorId: 'anchor-2',
+        }));
 
-        expect(() => {
-            model.addDescriptor('host-2', createDescriptor({
-                embedId: 'embed-2',
-                hostUnitId: 'host-2',
-                hostAnchorId: 'anchor-2',
-            }));
-        }).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(2);
     });
 
     it('allows a soft-deleted descriptor to keep the same child unit reference', () => {
@@ -56,14 +54,16 @@ describe('EmbedModelService child unit uniqueness', () => {
         expect(model.getDescriptor('host-1', 'embed-2')?.lifecycle).toBe('active');
     });
 
-    it('rejects restoring a soft-deleted descriptor when another active descriptor owns the child unit', () => {
+    it('restores a soft-deleted descriptor when another active descriptor references the child unit', () => {
         const model = new EmbedModelService();
 
         model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-1', hostAnchorId: 'anchor-1' }));
         model.softDeleteDescriptor('host-1', 'embed-1');
         model.addDescriptor('host-1', createDescriptor({ embedId: 'embed-2', hostAnchorId: 'anchor-2' }));
+        model.restoreDescriptor('host-1', 'embed-1');
 
-        expect(() => model.restoreDescriptor('host-1', 'embed-1')).toThrow('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+        expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(2);
+        expect(model.getDescriptor('host-1', 'embed-1')?.lifecycle).toBe('active');
     });
 
     it('drops runtime child unit state when loading a persisted resource', () => {

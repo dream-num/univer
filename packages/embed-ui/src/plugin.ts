@@ -26,7 +26,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { EmbedHostAdapterRegistryService, UniverEmbedPlugin } from '@univerjs/embed';
+import { EmbedHostAdapterRegistryService, EmbedUnitLeasePolicyService, UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
@@ -79,6 +79,14 @@ export class UniverEmbedUIPlugin extends Plugin {
     }
 
     override onStarting() {
+        this._enableEmbedUnitLeasePolicy();
+        this._registerServices();
+        this._registerConfiguredContributions();
+        this._touchServices();
+        this._registerDefaultHostToolbar();
+    }
+
+    private _registerServices(): void {
         ([
             [EmbedHostContainerRegistryService],
             [EmbedHostRestoreService],
@@ -107,7 +115,9 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
+    }
 
+    private _registerConfiguredContributions(): void {
         flushPendingEmbedUIContributions(this._injector);
         flushPendingEmbedProductMenuContributions(this._injector);
 
@@ -172,6 +182,10 @@ export class UniverEmbedUIPlugin extends Plugin {
             }
         });
 
+        this._registerFloatingMenus();
+    }
+
+    private _registerFloatingMenus(): void {
         const floatingMenuRegistry = this._injector.get(EmbedFloatingMenuRegistryService);
         (this._config.floatingMenus ?? []).forEach((contribution) => {
             if (!floatingMenuRegistry.hasExact(contribution.hostType, contribution.entry, contribution.childType)) {
@@ -185,7 +199,9 @@ export class UniverEmbedUIPlugin extends Plugin {
                 }
             });
         }
+    }
 
+    private _touchServices(): void {
         touchDependencies(this._injector, [
             [EmbedHostContainerRegistryService],
             [EmbedHostRestoreService],
@@ -212,7 +228,9 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedSceneCanvasCaptureService],
             [EmbedUndoBridgeService],
         ]);
+    }
 
+    private _registerDefaultHostToolbar(): void {
         if (this._config.useDefaultHostToolbar !== false && this._injector.has(IUIPartsService)) {
             this.disposeWithMe(
                 this._injector.get(IUIPartsService).registerComponent(
@@ -221,5 +239,9 @@ export class UniverEmbedUIPlugin extends Plugin {
                 )
             );
         }
+    }
+
+    private _enableEmbedUnitLeasePolicy(): void {
+        this._injector.get(EmbedUnitLeasePolicyService).enableExclusivePolicy();
     }
 }

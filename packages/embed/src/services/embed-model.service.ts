@@ -16,19 +16,19 @@
 
 import type { IEmbedDescriptor, IEmbedResource } from '../types/embed';
 import type { ResourceRefInput } from '../types/resource-ref';
-import { Optional, ReferencedUnitOwnerKind } from '@univerjs/core';
+import { Optional } from '@univerjs/core';
 import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
 import { EmbedError, EmbedErrorCode } from '../common/error';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
 import { parseResourceRef } from '../common/resource-ref-uri';
 import { fromResourceRefUnitType } from '../common/unit-type';
-import { EmbedReferencedUnitClaimService } from './embed-referenced-unit-claim.service';
+import { EmbedUnitLeaseService } from './embed-unit-lease.service';
 
 export class EmbedModelService {
     private readonly _resources = new Map<string, IEmbedResource>();
 
     constructor(
-        @Optional(EmbedReferencedUnitClaimService) private readonly _referencedUnitClaimService?: EmbedReferencedUnitClaimService
+        @Optional(EmbedUnitLeaseService) private readonly _unitLeaseService?: EmbedUnitLeaseService
     ) {
         // noop
     }
@@ -36,7 +36,6 @@ export class EmbedModelService {
     addDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): void {
         const now = Date.now();
         const normalizedDescriptor = this._normalizeDescriptor(hostUnitId, descriptor);
-        this._assertActiveChildUnitAvailable(normalizedDescriptor);
         const resource = this._ensureResource(hostUnitId);
         resource.embeds[normalizedDescriptor.embedId] = {
             ...normalizedDescriptor,
@@ -95,11 +94,7 @@ export class EmbedModelService {
             return;
         }
 
-        this._referencedUnitClaimService?.release({
-            kind: ReferencedUnitOwnerKind.Embed,
-            unitId: hostUnitId,
-            ownerId: embedId,
-        });
+        this._unitLeaseService?.release({ hostUnitId, embedId });
         descriptor.lifecycle = 'soft-deleted';
         descriptor.updatedAt = Date.now();
     }
@@ -110,10 +105,6 @@ export class EmbedModelService {
             return;
         }
 
-        this._assertActiveChildUnitAvailable({
-            ...descriptor,
-            lifecycle: 'active',
-        });
         descriptor.lifecycle = 'active';
         descriptor.updatedAt = Date.now();
     }
@@ -130,16 +121,11 @@ export class EmbedModelService {
                 embedId,
             });
         }
-        this._assertResourceHasNoDuplicateActiveChildUnits(normalizedResource);
-        for (const descriptor of Object.values(normalizedResource.embeds)) {
-            this._assertActiveChildUnitAvailable(descriptor, unitId);
-        }
 
         this._resources.set(unitId, this._cloneResource(normalizedResource));
     }
 
     unloadUnit(unitId: string): void {
-        this._referencedUnitClaimService?.releaseHost(unitId);
         this._resources.delete(unitId);
     }
 
@@ -159,7 +145,6 @@ export class EmbedModelService {
                 }),
             ])),
         };
-        this._assertResourceHasNoDuplicateActiveChildUnits(resource);
         return resource;
     }
 
@@ -206,55 +191,6 @@ export class EmbedModelService {
 
     private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): ResourceRefInput {
         return descriptor.source.ref;
-    }
-
-    private _assertActiveChildUnitAvailable(descriptor: IEmbedDescriptor, replacingUnitId?: string): void {
-        if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
-            return;
-        }
-
-        for (const [unitId, resource] of this._resources.entries()) {
-            if (unitId === replacingUnitId) {
-                continue;
-            }
-
-            const duplicated = Object.values(resource.embeds).find((item) =>
-                item.lifecycle !== 'soft-deleted' &&
-                item.childUnitId === descriptor.childUnitId &&
-                (item.hostUnitId !== descriptor.hostUnitId || item.embedId !== descriptor.embedId)
-            );
-            if (duplicated) {
-                throw new EmbedError(EmbedErrorCode.ChildUnitAlreadyEmbedded, {
-                    hostUnitId: descriptor.hostUnitId,
-                    embedId: descriptor.embedId,
-                    childUnitId: descriptor.childUnitId,
-                    duplicatedHostUnitId: duplicated.hostUnitId,
-                    duplicatedEmbedId: duplicated.embedId,
-                });
-            }
-        }
-    }
-
-    private _assertResourceHasNoDuplicateActiveChildUnits(resource: IEmbedResource): void {
-        const activeByChildUnit = new Map<string, IEmbedDescriptor>();
-        for (const descriptor of Object.values(resource.embeds)) {
-            if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
-                continue;
-            }
-
-            const duplicated = activeByChildUnit.get(descriptor.childUnitId);
-            if (duplicated && duplicated.embedId !== descriptor.embedId) {
-                throw new EmbedError(EmbedErrorCode.ChildUnitAlreadyEmbedded, {
-                    hostUnitId: descriptor.hostUnitId,
-                    embedId: descriptor.embedId,
-                    childUnitId: descriptor.childUnitId,
-                    duplicatedHostUnitId: duplicated.hostUnitId,
-                    duplicatedEmbedId: duplicated.embedId,
-                });
-            }
-
-            activeByChildUnit.set(descriptor.childUnitId, descriptor);
-        }
     }
 
     private _ensureResource(unitId: string): IEmbedResource {

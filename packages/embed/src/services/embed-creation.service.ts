@@ -65,7 +65,6 @@ export class EmbedCreationService {
             mode: context.mode ?? 'interactive',
             sourceMeta: context.sourceMeta ?? createDefaultEmbedSourceMeta(capability),
         };
-        this._assertChildUnitAvailable(context.hostUnitId, descriptor);
 
         return {
             descriptor,
@@ -103,7 +102,6 @@ export class EmbedCreationService {
             createdAt: undefined,
             updatedAt: undefined,
         };
-        this._assertChildUnitAvailable(params.hostUnitId, descriptor);
 
         return descriptor;
     }
@@ -121,24 +119,5 @@ export class EmbedCreationService {
 
     removeEmbed(params: { hostUnitId: string; embedId: string }): void {
         this._model.softDeleteDescriptor(params.hostUnitId, params.embedId);
-    }
-
-    private _assertChildUnitAvailable(hostUnitId: string, descriptor: IEmbedDescriptor): void {
-        if (!descriptor.childUnitId) {
-            return;
-        }
-
-        const duplicated = this._model.getActiveDescriptorsByChildUnit(descriptor.childUnitId).find((item) =>
-            (item.hostUnitId !== hostUnitId || item.embedId !== descriptor.embedId)
-        );
-        if (duplicated) {
-            throw new EmbedError(EmbedErrorCode.ChildUnitAlreadyEmbedded, {
-                hostUnitId,
-                embedId: descriptor.embedId,
-                childUnitId: descriptor.childUnitId,
-                duplicatedHostUnitId: duplicated.hostUnitId,
-                duplicatedEmbedId: duplicated.embedId,
-            });
-        }
     }
 }

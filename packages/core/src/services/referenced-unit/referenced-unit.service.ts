@@ -20,20 +20,6 @@ import type { ICreateUnitOptions } from '../instance/instance.service';
 import type { ResourceRefInput } from './resource-ref';
 import { createIdentifier } from '../../common/di';
 
-export const ReferencedUnitOwnerKind = {
-    Embed: 'embed',
-} as const;
-
-export type ReferencedUnitOwnerKind = typeof ReferencedUnitOwnerKind[keyof typeof ReferencedUnitOwnerKind];
-
-export interface IReferencedUnitOwner {
-    kind: typeof ReferencedUnitOwnerKind.Embed;
-    /** Host unit id that owns the embed descriptor. */
-    unitId: string;
-    /** Stable embed id inside the host unit. */
-    ownerId: string;
-}
-
 export interface IReferencedUnitRuntimeRecord {
     /** Canonical ResourceRef string that produced this runtime unit. */
     ref: string;
@@ -80,7 +66,6 @@ export interface IReferencedUnitReadDataOptions {
 }
 
 export enum ReferencedUnitErrorCode {
-    OwnerConflict = 'owner-conflict',
     ProviderMissing = 'provider-missing',
     ProviderConflict = 'provider-conflict',
     UnitTypeMismatch = 'unit-type-mismatch',
@@ -109,14 +94,6 @@ export interface IReferencedUnitManagerService {
      * type validation. This method never binds an embed owner.
      */
     ensure(ref: ResourceRefInput, options?: IReferencedUnitEnsureOptions): Promise<IReferencedUnitRuntimeRecord>;
-
-    /**
-     * Claim one runtime unit for one embed owner.
-     *
-     * The returned disposable releases exactly this claim once. Claiming a unit
-     * that is already claimed, including by the same owner, throws OwnerConflict.
-     */
-    claimUnit(owner: IReferencedUnitOwner, unitId: string): IDisposable;
 
     /**
      * Read data selected by a ResourceRef.

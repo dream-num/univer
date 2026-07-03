@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-export {
-    IReferencedUnitManagerService,
-    ReferencedUnitDataType,
-    ReferencedUnitError,
-    ReferencedUnitErrorCode,
-} from '@univerjs/core';
-export type {
-    IReferencedUnitDataValue,
-    IReferencedUnitEnsureOptions,
-    IReferencedUnitReadDataOptions,
-    IReferencedUnitReadDataResult,
-    IReferencedUnitRecord,
-    IReferencedUnitRuntimeRecord,
-    IReferencedUnitUsageCount,
-} from '@univerjs/core';
+export type EmbedUnitLeaseResolvedPolicy = 'none' | 'exclusive';
+
+export class EmbedUnitLeasePolicyService {
+    private _policy: EmbedUnitLeaseResolvedPolicy = 'none';
+
+    getPolicy(): EmbedUnitLeaseResolvedPolicy {
+        return this._policy;
+    }
+
+    enableExclusivePolicy(): void {
+        this._policy = 'exclusive';
+    }
+}

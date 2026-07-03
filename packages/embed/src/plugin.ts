@@ -41,11 +41,12 @@ import {
     flushPendingReferencedUnitApiResolvers,
     registerReferencedUnitApiResolvers,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
-import { EmbedReferencedUnitClaimService } from './services/embed-referenced-unit-claim.service';
 import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 import { EmbedReferencedUnitMaterializeService } from './services/embed-referenced-unit-materialize.service';
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 import { EmbedSourceResolverService } from './services/embed-source-resolver.service';
+import { EmbedUnitLeasePolicyService } from './services/embed-unit-lease-policy.service';
+import { EmbedUnitLeaseService } from './services/embed-unit-lease.service';
 
 // This core embed plugin intentionally has no product plugin dependencies.
 // Host/product integrations are contributed by docs/sheets/slides/base plugins.
@@ -78,7 +79,8 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedResourceRefProviderRegistryService],
             [EmbedReferencedUnitApiResolverRegistryService],
             [IReferencedUnitManagerService, { useClass: EmbedReferencedUnitManagerService }],
-            [EmbedReferencedUnitClaimService],
+            [EmbedUnitLeasePolicyService],
+            [EmbedUnitLeaseService],
             [EmbedReferencedUnitMaterializeService],
             [EmbedLocalRuntimeResourceRefUnitProvider],
             [EmbedLocalRuntimeResourceRefDataProvider],
@@ -119,7 +121,8 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedResourceRefProviderRegistryService],
             [EmbedReferencedUnitApiResolverRegistryService],
             [IReferencedUnitManagerService],
-            [EmbedReferencedUnitClaimService],
+            [EmbedUnitLeasePolicyService],
+            [EmbedUnitLeaseService],
             [EmbedReferencedUnitMaterializeService],
             [EmbedLocalRuntimeResourceRefUnitProvider],
             [EmbedLocalRuntimeResourceRefDataProvider],

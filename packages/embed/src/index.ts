@@ -99,7 +99,6 @@ export type {
     IReferencedUnitApiResolveContext,
     IReferencedUnitApiResolverRegistration,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
-export { EmbedReferencedUnitClaimService } from './services/embed-referenced-unit-claim.service';
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 export { EmbedReferencedUnitMaterializeService } from './services/embed-referenced-unit-materialize.service';
 export type { IEmbedDescriptorMaterializeContext } from './services/embed-referenced-unit-materialize.service';
@@ -115,6 +114,9 @@ export type {
     IReferencedUnitLoadResult,
 } from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
+export { EmbedUnitLeasePolicyService } from './services/embed-unit-lease-policy.service';
+export { EmbedUnitLeaseService } from './services/embed-unit-lease.service';
+export type { IEmbedUnitLeaseOwner, IEmbedUnitLeaseRecord } from './services/embed-unit-lease.service';
 export type {
     EmbedHostEntry,
     EmbedLayout,
@@ -155,7 +157,6 @@ export type {
 export type {
     IReferencedUnitDataValue,
     IReferencedUnitEnsureOptions,
-    IReferencedUnitOwner,
     IReferencedUnitReadDataOptions,
     IReferencedUnitReadDataResult,
     IReferencedUnitRecord,
@@ -167,7 +168,6 @@ export {
     ReferencedUnitDataType,
     ReferencedUnitError,
     ReferencedUnitErrorCode,
-    ReferencedUnitOwnerKind,
 } from './types/referenced-unit';
 export type {
     IResourceRef,

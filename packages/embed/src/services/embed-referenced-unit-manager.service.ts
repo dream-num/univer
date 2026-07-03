@@ -18,7 +18,6 @@ import type {
     IDisposable,
     IReferencedUnitEnsureOptions,
     IReferencedUnitManagerService,
-    IReferencedUnitOwner,
     IReferencedUnitReadDataOptions,
     IReferencedUnitReadDataResult,
     IReferencedUnitRuntimeRecord,
@@ -39,18 +38,9 @@ interface IReferencedUnitLoadState {
     record?: IReferencedUnitRuntimeRecord;
 }
 
-interface IReferencedUnitClaimState {
-    readonly owner: IReferencedUnitOwner;
-    readonly ownerKey: string;
-    readonly unitId: string;
-    readonly token: symbol;
-}
-
 export class EmbedReferencedUnitManagerService implements IReferencedUnitManagerService {
     private readonly _loadStates = new Map<string, IReferencedUnitLoadState>();
     private readonly _loadStatesByRuntimeUnitId = new Map<string, Set<IReferencedUnitLoadState>>();
-    private readonly _ownerClaims = new Map<string, IReferencedUnitClaimState>();
-    private readonly _unitClaims = new Map<string, IReferencedUnitClaimState>();
     private readonly _usageCounts = new Map<string, number>();
 
     constructor(
@@ -79,48 +69,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         });
 
         return this._withOptionalAbort(state.providerLoadPromise, options.signal);
-    }
-
-    claimUnit(ownerInput: IReferencedUnitOwner, unitId: string): IDisposable {
-        const owner = this._normalizeOwner(ownerInput);
-        const ownerKey = this._getOwnerKey(owner);
-        const existingOwnerClaim = this._ownerClaims.get(ownerKey);
-        if (existingOwnerClaim) {
-            throw new ReferencedUnitError(ReferencedUnitErrorCode.OwnerConflict, {
-                existingOwner: existingOwnerClaim.owner,
-                nextOwner: owner,
-                existingUnitId: existingOwnerClaim.unitId,
-                unitId,
-            });
-        }
-
-        const existingUnitClaim = this._unitClaims.get(unitId);
-        if (existingUnitClaim) {
-            throw new ReferencedUnitError(ReferencedUnitErrorCode.OwnerConflict, {
-                existingOwner: existingUnitClaim.owner,
-                nextOwner: owner,
-                unitId,
-            });
-        }
-
-        const claim: IReferencedUnitClaimState = {
-            owner,
-            ownerKey,
-            unitId,
-            token: Symbol(ownerKey),
-        };
-        this._ownerClaims.set(ownerKey, claim);
-        this._unitClaims.set(unitId, claim);
-
-        let disposed = false;
-        return toDisposable(() => {
-            if (disposed) {
-                return;
-            }
-
-            disposed = true;
-            this._releaseClaim(claim);
-        });
     }
 
     async readData(refInput: ResourceRefInput, options: IReferencedUnitReadDataOptions = {}): Promise<IReferencedUnitReadDataResult> {
@@ -171,12 +119,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
     }
 
     releaseUnit(unitId: string): void {
-        for (const claim of this._ownerClaims.values()) {
-            if (claim.unitId === unitId || claim.owner.unitId === unitId) {
-                this._releaseClaim(claim);
-            }
-        }
-
         for (const [key] of this._usageCounts) {
             const [fromUnitId, toUnitId] = JSON.parse(key) as [string, string];
             if (fromUnitId === unitId || toUnitId === unitId) {
@@ -280,16 +222,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
         states.add(state);
     }
 
-    private _releaseClaim(claim: IReferencedUnitClaimState): void {
-        if (this._ownerClaims.get(claim.ownerKey)?.token === claim.token) {
-            this._ownerClaims.delete(claim.ownerKey);
-        }
-
-        if (this._unitClaims.get(claim.unitId)?.token === claim.token) {
-            this._unitClaims.delete(claim.unitId);
-        }
-    }
-
     private _withOptionalAbort<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
         if (!signal) {
             return promise;
@@ -321,14 +253,6 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
                 }
             );
         });
-    }
-
-    private _normalizeOwner(owner: IReferencedUnitOwner): IReferencedUnitOwner {
-        return { ...owner };
-    }
-
-    private _getOwnerKey(owner: IReferencedUnitOwner): string {
-        return JSON.stringify([owner.kind, owner.unitId, owner.ownerId]);
     }
 
     private _getUnitLoadKey(ref: ResourceRef, unitType: UniverInstanceType): string {

@@ -75,6 +75,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
                 className={clsx(`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none
+                  rtl:!univer-pl-2 rtl:!univer-pr-4
                   dark:!univer-text-white
                 `, borderClassName)}
                 value={inputValue}
@@ -87,6 +88,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
                 className={`
                   univer-absolute univer-left-1.5 univer-top-1/2 -univer-translate-y-1/2 univer-text-sm
                   univer-text-gray-400
+                  rtl:univer-left-auto rtl:univer-right-1.5
                 `}
             >
                 #

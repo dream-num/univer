@@ -20,8 +20,9 @@
 
 import type { ReactElement } from 'react';
 import type { IButtonProps } from './Button';
-import { Children, cloneElement } from 'react';
+import { Children, cloneElement, useContext } from 'react';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 export interface IButtonGroupProps {
     className?: string;
@@ -34,9 +35,11 @@ export const ButtonGroup = ({
     orientation = 'horizontal',
     children,
 }: IButtonGroupProps) => {
+    const { direction } = useContext(ConfigContext);
     const totalButtons = Children.count(children);
     const isHorizontal = orientation === 'horizontal';
     const isVertical = orientation === 'vertical';
+    const isRtl = direction === 'rtl';
 
     return (
         <div
@@ -52,9 +55,10 @@ export const ButtonGroup = ({
                 return cloneElement(child, {
                     className: clsx(
                         {
-                            '!univer-rounded-l-none': isHorizontal && !isFirst,
-                            '!univer-rounded-r-none': isHorizontal && !isLast,
-                            '!univer-border-l-0': isHorizontal && !isFirst,
+                            '!univer-rounded-l-none': isHorizontal && (isRtl ? !isLast : !isFirst),
+                            '!univer-rounded-r-none': isHorizontal && (isRtl ? !isFirst : !isLast),
+                            '!univer-border-l-0': isHorizontal && !isRtl && !isFirst,
+                            '!univer-border-r-0': isHorizontal && isRtl && !isFirst,
 
                             '!univer-rounded-t-none': isVertical && !isFirst,
                             '!univer-rounded-b-none': isVertical && !isLast,

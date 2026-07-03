@@ -16,9 +16,9 @@
 
 export {
     IReferencedUnitManagerService,
+    ReferencedUnitDataType,
     ReferencedUnitError,
     ReferencedUnitErrorCode,
-    ReferencedUnitDataType,
     ReferencedUnitOwnerKind,
 } from '@univerjs/core';
 export type {

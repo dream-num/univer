@@ -15,13 +15,12 @@
  */
 
 import type {
+    IRange,
     IReferencedUnitDataValue,
     IReferencedUnitManagerService as IReferencedUnitManagerServiceInterface,
     IReferencedUnitReadDataResult,
-    IRange,
     ResourceRef,
     ResourceRefInput,
-    ResourceRefPart,
     UniverInstanceType,
     Workbook,
 } from '@univerjs/core';
@@ -34,7 +33,7 @@ import type {
     IEmbedResourceRefUnitProviderRegistration,
     IReferencedUnitLoadResult,
 } from './embed-resource-ref-provider-registry.service';
-import { getOriginCellValue, Inject, IReferencedUnitManagerService, IUniverInstanceService, ReferencedUnitDataType, UniverInstanceType as CoreUniverInstanceType } from '@univerjs/core';
+import { UniverInstanceType as CoreUniverInstanceType, getOriginCellValue, Inject, IReferencedUnitManagerService, IUniverInstanceService, ReferencedUnitDataType } from '@univerjs/core';
 import { EmbedError, EmbedErrorCode } from '../common/error';
 import { parseResourceRef } from '../common/resource-ref-uri';
 import { toResourceRefUnitType } from '../common/unit-type';

@@ -43,7 +43,6 @@ export {
     REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
     SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
 } from './common/const';
-export { EmbedError, EmbedErrorCode } from './common/error';
 export {
     cloneEmbedResource,
     createEmbedResourceEntry,
@@ -52,6 +51,7 @@ export {
     parseEmbedResourceEntry,
     upsertEmbedResourceEntry,
 } from './common/embed-resource';
+export { EmbedError, EmbedErrorCode } from './common/error';
 export { assertResourceRef, getResourceRefKey, getResourceRefUnitKey, getResourceRefUnitLocator, normalizeResourceRef } from './common/resource-ref';
 export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResourceRefInput } from './common/resource-ref-input';
 export { normalizeResourceRefLocator } from './common/resource-ref-locator';
@@ -78,6 +78,15 @@ export type {
     IEmbedHostCreateContext,
     IEmbedHostRemoveContext,
 } from './services/embed-host-lifecycle.service';
+export {
+    createLocalRuntimeResourceRefDataProviderRegistration,
+    createLocalRuntimeResourceRefUnitProviderRegistration,
+    EmbedLocalRuntimeResourceRefDataProvider,
+    EmbedLocalRuntimeResourceRefUnitProvider,
+    LOCAL_RUNTIME_RESOURCE_REF_DATA_PROVIDER_ID,
+    LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY,
+    LOCAL_RUNTIME_RESOURCE_REF_UNIT_PROVIDER_ID,
+} from './services/embed-local-runtime-resource-ref-provider';
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 export {
@@ -94,15 +103,6 @@ export { EmbedReferencedUnitClaimService } from './services/embed-referenced-uni
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 export { EmbedReferencedUnitMaterializeService } from './services/embed-referenced-unit-materialize.service';
 export type { IEmbedDescriptorMaterializeContext } from './services/embed-referenced-unit-materialize.service';
-export {
-    createLocalRuntimeResourceRefDataProviderRegistration,
-    createLocalRuntimeResourceRefUnitProviderRegistration,
-    EmbedLocalRuntimeResourceRefDataProvider,
-    EmbedLocalRuntimeResourceRefUnitProvider,
-    LOCAL_RUNTIME_RESOURCE_REF_DATA_PROVIDER_ID,
-    LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY,
-    LOCAL_RUNTIME_RESOURCE_REF_UNIT_PROVIDER_ID,
-} from './services/embed-local-runtime-resource-ref-provider';
 export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 export type {
     IEmbedResourceRefDataProvider,

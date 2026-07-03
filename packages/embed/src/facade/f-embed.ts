@@ -19,8 +19,7 @@ import type { FUniver } from '@univerjs/core/facade';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitMaterializeService, RemoveEmbedCommand } from '@univerjs/embed';
-import { EmbedError, EmbedErrorCode } from '../common/error';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedError, EmbedErrorCode, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitMaterializeService, RemoveEmbedCommand } from '@univerjs/embed';
 
 export interface ILoadEmbedOptions extends ICreateUnitOptions {
     signal?: AbortSignal;

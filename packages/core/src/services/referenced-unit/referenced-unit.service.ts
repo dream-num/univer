@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable } from '../../common/di';
+import type { UniverInstanceType } from '../../common/unit';
 import type { ICreateUnitOptions } from '../instance/instance.service';
 import type { ResourceRefInput } from './resource-ref';
 import { createIdentifier } from '../../common/di';
-import { UniverInstanceType } from '../../common/unit';
 
 export const ReferencedUnitOwnerKind = {
     Embed: 'embed',

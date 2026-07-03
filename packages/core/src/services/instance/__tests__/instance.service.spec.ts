@@ -227,7 +227,7 @@ describe('UniverInstanceService', () => {
             currentIds.push(unit?.getUnitId() ?? null);
         });
         service.focused$.subscribe((unitId) => {
-            focusedIds.push(unitId ?? null);
+            focusedIds.push(unitId);
         });
 
         service.setCurrentUnitForType(workbook.getUnitId());

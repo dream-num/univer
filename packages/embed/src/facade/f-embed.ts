@@ -157,27 +157,42 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      * @returns A promise resolving to the loaded child unit facade instance.
      * @example TypeScript
      * ```ts
-     * const embed = univerAPI.createEmbed({
+     * const hostUnitId = 'host-unit-id';
+     * const hostSheetId = 'host-sheet-id';
+     * const anotherUnitId = 'another-unit-id';
+     *
+     * const embed = univerAPI.createEmbed<UniverFacadeTypes.FDocument>({
+     *     embedId: 'doc-in-sheet',
      *     host: {
-     *         unitId: hostWorkbookId,
+     *         unitId: hostUnitId,
      *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
+     *         context: {
+     *             subUnitId: hostSheetId,
+     *             left: 80,
+     *             top: 80,
+     *             width: 640,
+     *             height: 360,
+     *         },
      *     },
-     *     content: { unitType: UniverInstanceType.UNIVER_SHEET, ref },
+     *     content: {
+     *         unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC,
+     *         ref: `#unit=${anotherUnitId}&type=doc`,
+     *     },
      * });
-     * const childWorkbook = await embed.loadAsync();
-     * console.log(childWorkbook.getId());
+     *
+     * const childDocument = await embed.loadAsync();
      * ```
      * @example TypeScript descriptor read type fallback
      * ```ts
      * const embed = univerAPI.listEmbeds()[0];
-     * const childWorkbook = await embed.loadAsync<UniverFacadeTypes.FWorkbook>();
-     * console.log(childWorkbook.getActiveSheet());
+     *
+     * const childDocument = await embed.loadAsync<UniverFacadeTypes.FDocument>();
      * ```
      * @example JavaScript
      * ```js
      * const embed = univerAPI.listEmbeds()[0];
-     * const childWorkbook = await embed.loadAsync();
-     * console.log(childWorkbook.getId());
+     *
+     * const childDocument = await embed.loadAsync();
      * ```
      */
     async loadAsync<TLoadFacade = TUnitFacade>(options: ILoadEmbedOptions = {}): Promise<TLoadFacade> {

@@ -93,7 +93,7 @@ export class EmbedUnitLeaseService {
     }
 
     releaseHost(hostUnitId: string): void {
-        for (const state of [...this._leasesByOwner.values()]) {
+        for (const state of this._leasesByOwner.values()) {
             if (state.record.hostUnitId === hostUnitId) {
                 this._releaseState(state);
             }
@@ -101,7 +101,7 @@ export class EmbedUnitLeaseService {
     }
 
     releaseUnit(unitId: string): void {
-        for (const state of [...this._leasesByOwner.values()]) {
+        for (const state of this._leasesByOwner.values()) {
             if (state.record.hostUnitId === unitId || state.record.childUnitId === unitId) {
                 this._releaseState(state);
             }

@@ -157,16 +157,13 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      * @returns A promise resolving to the loaded child unit facade instance.
      * @example TypeScript
      * ```ts
-     * const hostUnitId = 'host-unit-id';
-     * const hostSheetId = 'host-sheet-id';
-     *
      * const embed = univerAPI.createEmbed<UniverFacadeTypes.FDocument>({
      *     embedId: 'doc-in-sheet',
      *     host: {
-     *         unitId: hostUnitId,
+     *         unitId: 'host-unit-id',
      *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
      *         context: {
-     *             subUnitId: hostSheetId,
+     *             subUnitId: 'host-sheet-id',
      *             left: 80,
      *             top: 80,
      *             width: 640,

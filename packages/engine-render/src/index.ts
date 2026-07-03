@@ -25,6 +25,7 @@ export type { IPageRenderConfig } from './components/docs/document';
 export type { IDocumentOffsetConfig } from './components/docs/document';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export * from './components/docs/layout/doc-simple-skeleton';
+export { measureDocumentNoWrapTextWidth } from './components/docs/layout/doc-no-wrap-measure';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleton';
 export {

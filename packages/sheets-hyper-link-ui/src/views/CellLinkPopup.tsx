@@ -73,7 +73,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
         <div
             className={clsx(`
               univer-mb-1 univer-flex univer-max-w-80 univer-flex-row univer-items-center univer-justify-between
-              univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-3 univer-shadow-md
+              univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-2 univer-shadow-md
               dark:!univer-bg-gray-900
             `, borderClassName)}
             onClick={() => popupService.hideCurrentPopup()}
@@ -81,7 +81,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             <div
                 className={clsx(`
                   univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-flex-row univer-items-center
-                  univer-truncate univer-text-sm univer-leading-5 univer-text-primary-600
+                  univer-gap-1 univer-truncate univer-text-sm univer-leading-5 univer-text-primary-600
                 `, { 'univer-text-red-500': isError })}
                 onClick={() => {
                     if (isError) {
@@ -93,7 +93,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             >
                 <div
                     className={`
-                      univer-mr-2 univer-flex univer-size-5 univer-flex-none univer-items-center univer-justify-center
+                      univer-flex univer-size-5 univer-flex-none univer-items-center univer-justify-center
                       univer-text-base univer-text-gray-900
                       dark:!univer-text-white
                     `}
@@ -107,13 +107,14 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             <div
                 className={`
                   univer-flex univer-h-6 univer-flex-none univer-flex-row univer-items-center univer-justify-center
+                  univer-gap-2
                 `}
             >
                 {copyPermission && (
                     <div
                         className={clsx(`
-                          univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
-                          univer-items-center univer-justify-center univer-rounded univer-text-base
+                          univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
+                          univer-justify-center univer-rounded univer-text-base
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `, { 'univer-text-red-500': isError })}
@@ -142,9 +143,10 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                 {editPermission && (
                     <>
                         <div
+                            data-u-comp="cell-link-popup-edit"
                             className={`
-                              univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
-                              univer-items-center univer-justify-center univer-rounded univer-text-base
+                              univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
+                              univer-justify-center univer-rounded univer-text-base
                               hover:univer-bg-gray-100
                               dark:hover:!univer-bg-gray-700
                             `}
@@ -164,9 +166,10 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             </Tooltip>
                         </div>
                         <div
+                            data-u-comp="cell-link-popup-remove"
                             className={`
-                              univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
-                              univer-items-center univer-justify-center univer-rounded univer-text-base
+                              univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
+                              univer-justify-center univer-rounded univer-text-base
                               hover:univer-bg-gray-100
                               dark:hover:!univer-bg-gray-700
                             `}

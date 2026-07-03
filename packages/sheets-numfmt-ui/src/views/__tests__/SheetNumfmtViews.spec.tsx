@@ -348,6 +348,25 @@ describe('MoreNumfmtType Options', () => {
         expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({ pattern: '0.00%' });
         expect((currentTestBed.injector.get(ILayoutService) as unknown as TestLayoutService).checkContentIsFocused()).toBe(true);
     });
+
+    it('renders options in the current RTL direction', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        currentTestBed.injector.get(LocaleService).setDirection('rtl');
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <Options />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.getAttribute('dir')).toBe('rtl');
+    });
 });
 
 describe('CustomFormat', () => {

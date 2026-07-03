@@ -354,11 +354,9 @@ function renderPopup(
         );
     });
 
-    const actions = Array.from(container.querySelectorAll('.univer-ml-2')) as HTMLElement[];
-
     return {
-        edit: actions[0],
-        remove: actions[1],
+        edit: container.querySelector('[data-u-comp="cell-link-popup-edit"]') as HTMLElement,
+        remove: container.querySelector('[data-u-comp="cell-link-popup-remove"]') as HTMLElement,
     };
 }
 

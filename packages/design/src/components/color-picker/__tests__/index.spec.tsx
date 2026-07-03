@@ -15,7 +15,7 @@
  */
 
 import type { ComponentProps } from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
@@ -82,6 +82,16 @@ describe('ColorPicker', () => {
             moreLink.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             expect(document.body.innerHTML).toContain('univer-grid univer-w-64 univer-gap-2');
         }
+    });
+
+    it('should place custom color dialog above parent popovers', () => {
+        const { container } = render(<ColorPicker />);
+        const moreLink = container.querySelector('[data-u-comp="color-picker"] a') as HTMLAnchorElement;
+
+        fireEvent.click(moreLink);
+
+        const dialog = document.querySelector('[role="dialog"]');
+        expect(dialog?.className).toContain('!univer-z-[1090]');
     });
 
     it('should call onChange when rgb input changes in dialog', () => {
@@ -187,5 +197,21 @@ describe('ColorInput', () => {
             bInput.dispatchEvent(new Event('input', { bubbles: true }));
             expect(onChange).toHaveBeenCalledWith([0, 100, 100]); // Assuming #FF0000 corresponds to HSV [0, 100, 100]
         }
+    });
+
+    it('should mirror hex prefix and padding in RTL', () => {
+        const { container } = render(
+            <div dir="rtl">
+                <TestComponent onChange={onChange} alpha={1} format="hex" />
+            </div>
+        );
+
+        const hexInput = container.querySelector('input[maxlength="6"]') as HTMLInputElement;
+        const prefix = container.querySelector('span') as HTMLSpanElement;
+
+        expect(hexInput.className).toContain('rtl:!univer-pr-4');
+        expect(hexInput.className).toContain('rtl:!univer-pl-2');
+        expect(prefix.className).toContain('rtl:univer-left-auto');
+        expect(prefix.className).toContain('rtl:univer-right-1.5');
     });
 });

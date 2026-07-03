@@ -234,11 +234,14 @@ export class EmbedHostLifecycleService {
     }
 
     private _toSetDescriptorMutation(descriptor: IEmbedDescriptor): IMutationInfo {
+        const mutationDescriptor = { ...descriptor };
+        delete mutationDescriptor.childUnitId;
+
         return {
             id: SetEmbedDescriptorMutation.id,
             params: {
                 unitId: descriptor.hostUnitId,
-                descriptor,
+                descriptor: mutationDescriptor,
             },
         };
     }

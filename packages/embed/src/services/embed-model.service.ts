@@ -16,13 +16,22 @@
 
 import type { IEmbedDescriptor, IEmbedResource } from '../types/embed';
 import type { ResourceRefInput } from '../types/resource-ref';
+import { Optional, ReferencedUnitOwnerKind } from '@univerjs/core';
 import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
+import { EmbedError, EmbedErrorCode } from '../common/error';
 import { getResourceRefInputKey, normalizeResourceRefInput } from '../common/resource-ref-input';
 import { parseResourceRef } from '../common/resource-ref-uri';
 import { fromResourceRefUnitType } from '../common/unit-type';
+import { EmbedReferencedUnitClaimService } from './embed-referenced-unit-claim.service';
 
 export class EmbedModelService {
     private readonly _resources = new Map<string, IEmbedResource>();
+
+    constructor(
+        @Optional(EmbedReferencedUnitClaimService) private readonly _referencedUnitClaimService?: EmbedReferencedUnitClaimService
+    ) {
+        // noop
+    }
 
     addDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): void {
         const now = Date.now();
@@ -86,6 +95,11 @@ export class EmbedModelService {
             return;
         }
 
+        this._referencedUnitClaimService?.release({
+            kind: ReferencedUnitOwnerKind.Embed,
+            unitId: hostUnitId,
+            ownerId: embedId,
+        });
         descriptor.lifecycle = 'soft-deleted';
         descriptor.updatedAt = Date.now();
     }
@@ -125,6 +139,7 @@ export class EmbedModelService {
     }
 
     unloadUnit(unitId: string): void {
+        this._referencedUnitClaimService?.releaseHost(unitId);
         this._resources.delete(unitId);
     }
 
@@ -158,13 +173,21 @@ export class EmbedModelService {
 
         const childType = descriptor.childType ?? descriptor.source.unitType;
         if (childType == null) {
-            throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_REQUIRED');
+            throw new EmbedError(EmbedErrorCode.DescriptorChildTypeRequired, {
+                hostUnitId,
+                embedId: descriptor.embedId,
+            });
         }
         const ref = normalizeResourceRefInput(descriptor.source.ref);
         const parsedRef = parseResourceRef(ref);
 
         if (childType !== fromResourceRefUnitType(parsedRef.unit.type)) {
-            throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_MISMATCH');
+            throw new EmbedError(EmbedErrorCode.DescriptorChildTypeMismatch, {
+                hostUnitId,
+                embedId: descriptor.embedId,
+                childType,
+                refUnitType: parsedRef.unit.type,
+            });
         }
 
         return {
@@ -201,7 +224,13 @@ export class EmbedModelService {
                 (item.hostUnitId !== descriptor.hostUnitId || item.embedId !== descriptor.embedId)
             );
             if (duplicated) {
-                throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+                throw new EmbedError(EmbedErrorCode.ChildUnitAlreadyEmbedded, {
+                    hostUnitId: descriptor.hostUnitId,
+                    embedId: descriptor.embedId,
+                    childUnitId: descriptor.childUnitId,
+                    duplicatedHostUnitId: duplicated.hostUnitId,
+                    duplicatedEmbedId: duplicated.embedId,
+                });
             }
         }
     }
@@ -215,7 +244,13 @@ export class EmbedModelService {
 
             const duplicated = activeByChildUnit.get(descriptor.childUnitId);
             if (duplicated && duplicated.embedId !== descriptor.embedId) {
-                throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+                throw new EmbedError(EmbedErrorCode.ChildUnitAlreadyEmbedded, {
+                    hostUnitId: descriptor.hostUnitId,
+                    embedId: descriptor.embedId,
+                    childUnitId: descriptor.childUnitId,
+                    duplicatedHostUnitId: duplicated.hostUnitId,
+                    duplicatedEmbedId: duplicated.embedId,
+                });
             }
 
             activeByChildUnit.set(descriptor.childUnitId, descriptor);

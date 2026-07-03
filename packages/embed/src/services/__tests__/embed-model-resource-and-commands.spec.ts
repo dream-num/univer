@@ -268,43 +268,43 @@ describe('embed resource ref providers', () => {
             provider,
         };
 
-        const disposable = registry.register(registration);
+        const disposable = registry.registerUnitProvider(registration);
 
-        expect(registry.get({
+        expect(registry.getUnitProvider({
             file: { kind: 'uri', uri: 'univer://workspace/file-1' },
             unit: { selector: 'sheet-1', type: 'sheet' },
         })).toBe(registration);
-        expect(registry.get({
+        expect(registry.getUnitProvider({
             file: { kind: 'uri', uri: 'https://example.com/file' },
             unit: { selector: 'sheet-1', type: 'sheet' },
         })).toBeUndefined();
-        expect(registry.list()).toEqual([registration]);
-        expect(() => registry.register(registration)).toThrow('already registered');
+        expect(registry.listUnitProviders()).toEqual([registration]);
+        expect(() => registry.registerUnitProvider(registration)).toThrow('already registered');
 
         disposable.dispose();
-        expect(registry.get({
+        expect(registry.getUnitProvider({
             file: { kind: 'uri', uri: 'univer://workspace/file-1' },
             unit: { selector: 'sheet-1', type: 'sheet' },
         })).toBeUndefined();
-        registry.register(registration);
+        registry.registerUnitProvider(registration);
 
-        registry.register({
+        registry.registerUnitProvider({
             registrationId: 'all-uri',
             match: {
                 fileKinds: ['uri'],
             },
             provider: createResourceRefProvider(),
         });
-        expect(() => registry.get({
+        expect(() => registry.getUnitProvider({
             file: { kind: 'uri', uri: 'univer://workspace/file-1' },
             unit: { selector: 'sheet-1', type: 'sheet' },
-        })).toThrow('REFERENCED_UNIT_PROVIDER_CONFLICT');
+        })).toThrow('provider-conflict');
     });
 });
 
 function createResourceRefProvider() {
     return {
-        ensure: vi.fn((input: { unitType: UniverInstanceType }) => ({
+        ensureUnit: vi.fn((input: { unitType: UniverInstanceType }) => ({
             unitId: 'runtime-unit',
             unitType: input.unitType,
         })),
@@ -382,14 +382,20 @@ describe('embed commands and mutations', () => {
         const undoRedoService = { pushUndoRedo: vi.fn() };
         const accessor = createCommandAccessor(creationService, modelService, undoRedoService);
 
-        expect(CreateEmbedCommand.handler(accessor, {
+        const created = CreateEmbedCommand.handler(accessor, {
             embedId: 'embed-1',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             requestedHostAnchorId: 'anchor-1',
             entry: 'docs-custom-block',
             source: descriptor.source,
-        })).toBe(descriptor);
+        });
+        expect(created).toMatchObject({
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            hostAnchorId: 'anchor-1',
+        });
+        expect(created).not.toHaveProperty('childUnitId');
         expect(undoRedoService.pushUndoRedo).toHaveBeenLastCalledWith(expect.objectContaining({
             unitID: 'host-1',
             undoMutations: [
@@ -398,7 +404,7 @@ describe('embed commands and mutations', () => {
             ],
             redoMutations: [
                 { id: SetEmbedHostAnchorRecordMutation.id, params: { record: expect.objectContaining({ hostAnchorId: 'anchor-1' }) } },
-                { id: SetEmbedDescriptorMutation.id, params: { unitId: 'host-1', descriptor } },
+                { id: SetEmbedDescriptorMutation.id, params: { unitId: 'host-1', descriptor: created } },
             ],
         }));
 

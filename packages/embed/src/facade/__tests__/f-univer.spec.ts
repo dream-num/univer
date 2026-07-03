@@ -15,14 +15,13 @@
  */
 
 import type { IEmbedDescriptor } from '../../types/embed';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IReferencedUnitManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { CreateEmbedCommand, RemoveEmbedCommand } from '../../commands/commands/embed.command';
 import { EmbedModelService } from '../../services/embed-model.service';
 import { EmbedReferencedUnitApiResolverRegistryService } from '../../services/embed-referenced-unit-api-resolver-registry.service';
-import { EmbedReferencedUnitManagerService } from '../../services/embed-referenced-unit-manager.service';
+import { EmbedReferencedUnitMaterializeService } from '../../services/embed-referenced-unit-materialize.service';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../../services/embed-source-resolver.service';
-import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
 import { FEmbed } from '../f-embed';
 import { FEmbedHostSurface } from '../f-enum';
 import { FUniverEmbedMixin } from '../f-univer';
@@ -109,7 +108,7 @@ describe('embed facade', () => {
     it('loads units through the generic facade and embed facade', async () => {
         const descriptor = createDescriptor();
         const workbookFacade = { getId: vi.fn(() => 'child-1') };
-        const { api, facadeResolverRegistry, referencedUnitManager } = createFacade([descriptor], workbookFacade);
+        const { api, facadeResolverRegistry, referencedUnitManager, referencedUnitMaterializeService } = createFacade([descriptor], workbookFacade);
         const ref = descriptor.source.ref;
         expect(ref).toBeDefined();
 
@@ -120,8 +119,7 @@ describe('embed facade', () => {
             injector: expect.any(Object),
             api,
         });
-        expect(referencedUnitManager.ensure).toHaveBeenCalledWith({
-            ref,
+        expect(referencedUnitManager.ensure).toHaveBeenCalledWith(ref, {
             unitType: UniverInstanceType.UNIVER_SHEET,
             signal: undefined,
             createOptions: {},
@@ -135,14 +133,8 @@ describe('embed facade', () => {
             injector: expect.any(Object),
             api,
         });
-        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
-            ref,
-            owner: {
-                kind: ReferencedUnitOwnerKind.Embed,
-                unitId: 'host-1',
-                ownerId: 'embed-1',
-            },
-            unitType: UniverInstanceType.UNIVER_SHEET,
+        expect(referencedUnitMaterializeService.materializeDescriptor).toHaveBeenCalledWith({
+            descriptor,
             signal: undefined,
             createOptions: {
                 ...EMBED_CHILD_CREATE_OPTIONS,
@@ -156,15 +148,13 @@ describe('embed facade', () => {
         const { api, referencedUnitManager, univerInstanceService } = createFacade(undefined, workbookFacade);
 
         await expect(api.loadUnitAsync('#unit=child-1&type=sheet', { unitType: UniverInstanceType.UNIVER_SHEET })).resolves.toBe(workbookFacade);
-        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
-            ref: '#unit=child-1&type=sheet',
+        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith('#unit=child-1&type=sheet', {
             unitType: UniverInstanceType.UNIVER_SHEET,
             signal: undefined,
             createOptions: {},
         });
         await expect(api.loadUnitAsync('#unit=child-1&type=sheet')).resolves.toBe(workbookFacade);
-        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith({
-            ref: '#unit=child-1&type=sheet',
+        expect(referencedUnitManager.ensure).toHaveBeenLastCalledWith('#unit=child-1&type=sheet', {
             unitType: undefined,
             signal: undefined,
             createOptions: {},
@@ -214,13 +204,17 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
         getAllActiveDescriptors: vi.fn(() => descriptors),
     };
     const referencedUnitManager = {
-        ensure: vi.fn((input) => ({
-            loaded: Promise.resolve({
-                ref: input.ref,
-                unitId: 'child-1',
-                unitType: UniverInstanceType.UNIVER_SHEET,
-            }),
-            dispose: vi.fn(),
+        ensure: vi.fn((ref) => Promise.resolve({
+            ref,
+            unitId: 'child-1',
+            unitType: UniverInstanceType.UNIVER_SHEET,
+        })),
+    };
+    const referencedUnitMaterializeService = {
+        materializeDescriptor: vi.fn(({ descriptor }) => Promise.resolve({
+            ...descriptor,
+            childUnitId: 'child-1',
+            childType: UniverInstanceType.UNIVER_SHEET,
         })),
     };
     const facadeResolverRegistry = {
@@ -240,8 +234,11 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
             if (token === EmbedModelService) {
                 return model;
             }
-            if (token === EmbedReferencedUnitManagerService) {
+            if (token === IReferencedUnitManagerService) {
                 return referencedUnitManager;
+            }
+            if (token === EmbedReferencedUnitMaterializeService) {
+                return referencedUnitMaterializeService;
             }
             if (token === EmbedReferencedUnitApiResolverRegistryService) {
                 return facadeResolverRegistry;
@@ -256,7 +253,7 @@ function createFacade(descriptors: IEmbedDescriptor[] = [createDescriptor()], lo
         _univerInstanceService: univerInstanceService,
     }) as FUniverEmbedMixin;
 
-    return { api, commandService, facadeResolverRegistry, injector, model, referencedUnitManager, univerInstanceService };
+    return { api, commandService, facadeResolverRegistry, injector, model, referencedUnitManager, referencedUnitMaterializeService, univerInstanceService };
 }
 
 function createRef() {

@@ -43,6 +43,7 @@ export {
     REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
     SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
 } from './common/const';
+export { EmbedError, EmbedErrorCode } from './common/error';
 export {
     cloneEmbedResource,
     createEmbedResourceEntry,
@@ -51,7 +52,7 @@ export {
     parseEmbedResourceEntry,
     upsertEmbedResourceEntry,
 } from './common/embed-resource';
-export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
+export { assertResourceRef, getResourceRefKey, getResourceRefUnitKey, getResourceRefUnitLocator, normalizeResourceRef } from './common/resource-ref';
 export { getResourceRefInputKey, getResourceRefInputUnitSelector, normalizeResourceRefInput } from './common/resource-ref-input';
 export { normalizeResourceRefLocator } from './common/resource-ref-locator';
 export { formatResourceRef, parseResourceRef } from './common/resource-ref-uri';
@@ -89,13 +90,28 @@ export type {
     IReferencedUnitApiResolveContext,
     IReferencedUnitApiResolverRegistration,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
+export { EmbedReferencedUnitClaimService } from './services/embed-referenced-unit-claim.service';
 export { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
+export { EmbedReferencedUnitMaterializeService } from './services/embed-referenced-unit-materialize.service';
+export type { IEmbedDescriptorMaterializeContext } from './services/embed-referenced-unit-materialize.service';
+export {
+    createLocalRuntimeResourceRefDataProviderRegistration,
+    createLocalRuntimeResourceRefUnitProviderRegistration,
+    EmbedLocalRuntimeResourceRefDataProvider,
+    EmbedLocalRuntimeResourceRefUnitProvider,
+    LOCAL_RUNTIME_RESOURCE_REF_DATA_PROVIDER_ID,
+    LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY,
+    LOCAL_RUNTIME_RESOURCE_REF_UNIT_PROVIDER_ID,
+} from './services/embed-local-runtime-resource-ref-provider';
 export { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 export type {
-    IEmbedResourceRefEnsureInput,
-    IEmbedResourceRefProvider,
+    IEmbedResourceRefDataProvider,
+    IEmbedResourceRefDataProviderRegistration,
+    IEmbedResourceRefEnsureUnitInput,
     IEmbedResourceRefProviderMatch,
-    IEmbedResourceRefProviderRegistration,
+    IEmbedResourceRefReadDataInput,
+    IEmbedResourceRefUnitProvider,
+    IEmbedResourceRefUnitProviderRegistration,
     IReferencedUnitLoadResult,
 } from './services/embed-resource-ref-provider-registry.service';
 export { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './services/embed-source-resolver.service';
@@ -137,13 +153,20 @@ export type {
     IEmbedHostAnchorRecord,
 } from './types/host-anchor';
 export type {
-    IReferencedUnitEnsureInput,
-    IReferencedUnitHandle,
-    IReferencedUnitManagerService,
+    IReferencedUnitDataValue,
+    IReferencedUnitEnsureOptions,
     IReferencedUnitOwner,
+    IReferencedUnitReadDataOptions,
+    IReferencedUnitReadDataResult,
     IReferencedUnitRecord,
+    IReferencedUnitRuntimeRecord,
+    IReferencedUnitUsageCount,
 } from './types/referenced-unit';
 export {
+    IReferencedUnitManagerService,
+    ReferencedUnitDataType,
+    ReferencedUnitError,
+    ReferencedUnitErrorCode,
     ReferencedUnitOwnerKind,
 } from './types/referenced-unit';
 export type {

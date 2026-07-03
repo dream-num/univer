@@ -19,7 +19,8 @@ import type { FUniver } from '@univerjs/core/facade';
 import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitManagerService, ReferencedUnitOwnerKind, RemoveEmbedCommand } from '@univerjs/embed';
+import { EMBED_CHILD_CREATE_OPTIONS, EmbedReferencedUnitApiResolverRegistryService, EmbedReferencedUnitMaterializeService, RemoveEmbedCommand } from '@univerjs/embed';
+import { EmbedError, EmbedErrorCode } from '../common/error';
 
 export interface ILoadEmbedOptions extends ICreateUnitOptions {
     signal?: AbortSignal;
@@ -35,7 +36,7 @@ export interface ILoadEmbedOptions extends ICreateUnitOptions {
  */
 export class FEmbed<TUnitFacade = unknown> extends FBase {
     constructor(
-        private readonly _descriptor: IEmbedDescriptor,
+        private _descriptor: IEmbedDescriptor,
         private readonly _univerAPI: FUniver,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
@@ -182,24 +183,25 @@ export class FEmbed<TUnitFacade = unknown> extends FBase {
      */
     async loadAsync<TLoadFacade = TUnitFacade>(options: ILoadEmbedOptions = {}): Promise<TLoadFacade> {
         const { signal, ...createOptions } = options;
-        const handle = this._injector.get(EmbedReferencedUnitManagerService).ensure({
-            ref: this._descriptor.source.ref,
-            unitType: this._descriptor.childType,
-            owner: {
-                kind: ReferencedUnitOwnerKind.Embed,
-                unitId: this._descriptor.hostUnitId,
-                ownerId: this._descriptor.embedId,
-            },
+        const descriptor = await this._injector.get(EmbedReferencedUnitMaterializeService).materializeDescriptor({
+            descriptor: this._descriptor,
             signal,
             createOptions: {
                 ...EMBED_CHILD_CREATE_OPTIONS,
                 ...createOptions,
             },
         });
-        const record = await handle.loaded;
+        this._descriptor = descriptor;
+        if (!descriptor.childUnitId || descriptor.childType == null) {
+            throw new EmbedError(EmbedErrorCode.MaterializedChildUnitRequired, {
+                hostUnitId: descriptor.hostUnitId,
+                embedId: descriptor.embedId,
+            });
+        }
+
         return this._injector.get(EmbedReferencedUnitApiResolverRegistryService).resolve<TLoadFacade>({
-            unitId: record.unitId,
-            unitType: record.unitType,
+            unitId: descriptor.childUnitId,
+            unitType: descriptor.childType,
             injector: this._injector,
             api: this._univerAPI,
         });

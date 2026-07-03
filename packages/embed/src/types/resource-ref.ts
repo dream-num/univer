@@ -14,53 +14,19 @@
  * limitations under the License.
  */
 
-export type ResourceRefFile =
-    | { kind: 'self' }
-    | { kind: 'relative'; path: string }
-    | { kind: 'uri'; uri: string };
-
-export type ResourceRefUnitType = 'sheet' | 'doc' | 'slide' | 'base';
-
-export type ResourceRefUnitSelector = string;
-
-export interface IResourceRefUnit {
-    selector: ResourceRefUnitSelector;
-    type: ResourceRefUnitType;
-}
-
-export type ResourceRefUnit = IResourceRefUnit;
-
-export type ResourceRefPartKind = 'sheet' | 'range';
-
-export type ResourceRefPart =
-    | { kind: 'sheet'; sheetName: string; sheetId?: string }
-    | { kind: 'range'; ref: string; sheetName: string; range: string; sheetId?: string };
-
-export type ResourceRefExtensionValue = string | readonly string[];
-
-export interface IResourceRef {
-    file: ResourceRefFile;
-    unit: ResourceRefUnit;
-    part?: ResourceRefPart;
-    extensions?: Readonly<Record<string, ResourceRefExtensionValue>>;
-}
-
-export type ResourceRef = IResourceRef;
-
-export interface IParseResourceRefOptions {
-    mode?: 'strict' | 'lenient';
-}
-
-export interface IValidateResourceRefOptions {
-    mode?: 'strict' | 'lenient';
-}
-
-export interface IFormatResourceRefOptions {
-    preserveExtensions?: boolean;
-}
-
-export type ParseResourceRefOptions = IParseResourceRefOptions;
-export type ValidateResourceRefOptions = IValidateResourceRefOptions;
-export type FormatResourceRefOptions = IFormatResourceRefOptions;
-
-export type ResourceRefInput = ResourceRef | string;
+export type {
+    FormatResourceRefOptions,
+    IResourceRef,
+    IResourceRefUnit,
+    ParseResourceRefOptions,
+    ResourceRef,
+    ResourceRefExtensionValue,
+    ResourceRefFile,
+    ResourceRefInput,
+    ResourceRefPart,
+    ResourceRefPartKind,
+    ResourceRefUnit,
+    ResourceRefUnitSelector,
+    ResourceRefUnitType,
+    ValidateResourceRefOptions,
+} from '@univerjs/core';

@@ -92,7 +92,6 @@ export interface IFUniverEmbedMixin {
      * ```ts
      * const hostUnitId = 'host-unit-id';
      * const hostSheetId = 'host-sheet-id';
-     * const anotherUnitId = 'another-unit-id';
      *
      * const embed = univerAPI.createEmbed<UniverFacadeTypes.FDocument>({
      *     embedId: 'doc-in-sheet',
@@ -109,7 +108,7 @@ export interface IFUniverEmbedMixin {
      *     },
      *     content: {
      *         unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC,
-     *         ref: `#unit=${anotherUnitId}&type=doc`,
+     *         ref: '#unit=another-unit-id&type=doc',
      *     },
      * });
      *
@@ -186,19 +185,15 @@ export interface IFUniverEmbedMixin {
      * @returns A promise resolving to the loaded unit facade instance.
      * @example TypeScript
      * ```ts
-     * const anotherUnitId = 'another-unit-id';
-     *
      * const document = await univerAPI.loadUnitAsync<UniverFacadeTypes.FDocument>(
-     *     `#unit=${anotherUnitId}&type=doc`,
+     *     '#unit=another-unit-id&type=doc',
      *     { unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC }
      * );
      * ```
      * @example JavaScript
      * ```js
-     * const anotherUnitId = 'another-unit-id';
-     *
      * const document = await univerAPI.loadUnitAsync(
-     *     `#unit=${anotherUnitId}&type=doc`,
+     *     '#unit=another-unit-id&type=doc',
      *     { unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC }
      * );
      * ```

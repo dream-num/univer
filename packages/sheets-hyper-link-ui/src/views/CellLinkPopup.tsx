@@ -143,6 +143,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                 {editPermission && (
                     <>
                         <div
+                            data-u-comp="cell-link-popup-edit"
                             className={`
                               univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
                               univer-justify-center univer-rounded univer-text-base
@@ -165,6 +166,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             </Tooltip>
                         </div>
                         <div
+                            data-u-comp="cell-link-popup-remove"
                             className={`
                               univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
                               univer-justify-center univer-rounded univer-text-base

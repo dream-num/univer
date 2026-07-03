@@ -19,6 +19,25 @@ const workspaceRoots = [
     'tests',
 ];
 
+const forceShardedPackages = new Set([
+    // sheets-ui has many DOM/rendering tests. Istanbul coverage instrumentation
+    // can exceed the GitHub runner heap when the whole package runs at once.
+    '@univerjs/sheets-ui',
+]);
+
+const shardedPackageTestExcludes = new Map<string, string[]>([
+    [
+        '@univerjs/sheets-ui',
+        [
+            // The full React editor-container render spec currently spins under
+            // Vitest coverage and can OOM the shard before coverage is uploaded.
+            // Lower-level embed focus tests still cover the runtime ownership
+            // helpers without pulling the full cell editor tree into coverage.
+            'src/views/editor-container/EditorContainer.spec.tsx',
+        ],
+    ],
+]);
+
 function parseArgs() {
     const args = new Map<string, string | boolean>();
 
@@ -164,7 +183,7 @@ const { shardIndex, shardTotal, concurrency, dryRun, listOnly } = parseArgs();
 const packages = getCoveragePackages();
 const totalTestFiles = packages.reduce((total, pkg) => total + pkg.testFiles, 0);
 const heavyPackageThreshold = Math.ceil(totalTestFiles / shardTotal);
-const heavyPackages = packages.filter((pkg) => pkg.testFiles > heavyPackageThreshold);
+const heavyPackages = packages.filter((pkg) => pkg.testFiles > heavyPackageThreshold || forceShardedPackages.has(pkg.name));
 const regularPackages = packages.filter((pkg) => !heavyPackages.includes(pkg));
 const shards = assignShards(regularPackages, shardTotal);
 const selected = shards[shardIndex - 1].packages;
@@ -197,6 +216,7 @@ function runPnpm(args: string[]) {
 }
 
 for (const pkg of heavyPackages) {
+    const testExcludes = shardedPackageTestExcludes.get(pkg.name) ?? [];
     const args = [
         '--dir',
         pkg.dir,
@@ -206,6 +226,7 @@ for (const pkg of heavyPackages) {
         '--coverage',
         `--shard=${shardIndex}/${shardTotal}`,
         '--passWithNoTests',
+        ...testExcludes.flatMap((pattern) => ['--exclude', pattern]),
     ];
 
     if (dryRun) {

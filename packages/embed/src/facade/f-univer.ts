@@ -90,18 +90,17 @@ export interface IFUniverEmbedMixin {
      * @returns The created embed facade.
      * @example TypeScript
      * ```ts
-     * const target = univerAPI.getActiveSheet();
-     * if (!target) {
-     *     throw new Error('No active sheet');
-     * }
+     * const hostUnitId = 'host-unit-id';
+     * const hostSheetId = 'host-sheet-id';
+     * const anotherUnitId = 'another-unit-id';
      *
-     * const embed = univerAPI.createEmbed<UniverFacadeTypes.FWorkbook>({
-     *     embedId: 'sales-sheet-embed',
+     * const embed = univerAPI.createEmbed<UniverFacadeTypes.FDocument>({
+     *     embedId: 'doc-in-sheet',
      *     host: {
-     *         unitId: target.workbook.getId(),
+     *         unitId: hostUnitId,
      *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
      *         context: {
-     *             subUnitId: target.worksheet.getSheetId(),
+     *             subUnitId: hostSheetId,
      *             left: 80,
      *             top: 80,
      *             width: 640,
@@ -109,13 +108,12 @@ export interface IFUniverEmbedMixin {
      *         },
      *     },
      *     content: {
-     *         unitType: univerAPI.Enum.UniverInstanceType.UNIVER_SHEET,
-     *         ref: '#unit=remote-sheet&type=sheet',
+     *         unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC,
+     *         ref: `#unit=${anotherUnitId}&type=doc`,
      *     },
      * });
      *
-     * const childWorkbook = await embed.loadAsync();
-     * console.log(childWorkbook.getId());
+     * const childDocument = await embed.loadAsync();
      * ```
      */
     createEmbed<TUnitFacade = never, TChildType extends UniverInstanceType = UniverInstanceType>(
@@ -131,16 +129,12 @@ export interface IFUniverEmbedMixin {
      * @returns `true` when the remove command succeeds.
      * @example TypeScript
      * ```ts
-     * const target = univerAPI.getActiveSheet();
-     * if (!target) {
-     *     throw new Error('No active sheet');
-     * }
+     * const hostUnitId = 'host-unit-id';
      *
      * const removed = univerAPI.removeEmbed({
-     *     hostUnitId: target.workbook.getId(),
-     *     embedId: 'sales-sheet-embed',
+     *     hostUnitId,
+     *     embedId: 'doc-in-sheet',
      * });
-     * console.log(removed);
      * ```
      */
     removeEmbed(params: IRemoveEmbedParams): boolean;
@@ -154,16 +148,12 @@ export interface IFUniverEmbedMixin {
      * @returns The embed facade, or `null` when it does not exist.
      * @example TypeScript
      * ```ts
-     * const target = univerAPI.getActiveSheet();
-     * if (!target) {
-     *     throw new Error('No active sheet');
-     * }
+     * const hostUnitId = 'host-unit-id';
      *
      * const embed = univerAPI.getEmbed({
-     *     hostUnitId: target.workbook.getId(),
-     *     embedId: 'sales-sheet-embed',
+     *     hostUnitId,
+     *     embedId: 'doc-in-sheet',
      * });
-     * console.log(embed?.getDescriptor());
      * ```
      */
     getEmbed(params: IGetEmbedParams): FEmbed<unknown> | null;
@@ -177,15 +167,9 @@ export interface IFUniverEmbedMixin {
      * @returns Active embed facades.
      * @example TypeScript
      * ```ts
-     * const target = univerAPI.getActiveSheet();
-     * if (!target) {
-     *     throw new Error('No active sheet');
-     * }
+     * const hostUnitId = 'host-unit-id';
      *
-     * const embeds = univerAPI.listEmbeds({ hostUnitId: target.workbook.getId() });
-     * for (const embed of embeds) {
-     *     console.log(embed.getId(), embed.getChildType());
-     * }
+     * const embeds = univerAPI.listEmbeds({ hostUnitId });
      * ```
      */
     listEmbeds(params?: IListEmbedsParams): Array<FEmbed<unknown>>;
@@ -197,22 +181,26 @@ export interface IFUniverEmbedMixin {
      * callers can use {@link FEmbed.loadAsync}, which passes an embed owner.
      *
      * @param ref The resource reference to load. String input supports canonical
-     * self unit ResourceRefs like `#unit=<unitId>&type=sheet`.
+     * self unit ResourceRefs like `#unit=<unitId>&type=doc`.
      * @param options Optional request controls.
      * @returns A promise resolving to the loaded unit facade instance.
      * @example TypeScript
      * ```ts
-     * const workbook = await univerAPI.loadUnitAsync<UniverFacadeTypes.FWorkbook>(ref, {
-     *     unitType: univerAPI.Enum.UniverInstanceType.UNIVER_SHEET,
-     * });
-     * console.log(workbook.getId());
+     * const anotherUnitId = 'another-unit-id';
+     *
+     * const document = await univerAPI.loadUnitAsync<UniverFacadeTypes.FDocument>(
+     *     `#unit=${anotherUnitId}&type=doc`,
+     *     { unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC }
+     * );
      * ```
      * @example JavaScript
      * ```js
-     * const workbook = await univerAPI.loadUnitAsync(ref, {
-     *     unitType: univerAPI.Enum.UniverInstanceType.UNIVER_SHEET,
-     * });
-     * console.log(workbook.getId());
+     * const anotherUnitId = 'another-unit-id';
+     *
+     * const document = await univerAPI.loadUnitAsync(
+     *     `#unit=${anotherUnitId}&type=doc`,
+     *     { unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC }
+     * );
      * ```
      */
     loadUnitAsync<

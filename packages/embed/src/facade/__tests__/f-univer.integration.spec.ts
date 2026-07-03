@@ -57,22 +57,37 @@ describe('embed facade runtime integration', () => {
             ref: '#unit=remote-sheet&type=sheet',
         });
 
-        const floatingEmbed = univerAPI.createEmbed({
-            embedId: 'floating-doc-embed',
+        const hostSheetId = 'host-workbook-sheet';
+        const anotherUnitId = 'another-unit-id';
+        const docInSheetEmbed = univerAPI.createEmbed({
+            embedId: 'doc-in-sheet',
             host: {
                 unitId: hostWorkbook.getUnitId(),
-                surface: FEmbedHostSurface.SheetFloating,
-                context: { rect: { x: 10, y: 20, width: 480, height: 320 } },
+                surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
+                context: {
+                    subUnitId: hostSheetId,
+                    left: 80,
+                    top: 80,
+                    width: 640,
+                    height: 360,
+                },
             },
             content: {
-                unitType: UniverInstanceType.UNIVER_DOC,
-                ref: '#unit=remote-doc&type=doc',
+                unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC,
+                ref: `#unit=${anotherUnitId}&type=doc`,
             },
         });
-        expect(floatingEmbed.getHostType()).toBe(UniverInstanceType.UNIVER_SHEET);
-        expect(floatingEmbed.getEntry()).toBe('sheets-floating-object');
-        expect(floatingEmbed.getChildType()).toBe(UniverInstanceType.UNIVER_DOC);
-        expect(floatingEmbed.getChildUnitId()).toBeUndefined();
+        expect(docInSheetEmbed.getHostType()).toBe(UniverInstanceType.UNIVER_SHEET);
+        expect(docInSheetEmbed.getEntry()).toBe('sheets-floating-object');
+        expect(docInSheetEmbed.getChildType()).toBe(UniverInstanceType.UNIVER_DOC);
+        expect(docInSheetEmbed.getChildUnitId()).toBeUndefined();
+        expect(univerAPI.getEmbed({
+            hostUnitId: hostWorkbook.getUnitId(),
+            embedId: 'doc-in-sheet',
+        })?.getDescriptor().source).toEqual({
+            unitType: UniverInstanceType.UNIVER_DOC,
+            ref: '#unit=another-unit-id&type=doc',
+        });
 
         expect(univerAPI.listEmbeds()).toHaveLength(2);
         expect(univerAPI.listEmbeds({ hostUnitId: hostDoc.getUnitId() })).toHaveLength(1);

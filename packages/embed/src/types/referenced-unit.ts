@@ -14,45 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
-import type { ResourceRefInput } from './resource-ref';
-
-export const ReferencedUnitOwnerKind = {
-    Embed: 'embed',
-    Formula: 'formula',
-    Viewer: 'viewer',
-    ViewHost: 'view-host',
-} as const;
-
-export type ReferencedUnitOwnerKind =
-    | typeof ReferencedUnitOwnerKind[keyof typeof ReferencedUnitOwnerKind]
-    | (string & {});
-
-export interface IReferencedUnitOwner {
-    kind: ReferencedUnitOwnerKind;
-    unitId?: string;
-    ownerId?: string;
-}
-
-export interface IReferencedUnitRecord {
-    ref: string;
-    unitId: string;
-    unitType: UniverInstanceType;
-}
-
-export interface IReferencedUnitHandle {
-    readonly loaded: Promise<IReferencedUnitRecord>;
-    dispose(): void;
-}
-
-export interface IReferencedUnitEnsureInput {
-    ref: ResourceRefInput;
-    unitType?: UniverInstanceType;
-    owner?: IReferencedUnitOwner;
-    signal?: AbortSignal;
-    createOptions?: ICreateUnitOptions;
-}
-
-export interface IReferencedUnitManagerService {
-    ensure(input: IReferencedUnitEnsureInput): IReferencedUnitHandle;
-}
+export {
+    IReferencedUnitManagerService,
+    ReferencedUnitError,
+    ReferencedUnitErrorCode,
+    ReferencedUnitDataType,
+    ReferencedUnitOwnerKind,
+} from '@univerjs/core';
+export type {
+    IReferencedUnitDataValue,
+    IReferencedUnitEnsureOptions,
+    IReferencedUnitOwner,
+    IReferencedUnitReadDataOptions,
+    IReferencedUnitReadDataResult,
+    IReferencedUnitRecord,
+    IReferencedUnitRuntimeRecord,
+    IReferencedUnitUsageCount,
+} from '@univerjs/core';

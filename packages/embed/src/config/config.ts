@@ -15,7 +15,7 @@
  */
 
 import type { IReferencedUnitApiResolverRegistration } from '../services/embed-referenced-unit-api-resolver-registry.service';
-import type { IEmbedResourceRefProviderRegistration } from '../services/embed-resource-ref-provider-registry.service';
+import type { IEmbedResourceRefDataProviderRegistration, IEmbedResourceRefUnitProviderRegistration } from '../services/embed-resource-ref-provider-registry.service';
 import type { IEmbedCapability } from '../types/embed';
 import type { IEmbedHostAdapterContribution } from '../types/host-adapter';
 
@@ -27,7 +27,8 @@ export interface IUniverEmbedPluginConfig {
     useDefaultCapabilities?: boolean;
     capabilities?: readonly IEmbedCapability[];
     hostAdapters?: readonly IEmbedHostAdapterContribution[];
-    resourceRefProviderRegistrations?: readonly IEmbedResourceRefProviderRegistration[];
+    resourceRefUnitProviderRegistrations?: readonly IEmbedResourceRefUnitProviderRegistration[];
+    resourceRefDataProviderRegistrations?: readonly IEmbedResourceRefDataProviderRegistration[];
     referencedUnitApiResolvers?: readonly IReferencedUnitApiResolverRegistration[];
 }
 

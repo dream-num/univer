@@ -16,6 +16,7 @@
 
 import type { IEmbedCreateContext, IEmbedCreateResult, IEmbedDescriptor } from '../types/embed';
 import { Inject } from '@univerjs/core';
+import { EmbedError, EmbedErrorCode } from '../common/error';
 import { createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService } from './embed-capability-registry.service';
 import { EmbedModelService } from './embed-model.service';
 import { EmbedNestedGuardService } from './embed-nested-guard.service';
@@ -45,7 +46,11 @@ export class EmbedCreationService {
             entry: context.entry,
         });
         if (!capability) {
-            throw new Error('EMBED_CAPABILITY_NOT_SUPPORTED');
+            throw new EmbedError(EmbedErrorCode.CapabilityNotSupported, {
+                hostType: context.hostType,
+                childType: resolvedSource.childType,
+                entry: context.entry,
+            });
         }
 
         const descriptor: IEmbedDescriptor = {
@@ -86,13 +91,14 @@ export class EmbedCreationService {
     }): IEmbedDescriptor {
         const sourceDescriptor = this._model.getDescriptor(params.hostUnitId, params.sourceEmbedId);
         if (!sourceDescriptor) {
-            throw new Error('EMBED_DESCRIPTOR_NOT_FOUND');
+            throw new EmbedError(EmbedErrorCode.DescriptorNotFound, params);
         }
 
         const descriptor: IEmbedDescriptor = {
             ...sourceDescriptor,
             embedId: params.nextEmbedId,
             hostAnchorId: params.nextHostAnchorId,
+            childUnitId: undefined,
             lifecycle: 'active',
             createdAt: undefined,
             updatedAt: undefined,
@@ -126,7 +132,13 @@ export class EmbedCreationService {
             (item.hostUnitId !== hostUnitId || item.embedId !== descriptor.embedId)
         );
         if (duplicated) {
-            throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+            throw new EmbedError(EmbedErrorCode.ChildUnitAlreadyEmbedded, {
+                hostUnitId,
+                embedId: descriptor.embedId,
+                childUnitId: descriptor.childUnitId,
+                duplicatedHostUnitId: duplicated.hostUnitId,
+                duplicatedEmbedId: duplicated.embedId,
+            });
         }
     }
 }

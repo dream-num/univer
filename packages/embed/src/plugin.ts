@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverEmbedPluginConfig } from './config/config';
-import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, IReferencedUnitManagerService, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import { CopyEmbedCommand, CreateEmbedCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from './commands/mutations/embed-descriptor.mutation';
@@ -32,7 +32,7 @@ import { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 import { EmbedHostAdapterRegistryService, flushPendingEmbedHostAdapterContributions, registerEmbedHostAdapterContributions } from './services/embed-host-adapter-registry.service';
 import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
 import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
-import { createLocalRuntimeResourceRefProvider } from './services/embed-local-runtime-resource-ref-provider';
+import { createLocalRuntimeResourceRefDataProviderRegistration, createLocalRuntimeResourceRefUnitProviderRegistration, EmbedLocalRuntimeResourceRefDataProvider, EmbedLocalRuntimeResourceRefUnitProvider } from './services/embed-local-runtime-resource-ref-provider';
 import { EmbedModelService } from './services/embed-model.service';
 import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 import {
@@ -41,7 +41,9 @@ import {
     flushPendingReferencedUnitApiResolvers,
     registerReferencedUnitApiResolvers,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
+import { EmbedReferencedUnitClaimService } from './services/embed-referenced-unit-claim.service';
 import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
+import { EmbedReferencedUnitMaterializeService } from './services/embed-referenced-unit-materialize.service';
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 import { EmbedSourceResolverService } from './services/embed-source-resolver.service';
 
@@ -75,7 +77,11 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
             [EmbedReferencedUnitApiResolverRegistryService],
-            [EmbedReferencedUnitManagerService],
+            [IReferencedUnitManagerService, { useClass: EmbedReferencedUnitManagerService }],
+            [EmbedReferencedUnitClaimService],
+            [EmbedReferencedUnitMaterializeService],
+            [EmbedLocalRuntimeResourceRefUnitProvider],
+            [EmbedLocalRuntimeResourceRefDataProvider],
             [EmbedSourceResolverService],
             [EmbedNestedGuardService],
             [EmbedCreationService],
@@ -93,8 +99,10 @@ export class UniverEmbedPlugin extends Plugin {
         registerEmbedHostAdapterContributions(this._injector, this._config.hostAdapters ?? []);
 
         const resourceRefProviderRegistry = this._injector.get(EmbedResourceRefProviderRegistryService);
-        this.disposeWithMe(resourceRefProviderRegistry.register(createLocalRuntimeResourceRefProvider(this._injector)));
-        (this._config.resourceRefProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.register(registration)));
+        this.disposeWithMe(resourceRefProviderRegistry.registerUnitProvider(createLocalRuntimeResourceRefUnitProviderRegistration(this._injector.get(EmbedLocalRuntimeResourceRefUnitProvider))));
+        this.disposeWithMe(resourceRefProviderRegistry.registerDataProvider(createLocalRuntimeResourceRefDataProviderRegistration(this._injector.get(EmbedLocalRuntimeResourceRefDataProvider))));
+        (this._config.resourceRefUnitProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.registerUnitProvider(registration)));
+        (this._config.resourceRefDataProviderRegistrations ?? []).forEach((registration) => this.disposeWithMe(resourceRefProviderRegistry.registerDataProvider(registration)));
 
         const referencedUnitApiResolverRegistry = this._injector.get(EmbedReferencedUnitApiResolverRegistryService);
         referencedUnitApiResolverRegistry.registerMany(createDefaultReferencedUnitApiResolvers()).forEach((disposable) => this.disposeWithMe(disposable));
@@ -110,7 +118,11 @@ export class UniverEmbedPlugin extends Plugin {
             [EmbedFocusOwnerService],
             [EmbedResourceRefProviderRegistryService],
             [EmbedReferencedUnitApiResolverRegistryService],
-            [EmbedReferencedUnitManagerService],
+            [IReferencedUnitManagerService],
+            [EmbedReferencedUnitClaimService],
+            [EmbedReferencedUnitMaterializeService],
+            [EmbedLocalRuntimeResourceRefUnitProvider],
+            [EmbedLocalRuntimeResourceRefDataProvider],
             [EmbedSourceResolverService],
             [EmbedCreationService],
             [EmbedResourceController],

@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IReferencedUnitOwner } from '../types/referenced-unit';
-import type { ResourceRefFile, ResourceRefInput, ResourceRefUnitType } from '../types/resource-ref';
-import { toDisposable } from '@univerjs/core';
-import { parseResourceRef } from '../common/resource-ref-uri';
+import type {
+    ICreateUnitOptions,
+    IDisposable,
+    IReferencedUnitReadDataResult,
+    ReferencedUnitDataType,
+    ResourceRef,
+    ResourceRefFile,
+    ResourceRefPart,
+    ResourceRefUnitType,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { ReferencedUnitError, ReferencedUnitErrorCode, toDisposable } from '@univerjs/core';
 
-export interface IEmbedResourceRefEnsureInput {
-    ref: string;
-    refKey: string;
-    owner?: IReferencedUnitOwner;
+export interface IEmbedResourceRefEnsureUnitInput {
+    ref: ResourceRef;
     unitType: UniverInstanceType;
     createOptions: ICreateUnitOptions;
     signal?: AbortSignal;
@@ -34,43 +39,95 @@ export interface IReferencedUnitLoadResult {
     unitType: UniverInstanceType;
 }
 
-export interface IEmbedResourceRefProvider {
-    ensure: (input: IEmbedResourceRefEnsureInput) => IReferencedUnitLoadResult | Promise<IReferencedUnitLoadResult>;
+export interface IEmbedResourceRefUnitProvider {
+    ensureUnit: (input: IEmbedResourceRefEnsureUnitInput) => IReferencedUnitLoadResult | Promise<IReferencedUnitLoadResult>;
+}
+
+export interface IEmbedResourceRefReadDataInput {
+    ref: ResourceRef;
+    unitType: UniverInstanceType;
+    dataType: ReferencedUnitDataType;
+    selector: ResourceRefPart;
+    signal?: AbortSignal;
+}
+
+export interface IEmbedResourceRefDataProvider {
+    readData: (input: IEmbedResourceRefReadDataInput) => IReferencedUnitReadDataResult | Promise<IReferencedUnitReadDataResult>;
 }
 
 export interface IEmbedResourceRefProviderMatch {
-    uriReference?: boolean;
     fileKinds?: readonly ResourceRefFile['kind'][];
     uriSchemes?: readonly string[];
     unitTypes?: readonly ResourceRefUnitType[];
 }
 
-export interface IEmbedResourceRefProviderRegistration {
+export interface IEmbedResourceRefUnitProviderRegistration {
     registrationId: string;
     match: IEmbedResourceRefProviderMatch;
     priority?: number;
-    provider: IEmbedResourceRefProvider;
+    provider: IEmbedResourceRefUnitProvider;
+}
+
+export interface IEmbedResourceRefDataProviderRegistration {
+    registrationId: string;
+    match: IEmbedResourceRefProviderMatch;
+    priority?: number;
+    provider: IEmbedResourceRefDataProvider;
 }
 
 export class EmbedResourceRefProviderRegistryService {
-    private readonly _registrations: IEmbedResourceRefProviderRegistration[] = [];
+    private readonly _unitRegistrations: IEmbedResourceRefUnitProviderRegistration[] = [];
+    private readonly _dataRegistrations: IEmbedResourceRefDataProviderRegistration[] = [];
 
-    register(registration: IEmbedResourceRefProviderRegistration): IDisposable {
-        if (this._registrations.some((item) => item.registrationId === registration.registrationId)) {
-            throw new Error(`Embed IResourceRef provider already registered: ${registration.registrationId}`);
+    registerUnitProvider(registration: IEmbedResourceRefUnitProviderRegistration): IDisposable {
+        return this._register(this._unitRegistrations, registration, 'unit');
+    }
+
+    registerDataProvider(registration: IEmbedResourceRefDataProviderRegistration): IDisposable {
+        return this._register(this._dataRegistrations, registration, 'data');
+    }
+
+    getUnitProvider(ref: ResourceRef, unitType?: ResourceRefUnitType): IEmbedResourceRefUnitProviderRegistration | undefined {
+        return this._get(this._unitRegistrations, ref, unitType, 'unit');
+    }
+
+    getDataProvider(ref: ResourceRef, unitType?: ResourceRefUnitType): IEmbedResourceRefDataProviderRegistration | undefined {
+        return this._get(this._dataRegistrations, ref, unitType, 'data');
+    }
+
+    listUnitProviders(): IEmbedResourceRefUnitProviderRegistration[] {
+        return [...this._unitRegistrations];
+    }
+
+    listDataProviders(): IEmbedResourceRefDataProviderRegistration[] {
+        return [...this._dataRegistrations];
+    }
+
+    private _register<TRegistration extends { registrationId: string }>(
+        registrations: TRegistration[],
+        registration: TRegistration,
+        capability: 'unit' | 'data'
+    ): IDisposable {
+        if (registrations.some((item) => item.registrationId === registration.registrationId)) {
+            throw new Error(`Embed ResourceRef ${capability} provider already registered: ${registration.registrationId}`);
         }
 
-        this._registrations.push(registration);
+        registrations.push(registration);
         return toDisposable(() => {
-            const index = this._registrations.indexOf(registration);
+            const index = registrations.indexOf(registration);
             if (index >= 0) {
-                this._registrations.splice(index, 1);
+                registrations.splice(index, 1);
             }
         });
     }
 
-    get(ref: ResourceRefInput, unitType?: ResourceRefUnitType): IEmbedResourceRefProviderRegistration | undefined {
-        const matches = this._registrations.filter((registration) => this._matches(registration.match, ref, unitType));
+    private _get<TRegistration extends { match: IEmbedResourceRefProviderMatch; priority?: number }>(
+        registrations: TRegistration[],
+        ref: ResourceRef,
+        unitType: ResourceRefUnitType | undefined,
+        capability: 'unit' | 'data'
+    ): TRegistration | undefined {
+        const matches = registrations.filter((registration) => this._matches(registration.match, ref, unitType));
         if (matches.length === 0) {
             return undefined;
         }
@@ -78,25 +135,16 @@ export class EmbedResourceRefProviderRegistryService {
         const maxPriority = Math.max(...matches.map((registration) => registration.priority ?? 0));
         const topMatches = matches.filter((registration) => (registration.priority ?? 0) === maxPriority);
         if (topMatches.length > 1) {
-            throw new Error('REFERENCED_UNIT_PROVIDER_CONFLICT');
+            throw new ReferencedUnitError(ReferencedUnitErrorCode.ProviderConflict, {
+                capability,
+                registrationIds: topMatches.map((registration) => 'registrationId' in registration ? registration.registrationId : undefined),
+            });
         }
 
         return topMatches[0];
     }
 
-    list(): IEmbedResourceRefProviderRegistration[] {
-        return [...this._registrations];
-    }
-
-    private _matches(match: IEmbedResourceRefProviderMatch, ref: ResourceRefInput, unitType?: ResourceRefUnitType): boolean {
-        if (typeof ref === 'string') {
-            if (!match.uriReference) {
-                return false;
-            }
-
-            return this._matches(match, parseResourceRef(ref), unitType);
-        }
-
+    private _matches(match: IEmbedResourceRefProviderMatch, ref: ResourceRef, unitType?: ResourceRefUnitType): boolean {
         if (match.fileKinds && !match.fileKinds.includes(ref.file.kind)) {
             return false;
         }
@@ -112,7 +160,7 @@ export class EmbedResourceRefProviderRegistryService {
             }
         }
 
-        if (match.unitTypes && !match.unitTypes.includes(ref.unit.type)) {
+        if (match.unitTypes && !match.unitTypes.includes(unitType ?? ref.unit.type)) {
             return false;
         }
 

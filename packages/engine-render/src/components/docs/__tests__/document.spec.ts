@@ -23,6 +23,7 @@ import {
     LineType,
     PageLayoutType,
 } from '../../../basics/i-document-skeleton-cached';
+import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
@@ -1504,6 +1505,8 @@ describe('documents render', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         const headerPage = createPage(DocumentSkeletonPageType.HEADER, 'header-main');
         const footerPage = createPage(DocumentSkeletonPageType.FOOTER, 'footer-main');
+        bodyPage.marginLeft = 48;
+        headerPage.marginLeft = 0;
         attachTable(bodyPage);
         attachTable(headerPage);
 
@@ -1582,6 +1585,10 @@ describe('documents render', () => {
         expect(lineDraw).toHaveBeenCalled();
         expect(spanDraw).toHaveBeenCalled();
         expect(tableDraw).toHaveBeenCalledTimes(2);
+        expect(tableDraw.mock.calls[1][1]).toMatchObject({
+            marginLeft: 48,
+            type: DocumentSkeletonPageType.HEADER,
+        });
 
         documents.draw(canvas.getContext(), {
             viewBound: { left: 2000, top: 2000, right: 2200, bottom: 2200 },
@@ -1595,6 +1602,62 @@ describe('documents render', () => {
         documents.draw(canvas.getContext(), {
             viewBound: { left: 0, top: 0, right: 300, bottom: 300 },
         } as any);
+
+        documents.dispose();
+    });
+
+    it('draws footer table backgrounds relative to the footer parent area', () => {
+        const parentPage = createPage(DocumentSkeletonPageType.BODY, '');
+        parentPage.marginLeft = 48;
+        parentPage.marginTop = 12;
+
+        const footerPage = createPage(DocumentSkeletonPageType.FOOTER, 'footer-main');
+        footerPage.sections = [];
+        attachTable(footerPage);
+
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-footer-table-offset', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const rects: Array<{ x: number; y: number; width: number; height: number }> = [];
+        const ctx = {
+            beginPath: vi.fn(),
+            closePath: vi.fn(),
+            fill: vi.fn(),
+            getScale: () => ({ scaleX: 1, scaleY: 1 }),
+            rect: vi.fn((x: number, y: number, width: number, height: number) => {
+                rects.push({ x, y, width, height });
+            }),
+            restore: vi.fn(),
+            save: vi.fn(),
+            set fillStyle(_value: string) {},
+        } as any;
+        vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => undefined);
+
+        (documents as any)._drawHeaderFooter(
+            footerPage,
+            ctx,
+            [],
+            null,
+            [],
+            Vector2.create(0, 300),
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 },
+            parentPage,
+            false
+        );
+
+        expect(rects).toEqual([{
+            x: 60,
+            y: 332,
+            width: 120,
+            height: 60,
+        }]);
 
         documents.dispose();
     });

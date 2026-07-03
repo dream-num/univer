@@ -17,6 +17,9 @@
 import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IFDocumentTextRange } from './utils';
 import {
+    BooleanNumber,
+    DocumentFlavor,
+    generateRandomId,
     ICommandService,
     Inject,
     Injector,
@@ -26,6 +29,7 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
+import { CreateHeaderFooterCommand, HeaderFooterType } from '@univerjs/docs';
 import { FDocumentParagraph } from './f-document-paragraph';
 import { buildPlainTextInsertBody, replaceBodyRange } from './utils';
 
@@ -62,8 +66,9 @@ export class FDocument extends FBaseInitialable {
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
      * console.log(fDocument.getDocumentDataModel());
-     * console.log(fDocument.getDocumentDataModel('header-01')); // Get the header data model
-     * console.log(fDocument.getDocumentDataModel('footer-01')); // Get the footer data model
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * console.log(fDocument.getDocumentDataModel(headerSegmentId));
      * ```
      */
     getDocumentDataModel(segmentId: string = ''): DocumentDataModel {
@@ -84,8 +89,9 @@ export class FDocument extends FBaseInitialable {
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
      * console.log(fDocument.getBody()); // Get the main body
-     * console.log(fDocument.getBody('header-01')); // Get the header body
-     * console.log(fDocument.getBody('footer-01')); // Get the footer body
+     *
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * console.log(fDocument.getBody(footerSegmentId)); // Get the footer body
      * ```
      */
     getBody(segmentId: string = ''): IDocumentBody {
@@ -124,6 +130,19 @@ export class FDocument extends FBaseInitialable {
      */
     getName(): string {
         return this._documentDataModel.getTitle() || '';
+    }
+
+    /**
+     * Whether the document is a modern document or not.
+     * @returns {boolean} `true` if the document is a modern document, or `false` if it is not.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * console.log(fDocument.isModern());
+     * ```
+     */
+    isModern(): boolean {
+        return this._documentDataModel.getSnapshot().documentStyle.documentFlavor === DocumentFlavor.MODERN;
     }
 
     /**
@@ -171,6 +190,36 @@ export class FDocument extends FBaseInitialable {
     }
 
     /**
+     * Ensure the page header segment exists and return its segment id.
+     * @param {number} pageIndex The zero-based page index. Defaults to the first page.
+     * @returns {string} The header segment id.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * fDocument.insertText(0, 'Header text', headerSegmentId);
+     * ```
+     */
+    ensurePageHeader(pageIndex: number = 0): string {
+        return this._ensureHeaderFooter('header', pageIndex);
+    }
+
+    /**
+     * Ensure the page footer segment exists and return its segment id.
+     * @param {number} pageIndex The zero-based page index. Defaults to the first page.
+     * @returns {string} The footer segment id.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * fDocument.insertText(0, 'Footer text', footerSegmentId);
+     * ```
+     */
+    ensurePageFooter(pageIndex: number = 0): string {
+        return this._ensureHeaderFooter('footer', pageIndex);
+    }
+
+    /**
      * Insert plain text at a document body offset.
      * @param {number} index The zero-based insertion offset.
      * @param {string} text The plain text to insert.
@@ -180,6 +229,9 @@ export class FDocument extends FBaseInitialable {
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
      * fDocument.insertText(0, 'Hello ');
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * fDocument.insertText(0, 'Header text', headerSegmentId);
      * ```
      */
     insertText(index: number, text: string, segmentId: string = ''): boolean {
@@ -204,6 +256,10 @@ export class FDocument extends FBaseInitialable {
      * const fDocument = univerAPI.getActiveDocument();
      * const paragraphs = fDocument.getParagraphs();
      * console.log(paragraphs);
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const headerParagraphs = fDocument.getParagraphs(headerSegmentId);
+     * console.log(headerParagraphs);
      * ```
      */
     getParagraphs(segmentId: string = ''): FDocumentParagraph[] {
@@ -221,6 +277,10 @@ export class FDocument extends FBaseInitialable {
      * const fDocument = univerAPI.getActiveDocument();
      * const paragraph = fDocument.getParagraph('paragraph-01');
      * console.log(paragraph);
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const headerParagraph = fDocument.getParagraph('header-paragraph-01', headerSegmentId);
+     * console.log(headerParagraph);
      * ```
      */
     getParagraph(paragraphId: string, segmentId: string = ''): FDocumentParagraph | null {
@@ -242,6 +302,10 @@ export class FDocument extends FBaseInitialable {
      * const fDocument = univerAPI.getActiveDocument();
      * const paragraph = fDocument.findParagraphByText('Hello');
      * console.log(paragraph);
+     *
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * const footerParagraph = fDocument.findParagraphByText('Page', footerSegmentId);
+     * console.log(footerParagraph);
      * ```
      */
     findParagraphByText(text: string, segmentId: string = ''): FDocumentParagraph | null {
@@ -256,9 +320,14 @@ export class FDocument extends FBaseInitialable {
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
      * const paragraphsWithText = fDocument.findParagraphs('Hello');
+     * console.log(paragraphsWithText);
+     *
      * const paragraphsWithId = fDocument.findParagraphs({ paragraphId: 'paragraph-01' });
-     * const paragraphsWithSegment = fDocument.findParagraphs({ segmentId: 'header-01' });
-     * console.log(paragraphsWithText, paragraphsWithId, paragraphsWithSegment);
+     * console.log(paragraphsWithId);
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const paragraphsWithSegment = fDocument.findParagraphs({ segmentId: headerSegmentId });
+     * console.log(paragraphsWithSegment);
      * ```
      */
     findParagraphs(query: string | IFDocumentParagraphQuery): FDocumentParagraph[] {
@@ -289,6 +358,10 @@ export class FDocument extends FBaseInitialable {
      * const fDocument = univerAPI.getActiveDocument();
      * const paragraph = fDocument.insertParagraph(0, 'Document title');
      * paragraph.appendText(' suffix');
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const headerParagraph = fDocument.insertParagraph(0, 'Header title', headerSegmentId);
+     * headerParagraph.appendText(' suffix');
      * ```
      */
     insertParagraph(index: number, text: string = '', segmentId: string = ''): FDocumentParagraph {
@@ -326,6 +399,10 @@ export class FDocument extends FBaseInitialable {
      * const fDocument = univerAPI.getActiveDocument();
      * const paragraph = fDocument.appendParagraph('Summary');
      * console.log(paragraph.getText());
+     *
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * const footerParagraph = fDocument.appendParagraph('Confidential', footerSegmentId);
+     * console.log(footerParagraph.getText());
      * ```
      */
     appendParagraph(text: string = '', segmentId: string = ''): FDocumentParagraph {
@@ -341,6 +418,9 @@ export class FDocument extends FBaseInitialable {
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
      * fDocument.deleteRange({ startOffset: 0, endOffset: 5 });
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * fDocument.deleteRange({ startOffset: 0, endOffset: 5, segmentId: headerSegmentId });
      * ```
      */
     deleteRange(range: IFDocumentTextRange): boolean {
@@ -399,5 +479,72 @@ export class FDocument extends FBaseInitialable {
         }
 
         return paragraphs[index - 1].startIndex + 1;
+    }
+
+    private _ensureHeaderFooter(kind: 'header' | 'footer', pageIndex: number): string {
+        if (this.isModern()) {
+            throw new Error('The document is a modern document, header/footer is not supported.');
+        }
+
+        const { createType, segmentId: existingSegmentId } = this._getHeaderFooterCreateInfo(kind, pageIndex);
+        if (existingSegmentId) {
+            return existingSegmentId;
+        }
+
+        const segmentId = generateRandomId(6);
+        const result = this._commandService.syncExecuteCommand(CreateHeaderFooterCommand.id, {
+            unitId: this.getId(),
+            segmentId,
+            createType,
+        });
+
+        if (!result) {
+            throw new Error(`Failed to create page ${kind}.`);
+        }
+
+        return segmentId;
+    }
+
+    private _getHeaderFooterCreateInfo(kind: 'header' | 'footer', pageIndex: number): {
+        createType: HeaderFooterType;
+        segmentId: string;
+    } {
+        const { documentStyle } = this._documentDataModel.getSnapshot();
+        const isFirstPage = pageIndex === 0;
+        const isEvenPage = (pageIndex + 1) % 2 === 0;
+
+        if (isFirstPage && documentStyle.useFirstPageHeaderFooter === BooleanNumber.TRUE) {
+            return kind === 'header'
+                ? {
+                    createType: HeaderFooterType.FIRST_PAGE_HEADER,
+                    segmentId: documentStyle.firstPageHeaderId ?? '',
+                }
+                : {
+                    createType: HeaderFooterType.FIRST_PAGE_FOOTER,
+                    segmentId: documentStyle.firstPageFooterId ?? '',
+                };
+        }
+
+        if (isEvenPage && documentStyle.evenAndOddHeaders === BooleanNumber.TRUE) {
+            return kind === 'header'
+                ? {
+                    createType: HeaderFooterType.EVEN_PAGE_HEADER,
+                    segmentId: documentStyle.evenPageHeaderId ?? '',
+                }
+                : {
+                    createType: HeaderFooterType.EVEN_PAGE_FOOTER,
+                    segmentId: documentStyle.evenPageFooterId ?? '',
+                };
+        }
+
+        return kind === 'header'
+            ? {
+                createType: HeaderFooterType.DEFAULT_HEADER,
+                segmentId: documentStyle.defaultHeaderId ?? '',
+            }
+            : {
+                createType: HeaderFooterType.DEFAULT_FOOTER,
+                segmentId: documentStyle.defaultFooterId ?? '',
+            };
     }
 }

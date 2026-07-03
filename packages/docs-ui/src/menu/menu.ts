@@ -123,6 +123,56 @@ function getInsertTableHiddenObservable(
     });
 }
 
+export function disableMenuWhenHeaderFooterEditing(accessor: IAccessor): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const renderManagerService = accessor.get(IRenderManagerService);
+
+    return new Observable((subscriber) => {
+        let editAreaSubscription: { unsubscribe: () => void } | null = null;
+        let lastDisabled: boolean | undefined;
+
+        const emit = (disabled: boolean) => {
+            if (disabled !== lastDisabled) {
+                lastDisabled = disabled;
+                subscriber.next(disabled);
+            }
+        };
+
+        const emitByUnit = (unitId?: string | null | void) => {
+            editAreaSubscription?.unsubscribe();
+            editAreaSubscription = null;
+
+            if (!unitId || univerInstanceService.getUnitType(unitId) !== UniverInstanceType.UNIVER_DOC) {
+                emit(true);
+                return;
+            }
+
+            const currentRender = renderManagerService.getRenderById(unitId);
+            const skeletonManager = currentRender?.with(DocSkeletonManagerService);
+            const viewModel = skeletonManager?.getViewModel();
+            if (!viewModel) {
+                emit(true);
+                return;
+            }
+
+            const emitDisabled = (editArea?: Nullable<DocumentEditArea>) => {
+                const currentEditArea = editArea ?? viewModel.getEditArea();
+                emit(currentEditArea === DocumentEditArea.HEADER || currentEditArea === DocumentEditArea.FOOTER);
+            };
+
+            emitDisabled();
+            editAreaSubscription = viewModel.editAreaChange$.subscribe(emitDisabled);
+        };
+
+        const focusedSubscription = univerInstanceService.focused$.subscribe(emitByUnit);
+
+        return () => {
+            editAreaSubscription?.unsubscribe();
+            focusedSubscription.unsubscribe();
+        };
+    });
+}
+
 function getHeaderFooterMenuHiddenObservable(
     accessor: IAccessor
 ): Observable<boolean> {

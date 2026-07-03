@@ -301,7 +301,7 @@ export class DocumentViewModel implements IDisposable {
     private readonly _segmentViewModels$ = new BehaviorSubject<DocumentViewModel[]>([]);
     readonly segmentViewModels$ = this._segmentViewModels$.asObservable();
 
-    constructor(private _documentDataModel: DocumentDataModel) {
+    constructor(private _documentDataModel: DocumentDataModel, private _tableSource?: Record<string, ITable>) {
         if (_documentDataModel.getBody() == null) {
             return;
         }
@@ -538,7 +538,7 @@ export class DocumentViewModel implements IDisposable {
         this._tableCache.clear();
 
         const tables = this.getBody()?.tables;
-        const tableConfig = this.getSnapshot().tableSource;
+        const tableConfig = this._tableSource ?? this.getSnapshot().tableSource;
         if (tables == null || tableConfig == null) {
             return;
         }
@@ -601,13 +601,14 @@ export class DocumentViewModel implements IDisposable {
     private _buildHeaderFooterViewModel() {
         const { headerModelMap, footerModelMap } = this._documentDataModel;
         const viewModels = [];
+        const tableSource = this.getSnapshot().tableSource;
         for (const [headerId, headerModel] of headerModelMap) {
-            this._headerTreeMap.set(headerId, new DocumentViewModel(headerModel));
+            this._headerTreeMap.set(headerId, new DocumentViewModel(headerModel, tableSource));
             viewModels.push(this._headerTreeMap.get(headerId)!);
         }
 
         for (const [footerId, footerModel] of footerModelMap) {
-            this._footerTreeMap.set(footerId, new DocumentViewModel(footerModel));
+            this._footerTreeMap.set(footerId, new DocumentViewModel(footerModel, tableSource));
             viewModels.push(this._footerTreeMap.get(footerId)!);
         }
 

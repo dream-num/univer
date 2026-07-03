@@ -540,16 +540,21 @@ export class NodePositionConvertToCursor {
 
         const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
 
-        const skipPageIndex = (pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL) ? pageIndex : segmentPage;
+        const startRootPageIndex = pageType === DocumentSkeletonPageType.CELL && pages[pageIndex] == null ? segmentPage : pageIndex;
+        const endRootPageIndex = pageType === DocumentSkeletonPageType.CELL && pages[endPageIndex] == null ? endSegmentPage : endPageIndex;
+        const skipPageIndex = (pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL) ? startRootPageIndex : segmentPage;
         for (let p = 0; p < skipPageIndex; p++) {
             const page = pages[p];
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        const endIndex = (pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL) ? endPageIndex : endSegmentPage;
+        const endIndex = (pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL) ? endRootPageIndex : endSegmentPage;
 
         for (let p = skipPageIndex; p <= endIndex; p++) {
             const page = pages[p];
+            if (page == null) {
+                continue;
+            }
             const { headerId, footerId, pageWidth } = page;
             let segmentPage: Nullable<IDocumentSkeletonPage> = page;
 
@@ -558,7 +563,9 @@ export class NodePositionConvertToCursor {
             } else if (pageType === DocumentSkeletonPageType.FOOTER) {
                 segmentPage = skeFooters.get(footerId)?.get(pageWidth);
             } else if (pageType === DocumentSkeletonPageType.CELL) {
-                segmentPage = getPageFromPath(skeletonData, path);
+                segmentPage = path[0] === 'pages'
+                    ? getPageFromPath(skeletonData, path)
+                    : getCellPageFromSegmentPath(skeletonData, page, path);
             }
 
             if (segmentPage == null) {
@@ -600,7 +607,6 @@ export class NodePositionConvertToCursor {
                         break;
                     }
 
-                    this._liquid.translatePagePadding(page);
                     const rowSke = segmentPage.parent as IDocumentSkeletonRow;
                     const tableSke = rowSke.parent!;
                     const tablePage = tableSke.parent as IDocumentSkeletonPage | undefined;
@@ -612,6 +618,18 @@ export class NodePositionConvertToCursor {
                     const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
                     const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
                     const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+
+                    if (tablePage?.type === DocumentSkeletonPageType.HEADER) {
+                        this._liquid.translatePagePadding({
+                            ...tablePage,
+                            marginLeft: page.marginLeft,
+                        });
+                    } else if (tablePage?.type === DocumentSkeletonPageType.FOOTER) {
+                        const footerTop = page.pageHeight - tablePage.height - tablePage.marginBottom;
+                        this._liquid.translate(page.marginLeft, footerTop);
+                    } else {
+                        this._liquid.translatePagePadding(page);
+                    }
 
                     if (tablePageNestedOffset) {
                         this._liquid.translate(tablePageNestedOffset.left, tablePageNestedOffset.top);
@@ -745,6 +763,42 @@ function clipPositionToHorizontalRange(position: IPosition, clip: Nullable<{ lef
         startX,
         endX,
     };
+}
+
+function getCellPageFromSegmentPath(
+    skeletonData: Parameters<typeof getPageFromPath>[0],
+    rootPage: IDocumentSkeletonPage,
+    path: (string | number)[]
+): Nullable<IDocumentSkeletonPage> {
+    if (path[0] === 'pages') {
+        return null;
+    }
+
+    const segmentPages: IDocumentSkeletonPage[] = [];
+    const { headerId, footerId, pageWidth } = rootPage;
+    const headerPage = headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth);
+    const footerPage = footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth);
+
+    if (headerPage != null) {
+        segmentPages.push(headerPage);
+    }
+
+    if (footerPage != null) {
+        segmentPages.push(footerPage);
+    }
+
+    for (const segmentPage of segmentPages) {
+        const page = getPageFromPath({
+            ...skeletonData,
+            pages: [segmentPage],
+        }, ['pages', 0, ...path]);
+
+        if (page != null) {
+            return page;
+        }
+    }
+
+    return null;
 }
 
 function getDocumentUnitId(docSkeleton: DocumentSkeleton): string {

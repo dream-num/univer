@@ -147,4 +147,24 @@ describe('FDocument', () => {
         expect(document.save().body?.paragraphs?.map((item) => item.startIndex)).toEqual([21, 22]);
         expect(document.getParagraphs()[0].getText()).toBe('Document title suffix');
     });
+
+    it('ensures header and footer segments independently', () => {
+        const headerId = document.ensurePageHeader();
+        let snapshot = document.save();
+
+        expect(headerId).toEqual(expect.any(String));
+        expect(snapshot.documentStyle?.defaultHeaderId).toBe(headerId);
+        expect(snapshot.headers?.[headerId].body?.dataStream).toBe('\r\n');
+        expect(snapshot.documentStyle?.defaultFooterId).toBeFalsy();
+        expect(Object.keys(snapshot.footers ?? {})).toEqual([]);
+
+        const footerId = document.ensurePageFooter();
+        snapshot = document.save();
+
+        expect(footerId).toEqual(expect.any(String));
+        expect(footerId).not.toBe(headerId);
+        expect(snapshot.documentStyle?.defaultHeaderId).toBe(headerId);
+        expect(snapshot.documentStyle?.defaultFooterId).toBe(footerId);
+        expect(snapshot.footers?.[footerId].body?.dataStream).toBe('\r\n');
+    });
 });

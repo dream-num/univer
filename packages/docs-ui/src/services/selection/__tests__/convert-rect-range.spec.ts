@@ -174,6 +174,103 @@ describe('selection rect range helpers', () => {
         ]);
     });
 
+    it('projects rect ranges for header table cells from segment-relative paths', () => {
+        const firstCell = {
+            left: 0,
+            pageWidth: 50,
+            segmentId: 'header-table',
+            sections: [{ columns: [{ lines: [{}] }] }],
+        };
+        const secondCell = {
+            left: 50,
+            pageWidth: 50,
+            segmentId: 'header-table',
+            sections: [{ columns: [{ lines: [{}] }] }],
+        };
+        const row = {
+            cells: [firstCell, secondCell],
+            height: 20,
+            index: 0,
+            top: 0,
+        };
+        const table = {
+            left: 7,
+            rows: [row],
+            tableId: 'header-table',
+            top: 4,
+        };
+        const headerPage = {
+            marginLeft: 0,
+            marginTop: 12,
+            pageHeight: 100,
+            pageWidth: 420,
+            skeTables: new Map([['header-table', table]]),
+            type: DocumentSkeletonPageType.HEADER,
+        };
+        const page = {
+            headerId: 'header-1',
+            marginLeft: 50,
+            marginTop: 100,
+            pageHeight: 500,
+            pageWidth: 600,
+            skeTables: new Map(),
+        };
+
+        (firstCell as { parent?: unknown }).parent = row;
+        (secondCell as { parent?: unknown }).parent = row;
+        (row as { parent?: unknown }).parent = table;
+        (table as { parent?: unknown }).parent = headerPage;
+
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map([['header-1', new Map([[600, headerPage]])]]),
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'unit-1',
+                }),
+                getSnapshot: () => ({
+                    tableSource: {
+                        'header-table': {
+                            tableRows: [{
+                                tableCells: [{}, {}],
+                            }],
+                        },
+                    },
+                }),
+            }),
+        };
+        const anchor = {
+            ...createNodePosition(['skeTables', 'header-table', 'rows', 0, 'cells', 0]),
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            segmentPage: 0,
+        } as never;
+        const focus = {
+            ...createNodePosition(['skeTables', 'header-table', 'rows', 0, 'cells', 1]),
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            segmentPage: 0,
+        } as never;
+        const convertor = new NodePositionConvertToRectRange({
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(anchor, focus);
+
+        expect(result?.pointGroup[0]).toEqual([
+            { x: 57, y: 16 },
+            { x: 157, y: 16 },
+            { x: 157, y: 36 },
+            { x: 57, y: 36 },
+            { x: 57, y: 16 },
+        ]);
+    });
+
     it('detects same table-cell data across pages and compares table order', () => {
         const anchor = createNodePosition(['pages', 0, 'skeTables', 'table#-#0', 'rows', 1, 'cells', 2]);
         const focus = createNodePosition(['pages', 1, 'skeTables', 'table#-#1', 'rows', 1, 'cells', 2]);

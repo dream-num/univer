@@ -357,5 +357,29 @@ describe('DocumentViewModel', () => {
             expect(() => vm.getCustomBlockWithoutSetCurrentIndex(0)).toThrow();
             vm.dispose();
         });
+
+        it('uses root table source when building header and footer table caches', () => {
+            const tableDataStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}H${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`;
+            const headerModel = createDocumentDataModel({
+                body: {
+                    dataStream: `${tableDataStream}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                    tables: [{ tableId: 'header-table', startIndex: 0, endIndex: tableDataStream.length }],
+                },
+            });
+            const tableSource = { tableId: 'header-table' };
+            const model = createDocumentDataModel({
+                snapshot: {
+                    tableSource: {
+                        'header-table': tableSource,
+                    },
+                },
+                headerModelMap: new Map([['h1', headerModel]]),
+            });
+
+            const viewModel = new DocumentViewModel(model);
+            const headerViewModel = viewModel.getSelfOrHeaderFooterViewModel('h1');
+
+            expect(headerViewModel.getTableByStartIndex(0)?.tableSource).toBe(tableSource);
+        });
     });
 });

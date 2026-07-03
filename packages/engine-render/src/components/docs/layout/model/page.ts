@@ -136,8 +136,8 @@ export function createSkeletonPage(
 
     page.originMarginTop = marginTop;
     page.originMarginBottom = marginBottom;
-    page.marginTop = _getVerticalMargin(marginTop, header, pageHeight);
-    page.marginBottom = _getVerticalMargin(marginBottom, footer, pageHeight);
+    page.marginTop = _getVerticalMargin(marginTop, header);
+    page.marginBottom = _getVerticalMargin(marginBottom, footer);
 
     const sections = page.sections;
     const lastSection = sections[sections.length - 1];
@@ -453,8 +453,13 @@ export function applyTrailingBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[]
 
 function _getVerticalMargin(
     marginTB: number,
-    _headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>,
-    _pageHeight: number
+    headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>
 ) {
-    return marginTB;
+    if (headerOrFooter == null) {
+        return marginTB;
+    }
+
+    const { marginTop = 0, height = 0, marginBottom = 0 } = headerOrFooter;
+
+    return Math.max(marginTB, marginTop + height + marginBottom);
 }

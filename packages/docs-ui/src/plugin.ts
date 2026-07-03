@@ -132,7 +132,7 @@ import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
-import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut, SoftBreakLineShortcut } from './shortcuts/core-editing.shortcut';
+import { BreakLineShortcut, CloseHeaderFooterShortcut, DeleteLeftShortcut, DeleteRightShortcut, SoftBreakLineShortcut } from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDocumentEndShortcut,
     MoveCursorDocumentStartShortcut,
@@ -345,6 +345,7 @@ export class UniverDocsUIPlugin extends Plugin {
             SelectAllShortcut,
             DeleteLeftShortcut,
             DeleteRightShortcut,
+            CloseHeaderFooterShortcut,
             BreakLineShortcut,
             SoftBreakLineShortcut,
             ShiftTabShortCut,

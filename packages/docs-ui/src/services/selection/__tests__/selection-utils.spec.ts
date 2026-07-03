@@ -631,6 +631,82 @@ describe('selection utils', () => {
         ]);
     });
 
+    it('keeps header table rect selection points relative to the document offset', () => {
+        const rows = Array.from({ length: 3 }, (_, rowIndex) => {
+            const cells = Array.from({ length: 3 }, (_cell, columnIndex) => createCellPage(columnIndex * 100, 100, 'header-table-1'));
+            const row: IMockRow = { index: rowIndex, top: rowIndex * 34, height: 34, cells };
+            cells.forEach((cell) => {
+                (cell as { parent?: unknown }).parent = row;
+            });
+
+            return row;
+        });
+        const table = { tableId: 'header-table-1', top: 0, left: 0, width: 300, height: 102, rows } as never;
+        rows.forEach((row) => {
+            (row as { parent?: unknown }).parent = table;
+        });
+
+        const rootPage = {
+            headerId: 'header-1',
+            marginLeft: 36,
+            marginTop: 120,
+            pageHeight: 960,
+            pageWidth: 720,
+            skeTables: new Map(),
+        };
+        const headerPage = {
+            marginTop: 60,
+            pageWidth: 720,
+            sections: [],
+            skeTables: new Map([['header-table-1', table]]),
+        };
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [rootPage],
+                skeFooters: new Map(),
+                skeHeaders: new Map([['header-1', new Map([[720, headerPage]])]]),
+            }),
+            getViewModel: () => ({
+                getSnapshot: () => ({
+                    tableSource: {
+                        'header-table-1': {
+                            tableRows: rows.map(() => ({
+                                tableCells: [{}, {}, {}],
+                            })),
+                        },
+                    },
+                }),
+            }),
+        };
+        const anchor = {
+            ...createNodePosition(['skeTables', 'header-table-1', 'rows', 0, 'cells', 0]),
+            pageType: 3,
+            segmentPage: 0,
+        };
+        const focus = {
+            ...createNodePosition(['skeTables', 'header-table-1', 'rows', 2, 'cells', 0]),
+            pageType: 3,
+            segmentPage: 0,
+        };
+        const convertor = new NodePositionConvertToRectRange({
+            docsLeft: 360,
+            docsTop: 20,
+            pageLayoutType: 0,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(anchor, focus);
+
+        expect(result?.pointGroup[0]).toEqual([
+            { x: 36, y: 60 },
+            { x: 136, y: 60 },
+            { x: 136, y: 94 },
+            { x: 36, y: 94 },
+            { x: 36, y: 60 },
+        ]);
+    });
+
     it('clips table rect selection to the horizontal render viewport', () => {
         const { anchor, focus, skeleton } = createRowSpanMergePointHarness();
         setDocsTableRenderViewportProvider((unitId, tableId) => {

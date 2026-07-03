@@ -39,7 +39,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSkeletonManagerService, HeaderFooterType, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
@@ -49,15 +49,6 @@ import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
 const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
-
-export enum HeaderFooterType {
-    FIRST_PAGE_HEADER,
-    FIRST_PAGE_FOOTER,
-    DEFAULT_HEADER,
-    DEFAULT_FOOTER,
-    EVEN_PAGE_HEADER,
-    EVEN_PAGE_FOOTER,
-}
 
 interface IHeaderFooterCreate {
     createType: Nullable<HeaderFooterType>;

@@ -16,10 +16,11 @@
 
 import type { IDropdownMenuProps } from '@univerjs/design';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import { LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx, DropdownMenu, Input } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
 import { IconManager } from '../../common';
-import { useDependency } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
 
 export interface ISliderProps {
     /** The value of slider. When range is false, use number, otherwise, use [number, number] */
@@ -64,8 +65,11 @@ const DRAG_COMMIT_INTERVAL = 50;
  */
 export function Slider(props: ISliderProps) {
     const iconManager = useDependency(IconManager);
+    const localeService = useDependency(LocaleService);
 
     const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
+    const isRtl = direction === 'rtl';
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
     const isEditingZoomRef = useRef(false);
@@ -132,6 +136,10 @@ export function Slider(props: ISliderProps) {
             offsetX = 0;
         } else if (offsetX >= railWidth) {
             offsetX = railWidth;
+        }
+
+        if (isRtl) {
+            offsetX = railWidth - offsetX;
         }
 
         const ratio = offsetX / railWidth;
@@ -303,6 +311,7 @@ export function Slider(props: ISliderProps) {
     }];
     const visualValue = isDragging ? dragValue : value;
     const sliderOffset = Math.min(Math.max(getSliderOffset(visualValue) ?? 0, 0), 100);
+    const handleOffset = isRtl ? 100 - sliderOffset : sliderOffset;
 
     const ReduceIcon = iconManager.get('ReduceIcon');
     const IncreaseIcon = iconManager.get('IncreaseIcon');
@@ -352,10 +361,9 @@ export function Slider(props: ISliderProps) {
                         onPointerDown={handlePointerDown}
                     >
                         <div
-                            className={`
-                              univer-bg-primary-500/60 univer-absolute univer-left-0 univer-top-0 univer-h-full
-                              univer-rounded-full
-                            `}
+                            className={clsx(`
+                              univer-bg-primary-500/60 univer-absolute univer-top-0 univer-h-full univer-rounded-full
+                            `, isRtl ? 'univer-right-0' : 'univer-left-0')}
                             style={{
                                 width: `${sliderOffset}%`,
                             }}
@@ -391,7 +399,7 @@ export function Slider(props: ISliderProps) {
                             aria-valuenow={visualValue}
                             type="button"
                             style={{
-                                left: `${sliderOffset}%`,
+                                left: `${handleOffset}%`,
                             }}
                             onPointerDown={handlePointerDown}
                         />

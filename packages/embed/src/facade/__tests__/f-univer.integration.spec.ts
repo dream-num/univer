@@ -58,7 +58,6 @@ describe('embed facade runtime integration', () => {
         });
 
         const hostSheetId = 'host-workbook-sheet';
-        const anotherUnitId = 'another-unit-id';
         const docInSheetEmbed = univerAPI.createEmbed({
             embedId: 'doc-in-sheet',
             host: {
@@ -74,7 +73,7 @@ describe('embed facade runtime integration', () => {
             },
             content: {
                 unitType: univerAPI.Enum.UniverInstanceType.UNIVER_DOC,
-                ref: `#unit=${anotherUnitId}&type=doc`,
+                ref: '#unit=another-unit-id&type=doc',
             },
         });
         expect(docInSheetEmbed.getHostType()).toBe(UniverInstanceType.UNIVER_SHEET);

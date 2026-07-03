@@ -57,14 +57,13 @@ describe('embed facade runtime integration', () => {
             ref: '#unit=remote-sheet&type=sheet',
         });
 
-        const hostSheetId = 'host-workbook-sheet';
         const docInSheetEmbed = univerAPI.createEmbed({
             embedId: 'doc-in-sheet',
             host: {
                 unitId: hostWorkbook.getUnitId(),
                 surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
                 context: {
-                    subUnitId: hostSheetId,
+                    subUnitId: 'host-workbook-sheet',
                     left: 80,
                     top: 80,
                     width: 640,

@@ -90,16 +90,13 @@ export interface IFUniverEmbedMixin {
      * @returns The created embed facade.
      * @example TypeScript
      * ```ts
-     * const hostUnitId = 'host-unit-id';
-     * const hostSheetId = 'host-sheet-id';
-     *
      * const embed = univerAPI.createEmbed<UniverFacadeTypes.FDocument>({
      *     embedId: 'doc-in-sheet',
      *     host: {
-     *         unitId: hostUnitId,
+     *         unitId: 'host-unit-id',
      *         surface: univerAPI.Enum.FEmbedHostSurface.SheetFloating,
      *         context: {
-     *             subUnitId: hostSheetId,
+     *             subUnitId: 'host-sheet-id',
      *             left: 80,
      *             top: 80,
      *             width: 640,
@@ -128,10 +125,8 @@ export interface IFUniverEmbedMixin {
      * @returns `true` when the remove command succeeds.
      * @example TypeScript
      * ```ts
-     * const hostUnitId = 'host-unit-id';
-     *
      * const removed = univerAPI.removeEmbed({
-     *     hostUnitId,
+     *     hostUnitId: 'host-unit-id',
      *     embedId: 'doc-in-sheet',
      * });
      * ```
@@ -147,10 +142,8 @@ export interface IFUniverEmbedMixin {
      * @returns The embed facade, or `null` when it does not exist.
      * @example TypeScript
      * ```ts
-     * const hostUnitId = 'host-unit-id';
-     *
      * const embed = univerAPI.getEmbed({
-     *     hostUnitId,
+     *     hostUnitId: 'host-unit-id',
      *     embedId: 'doc-in-sheet',
      * });
      * ```
@@ -166,9 +159,7 @@ export interface IFUniverEmbedMixin {
      * @returns Active embed facades.
      * @example TypeScript
      * ```ts
-     * const hostUnitId = 'host-unit-id';
-     *
-     * const embeds = univerAPI.listEmbeds({ hostUnitId });
+     * const embeds = univerAPI.listEmbeds({ hostUnitId: 'host-unit-id' });
      * ```
      */
     listEmbeds(params?: IListEmbedsParams): Array<FEmbed<unknown>>;

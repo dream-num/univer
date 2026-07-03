@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DocContentInsertService } from '../services/doc-content-insert.service';
 
 export function consumeContentInsertRange(accessor: IAccessor, unitId: string) {
@@ -23,4 +24,8 @@ export function consumeContentInsertRange(accessor: IAccessor, unitId: string) {
     } catch {
         return null;
     }
+}
+
+export function isHeaderFooterSelection(range?: ITextRangeWithStyle): boolean {
+    return Boolean(range?.segmentId);
 }

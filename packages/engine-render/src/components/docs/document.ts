@@ -1223,9 +1223,16 @@ export class Documents extends DocComponent {
         const { y: originY } = this._drawLiquid;
 
         if (skeTables.size > 0) {
+            const tablePage = {
+                ...page,
+                marginLeft: parentPage.marginLeft,
+                marginRight: parentPage.marginRight,
+                marginTop: isHeader ? page.marginTop : page.marginTop + alignOffsetNoAngle.y,
+            };
+
             this._drawTable(
                 ctx,
-                page,
+                tablePage,
                 skeTables,
                 extensions,
                 backgroundExtension,

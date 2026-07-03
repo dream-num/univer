@@ -19,6 +19,7 @@ import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { EnterCommand } from '../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
 import { DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/doc-delete.command';
+import { CloseHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { whenDocAndEditorFocused, whenDocAndEditorFocusedWithBreakLine } from './utils';
 
 export const BreakLineShortcut: IShortcutItem = {
@@ -43,6 +44,12 @@ export const DeleteRightShortcut: IShortcutItem = {
     id: DeleteRightCommand.id,
     preconditions: whenDocAndEditorFocused,
     binding: KeyCode.DELETE,
+};
+
+export const CloseHeaderFooterShortcut: IShortcutItem = {
+    id: CloseHeaderFooterCommand.id,
+    preconditions: whenDocAndEditorFocused,
+    binding: KeyCode.ESC,
 };
 
 // export const TabShortcut: IShortcutItem = {

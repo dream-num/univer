@@ -17,13 +17,21 @@
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { BreakLineCommand } from '../../commands/commands/break-line.command';
-import { SoftBreakLineShortcut } from '../core-editing.shortcut';
+import { CloseHeaderFooterCommand } from '../../commands/commands/doc-header-footer.command';
+import { CloseHeaderFooterShortcut, SoftBreakLineShortcut } from '../core-editing.shortcut';
 
 describe('docs core editing shortcuts', () => {
     it('registers Shift+Enter as a soft line break', () => {
         expect(SoftBreakLineShortcut).toMatchObject({
             id: BreakLineCommand.id,
             binding: KeyCode.ENTER | MetaKeys.SHIFT,
+        });
+    });
+
+    it('registers Escape to close header footer editing', () => {
+        expect(CloseHeaderFooterShortcut).toMatchObject({
+            id: CloseHeaderFooterCommand.id,
+            binding: KeyCode.ESC,
         });
     });
 });

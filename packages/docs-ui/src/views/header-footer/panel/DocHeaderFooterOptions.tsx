@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentStyle } from '@univerjs/core';
-import type { IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
+import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { LocaleKey } from '../../../locale/types';
 import {
     BooleanNumber,

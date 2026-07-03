@@ -135,4 +135,10 @@ describe('Input', () => {
         const input = container.querySelector('input') as HTMLInputElement;
         expect(input.style.paddingRight).toBe('26px');
     });
+
+    it('should not override default right padding when no trailing content exists', () => {
+        const { container } = render(<Input />);
+        const input = container.querySelector('input') as HTMLInputElement;
+        expect(input.style.paddingRight).toBe('');
+    });
 });

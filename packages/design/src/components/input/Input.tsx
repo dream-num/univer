@@ -123,6 +123,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             if (allowClear && !(slot && slotRef.current)) setPaddingRight(26);
         }, []); // only enough for init, otherwise it works again when you click it
 
+        const mergedInputStyle = paddingRight > 0
+            ? { ...inputStyle, paddingRight }
+            : inputStyle;
+
         return (
             <div
                 data-u-comp="input"
@@ -155,7 +159,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     onChange={handleChange}
                     onFocus={onFocus}
                     onBlur={onBlur}
-                    style={{ ...inputStyle, paddingRight }}
+                    style={mergedInputStyle}
                     {...props}
                 />
                 {hasSlotContent && (

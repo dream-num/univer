@@ -171,20 +171,20 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
     }
 
     releaseUnit(unitId: string): void {
-        for (const claim of [...this._ownerClaims.values()]) {
+        for (const claim of this._ownerClaims.values()) {
             if (claim.unitId === unitId || claim.owner.unitId === unitId) {
                 this._releaseClaim(claim);
             }
         }
 
-        for (const [key] of [...this._usageCounts]) {
+        for (const [key] of this._usageCounts) {
             const [fromUnitId, toUnitId] = JSON.parse(key) as [string, string];
             if (fromUnitId === unitId || toUnitId === unitId) {
                 this._usageCounts.delete(key);
             }
         }
 
-        for (const state of [...this._loadStates.values()]) {
+        for (const state of this._loadStates.values()) {
             if (state.record?.unitId === unitId) {
                 this._removeLoadState(state);
             }

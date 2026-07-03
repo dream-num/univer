@@ -84,7 +84,7 @@ export class EmbedReferencedUnitClaimService {
     }
 
     releaseHost(hostUnitId: string): void {
-        for (const claim of [...this._claims.values()]) {
+        for (const claim of this._claims.values()) {
             if (claim.owner.unitId === hostUnitId) {
                 this.release(claim.owner);
             }
@@ -94,7 +94,7 @@ export class EmbedReferencedUnitClaimService {
     }
 
     releaseUnit(unitId: string): void {
-        for (const claim of [...this._claims.values()]) {
+        for (const claim of this._claims.values()) {
             if (claim.unitId === unitId || claim.owner.unitId === unitId) {
                 this.release(claim.owner);
             }

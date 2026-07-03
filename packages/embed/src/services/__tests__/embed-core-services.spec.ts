@@ -17,8 +17,9 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedCapability, IEmbedCreateContext, IEmbedDescriptor } from '../../types/embed';
 import type { IEmbedResourceRefDataProvider, IEmbedResourceRefUnitProvider, IReferencedUnitLoadResult } from '../embed-resource-ref-provider-registry.service';
-import { IUniverInstanceService, parseResourceRef, ReferencedUnitDataType, ReferencedUnitErrorCode, UniverInstanceType } from '@univerjs/core';
+import { parseResourceRef, ReferencedUnitDataType, ReferencedUnitErrorCode, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { formatResourceRef } from '../../common/resource-ref-uri';
 import { ReferencedUnitOwnerKind } from '../../types/referenced-unit';
 import {
     createDefaultEmbedCapabilities,
@@ -27,7 +28,6 @@ import {
     flushPendingEmbedCapabilities,
     registerEmbedCapabilities,
 } from '../embed-capability-registry.service';
-import { formatResourceRef } from '../../common/resource-ref-uri';
 import { EmbedCreationService } from '../embed-creation.service';
 import { createLocalRuntimeResourceRefUnitProviderRegistration, EmbedLocalRuntimeResourceRefUnitProvider, LOCAL_RUNTIME_RESOURCE_REF_PROVIDER_PRIORITY, LOCAL_RUNTIME_RESOURCE_REF_UNIT_PROVIDER_ID } from '../embed-local-runtime-resource-ref-provider';
 import { EmbedNestedGuardService } from '../embed-nested-guard.service';
@@ -219,7 +219,6 @@ describe('EmbedSourceResolverService', () => {
         })).toThrow('INVALID_URI_REFERENCE');
     });
 });
-
 
 describe('EmbedLocalRuntimeResourceRefUnitProvider', () => {
     it('resolves canonical self unit refs from existing runtime units', () => {

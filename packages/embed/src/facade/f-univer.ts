@@ -27,8 +27,7 @@ import type {
 import type { FEmbedHostSurface } from './f-enum';
 import { generateRandomId, IReferencedUnitManagerService, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { CreateEmbedCommand, EmbedModelService, EmbedReferencedUnitApiResolverRegistryService, normalizeResourceRefLocator } from '@univerjs/embed';
-import { EmbedError, EmbedErrorCode } from '../common/error';
+import { CreateEmbedCommand, EmbedError, EmbedErrorCode, EmbedModelService, EmbedReferencedUnitApiResolverRegistryService, normalizeResourceRefLocator } from '@univerjs/embed';
 import { FEmbed } from './f-embed';
 
 export interface ICreateEmbedHostParams {

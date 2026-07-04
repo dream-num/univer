@@ -220,8 +220,9 @@ export function Ribbon(props: IRibbonProps) {
                 {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
                     <div
                         className={`
-                          univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
-                          univer-gap-2
+                          univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-flex-row
+                          univer-items-center univer-gap-2
+                          rtl:univer-left-2 rtl:univer-right-auto
                           [&>*]:univer-inline-flex [&>*]:univer-h-6 [&>*]:univer-items-center [&>*]:univer-rounded
                           [&>*]:univer-px-1 [&>*]:univer-transition-colors
                           hover:[&>*]:univer-bg-gray-100

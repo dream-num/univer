@@ -18,16 +18,42 @@ import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
-import { debounce, generateRandomId, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import {
+    debounce,
+    generateRandomId,
+    ICommandService,
+    IUniverInstanceService,
+    ThemeService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
-import { deserializeRangeWithSheet, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import {
+    deserializeRangeWithSheet,
+    IDefinedNamesService,
+    IFunctionService,
+    ISuperTableService,
+    LexerTreeBuilder,
+} from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
-import { getPrimaryForRange, InsertDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetSelectionsOperation, SetWorksheetShowCommand, SheetPermissionCheckController, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import {
+    getPrimaryForRange,
+    InsertDefinedNameCommand,
+    SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
+    SetSelectionsOperation,
+    SetWorksheetShowCommand,
+    SheetPermissionCheckController,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+} from '@univerjs/sheets';
 import { ILayoutService, useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
 import { genNormalSelectionStyle } from '../../services/selection/const';
-import { DefinedNameBoxActionType, getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction } from '../../services/utils/defined-name-utils';
+import {
+    DefinedNameBoxActionType,
+    getAbsoluteRefStringFromSelection,
+    resolveDefinedNameBoxAction,
+} from '../../services/utils/defined-name-utils';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 
 export function DefinedName({ disable }: { disable: boolean }) {
@@ -271,9 +297,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 ref={inputRef}
                 className={clsx(`
                   univer-box-border univer-size-full univer-appearance-none univer-pl-1.5 univer-pr-5
-                  rtl:univer-pl-5 rtl:univer-pr-1.5
                   univer-text-gray-900
                   focus:univer-outline-none
+                  rtl:univer-pl-5 rtl:univer-pr-1.5
                   dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white
                 `, borderRightClassName, {
                     'univer-cursor-not-allowed': disable,
@@ -300,8 +326,8 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     className={clsx(`
                       univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
-                      rtl:univer-left-0 rtl:univer-right-auto
                       hover:univer-bg-gray-100
+                      rtl:univer-left-0 rtl:univer-right-auto
                       dark:!univer-text-white
                       dark:hover:!univer-bg-gray-800
                     `, {

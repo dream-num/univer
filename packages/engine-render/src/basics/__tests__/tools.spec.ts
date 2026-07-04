@@ -118,6 +118,7 @@ describe('tools extra', () => {
         expect(requester2.cancelAnimationFrame).toHaveBeenCalledWith(12);
 
         expect(createCanvasElement().tagName).toBe('CANVAS');
+        expect(createCanvasElement().dir).toBe('ltr');
         expect(createImageElement().tagName).toBe('IMG');
     });
 

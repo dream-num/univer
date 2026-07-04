@@ -151,6 +151,7 @@ export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
+    disableMenuWhenHeaderFooterEditing,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,

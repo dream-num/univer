@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/storybook",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -21,7 +21,7 @@
         "@storybook/addon-links": "^10.4.6",
         "@storybook/addon-styling-webpack": "^3.0.2",
         "@storybook/addon-webpack5-compiler-swc": "^4.0.3",
-        "@storybook/icons": "^2.0.2",
+        "@storybook/icons": "^2.1.0",
         "@storybook/react": "^10.4.6",
         "@storybook/react-webpack5": "^10.4.6",
         "@univerjs/core": "workspace:*",

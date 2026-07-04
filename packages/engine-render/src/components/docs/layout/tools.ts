@@ -679,7 +679,8 @@ export interface IDocumentSkeletonLineContext {
     visualWidth?: number;
 }
 
-export type DocumentSkeletonTableSource = 'page' | 'column';
+export type DocumentSkeletonTableSource = 'page' | 'column' | 'header' | 'footer';
+type HeaderFooterSkeletonMap = Map<string, Map<number, IDocumentSkeletonPage>>;
 
 export interface IDocumentSkeletonTableCellGeometry {
     cell: IDocumentSkeletonPage;
@@ -713,6 +714,8 @@ export interface IDocumentSkeletonTableIteratorOptions {
     docsTop?: number;
     pageMarginTop?: number;
     resolveViewport?: boolean;
+    skeFooters?: HeaderFooterSkeletonMap;
+    skeHeaders?: HeaderFooterSkeletonMap;
     tableCellInsetX?: number;
     unitId?: string;
 }
@@ -726,6 +729,8 @@ export function documentSkeletonTableIterator(
         docsTop = 0,
         pageMarginTop = 0,
         resolveViewport = true,
+        skeFooters,
+        skeHeaders,
         tableCellInsetX = 0,
         unitId = '',
     } = options;
@@ -749,6 +754,42 @@ export function documentSkeletonTableIterator(
             tableCellInsetX,
             unitId,
         });
+
+        const rootPageDocumentTop = rootPageTop - rootPage.marginTop;
+        const rootPageDocumentLeft = docsLeft + rootPage.marginLeft;
+        const headerPage = rootPage.headerId == null ? undefined : skeHeaders?.get(rootPage.headerId)?.get(rootPage.pageWidth);
+        if (headerPage != null) {
+            collectPageTables({
+                contexts,
+                docsLeft,
+                page: headerPage,
+                pageIndex,
+                pageLeft: rootPageDocumentLeft,
+                pageTop: rootPageDocumentTop + headerPage.marginTop,
+                rootPage,
+                source: 'header',
+                resolveViewport,
+                tableCellInsetX,
+                unitId,
+            });
+        }
+
+        const footerPage = rootPage.footerId == null ? undefined : skeFooters?.get(rootPage.footerId)?.get(rootPage.pageWidth);
+        if (footerPage != null) {
+            collectPageTables({
+                contexts,
+                docsLeft,
+                page: footerPage,
+                pageIndex,
+                pageLeft: rootPageDocumentLeft,
+                pageTop: rootPageDocumentTop + rootPage.pageHeight - footerPage.height - footerPage.marginBottom,
+                rootPage,
+                source: 'footer',
+                resolveViewport,
+                tableCellInsetX,
+                unitId,
+            });
+        }
 
         rootPage.skeColumnGroups?.forEach((columnGroup) => {
             columnGroup.columns.forEach((columnGroupColumn) => {
@@ -1762,20 +1803,28 @@ export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (st
             const pageIndex = pathCopy.shift() as number;
             page = skeletonData.pages[pageIndex];
         } else if (field === 'skeTables') {
+            if (page == null) {
+                return null;
+            }
+
             const tableId = pathCopy.shift() as string;
             pathCopy.shift(); // rows
             const rowIndex = pathCopy.shift() as number;
             pathCopy.shift(); // cells
             const cellIndex = pathCopy.shift() as number;
 
-            page = page!.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
+            page = page.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
         } else if (field === 'skeColumnGroups') {
+            if (page == null) {
+                return null;
+            }
+
             const columnGroupId = pathCopy.shift() as string;
             pathCopy.shift(); // columns
             const columnIndex = pathCopy.shift() as number;
             pathCopy.shift(); // page
 
-            page = page!.skeColumnGroups?.get(columnGroupId)?.columns[columnIndex]?.page;
+            page = page.skeColumnGroups?.get(columnGroupId)?.columns[columnIndex]?.page;
         }
     }
 

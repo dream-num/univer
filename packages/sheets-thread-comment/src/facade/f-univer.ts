@@ -310,6 +310,7 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
 
     /**
      * @ignore
+     * @returns {FTheadCommentBuilder} The thread comment builder.
      */
     override newTheadComment(comment?: IThreadComment): FTheadCommentBuilder {
         return new FTheadCommentBuilder(comment);

@@ -128,8 +128,8 @@ describe('page model', () => {
         expect(firstPage.footerId).toBe('f-first');
         expect(firstPage.pageWidth).toBe(200);
         expect(firstPage.pageHeight).toBe(300);
-        expect(firstPage.marginTop).toBe(12);
-        expect(firstPage.marginBottom).toBe(14);
+        expect(firstPage.marginTop).toBe(31);
+        expect(firstPage.marginBottom).toBe(33);
         expect(firstPage.sections.length).toBeGreaterThan(0);
         expect(skeletonResourceReference.skeHeaders.get('h-first')?.has(200)).toBe(true);
         expect(skeletonResourceReference.skeFooters.get('f-first')?.has(200)).toBe(true);
@@ -137,6 +137,55 @@ describe('page model', () => {
         const evenPage = createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, 2);
         expect(evenPage.headerId).toBe('h-even');
         expect(evenPage.footerId).toBe('f-even');
+    });
+
+    it('keeps the configured margin when header and footer content fit inside it', () => {
+        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
+            pages: [{
+                ...areaPage,
+                height: 8,
+                sections: [
+                    {
+                        columns: [
+                            {
+                                lines: [{ paragraphIndex: 0 }],
+                            },
+                        ],
+                    },
+                ],
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            }],
+        }));
+
+        const skeletonResourceReference = createSkeletonResourceReference();
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference,
+            isDirty: false,
+        } as any;
+
+        const page = createSkeletonPage(
+            ctx,
+            {
+                pageNumberStart: 1,
+                pageSize: { width: 200, height: 300 },
+                headerIds: { defaultHeaderId: 'h-default' },
+                footerIds: { defaultFooterId: 'f-default' },
+                headerTreeMap: new Map([['h-default', { getChildren: () => [{}] }]]),
+                footerTreeMap: new Map([['f-default', { getChildren: () => [{}] }]]),
+                columnProperties: [],
+                marginTop: 40,
+                marginBottom: 40,
+                marginHeader: 6,
+                marginFooter: 8,
+            } as any,
+            skeletonResourceReference,
+            1
+        );
+
+        expect(page.marginTop).toBe(40);
+        expect(page.marginBottom).toBe(40);
     });
 
     it('does not create negative-width columns for oversized single-column section properties', () => {

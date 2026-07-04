@@ -16,7 +16,7 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { ICommandService, IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, ICommandService, IResourceManagerService, IUndoRedoService, UniverInstanceType } from '@univerjs/core';
 import { InsertTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
@@ -146,5 +146,36 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Document title suffix\r\r\n');
         expect(document.save().body?.paragraphs?.map((item) => item.startIndex)).toEqual([21, 22]);
         expect(document.getParagraphs()[0].getText()).toBe('Document title suffix');
+    });
+
+    it('ensures header and footer segments independently', () => {
+        univer.dispose();
+        const documentData = createDocumentData('classic-doc', {
+            dataStream: 'Hello,\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_header_footer' }],
+        });
+        documentData.documentStyle = {
+            ...documentData.documentStyle,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        };
+        createDocumentFacade(documentData);
+
+        const headerId = document.ensurePageHeader();
+        let snapshot = document.save();
+
+        expect(headerId).toEqual(expect.any(String));
+        expect(snapshot.documentStyle?.defaultHeaderId).toBe(headerId);
+        expect(snapshot.headers?.[headerId].body?.dataStream).toBe('\r\n');
+        expect(snapshot.documentStyle?.defaultFooterId).toBeFalsy();
+        expect(Object.keys(snapshot.footers ?? {})).toEqual([]);
+
+        const footerId = document.ensurePageFooter();
+        snapshot = document.save();
+
+        expect(footerId).toEqual(expect.any(String));
+        expect(footerId).not.toBe(headerId);
+        expect(snapshot.documentStyle?.defaultHeaderId).toBe(headerId);
+        expect(snapshot.documentStyle?.defaultFooterId).toBe(footerId);
+        expect(snapshot.footers?.[footerId].body?.dataStream).toBe('\r\n');
     });
 });

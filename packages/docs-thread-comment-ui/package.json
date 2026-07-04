@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-thread-comment-ui",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Thread comment UI integration for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -78,7 +78,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.15.1",
+        "@univerjs/icons": "1.16.0",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"

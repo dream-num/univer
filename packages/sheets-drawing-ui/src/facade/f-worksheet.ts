@@ -184,8 +184,8 @@ export interface IFWorksheetDrawingUIMixin {
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      *
-     * // You should register components at an appropriate time (e.g., when Univer is loaded)
-     * // This is a React component. For Vue3 components, the third parameter should be `{ framework: 'vue3' }`
+     * // You should register components at an appropriate time (e.g., when Univer is loaded).
+     * // This is a React component. For other frameworks, pass a matching adapter option, such as `{ framework: 'vue3' }`.
      * univerAPI.registerComponent(
      *   'myFloatDom',
      *   ({ data }) => (

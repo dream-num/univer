@@ -517,6 +517,7 @@ describe('docs layout tools extra', () => {
         expect(getPageFromPath(root as any, ['pages', 0])).toBe(root.pages[0]);
         expect(getPageFromPath(root as any, ['pages', 0, 'skeTables', 't1', 'rows', 0, 'cells', 0])).toBe(pageCell);
         expect(getPageFromPath(root as any, ['pages', 0, 'skeColumnGroups', 'cg1', 'columns', 0, 'page'])).toBe(columnPage);
+        expect(getPageFromPath(root as any, ['skeTables', 't1', 'rows', 0, 'cells', 0])).toBeNull();
     });
 
     it('iterates document skeleton lines with nested table and column layout context', () => {
@@ -739,6 +740,66 @@ describe('docs layout tools extra', () => {
                 tableRect: { bottom: 203, left: 303, right: 423, top: 167 },
             },
         ]);
+    });
+
+    it('iterates header tables with the root page margins and header content offset', () => {
+        const header = {
+            height: 80,
+            marginBottom: 5,
+            marginLeft: 0,
+            marginRight: 0,
+            marginTop: 24,
+            pageHeight: 100,
+            pageWidth: 440,
+            sections: [],
+            skeTables: new Map([['header-table-1', {
+                tableId: 'header-table-1',
+                height: 30,
+                left: 0,
+                rows: [],
+                top: 0,
+                width: 120,
+            }]]),
+        };
+        const page = {
+            footerId: 'footer-1',
+            headerId: 'header-1',
+            marginBottom: 100,
+            marginLeft: 80,
+            marginRight: 80,
+            marginTop: 100,
+            pageHeight: 600,
+            pageWidth: 600,
+            sections: [],
+            skeTables: new Map(),
+        };
+
+        const tables = Array.from(documentSkeletonTableIterator([page as any], {
+            docsLeft: 10,
+            docsTop: 20,
+            skeHeaders: new Map([['header-1', new Map([[600, header as any]])]]),
+        }));
+
+        expect(tables.map((context) => ({
+            pageIndex: context.pageIndex,
+            pageLeft: context.pageLeft,
+            pageTop: context.pageTop,
+            source: context.source,
+            tableId: context.tableId,
+            tableRect: context.tableRect,
+        }))).toEqual([{
+            pageIndex: 0,
+            pageLeft: 90,
+            pageTop: 44,
+            source: 'header',
+            tableId: 'header-table-1',
+            tableRect: {
+                bottom: 74,
+                left: 90,
+                right: 210,
+                top: 44,
+            },
+        }]);
     });
 
     it('resolves column child page offsets from skeleton parents', () => {

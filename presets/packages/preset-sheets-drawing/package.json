@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-sheets-drawing",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Preset for drawing capabilities in Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

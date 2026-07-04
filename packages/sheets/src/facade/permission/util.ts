@@ -50,6 +50,9 @@ export function determineScope(editState: EditStateEnum, viewState: ViewStateEnu
 /**
  * Check if there are no range protection rules for the given unit and subunit when removing a range protection rule.
  * If there are no rules left, also remove the associated worksheet protection and update the permission points accordingly.
+ * @param {Injector} injector The injector used to resolve permission services.
+ * @param {string} unitId The workbook unit id.
+ * @param {string} subUnitId The worksheet subunit id.
  */
 export function handleWorksheetRangePermissionIsEmpty(injector: Injector, unitId: string, subUnitId: string): void {
     const rangeProtectionRuleModel = injector.get(RangeProtectionRuleModel);
@@ -72,6 +75,14 @@ export function handleWorksheetRangePermissionIsEmpty(injector: Injector, unitId
 
 /**
  * Get the list of range protection rules for a specific worksheet or range, and convert them to FRangeProtectionRule instances.
+ * @param {Injector} injector The injector used to resolve permission services.
+ * @param {string} unitId The workbook unit id.
+ * @param {string} subUnitId The worksheet subunit id.
+ * @param {object} options Options for listing range protection rules.
+ * @param {FWorksheet} options.worksheet The worksheet facade used to convert ranges.
+ * @param {FRange} [options.specificRange] Optional range used to filter rules.
+ * @param {boolean} [options.ignoreCollaborators] Whether to skip fetching collaborators for performance.
+ * @returns {Promise<FRangeProtectionRule[]>} The range protection rules.
  */
 export async function getListRangeProtectionRules(
     injector: Injector,

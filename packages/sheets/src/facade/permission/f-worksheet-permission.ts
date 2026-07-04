@@ -768,6 +768,8 @@ export class FWorksheetPermission extends FBase {
 
     /**
      * List all range protection rules for the worksheet.
+     * @param {object} [options] Options for listing range protection rules.
+     * @param {boolean} [options.ignoreCollaborators] Whether to skip fetching collaborators for performance.
      * @returns {Promise<FRangeProtectionRule[]>} Array of protection rules.
      * @example
      * ```ts

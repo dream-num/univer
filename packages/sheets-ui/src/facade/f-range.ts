@@ -27,14 +27,15 @@ import { ComponentManager } from '@univerjs/ui';
 export interface IFComponentKey {
     /**
      * The key of the component to be rendered in the popup.
-     * if key is a string, it will be query from the component registry.
-     * if key is a React or Vue3 component, it will be rendered directly.
+     * If key is a string, it will be queried from the component registry.
+     * If key is a component, it will be registered temporarily with the specified framework.
      */
     componentKey: string | ComponentType;
     /**
-     * If componentKey is a Vue3 component, this must be set to true
+     * The framework adapter used to render a direct component.
+     * Defaults to `react`.
      */
-    isVue3?: boolean;
+    framework?: string;
 }
 
 export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFComponentKey { }
@@ -382,14 +383,15 @@ declare module '@univerjs/sheets/facade' {
  * @returns {string} The transformed component key.
  */
 export function transformComponentKey(component: IFComponentKey, componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
-    const { componentKey, isVue3 } = component;
+    const { componentKey, framework } = component;
     let key: string;
     const disposableCollection = new DisposableCollection();
     if (typeof componentKey === 'string') {
         key = componentKey;
     } else {
-        key = `External_${generateRandomId(6)}`;
-        disposableCollection.add(componentManager.register(key, componentKey, { framework: isVue3 ? 'vue3' : 'react' }));
+        const resolvedFramework = framework ?? 'react';
+        key = resolvedFramework === 'web-component' ? `external-${generateRandomId(6).toLowerCase()}` : `External_${generateRandomId(6)}`;
+        disposableCollection.add(componentManager.register(key, componentKey, { framework: resolvedFramework }));
     }
 
     return {

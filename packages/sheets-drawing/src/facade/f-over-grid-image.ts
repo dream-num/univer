@@ -67,8 +67,7 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, skeleton: Sp
 /**
  * Convert the FOverGridImage to a ISheetImage
  * @param {IFOverGridImage} fOverGridImage The FOverGridImage
- * @param {ISheetSelectionRenderService} selectionRenderService The selection render service
- * @param {SheetSkeletonManagerService} sheetSkeletonManagerService The skeleton manager service
+ * @param {SheetSkeletonService} sheetSkeletonService The sheet skeleton service
  * @returns {ISheetImage} The ISheetImage {@link ISheetImage}
  */
 function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sheetSkeletonService: SheetSkeletonService): ISheetImage {
@@ -223,6 +222,12 @@ export class FOverGridImageBuilder {
     }
 
     /**
+     * Set the source of the image. The source type defaults to URL.
+     * @param {string} source - The source of the image
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
+     */
+    setSource(source: string): FOverGridImageBuilder;
+    /**
      * Set the source of the image.
      * @param {string} source - The source of the image
      * @param {ImageSourceType} [sourceType] - The source type of the image, default is URL
@@ -242,7 +247,6 @@ export class FOverGridImageBuilder {
      * fWorksheet.insertImages([image]);
      * ```
      */
-    setSource(source: string): FOverGridImageBuilder;
     setSource(source: string, sourceType?: ImageSourceType): FOverGridImageBuilder;
     setSource(source: string, sourceType?: ImageSourceType): FOverGridImageBuilder {
         const sourceTypeVal = sourceType ?? ImageSourceType.URL;

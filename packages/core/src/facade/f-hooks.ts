@@ -42,6 +42,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {})` as instead
      */
     onStarting(callback: () => void): IDisposable {
@@ -50,6 +51,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {})` as instead
      */
     onReady(callback: () => void): IDisposable {
@@ -58,6 +60,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {})` as instead
      */
     onRendered(callback: () => void): IDisposable {
@@ -66,6 +69,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {})` as instead
      */
     onSteady(callback: () => void): IDisposable {
@@ -74,6 +78,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeUndo, (event) => {})` as instead
      */
     onBeforeUndo(callback: (action: IUndoRedoItem) => void): IDisposable {
@@ -92,6 +97,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.Undo, (event) => {})` as instead
      */
     onUndo(callback: (action: IUndoRedoItem) => void): IDisposable {
@@ -110,6 +116,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeRedo, (event) => {})` as instead
      */
     onBeforeRedo(callback: (action: IUndoRedoItem) => void): IDisposable {
@@ -128,6 +135,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.Redo, (event) => {})` as instead
      */
     onRedo(callback: (action: IUndoRedoItem) => void): IDisposable {

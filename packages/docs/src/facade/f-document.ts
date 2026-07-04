@@ -393,6 +393,7 @@ export class FDocument extends FBaseInitialable {
     /**
      * Append a plain-text paragraph at the end of the body.
      * @param {string} text The paragraph text. Defaults to an empty paragraph.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
      * @returns {FDocumentParagraph} The appended paragraph wrapper.
      * @example
      * ```ts

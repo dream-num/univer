@@ -137,15 +137,15 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                                 <div
                                     data-u-comp="defined-name-overlay-row"
                                     className={clsx(`
-                                      univer-flex univer-items-center univer-justify-between univer-gap-2 univer-py-1
+                                      univer-flex univer-items-center univer-gap-2 univer-py-1
                                       rtl:univer-flex-row-reverse
                                     `, borderBottomClassName)}
                                 >
                                     <div
                                         data-u-comp="defined-name-overlay-name"
                                         className={`
-                                          univer-w-[50%] univer-min-w-0 univer-flex-shrink-0 univer-truncate
-                                          univer-text-sm univer-text-gray-600
+                                          univer-min-w-0 univer-flex-1 univer-basis-0 univer-truncate univer-text-sm
+                                          univer-text-gray-600
                                           rtl:univer-text-right
                                           dark:!univer-text-gray-200
                                         `}
@@ -156,8 +156,8 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                                     <div
                                         data-u-comp="defined-name-overlay-reference"
                                         className={`
-                                          univer-w-[50%] univer-min-w-0 univer-flex-shrink-0 univer-truncate
-                                          univer-text-xs univer-text-gray-400
+                                          univer-min-w-0 univer-flex-1 univer-basis-0 univer-truncate univer-text-xs
+                                          univer-text-gray-400
                                           rtl:univer-text-right
                                         `}
                                         title={definedName.formulaOrRefString}

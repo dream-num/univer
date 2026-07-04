@@ -271,6 +271,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 ref={inputRef}
                 className={clsx(`
                   univer-box-border univer-size-full univer-appearance-none univer-pl-1.5 univer-pr-5
+                  rtl:univer-pl-5 rtl:univer-pr-1.5
                   univer-text-gray-900
                   focus:univer-outline-none
                   dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white
@@ -299,6 +300,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     className={clsx(`
                       univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
+                      rtl:univer-left-0 rtl:univer-right-auto
                       hover:univer-bg-gray-100
                       dark:!univer-text-white
                       dark:hover:!univer-bg-gray-800

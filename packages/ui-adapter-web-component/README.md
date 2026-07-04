@@ -30,9 +30,20 @@ import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-compon
 univer.registerPlugin(UniverWebComponentAdapterPlugin);
 ```
 
+Register custom elements with the `web-component` framework option. Runtime props are assigned to the created element as DOM properties, which supports object values such as `data` and `extraProps`.
+
+```ts
+class MyPopup extends HTMLElement {
+    set data(value) {
+        this.textContent = value?.label ?? '';
+    }
+}
+
+univerAPI.registerComponent('my-popup', MyPopup, { framework: 'web-component' });
+```
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/ui-adapter-web-component)
 - [GitHub repository](https://github.com/dream-num/univer)
-

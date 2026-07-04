@@ -36,7 +36,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "1.15.1",
+        "@univerjs/icons": "1.16.0",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/preset-docs-core": "workspace:*",
@@ -101,7 +101,7 @@
         "rxjs": "^7.8.2"
     },
     "devDependencies": {
-        "@clack/prompts": "^1.6.0",
+        "@clack/prompts": "^1.7.0",
         "@types/minimist": "^1.2.5",
         "@univerjs-infra/shared": "workspace:*",
         "detect-port": "^2.1.0",

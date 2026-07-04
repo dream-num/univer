@@ -40,4 +40,6 @@ export {
 export type { ICanvasFloatDom, ICanvasFloatDomInfo, IDOMAnchor } from './services/canvas-float-dom-manager.service';
 export { DrawingContextMenuService, IDrawingContextMenuService } from './services/drawing-context-menu.service';
 export type { IDrawingContextMenuProvider, IDrawingContextMenuProviderContext } from './services/drawing-context-menu.service';
+export { SheetDrawingHitTestService } from './services/sheet-drawing-hit-test.service';
+export type { ISheetDrawingDoubleClickEvent, ISheetDrawingHitTestResult } from './services/sheet-drawing-hit-test.service';
 export { SheetDrawingAnchor } from './views/sheet-image-panel/SheetDrawingAnchor';

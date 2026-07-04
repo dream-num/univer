@@ -52,6 +52,7 @@ import { DrawingPopupMenuController } from './menu/drawing-popup-menu.controller
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 import { DrawingContextMenuService, IDrawingContextMenuService } from './services/drawing-context-menu.service';
+import { SheetDrawingHitTestService } from './services/sheet-drawing-hit-test.service';
 
 @DependentOn(UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
@@ -84,6 +85,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         registerDependencies(this._injector, [
             [ComponentsController],
             [SheetCanvasFloatDomManagerService],
+            [SheetDrawingHitTestService],
             [SheetDrawingUIController],
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],

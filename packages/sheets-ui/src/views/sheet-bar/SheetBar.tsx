@@ -113,9 +113,12 @@ export const SheetBar = () => {
             {/* Scroll arrows */}
             {(!leftScrollState || !rightScrollState) && (
                 <div
+                    data-u-comp="sheet-bar-scroll-buttons"
                     className={`
                       univer-relative univer-flex univer-items-center univer-px-2
+                      rtl:univer-flex-row-reverse
                       after:univer-absolute after:univer-right-0 after:univer-top-1/2 after:univer-h-4 after:univer-w-px
+                      rtl:after:univer-left-0 rtl:after:univer-right-auto
                       after:-univer-translate-y-1/2 after:univer-bg-gray-200 after:univer-content-[""]
                     `}
                 >

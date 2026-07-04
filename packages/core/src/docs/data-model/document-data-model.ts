@@ -46,8 +46,12 @@ function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData
         return defaultSnapshot;
     }
 
-    const mergedSnapshot = mergeWith({}, defaultSnapshot, snapshot, (_objValue, srcValue) => {
+    const mergedSnapshot = mergeWith({}, defaultSnapshot, snapshot, (_objValue, srcValue, key) => {
         if (Array.isArray(srcValue)) {
+            return srcValue;
+        }
+
+        if (key === 'body' && srcValue != null && typeof srcValue === 'object') {
             return srcValue;
         }
     });

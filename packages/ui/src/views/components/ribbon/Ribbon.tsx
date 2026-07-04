@@ -253,7 +253,10 @@ export function Ribbon(props: IRibbonProps) {
                 <div
                     data-u-comp="ribbon-toolbar"
                     ref={containerRef}
-                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
+                    className={clsx(`
+                      univer-flex univer-overflow-hidden
+                      rtl:univer-divide-x-reverse
+                    `, divideXClassName, {
                         'univer-justify-center': ribbonType === 'classic',
                     })}
                     role="toolbar"

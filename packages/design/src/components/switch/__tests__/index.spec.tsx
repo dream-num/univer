@@ -36,14 +36,6 @@ describe('Switch', () => {
         expect(checkboxElement.checked).toBeTruthy();
     });
 
-    it('passes input props to the switch input', () => {
-        const { container } = render(<Switch inputProps={{ 'aria-label': 'Grid' }} />);
-
-        const checkboxElement = container.querySelector('[role="switch"]')! as HTMLInputElement;
-
-        expect(checkboxElement.getAttribute('aria-label')).toBe('Grid');
-    });
-
     it('change the checked', () => {
         const { container } = render(<Switch defaultChecked />);
 

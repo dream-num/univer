@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import type { InputHTMLAttributes } from 'react';
 import { useEffect, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface ISwitchProps {
     defaultChecked?: boolean;
-    inputProps?: Pick<InputHTMLAttributes<HTMLInputElement>, 'aria-label' | 'aria-labelledby' | 'aria-describedby'>;
     onChange?: (checked: boolean) => void;
 }
 
 const Switch = (props: ISwitchProps) => {
-    const { defaultChecked = false, inputProps, onChange } = props;
+    const { defaultChecked = false, onChange } = props;
     const [checked, setChecked] = useState(defaultChecked);
 
     const handleChange = () => {
@@ -41,9 +39,7 @@ const Switch = (props: ISwitchProps) => {
         <div className="univer-h-4">
             <label className="univer-relative univer-inline-block univer-h-4 univer-w-7">
                 <input
-                    {...inputProps}
                     className="univer-size-0 univer-opacity-0"
-                    role="switch"
                     type="checkbox"
                     checked={checked}
                     onChange={handleChange}

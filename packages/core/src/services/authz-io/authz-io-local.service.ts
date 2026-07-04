@@ -100,7 +100,12 @@ export class AuthzIoLocalService implements IAuthzIoService {
                 return JSON.parse(json);
             },
             pluginName: 'SHEET_AuthzIoMockService_PLUGIN',
-            businesses: [UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC, UniverInstanceType.UNIVER_SLIDE],
+            businesses: [
+                UniverInstanceType.UNIVER_SHEET,
+                UniverInstanceType.UNIVER_DOC,
+                UniverInstanceType.UNIVER_SLIDE,
+                UniverInstanceType.UNIVER_BOARD,
+            ],
             onLoad: (_unitId, resource) => {
                 for (const key in resource) {
                     this._permissionMap.set(key, resource[key]);
@@ -333,7 +338,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
         return undefined;
     }
 
-    async putCollaborators(config: IPutCollaboratorsRequest): Promise<void> {
+    async putCollaborators(_config: IPutCollaboratorsRequest): Promise<void> {
         return undefined;
     }
 

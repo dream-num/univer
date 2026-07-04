@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.0.0-alpha.2](https://github.com/dream-num/univer/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2026-07-04)
+
+### Bug Fixes
+
+* **engine-render:** force canvas ltr direction as RTL fallback ([#7188](https://github.com/dream-num/univer/issues/7188)) ([6ae8eb3](https://github.com/dream-num/univer/commit/6ae8eb3ef05c7645ed1425b13358bab1d8155a32))
+* fix RTL layout issues in sheet UI components ([#7187](https://github.com/dream-num/univer/issues/7187)) ([0ecbd3d](https://github.com/dream-num/univer/commit/0ecbd3de1d4b37e6595f847d1936dd6096657ee1))
+* **numfmt-ui:** respect RTL direction in more format options ([#7183](https://github.com/dream-num/univer/issues/7183)) ([5d98ccd](https://github.com/dream-num/univer/commit/5d98ccd162d32f4a6e078c819d8253736f2853c0))
+* improve RTL support ([#7181](https://github.com/dream-num/univer/issues/7181)) ([6eb9e06](https://github.com/dream-num/univer/commit/6eb9e0665a8011b5e66d7ea45af012d9699e9a33))
+* **docs-ui:** use source types for doc helpers ([#7176](https://github.com/dream-num/univer/issues/7176)) ([0593e5e](https://github.com/dream-num/univer/commit/0593e5e61468852383101f14247f331581bd75b2))
+* **core:** preserve facade accessor descriptors ([#7174](https://github.com/dream-num/univer/issues/7174)) ([ad1d910](https://github.com/dream-num/univer/commit/ad1d910c03ba9c53919b39192c9a3c39c731a3d1))
+
+### Features
+
+* **ui:** support generic component framework adapters ([#7190](https://github.com/dream-num/univer/issues/7190)) ([67a92cf](https://github.com/dream-num/univer/commit/67a92cfab91522e1a245919a099ac803a3cfb0ec))
+* **docs:** support header footer creation ([#7185](https://github.com/dream-num/univer/issues/7185)) ([e3d7d12](https://github.com/dream-num/univer/commit/e3d7d12fd086141d0d0a1de59fe1e5feb8632a7e))
+* **protocol:** add board snapshot metadata ([#7184](https://github.com/dream-num/univer/issues/7184)) ([81d176b](https://github.com/dream-num/univer/commit/81d176b0aab6747d82fb8369fe92e8a033c5f839))
+* **ui:** add reusable font family dropdown ([#7180](https://github.com/dream-num/univer/issues/7180)) ([bae210e](https://github.com/dream-num/univer/commit/bae210e24f2ab9a39790d684d6cf78c8e6cade03))
+* supplement cursor type enum ([#7177](https://github.com/dream-num/univer/issues/7177)) ([689a25b](https://github.com/dream-num/univer/commit/689a25b694deff533452ba47176d49c00a23350a))
+* support chart drawing interact with shape ([#7172](https://github.com/dream-num/univer/issues/7172)) ([526ee1a](https://github.com/dream-num/univer/commit/526ee1a383df5ad611ad4f3f127af3060bfb8400))
+
+### Other Changes (chore)
+
+* **deps:** update univer icons ([#7189](https://github.com/dream-num/univer/issues/7189)) ([f0472ab](https://github.com/dream-num/univer/commit/f0472ab5784df86f80262d2b2de69bf93f50e52f))
+* normalize plugin config registration ([#7179](https://github.com/dream-num/univer/issues/7179)) ([b0ba09c](https://github.com/dream-num/univer/commit/b0ba09c455c7ac2de5d978b99c43fc3e2ff9aea0))
+* add docs consumeContentInsertRange export ([#7178](https://github.com/dream-num/univer/issues/7178)) ([56eca20](https://github.com/dream-num/univer/commit/56eca208275e4c842a69a1fd1ee590adb82a650d))
+
+### Other Changes (refactor)
+
+* **docs:** keep only paragraph APIs in docs package facade ([#7175](https://github.com/dream-num/univer/issues/7175)) ([fae37bb](https://github.com/dream-num/univer/commit/fae37bbbd44a48d3120c9de7a9db2d3825a0d362))
+
 ## [1.0.0-alpha.1](https://github.com/dream-num/univer/compare/v1.0.0-alpha.0...v1.0.0-alpha.1) (2026-06-27)
 
 ### Bug Fixes

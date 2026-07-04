@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-conditional-formatting-ui",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Conditional formatting UI for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

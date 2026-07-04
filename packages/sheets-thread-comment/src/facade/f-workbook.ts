@@ -121,6 +121,7 @@ export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWo
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated
      */
     override onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable {
@@ -131,6 +132,7 @@ export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWo
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated
      */
     override onBeforeAddThreadComment(callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
@@ -149,6 +151,7 @@ export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWo
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated
      */
     override onBeforeUpdateThreadComment(callback: (params: IUpdateCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
@@ -167,6 +170,7 @@ export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWo
 
     /**
      * @param callback
+     * @returns {IDisposable} A disposable used to remove the listener.
      * @deprecated
      */
     override onBeforeDeleteThreadComment(callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {

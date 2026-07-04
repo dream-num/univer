@@ -205,6 +205,8 @@ export class FFormula extends FBase {
 
     /**
      * @deprecated Use `onCalculationResultApplied` instead.
+     * @param {number} [timeout] The timeout in milliseconds. Defaults to 30000.
+     * @returns {Promise<boolean>} Whether computing completed before timeout.
      */
     whenComputingCompleteAsync(timeout?: number): Promise<boolean> {
         const gcss = this._injector.get(GlobalComputingStatusService);
@@ -218,6 +220,7 @@ export class FFormula extends FBase {
 
     /**
      * @deprecated Use `onCalculationResultApplied` instead.
+     * @returns {Promise<void>} A promise that resolves when calculation ends.
      */
     onCalculationEnd(): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -439,11 +442,11 @@ export class FFormula extends FBase {
      * dependency-calculation command for the given unit, sheet, and cell location,
      * and returns the computed dependency tree when the calculation is completed.
      *
-     * @param param The target cell location:
-     *   - `unitId`  The workbook ID.
-     *   - `sheetId` The sheet ID.
-     *   - `row`     The zero-based row index.
-     *   - `column`  The zero-based column index.
+     * @param {object} param The target cell location.
+     * @param {string} param.unitId The workbook ID.
+     * @param {string} param.sheetId The sheet ID.
+     * @param {number} param.row The zero-based row index.
+     * @param {number} param.column The zero-based column index.
      *
      * @param {number} [timeout]
      *        Optional timeout in milliseconds. If no result is received within this
@@ -749,6 +752,7 @@ export class FFormula extends FBase {
      * ```
      *
      * @param formulaString The formula string to parse (with or without leading `=`)
+     * @param unitId The workbook unit id used to resolve defined names and tables.
      * @returns A formula expression tree describing the hierarchical structure of the formula
      */
     getFormulaExpressTree(formulaString: string, unitId: string): IExprTreeNode | null {

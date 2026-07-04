@@ -192,6 +192,7 @@ export class FMenu extends FMenuBase {
 
     /**
      * @ignore
+     * @returns The generated menu schema.
      */
     __getSchema(): { [key: string]: MenuSchemaType } {
         this._commandToRegister.forEach((command, id) => {
@@ -326,6 +327,7 @@ export class FSubmenu extends FMenuBase {
 
     /**
      * @ignore
+     * @returns The generated submenu schema.
      */
     __getSchema(): { [key: string]: MenuSchemaType } {
         const schema: { [key: string]: MenuSchemaType } = {};

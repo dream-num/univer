@@ -18,6 +18,7 @@ import type { Nullable } from '../../shared';
 import type { IDocumentBody, IDocumentData, IDocumentRenderConfig, IDocumentStyle, IDrawings, IListData } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
+import { mergeWith } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
 import { isInternalEditorID } from '../../common/const';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
@@ -39,39 +40,17 @@ function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData
         return { ...DEFAULT_DOC, ...snapshot } as IDocumentData;
     }
 
-    const defaultSnapshot = getEmptySnapshot(snapshot.id, snapshot.locale, snapshot.title);
+    const defaultSnapshot = getEmptySnapshot(snapshot.id, snapshot.locale, snapshot.title, snapshot.documentStyle?.documentFlavor);
 
     if (Tools.isEmptyObject(snapshot)) {
         return defaultSnapshot;
     }
 
-    const mergedSnapshot = Tools.commonExtend<IDocumentData>(defaultSnapshot, snapshot);
-    const { documentStyle, settings } = snapshot;
-
-    if (documentStyle != null) {
-        if (documentStyle.pageSize != null) {
-            documentStyle.pageSize = {
-                ...defaultSnapshot.documentStyle.pageSize,
-                ...documentStyle.pageSize,
-            };
+    const mergedSnapshot = mergeWith({}, defaultSnapshot, snapshot, (_objValue, srcValue) => {
+        if (Array.isArray(srcValue)) {
+            return srcValue;
         }
-
-        if (documentStyle.renderConfig != null) {
-            documentStyle.renderConfig = {
-                ...defaultSnapshot.documentStyle.renderConfig,
-                ...documentStyle.renderConfig,
-            };
-        }
-
-        mergedSnapshot.documentStyle = Tools.commonExtend(defaultSnapshot.documentStyle, documentStyle);
-    }
-
-    if (settings != null) {
-        mergedSnapshot.settings = {
-            ...defaultSnapshot.settings,
-            ...settings,
-        };
-    }
+    });
 
     return mergedSnapshot;
 }

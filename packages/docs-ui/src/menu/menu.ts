@@ -82,7 +82,7 @@ import {
     AlignRightCommand,
 } from '../commands/commands/paragraph-align.command';
 import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
-import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
+// import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
@@ -1267,33 +1267,33 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
     };
 }
 
-export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
+// export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+//     const commandService = accessor.get(ICommandService);
+//     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    return {
-        id: SwitchDocModeCommand.id,
-        type: MenuItemType.BUTTON,
-        icon: 'KeyboardIcon',
-        tooltip: 'docs-ui.toolbar.documentFlavor',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        activated$: new Observable<boolean>((subscriber) => {
-            const subscription = commandService.onCommandExecuted((c) => {
-                if (c.id === RichTextEditingMutation.id) {
-                    const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+//     return {
+//         id: SwitchDocModeCommand.id,
+//         type: MenuItemType.BUTTON,
+//         icon: 'KeyboardIcon',
+//         tooltip: 'docs-ui.toolbar.documentFlavor',
+//         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+//         activated$: new Observable<boolean>((subscriber) => {
+//             const subscription = commandService.onCommandExecuted((c) => {
+//                 if (c.id === RichTextEditingMutation.id) {
+//                     const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
-                    subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
-                }
-            });
+//                     subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
+//                 }
+//             });
 
-            const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+//             const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
-            subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
+//             subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
 
-            return () => subscription.dispose();
-        }),
-    };
-}
+//             return () => subscription.dispose();
+//         }),
+//     };
+// }
 
 export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {

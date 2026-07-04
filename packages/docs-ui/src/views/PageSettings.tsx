@@ -152,9 +152,9 @@ export function PageSettings(props: IConfirmChildrenProps) {
         }));
     };
 
-    const handleModeChange = (mode: IPageSettings['mode']) => {
-        setSettings((prev) => ({ ...prev, mode }));
-    };
+    // const handleModeChange = (mode: IPageSettings['mode']) => {
+    //     setSettings((prev) => ({ ...prev, mode }));
+    // };
 
     const handleModernWidthChange = (modernWidth: ModernDocumentWidthMode) => {
         setSettings((prev) => ({ ...prev, modernWidth }));
@@ -162,7 +162,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
 
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
-            <div
+            {/* <div
                 className="
                   univer-grid univer-grid-cols-2 univer-rounded-lg univer-bg-gray-100 univer-p-1
                   dark:!univer-bg-gray-800
@@ -186,7 +186,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         {localeService.t<LocaleKey>(mode === DocumentFlavor.MODERN ? 'docs-ui.page-settings.modern-mode' : 'docs-ui.page-settings.classic-mode')}
                     </button>
                 ))}
-            </div>
+            </div> */}
 
             {settings.mode === DocumentFlavor.MODERN
                 ? (

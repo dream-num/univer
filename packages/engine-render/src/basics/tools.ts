@@ -134,6 +134,9 @@ export const cancelRequestFrame = (requestID: number, requester?: any) => {
 
 export const createCanvasElement = (): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
+    // TODO: Remove this fallback when canvas/docs rendering fully supports RTL.
+    // Keep canvas text rendering isolated from an RTL ancestor's inherited direction.
+    canvas.dir = 'ltr';
     // on some environments canvas.style is readonly
     try {
         (canvas as any).style = canvas.style || {};

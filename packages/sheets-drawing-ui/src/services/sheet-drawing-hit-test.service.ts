@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IDisposable, Workbook } from '@univerjs/core';
+import type { IDisposable, IDrawingParam, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRender, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { Disposable, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';

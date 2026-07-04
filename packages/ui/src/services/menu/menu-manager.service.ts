@@ -368,7 +368,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             }
         };
 
-        return findKey(this._menu) ?? [];
+        return findKey(this._menu);
     }
 
     /**

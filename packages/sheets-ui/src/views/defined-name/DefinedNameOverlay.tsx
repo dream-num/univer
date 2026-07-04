@@ -32,6 +32,7 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
     const definedNamesService = useDependency(IDefinedNamesService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sidebarService = useDependency(ISidebarService);
+    const direction = localeService.getDirection();
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
@@ -106,7 +107,14 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
     };
 
     return (
-        <div className="univer-w-[300px]">
+        <div
+            data-u-comp="defined-name-overlay"
+            dir={direction}
+            className="
+              univer-w-[300px]
+              rtl:univer-text-right
+            "
+        >
             <div
                 ref={listContainerRef}
                 className={clsx('univer-max-h-[360px] univer-min-h-0 univer-overflow-y-auto', scrollbarClassName, {
@@ -127,14 +135,18 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                                 onClick={() => { focusDefinedName(definedName); }}
                             >
                                 <div
+                                    data-u-comp="defined-name-overlay-row"
                                     className={clsx(`
-                                      univer-flex univer-items-center univer-justify-between univer-gap-2 univer-py-1
+                                      univer-flex univer-items-center univer-gap-2 univer-py-1
+                                      rtl:univer-flex-row-reverse
                                     `, borderBottomClassName)}
                                 >
                                     <div
+                                        data-u-comp="defined-name-overlay-name"
                                         className={`
-                                          univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-sm
+                                          univer-min-w-0 univer-flex-1 univer-basis-0 univer-truncate univer-text-sm
                                           univer-text-gray-600
+                                          rtl:univer-text-right
                                           dark:!univer-text-gray-200
                                         `}
                                         title={definedName.name}
@@ -142,9 +154,11 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                                         {definedName.name}
                                     </div>
                                     <div
+                                        data-u-comp="defined-name-overlay-reference"
                                         className={`
-                                          univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-xs
+                                          univer-min-w-0 univer-flex-1 univer-basis-0 univer-truncate univer-text-xs
                                           univer-text-gray-400
+                                          rtl:univer-text-right
                                         `}
                                         title={definedName.formulaOrRefString}
                                     >
@@ -157,9 +171,11 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                 </div>
             </div>
             <div
+                data-u-comp="defined-name-overlay-footer"
                 className={`
                   univer-cursor-pointer univer-p-2 univer-transition-colors univer-duration-200
                   hover:univer-bg-gray-100
+                  rtl:univer-text-right
                   dark:hover:!univer-bg-gray-600
                 `}
                 onClick={openSlider}

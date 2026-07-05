@@ -24,58 +24,7 @@ import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sh
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useContext } from 'react';
 import { BorderLine } from './border-line/BorderLine';
-import { BORDER_LINE_CHILDREN } from './interface';
-
-const BORDER_SIZE_CHILDREN = [
-    {
-        label: BorderStyleTypes.THIN,
-        value: BorderStyleTypes.THIN,
-    },
-    {
-        label: BorderStyleTypes.HAIR,
-        value: BorderStyleTypes.HAIR,
-    },
-    {
-        label: BorderStyleTypes.DOTTED,
-        value: BorderStyleTypes.DOTTED,
-    },
-    {
-        label: BorderStyleTypes.DASHED,
-        value: BorderStyleTypes.DASHED,
-    },
-    {
-        label: BorderStyleTypes.DASH_DOT,
-        value: BorderStyleTypes.DASH_DOT,
-    },
-    {
-        label: BorderStyleTypes.DASH_DOT_DOT,
-        value: BorderStyleTypes.DASH_DOT_DOT,
-    },
-    {
-        label: BorderStyleTypes.MEDIUM,
-        value: BorderStyleTypes.MEDIUM,
-    },
-    {
-        label: BorderStyleTypes.MEDIUM_DASHED,
-        value: BorderStyleTypes.MEDIUM_DASHED,
-    },
-    {
-        label: BorderStyleTypes.MEDIUM_DASH_DOT,
-        value: BorderStyleTypes.MEDIUM_DASH_DOT,
-    },
-    {
-        label: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
-        value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
-    },
-    {
-        label: BorderStyleTypes.THICK,
-        value: BorderStyleTypes.THICK,
-    },
-    {
-        label: BorderStyleTypes.DOUBLE,
-        value: BorderStyleTypes.DOUBLE,
-    },
-];
+import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './interface';
 
 function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {
     if (!borderData) return;

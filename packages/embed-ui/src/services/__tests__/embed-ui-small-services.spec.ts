@@ -30,7 +30,7 @@ import {
     getEmbedTabPeerWorkbenchRole,
     isEmbedTabPeerEntry,
 } from '../../common/tab-peer-workbench';
-import { resolveChromeAnchorRect, shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
+import { resolveChromeAnchorRect, shouldDeferSheetFloatRuntimeMount, syncChromeControlsVisibility, syncDocsSheetLikeChromePageArea, syncRuntimeInteractionVisibility } from '../../components/EmbedFloatDomRenderer';
 import { EmbedHostAnchorCleanupController } from '../../controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from '../../controllers/embed-host-ribbon-override.controller';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
@@ -333,6 +333,15 @@ describe('embed-ui small services and controllers', () => {
         expect(rect.height).toBe(240);
 
         wrapper.remove();
+    });
+
+    it('syncs docs sheet-like page area coordinates onto the fixed chrome layer', () => {
+        const chrome = document.createElement('div');
+
+        syncDocsSheetLikeChromePageArea(chrome, createRect(40, 20, 900, 320), createRect(120, 60, 640, 280));
+
+        expect(chrome.style.getPropertyValue('--univer-embed-docs-block-page-left')).toBe('80px');
+        expect(chrome.style.getPropertyValue('--univer-embed-docs-block-page-width')).toBe('640px');
     });
 
     it('routes child undo redo to host stack when focus owner matches', () => {

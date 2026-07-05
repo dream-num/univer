@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IEmbedFloatingActivation, IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { IMenuItem, IMenuSchema, IValueOption } from '@univerjs/ui';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import {
     BorderStyleTypes,
@@ -32,35 +32,33 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { Button, clsx, ColorPicker, Dropdown, Tooltip } from '@univerjs/design';
-import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { RemoveEmbedCommand } from '@univerjs/embed';
+import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuStage as resolveCommonEmbedFloatingMenuStage, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import {
     AlignBottomIcon,
     AlignTopIcon,
-    AllBorderIcon,
     AutowrapIcon,
     BoldIcon,
     BrushIcon,
+    CancelMergeIcon,
+    CheckMarkIcon,
+    DeleteIcon,
     FilterIcon,
     FontColorDoubleIcon,
-    GridOutlineIcon,
     HorizontallyIcon,
-    InnerBorderDoubleIcon,
-    ItalicIcon,
+    HorizontalMergeIcon,
     LeftJustifyingIcon,
     MergeAllIcon,
     MoreDownIcon,
     NoBorderIcon,
+    NoColorDoubleIcon,
     NumberIcon,
-    OuterBorderDoubleIcon,
     OverflowIcon,
     PaintBucketDoubleIcon,
     RightJustifyingIcon,
-    StrikethroughIcon,
     TruncationIcon,
-    TypographyIcon,
-    UnderlineIcon,
-    VerticalBorderDoubleIcon,
     VerticalCenterIcon,
+    VerticalIntegrationIcon,
 } from '@univerjs/icons';
 import {
     AddWorksheetMergeAllCommand,
@@ -68,6 +66,7 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
     RemoveWorksheetMergeCommand,
+    ResetBackgroundColorCommand,
     SetBackgroundColorCommand,
     SetBorderBasicCommand,
     SetHorizontalTextAlignCommand,
@@ -75,18 +74,18 @@ import {
     SetVerticalTextAlignCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { FONT_SIZE_LIST, IMenuManagerService, MenuManagerPosition, ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
+import { FONT_SIZE_LIST, FontFamilyItem, IconManager, IMenuManagerService, MenuManagerPosition, ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
 import { createElement, forwardRef, useEffect, useMemo, useState } from 'react';
 import {
+    ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
-    SetRangeItalicCommand,
-    SetRangeStrickThroughCommand,
     SetRangeTextColorCommand,
-    SetRangeUnderlineCommand,
 } from './commands/commands/inline-format.command';
 import { SetOnceFormatPainterCommand } from './commands/commands/set-format-painter.command';
+import { BorderLine } from './views/border-panel/border-line/BorderLine';
+import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './views/border-panel/interface';
 
 const OPEN_NUMFMT_PANEL_MENU_ID = 'sheet.operation.open.numfmt.panel';
 const SMART_TOGGLE_FILTER_MENU_ID = 'sheet.command.smart-toggle-filter';
@@ -99,21 +98,34 @@ export type SheetFloatingToolbarItem =
 export function createSheetsFloatingToolbarItems(): SheetFloatingToolbarItem[] {
     return [
         { id: 'formatPainter', type: 'button' },
+        { id: 'divider-format-tools', type: 'divider' },
         { id: 'numberFormat', type: 'dropdown' },
         { id: 'divider-format', type: 'divider' },
         { id: 'fontFamily', type: 'dropdown' },
         { id: 'fontSize', type: 'dropdown' },
-        { id: 'fontComposite', type: 'dropdown' },
+        { id: 'bold', type: 'button' },
         { id: 'divider-font', type: 'divider' },
         { id: 'textColor', type: 'dropdown' },
         { id: 'backgroundColor', type: 'dropdown' },
         { id: 'borderComposite', type: 'dropdown' },
         { id: 'divider-border', type: 'divider' },
         { id: 'merge', type: 'dropdown' },
+        { id: 'horizontalAlign', type: 'dropdown' },
+        { id: 'verticalAlign', type: 'dropdown' },
         { id: 'wrap', type: 'dropdown' },
         { id: 'divider-layout', type: 'divider' },
         { id: 'filter', type: 'button' },
+        { id: 'divider-block', type: 'divider' },
+        { id: 'deleteBlock', type: 'button' },
     ];
+}
+
+export function createSheetsFloatingBorderLineItems(): typeof BORDER_LINE_CHILDREN {
+    return [...BORDER_LINE_CHILDREN];
+}
+
+export function createSheetsFloatingFontSizeItems(): typeof FONT_SIZE_LIST {
+    return [...FONT_SIZE_LIST];
 }
 
 export interface IResolvedSheetsFloatingToolbarMenuItems {
@@ -121,14 +133,7 @@ export interface IResolvedSheetsFloatingToolbarMenuItems {
     numberFormat?: IMenuItem;
     fontFamily?: IMenuItem;
     fontSize?: IMenuItem;
-    fontComposite?: {
-        bold?: IMenuItem;
-        italic?: IMenuItem;
-        underline?: IMenuItem;
-        strikethrough?: IMenuItem;
-        horizontalAlign?: IMenuItem;
-        verticalAlign?: IMenuItem;
-    };
+    bold?: IMenuItem;
     textColor?: IMenuItem;
     backgroundColor?: IMenuItem;
     borderComposite?: IMenuItem;
@@ -139,29 +144,28 @@ export interface IResolvedSheetsFloatingToolbarMenuItems {
         horizontal?: IMenuItem;
         unmerge?: IMenuItem;
     };
+    horizontalAlign?: IMenuItem;
+    verticalAlign?: IMenuItem;
     wrap?: IMenuItem;
     filter?: IMenuItem;
+    deleteBlock?: true;
 }
 
-const SHEET_FLOATING_MENU_TARGETS = {
+type SheetFloatingDirectMenuKey = Exclude<keyof IResolvedSheetsFloatingToolbarMenuItems, 'merge' | 'deleteBlock'>;
+
+const SHEET_FLOATING_MENU_TARGETS: Record<SheetFloatingDirectMenuKey, string> = {
     formatPainter: SetOnceFormatPainterCommand.id,
     numberFormat: OPEN_NUMFMT_PANEL_MENU_ID,
     fontFamily: SetRangeFontFamilyCommand.id,
     fontSize: SetRangeFontSizeCommand.id,
+    bold: SetRangeBoldCommand.id,
     textColor: SetRangeTextColorCommand.id,
     backgroundColor: SetBackgroundColorCommand.id,
     borderComposite: SetBorderBasicCommand.id,
-    wrap: SetTextWrapCommand.id,
-    filter: SMART_TOGGLE_FILTER_MENU_ID,
-};
-
-const SHEET_FLOATING_FONT_COMPOSITE_TARGETS = {
-    bold: SetRangeBoldCommand.id,
-    italic: SetRangeItalicCommand.id,
-    underline: SetRangeUnderlineCommand.id,
-    strikethrough: SetRangeStrickThroughCommand.id,
     horizontalAlign: SetHorizontalTextAlignCommand.id,
     verticalAlign: SetVerticalTextAlignCommand.id,
+    wrap: SetTextWrapCommand.id,
+    filter: SMART_TOGGLE_FILTER_MENU_ID,
 };
 
 const SHEET_FLOATING_MERGE_TARGETS = {
@@ -183,20 +187,9 @@ export function resolveSheetsFloatingToolbarMenuItems(menuSchemas: IMenuSchema[]
         return schema?.item;
     };
 
-    Object.entries(SHEET_FLOATING_MENU_TARGETS).forEach(([key, targetId]) => {
-        resolved[key as keyof IResolvedSheetsFloatingToolbarMenuItems] = findMenuItem(targetId);
+    (Object.keys(SHEET_FLOATING_MENU_TARGETS) as SheetFloatingDirectMenuKey[]).forEach((key) => {
+        resolved[key] = findMenuItem(SHEET_FLOATING_MENU_TARGETS[key]);
     });
-    const fontComposite = Object.entries(SHEET_FLOATING_FONT_COMPOSITE_TARGETS).reduce<NonNullable<IResolvedSheetsFloatingToolbarMenuItems['fontComposite']>>((result, [key, targetId]) => {
-        const item = findMenuItem(targetId);
-        if (item) {
-            result[key as keyof NonNullable<IResolvedSheetsFloatingToolbarMenuItems['fontComposite']>] = item;
-        }
-
-        return result;
-    }, {});
-    if (hasResolvedMenuItem(fontComposite)) {
-        resolved.fontComposite = fontComposite;
-    }
     const merge = Object.entries(SHEET_FLOATING_MERGE_TARGETS).reduce<NonNullable<IResolvedSheetsFloatingToolbarMenuItems['merge']>>((result, [key, targetId]) => {
         const item = findMenuItem(targetId);
         if (item) {
@@ -208,16 +201,19 @@ export function resolveSheetsFloatingToolbarMenuItems(menuSchemas: IMenuSchema[]
     if (hasResolvedMenuItem(merge)) {
         resolved.merge = merge;
     }
+    resolved.deleteBlock = true;
 
     return resolved;
 }
 
-const SHEET_FLOATING_TOOLBAR_GROUPS: Array<{ dividerBefore?: string; items: Array<Exclude<keyof IResolvedSheetsFloatingToolbarMenuItems, 'fontComposite'> | 'fontComposite'> }> = [
-    { items: ['formatPainter', 'numberFormat'] },
-    { dividerBefore: 'divider-format', items: ['fontFamily', 'fontSize', 'fontComposite'] },
+const SHEET_FLOATING_TOOLBAR_GROUPS: Array<{ dividerBefore?: string; items: Array<keyof IResolvedSheetsFloatingToolbarMenuItems> }> = [
+    { items: ['formatPainter'] },
+    { dividerBefore: 'divider-format-tools', items: ['numberFormat'] },
+    { dividerBefore: 'divider-format', items: ['fontFamily', 'fontSize', 'bold'] },
     { dividerBefore: 'divider-font', items: ['textColor', 'backgroundColor', 'borderComposite'] },
-    { dividerBefore: 'divider-border', items: ['merge', 'wrap'] },
+    { dividerBefore: 'divider-border', items: ['merge', 'horizontalAlign', 'verticalAlign', 'wrap'] },
     { dividerBefore: 'divider-layout', items: ['filter'] },
+    { dividerBefore: 'divider-block', items: ['deleteBlock'] },
 ];
 
 export function createVisibleSheetsFloatingToolbarItems(resolved: IResolvedSheetsFloatingToolbarMenuItems): SheetFloatingToolbarItem[] {
@@ -227,7 +223,7 @@ export function createVisibleSheetsFloatingToolbarItems(resolved: IResolvedSheet
             .filter((id) => hasToolbarCapability(resolved, id))
             .map<SheetFloatingToolbarItem>((id) => ({
                 id,
-                type: id === 'formatPainter' || id === 'filter' ? 'button' : 'dropdown',
+                type: id === 'formatPainter' || id === 'bold' || id === 'filter' || id === 'deleteBlock' ? 'button' : 'dropdown',
             }));
         if (!groupItems.length) {
             return;
@@ -243,10 +239,6 @@ export function createVisibleSheetsFloatingToolbarItems(resolved: IResolvedSheet
 }
 
 function hasToolbarCapability(resolved: IResolvedSheetsFloatingToolbarMenuItems, id: string): boolean {
-    if (id === 'fontComposite') {
-        return Boolean(resolved.fontComposite && hasResolvedMenuItem(resolved.fontComposite));
-    }
-
     return Boolean(resolved[id as keyof IResolvedSheetsFloatingToolbarMenuItems]);
 }
 
@@ -296,7 +288,7 @@ function mountSheetsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
             childUnitId: context.childUnitId,
             entry: context.descriptor.entry,
             fullscreen: Boolean(context.renderScope.fullscreen),
-            usesDomFloatingStage: context.descriptor.entry !== 'slides-floating-object',
+            usesDomFloatingStage: shouldUseSheetsFloatingMenuDomStage(context.descriptor.entry),
             renderScopeActive$: context.renderScope.active$,
         })
     ));
@@ -317,6 +309,10 @@ interface ISheetEmbedFloatingMenuProps {
     renderScopeActive$: Observable<boolean>;
 }
 
+export function shouldUseSheetsFloatingMenuDomStage(_entry: string): boolean {
+    return true;
+}
+
 export function resolveSheetsFloatingMenuStage(params: {
     embedId: string;
     active: IEmbedFloatingActivation | null;
@@ -326,14 +322,6 @@ export function resolveSheetsFloatingMenuStage(params: {
 }): SheetFloatingMenuStage {
     return resolveCommonEmbedFloatingMenuStage(params);
 }
-
-const FONT_FAMILY_OPTIONS = [
-    { label: 'Default', value: 'Default' },
-    { label: 'Arial', value: 'Arial' },
-    { label: 'Times New Roman', value: 'Times New Roman' },
-    { label: 'Courier New', value: 'Courier New' },
-    { label: 'Microsoft YaHei', value: 'Microsoft YaHei' },
-];
 
 export function resolveSheetsFloatingMenuClassName(params: {
     entry: string;
@@ -376,6 +364,28 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
     });
     const isStage2 = stage === 'stage2';
     const [menuVersion, setMenuVersion] = useState(0);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const getDropdownOpenProps = (id: string) => ({
+        open: openDropdown === id,
+        onOpenChange: (open: boolean) => setOpenDropdown(open ? id : null),
+    });
+    useEffect(() => {
+        if (!openDropdown) {
+            return;
+        }
+
+        const closeDropdownOnOutsidePointerDown = (event: PointerEvent) => {
+            if (!isFloatingDropdownOwnSurfaceTarget(event.target, embedId)) {
+                setOpenDropdown(null);
+            }
+        };
+
+        document.addEventListener('pointerdown', closeDropdownOnOutsidePointerDown, true);
+
+        return () => {
+            document.removeEventListener('pointerdown', closeDropdownOnOutsidePointerDown, true);
+        };
+    }, [embedId, openDropdown]);
     useEffect(() => {
         const subscription = menuManagerService.menuChanged$.subscribe(() => {
             setMenuVersion((version) => version + 1);
@@ -419,7 +429,7 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
     const getSelectionRanges = () => {
         return selectionService.getCurrentSelections()?.map((selection) => selection.range) ?? [];
     };
-    const setBorder = (item: IMenuItem | undefined, type: BorderType, style = BorderStyleTypes.THIN) => {
+    const setBorder = (item: IMenuItem | undefined, type: BorderType, style = BorderStyleTypes.THIN, color = '#000000') => {
         const target = getSheetTarget();
         const ranges = getSelectionRanges();
         if (!target || !ranges.length) {
@@ -432,11 +442,14 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
             ranges,
             value: {
                 type,
-                color: '#000000',
+                color,
                 style,
                 activeBorderType: true,
             },
         });
+    };
+    const removeEmbed = () => {
+        void commandService.executeCommand(RemoveEmbedCommand.id, { hostUnitId, embedId });
     };
 
     return (
@@ -453,33 +466,34 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
                     <BrushIcon />
                 </MenuButtonFromMenu>
             )}
+            {visibleToolbarItemIds.has('divider-format-tools') && <Divider />}
             {visibleToolbarItemIds.has('numberFormat') && (
                 <NumberFormatDropdown menuItem={resolvedMenuItems.numberFormat} onClick={() => executeMenuItem(resolvedMenuItems.numberFormat)} />
             )}
             {visibleToolbarItemIds.has('divider-format') && <Divider />}
             {visibleToolbarItemIds.has('fontFamily') && (
-                <TextDropdown
+                <FontFamilyFloatingDropdown
                     embedId={embedId}
                     menuItem={resolvedMenuItems.fontFamily}
                     title={localeService.t('sheets-ui.toolbar.font')}
-                    icon={<TypographyIcon />}
-                    label="Default"
-                    options={FONT_FAMILY_OPTIONS}
+                    {...getDropdownOpenProps('fontFamily')}
                     onSelect={(value) => executeMenuItem(resolvedMenuItems.fontFamily, { value })}
                 />
             )}
             {visibleToolbarItemIds.has('fontSize') && (
-                <TextDropdown
+                <FontSizeFloatingDropdown
                     embedId={embedId}
                     menuItem={resolvedMenuItems.fontSize}
                     title={localeService.t('sheets-ui.toolbar.fontSize')}
-                    icon={<span className="univer-text-[13px] univer-font-semibold">T</span>}
-                    label="10"
-                    options={FONT_SIZE_LIST.map((item) => ({ label: String(item.label ?? item.value), value: String(item.value) }))}
+                    {...getDropdownOpenProps('fontSize')}
                     onSelect={(value) => executeMenuItem(resolvedMenuItems.fontSize, { value: Number(value) })}
                 />
             )}
-            {visibleToolbarItemIds.has('fontComposite') && <FontCompositeDropdown embedId={embedId} menuItems={resolvedMenuItems.fontComposite} execute={executeMenuItem} />}
+            {visibleToolbarItemIds.has('bold') && (
+                <MenuButtonFromMenu item={resolvedMenuItems.bold} fallbackTitle={localeService.t('sheets-ui.toolbar.bold')} onClick={() => executeMenuItem(resolvedMenuItems.bold)}>
+                    <BoldIcon />
+                </MenuButtonFromMenu>
+            )}
             {visibleToolbarItemIds.has('divider-font') && <Divider />}
             {visibleToolbarItemIds.has('textColor') && (
                 <ColorDropdown
@@ -488,7 +502,9 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
                     title={localeService.t('sheets-ui.toolbar.textColor.main')}
                     icon={<FontColorDoubleIcon className="univer-fill-primary-600" />}
                     defaultColor="#111827"
+                    {...getDropdownOpenProps('textColor')}
                     onChange={(value) => executeMenuItem(resolvedMenuItems.textColor, { value })}
+                    onReset={() => execute(ResetRangeTextColorCommand.id)}
                 />
             )}
             {visibleToolbarItemIds.has('backgroundColor') && (
@@ -498,24 +514,46 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
                     title={localeService.t('sheets-ui.toolbar.fillColor.main')}
                     icon={<PaintBucketDoubleIcon className="univer-fill-primary-600" />}
                     defaultColor="#ffffff"
+                    {...getDropdownOpenProps('backgroundColor')}
                     onChange={(value) => executeMenuItem(resolvedMenuItems.backgroundColor, { value })}
+                    onReset={() => execute(ResetBackgroundColorCommand.id)}
                 />
             )}
-            {visibleToolbarItemIds.has('borderComposite') && <BorderCompositeDropdown embedId={embedId} menuItem={resolvedMenuItems.borderComposite} onSelect={(type, style) => setBorder(resolvedMenuItems.borderComposite, type, style)} />}
+            {visibleToolbarItemIds.has('borderComposite') && <BorderCompositeDropdown embedId={embedId} menuItem={resolvedMenuItems.borderComposite} {...getDropdownOpenProps('borderComposite')} onSelect={(type, style, color) => setBorder(resolvedMenuItems.borderComposite, type, style, color)} />}
             {visibleToolbarItemIds.has('divider-border') && <Divider />}
-            {visibleToolbarItemIds.has('merge') && <MergeDropdown embedId={embedId} menuItems={resolvedMenuItems.merge} execute={executeMenuItem} />}
-            {visibleToolbarItemIds.has('wrap') && <WrapDropdown embedId={embedId} menuItem={resolvedMenuItems.wrap} execute={execute} />}
+            {visibleToolbarItemIds.has('merge') && <MergeDropdown embedId={embedId} menuItems={resolvedMenuItems.merge} {...getDropdownOpenProps('merge')} execute={executeMenuItem} />}
+            {visibleToolbarItemIds.has('horizontalAlign') && (
+                <HorizontalAlignDropdown embedId={embedId} menuItem={resolvedMenuItems.horizontalAlign} {...getDropdownOpenProps('horizontalAlign')} execute={executeMenuItem} />
+            )}
+            {visibleToolbarItemIds.has('verticalAlign') && (
+                <VerticalAlignDropdown embedId={embedId} menuItem={resolvedMenuItems.verticalAlign} {...getDropdownOpenProps('verticalAlign')} execute={executeMenuItem} />
+            )}
+            {visibleToolbarItemIds.has('wrap') && <WrapDropdown embedId={embedId} menuItem={resolvedMenuItems.wrap} {...getDropdownOpenProps('wrap')} execute={execute} />}
             {visibleToolbarItemIds.has('divider-layout') && <Divider />}
             {visibleToolbarItemIds.has('filter') && (
                 <MenuButtonFromMenu item={resolvedMenuItems.filter} fallbackTitle="Filter" onClick={() => executeMenuItem(resolvedMenuItems.filter)}>
                     <FilterIcon />
                 </MenuButtonFromMenu>
             )}
+            {visibleToolbarItemIds.has('divider-block') && <Divider />}
+            {visibleToolbarItemIds.has('deleteBlock') && (
+                <MenuButton
+                    title="Delete embed block"
+                    className="
+                      univer-text-red-500
+                      hover:univer-text-red-600
+                    "
+                    onClick={removeEmbed}
+                >
+                    <DeleteIcon />
+                </MenuButton>
+            )}
         </div>
     );
 }
 
 const SHEET_FLOATING_TOOLBAR_SELECTOR_CLASS = 'univer-gap-1 univer-px-1.5 univer-text-sm';
+const SHEET_FLOATING_TOOLBAR_COMPACT_DROPDOWN_CLASS = 'univer-gap-0.5 univer-px-1';
 const SHEET_FLOATING_TOOLBAR_PANEL_BUTTON_CLASS = 'univer-size-7';
 const SHEET_FLOATING_TOOLBAR_ICON_BUTTON_CLASS = 'univer-text-sm';
 const SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS = 'univer-size-4';
@@ -524,13 +562,13 @@ const EMBED_FLOATING_MENU_POPUP_ATTRIBUTE = 'data-embed-floating-menu-popup';
 const FloatingToolbarTrigger = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & {
     children: ReactNode;
     title: string;
-}>(({ children, onClick, onMouseDown, onPointerDown, ...restProps }, ref) => (
+}>(({ children, className, onClick, onMouseDown, onPointerDown, ...restProps }, ref) => (
     <Button
         ref={ref}
         type="button"
         size="small"
         variant="ghost"
-        className={SHEET_FLOATING_TOOLBAR_SELECTOR_CLASS}
+        className={clsx(SHEET_FLOATING_TOOLBAR_SELECTOR_CLASS, className)}
         aria-label={restProps.title}
         onPointerDown={(event) => {
             event.stopPropagation();
@@ -551,9 +589,93 @@ const FloatingToolbarTrigger = forwardRef<HTMLButtonElement, ButtonHTMLAttribute
 ));
 FloatingToolbarTrigger.displayName = 'FloatingToolbarTrigger';
 
+const FloatingToolbarSplitTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement> & {
+    title: string;
+    primary: ReactNode;
+    disabled?: boolean;
+    open?: boolean;
+    onPrimaryClick: () => void;
+}>(({ title, primary, disabled, open, onPrimaryClick, onMouseDown, onPointerDown, onClick, ...restProps }, ref) => (
+    <div
+        ref={ref}
+        className={clsx(`
+          univer-box-border univer-inline-flex univer-h-6 univer-cursor-pointer univer-select-none univer-items-center
+          univer-overflow-hidden univer-rounded-md univer-text-sm univer-text-gray-900
+          hover:univer-bg-gray-100
+          dark:!univer-text-white
+          dark:hover:!univer-bg-gray-700
+        `, {
+            'univer-bg-gray-100 dark:!univer-bg-gray-700': open,
+            'univer-cursor-not-allowed univer-opacity-60': disabled,
+        })}
+        role="group"
+        aria-label={title}
+        aria-disabled={disabled}
+        title={title}
+        onPointerDown={(event) => {
+            event.stopPropagation();
+            onPointerDown?.(event);
+        }}
+        onMouseDown={(event) => {
+            event.stopPropagation();
+            onMouseDown?.(event);
+        }}
+        onClick={(event) => {
+            onClick?.(event);
+            event.stopPropagation();
+        }}
+        {...restProps}
+    >
+        <button
+            type="button"
+            className="
+              univer-box-border univer-flex univer-h-6 univer-w-7 univer-cursor-pointer univer-items-center
+              univer-justify-center univer-border-none univer-bg-transparent univer-p-0 univer-text-gray-900
+              hover:univer-bg-gray-200
+              disabled:univer-cursor-not-allowed
+              dark:!univer-text-white
+              dark:hover:!univer-bg-gray-600
+            "
+            aria-label={title}
+            title={title}
+            disabled={disabled}
+            onClick={(event) => {
+                event.stopPropagation();
+                onPrimaryClick();
+            }}
+        >
+            {primary}
+        </button>
+        <span
+            className="
+              univer-h-3 univer-w-px univer-bg-gray-100
+              dark:!univer-bg-gray-700
+            "
+        />
+        <button
+            type="button"
+            className="
+              univer-box-border univer-flex univer-h-6 univer-w-5 univer-cursor-pointer univer-items-center
+              univer-justify-center univer-border-none univer-bg-transparent univer-p-0 univer-text-gray-900
+              hover:univer-bg-gray-200
+              disabled:univer-cursor-not-allowed
+              dark:!univer-text-white
+              dark:hover:!univer-bg-gray-600
+            "
+            aria-label={title}
+            title={title}
+            disabled={disabled}
+        >
+            <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
+        </button>
+    </div>
+));
+FloatingToolbarSplitTrigger.displayName = 'FloatingToolbarSplitTrigger';
+
 function MenuButton(props: {
     children: ReactNode;
     title: string;
+    className?: string;
     disabled?: boolean;
     active?: boolean;
     onClick: () => void;
@@ -561,7 +683,7 @@ function MenuButton(props: {
     return (
         <Tooltip title={props.title} placement="bottom">
             <ToolbarButton
-                className={SHEET_FLOATING_TOOLBAR_ICON_BUTTON_CLASS}
+                className={clsx(SHEET_FLOATING_TOOLBAR_ICON_BUTTON_CLASS, props.className)}
                 title={props.title}
                 aria-label={props.title}
                 disabled={props.disabled}
@@ -667,100 +789,208 @@ function NumberFormatDropdown(props: {
     );
 }
 
-function TextDropdown(props: {
+function FontFamilyFloatingDropdown(props: {
     embedId: string;
     menuItem: IMenuItem | undefined;
     title: string;
-    icon: ReactNode;
-    label: string;
-    options: Array<{ label: string; value: string }>;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     onSelect: (value: string) => void;
 }) {
     const { hidden, disabled, value } = useMenuItemRuntimeState(props.menuItem);
-    const [open, setOpen] = useState(false);
     if (!props.menuItem || hidden) {
         return null;
     }
 
-    const label = typeof value === 'string' || typeof value === 'number' ? String(value) : props.label;
+    const fontFamily = typeof value === 'string' && value ? value : 'Arial';
 
     return (
         <InlineFloatingDropdown
             embedId={props.embedId}
             disabled={disabled}
             title={props.title}
-            open={open}
-            onOpenChange={setOpen}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
             trigger={(
                 <>
-                    {props.icon}
-                    <span className="univer-max-w-20 univer-truncate">{label}</span>
+                    <span className="univer-w-28 univer-truncate univer-text-left">{fontFamily}</span>
                     <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
                 </>
             )}
             overlay={(
-                <MenuPanel>
-                    {props.options.map((item) => (
-                        <MenuPanelItem
-                            key={item.value}
-                            active={item.value === label}
-                            onClick={() => {
-                                props.onSelect(item.value);
-                                setOpen(false);
-                            }}
-                        >
-                            <span className="univer-truncate">{item.label}</span>
-                        </MenuPanelItem>
-                    ))}
-                </MenuPanel>
+                <div
+                    className="
+                      univer-box-border univer-max-h-72 univer-min-w-44 univer-overflow-y-auto univer-rounded-lg
+                      univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
+                      univer-shadow-lg
+                      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+                      [&_button]:!univer-h-7 [&_button]:!univer-px-2
+                      [&_ul]:!univer-text-sm
+                    "
+                    onPointerDown={keepFloatingPanelInteraction}
+                    onMouseDown={keepFloatingPanelInteraction}
+                >
+                    <FontFamilyItem
+                        value={fontFamily}
+                        onChange={(nextValue) => {
+                            props.onSelect(nextValue);
+                            props.onOpenChange(false);
+                        }}
+                    />
+                </div>
             )}
         />
     );
 }
 
-function FontCompositeDropdown(props: {
+function FontSizeFloatingDropdown(props: {
     embedId: string;
-    menuItems: IResolvedSheetsFloatingToolbarMenuItems['fontComposite'];
+    menuItem: IMenuItem | undefined;
+    title: string;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onSelect: (value: string) => void;
+}) {
+    const { hidden, disabled, value } = useMenuItemRuntimeState(props.menuItem);
+    if (!props.menuItem || hidden) {
+        return null;
+    }
+
+    const fontSize = typeof value === 'number' || typeof value === 'string' ? Number(value) : 11;
+
+    return (
+        <InlineFloatingDropdown
+            embedId={props.embedId}
+            disabled={disabled}
+            title={props.title}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
+            trigger={(
+                <>
+                    <span className="univer-min-w-6 univer-text-left">{fontSize}</span>
+                    <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
+                </>
+            )}
+            overlay={(
+                <div
+                    className="
+                      univer-box-border univer-max-h-72 univer-min-w-20 univer-overflow-y-auto univer-rounded-lg
+                      univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
+                      univer-shadow-lg
+                      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+                    "
+                    onPointerDown={keepFloatingPanelInteraction}
+                    onMouseDown={keepFloatingPanelInteraction}
+                >
+                    {createSheetsFloatingFontSizeItems().map((item) => {
+                        const selected = Number(item.value) === fontSize;
+                        return (
+                            <button
+                                key={item.value}
+                                type="button"
+                                className={clsx(`
+                                  univer-grid univer-h-7 univer-w-full univer-grid-cols-[1fr_1rem] univer-items-center
+                                  univer-gap-2 univer-rounded univer-border-none univer-bg-transparent univer-px-2
+                                  univer-text-left univer-text-sm univer-text-gray-900
+                                  hover:univer-bg-gray-100
+                                  dark:!univer-text-white
+                                  dark:hover:!univer-bg-gray-700
+                                `, {
+                                    'univer-bg-gray-100 dark:!univer-bg-gray-700': selected,
+                                })}
+                                onClick={() => {
+                                    props.onSelect(String(item.value));
+                                    props.onOpenChange(false);
+                                }}
+                            >
+                                <span>{item.label}</span>
+                                {selected && <CheckMarkIcon className="univer-text-primary-600" />}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        />
+    );
+}
+
+function HorizontalAlignDropdown(props: {
+    embedId: string;
+    menuItem: IMenuItem | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     execute: (item: IMenuItem | undefined, params?: object) => void;
 }) {
     const localeService = useDependency(LocaleService);
-    if (!props.menuItems) {
+    const { hidden, disabled } = useMenuItemRuntimeState(props.menuItem);
+    if (!props.menuItem || hidden) {
         return null;
     }
 
     return (
-        <Dropdown
-            align="start"
-            sideOffset={6}
-            onPointerDownOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
-            onFocusOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
-            onInteractOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+        <InlineFloatingDropdown
+            embedId={props.embedId}
+            disabled={disabled}
+            title={localeService.t('sheets-ui.toolbar.horizontalAlignMode.main')}
+            triggerClassName={SHEET_FLOATING_TOOLBAR_COMPACT_DROPDOWN_CLASS}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
+            trigger={(
+                <>
+                    <LeftJustifyingIcon />
+                    <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
+                </>
+            )}
             overlay={(
                 <Panel embedId={props.embedId} onPointerDown={(event) => event.stopPropagation()}>
                     <PanelRow>
-                        <PanelButtonFromMenu item={props.menuItems.bold} title={localeService.t('sheets-ui.toolbar.bold')} onClick={() => props.execute(props.menuItems?.bold)}><BoldIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.italic} title={localeService.t('sheets-ui.toolbar.italic')} onClick={() => props.execute(props.menuItems?.italic)}><ItalicIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.underline} title={localeService.t('sheets-ui.toolbar.underline')} onClick={() => props.execute(props.menuItems?.underline)}><UnderlineIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.strikethrough} title={localeService.t('sheets-ui.toolbar.strikethrough')} onClick={() => props.execute(props.menuItems?.strikethrough)}><StrikethroughIcon /></PanelButtonFromMenu>
-                    </PanelRow>
-                    <PanelRow>
-                        <PanelButtonFromMenu item={props.menuItems.horizontalAlign} title={localeService.t('sheets-ui.align.left')} onClick={() => props.execute(props.menuItems?.horizontalAlign, { value: HorizontalAlign.LEFT })}><LeftJustifyingIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.horizontalAlign} title={localeService.t('sheets-ui.align.center')} onClick={() => props.execute(props.menuItems?.horizontalAlign, { value: HorizontalAlign.CENTER })}><HorizontallyIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.horizontalAlign} title={localeService.t('sheets-ui.align.right')} onClick={() => props.execute(props.menuItems?.horizontalAlign, { value: HorizontalAlign.RIGHT })}><RightJustifyingIcon /></PanelButtonFromMenu>
-                    </PanelRow>
-                    <PanelRow>
-                        <PanelButtonFromMenu item={props.menuItems.verticalAlign} title={localeService.t('sheets-ui.align.top')} onClick={() => props.execute(props.menuItems?.verticalAlign, { value: VerticalAlign.TOP })}><AlignTopIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.verticalAlign} title={localeService.t('sheets-ui.align.middle')} onClick={() => props.execute(props.menuItems?.verticalAlign, { value: VerticalAlign.MIDDLE })}><VerticalCenterIcon /></PanelButtonFromMenu>
-                        <PanelButtonFromMenu item={props.menuItems.verticalAlign} title={localeService.t('sheets-ui.align.bottom')} onClick={() => props.execute(props.menuItems?.verticalAlign, { value: VerticalAlign.BOTTOM })}><AlignBottomIcon /></PanelButtonFromMenu>
+                        <PanelButtonFromMenu item={props.menuItem} title={localeService.t('sheets-ui.align.left')} onClick={() => props.execute(props.menuItem, { value: HorizontalAlign.LEFT })}><LeftJustifyingIcon /></PanelButtonFromMenu>
+                        <PanelButtonFromMenu item={props.menuItem} title={localeService.t('sheets-ui.align.center')} onClick={() => props.execute(props.menuItem, { value: HorizontalAlign.CENTER })}><HorizontallyIcon /></PanelButtonFromMenu>
+                        <PanelButtonFromMenu item={props.menuItem} title={localeService.t('sheets-ui.align.right')} onClick={() => props.execute(props.menuItem, { value: HorizontalAlign.RIGHT })}><RightJustifyingIcon /></PanelButtonFromMenu>
                     </PanelRow>
                 </Panel>
             )}
-        >
-            <FloatingToolbarTrigger title={localeService.t('sheets-ui.toolbar.font')}>
-                <BoldIcon />
-                <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
-            </FloatingToolbarTrigger>
-        </Dropdown>
+        />
+    );
+}
+
+function VerticalAlignDropdown(props: {
+    embedId: string;
+    menuItem: IMenuItem | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    execute: (item: IMenuItem | undefined, params?: object) => void;
+}) {
+    const localeService = useDependency(LocaleService);
+    const { hidden, disabled } = useMenuItemRuntimeState(props.menuItem);
+    if (!props.menuItem || hidden) {
+        return null;
+    }
+
+    return (
+        <InlineFloatingDropdown
+            embedId={props.embedId}
+            disabled={disabled}
+            title={localeService.t('sheets-ui.toolbar.verticalAlignMode.main')}
+            triggerClassName={SHEET_FLOATING_TOOLBAR_COMPACT_DROPDOWN_CLASS}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
+            trigger={(
+                <>
+                    <VerticalCenterIcon />
+                    <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
+                </>
+            )}
+            overlay={(
+                <Panel embedId={props.embedId} onPointerDown={(event) => event.stopPropagation()}>
+                    <PanelRow>
+                        <PanelButtonFromMenu item={props.menuItem} title={localeService.t('sheets-ui.align.top')} onClick={() => props.execute(props.menuItem, { value: VerticalAlign.TOP })}><AlignTopIcon /></PanelButtonFromMenu>
+                        <PanelButtonFromMenu item={props.menuItem} title={localeService.t('sheets-ui.align.middle')} onClick={() => props.execute(props.menuItem, { value: VerticalAlign.MIDDLE })}><VerticalCenterIcon /></PanelButtonFromMenu>
+                        <PanelButtonFromMenu item={props.menuItem} title={localeService.t('sheets-ui.align.bottom')} onClick={() => props.execute(props.menuItem, { value: VerticalAlign.BOTTOM })}><AlignBottomIcon /></PanelButtonFromMenu>
+                    </PanelRow>
+                </Panel>
+            )}
+        />
     );
 }
 
@@ -783,8 +1013,12 @@ function ColorDropdown(props: {
     title: string;
     icon: ReactNode;
     defaultColor: string;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     onChange: (value: string) => void;
+    onReset: () => void;
 }) {
+    const localeService = useDependency(LocaleService);
     const { hidden, disabled, value } = useMenuItemRuntimeState(props.menuItem);
     const [color, setColor] = useState(props.defaultColor);
     if (!props.menuItem || hidden) {
@@ -798,6 +1032,8 @@ function ColorDropdown(props: {
             disabled={disabled}
             align="start"
             sideOffset={6}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
             onPointerDownOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
             onFocusOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
             onInteractOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
@@ -806,10 +1042,12 @@ function ColorDropdown(props: {
                     data-embed-id={props.embedId}
                     {...{ [EMBED_FLOATING_MENU_POPUP_ATTRIBUTE]: 'true' }}
                     className="
-                      univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-4 univer-shadow-lg
+                      univer-box-border univer-w-72 univer-overflow-hidden univer-rounded-lg univer-border
+                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-3 univer-shadow-lg
                       dark:!univer-bg-gray-900
                     "
                     onPointerDown={keepFloatingPanelInteraction}
+                    onMouseDown={keepFloatingPanelInteraction}
                 >
                     <ColorPicker
                         value={displayColor}
@@ -818,6 +1056,26 @@ function ColorDropdown(props: {
                             props.onChange(value);
                         }}
                     />
+                    <MenuSeparator />
+                    <button
+                        type="button"
+                        className="
+                          univer-flex univer-h-8 univer-w-full univer-items-center univer-gap-2 univer-rounded
+                          univer-border-none univer-bg-transparent univer-px-1 univer-text-left univer-text-sm
+                          univer-text-gray-900
+                          hover:univer-bg-gray-100
+                          dark:!univer-text-white
+                          dark:hover:!univer-bg-gray-700
+                        "
+                        onClick={() => {
+                            setColor(props.defaultColor);
+                            props.onReset();
+                            props.onOpenChange(false);
+                        }}
+                    >
+                        <NoColorDoubleIcon />
+                        <span>{localeService.t('sheets-ui.toolbar.resetColor')}</span>
+                    </button>
                 </div>
             )}
         >
@@ -831,37 +1089,32 @@ function ColorDropdown(props: {
 function BorderCompositeDropdown(props: {
     embedId: string;
     menuItem: IMenuItem | undefined;
-    onSelect: (type: BorderType, style?: BorderStyleTypes) => void;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onSelect: (type: BorderType, style?: BorderStyleTypes, color?: string) => void;
 }) {
     const localeService = useDependency(LocaleService);
+    const iconManager = useDependency(IconManager);
     const { hidden, disabled } = useMenuItemRuntimeState(props.menuItem);
     const [borderType, setBorderType] = useState(BorderType.ALL);
     const [borderStyle, setBorderStyle] = useState(BorderStyleTypes.THIN);
+    const [borderColor, setBorderColor] = useState('#000000');
     if (!props.menuItem || hidden) {
         return null;
     }
 
-    const borderTypes = [
-        { title: localeService.t('sheets-ui.borderLine.borderAll'), type: BorderType.ALL, icon: <AllBorderIcon /> },
-        { title: localeService.t('sheets-ui.borderLine.borderOutside'), type: BorderType.OUTSIDE, icon: <OuterBorderDoubleIcon /> },
-        { title: localeService.t('sheets-ui.borderLine.borderInside'), type: BorderType.INSIDE, icon: <InnerBorderDoubleIcon /> },
-        { title: localeService.t('sheets-ui.borderLine.borderVertical'), type: BorderType.VERTICAL, icon: <VerticalBorderDoubleIcon /> },
-        { title: localeService.t('sheets-ui.borderLine.borderNone'), type: BorderType.NONE, icon: <NoBorderIcon /> },
-    ];
-    const borderStyles = [
-        { title: 'Solid', style: BorderStyleTypes.THIN },
-        { title: 'Dotted', style: BorderStyleTypes.DOTTED },
-        { title: 'Dashed', style: BorderStyleTypes.DASHED },
-    ];
-    const borderWidths = [
-        { title: 'Thin', style: BorderStyleTypes.THIN },
-        { title: 'Medium', style: BorderStyleTypes.MEDIUM },
-        { title: 'Thick', style: BorderStyleTypes.THICK },
-    ];
-    const applyBorder = (nextType = borderType, nextStyle = borderStyle) => {
+    const applyBorder = (nextType = borderType, nextStyle = borderStyle, nextColor = borderColor) => {
         setBorderType(nextType);
         setBorderStyle(nextStyle);
-        props.onSelect(nextType, nextStyle);
+        setBorderColor(nextColor);
+        props.onSelect(nextType, nextStyle, nextColor);
+    };
+    const getBorderIconName = (type: BorderType) => {
+        return createSheetsFloatingBorderLineItems().find((item) => item.value === type)?.icon ?? 'AllBorderIcon';
+    };
+    const renderBorderIcon = (icon: string, className = 'univer-fill-primary-600') => {
+        const Icon = iconManager.get(icon);
+        return Icon ? <Icon className={className} /> : <NoBorderIcon />;
     };
 
     return (
@@ -869,39 +1122,130 @@ function BorderCompositeDropdown(props: {
             disabled={disabled}
             align="start"
             sideOffset={6}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
             onPointerDownOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
             onFocusOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
             onInteractOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
             overlay={(
                 <Panel embedId={props.embedId} onPointerDown={(event) => event.stopPropagation()}>
-                    <PanelRow>
-                        {borderTypes.map((item) => (
-                            <PanelButton key={item.type} title={item.title} active={borderType === item.type} onClick={() => applyBorder(item.type)}>
-                                {item.icon}
+                    <div
+                        className="
+                          univer-grid univer-grid-cols-5 univer-gap-2 univer-text-gray-600
+                          dark:!univer-text-gray-200
+                        "
+                    >
+                        {createSheetsFloatingBorderLineItems().map((item) => (
+                            <PanelButton
+                                key={item.value}
+                                title={localeService.t(item.label)}
+                                active={borderType === item.value}
+                                onClick={() => applyBorder(item.value as BorderType)}
+                            >
+                                {renderBorderIcon(item.icon)}
                             </PanelButton>
                         ))}
-                    </PanelRow>
+                    </div>
+                    <MenuSeparator />
                     <PanelRow>
-                        {borderStyles.map((item) => (
-                            <PanelButton key={item.style} title={item.title} active={borderStyle === item.style} onClick={() => applyBorder(borderType, item.style)}>
-                                <LinePreview style={item.style} />
+                        <Dropdown
+                            align="start"
+                            sideOffset={6}
+                            onPointerDownOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+                            onFocusOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+                            onInteractOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+                            overlay={(
+                                <div
+                                    data-embed-id={props.embedId}
+                                    {...{ [EMBED_FLOATING_MENU_POPUP_ATTRIBUTE]: 'true' }}
+                                    className="
+                                      univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-4
+                                      univer-shadow-lg
+                                      dark:!univer-bg-gray-900
+                                    "
+                                    onPointerDown={keepFloatingPanelInteraction}
+                                    onMouseDown={keepFloatingPanelInteraction}
+                                >
+                                    <ColorPicker value={borderColor} onChange={(color) => applyBorder(borderType, borderStyle, color)} />
+                                </div>
+                            )}
+                        >
+                            <PanelButton title={localeService.t('sheets-ui.borderLine.borderColor')} active={false} onClick={() => undefined}>
+                                <PaintBucketDoubleIcon extend={{ colorChannel1: borderColor }} />
+                                <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
                             </PanelButton>
-                        ))}
-                    </PanelRow>
-                    <PanelRow>
-                        {borderWidths.map((item) => (
-                            <PanelButton key={item.style} title={item.title} active={borderStyle === item.style} onClick={() => applyBorder(borderType, item.style)}>
-                                <LinePreview style={item.style} />
+                        </Dropdown>
+                        <Dropdown
+                            align="start"
+                            sideOffset={6}
+                            onPointerDownOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+                            onFocusOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+                            onInteractOutside={(event) => keepFloatingDropdownOpenForOwnSurface(event, props.embedId)}
+                            overlay={(
+                                <div
+                                    data-embed-id={props.embedId}
+                                    {...{ [EMBED_FLOATING_MENU_POPUP_ATTRIBUTE]: 'true' }}
+                                    className="
+                                      univer-box-border univer-grid univer-min-w-48 univer-gap-1 univer-rounded-lg
+                                      univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                                      univer-p-1.5 univer-shadow-lg
+                                      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+                                    "
+                                    onPointerDown={keepFloatingPanelInteraction}
+                                    onMouseDown={keepFloatingPanelInteraction}
+                                >
+                                    {BORDER_SIZE_CHILDREN.map((item) => (
+                                        <button
+                                            key={item.value}
+                                            type="button"
+                                            className={clsx(`
+                                              univer-relative univer-flex univer-h-8 univer-cursor-pointer
+                                              univer-items-center univer-justify-center univer-rounded
+                                              univer-border-none univer-bg-transparent univer-px-2
+                                              hover:univer-bg-gray-100
+                                              dark:hover:!univer-bg-gray-700
+                                            `, {
+                                                'univer-bg-gray-200 dark:!univer-bg-gray-600': borderStyle === item.value,
+                                            })}
+                                            onClick={() => applyBorder(borderType, item.value)}
+                                        >
+                                            <BorderLine
+                                                className="
+                                                  univer-fill-gray-900
+                                                  dark:!univer-fill-white
+                                                "
+                                                type={item.value}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        >
+                            <PanelButton title={localeService.t('sheets-ui.borderLine.borderSize')} active={false} onClick={() => undefined}>
+                                <BorderLine
+                                    className="
+                                      univer-fill-gray-900
+                                      dark:!univer-fill-white
+                                    "
+                                    type={borderStyle}
+                                />
+                                <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
                             </PanelButton>
-                        ))}
+                        </Dropdown>
                     </PanelRow>
                 </Panel>
             )}
         >
-            <FloatingToolbarTrigger title={getLocalizedMenuTitle(props.menuItem, localeService, 'sheets-ui.toolbar.border.main')}>
-                <GridOutlineIcon />
-                <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
-            </FloatingToolbarTrigger>
+            <FloatingToolbarSplitTrigger
+                title={getLocalizedMenuTitle(props.menuItem, localeService, 'sheets-ui.toolbar.border.main')}
+                disabled={disabled}
+                open={props.open}
+                primary={renderBorderIcon(getBorderIconName(borderType), 'univer-text-gray-900 dark:!univer-text-white')}
+                onPrimaryClick={() => {
+                    applyBorder();
+                    props.onOpenChange(false);
+                }}
+            />
         </Dropdown>
     );
 }
@@ -909,17 +1253,18 @@ function BorderCompositeDropdown(props: {
 function MergeDropdown(props: {
     embedId: string;
     menuItems: IResolvedSheetsFloatingToolbarMenuItems['merge'];
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     execute: (item: IMenuItem | undefined, params?: object) => void;
 }) {
     const localeService = useDependency(LocaleService);
     const { hidden, disabled } = useMenuItemRuntimeState(props.menuItems?.root);
-    const [open, setOpen] = useState(false);
     const entries: Array<{ item: IMenuItem; icon: ReactNode }> = [];
     [
         { item: props.menuItems?.all, icon: <MergeAllIcon /> },
-        { item: props.menuItems?.vertical, icon: <VerticalBorderDoubleIcon /> },
-        { item: props.menuItems?.horizontal, icon: <InnerBorderDoubleIcon /> },
-        { item: props.menuItems?.unmerge, icon: <NoBorderIcon /> },
+        { item: props.menuItems?.vertical, icon: <VerticalIntegrationIcon /> },
+        { item: props.menuItems?.horizontal, icon: <HorizontalMergeIcon /> },
+        { item: props.menuItems?.unmerge, icon: <CancelMergeIcon /> },
     ].forEach(({ item, icon }) => {
         if (item) {
             entries.push({ item, icon });
@@ -934,8 +1279,9 @@ function MergeDropdown(props: {
             embedId={props.embedId}
             disabled={disabled}
             title={getLocalizedMenuTitle(props.menuItems.root, localeService, 'sheets-ui.toolbar.mergeCell.main')}
-            open={open}
-            onOpenChange={setOpen}
+            triggerClassName={SHEET_FLOATING_TOOLBAR_COMPACT_DROPDOWN_CLASS}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
             trigger={(
                 <>
                     <MergeAllIcon />
@@ -943,20 +1289,20 @@ function MergeDropdown(props: {
                 </>
             )}
             overlay={(
-                <MenuPanel>
+                <RibbonListPanel>
                     {entries.map(({ item, icon }) => (
-                        <MenuPanelItem
+                        <RibbonListItem
                             key={item.id}
                             icon={icon}
                             onClick={() => {
                                 props.execute(item);
-                                setOpen(false);
+                                props.onOpenChange(false);
                             }}
                         >
                             {localeService.t(getMenuTitle(item))}
-                        </MenuPanelItem>
+                        </RibbonListItem>
                     ))}
-                </MenuPanel>
+                </RibbonListPanel>
             )}
         />
     );
@@ -965,11 +1311,12 @@ function MergeDropdown(props: {
 function WrapDropdown(props: {
     embedId: string;
     menuItem: IMenuItem | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     execute: (commandId: string, params?: object) => void;
 }) {
     const localeService = useDependency(LocaleService);
     const { hidden, disabled } = useMenuItemRuntimeState(props.menuItem);
-    const [open, setOpen] = useState(false);
     if (!props.menuItem || hidden) {
         return null;
     }
@@ -992,8 +1339,9 @@ function WrapDropdown(props: {
             embedId={props.embedId}
             disabled={disabled}
             title={getLocalizedMenuTitle(props.menuItem, localeService, 'sheets-ui.toolbar.textWrapMode.main')}
-            open={open}
-            onOpenChange={setOpen}
+            triggerClassName={SHEET_FLOATING_TOOLBAR_COMPACT_DROPDOWN_CLASS}
+            open={props.open}
+            onOpenChange={props.onOpenChange}
             trigger={(
                 <>
                     <AutowrapIcon />
@@ -1008,7 +1356,7 @@ function WrapDropdown(props: {
                             icon={entry.icon}
                             onClick={() => {
                                 props.execute(entry.commandId, entry.params);
-                                setOpen(false);
+                                props.onOpenChange(false);
                             }}
                         >
                             {entry.label}
@@ -1059,19 +1407,18 @@ function keepFloatingPanelInteraction(event: React.MouseEvent<HTMLElement> | Rea
     }
 }
 
-function keepFloatingDropdownOpenForOwnSurface(event: { target: EventTarget | null; preventDefault: () => void }, embedId: string): void {
-    const target = event.target;
+export function isFloatingDropdownOwnSurfaceTarget(target: EventTarget | null, embedId: string): boolean {
     if (!(target instanceof HTMLElement)) {
-        return;
+        return false;
     }
 
     const surface = target.closest('[data-embed-floating-menu="true"], [data-embed-floating-menu-popup="true"]');
-    if (surface?.getAttribute('data-embed-id') === embedId) {
-        event.preventDefault();
-        return;
-    }
+    return surface?.getAttribute('data-embed-id') === embedId;
+}
 
-    if (target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`)) {
+export function keepFloatingDropdownOpenForOwnSurface(event: { target: EventTarget | null; preventDefault: () => void }, embedId: string): void {
+    const target = event.target;
+    if (isFloatingDropdownOwnSurfaceTarget(target, embedId)) {
         event.preventDefault();
     }
 }
@@ -1098,12 +1445,24 @@ function PanelRow(props: { children: ReactNode }) {
     return <div className="univer-flex univer-items-center univer-gap-1">{props.children}</div>;
 }
 
+function MenuSeparator() {
+    return (
+        <span
+            className="
+              univer-my-1 univer-block univer-h-px univer-w-full univer-bg-gray-200
+              dark:!univer-bg-gray-700
+            "
+        />
+    );
+}
+
 function InlineFloatingDropdown(props: {
     embedId: string;
     title: string;
     trigger: ReactNode;
     overlay: ReactNode;
     disabled?: boolean;
+    triggerClassName?: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }) {
@@ -1136,6 +1495,7 @@ function InlineFloatingDropdown(props: {
                 aria-expanded={open}
                 data-state={open ? 'open' : 'closed'}
                 disabled={props.disabled}
+                className={props.triggerClassName}
             >
                 {props.trigger}
             </FloatingToolbarTrigger>
@@ -1156,6 +1516,42 @@ function MenuPanel(props: { children: ReactNode }) {
         >
             {props.children}
         </section>
+    );
+}
+
+function RibbonListPanel(props: { children: ReactNode }) {
+    return (
+        <section
+            className="
+              univer-box-border univer-grid univer-min-w-44 univer-gap-0.5 univer-rounded-lg univer-border
+              univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1 univer-shadow-lg
+              dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+            "
+            onPointerDown={keepFloatingPanelInteraction}
+            onMouseDown={keepFloatingPanelInteraction}
+        >
+            {props.children}
+        </section>
+    );
+}
+
+function RibbonListItem(props: { children: ReactNode; icon: ReactNode; onClick: () => void }) {
+    return (
+        <button
+            type="button"
+            className="
+              univer-box-border univer-grid univer-h-7 univer-w-full univer-grid-cols-[1.5rem_1fr] univer-items-center
+              univer-gap-2 univer-rounded univer-border-none univer-bg-transparent univer-px-2 univer-text-left
+              univer-text-sm univer-text-gray-900 univer-transition-colors
+              hover:univer-bg-gray-100
+              dark:!univer-text-white
+              dark:hover:!univer-bg-gray-700
+            "
+            onClick={props.onClick}
+        >
+            <span className="univer-flex univer-items-center univer-justify-center">{props.icon}</span>
+            <span className="univer-truncate">{props.children}</span>
+        </button>
     );
 }
 
@@ -1195,13 +1591,6 @@ function PanelButton(props: { title: string; active?: boolean; disabled?: boolea
             </ToolbarButton>
         </Tooltip>
     );
-}
-
-function LinePreview(props: { style: BorderStyleTypes }) {
-    const borderStyle = props.style === BorderStyleTypes.DOTTED ? 'dotted' : props.style === BorderStyleTypes.DASHED ? 'dashed' : 'solid';
-    const borderWidth = props.style === BorderStyleTypes.THICK ? 3 : props.style === BorderStyleTypes.MEDIUM ? 2 : 1;
-
-    return <span className="univer-block univer-w-4" style={{ borderTop: `${borderWidth}px ${borderStyle} currentColor` }} />;
 }
 
 function Divider() {

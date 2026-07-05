@@ -35,8 +35,12 @@ class TestSlideUnit extends UnitModel {
     private readonly _name$ = new BehaviorSubject('');
     override name$ = this._name$.asObservable();
 
+    constructor(private readonly _unitId = 'slide-1') {
+        super();
+    }
+
     override getUnitId(): string {
-        return 'slide-1';
+        return this._unitId;
     }
 
     override setName(name: string): void {
@@ -100,6 +104,7 @@ function createService() {
         injector,
         service: injector.get(ILayoutService),
         contextService: injector.get(IContextService),
+        univerInstanceService,
     };
 }
 
@@ -179,9 +184,17 @@ describe('DesktopLayoutService', () => {
         expect(contextService.getContextValue(FOCUSING_UNIVER)).toBe(true);
         expect(contextService.getContextValue(FOCUSING_UNIVER_EDITOR)).toBe(false);
 
+        contextService.setContextValue(FOCUSING_UNIVER_EDITOR, true);
+        Object.defineProperty(globalThis.document, 'activeElement', {
+            configurable: true,
+            get: () => button,
+        });
         dispatchFocusIn(button);
         await Promise.resolve();
         expect(focused).toEqual(['slide-1']);
+        expect(service.isFocused).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_UNIVER)).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_UNIVER_EDITOR)).toBe(false);
     });
 
     it('does not give focus back to the host unit when an embed-owned render canvas receives focus', async () => {
@@ -203,5 +216,25 @@ describe('DesktopLayoutService', () => {
         await Promise.resolve();
 
         expect(focused).toEqual([]);
+    });
+
+    it('focuses the unit declared by a render canvas before delegating focus', async () => {
+        const { injector, service, univerInstanceService } = createService();
+        const focused: string[] = [];
+        const root = createElement('app-layout');
+        const canvas = createElement('render-canvas');
+        canvas.dataset.uUnitId = 'slide-2';
+        root.contains = (target: unknown) => target === canvas;
+        const slide2 = injector.createInstance(TestSlideUnit, 'slide-2');
+
+        univerInstanceService.__addUnit(slide2, { makeCurrent: false });
+        service.registerRootContainerElement(root);
+        service.registerFocusHandler(UniverInstanceType.UNIVER_SLIDE, (unitId) => focused.push(unitId));
+
+        dispatchFocusIn(canvas);
+        await Promise.resolve();
+
+        expect(univerInstanceService.getFocusedUnit()?.getUnitId()).toBe('slide-2');
+        expect(focused).toEqual(['slide-2']);
     });
 });

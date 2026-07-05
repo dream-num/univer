@@ -181,7 +181,17 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
                     givingBackFocusElements.some((item) => target.dataset.uComp === item) &&
                     !isEmbedOwnedFocusTarget(target)
                 ) {
-                    queueMicrotask(() => this.focus());
+                    queueMicrotask(() => {
+                        const targetUnitId = getFocusUnitIdFromElement(target);
+                        if (targetUnitId && this._univerInstanceService.getUnit(targetUnitId)) {
+                            this._univerInstanceService.focusUnit(targetUnitId);
+                        }
+
+                        this.focus();
+                        this._isFocused = true;
+                        this._contextService.setContextValue(FOCUSING_UNIVER, this._isFocused);
+                        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR, getFocusingUniverEditorStatus());
+                    });
                     return;
                 }
 
@@ -208,4 +218,8 @@ function getFocusingUniverEditorStatus(): boolean {
 
 function isEmbedOwnedFocusTarget(target: HTMLElement): boolean {
     return target.closest?.(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
+}
+
+function getFocusUnitIdFromElement(target: HTMLElement): string | undefined {
+    return target.dataset.uUnitId;
 }

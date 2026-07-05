@@ -138,6 +138,15 @@ export class DocCanvasPopManagerService extends Disposable {
         super();
     }
 
+    private _shouldUpdateForCommand(commandInfo: { id: string; params?: unknown }, unitId: string): boolean {
+        if (commandInfo.id !== SetDocZoomRatioOperation.id && commandInfo.id !== RichTextEditingMutation.id) {
+            return false;
+        }
+
+        const params = commandInfo.params as { unitId?: string } | undefined;
+        return params?.unitId == null || params.unitId === unitId;
+    }
+
     private _createRectPositionObserver(rect: IBoundRectNoAngle | (() => IBoundRectNoAngle), currentRender: IRender) {
         const calc = () => {
             const { scene, engine } = currentRender;
@@ -170,31 +179,33 @@ export class DocCanvasPopManagerService extends Disposable {
 
         const position$ = new BehaviorSubject<IBoundRectNoAngle>(position);
         const disposable = new DisposableCollection();
-
-        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetDocZoomRatioOperation.id || commandInfo.id === RichTextEditingMutation.id) {
+        const updatePosition = () => {
+            try {
                 const newPosition = calc();
                 if (newPosition) {
                     position$.next(newPosition);
                 }
+            } catch {
+                // The popup may outlive an embedded render while its host switches tabs.
+                // Keep the last anchor until the popup is disposed.
+            }
+        };
+
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
+            if (this._shouldUpdateForCommand(commandInfo, currentRender.unitId)) {
+                updatePosition();
             }
         }));
 
         const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-                const newPosition = calc();
-                if (newPosition) {
-                    position$.next(newPosition);
-                }
+                updatePosition();
             }));
         }
 
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
-            const newPosition = calc();
-            if (newPosition) {
-                position$.next(newPosition);
-            }
+            updatePosition();
         }));
 
         return {

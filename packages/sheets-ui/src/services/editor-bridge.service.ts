@@ -44,6 +44,7 @@ export interface IEditorBridgeServiceVisibleParam {
     eventType: DeviceInputEventType;
     unitId: string;
     keycode?: KeyCode;
+    initialValue?: string;
 }
 
 export interface ICurrentEditCellParam {

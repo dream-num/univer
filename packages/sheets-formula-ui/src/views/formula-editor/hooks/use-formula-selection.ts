@@ -74,6 +74,53 @@ export function resolveFormulaSelectionCursorIndex(activeRange: { collapsed?: bo
     return index;
 }
 
+export function getSelectionAfterLaggingFormulaInput(
+    dataStream: string,
+    selection: { collapsed?: boolean; startOffset?: number; endOffset?: number } | undefined,
+    content: string
+): { startOffset: number; endOffset: number; collapsed: true } | undefined {
+    if (
+        !content ||
+        content.includes('\r') ||
+        content.includes('\n') ||
+        !dataStream.startsWith('=') ||
+        !selection?.collapsed
+    ) {
+        return undefined;
+    }
+
+    const startOffset = selection.startOffset;
+    if (startOffset == null) {
+        return undefined;
+    }
+    if (selection.endOffset !== startOffset) {
+        return undefined;
+    }
+
+    if (dataStream.slice(startOffset, startOffset + content.length) !== content) {
+        return undefined;
+    }
+
+    const nextOffset = startOffset + content.length;
+    return {
+        startOffset: nextOffset,
+        endOffset: nextOffset,
+        collapsed: true,
+    };
+}
+
+export function resolveFormulaSelectingIntent(adding: boolean, editing: boolean): FormulaSelectingType {
+    if (adding) {
+        return FormulaSelectingType.NEED_ADD;
+    }
+
+    if (editing) {
+        return FormulaSelectingType.CAN_EDIT;
+    }
+
+    return FormulaSelectingType.NOT_SELECT;
+}
+
 // eslint-disable-next-line max-lines-per-function
 export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; isFocus: boolean; disableOnClick?: boolean; unitId: string; subUnitId: string }) {
     const { editor, editorId, isFocus, disableOnClick, unitId, subUnitId } = opts;
@@ -87,6 +134,7 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
     const [isSelecting, innerSetIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const isDisabledByPointer = useRef(true);
+    const lastInputContentRef = useRef('');
     const refSelectionsRenderService = sheetRenderer?.with(RefSelectionsRenderService);
     const isSelectingRef = useStateRef(isSelecting);
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
@@ -112,7 +160,8 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
         const config = resolveFormulaSelectionDataStream(injector, editor, editorId);
         if (!config) return;
         const dataStream = config?.dataStream?.slice(0, -2);
-        const index = resolveFormulaSelectionCursorIndex(activeRange, dataStream);
+        const normalizedActiveRange = getSelectionAfterLaggingFormulaInput(dataStream, activeRange, lastInputContentRef.current) ?? activeRange;
+        const index = resolveFormulaSelectionCursorIndex(normalizedActiveRange, dataStream);
         const nodes = (lexerTreeBuilder.sequenceNodesBuilder(dataStream) ?? []).map((node) => {
             if (typeof node === 'object') {
                 if (node.nodeType === sequenceNodeType.REFERENCE) {
@@ -135,9 +184,13 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
         const focusingNode = nodes.find((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2) as unknown as (ISequenceNode & { range: IUnitRangeName });
         const adding = (char && matchRefDrawToken(char)) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET));
         const editing = Boolean(focusingNode);
+        const selectingIntent = resolveFormulaSelectingIntent(Boolean(adding), editing);
 
-        if (dataStream?.substring(0, 1) === '=' && (adding || editing)) {
-            if (editing) {
+        if (dataStream?.substring(0, 1) === '=' && selectingIntent !== FormulaSelectingType.NOT_SELECT) {
+            if (selectingIntent === FormulaSelectingType.NEED_ADD) {
+                isDisabledByPointer.current = false;
+                setIsSelecting(FormulaSelectingType.NEED_ADD);
+            } else if (focusingNode) {
                 if (shouldSkipReferenceEditingByPointer(isDisabledByPointer.current, disableOnClick)) {
                     return;
                 }
@@ -158,9 +211,6 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
                 } else {
                     setIsSelecting(FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE);
                 }
-            } else {
-                isDisabledByPointer.current = false;
-                setIsSelecting(FormulaSelectingType.NEED_ADD);
             }
         } else {
             setIsSelecting(FormulaSelectingType.NOT_SELECT);
@@ -182,11 +232,30 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
             return;
         }
 
-        const sub = editor.input$.subscribe(() => {
-            queueMicrotask(calculateSelectingType);
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        const sub = editor.input$.subscribe(({ content, isComposing }) => {
+            if (!isComposing) {
+                lastInputContentRef.current = content;
+            }
+            queueMicrotask(() => {
+                calculateSelectingType();
+            });
+
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(() => {
+                calculateSelectingType();
+                lastInputContentRef.current = '';
+            }, 0);
         });
 
-        return () => sub.unsubscribe();
+        return () => {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            sub.unsubscribe();
+        };
     }, [calculateSelectingType, editor, isFocus]);
 
     useEffect(() => {

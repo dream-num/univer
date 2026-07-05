@@ -16,7 +16,8 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { EmbedModelService, getResourceRefInputUnitSelector } from '@univerjs/embed';
 import { EmbedContentSizeRegistryService } from '@univerjs/embed-ui';
 import { setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
@@ -32,7 +33,8 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Optional(EmbedContentSizeRegistryService) private readonly _contentSizeRegistry?: EmbedContentSizeRegistryService
+        @Optional(EmbedContentSizeRegistryService) private readonly _contentSizeRegistry?: EmbedContentSizeRegistryService,
+        @Optional(EmbedModelService) private readonly _embedModelService?: EmbedModelService
     ) {
         super();
 
@@ -54,6 +56,14 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
                 this._pendingChildUnits.clear();
             },
         });
+        const sheetUnitAddedSubscription = this._univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
+            refreshScheduler.schedule();
+        });
+        const baseUnitAddedSubscription = this._univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_BASE).subscribe(() => {
+            refreshScheduler.schedule();
+        });
+        this.disposeWithMe(toDisposable(() => sheetUnitAddedSubscription.unsubscribe()));
+        this.disposeWithMe(toDisposable(() => baseUnitAddedSubscription.unsubscribe()));
 
         const unregisterRenderViewportProvider = setDocsCustomBlockRenderViewportProvider((unitId, blockId, input) => {
             if (unitId !== this._context.unitId) {
@@ -61,22 +71,24 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             }
 
             const drawing = this._context.unit.getSnapshot().drawings?.[blockId] as Nullable<{
-                data?: { childType?: UniverInstanceType; childUnitId?: string };
+                data?: { childType?: UniverInstanceType; childUnitId?: string; embedId?: string };
             }>;
-            const childType = drawing?.data?.childType;
+            const drawingData = drawing?.data;
+            const childType = drawingData?.childType;
             if (childType !== UniverInstanceType.UNIVER_SHEET && childType !== UniverInstanceType.UNIVER_BASE) {
                 return null;
             }
 
             const visibleCanvas = this._getVisibleCanvasDocumentRect();
-            const childUnit = drawing?.data?.childUnitId
-                ? this._getChildUnitForMeasurement(drawing.data.childUnitId, childType, refreshScheduler.schedule)
+            const childUnitId = this._resolveChildUnitId(drawingData, childType);
+            const childUnit = childUnitId
+                ? this._getChildUnitForMeasurement(childUnitId, childType, refreshScheduler.schedule)
                 : undefined;
-            const contentSize = drawing?.data?.childUnitId && childUnit != null
+            const contentSize = childUnitId && childUnit != null
                 ? this._contentSizeRegistry?.measureContentSize({
                     childType,
                     childUnit,
-                    childUnitId: drawing.data.childUnitId,
+                    childUnitId,
                     viewportWidth: input.fallbackWidth,
                 })
                 : undefined;
@@ -111,7 +123,10 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
                 return;
             }
 
-            const childUnitIds = collectDocsTableLikeEmbedChildUnitIds(this._context.unit.getSnapshot().drawings);
+            const childUnitIds = collectDocsTableLikeEmbedChildUnitIds(
+                this._context.unit.getSnapshot().drawings,
+                (data) => this._resolveChildUnitId(data)
+            );
             if (!shouldRefreshDocsCustomBlockSizeForCommand({
                 childUnitIds,
                 commandParams: command.params,
@@ -124,6 +139,42 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
         }));
     }
 
+    private _resolveChildUnitId(data: unknown, expectedChildType?: UniverInstanceType): string | undefined {
+        if (!data || typeof data !== 'object') {
+            return undefined;
+        }
+
+        const drawingData = data as { childType?: unknown; childUnitId?: unknown; embedId?: unknown; hostUnitId?: unknown };
+        const childType = typeof drawingData.childType === 'number' ? drawingData.childType as UniverInstanceType : expectedChildType;
+        if (childType !== UniverInstanceType.UNIVER_SHEET && childType !== UniverInstanceType.UNIVER_BASE) {
+            return undefined;
+        }
+
+        if (typeof drawingData.childUnitId === 'string') {
+            return drawingData.childUnitId;
+        }
+
+        if (typeof drawingData.embedId !== 'string') {
+            return undefined;
+        }
+
+        const hostUnitId = typeof drawingData.hostUnitId === 'string' ? drawingData.hostUnitId : this._context.unitId;
+        const descriptor = this._embedModelService?.getDescriptor(hostUnitId, drawingData.embedId);
+        if (descriptor?.childType !== childType) {
+            return undefined;
+        }
+
+        if (typeof descriptor.childUnitId === 'string') {
+            return descriptor.childUnitId;
+        }
+
+        try {
+            return getResourceRefInputUnitSelector(descriptor.source.ref);
+        } catch {
+            return undefined;
+        }
+    }
+
     private _getChildUnitForMeasurement(childUnitId: string, childType: UniverInstanceType, scheduleRefresh: () => void): unknown {
         const cacheKey = `${childType}:${childUnitId}`;
         if (this._resolvedChildUnits.has(cacheKey)) {
@@ -131,6 +182,9 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
         }
 
         const unitOrPromise = this._univerInstanceService.getUnit(childUnitId, childType) as unknown;
+        if (unitOrPromise == null) {
+            return undefined;
+        }
         if (!isPromiseLike(unitOrPromise)) {
             this._resolvedChildUnits.set(cacheKey, unitOrPromise);
             return unitOrPromise;

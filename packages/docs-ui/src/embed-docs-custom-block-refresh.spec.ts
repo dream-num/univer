@@ -28,6 +28,22 @@ describe('docs custom block refresh helpers', () => {
         })].sort()).toEqual(['base-1', 'sheet-1']);
     });
 
+    it('can collect runtime child unit ids through a resolver', () => {
+        expect([...collectDocsTableLikeEmbedChildUnitIds({
+            base: { data: { childType: UniverInstanceType.UNIVER_BASE, embedId: 'base-embed' } },
+            sheet: { data: { childType: UniverInstanceType.UNIVER_SHEET, embedId: 'sheet-embed' } },
+            slide: { data: { childType: UniverInstanceType.UNIVER_SLIDE, embedId: 'slide-embed' } },
+        }, (data) => {
+            if (data.embedId === 'base-embed') {
+                return 'base-1';
+            }
+            if (data.embedId === 'sheet-embed') {
+                return 'sheet-1';
+            }
+            return 'slide-1';
+        })].sort()).toEqual(['base-1', 'sheet-1']);
+    });
+
     it('refreshes only when a command targets an embedded child unit', () => {
         const childUnitIds = new Set(['sheet-1']);
 

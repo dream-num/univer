@@ -19,5 +19,6 @@ export {
     getResourceRefKey,
     getResourceRefUnitKey,
     getResourceRefUnitLocator,
+    isResourceRefRangePart,
     normalizeResourceRef,
 } from '@univerjs/core';

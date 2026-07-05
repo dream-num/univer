@@ -96,29 +96,34 @@ class TestRenderManagerService {
     readonly createdUnitIds: string[] = [];
     readonly removedUnitIds: string[] = [];
     readonly canvases = new Map<string, TestCanvas>();
+    readonly renderers = new Map<string, { unitId: string; engine: { getCanvas: () => TestCanvas; canvasColorService: undefined } }>();
 
     createRender(unitId: string) {
         this.createdUnitIds.push(unitId);
-    }
-
-    has(unitId: string) {
-        return this.createdUnitIds.includes(unitId);
-    }
-
-    removeRender(unitId: string) {
-        this.removedUnitIds.push(unitId);
-    }
-
-    emitCreated(unitId: string) {
         const canvas = new TestCanvas();
         this.canvases.set(unitId, canvas);
-        this.created$.next({
+        const renderer = {
             unitId,
             engine: {
                 getCanvas: () => canvas,
                 canvasColorService: undefined,
             },
-        });
+        };
+        this.renderers.set(unitId, renderer);
+        return renderer;
+    }
+
+    has(unitId: string) {
+        return this.renderers.has(unitId);
+    }
+
+    getRenderById(unitId: string) {
+        return this.renderers.get(unitId) ?? null;
+    }
+
+    removeRender(unitId: string) {
+        this.removedUnitIds.push(unitId);
+        this.renderers.delete(unitId);
     }
 }
 
@@ -161,7 +166,6 @@ describe('DocsRenderService', () => {
     it('creates renderers for document lifecycle changes and styles doc canvases', () => {
         const { service, instanceService, renderManagerService } = createLifecycleService();
 
-        renderManagerService.emitCreated('doc-existing');
         expect(renderManagerService.createdUnitIds).toEqual(['doc-existing']);
         expect(renderManagerService.canvases.get('doc-existing')?.id).toBe('univer-doc-main-canvas');
         expect(renderManagerService.canvases.get('doc-existing')?.contextId).toBe('univer-doc-main-canvas');
@@ -172,7 +176,6 @@ describe('DocsRenderService', () => {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
         });
         instanceService.addUnit(editorDoc);
-        renderManagerService.emitCreated(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         expect(renderManagerService.createdUnitIds).toEqual(['doc-existing', DOCS_NORMAL_EDITOR_UNIT_ID_KEY]);
         expect(renderManagerService.canvases.get(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.style.backgroundColor).toBe('transparent');
 

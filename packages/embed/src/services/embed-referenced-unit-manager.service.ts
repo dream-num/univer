@@ -25,7 +25,7 @@ import type {
     ResourceRefInput,
 } from '@univerjs/core';
 import type { IEmbedResourceRefUnitProvider } from './embed-resource-ref-provider-registry.service';
-import { formatResourceRef, getResourceRefUnitKey, normalizeResourceRefInput, Optional, ReferencedUnitDataType, ReferencedUnitError, ReferencedUnitErrorCode, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { formatResourceRef, getResourceRefUnitKey, isResourceRefRangePart, normalizeResourceRefInput, Optional, ReferencedUnitDataType, ReferencedUnitError, ReferencedUnitErrorCode, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EMBED_CHILD_CREATE_OPTIONS } from '../common/const';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
 import { EmbedResourceRefProviderRegistryService } from './embed-resource-ref-provider-registry.service';
@@ -73,7 +73,7 @@ export class EmbedReferencedUnitManagerService implements IReferencedUnitManager
 
     async readData(refInput: ResourceRefInput, options: IReferencedUnitReadDataOptions = {}): Promise<IReferencedUnitReadDataResult> {
         const ref = normalizeResourceRefInput(refInput);
-        if (!ref.part || ref.part.kind !== 'range') {
+        if (!isResourceRefRangePart(ref.part)) {
             throw new ReferencedUnitError(ReferencedUnitErrorCode.MissingDataSelector, { ref });
         }
 

@@ -789,6 +789,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
+                    if (sheetDrawing.hidden) {
+                        this._removeDom(data.drawingId);
+                        return;
+                    }
+
+                    if (!this._domLayerInfoMap.has(data.drawingId)) {
+                        this._drawingManagerService.addNotification([data]);
+                        return;
+                    }
+
                     const newValue = {
                         ...sheetDrawing.transform,
                     };

@@ -110,6 +110,20 @@ describe('UnitDrawingService', () => {
         expect(service.getOldDrawingByParam(createSearch('b'))).toMatchObject(drawingB);
     });
 
+    it('should build and apply update operations for newly added metadata fields', () => {
+        const drawingA = createDrawing('a');
+
+        service.applyJson1(unitId, subUnitId, service.getBatchAddOp([drawingA]).redo);
+
+        const updateOp = service.getBatchUpdateOp([{ ...drawingA, hidden: true }]);
+        service.applyJson1(unitId, subUnitId, updateOp.redo);
+
+        expect(service.getDrawingByParam(createSearch('a'))).toMatchObject({
+            drawingId: 'a',
+            hidden: true,
+        });
+    });
+
     it('expands grouped remove operations to include all nested drawing records', () => {
         service.applyJson1(unitId, subUnitId, service.getBatchAddOp([
             createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),

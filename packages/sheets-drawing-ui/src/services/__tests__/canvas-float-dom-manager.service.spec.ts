@@ -15,7 +15,9 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IRender, IRenderManagerService as IRenderManagerServiceType, Scene } from '@univerjs/engine-render';
+import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import type { ICanvasFloatDomInfo, ISheetFloatDomRenderObjectFactoryContext } from '../canvas-float-dom-manager.service';
 import {
@@ -29,7 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -610,6 +612,82 @@ describe('SheetCanvasFloatDomManagerService', () => {
         headerDom.dispose();
         expect(fixture.manager.getFloatDomsBySubUnitId('test', 'sheet1')).toEqual([]);
         expect(findFloatDom(canvasFloatDomService, 'header-card')).toBeUndefined();
+    });
+
+    it('removes and restores float dom layers when the drawing hidden state changes', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+
+        const drawing: ISheetFloatDom = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+            drawingType: DrawingTypeEnum.DRAWING_DOM,
+            componentKey: 'RangeCard',
+            data: { label: 'Range order' },
+            allowTransform: true,
+            transform: { left: 88, top: 34, width: 80, height: 24 },
+            sheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+            },
+            axisAlignSheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+            },
+        };
+        const addOp = fixture.get(ISheetDrawingService).getBatchAddOp([drawing]) as IDrawingJsonUndo1;
+
+        expect(fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: addOp.redo,
+            objects: addOp.objects,
+            type: DrawingApplyType.INSERT,
+        })).toBe(true);
+
+        expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeDefined();
+        const rangeDrawing = fixture.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+        })!;
+        const hiddenOp = fixture.get(ISheetDrawingService).getBatchUpdateOp([{ ...rangeDrawing, hidden: true }]) as IDrawingJsonUndo1;
+        expect(hiddenOp.redo).not.toEqual([]);
+        expect(hiddenOp.redo).not.toBeNull();
+
+        expect(fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: hiddenOp.redo,
+            objects: hiddenOp.objects,
+            type: DrawingApplyType.UPDATE,
+        })).toBe(true);
+
+        expect(fixture.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+        })?.hidden).toBe(true);
+        expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeUndefined();
+
+        const visibleDrawing = fixture.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+        })!;
+        const visibleOp = fixture.get(ISheetDrawingService).getBatchUpdateOp([{ ...visibleDrawing, hidden: false }]) as IDrawingJsonUndo1;
+
+        fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: visibleOp.redo,
+            objects: visibleOp.objects,
+            type: DrawingApplyType.UPDATE,
+        });
+
+        expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeDefined();
     });
 
     it('uses the registered render object factory for chart float dom rects without affecting normal float doms', () => {

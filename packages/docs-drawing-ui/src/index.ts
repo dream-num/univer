@@ -16,6 +16,8 @@
 
 import './global.css';
 
+export { IDocDrawingService } from '@univerjs/docs-drawing';
+export type { IDocDrawing } from '@univerjs/docs-drawing';
 export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing.command';
 export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.command';
 export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';

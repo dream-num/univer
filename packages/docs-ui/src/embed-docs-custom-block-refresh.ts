@@ -17,12 +17,17 @@
 import type { UniverInstanceType } from '@univerjs/core';
 import { isSheetLikeDocsCustomBlockChildType } from './embed-host-anchor';
 
-export function collectDocsTableLikeEmbedChildUnitIds(drawings: Record<string, unknown> | undefined): Set<string> {
+export function collectDocsTableLikeEmbedChildUnitIds(
+    drawings: Record<string, unknown> | undefined,
+    resolveChildUnitId?: (data: Record<string, unknown>) => string | undefined
+): Set<string> {
     const childUnitIds = new Set<string>();
 
     Object.values(drawings ?? {}).forEach((drawing) => {
         const data = getDrawingData(drawing);
-        const childUnitId = typeof data?.childUnitId === 'string' ? data.childUnitId : undefined;
+        const childUnitId = data
+            ? resolveChildUnitId?.(data) ?? (typeof data.childUnitId === 'string' ? data.childUnitId : undefined)
+            : undefined;
         const childType = typeof data?.childType === 'number' ? data.childType as UniverInstanceType : undefined;
         if (!childUnitId || !isSheetLikeDocsCustomBlockChildType(childType)) {
             return;

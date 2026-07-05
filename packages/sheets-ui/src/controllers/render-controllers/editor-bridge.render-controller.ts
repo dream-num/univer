@@ -73,6 +73,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         this._initEventListener(d);
         this._commandExecutedListener(d);
         this._initialKeyboardListener(d);
+        this._initSheetFocusListener(d);
         return d;
     }
 
@@ -213,6 +214,30 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }
     }
 
+    private _initSheetFocusListener(d: DisposableCollection) {
+        d.add(this._contextService.subscribeContextValue$(FOCUSING_SHEET).subscribe((isFocusingSheet) => {
+            if (
+                !isFocusingSheet ||
+                !this._isCurrentSheetFocused() ||
+                this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) ||
+                this._editorBridgeService.isVisible().visible
+            ) {
+                return;
+            }
+
+            this._focusCellEditorInput();
+        }));
+    }
+
+    private _focusCellEditorInput(): void {
+        const render = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const docSelectionRenderService = render?.with(DocSelectionRenderService);
+
+        if (!docSelectionRenderService?.isFocusing) {
+            docSelectionRenderService?.focus();
+        }
+    }
+
     private _commandExecutedListener(d: DisposableCollection) {
         const refreshCommandSet = new Set([ClearSelectionFormatCommand.id, SetZoomRatioCommand.id]);
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -249,10 +274,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             return;
         }
 
+        const initialValue = config.content ?? event.data ?? '';
         this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: event.which,
+            initialValue,
             unitId: this._context.unitId,
         });
     }

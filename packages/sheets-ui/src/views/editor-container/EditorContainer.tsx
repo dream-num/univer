@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedFloatingGeometryService, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, resolveActiveEmbedRuntimeDomScope, resolveEmbedRuntimeDomScope } from '@univerjs/embed-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -253,10 +253,17 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         }
 
         cellEditorResizeService.fitTextSize();
+        if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
+            return;
+        }
 
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
         const focusEditor = () => {
+            if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
+                return;
+            }
+
             const ownerDocument = rootRef.current?.ownerDocument ?? document;
             const scope = rootRef.current
                 ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
@@ -344,7 +351,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         }));
 
         return () => collection.dispose();
-    }, [editState?.unitId, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
+    }, [editState?.unitId, injector, instanceService, visible?.unitId, visible?.visible]);
 
     useEffect(() => {
         if (visible?.visible || !injector.has(EmbedRuntimeFocusCoordinator)) {

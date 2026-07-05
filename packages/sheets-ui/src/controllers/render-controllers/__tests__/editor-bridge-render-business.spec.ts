@@ -100,6 +100,7 @@ function createController(options?: {
         [FOCUSING_SHEET, options?.focusingSheet ?? true],
         [FOCUSING_FX_BAR_EDITOR, false],
     ]);
+    const focusingSheet$ = new Subject<boolean>();
     const context = {
         unitId: 'unit-1',
         unit: workbook,
@@ -137,6 +138,9 @@ function createController(options?: {
             getFocusedUnit: vi.fn(() => ({
                 getUnitId: () => options?.focusedUnitId ?? 'unit-1',
             })),
+            getUnit: vi.fn(() => ({
+                getBody: () => ({ dataStream: '=\r\n' }),
+            })),
         } as any,
         commandService as any,
         editorBridgeService as any,
@@ -160,6 +164,7 @@ function createController(options?: {
         {
             getContextValue: vi.fn((key: string) => contextValues.get(key)),
             setContextValue: vi.fn((key: string, value: unknown) => contextValues.set(key, value)),
+            subscribeContextValue$: vi.fn((key: string) => key === FOCUSING_SHEET ? focusingSheet$ : new Subject<unknown>()),
         } as any,
         renderManagerService as any,
         {
@@ -290,6 +295,7 @@ describe('EditorBridgeRenderController business flows', () => {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: 65,
+            initialValue: 'A',
             unitId: 'unit-1',
         });
 
@@ -313,6 +319,7 @@ describe('EditorBridgeRenderController business flows', () => {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: 187,
+            initialValue: '=',
             unitId: 'unit-1',
         });
 
@@ -331,6 +338,7 @@ describe('EditorBridgeRenderController business flows', () => {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: 187,
+            initialValue: '=',
             unitId: 'unit-1',
         });
 

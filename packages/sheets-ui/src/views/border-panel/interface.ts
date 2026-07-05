@@ -16,6 +16,7 @@
 
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { ICustomComponentProps } from '@univerjs/ui';
+import { BorderStyleTypes } from '@univerjs/core';
 import { COMPONENT_PREFIX } from '../const';
 
 export const BORDER_PANEL_COMPONENT = `${COMPONENT_PREFIX}_BORDER_PANEL_COMPONENT`;
@@ -98,5 +99,56 @@ export const BORDER_LINE_CHILDREN = [
         label: 'sheets-ui.borderLine.borderMltrBctr',
         icon: 'RightDoubleDiagonalDoubleIcon',
         value: 'mltr_bctr',
+    },
+];
+
+export const BORDER_SIZE_CHILDREN = [
+    {
+        label: BorderStyleTypes.THIN,
+        value: BorderStyleTypes.THIN,
+    },
+    {
+        label: BorderStyleTypes.HAIR,
+        value: BorderStyleTypes.HAIR,
+    },
+    {
+        label: BorderStyleTypes.DOTTED,
+        value: BorderStyleTypes.DOTTED,
+    },
+    {
+        label: BorderStyleTypes.DASHED,
+        value: BorderStyleTypes.DASHED,
+    },
+    {
+        label: BorderStyleTypes.DASH_DOT,
+        value: BorderStyleTypes.DASH_DOT,
+    },
+    {
+        label: BorderStyleTypes.DASH_DOT_DOT,
+        value: BorderStyleTypes.DASH_DOT_DOT,
+    },
+    {
+        label: BorderStyleTypes.MEDIUM,
+        value: BorderStyleTypes.MEDIUM,
+    },
+    {
+        label: BorderStyleTypes.MEDIUM_DASHED,
+        value: BorderStyleTypes.MEDIUM_DASHED,
+    },
+    {
+        label: BorderStyleTypes.MEDIUM_DASH_DOT,
+        value: BorderStyleTypes.MEDIUM_DASH_DOT,
+    },
+    {
+        label: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
+        value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
+    },
+    {
+        label: BorderStyleTypes.THICK,
+        value: BorderStyleTypes.THICK,
+    },
+    {
+        label: BorderStyleTypes.DOUBLE,
+        value: BorderStyleTypes.DOUBLE,
     },
 ];

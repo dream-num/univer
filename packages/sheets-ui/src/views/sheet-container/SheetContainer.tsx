@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -225,6 +225,10 @@ function useFocusedUnitType(): UniverInstanceType | null {
     const focusedUnitId = useObservable(() => univerInstanceService.focused$, null, false, [univerInstanceService]);
     return useMemo(() => {
         if (!focusedUnitId) return null;
+
+        if (isInternalEditorID(focusedUnitId) && univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)) {
+            return UniverInstanceType.UNIVER_SHEET;
+        }
 
         const focusedUnit = univerInstanceService.getUnit(focusedUnitId);
         return focusedUnit?.type ?? null;

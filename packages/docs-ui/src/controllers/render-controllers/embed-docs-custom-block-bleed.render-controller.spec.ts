@@ -61,7 +61,7 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
         };
         const controller = new EmbedDocsCustomBlockBleedRenderController(
             context as never,
-            { getUnit: vi.fn(() => ({ unit: true })) } as never,
+            createInstanceService({ getUnit: vi.fn(() => ({ unit: true })) }) as never,
             commandService as never,
             contentSizeRegistry as never
         );
@@ -102,6 +102,118 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
         expect(providerState.provider).toBeNull();
     });
 
+    it('resolves runtime child unit ids from embed descriptors when custom block drawings only persist embed ids', () => {
+        vi.useFakeTimers();
+        const commandListeners: Array<(command: { id: string; params?: unknown }) => void> = [];
+        const commandService = {
+            onCommandExecuted: vi.fn((listener) => {
+                commandListeners.push(listener);
+                return { dispose: vi.fn() };
+            }),
+            syncExecuteCommand: vi.fn(),
+        };
+        const context = createRenderContext({
+            drawings: {
+                'sheet-block': {
+                    data: {
+                        childType: UniverInstanceType.UNIVER_SHEET,
+                        embedId: 'sheet-embed',
+                        hostUnitId: 'doc-1',
+                    },
+                },
+            },
+        });
+        const childUnit = { unit: true };
+        const instanceService = {
+            getUnit: vi.fn(() => childUnit),
+        };
+        const contentSizeRegistry = {
+            measureContentSize: vi.fn(() => ({ height: 720, width: 1280 })),
+        };
+        const embedModelService = {
+            getDescriptor: vi.fn(() => ({
+                childType: UniverInstanceType.UNIVER_SHEET,
+                source: {
+                    ref: '#unit=sheet-1&type=sheet',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                },
+            })),
+        };
+
+        const controller = new EmbedDocsCustomBlockBleedRenderController(
+            context as never,
+            createInstanceService(instanceService) as never,
+            commandService as never,
+            contentSizeRegistry as never,
+            embedModelService as never
+        );
+
+        expect(providerState.provider?.('doc-1', 'sheet-block', createViewportInput())).toMatchObject({
+            contentHeight: 720,
+            contentWidth: 1280,
+            height: 720,
+        });
+        expect(embedModelService.getDescriptor).toHaveBeenCalledWith('doc-1', 'sheet-embed');
+        expect(instanceService.getUnit).toHaveBeenCalledWith('sheet-1', UniverInstanceType.UNIVER_SHEET);
+        expect(contentSizeRegistry.measureContentSize).toHaveBeenCalledWith({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnit,
+            childUnitId: 'sheet-1',
+            viewportWidth: 960,
+        });
+
+        commandListeners[0]({ id: 'sheet-command', params: { unitId: 'sheet-1' } });
+        vi.runOnlyPendingTimers();
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDocZoomRatioOperation.id, {
+            unitId: 'doc-1',
+            zoomRatio: 1.5,
+        });
+
+        controller.dispose();
+    });
+
+    it('does not cache missing sync child units before late materialization', () => {
+        const commandService = {
+            onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })),
+            syncExecuteCommand: vi.fn(),
+        };
+        const context = createRenderContext();
+        const childUnit = { unit: true };
+        const instanceService = createInstanceService({
+            getUnit: vi.fn()
+                .mockReturnValueOnce(undefined)
+                .mockReturnValueOnce(childUnit),
+        });
+        const contentSizeRegistry = {
+            measureContentSize: vi.fn(() => ({ height: 700, width: 1500 })),
+        };
+        const controller = new EmbedDocsCustomBlockBleedRenderController(
+            context as never,
+            instanceService as never,
+            commandService as never,
+            contentSizeRegistry as never
+        );
+
+        expect(providerState.provider?.('doc-1', 'sheet-block', createViewportInput())).toMatchObject({
+            contentHeight: 480,
+            height: 480,
+        });
+        expect(contentSizeRegistry.measureContentSize).not.toHaveBeenCalled();
+
+        expect(providerState.provider?.('doc-1', 'sheet-block', createViewportInput())).toMatchObject({
+            contentHeight: 700,
+            height: 700,
+        });
+        expect(contentSizeRegistry.measureContentSize).toHaveBeenCalledWith({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnit,
+            childUnitId: 'sheet-1',
+            viewportWidth: 960,
+        });
+
+        controller.dispose();
+    });
+
     it('returns null when visible canvas bounds are invalid', () => {
         const context = createRenderContext({
             canvasRect: { height: 0, width: 0 },
@@ -109,7 +221,7 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
 
         const controller = new EmbedDocsCustomBlockBleedRenderController(
             context as never,
-            { getUnit: vi.fn() } as never,
+            createInstanceService({ getUnit: vi.fn() }) as never,
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never
         );
 
@@ -135,7 +247,7 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
         };
         const controller = new EmbedDocsCustomBlockBleedRenderController(
             context as never,
-            { getUnit: vi.fn(() => Promise.resolve(childUnit)) } as never,
+            createInstanceService({ getUnit: vi.fn(() => Promise.resolve(childUnit)) }) as never,
             commandService as never,
             contentSizeRegistry as never
         );
@@ -182,6 +294,16 @@ function createViewportInput() {
     };
 }
 
+function createInstanceService(overrides: { getUnit?: ReturnType<typeof vi.fn> } = {}) {
+    return {
+        getUnit: vi.fn(),
+        getTypeOfUnitAdded$: vi.fn(() => ({
+            subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })),
+        })),
+        ...overrides,
+    };
+}
+
 function createCollapsedViewportInput() {
     return {
         ...createViewportInput(),
@@ -192,8 +314,9 @@ function createCollapsedViewportInput() {
 
 function createRenderContext(overrides: {
     canvasRect?: { height: number; width: number };
+    drawings?: Record<string, unknown>;
 } = {}): Partial<IRenderContext<never>> {
-    const drawings = {
+    const drawings = overrides.drawings ?? {
         'sheet-block': {
             data: {
                 childType: UniverInstanceType.UNIVER_SHEET,

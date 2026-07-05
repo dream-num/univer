@@ -25,8 +25,8 @@ import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-fo
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
@@ -148,6 +148,8 @@ export function calcHighlightRanges(opts: {
         const activeIndex = endIndexes.findIndex((end) => end + 2 === cursor);
         if (activeIndex !== -1) {
             refSelectionsRenderService?.setActiveSelectionIndex(activeIndex);
+        } else if (selectionWithStyle.length) {
+            refSelectionsRenderService?.setActiveSelectionIndex(selectionWithStyle.length - 1);
         } else {
             refSelectionsRenderService?.resetActiveSelectionIndex();
         }
@@ -167,15 +169,28 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const themeService = useDependency(ThemeService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const currentWorkbook = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
-    const currentRender = currentWorkbook ? renderManagerService.getRenderById(currentWorkbook.getUnitId()) : null;
-    const refSelectionsRenderService = currentRender?.with(RefSelectionsRenderService);
-    const sheetSkeletonManagerService = currentRender?.with(SheetSkeletonManagerService);
+    const ownerRender = renderManagerService.getRenderById(unitId);
+    const ownerRefSelectionsRenderService = ownerRender?.with(RefSelectionsRenderService);
 
-    const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor) => {
+    const getHighlightWorkbook = useEvent((refSelections: IRefSelection[]) => {
+        const ownerWorkbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentUnitId = currentWorkbook?.getUnitId();
+        const hasExplicitCurrentWorkbookRef = Boolean(currentUnitId) && refSelections.some((refSelection) =>
+            deserializeRangeWithSheet(refSelection.token).unitId === currentUnitId
+        );
+
+        return hasExplicitCurrentWorkbookRef ? currentWorkbook : ownerWorkbook ?? currentWorkbook;
+    });
+
+    const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor, isEnd = false) => {
+        const currentWorkbook = getHighlightWorkbook(refSelections);
         if (!currentWorkbook) return;
-        if (refSelectionsRenderService?.selectionMoving) return;
+        const currentRender = renderManagerService.getRenderById(currentWorkbook.getUnitId());
+        const refSelectionsRenderService = currentRender?.with(RefSelectionsRenderService);
+        const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
+        const sheetSkeletonManagerService = currentRender?.with(SheetSkeletonManagerService);
+        if (!isEnd && refSelectionsRenderService?.selectionMoving) return;
         const selectionWithStyle = calcHighlightRanges({
             unitId,
             subUnitId,
@@ -197,13 +212,16 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
         } else {
             refSelectionsService.setSelections(selectionWithStyle);
         }
+        if (isEnd && selectionWithStyle.length) {
+            sheetSelectionRenderService?.resetSelectionsByModelData([]);
+        }
     });
 
     useEffect(() => {
         return () => {
-            refSelectionsRenderService?.resetActiveSelectionIndex();
+            ownerRefSelectionsRenderService?.resetActiveSelectionIndex();
         };
-    }, [refSelectionsRenderService]);
+    }, [ownerRefSelectionsRenderService]);
 
     return highlightSheet;
 }
@@ -218,7 +236,8 @@ export function useDocHight(_leadingCharacter: string = '') {
         editor: Editor,
         sequenceNodes: INode[],
         isNeedResetSelection = true,
-        newSelections?: ITextRange[]
+        newSelections?: ITextRange[],
+        sourceText?: string
     ) => {
         const data = editor.getDocumentData();
         const editorId = editor.getEditorId();
@@ -249,13 +268,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             }
 
             cloneBody.textRuns = [{ st: 0, ed: 1, ts: { fs: 11 } }, ...textRuns];
-            const text = sequenceNodes.reduce((pre, cur) => {
-                if (typeof cur === 'string') {
-                    return `${pre}${cur}`;
-                }
-                return `${pre}${cur.token}`;
-            }, '');
-            cloneBody.dataStream = `${_leadingCharacter}${text}\r\n`;
+            cloneBody.dataStream = getFormulaHighlightDataStream(_leadingCharacter, sequenceNodes, sourceText);
             let selections;
             if (isNeedResetSelection) {
                 // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
@@ -276,6 +289,17 @@ export function useDocHight(_leadingCharacter: string = '') {
         }
     });
     return highlightDoc;
+}
+
+export function getFormulaHighlightDataStream(leadingCharacter: string, sequenceNodes: Array<ISequenceNode | string>, sourceText?: string): string {
+    const text = sourceText ?? sequenceNodes.reduce((pre, cur) => {
+        if (typeof cur === 'string') {
+            return `${pre}${cur}`;
+        }
+        return `${pre}${cur.token}`;
+    }, '');
+
+    return `${leadingCharacter}${text}\r\n`;
 }
 
 interface IColorMap {

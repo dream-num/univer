@@ -22,7 +22,7 @@ import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui'
 import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 
-export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string, editorId: string, disableContextMenu = true) => {
+export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, unitId: string, editorId: string, disableContextMenu = true) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const contextService = useDependency(IContextService);
     const contextMenuService = useDependency(IContextMenuService);
@@ -50,7 +50,7 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
     }, [contextService, isNeed, refSelectionsService, disableContextMenu, editorId]);
 
     useLayoutEffect(() => {
-        if (isNeed && selecting) {
+        if (isNeed && Boolean(selecting)) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
 

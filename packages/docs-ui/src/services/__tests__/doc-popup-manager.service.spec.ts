@@ -240,6 +240,44 @@ describe('DocCanvasPopManagerService', () => {
         expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 10, bottom: 30 });
     });
 
+    it('does not refresh rect popup anchors for rich text changes from another document', () => {
+        const { service, popupService, commandService } = createService();
+        const rect = { left: 10, right: 110, top: 20, bottom: 40 };
+        const getRect = vi.fn(() => rect);
+
+        service.attachPopupToRect(getRect, { componentKey: 'dynamic-rect' }, 'doc-1');
+        const popup = popupService.popups.get('popup-1');
+        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+
+        rect.left = 30;
+        rect.right = 130;
+        commandService.emit(RichTextEditingMutation.id, { unitId: 'slide-shape-editor' });
+
+        expect(getRect).toHaveBeenCalledTimes(1);
+        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
+    });
+
+    it('keeps the last rect popup anchor when a stale dynamic rect throws during refresh', () => {
+        const { service, popupService, commandService } = createService();
+        let stale = false;
+        const getRect = vi.fn(() => {
+            if (stale) {
+                throw new TypeError('Cannot read properties of null (reading clone)');
+            }
+
+            return { left: 10, right: 110, top: 20, bottom: 40 };
+        });
+
+        service.attachPopupToRect(getRect, { componentKey: 'stale-dynamic-rect' }, 'doc-1');
+        const popup = popupService.popups.get('popup-1');
+        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+
+        stale = true;
+
+        expect(() => commandService.emit(RichTextEditingMutation.id, { unitId: 'doc-1' })).not.toThrow();
+        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
+    });
+
     it('ignores stale rect popup updates after the render canvas is released', () => {
         const { service, popupService, renderManagerService, commandService } = createService();
 

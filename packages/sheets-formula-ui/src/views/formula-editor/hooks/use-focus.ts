@@ -22,7 +22,7 @@ import { useDependency, useEvent } from '@univerjs/ui';
 
 export function focusFormulaEditor(
     editorService: Pick<IEditorService, 'focus'>,
-    editor?: Pick<Editor, 'getEditorId' | 'getSelectionRanges' | 'setSelectionRanges' | 'getDocumentData' | 'docSelectionRenderService'>,
+    editor?: Pick<Editor, 'getEditorId' | 'getSelectionRanges' | 'setSelectionRanges' | 'getDocumentData' | 'docSelectionRenderService'> & { editorDOM?: HTMLElement },
     offset?: number
 ) {
     if (!editor) {
@@ -30,6 +30,7 @@ export function focusFormulaEditor(
     }
 
     editorService.focus(editor.getEditorId());
+    focusFormulaEditorElement(editor);
     if (editor.docSelectionRenderService.isOnPointerEvent) {
         return;
     }
@@ -44,6 +45,12 @@ export function focusFormulaEditor(
     } else {
         editor.setSelectionRanges(selections);
     }
+}
+
+function focusFormulaEditorElement(editor: Pick<Editor, 'getEditorId'> & { editorDOM?: HTMLElement }): void {
+    const ownerDocument = editor.editorDOM?.ownerDocument ?? document;
+    const editorElement = ownerDocument.getElementById(`__editor_${editor.getEditorId()}`);
+    editorElement?.focus({ preventScroll: true });
 }
 
 export function shouldSkipFormulaEditorMouseUpFocus(_target: EventTarget | null): boolean {

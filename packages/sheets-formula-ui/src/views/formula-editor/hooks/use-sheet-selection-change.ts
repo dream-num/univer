@@ -23,7 +23,9 @@ import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
 import {
     DisposableCollection,
+    FOCUSING_FX_BAR_EDITOR,
     ICommandService,
+    IContextService,
     IUniverInstanceService,
     noop,
     Rectangle,
@@ -31,10 +33,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
 import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
+    isFormulaLexerToken,
     LexerTreeBuilder,
+    matchRefDrawToken,
+    matchToken,
     sequenceNodeType,
     serializeRange,
     serializeRangeWithSheet,
@@ -54,6 +60,7 @@ import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
 import { FormulaSelectingType, resolveFormulaSelectionWorkbook } from './use-formula-selection';
 import { calcHighlightRanges } from './use-highlight';
+import { isFormulaEditorInteractionOwner } from './use-left-and-right-arrow';
 import { useStateRef } from './use-state-ref';
 
 export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
@@ -76,10 +83,44 @@ export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTree
     return {
         nodeIndex,
         updatingRefIndex,
+        formulaText: dataStream.slice(1),
         sequenceNodes,
         offset,
     };
 };
+
+export function getSequenceNodeCharAtOffset(sequenceNodes: (string | { token: string })[], offset: number): string | undefined {
+    let currentOffset = 0;
+    for (const node of sequenceNodes) {
+        const text = typeof node === 'string' ? node : node.token;
+        const nextOffset = currentOffset + text.length;
+        if (offset > currentOffset && offset <= nextOffset) {
+            return text[offset - currentOffset - 1];
+        }
+        currentOffset = nextOffset;
+    }
+
+    return undefined;
+}
+
+export function isFormulaReferenceAddingContext(sequenceNodes: (string | { token: string })[], offset: number): boolean {
+    const char = getSequenceNodeCharAtOffset(sequenceNodes, offset);
+    return Boolean(char && matchRefDrawToken(char));
+}
+
+export function isFormulaReferenceAddingTextContext(formulaText: string, offset: number): boolean {
+    const char = formulaText[offset - 1];
+    const nextChar = formulaText[offset];
+    return Boolean(char && matchRefDrawToken(char) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET)));
+}
+
+export function insertFormulaReferenceText(formulaText: string, refText: string, offset: number): string {
+    return `${formulaText.slice(0, offset)}${refText}${formulaText.slice(offset)}`;
+}
+
+export function shouldSkipFormulaReferenceUpdate(isAdd: boolean, selectionCount: number): boolean {
+    return !isAdd && selectionCount === 0;
+}
 
 export function getSelectionsForFormulaRefUpdate(
     selections: IRange[],
@@ -164,6 +205,7 @@ export function createSelectionChangeDuplicateEndGuard<TSelection>(): ISelection
 export function createSelectionChangeHandler<TSelection>(opts: {
     initialSelectionsCount: number;
     onSelectionsChange: (selections: TSelection[], isEnd: boolean, isCtrlAddMode?: boolean) => void;
+    onDuplicateEnd?: (selections: TSelection[]) => void;
     duplicateEndGuard?: ISelectionChangeDuplicateEndGuard<TSelection>;
 }) {
     let prevSelectionsCount = opts.initialSelectionsCount;
@@ -183,11 +225,19 @@ export function createSelectionChangeHandler<TSelection>(opts: {
         const isCtrlAddMode = !options?.initial && prevSelectionsCount > 0 && selections.length > prevSelectionsCount;
         if (isCtrlAddMode && !isEnd) {
             pendingCtrlAddCount = selections.length;
-            duplicateEndGuard.reset();
+            if (duplicateEndGuard.shouldSkip(selections, false)) {
+                return;
+            }
+            opts.onSelectionsChange(selections, false, true);
+            prevSelectionsCount = selections.length;
+            pendingCtrlAddCount = 0;
             return;
         }
         const shouldApplyPendingCtrlAdd = isEnd && selections.length === pendingCtrlAddCount;
         if (duplicateEndGuard.shouldSkip(selections, isEnd)) {
+            if (isEnd) {
+                opts.onDuplicateEnd?.(selections);
+            }
             prevSelectionsCount = selections.length;
             pendingCtrlAddCount = 0;
             return;
@@ -241,7 +291,9 @@ export const useSheetSelectionChange = (
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
+    const contextService = useDependency(IContextService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const editorService = useDependency(IEditorService);
     const themeService = useDependency(ThemeService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
@@ -259,10 +311,19 @@ export const useSheetSelectionChange = (
     const duplicateEndGuard = useMemo(() => getSharedSelectionChangeDuplicateEndGuard(`${unitId}:${subUnitId}`), [subUnitId, unitId]);
     // eslint-disable-next-line complexity
     const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
+        if (!editor || !isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
+            fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
+        })) {
+            return;
+        }
+
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
         if (!ctx) return;
-        const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
-        if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
+        const { nodeIndex, updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
+        const isAddingReference = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
+            isFormulaReferenceAddingContext(sequenceNodes, offset) ||
+            isFormulaReferenceAddingTextContext(formulaText, offset);
+        if (isAddingReference) {
             if (offset !== 0) {
                 if (nodeIndex === -1 && sequenceNodes.length) {
                     return;
@@ -281,6 +342,11 @@ export const useSheetSelectionChange = (
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
+                if (isFormulaReferenceAddingTextContext(formulaText, offset)) {
+                    const result = insertFormulaReferenceText(formulaText, refRanges[0], offset);
+                    handleRangeChange(result, offset + refRanges[0].length, isEnd);
+                    return;
+                }
                 sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                 const result = sequenceNodeToText(newSequenceNodes);
@@ -406,6 +472,13 @@ export const useSheetSelectionChange = (
                 onSelectionsChange: (selections, isEnd, isCtrlAddMode) => {
                     onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
                 },
+                onDuplicateEnd: () => {
+                    const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                    if (!ctx) {
+                        return;
+                    }
+                    handleRangeChange(ctx.formulaText, ctx.offset, true);
+                },
             });
             let isInitialMoveEnd = true;
 
@@ -483,6 +556,11 @@ export const useSheetSelectionChange = (
                 if (commandInfo.id !== SetSelectionsOperation.id) {
                     return;
                 }
+                if (!editor || !isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
+                    fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
+                })) {
+                    return;
+                }
 
                 const params = commandInfo.params as ISetSelectionsOperationParams;
                 if (params.extra !== 'formula-editor') {
@@ -502,7 +580,12 @@ export const useSheetSelectionChange = (
                         range.unitId = params.unitId;
                         range.sheetId = params.subUnitId;
 
-                        const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
+                        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                        const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
+                            Boolean(ctx && (
+                                isFormulaReferenceAddingContext(ctx.sequenceNodes, ctx.offset) ||
+                                isFormulaReferenceAddingTextContext(ctx.formulaText, ctx.offset)
+                            ));
                         const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
                         if (isAdd) {
                             if (selections.length > 0 && isSameFormulaSelection(selections[selections.length - 1], range)) {
@@ -510,6 +593,9 @@ export const useSheetSelectionChange = (
                             }
                             selections.push(range);
                         } else {
+                            if (shouldSkipFormulaReferenceUpdate(isAdd, selections.length)) {
+                                return;
+                            }
                             selections[selections.length - 1] = range;
                         }
                         if (duplicateEndGuard.shouldSkip(selections, true)) {
@@ -524,7 +610,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, duplicateEndGuard, editor, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
+    }, [commandService, contextService, duplicateEndGuard, editor, editorService, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
 
     useEffect(() => {
         if (!editor) {

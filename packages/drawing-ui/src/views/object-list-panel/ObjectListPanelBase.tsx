@@ -1,3 +1,19 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { DragEvent, FocusEvent, KeyboardEvent, MouseEvent } from 'react';
 import { Button, clsx, Input } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, EyeIcon, EyelashIcon, LockIcon, MoreDownIcon, MoreRightIcon } from '@univerjs/icons';
@@ -63,6 +79,66 @@ export interface IObjectListPanelLabels {
     filterLocked: string;
     sectionCanvas: string;
     sectionFloating: string;
+}
+
+export type ObjectListPanelTypeNameKey =
+    | 'chart'
+    | 'connector'
+    | 'container'
+    | 'dom'
+    | 'group'
+    | 'image'
+    | 'object'
+    | 'placeholder'
+    | 'shape'
+    | 'smartArt'
+    | 'table'
+    | 'text'
+    | 'unit'
+    | 'video';
+
+interface IObjectListPanelLocaleService {
+    t: (key: string) => string;
+}
+
+const objectListPanelLabelKeys: Record<keyof IObjectListPanelLabels, string> = {
+    title: 'drawing-ui.objectListPanel.title',
+    empty: 'drawing-ui.objectListPanel.empty',
+    showAll: 'drawing-ui.objectListPanel.showAll',
+    hideAll: 'drawing-ui.objectListPanel.hideAll',
+    moveForward: 'drawing-ui.objectListPanel.moveForward',
+    moveBackward: 'drawing-ui.objectListPanel.moveBackward',
+    close: 'drawing-ui.objectListPanel.close',
+    show: 'drawing-ui.objectListPanel.show',
+    hide: 'drawing-ui.objectListPanel.hide',
+    lock: 'drawing-ui.objectListPanel.lock',
+    unlock: 'drawing-ui.objectListPanel.unlock',
+    name: 'drawing-ui.objectListPanel.name',
+    nameInput: 'drawing-ui.objectListPanel.nameInput',
+    description: 'drawing-ui.objectListPanel.description',
+    descriptionPlaceholder: 'drawing-ui.objectListPanel.descriptionPlaceholder',
+    details: 'drawing-ui.objectListPanel.details',
+    noSelection: 'drawing-ui.objectListPanel.noSelection',
+    locate: 'drawing-ui.objectListPanel.locate',
+    expand: 'drawing-ui.objectListPanel.expand',
+    collapse: 'drawing-ui.objectListPanel.collapse',
+    dragToReorder: 'drawing-ui.objectListPanel.dragToReorder',
+    search: 'drawing-ui.objectListPanel.search',
+    filterAll: 'drawing-ui.objectListPanel.filterAll',
+    filterHidden: 'drawing-ui.objectListPanel.filterHidden',
+    filterLocked: 'drawing-ui.objectListPanel.filterLocked',
+    sectionCanvas: 'drawing-ui.objectListPanel.sectionCanvas',
+    sectionFloating: 'drawing-ui.objectListPanel.sectionFloating',
+};
+
+export function getObjectListPanelLabels(localeService: IObjectListPanelLocaleService): IObjectListPanelLabels {
+    return Object.fromEntries(
+        Object.entries(objectListPanelLabelKeys).map(([labelKey, localeKey]) => [labelKey, localeService.t(localeKey)])
+    ) as unknown as IObjectListPanelLabels;
+}
+
+export function getObjectListPanelTypeName(localeService: IObjectListPanelLocaleService, typeName: ObjectListPanelTypeNameKey): string {
+    return localeService.t(`drawing-ui.objectListPanel.typeNames.${typeName}`);
 }
 
 export interface IObjectListPanelBaseProps {
@@ -265,7 +341,8 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                 <div className="univer-flex univer-h-8 univer-shrink-0 univer-items-center univer-gap-2">
                     <div
                         className="
-                          univer-min-w-0 univer-flex-1 univer-truncate univer-text-sm univer-font-semibold univer-text-gray-900
+                          univer-min-w-0 univer-flex-1 univer-truncate univer-text-sm univer-font-semibold
+                          univer-text-gray-900
                           dark:!univer-text-gray-100
                         "
                     >
@@ -346,13 +423,23 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                             type="button"
                             className={clsx(
                                 `
-                                  univer-h-7 univer-min-w-0 univer-flex-1 univer-rounded-md univer-border univer-border-solid
-                                  univer-px-2 univer-text-xs univer-outline-none univer-transition-colors
+                                  univer-h-7 univer-min-w-0 univer-flex-1 univer-rounded-md univer-border
+                                  univer-border-solid univer-px-2 univer-text-xs univer-outline-none
+                                  univer-transition-colors
                                   dark:!univer-border-gray-700
                                 `,
                                 filterMode === mode
-                                    ? 'univer-border-primary-500 univer-bg-primary-50 univer-text-primary-600 dark:!univer-bg-primary-900/30 dark:!univer-text-primary-200'
-                                    : 'univer-border-gray-200 univer-bg-white univer-text-gray-600 hover:univer-bg-gray-50 dark:!univer-bg-gray-900 dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-800'
+                                    ? `
+                                      dark:!univer-bg-primary-900/30
+                                      univer-border-primary-500 univer-bg-primary-50 univer-text-primary-600
+                                      dark:!univer-text-primary-200
+                                    `
+                                    : `
+                                      univer-border-gray-200 univer-bg-white univer-text-gray-600
+                                      hover:univer-bg-gray-50
+                                      dark:!univer-bg-gray-900 dark:!univer-text-gray-300
+                                      dark:hover:!univer-bg-gray-800
+                                    `
                             )}
                             aria-pressed={filterMode === mode}
                             onClick={() => setFilterMode(mode)}
@@ -369,7 +456,10 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                     : (
                         <div className="univer-flex univer-min-w-0 univer-flex-col univer-gap-0.5">
                             {visibleItemSections.map((section) => (
-                                <div key={section.id || 'default'} className="univer-flex univer-min-w-0 univer-flex-col univer-gap-0.5">
+                                <div
+                                    key={section.id || 'default'}
+                                    className="univer-flex univer-min-w-0 univer-flex-col univer-gap-0.5"
+                                >
                                     {showSectionHeaders && section.title && (() => {
                                         const sectionCollapsed = !!section.id && collapsedSectionIds.has(section.id);
 
@@ -377,11 +467,14 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                             <button
                                                 type="button"
                                                 className="
-                                                  univer-box-border univer-flex univer-h-7 univer-w-full univer-items-center univer-gap-1
-                                                  univer-rounded-md univer-border-0 univer-bg-transparent univer-px-2 univer-pt-1
-                                                  univer-text-xs univer-font-semibold univer-uppercase univer-text-gray-400
-                                                  univer-outline-none hover:univer-bg-gray-50 hover:univer-text-gray-600
-                                                  disabled:univer-cursor-default disabled:hover:univer-bg-transparent
+                                                  univer-box-border univer-flex univer-h-7 univer-w-full
+                                                  univer-items-center univer-gap-1 univer-rounded-md univer-border-0
+                                                  univer-bg-transparent univer-px-2 univer-pt-1 univer-text-xs
+                                                  univer-font-semibold univer-uppercase univer-text-gray-400
+                                                  univer-outline-none
+                                                  hover:univer-bg-gray-50 hover:univer-text-gray-600
+                                                  disabled:univer-cursor-default
+                                                  disabled:hover:univer-bg-transparent
                                                   dark:!univer-text-gray-500
                                                   dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-300
                                                 "
@@ -391,13 +484,32 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                             >
                                                 {section.id
                                                     ? (
-                                                        <span className="univer-flex univer-size-4 univer-shrink-0 univer-items-center univer-justify-center">
+                                                        <span
+                                                            className="
+                                                              univer-flex univer-size-4 univer-shrink-0
+                                                              univer-items-center univer-justify-center
+                                                            "
+                                                        >
                                                             {sectionCollapsed ? <MoreRightIcon /> : <MoreDownIcon />}
                                                         </span>
                                                     )
                                                     : <span className="univer-size-4 univer-shrink-0" />}
-                                                <span className="univer-min-w-0 univer-flex-1 univer-truncate univer-text-left">{section.title}</span>
-                                                <span className="univer-shrink-0 univer-text-[10px] univer-font-medium univer-text-gray-400 dark:!univer-text-gray-500">{section.items.length}</span>
+                                                <span
+                                                    className="
+                                                      univer-min-w-0 univer-flex-1 univer-truncate univer-text-left
+                                                    "
+                                                >
+                                                    {section.title}
+                                                </span>
+                                                <span
+                                                    className="
+                                                      univer-shrink-0 univer-text-[10px] univer-font-medium
+                                                      univer-text-gray-400
+                                                      dark:!univer-text-gray-500
+                                                    "
+                                                >
+                                                    {section.items.length}
+                                                </span>
                                             </button>
                                         );
                                     })()}
@@ -502,9 +614,18 @@ function ObjectListRow(props: {
                   univer-items-center univer-gap-1.5 univer-overflow-hidden univer-rounded-md univer-pr-1.5
                   univer-transition-colors
                 `,
-                !disabled && 'hover:univer-bg-gray-100 dark:hover:!univer-bg-gray-800',
-                selected && 'univer-bg-gray-100 dark:!univer-bg-gray-800',
-                disabled && 'univer-text-gray-400 dark:!univer-text-gray-500',
+                !disabled && `
+                  hover:univer-bg-gray-100
+                  dark:hover:!univer-bg-gray-800
+                `,
+                selected && `
+                  univer-bg-gray-100
+                  dark:!univer-bg-gray-800
+                `,
+                disabled && `
+                  univer-text-gray-400
+                  dark:!univer-text-gray-500
+                `,
                 dragging && 'univer-opacity-50'
             )}
             style={{ paddingLeft: level * 14 + 4 }}
@@ -552,19 +673,24 @@ function ObjectListRow(props: {
                 ? (
                     <Input
                         key={item.name}
-                        className={clsx('univer-h-7 univer-w-0 univer-min-w-0 univer-flex-1', disabled && 'univer-cursor-not-allowed')}
+                        className={clsx('univer-h-7 univer-w-0 univer-min-w-0 univer-flex-1', disabled && `
+                          univer-cursor-not-allowed
+                        `)}
                         inputClass={clsx(
                             `
-                              !univer-h-7 univer-min-w-0 univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap
-                              !univer-rounded !univer-border-transparent !univer-bg-transparent !univer-px-1 univer-text-sm
-                              univer-text-gray-900 !univer-shadow-none
+                              !univer-h-7 univer-min-w-0 univer-overflow-hidden univer-text-ellipsis
+                              univer-whitespace-nowrap !univer-rounded !univer-border-transparent !univer-bg-transparent
+                              !univer-px-1 univer-text-sm univer-text-gray-900 !univer-shadow-none
                               focus:!univer-border-primary-500 focus:!univer-bg-white focus:!univer-ring-1
                               focus:!univer-ring-primary-100
                               disabled:!univer-bg-transparent disabled:univer-opacity-100
                               dark:!univer-text-gray-100
                               dark:focus:!univer-bg-gray-900 dark:focus:!univer-ring-primary-900
                             `,
-                            disabled && 'univer-text-gray-400 dark:!univer-text-gray-500'
+                            disabled && `
+                              univer-text-gray-400
+                              dark:!univer-text-gray-500
+                            `
                         )}
                         inputStyle={{ maxWidth: '100%', boxSizing: 'border-box' }}
                         value={draftName}
@@ -636,20 +762,44 @@ function ObjectDetailsEditor(props: {
 
     if (!item) {
         return (
-            <div className="univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-p-3 univer-text-sm univer-text-gray-500 dark:!univer-border-gray-700 dark:!univer-text-gray-400">
+            <div
+                className="
+                  univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-p-3 univer-text-sm
+                  univer-text-gray-500
+                  dark:!univer-border-gray-700 dark:!univer-text-gray-400
+                "
+            >
                 {labels.noSelection}
             </div>
         );
     }
 
     return (
-        <div className="univer-flex univer-shrink-0 univer-flex-col univer-gap-2 univer-border-0 univer-border-t univer-border-solid univer-border-gray-200 univer-pt-3 dark:!univer-border-gray-700">
-            <div className="univer-text-xs univer-font-semibold univer-uppercase univer-text-gray-500 dark:!univer-text-gray-400">
+        <div
+            className="
+              univer-flex univer-shrink-0 univer-flex-col univer-gap-2 univer-border-0 univer-border-t
+              univer-border-solid univer-border-gray-200 univer-pt-3
+              dark:!univer-border-gray-700
+            "
+        >
+            <div
+                className="
+                  univer-text-xs univer-font-semibold univer-uppercase univer-text-gray-500
+                  dark:!univer-text-gray-400
+                "
+            >
                 {labels.details}
             </div>
             {showName && (
                 <label className="univer-flex univer-flex-col univer-gap-1">
-                    <span className="univer-text-xs univer-text-gray-500 dark:!univer-text-gray-400">{labels.name}</span>
+                    <span
+                        className="
+                          univer-text-xs univer-text-gray-500
+                          dark:!univer-text-gray-400
+                        "
+                    >
+                        {labels.name}
+                    </span>
                     <Input
                         value={draftName}
                         aria-label={labels.nameInput}
@@ -670,12 +820,19 @@ function ObjectDetailsEditor(props: {
             )}
             {showDescription && (
                 <label className="univer-flex univer-flex-col univer-gap-1">
-                    <span className="univer-text-xs univer-text-gray-500 dark:!univer-text-gray-400">{labels.description}</span>
+                    <span
+                        className="
+                          univer-text-xs univer-text-gray-500
+                          dark:!univer-text-gray-400
+                        "
+                    >
+                        {labels.description}
+                    </span>
                     <textarea
                         className="
                           univer-box-border univer-min-h-16 univer-w-full univer-resize-none univer-rounded-md
-                          univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2 univer-text-sm
-                          univer-text-gray-900 univer-outline-none
+                          univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
+                          univer-text-sm univer-text-gray-900 univer-outline-none
                           focus:univer-border-primary-500 focus:univer-ring-1 focus:univer-ring-primary-100
                           disabled:univer-cursor-not-allowed disabled:univer-opacity-70
                           dark:!univer-border-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-gray-100

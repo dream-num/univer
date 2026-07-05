@@ -572,27 +572,6 @@ export class EmbedMountService {
                 scopedInstanceService.setCurrentUnitForType(descriptor.childUnitId);
                 scopedInstanceService.focusUnit(descriptor.childUnitId);
             }
-            if (mode === 'float' && this._injector.has(IUniverInstanceService)) {
-                const instanceService = this._injector.get(IUniverInstanceService);
-                const getCurrentUnitOfType = (instanceService as unknown as {
-                    getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
-                }).getCurrentUnitOfType;
-                const getFocusedUnit = (instanceService as unknown as {
-                    getFocusedUnit?: () => { getUnitId: () => string } | null | undefined;
-                }).getFocusedUnit;
-                if (
-                    typeof getCurrentUnitOfType !== 'function' ||
-                    getCurrentUnitOfType.call(instanceService, descriptor.childType)?.getUnitId() !== descriptor.childUnitId
-                ) {
-                    instanceService.setCurrentUnitForType(descriptor.childUnitId);
-                }
-                if (
-                    typeof getFocusedUnit !== 'function' ||
-                    getFocusedUnit.call(instanceService)?.getUnitId() !== descriptor.childUnitId
-                ) {
-                    instanceService.focusUnit(descriptor.childUnitId);
-                }
-            }
             if (mode === 'tab' && this._injector.has(IUniverInstanceService)) {
                 const instanceService = this._injector.get(IUniverInstanceService);
                 const getCurrentUnitOfType = (instanceService as unknown as {

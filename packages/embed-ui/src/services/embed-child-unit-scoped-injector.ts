@@ -30,11 +30,13 @@ import { CreateEmbedCommand } from '@univerjs/embed';
 import {
     CanvasPopupService,
     ContextMenuService,
+    DesktopRibbonService,
     DesktopSidebarService,
     ICanvasPopupService,
     IContextMenuService,
     ILayoutService,
     IMenuManagerService,
+    IRibbonService,
     ISidebarService,
 } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
@@ -170,11 +172,14 @@ export function createEmbedChildUnitScopedInjector(
     }
 
     scopedInjector = createEmbedScopedInjector(context.injector, scopedOverrides);
+    const ownedScopedServices: IDisposable[] = [];
     const scopedMenuManagerService = createScopedMenuManagerService(context.injector, scopedInjector);
     if (scopedMenuManagerService) {
         scopedInjector.add([IMenuManagerService, { useValue: scopedMenuManagerService }]);
+        const scopedRibbonService = new DesktopRibbonService(scopedMenuManagerService, scopedInstanceService as IUniverInstanceService);
+        scopedInjector.add([IRibbonService, { useValue: scopedRibbonService }]);
+        ownedScopedServices.push(scopedRibbonService);
     }
-    const ownedFullscreenServices: IDisposable[] = [];
     if (context.renderScope.fullscreen) {
         const fullscreenContextMenuService = createFullscreenContextMenuService(scopedInjector);
         const fullscreenPopupService = new CanvasPopupService();
@@ -182,7 +187,7 @@ export function createEmbedChildUnitScopedInjector(
         scopedInjector.add([IContextMenuService, { useValue: fullscreenContextMenuService }]);
         scopedInjector.add([ICanvasPopupService, { useValue: fullscreenPopupService }]);
         scopedInjector.add([ISidebarService, { useValue: fullscreenSidebarService }]);
-        ownedFullscreenServices.push(fullscreenContextMenuService, fullscreenPopupService, fullscreenSidebarService);
+        ownedScopedServices.push(fullscreenContextMenuService, fullscreenPopupService, fullscreenSidebarService);
     } else {
         const scopedContextMenuService = createScopedContextMenuService(context.injector, scopedInjector);
         if (scopedContextMenuService) {
@@ -193,7 +198,7 @@ export function createEmbedChildUnitScopedInjector(
     if (scopedLayoutService) {
         scopedInjector.add([ILayoutService, { useValue: scopedLayoutService }]);
     }
-    if (ownedFullscreenServices.length) {
+    if (ownedScopedServices.length) {
         const disposeScopedInjector = scopedInjector.dispose.bind(scopedInjector);
         let disposed = false;
         scopedInjector.dispose = () => {
@@ -201,7 +206,7 @@ export function createEmbedChildUnitScopedInjector(
                 return;
             }
             disposed = true;
-            ownedFullscreenServices.forEach((service) => service.dispose());
+            ownedScopedServices.forEach((service) => service.dispose());
             disposeScopedInjector();
         };
     }

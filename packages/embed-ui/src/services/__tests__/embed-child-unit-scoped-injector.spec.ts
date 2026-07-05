@@ -29,7 +29,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { CreateEmbedCommand } from '@univerjs/embed';
-import { ICanvasPopupService, IContextMenuService, ILayoutService, IMenuManagerService, ISidebarService } from '@univerjs/ui';
+import { ICanvasPopupService, IContextMenuService, ILayoutService, IMenuManagerService, IRibbonService, ISidebarService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from '../embed-child-unit-scoped-injector';
@@ -96,9 +96,15 @@ describe('embed child unit scoped injector', () => {
             resolveStackUnitId: vi.fn((unitId: string) => unitId === 'child-sheet' ? 'host-stack' : unitId),
             pushUndoRedoForChild: vi.fn(),
         };
-        const scopedMenuManager = { scoped: true };
+        const scopedMenuManager = {
+            scoped: true,
+            menuChanged$: new Subject<void>(),
+            getMenuByPositionKey: vi.fn(() => []),
+        };
         const menuManagerService = {
+            menuChanged$: new Subject<void>(),
             createScoped: vi.fn(() => scopedMenuManager),
+            getMenuByPositionKey: vi.fn(() => []),
         };
         const contextMenuService = {
             disabled: false,
@@ -142,6 +148,7 @@ describe('embed child unit scoped injector', () => {
         expect(scopedInjector?.get(EmbedInteractionBoundaryService)).toBe(interactionBoundaryService);
         expect(scopedInjector?.get(EmbedRuntimeFocusCoordinator)).toBe(runtimeFocusCoordinator);
         expect(scopedInjector?.get(IMenuManagerService)).toBe(scopedMenuManager);
+        expect(scopedInjector?.get(IRibbonService)).toBeDefined();
         expect(scopedInjector?.get(IContextMenuService)).not.toBe(contextMenuService);
         const scopedLayoutService = scopedInjector?.get(ILayoutService);
         expect(scopedLayoutService?.rootContainerElement).toBe(childContext.renderScope.rootElement);

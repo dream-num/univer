@@ -16,6 +16,7 @@
 
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import { UniverInstanceType } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedActivationService } from '../embed-activation.service';
 
@@ -73,7 +74,7 @@ describe('EmbedActivationService', () => {
         expect(mountService.activateSession).toHaveBeenCalledWith('float-doc');
     });
 
-    it('focuses the child unit when a floating embed enters stage2', () => {
+    it('activates stage2 floating embeds without moving global focus away from the host ribbon', () => {
         const univerInstanceService = {
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
@@ -119,15 +120,13 @@ describe('EmbedActivationService', () => {
             embedId: 'float-sheet',
             childUnitId: 'child-sheet',
         }, 'stage2');
-        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
-        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
-        expect(menuOverrideService.activate).toHaveBeenCalledWith(descriptor, 'float-stage2', {
-            layoutPolicy: { ribbon: 'host' },
-            allowPlaceholder: false,
-        });
+        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+        expect(menuOverrideService.clear).toHaveBeenCalledWith();
+        expect(menuOverrideService.activate).not.toHaveBeenCalled();
     });
 
-    it('focuses the child unit when a floating runtime enters interactive stage2', () => {
+    it('marks the floating runtime active without moving global focus when it enters interactive stage2', () => {
         const univerInstanceService = {
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
@@ -177,8 +176,52 @@ describe('EmbedActivationService', () => {
             embedId: 'float-sheet',
             childUnitId: 'child-sheet',
         }, 'stage2');
-        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
-        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
+        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+    });
+
+    it('restores host global focus when a stage2 floating child writes focus to itself', () => {
+        const focused$ = new Subject<string>();
+        let focusedUnitId = 'host-doc';
+        const univerInstanceService = {
+            focused$,
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => focusedUnitId })),
+            setCurrentUnitForType: vi.fn(),
+            focusUnit: vi.fn((unitId: string) => {
+                focusedUnitId = unitId;
+            }),
+        };
+        const service = new EmbedActivationService(
+            univerInstanceService as never,
+            { setFocusOwner: vi.fn(), clearFocusOwner: vi.fn() } as never,
+            { activateAnchor: vi.fn() } as never,
+            { activate: vi.fn(), clear: vi.fn() } as never,
+            { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) } as never,
+            undefined,
+            { activate: vi.fn() } as never
+        );
+        const descriptor: IEmbedDescriptor = {
+            embedId: 'float-sheet',
+            hostUnitId: 'host-doc',
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
+            hostAnchorId: 'drawing-1',
+            source: {
+                unitType: UniverInstanceType.UNIVER_SHEET,
+                ref: { file: { kind: 'self' }, unit: { selector: 'child-sheet', type: 'sheet' } },
+            },
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        };
+
+        service.activateFloating(descriptor, 'stage2');
+        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+
+        focusedUnitId = 'child-sheet';
+        focused$.next('child-sheet');
+
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('host-doc');
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('host-doc');
     });
 
     it('focuses the child unit for fullscreen runtimes without activating floating state', () => {

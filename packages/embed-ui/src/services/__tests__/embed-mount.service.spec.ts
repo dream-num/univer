@@ -33,6 +33,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
+import { IMenuManagerService, IRibbonService, MenuManagerPosition } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedChildViewRegistryService } from '../embed-child-view-registry.service';
 import { EmbedFloatingActiveService } from '../embed-floating-active.service';
@@ -189,10 +191,24 @@ describe('EmbedMountService', () => {
         expect(focusOwnerService.getFocusOwner()).toBeNull();
     });
 
-    it('focuses the child unit in both the scoped and global runtime when a stage2 floating child receives pointer focus', () => {
+    it('focuses the child unit only in the scoped runtime when a stage2 floating child receives pointer focus', () => {
         const hostElement = document.createElement('div');
         const childUnit = { getUnitId: () => 'child-sheet' };
         let childContext: IEmbedChildContainerContext | undefined;
+        const scopedMenuManager = {
+            menuChanged$: new Subject<void>(),
+            getMenuByPositionKey: vi.fn(() => []),
+        };
+        const menuManagerService = {
+            menuChanged$: new Subject<void>(),
+            createScoped: vi.fn(() => scopedMenuManager),
+            getMenuByPositionKey: vi.fn(() => []),
+        };
+        const hostRibbonService = {
+            showContextualTab: vi.fn(),
+            hideContextualTab: vi.fn(),
+            hideAllContextualTabs: vi.fn(),
+        };
         const instanceService = {
             currentUnitId: 'host-doc',
             getUnit: vi.fn(() => childUnit),
@@ -224,6 +240,8 @@ describe('EmbedMountService', () => {
                 [IContextService, contextService],
                 [EmbedFocusOwnerService, focusOwnerService],
                 [EmbedFloatingActiveService, floatingActiveService],
+                [IMenuManagerService, menuManagerService],
+                [IRibbonService, hostRibbonService],
             ],
         });
 
@@ -233,9 +251,16 @@ describe('EmbedMountService', () => {
         expect(childContext?.runtimeScope.instanceService?.getFocusedUnit()?.getUnitId()).toBe('child-sheet');
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SHEET, true);
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, false);
-        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
-        expect(instanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(instanceService.focusUnit).not.toHaveBeenCalled();
         expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-sheet' });
+        expect(childContext?.runtimeScope.injector.has(IRibbonService)).toBe(true);
+
+        const childRibbonService = childContext?.runtimeScope.injector.get(IRibbonService);
+        expect(childRibbonService).not.toBe(hostRibbonService);
+        childRibbonService?.showContextualTab('shape-format', { activate: true });
+        expect(hostRibbonService.showContextualTab).not.toHaveBeenCalled();
+        expect(scopedMenuManager.getMenuByPositionKey).toHaveBeenCalledWith(MenuManagerPosition.RIBBON);
     });
 
     it('runs child deactivate hooks before deactivating tab sessions', () => {

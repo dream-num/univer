@@ -16,8 +16,6 @@
 
 import './global.css';
 
-export { IDocDrawingService } from '@univerjs/docs-drawing';
-export type { IDocDrawing } from '@univerjs/docs-drawing';
 export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing.command';
 export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.command';
 export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
@@ -37,3 +35,5 @@ export { DOCS_SHAPE_BELOW_MENU_ID, DOCS_SHAPE_MENU_ID } from './menu/shape.menu'
 export { UniverDocsDrawingUIPlugin } from './plugin';
 export { DocDrawingPosition } from './views/doc-image-panel/DocDrawingPosition';
 export { DocDrawingTextWrap } from './views/doc-image-panel/DocDrawingTextWrap';
+export { IDocDrawingService } from '@univerjs/docs-drawing';
+export type { IDocDrawing } from '@univerjs/docs-drawing';

@@ -473,8 +473,10 @@ export function EmbedFloatDomRenderer(props: {
             syncChromeControlsVisibility(chrome, chromeControlsVisible, dragHandleVisible, stage);
             if (docsSheetLikeChrome) {
                 chrome.style.setProperty('--univer-embed-floating-menu-top', '8px');
+                syncDocsSheetLikeChromePageArea(chrome, rect, rawContainerRect);
             } else {
                 chrome.style.removeProperty('--univer-embed-floating-menu-top');
+                clearDocsSheetLikeChromePageArea(chrome);
             }
             chrome.style.visibility = chromeVisible ? '' : 'hidden';
             chrome.style.pointerEvents = chromeVisible && stage !== 'inactive' ? '' : 'none';
@@ -1550,6 +1552,21 @@ export function syncChromeControlsVisibility(chrome: HTMLElement | undefined, vi
             });
         }
     });
+}
+
+export function syncDocsSheetLikeChromePageArea(chrome: HTMLElement, chromeRect: DOMRect, pageRect: DOMRect): void {
+    const visibleLeft = Math.max(chromeRect.left, pageRect.left);
+    const visibleRight = Math.min(chromeRect.right, pageRect.right);
+    const left = Math.max(0, visibleLeft - chromeRect.left);
+    const width = Math.max(1, visibleRight - visibleLeft || Math.min(pageRect.width, chromeRect.width));
+
+    chrome.style.setProperty('--univer-embed-docs-block-page-left', `${left}px`);
+    chrome.style.setProperty('--univer-embed-docs-block-page-width', `${width}px`);
+}
+
+function clearDocsSheetLikeChromePageArea(chrome: HTMLElement): void {
+    chrome.style.removeProperty('--univer-embed-docs-block-page-left');
+    chrome.style.removeProperty('--univer-embed-docs-block-page-width');
 }
 
 export function resolveChromeAnchorRect(container: HTMLElement): DOMRect {

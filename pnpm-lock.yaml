@@ -1397,7 +1397,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+        version: 4.1.9(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/embed-ui:
     dependencies:
@@ -1411,8 +1411,8 @@ importers:
         specifier: workspace:*
         version: link:../embed
       '@univerjs/icons':
-        specifier: 1.13.0
-        version: 1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.16.0
+        version: 1.16.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1434,7 +1434,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+        version: 4.1.9(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/engine-formula:
     dependencies:
@@ -6988,14 +6988,14 @@ packages:
   '@univerjs/icons-svg@1.18.0':
     resolution: {integrity: sha512-ubflVwfPl7JaOMN9dLnuuRrzum/ZRZPl3HiRRpTOkShXpWMotn7sX8EteZZMJjmvT4D9cj7o56S6J86tPUzKuA==}
 
-  '@univerjs/icons@1.13.0':
-    resolution: {integrity: sha512-K1wBl7I+TZa+B8SvQHwojO9c/cYdk+Pkfd7hVB8wd0yMg4neuH4JeOdra2zxoG7qTcBEXSBPZbKLMxuA8/GNZQ==}
+  '@univerjs/icons@1.18.0':
+    resolution: {integrity: sha512-zT8oH9W2oELkz9mD8Zic705TU5/PYB1GedzvlbSQR5lyrK0RCMQCzaC2qZZyD1N13W24takpfyX9j1fIYT6adg==}
     peerDependencies:
       react: 19.2.7
       react-dom: 19.2.7
 
-  '@univerjs/icons@1.18.0':
-    resolution: {integrity: sha512-zT8oH9W2oELkz9mD8Zic705TU5/PYB1GedzvlbSQR5lyrK0RCMQCzaC2qZZyD1N13W24takpfyX9j1fIYT6adg==}
+  '@univerjs/icons@1.16.0':
+    resolution: {integrity: sha512-eJZMHh7hIpLRZpcL6aXtRRNLalLWnClQ7Ruj/ms7OpkR94yUKicd78bwQFfWiV57/9n2CNCPldPlQGjKeoJBSg==}
     peerDependencies:
       react: 19.2.7
       react-dom: 19.2.7
@@ -14461,8 +14461,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.61.1(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.61.1(typescript@6.0.3)
-      '@typescript-eslint/types': 8.61.1
+      '@typescript-eslint/tsconfig-utils': 8.62.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.62.1
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -14705,12 +14705,12 @@ snapshots:
 
   '@univerjs/icons-svg@1.18.0': {}
 
-  '@univerjs/icons@1.13.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@univerjs/icons@1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
-  '@univerjs/icons@1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@univerjs/icons@1.16.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
@@ -16615,6 +16615,10 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.4):
     optionalDependencies:
       picomatch: 4.0.4
+
+  fdir@6.5.0(picomatch@4.0.5):
+    optionalDependencies:
+      picomatch: 4.0.5
 
   file-entry-cache@8.0.0:
     dependencies:
@@ -19568,8 +19572,8 @@ snapshots:
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
 
   tinypool@2.1.0: {}
 
@@ -20020,7 +20024,7 @@ snapshots:
       acorn-import-phases: 1.0.4(acorn@8.16.0)
       browserslist: 4.28.2
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.21.0
+      enhanced-resolve: 5.24.1
       es-module-lexer: 2.1.0
       eslint-scope: 5.1.1
       events: 3.3.0

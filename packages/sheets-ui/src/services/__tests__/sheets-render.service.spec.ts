@@ -145,18 +145,21 @@ describe('SheetsRenderService', () => {
             options: { mountContainer: 'container' },
         });
 
-        const canvas = { setId: vi.fn() };
+        const canvasElement = { dataset: {} as Record<string, string> };
+        const canvas = { setId: vi.fn(), getCanvasEle: vi.fn(() => canvasElement) };
         const context = { setId: vi.fn() };
         created$.next({
             unitId: 'book-2',
             engine: {
                 getCanvas: () => ({
                     setId: canvas.setId,
+                    getCanvasEle: canvas.getCanvasEle,
                     getContext: () => context,
                 }),
             },
         });
         expect(canvas.setId).toHaveBeenCalledWith('univer-sheet-main-canvas_book-2');
+        expect(canvasElement.dataset.uUnitId).toBe('book-2');
         expect(context.setId).toHaveBeenCalledWith('univer-sheet-main-canvas_book-2');
 
         disposed$.next(createWorkbook('book-1'));

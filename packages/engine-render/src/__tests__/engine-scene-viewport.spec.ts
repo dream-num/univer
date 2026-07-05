@@ -568,6 +568,36 @@ describe('engine scene viewport extra', () => {
         transformer.dispose();
     });
 
+    it('expands transformer border spacing symmetrically around object bounds', () => {
+        const transformer = new Transformer({
+            getEngine: () => ({ activeScene: null }),
+        } as any, {
+            anchorSize: 8,
+            anchorStyle: 'canva',
+            borderSpacing: 2,
+            borderStrokeWidth: 1,
+        });
+
+        expect((transformer as any)._getOutlinePosition(100, 50, 2, 1)).toEqual({
+            left: -3,
+            top: -3,
+            width: 104,
+            height: 54,
+        });
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerResizeLM__', 50, 100, {
+            transformerConfig: {
+                anchorSize: 8,
+                borderSpacing: 2,
+                borderStrokeWidth: 1,
+            },
+        })).toEqual({
+            left: -7,
+            top: 21,
+        });
+
+        transformer.dispose();
+    });
+
     it('supports bottom rotate control without a connector line', () => {
         const { engine, scene } = createFixture();
         engine.setActiveScene(scene.sceneKey);

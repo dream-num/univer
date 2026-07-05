@@ -19,7 +19,7 @@ export type ResourceRefFile =
     | { kind: 'relative'; path: string }
     | { kind: 'uri'; uri: string };
 
-export type ResourceRefUnitType = 'sheet' | 'doc' | 'slide' | 'base';
+export type ResourceRefUnitType = string;
 
 export type ResourceRefUnitSelector = string;
 
@@ -30,13 +30,31 @@ export interface IResourceRefUnit {
 
 export type ResourceRefUnit = IResourceRefUnit;
 
-export type ResourceRefPartKind = 'sheet' | 'range';
-
-export type ResourceRefPart =
-    | { kind: 'sheet'; sheetName: string; sheetId?: string }
-    | { kind: 'range'; ref: string; sheetName: string; range: string; sheetId?: string };
-
 export type ResourceRefExtensionValue = string | readonly string[];
+export type ResourceRefPartValue = ResourceRefExtensionValue | undefined;
+
+export interface IResourceRefPart {
+    kind: string;
+    readonly [key: string]: ResourceRefPartValue;
+}
+
+export interface IResourceRefSheetPart extends IResourceRefPart {
+    kind: 'sheet';
+    sheetName: string;
+    sheetId?: string;
+}
+
+export interface IResourceRefRangePart extends IResourceRefPart {
+    kind: 'range';
+    ref: string;
+    sheetName: string;
+    range: string;
+    sheetId?: string;
+}
+
+export type ResourceRefPartKind = IResourceRefSheetPart['kind'] | IResourceRefRangePart['kind'];
+
+export type ResourceRefPart = IResourceRefPart | IResourceRefSheetPart | IResourceRefRangePart;
 
 export interface IResourceRef {
     file: ResourceRefFile;
@@ -103,7 +121,6 @@ export class ResourceRefError extends Error {
     }
 }
 
-const RESOURCE_REF_UNIT_TYPES = new Set<ResourceRefUnitType>(['sheet', 'doc', 'slide', 'base']);
 const INVALID_PERCENT_ESCAPE_PATTERN = /%(?![0-9A-Fa-f]{2})/;
 const SUPPORTED_FRAGMENT_KEYS = new Set(['unit', 'type']);
 
@@ -166,6 +183,14 @@ export function assertResourceRef(ref: ResourceRef): asserts ref is ResourceRef 
             }
         }
     }
+}
+
+export function isResourceRefRangePart(part: ResourceRefPart | undefined): part is IResourceRefRangePart {
+    return !!part &&
+        part.kind === 'range' &&
+        typeof part.ref === 'string' &&
+        typeof part.sheetName === 'string' &&
+        typeof part.range === 'string';
 }
 
 export function parseResourceRef(uriReference: string, _options: ParseResourceRefOptions = {}): ResourceRef {
@@ -237,17 +262,13 @@ function assertResourceRefFile(file: ResourceRefFile): void {
 }
 
 function assertResourceRefUnit(unit: ResourceRefUnit): void {
-    if (!unit || typeof unit !== 'object' || !unit.selector) {
+    if (!unit || typeof unit !== 'object' || !unit.selector || typeof unit.type !== 'string' || !unit.type) {
         throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidUnit, { unit });
-    }
-
-    if (!RESOURCE_REF_UNIT_TYPES.has(unit.type)) {
-        throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidUnitType, { unit });
     }
 }
 
 function assertResourceRefPart(part: ResourceRefPart): void {
-    if (!part || typeof part !== 'object') {
+    if (!part || typeof part !== 'object' || typeof part.kind !== 'string' || !part.kind) {
         throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidPart, { part });
     }
 
@@ -261,9 +282,18 @@ function assertResourceRefPart(part: ResourceRefPart): void {
             if (!part.ref || !part.sheetName || !part.range) {
                 throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidRangePart, { part });
             }
-            return;
+            break;
         default:
-            throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidPartKind, { part });
+            break;
+    }
+
+    for (const [key, value] of Object.entries(part)) {
+        if (!key) {
+            throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidPart, { part });
+        }
+        if (value != null && typeof value !== 'string' && (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))) {
+            throw new ResourceRefError(ResourceRefErrorCode.ResourceRefInvalidPart, { part });
+        }
     }
 }
 
@@ -289,11 +319,15 @@ function normalizeResourceRefPart(part: ResourceRefPart): ResourceRefPart {
         case 'range':
             return {
                 kind: 'range',
-                ref: part.ref,
-                sheetName: part.sheetName,
-                range: part.range,
-                ...(part.sheetId ? { sheetId: part.sheetId } : {}),
+                ref: part.ref as string,
+                sheetName: part.sheetName as string,
+                range: part.range as string,
+                ...(part.sheetId ? { sheetId: part.sheetId as string } : {}),
             };
+        default:
+            return Object.fromEntries(Object.entries(part)
+                .sort(([left], [right]) => left.localeCompare(right))
+                .map(([key, value]) => [key, Array.isArray(value) ? [...value] : value])) as ResourceRefPart;
     }
 }
 

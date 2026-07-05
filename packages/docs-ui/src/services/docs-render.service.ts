@@ -67,28 +67,36 @@ export class DocsRenderService extends RxDisposable {
         }
 
         const unitId = doc.getUnitId();
-        this._renderManagerService.created$.subscribe((renderer) => {
-            if (renderer.unitId === unitId) {
-                const documentFlavor = doc.getSnapshot().documentStyle.documentFlavor;
-                const canvas = renderer.engine.getCanvas();
-                canvas.setId(DOC_MAIN_CANVAS_ID);
-                canvas.getContext().setId(DOC_MAIN_CANVAS_ID);
-                canvas.getCanvasEle().style.backgroundColor = getDocsCanvasBackgroundColor(
-                    documentFlavor,
-                    renderer.engine.canvasColorService,
-                    undefined,
-                    isInternalEditorID(unitId)
-                );
-            }
-        });
-
         if (!this._renderManagerService.has(unitId)) {
-            this._createRenderWithId(unitId);
+            this._createRenderWithId(unitId, doc);
+            return;
+        }
+
+        const renderer = this._renderManagerService.getRenderById(unitId);
+        if (renderer) {
+            this._syncRendererCanvas(renderer, doc);
         }
     }
 
-    private _createRenderWithId(unitId: string) {
-        this._renderManagerService.createRender(unitId);
+    private _createRenderWithId(unitId: string, doc?: DocumentDataModel) {
+        const renderer = this._renderManagerService.createRender(unitId);
+        if (doc) {
+            this._syncRendererCanvas(renderer, doc);
+        }
+    }
+
+    private _syncRendererCanvas(renderer: ReturnType<IRenderManagerService['createRender']>, doc: DocumentDataModel): void {
+        const unitId = doc.getUnitId();
+        const documentFlavor = doc.getSnapshot().documentStyle.documentFlavor;
+        const canvas = renderer.engine.getCanvas();
+        canvas.setId(DOC_MAIN_CANVAS_ID);
+        canvas.getContext().setId(DOC_MAIN_CANVAS_ID);
+        canvas.getCanvasEle().style.backgroundColor = getDocsCanvasBackgroundColor(
+            documentFlavor,
+            renderer.engine.canvasColorService,
+            undefined,
+            isInternalEditorID(unitId)
+        );
     }
 
     private _disposeRenderer(doc: DocumentDataModel) {

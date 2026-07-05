@@ -94,8 +94,12 @@ describe('resource refs', () => {
         expect(() => assertResourceRef({ file: { kind: 'relative', path: '' }, unit: { selector: 'sheet-1', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_RELATIVE_PATH');
         expect(() => assertResourceRef({ file: { kind: 'uri', uri: '' }, unit: { selector: 'sheet-1', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_URI');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: '', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_UNIT');
-        expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'unknown' } } as never)).toThrow('RESOURCE_REF_INVALID_UNIT_TYPE');
-        expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, part: { kind: 'unknown' } } as never)).toThrow('RESOURCE_REF_INVALID_PART_KIND');
+        expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: '' } } as never)).toThrow('RESOURCE_REF_INVALID_UNIT');
+        expect(normalizeResourceRef({ file: { kind: 'self' }, unit: { selector: 'unit-1', type: 'custom' }, part: { kind: 'custom-selector', value: 'ok' } })).toEqual({
+            file: { kind: 'self' },
+            unit: { selector: 'unit-1', type: 'custom' },
+            part: { kind: 'custom-selector', value: 'ok' },
+        });
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, part: { kind: 'sheet', sheetName: '' } } as never)).toThrow('RESOURCE_REF_INVALID_SHEET_PART');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, part: { kind: 'range', ref: 'A1', sheetName: '', range: 'A1' } } as never)).toThrow('RESOURCE_REF_INVALID_RANGE_PART');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, extensions: [] } as never)).toThrow('RESOURCE_REF_INVALID_EXTENSIONS');

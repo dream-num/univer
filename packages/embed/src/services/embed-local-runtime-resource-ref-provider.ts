@@ -33,7 +33,7 @@ import type {
     IEmbedResourceRefUnitProviderRegistration,
     IReferencedUnitLoadResult,
 } from './embed-resource-ref-provider-registry.service';
-import { UniverInstanceType as CoreUniverInstanceType, getOriginCellValue, Inject, IReferencedUnitManagerService, IUniverInstanceService, ReferencedUnitDataType } from '@univerjs/core';
+import { UniverInstanceType as CoreUniverInstanceType, getOriginCellValue, Inject, IReferencedUnitManagerService, isResourceRefRangePart, IUniverInstanceService, ReferencedUnitDataType } from '@univerjs/core';
 import { EmbedError, EmbedErrorCode } from '../common/error';
 import { parseResourceRef } from '../common/resource-ref-uri';
 import { toResourceRefUnitType } from '../common/unit-type';
@@ -77,13 +77,14 @@ export class EmbedLocalRuntimeResourceRefDataProvider implements IEmbedResourceR
     }
 
     async readData(input: IEmbedResourceRefReadDataInput): Promise<IReferencedUnitReadDataResult> {
-        if (input.dataType !== ReferencedUnitDataType.RANGE || input.selector.kind !== 'range') {
+        if (input.dataType !== ReferencedUnitDataType.RANGE || !isResourceRefRangePart(input.selector)) {
             throw new EmbedError(EmbedErrorCode.LocalRuntimeResourceRefDataSelectorUnsupported, {
                 dataType: input.dataType,
                 selector: input.selector,
             });
         }
 
+        const selector = input.selector;
         const record = await this._referencedUnitManager.ensure(
             getResourceRefUnitLocatorRef(input.ref),
             {
@@ -107,9 +108,9 @@ export class EmbedLocalRuntimeResourceRefDataProvider implements IEmbedResourceR
             });
         }
 
-        const worksheet = input.selector.sheetId
-            ? workbook.getSheetBySheetId(input.selector.sheetId)
-            : workbook.getSheetBySheetName(input.selector.sheetName);
+        const worksheet = selector.sheetId
+            ? workbook.getSheetBySheetId(selector.sheetId)
+            : workbook.getSheetBySheetName(selector.sheetName);
         if (!worksheet) {
             throw new EmbedError(EmbedErrorCode.LocalRuntimeResourceRefDataSheetNotFound, {
                 ref: input.ref,
@@ -119,7 +120,7 @@ export class EmbedLocalRuntimeResourceRefDataProvider implements IEmbedResourceR
 
         return {
             type: ReferencedUnitDataType.RANGE,
-            values: worksheet.getRange(parseA1Range(input.selector.range)).getValues().map((row) => row.map((cell) => toDataValue(getOriginCellValue(cell)))),
+            values: worksheet.getRange(parseA1Range(selector.range)).getValues().map((row) => row.map((cell) => toDataValue(getOriginCellValue(cell)))),
         };
     }
 }

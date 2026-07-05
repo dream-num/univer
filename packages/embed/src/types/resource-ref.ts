@@ -17,6 +17,9 @@
 export type {
     FormatResourceRefOptions,
     IResourceRef,
+    IResourceRefPart,
+    IResourceRefRangePart,
+    IResourceRefSheetPart,
     IResourceRefUnit,
     ParseResourceRefOptions,
     ResourceRef,
@@ -25,6 +28,7 @@ export type {
     ResourceRefInput,
     ResourceRefPart,
     ResourceRefPartKind,
+    ResourceRefPartValue,
     ResourceRefUnit,
     ResourceRefUnitSelector,
     ResourceRefUnitType,

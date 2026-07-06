@@ -30,6 +30,7 @@ import { ClassicMenu } from './ribbon-menu/ClassicMenu';
 import { DefaultMenu } from './ribbon-menu/DefaultMenu';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
+import { ToolbarDropdownProvider } from './TooltipButtonWrapper';
 
 interface IRibbonProps {
     ribbonType: RibbonType;
@@ -262,70 +263,72 @@ export function Ribbon(props: IRibbonProps) {
                     role="toolbar"
                     aria-label={localeService.t(activatedTabTitle)}
                 >
-                    {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
-                        <Fragment key={groupItem.key}>
-                            <div
-                                className="
-                                  univer-grid univer-shrink-0 univer-grid-flow-col univer-gap-2 univer-px-2
-                                  empty:univer-hidden
-                                "
-                            >
-                                {groupItem.children && groupItem.children?.map((child) => (
-                                    child.item && <ToolbarItem key={child.key} {...child.item} />
-                                ))}
-                            </div>
-                        </Fragment>
-                    ))}
-
-                    {/* More functions dropdown */}
-                    {collapsedIds.length > 0 && (
-                        <div
-                            data-u-comp="ribbon-toolbar-more"
-                            className={`
-                              univer-pl-2
-                              rtl:univer-pr-2
-                            `}
-                        >
-                            <Dropdown
-                                collisionPadding={{ right: 12, left: 12 }}
-                                onOpenAutoFocus={(e) => e.preventDefault()}
-                                overlay={(
-                                    <div
-                                        className={`
-                                          univer-box-border univer-grid univer-max-w-[--radix-popper-available-width]
-                                          univer-gap-2 univer-p-2
-                                        `}
-                                    >
-                                        {activeGroup.hiddenGroups.map((groupItem) => (
-                                            <div
-                                                key={groupItem.key}
-                                                className="univer-flex univer-items-center univer-gap-2"
-                                            >
-                                                <div className="univer-flex univer-flex-wrap univer-gap-2">
-                                                    {groupItem.children
-                                                        ? groupItem.children?.map((child) => (
-                                                            child.item && <ToolbarItem key={child.key} {...child.item} />
-                                                        ))
-                                                        : (
-                                                            groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
-                                                        )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            >
-                                <button
-                                    type="button"
-                                    className={toolbarButtonClassName}
-                                    aria-label={localeService.t<LocaleKey>('ui.ribbon.more')}
-                                    aria-haspopup="true"
+                    <ToolbarDropdownProvider>
+                        {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
+                            <Fragment key={groupItem.key}>
+                                <div
+                                    className="
+                                      univer-grid univer-shrink-0 univer-grid-flow-col univer-gap-2 univer-px-2
+                                      empty:univer-hidden
+                                    "
                                 >
-                                    <MoreVerticalIcon />
-                                </button>
-                            </Dropdown>
-                        </div>
-                    )}
+                                    {groupItem.children && groupItem.children?.map((child) => (
+                                        child.item && <ToolbarItem key={child.key} {...child.item} />
+                                    ))}
+                                </div>
+                            </Fragment>
+                        ))}
+
+                        {/* More functions dropdown */}
+                        {collapsedIds.length > 0 && (
+                            <div
+                                data-u-comp="ribbon-toolbar-more"
+                                className={`
+                                  univer-pl-2
+                                  rtl:univer-pr-2
+                                `}
+                            >
+                                <Dropdown
+                                    collisionPadding={{ right: 12, left: 12 }}
+                                    onOpenAutoFocus={(e) => e.preventDefault()}
+                                    overlay={(
+                                        <div
+                                            className={`
+                                              univer-box-border univer-grid
+                                              univer-max-w-[--radix-popper-available-width] univer-gap-2 univer-p-2
+                                            `}
+                                        >
+                                            {activeGroup.hiddenGroups.map((groupItem) => (
+                                                <div
+                                                    key={groupItem.key}
+                                                    className="univer-flex univer-items-center univer-gap-2"
+                                                >
+                                                    <div className="univer-flex univer-flex-wrap univer-gap-2">
+                                                        {groupItem.children
+                                                            ? groupItem.children?.map((child) => (
+                                                                child.item && <ToolbarItem key={child.key} {...child.item} />
+                                                            ))
+                                                            : (
+                                                                groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
+                                                            )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                >
+                                    <button
+                                        type="button"
+                                        className={toolbarButtonClassName}
+                                        aria-label={localeService.t<LocaleKey>('ui.ribbon.more')}
+                                        aria-haspopup="true"
+                                    >
+                                        <MoreVerticalIcon />
+                                    </button>
+                                </Dropdown>
+                            </div>
+                        )}
+                    </ToolbarDropdownProvider>
                 </div>
             </div>
 

@@ -63,7 +63,6 @@ import {
     SubtitleHeadingCommand,
     TitleHeadingCommand,
 } from '../commands/commands/set-heading.command';
-import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import {
     DocTableDeleteColumnsCommand,
     DocTableDeleteRowsCommand,
@@ -106,7 +105,7 @@ import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
     CheckListMenuItemFactory,
-    DocSwitchModeMenuItemFactory,
+    // DocSwitchModeMenuItemFactory,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,
@@ -274,10 +273,10 @@ export const menuSchema: MenuSchemaType = {
             order: 10,
             menuItemFactory: HeaderFooterMenuItemFactory,
         },
-        [SwitchDocModeCommand.id]: {
-            order: 11,
-            menuItemFactory: DocSwitchModeMenuItemFactory,
-        },
+        // [SwitchDocModeCommand.id]: {
+        //     order: 11,
+        //     menuItemFactory: DocSwitchModeMenuItemFactory,
+        // },
         [DocOpenPageSettingCommand.id]: {
             order: 12,
             menuItemFactory: PageSettingMenuItemFactory,

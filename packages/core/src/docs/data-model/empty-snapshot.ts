@@ -16,16 +16,17 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import { generateRandomId } from '../../shared/random-id';
-import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '../../types/const';
+import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, PAGE_SIZE } from '../../types/const';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
-import { DocumentFlavor } from '../../types/interfaces';
+import { DocumentFlavor, PaperType } from '../../types/interfaces';
 import { createParagraphId } from '../paragraph-id';
 
 export function getEmptySnapshot(
     unitID = generateRandomId(6),
     locale = LocaleType.EN_US,
-    title = ''
+    title = '',
+    documentFlavor: DocumentFlavor = DocumentFlavor.MODERN
 ): IDocumentData {
     const EMPTY_DOCUMENT_DATA: IDocumentData = {
         id: unitID,
@@ -50,9 +51,7 @@ export function getEmptySnapshot(
                     startIndex: 0,
                     paragraphId: createParagraphId(new Set()),
                     paragraphStyle: {
-                        spaceAbove: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE },
-                        lineSpacing: DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
-                        spaceBelow: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW },
+                        lineSpacing: 1,
                     },
                 },
             ],
@@ -63,23 +62,12 @@ export function getEmptySnapshot(
             ],
         },
         documentStyle: {
-            pageSize: {
-                width: MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM],
-                height: 842 / 0.75,
-            },
-            documentFlavor: DocumentFlavor.MODERN,
-            marginTop: 50,
-            marginBottom: 50,
-            marginRight: 50,
-            marginLeft: 50,
-            renderConfig: {
-                zeroWidthParagraphBreak: BooleanNumber.FALSE,
-                vertexAngle: 0,
-                centerAngle: 0,
-                background: {
-                    rgb: '#ccc',
-                },
-            },
+            pageSize: PAGE_SIZE[PaperType.A4],
+            documentFlavor,
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 72,
+            marginLeft: 72,
             autoHyphenation: BooleanNumber.TRUE,
             doNotHyphenateCaps: BooleanNumber.FALSE,
             consecutiveHyphenLimit: 2,
@@ -95,8 +83,32 @@ export function getEmptySnapshot(
             marginFooter: 30,
         },
         settings: {},
-
     };
+
+    // Set default values for modern document flavor
+    if (documentFlavor === DocumentFlavor.MODERN) {
+        EMPTY_DOCUMENT_DATA.body!.paragraphs![0].paragraphStyle = {
+            spaceAbove: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE },
+            lineSpacing: DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+            spaceBelow: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW },
+        };
+        EMPTY_DOCUMENT_DATA.documentStyle.pageSize = {
+            width: MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM],
+            height: 842 / 0.75,
+        };
+        EMPTY_DOCUMENT_DATA.documentStyle.marginTop = 50;
+        EMPTY_DOCUMENT_DATA.documentStyle.marginBottom = 50;
+        EMPTY_DOCUMENT_DATA.documentStyle.marginRight = 50;
+        EMPTY_DOCUMENT_DATA.documentStyle.marginLeft = 50;
+        EMPTY_DOCUMENT_DATA.documentStyle.renderConfig = {
+            zeroWidthParagraphBreak: BooleanNumber.FALSE,
+            vertexAngle: 0,
+            centerAngle: 0,
+            background: {
+                rgb: '#ccc',
+            },
+        };
+    }
 
     return EMPTY_DOCUMENT_DATA;
 }

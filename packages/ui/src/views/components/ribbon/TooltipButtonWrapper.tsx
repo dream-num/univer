@@ -20,7 +20,17 @@ import type { Subscription } from 'rxjs';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import {
+    createContext,
+    forwardRef,
+    useCallback,
+    useContext,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { combineLatest, of } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../utils/di';
@@ -31,17 +41,40 @@ const TooltipWrapperContext = createContext({
     setDropdownVisible: (_visible: boolean) => {},
 });
 
+const ToolbarDropdownContext = createContext<{
+    openDropdownKey: string | null;
+    setOpenDropdownKey: (key: string | null) => void;
+} | null>(null);
+
 export interface ITooltipWrapperRef {
     el: HTMLSpanElement | null;
 }
 
-export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((props, ref) => {
-    const { children, ...tooltipProps } = props;
+export function ToolbarDropdownProvider(props: { children: ReactNode }) {
+    const [openDropdownKey, setOpenDropdownKey] = useState<string | null>(null);
+    const contextValue = useMemo(() => ({
+        openDropdownKey,
+        setOpenDropdownKey,
+    }), [openDropdownKey]);
+
+    return (
+        <ToolbarDropdownContext.Provider value={contextValue}>
+            {props.children}
+        </ToolbarDropdownContext.Provider>
+    );
+}
+
+export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { dropdownKey?: string }>((props, ref) => {
+    const { children, dropdownKey, ...tooltipProps } = props;
 
     const spanRef = useRef<HTMLSpanElement>(null);
 
     const [tooltipVisible, setTooltipVisible] = useState(false);
-    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [localDropdownVisible, setLocalDropdownVisible] = useState(false);
+    const toolbarDropdownContext = useContext(ToolbarDropdownContext);
+    const dropdownVisible = dropdownKey && toolbarDropdownContext
+        ? toolbarDropdownContext.openDropdownKey === dropdownKey
+        : localDropdownVisible;
 
     function handleChangeTooltipVisible(visible: boolean) {
         if (dropdownVisible) {
@@ -51,16 +84,20 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
         }
     }
 
-    function handleChangeDropdownVisible(visible: boolean) {
-        setDropdownVisible(visible);
+    const handleChangeDropdownVisible = useCallback((visible: boolean) => {
+        if (dropdownKey && toolbarDropdownContext) {
+            toolbarDropdownContext.setOpenDropdownKey(visible ? dropdownKey : null);
+        } else {
+            setLocalDropdownVisible(visible);
+        }
 
         setTooltipVisible(false);
-    }
+    }, [dropdownKey, toolbarDropdownContext]);
 
     const contextValue = useMemo(() => ({
         dropdownVisible,
         setDropdownVisible: handleChangeDropdownVisible,
-    }), [dropdownVisible]);
+    }), [dropdownVisible, handleChangeDropdownVisible]);
 
     useImperativeHandle(ref, () => ({
         el: spanRef.current,
@@ -82,7 +119,9 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
         )
         : (
             <span ref={spanRef}>
-                {children}
+                <TooltipWrapperContext.Provider value={contextValue}>
+                    {children}
+                </TooltipWrapperContext.Provider>
             </span>
         );
 });
@@ -150,6 +189,10 @@ export function DropdownMenuLabel({ icon, value, option, onOptionSelect }: {
     );
 }
 
+function getOptionKey(option: IValueOption) {
+    return String(option.id ?? option.commandId ?? option.value ?? (typeof option.label === 'string' ? option.label : option.label?.name));
+}
+
 export function DropdownMenuWrapper({
     menuId,
     slot,
@@ -182,6 +225,7 @@ export function DropdownMenuWrapper({
     }, [menuManagerService]);
 
     const menuItems = useMemo(() => {
+        void menuVersion;
         return menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];
     }, [menuId, menuManagerService, menuVersion]);
 
@@ -244,9 +288,9 @@ export function DropdownMenuWrapper({
         return (
             <DropdownWrapper
                 disabled={disabled}
-                overlay={options.map((option, index) => (
+                overlay={options.map((option) => (
                     <DropdownMenuLabel
-                        key={index}
+                        key={getOptionKey(option)}
                         value={value}
                         option={option}
                         onOptionSelect={handleOptionSelect}

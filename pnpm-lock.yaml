@@ -112,8 +112,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../mockdata
@@ -358,11 +358,11 @@ importers:
         version: 4.1.9(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
     devDependencies:
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/icons-svg':
-        specifier: ^1.17.0
-        version: 1.17.0
+        specifier: ^1.18.0
+        version: 1.18.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -503,8 +503,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../common/mockdata
@@ -747,8 +747,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -885,8 +885,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.17)(react@19.2.7)
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1070,8 +1070,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1171,8 +1171,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1214,8 +1214,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -1266,8 +1266,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1340,8 +1340,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1454,8 +1454,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1614,8 +1614,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/icons-svg':
-        specifier: ^1.17.0
-        version: 1.17.0
+        specifier: ^1.18.0
+        version: 1.18.0
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
@@ -1644,8 +1644,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1699,8 +1699,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1785,8 +1785,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1954,8 +1954,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2083,8 +2083,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2169,8 +2169,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2255,8 +2255,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2332,8 +2332,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2403,8 +2403,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2489,8 +2489,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2572,8 +2572,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2636,8 +2636,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -2719,8 +2719,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../slides
@@ -2803,8 +2803,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -2849,8 +2849,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.17.0
-        version: 1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@wendellhu/redi':
         specifier: 1.1.2
         version: 1.1.2(react@19.2.7)
@@ -4111,23 +4111,12 @@ packages:
       '@csstools/css-parser-algorithms': ^4.0.0
       '@csstools/css-tokenizer': ^4.0.0
 
-  '@csstools/color-helpers@6.0.2':
-    resolution: {integrity: sha512-LMGQLS9EuADloEFkcTBR3BwV/CGHV7zyDxVRtVDTwdI2Ca4it0CCVTT9wCkxSgokjE5Ho41hEPgb8OEUwoXr6Q==}
-    engines: {node: '>=20.19.0'}
-
   '@csstools/color-helpers@6.1.0':
     resolution: {integrity: sha512-064IFJdjTfUqnjpCVpMOdbr8FLQBhinbZj6yRv2An2E41O/pLEXqfFRWqGq/SxlE5PEUYTlvWsG2r8MswAVvkg==}
     engines: {node: '>=20.19.0'}
 
   '@csstools/css-calc@3.2.1':
     resolution: {integrity: sha512-DtdHlgXh5ZkA43cwBcAm+huzgJiwx3ZTWVjBs94kwz2xKqSimDA3lBgCjphYgwgVUMWatSM0pDd8TILB1yrVVg==}
-    engines: {node: '>=20.19.0'}
-    peerDependencies:
-      '@csstools/css-parser-algorithms': ^4.0.0
-      '@csstools/css-tokenizer': ^4.0.0
-
-  '@csstools/css-color-parser@4.1.3':
-    resolution: {integrity: sha512-DOgvIPkikIOixQRlD4YF31VN6fLLUTdrzhfRbis8vm0kMTgIbEPX0Ip/YX9fOeV9iywAS4sUUbTclpan7yYP8Q==}
     engines: {node: '>=20.19.0'}
     peerDependencies:
       '@csstools/css-parser-algorithms': ^4.0.0
@@ -4146,8 +4135,8 @@ packages:
     peerDependencies:
       '@csstools/css-tokenizer': ^4.0.0
 
-  '@csstools/css-syntax-patches-for-csstree@1.1.5':
-    resolution: {integrity: sha512-oNjBvzLq2GPZtJphCjLqXow/cHySHSgtxvKZb7OqSZ/xHgw6NWNhfad+6AB9cLeVm6eA9d/qMll3JdEHjy6M+A==}
+  '@csstools/css-syntax-patches-for-csstree@1.1.6':
+    resolution: {integrity: sha512-TcJCWFbXLPpJYq6z7bfOyjWYJDiDg2/I4gyUC9pqPNqHFRIey0EB0q0L5cSnQDfWJg8Jd6VadakxdIez/3zkqQ==}
     peerDependencies:
       css-tree: ^3.2.1
     peerDependenciesMeta:
@@ -6898,11 +6887,11 @@ packages:
     resolution: {integrity: sha512-4g3BLxfdTMy8iZG0MaBkadnlRrCJ74cQiFbyEVMrkwIoqdyaXXQM22cotDvrl4x28wgIZ9rEJRoM+mmhSJpJ1g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@univerjs/icons-svg@1.17.0':
-    resolution: {integrity: sha512-mBtHAiuoMcnLOmwUb9eRKVF0uOJxQyfSeNg++3olUT6Mmgms8QQPiGL8YeXeej4vaGWr0LUJfZ9h7Z5bQcwO/w==}
+  '@univerjs/icons-svg@1.18.0':
+    resolution: {integrity: sha512-ubflVwfPl7JaOMN9dLnuuRrzum/ZRZPl3HiRRpTOkShXpWMotn7sX8EteZZMJjmvT4D9cj7o56S6J86tPUzKuA==}
 
-  '@univerjs/icons@1.17.0':
-    resolution: {integrity: sha512-O0dytfx/XSPPJEvEmGrUIqycCMiyGlbWJ/v2x8IoifzzyB/Zeh0rJPuZ3bbaEniilwB27OV7HIWdejnusMkccA==}
+  '@univerjs/icons@1.18.0':
+    resolution: {integrity: sha512-zT8oH9W2oELkz9mD8Zic705TU5/PYB1GedzvlbSQR5lyrK0RCMQCzaC2qZZyD1N13W24takpfyX9j1fIYT6adg==}
     peerDependencies:
       react: 19.2.7
       react-dom: 19.2.7
@@ -7155,6 +7144,11 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+  acorn@8.17.0:
+    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
   address@2.0.3:
     resolution: {integrity: sha512-XNAb/a6TCqou+TufU8/u11HCu9x1gYvOoxLwtlXgIqmkrYQADVv6ljyW2zwiPhHz9R1gItAWpuDrdJMmrOBFEA==}
     engines: {node: '>= 16.0.0'}
@@ -7356,6 +7350,11 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
+  baseline-browser-mapping@2.10.42:
+    resolution: {integrity: sha512-c/jurFrDLyui7o1J86yLkRu4LMsTYcBohveus7/I2Hzdn9KIP2bdJPTue/lR1KH46enoPbD77GKeSYNdyPoD3Q==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
   baseline-browser-mapping@2.9.4:
     resolution: {integrity: sha512-ZCQ9GEWl73BVm8bu5Fts8nt7MHdbt5vY9bP6WGnUh+r3l8M7CgfyTlwsgCbMC66BNxPr6Xoce3j66Ms5YUQTNA==}
     hasBin: true
@@ -7401,6 +7400,11 @@ packages:
 
   browserslist@4.28.2:
     resolution: {integrity: sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg==}
+    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+    hasBin: true
+
+  browserslist@4.28.4:
+    resolution: {integrity: sha512-MTc8i/x9jBQd1iMw2CFGS+rwMa07eYjLR0CCTLDACl9xhxy+nIs3KeML/biicXtk9JrZ6dnnTatmc7ErPXIxqw==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
@@ -7467,6 +7471,9 @@ packages:
 
   caniuse-lite@1.0.30001788:
     resolution: {integrity: sha512-6q8HFp+lOQtcf7wBK+uEenxymVWkGKkjFpCvw5W25cmMwEDU45p1xQFBQv8JDlMMry7eNxyBaR+qxgmTUZkIRQ==}
+
+  caniuse-lite@1.0.30001802:
+    resolution: {integrity: sha512-vmv8ub2xwTNmljSKf82mtCk5JH7hC+YgzLj3P5zotvA0tPQ9016tdNNOG8WRca1IxOnhSsivB+J0z5FeE5LOUw==}
 
   case-sensitive-paths-webpack-plugin@2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
@@ -7990,6 +7997,9 @@ packages:
 
   electron-to-chromium@1.5.338:
     resolution: {integrity: sha512-KVQQ3xko9/coDX3qXLUEEbqkKT8L+1DyAovrtu0Khtrt9wjSZ+7CZV4GVzxFy9Oe1NbrIU1oVXCwHJruIA1PNg==}
+
+  electron-to-chromium@1.5.387:
+    resolution: {integrity: sha512-TaxwufTFDufvPEoXdhwVrA3UdFWBeWGkYoJ1K8ldF1xe6gKfth6iRNS5lTQ5JPNOHdGQm8PT1QYKUqFLCiUefQ==}
 
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
@@ -9681,6 +9691,10 @@ packages:
   node-releases@2.0.37:
     resolution: {integrity: sha512-1h5gKZCF+pO/o3Iqt5Jp7wc9rH3eJJ0+nh/CIoiRwjRxde/hAHyLPXYN4V3CqKAbiZPSeJFSWHmJsbkicta0Eg==}
 
+  node-releases@2.0.50:
+    resolution: {integrity: sha512-J6l92tKHX6w8Jy5nO1Vuc01NoIiRGi/d6qBKVxh+IQ8Cr3b6HbVNfKiF8ZpFKufTwpwxMmce2W3iQZ861ZRyTg==}
+    engines: {node: '>=18'}
+
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
@@ -10648,11 +10662,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  semver@7.8.4:
-    resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   semver@7.8.5:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
@@ -11025,11 +11034,11 @@ packages:
     resolution: {integrity: sha512-azl+t0z7pw/z958Gy9svOTuzqIk6xq+NSheJzn5MMWtWTFywIacg2wUlzKFGtt3cthx0r2SxMK0yzJOR0IES7Q==}
     engines: {node: '>=14.0.0'}
 
-  tldts-core@7.4.2:
-    resolution: {integrity: sha512-nwEyF4vl4RSJjwSjBUmOSxc3BFPoIFdlRthJ6e+5v9P3bHNsoD06UjuqMUspqp7vsEZ1beaHi1km+optiE17yA==}
+  tldts-core@7.4.6:
+    resolution: {integrity: sha512-TkQNGJIhlEphpHCjKodMTSe23egUZr/g+flI2qkLgiJ/maAzSgXypSLRTNH3nCmqgayEmtcJBiLcfODSAr1xoA==}
 
-  tldts@7.4.2:
-    resolution: {integrity: sha512-kCwffuaH8ntKtygnWe1b4BJKWiCUH30n5KfoTr6IchcXOwR7chAOFJxFrH3vjANafUYrIA4a7SDL+nn7SiR4Sw==}
+  tldts@7.4.6:
+    resolution: {integrity: sha512-rbP0Gyx8b3Ae9yO//CU2wbSnQNoQ66m1nJdSbSHmnwKwzkkz/u8mERYU8T2rmlmy+bJvRNn84yNCW8gYqox44Q==}
     hasBin: true
 
   to-regex-range@5.0.1:
@@ -11192,8 +11201,8 @@ packages:
     resolution: {integrity: sha512-4yqz8a3n5HmGTlsbADNtr/dJlhkh/55Rq798G6ibiULcXbDtaLpTl1pvdqcbFfeoj3iSi52lePFM7h9H21cw/A==}
     engines: {node: '>=18.17'}
 
-  undici@7.27.2:
-    resolution: {integrity: sha512-uZsKNuzQxDMUY6M3pIMvy5tvlGmtq8XJ2oLAkfRKGNu+1VQAIvLy2xIVG5ATZl5wDXl/tddByAWCizRbOme+TA==}
+  undici@7.28.0:
+    resolution: {integrity: sha512-cRZYrTDwWznlnRiPjggAGxZXanty6M8RV1ff8Wm4LWXBp7/IG8v5DnOm74DtUBp9OONpK75YlPnIjQqX0dBDtA==}
     engines: {node: '>=20.18.1'}
 
   unicode-regex@4.2.0:
@@ -11686,7 +11695,7 @@ snapshots:
     dependencies:
       '@asamuzakjp/generational-cache': 1.0.1
       '@csstools/css-calc': 3.2.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
-      '@csstools/css-color-parser': 4.1.3(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
+      '@csstools/css-color-parser': 4.1.9(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
 
@@ -11801,7 +11810,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.29.7
       '@babel/helper-validator-option': 7.29.7
-      browserslist: 4.28.2
+      browserslist: 4.28.4
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -12107,19 +12116,10 @@ snapshots:
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
 
-  '@csstools/color-helpers@6.0.2': {}
-
   '@csstools/color-helpers@6.1.0': {}
 
   '@csstools/css-calc@3.2.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)':
     dependencies:
-      '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
-      '@csstools/css-tokenizer': 4.0.0
-
-  '@csstools/css-color-parser@4.1.3(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)':
-    dependencies:
-      '@csstools/color-helpers': 6.0.2
-      '@csstools/css-calc': 3.2.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
 
@@ -12134,7 +12134,7 @@ snapshots:
     dependencies:
       '@csstools/css-tokenizer': 4.0.0
 
-  '@csstools/css-syntax-patches-for-csstree@1.1.5(css-tree@3.2.1)':
+  '@csstools/css-syntax-patches-for-csstree@1.1.6(css-tree@3.2.1)':
     optionalDependencies:
       css-tree: 3.2.1
 
@@ -12918,13 +12918,6 @@ snapshots:
       '@types/react': 19.2.17
       react: 19.2.7
 
-  '@napi-rs/wasm-runtime@1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
-    dependencies:
-      '@emnapi/core': 1.10.0
-      '@emnapi/runtime': 1.10.0
-      '@tybys/wasm-util': 0.10.2
-    optional: true
-
   '@napi-rs/wasm-runtime@1.1.5(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
     dependencies:
       '@emnapi/core': 1.11.0
@@ -12944,6 +12937,13 @@ snapshots:
       '@emnapi/core': 1.9.2
       '@emnapi/runtime': 1.9.2
       '@tybys/wasm-util': 0.10.2
+    optional: true
+
+  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+    dependencies:
+      '@emnapi/core': 1.10.0
+      '@emnapi/runtime': 1.10.0
+      '@tybys/wasm-util': 0.10.3
     optional: true
 
   '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)':
@@ -13693,7 +13693,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
   '@rolldown/binding-wasm32-wasi@1.1.2':
@@ -14599,9 +14599,9 @@ snapshots:
       '@typescript-eslint/types': 8.62.1
       eslint-visitor-keys: 5.0.1
 
-  '@univerjs/icons-svg@1.17.0': {}
+  '@univerjs/icons-svg@1.18.0': {}
 
-  '@univerjs/icons@1.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@univerjs/icons@1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
@@ -14933,6 +14933,8 @@ snapshots:
 
   acorn@8.16.0: {}
 
+  acorn@8.17.0: {}
+
   address@2.0.3: {}
 
   aggregate-error@3.1.0:
@@ -15137,6 +15139,8 @@ snapshots:
 
   baseline-browser-mapping@2.10.19: {}
 
+  baseline-browser-mapping@2.10.42: {}
+
   baseline-browser-mapping@2.9.4: {}
 
   bidi-js@1.0.3:
@@ -15195,6 +15199,14 @@ snapshots:
       node-releases: 2.0.37
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
+  browserslist@4.28.4:
+    dependencies:
+      baseline-browser-mapping: 2.10.42
+      caniuse-lite: 1.0.30001802
+      electron-to-chromium: 1.5.387
+      node-releases: 2.0.50
+      update-browserslist-db: 1.2.3(browserslist@4.28.4)
+
   buffer-from@1.1.2: {}
 
   buffer-image-size@0.6.4:
@@ -15251,6 +15263,8 @@ snapshots:
   caniuse-lite@1.0.30001759: {}
 
   caniuse-lite@1.0.30001788: {}
+
+  caniuse-lite@1.0.30001802: {}
 
   case-sensitive-paths-webpack-plugin@2.4.0: {}
 
@@ -15734,6 +15748,8 @@ snapshots:
   electron-to-chromium@1.5.266: {}
 
   electron-to-chromium@1.5.338: {}
+
+  electron-to-chromium@1.5.387: {}
 
   emoji-regex@10.6.0: {}
 
@@ -17126,7 +17142,7 @@ snapshots:
       '@asamuzakjp/css-color': 5.1.11
       '@asamuzakjp/dom-selector': 7.1.1
       '@bramus/specificity': 2.4.2
-      '@csstools/css-syntax-patches-for-csstree': 1.1.5(css-tree@3.2.1)
+      '@csstools/css-syntax-patches-for-csstree': 1.1.6(css-tree@3.2.1)
       '@exodus/bytes': 1.15.1
       css-tree: 3.2.1
       data-urls: 7.0.0
@@ -17138,7 +17154,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.27.2
+      undici: 7.28.0
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -17364,7 +17380,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.8.4
+      semver: 7.8.5
 
   markdown-table@3.0.4: {}
 
@@ -17837,6 +17853,8 @@ snapshots:
   node-releases@2.0.27: {}
 
   node-releases@2.0.37: {}
+
+  node-releases@2.0.50: {}
 
   normalize-path@3.0.0: {}
 
@@ -19036,8 +19054,6 @@ snapshots:
 
   semver@7.8.2: {}
 
-  semver@7.8.4: {}
-
   semver@7.8.5: {}
 
   serve-handler@6.1.7:
@@ -19414,7 +19430,7 @@ snapshots:
   terser@5.47.1:
     dependencies:
       '@jridgewell/source-map': 0.3.11
-      acorn: 8.16.0
+      acorn: 8.17.0
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -19454,11 +19470,11 @@ snapshots:
 
   tinyspy@4.0.4: {}
 
-  tldts-core@7.4.2: {}
+  tldts-core@7.4.6: {}
 
-  tldts@7.4.2:
+  tldts@7.4.6:
     dependencies:
-      tldts-core: 7.4.2
+      tldts-core: 7.4.6
 
   to-regex-range@5.0.1:
     dependencies:
@@ -19475,7 +19491,7 @@ snapshots:
 
   tough-cookie@6.0.1:
     dependencies:
-      tldts: 7.4.2
+      tldts: 7.4.6
 
   tr46@6.0.0:
     dependencies:
@@ -19630,7 +19646,7 @@ snapshots:
 
   undici@6.26.0: {}
 
-  undici@7.27.2: {}
+  undici@7.28.0: {}
 
   unicode-regex@4.2.0:
     dependencies:
@@ -19719,6 +19735,12 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
+  update-browserslist-db@1.2.3(browserslist@4.28.4):
+    dependencies:
+      browserslist: 4.28.4
+      escalade: 3.2.0
+      picocolors: 1.1.1
+
   update-check@1.5.4:
     dependencies:
       registry-auth-token: 3.3.2
@@ -19772,7 +19794,7 @@ snapshots:
   vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.32.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       postcss: 8.5.16
       rolldown: 1.0.0-rc.18
       tinyglobby: 0.2.17

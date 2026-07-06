@@ -16,7 +16,7 @@
 
 import type { ISectionBreakConfig } from '../../../../../../basics/interfaces';
 import { DocumentDataModel } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DocumentViewModel } from '../../../../view-model/document-view-model';
 import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from '../language-ruler';
 
@@ -99,6 +99,24 @@ describe('language-ruler', () => {
             const result = otherHandler(0, 'Hi\uD83D\uDE00', viewModel, paragraphNode, sectionBreakConfig, paragraph);
             expect(result.step).toBe(2);
             expect(result.glyphGroup.length).toBe(2);
+        });
+
+        it('uses runtime custom range width for placeholder glyphs', () => {
+            const { viewModel } = createViewModel('i');
+            const paragraphNode = getParagraphNode(viewModel);
+            const paragraph = getParagraph(viewModel);
+            const sectionBreakConfig = createSectionBreakConfig();
+            vi.spyOn(viewModel, 'getCustomRange').mockReturnValue({
+                endIndex: 0,
+                glyphWidthEm: 3,
+                rangeId: 'formula-1',
+                startIndex: 0,
+            } as never);
+
+            const result = otherHandler(0, 'i', viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            const glyph = result.glyphGroup[0];
+
+            expect(glyph.width).toBeCloseTo(glyph.fontStyle!.originFontSize * 3);
         });
     });
 

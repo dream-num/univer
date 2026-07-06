@@ -86,7 +86,7 @@
         "clsx": "^2.1.1",
         "react-transition-group": "^4.4.5",
         "sonner": "^2.0.7",
-        "tailwind-merge": "2.6.0"
+        "tailwind-merge": "3.6.0"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "6.9.1",

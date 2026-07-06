@@ -16,7 +16,17 @@
 
 import type { DragEvent, FocusEvent, KeyboardEvent, MouseEvent } from 'react';
 import { Button, clsx, Input } from '@univerjs/design';
-import { ArrowDownIcon, ArrowUpIcon, CloseIcon, EyeIcon, EyelashIcon, LockIcon, MoreDownIcon, MoreRightIcon } from '@univerjs/icons';
+import {
+    ArrowDownIcon,
+    ArrowUpIcon,
+    CloseIcon,
+    EyeIcon,
+    EyelashIcon,
+    LocateFixedIcon,
+    LockIcon,
+    MoreDownIcon,
+    MoreRightIcon,
+} from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { OBJECT_LIST_CANVAS_SECTION_ID, OBJECT_LIST_FLOATING_SECTION_ID } from './object-list-panel-layer';
 
@@ -194,16 +204,6 @@ function hasCapability(
     fallback = true
 ): boolean {
     return item?.capabilities?.[key] ?? panelCapabilities?.[key] ?? fallback;
-}
-
-function LocateFixedIcon() {
-    return (
-        <svg className="univer-size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 4v3M12 17v3M4 12h3M17 12h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-            <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
-            <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-        </svg>
-    );
 }
 
 export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {

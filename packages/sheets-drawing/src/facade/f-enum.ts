@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/core';
 import { FEnum } from '@univerjs/core/facade';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 
@@ -25,17 +25,12 @@ export interface IFSheetsDrawingEnumMixin {
     /** Please refer to {@link DrawingTypeEnum}. */
     DrawingType: typeof DrawingTypeEnum;
 
-    /** Please refer to {@link ImageSourceType}. */
-    ImageSourceType: Omit<typeof ImageSourceType, 'UUID'>;
-
     /** Please refer to {@link SheetDrawingAnchorType}. */
     SheetDrawingAnchorType: typeof SheetDrawingAnchorType;
 }
 
 export class FSheetsDrawingEnumMixin extends FEnum implements IFSheetsDrawingEnumMixin {
     override get DrawingType(): typeof DrawingTypeEnum { return DrawingTypeEnum; };
-
-    override get ImageSourceType(): Omit<typeof ImageSourceType, 'UUID'> { return ImageSourceType; };
 
     override get SheetDrawingAnchorType(): typeof SheetDrawingAnchorType { return SheetDrawingAnchorType; };
 }

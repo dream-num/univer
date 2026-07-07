@@ -44,6 +44,7 @@ export function Gallery(props: IGalleryProps) {
     const dialogRef = useRef<HTMLDivElement>(null);
 
     const activeImage = useMemo(() => images[activeImageIndex], [activeImageIndex, images]);
+    const hasPagination = images.length > 1;
 
     // Focus management
     useEffect(() => {
@@ -159,16 +160,18 @@ export function Gallery(props: IGalleryProps) {
                   univer-text-gray-400
                 `}
             >
-                <Pager
-                    className={`
-                      !univer-text-gray-400
-                      [&_[data-u-comp=pager-left-arrow]:hover]:!univer-bg-gray-600
-                      [&_[data-u-comp=pager-right-arrow]:hover]:!univer-bg-gray-600
-                    `}
-                    value={activeImageIndex + 1}
-                    total={images.length}
-                    onChange={(value) => setActiveImageIndex(value - 1)}
-                />
+                {hasPagination && (
+                    <Pager
+                        className={`
+                          !univer-text-gray-400
+                          [&_[data-u-comp=pager-left-arrow]:hover]:!univer-bg-gray-600
+                          [&_[data-u-comp=pager-right-arrow]:hover]:!univer-bg-gray-600
+                        `}
+                        value={activeImageIndex + 1}
+                        total={images.length}
+                        onChange={(value) => setActiveImageIndex(value - 1)}
+                    />
+                )}
                 <button
                     type="button"
                     aria-label="Zoom in"

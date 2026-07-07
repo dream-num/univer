@@ -19,6 +19,7 @@ import type { IDrawingGroupUpdateParam, IDrawingOrderUpdateParam } from '@univer
 import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, Univer } from '@univerjs/core';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { resolveDrawingUIRotateEnabled } from '../../../utils/rotate-enabled';
 import {
     AlignType,
     SetDrawingAlignBottomOperation,
@@ -41,7 +42,6 @@ import {
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../drawing-group.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../image-crop.operation';
 import { ImageResetSizeOperation } from '../image-reset-size.operation';
-import { resolveDrawingUIRotateEnabled } from '../../../utils/rotate-enabled';
 
 const unitId = 'drawing-ui-unit';
 const subUnitId = 'drawing-ui-subunit';

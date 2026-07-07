@@ -24,6 +24,7 @@ import {
     DocumentBlockRangeType,
     DrawingTypeEnum,
     generateRandomId,
+    ImageSourceType,
     isSafeUrl,
     NamedStyleType,
     ObjectRelativeFromH,
@@ -35,7 +36,6 @@ import {
     TableSizeType,
     Tools,
 } from '@univerjs/core';
-import { ImageSourceType } from '@univerjs/drawing';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';

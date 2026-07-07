@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDrawingParam, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IAccessor, IDrawingParam, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IImageData } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type {
@@ -36,7 +36,9 @@ import {
     generateRandomId,
     ICommandService,
     IContextService,
+    IImageIoService,
     ImageSourceType,
+    ImageUploadStatusType,
     Inject,
     Injector,
     IURLImageService,
@@ -56,8 +58,6 @@ import {
     getDrawingImageAllowSize,
     getImageSize,
     IDrawingManagerService,
-    IImageIoService,
-    ImageUploadStatusType,
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';

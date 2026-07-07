@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import type { IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,

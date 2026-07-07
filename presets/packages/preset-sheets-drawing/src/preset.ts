@@ -16,8 +16,9 @@
 
 import type { IUniverDrawingConfig } from '@univerjs/drawing';
 import type { IPreset } from '@univerjs/presets';
+import { IImageIoService } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
-import { IImageIoService, UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';

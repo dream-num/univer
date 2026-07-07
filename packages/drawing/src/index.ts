@@ -41,5 +41,3 @@ export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { resolveDrawingRotateEnabled } from './utils/rotate-enabled';
 export type { IDrawingRotateEnabledResolverOptions } from './utils/rotate-enabled';
-export { IImageIoService, ImageSourceType, ImageUploadStatusType } from '@univerjs/core';
-export type { IImageIoServiceParam } from '@univerjs/core';

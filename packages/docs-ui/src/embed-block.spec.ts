@@ -15,7 +15,8 @@
  */
 
 import { IConfigService, UniverInstanceType } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
 
@@ -28,6 +29,10 @@ vi.mock('@univerjs/embed-ui', async (importOriginal) => {
 });
 
 describe('docs embed block contribution', () => {
+    beforeEach(() => {
+        vi.mocked(mountEmbedRenderChildUnit).mockClear();
+    });
+
     it('uses a ribbon block contribution for docs child units', () => {
         expect(createDocsEmbedBlockContribution()).toMatchObject({
             childType: UniverInstanceType.UNIVER_DOC,
@@ -35,7 +40,7 @@ describe('docs embed block contribution', () => {
         });
     });
 
-    it('injects fit-to-width config only for floating docs blocks', () => {
+    it('passes fit-to-width config through a scoped render injector for floating docs blocks', () => {
         const childView = createDocsEmbedChildViewContribution();
         const configService = {
             getConfig: vi.fn((id: string | symbol) => id === DOCS_UI_PLUGIN_CONFIG_KEY
@@ -49,7 +54,13 @@ describe('docs embed block contribution', () => {
             runtimeScope: { injector },
         } as never);
 
-        const replacement = injector.add.mock.calls[0][0][1].useValue;
+        const mountOptions = vi.mocked(mountEmbedRenderChildUnit).mock.calls[0][3];
+        const scopedInjector = mountOptions?.scopedInjector;
+        expect(scopedInjector).toBeDefined();
+        expect(scopedInjector).not.toBe(injector);
+        expect(injector.add).not.toHaveBeenCalled();
+
+        const replacement = scopedInjector!.get(IConfigService);
         expect(replacement.getConfig(DOCS_UI_PLUGIN_CONFIG_KEY)).toMatchObject({
             fitToWidth: {
                 align: 'start',
@@ -67,6 +78,7 @@ describe('docs embed block contribution', () => {
             runtimeScope: { injector: tabInjector },
         } as never);
         expect(tabInjector.add).not.toHaveBeenCalled();
+        expect(vi.mocked(mountEmbedRenderChildUnit).mock.calls[1][3]?.scopedInjector).toBeUndefined();
     });
 
     it('skips config injection when config service is unavailable', () => {

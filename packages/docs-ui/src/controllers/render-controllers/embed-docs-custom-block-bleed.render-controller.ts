@@ -129,6 +129,7 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             );
             if (!shouldRefreshDocsCustomBlockSizeForCommand({
                 childUnitIds,
+                commandId: command.id,
                 commandParams: command.params,
                 hostUnitId: this._context.unitId,
             })) {

@@ -29,7 +29,7 @@ import { createDefaultEmbedCapabilities, EmbedCapabilityRegistryService, flushPe
 import { EmbedChildRetentionService } from './services/embed-child-retention.service';
 import { EmbedCreationService } from './services/embed-creation.service';
 import { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
-import { EmbedHostAdapterRegistryService, flushPendingEmbedHostAdapterContributions, registerEmbedHostAdapterContributions } from './services/embed-host-adapter-registry.service';
+import { EmbedHostAdapterRegistryService, flushPendingEmbedHostAdapterContributions } from './services/embed-host-adapter-registry.service';
 import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
 import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
 import { createLocalRuntimeResourceRefDataProviderRegistration, createLocalRuntimeResourceRefUnitProviderRegistration, EmbedLocalRuntimeResourceRefDataProvider, EmbedLocalRuntimeResourceRefUnitProvider } from './services/embed-local-runtime-resource-ref-provider';
@@ -39,7 +39,6 @@ import {
     createDefaultReferencedUnitApiResolvers,
     EmbedReferencedUnitApiResolverRegistryService,
     flushPendingReferencedUnitApiResolvers,
-    registerReferencedUnitApiResolvers,
 } from './services/embed-referenced-unit-api-resolver-registry.service';
 import { EmbedReferencedUnitManagerService } from './services/embed-referenced-unit-manager.service';
 import { EmbedReferencedUnitMaterializeService } from './services/embed-referenced-unit-materialize.service';
@@ -91,14 +90,10 @@ export class UniverEmbedPlugin extends Plugin {
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
         const capabilityRegistry = this._injector.get(EmbedCapabilityRegistryService);
-        if (this._config.useDefaultCapabilities !== false && capabilityRegistry.list().length === 0) {
+        if (capabilityRegistry.list().length === 0) {
             capabilityRegistry.registerMany(createDefaultEmbedCapabilities());
         }
-        flushPendingEmbedCapabilities(this._injector);
-        capabilityRegistry.registerMany(this._config.capabilities ?? []);
-
-        flushPendingEmbedHostAdapterContributions(this._injector);
-        registerEmbedHostAdapterContributions(this._injector, this._config.hostAdapters ?? []);
+        this._flushPendingContributions();
 
         const resourceRefProviderRegistry = this._injector.get(EmbedResourceRefProviderRegistryService);
         this.disposeWithMe(resourceRefProviderRegistry.registerUnitProvider(createLocalRuntimeResourceRefUnitProviderRegistration(this._injector.get(EmbedLocalRuntimeResourceRefUnitProvider))));
@@ -108,8 +103,7 @@ export class UniverEmbedPlugin extends Plugin {
 
         const referencedUnitApiResolverRegistry = this._injector.get(EmbedReferencedUnitApiResolverRegistryService);
         referencedUnitApiResolverRegistry.registerMany(createDefaultReferencedUnitApiResolvers()).forEach((disposable) => this.disposeWithMe(disposable));
-        flushPendingReferencedUnitApiResolvers(this._injector);
-        registerReferencedUnitApiResolvers(this._injector, this._config.referencedUnitApiResolvers ?? []);
+        this._flushPendingContributions();
 
         touchDependencies(this._injector, [
             [EmbedModelService],
@@ -142,5 +136,15 @@ export class UniverEmbedPlugin extends Plugin {
             CopyEmbedCommand,
             RemoveEmbedCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    override onReady(): void {
+        this._flushPendingContributions();
+    }
+
+    private _flushPendingContributions(): void {
+        flushPendingEmbedCapabilities(this._injector);
+        flushPendingEmbedHostAdapterContributions(this._injector);
+        flushPendingReferencedUnitApiResolvers(this._injector);
     }
 }

@@ -88,12 +88,16 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
         commandListeners[0]({ id: SetDocZoomRatioOperation.id, params: { unitId: 'sheet-1' } });
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
 
-        commandListeners[0]({ id: 'sheet-command', params: { unitId: 'sheet-1' } });
+        commandListeners[0]({ id: 'sheet.mutation.set-range-values', params: { unitId: 'sheet-1' } });
         vi.runOnlyPendingTimers();
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDocZoomRatioOperation.id, {
             unitId: 'doc-1',
             zoomRatio: 1.5,
         });
+
+        commandListeners[0]({ id: 'sheet.operation.set-selections', params: { unitId: 'sheet-1' } });
+        vi.runOnlyPendingTimers();
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(1);
 
         commandListeners[0]({ id: 'host-command', params: { unitId: 'doc-1' } });
         expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(1);
@@ -162,7 +166,7 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
             viewportWidth: 960,
         });
 
-        commandListeners[0]({ id: 'sheet-command', params: { unitId: 'sheet-1' } });
+        commandListeners[0]({ id: 'sheet.mutation.set-range-values', params: { unitId: 'sheet-1' } });
         vi.runOnlyPendingTimers();
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDocZoomRatioOperation.id, {
             unitId: 'doc-1',

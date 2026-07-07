@@ -14,3 +14,7 @@ overrides:
     basic-ftp: 5.2.0
     react: 19.2.7
     react-dom: 19.2.7
+minimumReleaseAgeExclude:
+    - '@univerjs/icons@1.18.0'
+    - '@univerjs/icons-svg@1.18.0'
+    - caniuse-lite@1.0.30001802

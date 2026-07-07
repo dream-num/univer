@@ -55,7 +55,7 @@ describe('registerDocsEmbedUIContributions', () => {
 
         registerDocsEmbedUIContributions(injector as never);
         expect(injector.adapterRegistry.list()).toHaveLength(1);
-        expect(injector.previewService.registerProvider).toHaveBeenCalledTimes(2);
+        expect(injector.previewService.registerProvider).toHaveBeenCalledTimes(1);
     });
 
     it('registers immediately when embed-ui registries are already present', () => {

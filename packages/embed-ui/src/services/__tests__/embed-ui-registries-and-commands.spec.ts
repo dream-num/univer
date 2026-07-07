@@ -53,7 +53,7 @@ import {
 } from '../../common/embed-runtime-slots';
 import { UniverEmbedUIPlugin } from '../../plugin';
 import { EmbedBlockRegistryService } from '../embed-block-registry.service';
-import { EmbedChildProductPluginRegistryService } from '../embed-child-product-plugin-registry.service';
+import { EmbedChildProductPluginRegistryService, registerEmbedChildProductPluginContribution } from '../embed-child-product-plugin-registry.service';
 import { createEmbedChildRuntimeScope } from '../embed-child-runtime-scope';
 import { EmbedChildViewRegistryService } from '../embed-child-view-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../embed-floating-menu-registry.service';
@@ -430,12 +430,7 @@ describe('embed-ui registries and commands', () => {
         menuOverride.clear('embed-1');
         expect(menuOverride.getOverride()).toBeNull();
 
-        expect(menuOverride.activate(createDescriptor(), 'float-stage2', { layoutPolicy: { ribbon: 'hidden' } })).toBeNull();
-        const floatingOverride = menuOverride.activate(createDescriptor(), 'float-stage2', { layoutPolicy: { ribbon: 'host' } });
-        expect(floatingOverride).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-1', reason: 'float-stage2' });
-        expect(floatingOverride?.hideHostFxBar).toBeUndefined();
-        menuOverride.clear('embed-1');
-        expect(menuOverride.getOverride()).toBeNull();
+        expect(() => menuOverride.activate(createDescriptor(), 'float-stage2' as never)).toThrow('UNSUPPORTED_REASON');
 
         const fullscreen = new EmbedFullscreenService();
         const exited: unknown[] = [];
@@ -761,7 +756,7 @@ describe('embed-ui registries and commands', () => {
         expect(secondMountDispose).toHaveBeenCalled();
     });
 
-    it('registers child product plugin contributions from embed ui plugin config', () => {
+    it('flushes pending child product plugin contributions from embed ui plugin startup', () => {
         const registry = new EmbedChildProductPluginRegistryService(createAccessor([]) as never);
         const contribution = {
             id: 'sheets-full',
@@ -778,10 +773,13 @@ describe('embed-ui registries and commands', () => {
             setConfig: vi.fn(),
         };
 
+        registerEmbedChildProductPluginContribution(injector, contribution);
+
         const plugin = new UniverEmbedUIPlugin({
-            childProductPlugins: [contribution],
-            useDefaultFloatingMenus: false,
-            useDefaultHostToolbar: false,
+            defaults: {
+                floatingMenus: false,
+                hostToolbar: false,
+            },
         }, injector, configService as never);
 
         plugin.onStarting();
@@ -802,8 +800,10 @@ describe('embed-ui registries and commands', () => {
         };
 
         const plugin = new UniverEmbedUIPlugin({
-            useDefaultFloatingMenus: false,
-            useDefaultHostToolbar: false,
+            defaults: {
+                floatingMenus: false,
+                hostToolbar: false,
+            },
         }, injector, configService as never);
 
         plugin.onStarting();

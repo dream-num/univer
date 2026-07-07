@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedFloatingGeometryService, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, resolveActiveEmbedRuntimeDomScope, resolveEmbedRuntimeDomScope } from '@univerjs/embed-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -107,7 +107,9 @@ export function shouldRefocusCellEditorAfterPointerDown(options: {
 function isEmbedRuntimeInteractiveElement(element: HTMLElement): boolean {
     const role = element.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
-    return role === 'child-editor' || role === 'child-popup' || role === 'floating-menu';
+    return role === 'child-editor' ||
+        role === 'child-popup' ||
+        role === 'floating-menu';
 }
 
 function shouldPreserveEmbedPopupFocus(embedId: string | undefined, ownerDocument: Document): boolean {
@@ -129,6 +131,30 @@ function shouldPreserveEmbedPopupFocus(embedId: string | undefined, ownerDocumen
         activeElement.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
     return role === 'child-popup' || role === 'floating-menu';
+}
+
+function shouldPreserveEmbedInteractiveFocus(embedId: string | undefined, ownerDocument: Document): boolean {
+    if (!embedId) {
+        return false;
+    }
+
+    const activeElement = ownerDocument.activeElement;
+    if (!(activeElement instanceof HTMLElement)) {
+        return false;
+    }
+
+    const ownerElement = activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
+    if (!ownerElement) {
+        return false;
+    }
+
+    const role = activeElement.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
+        activeElement.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+
+    return (role == null && activeElement.tagName !== 'CANVAS') ||
+        role === 'child-editor' ||
+        role === 'child-popup' ||
+        role === 'floating-menu';
 }
 
 function isEmbedRuntimeEditorOrPopup(target: EventTarget | null | undefined): boolean {
@@ -234,7 +260,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             return undefined;
         }
 
-        const subscription = injector.get(EmbedRuntimeFocusCoordinator).runtimeFocusChanged$.subscribe(() => {
+        const subscription = injector.get(EmbedRuntimeFocusCoordinator).runtimeSessionChanged$.subscribe(() => {
             setRuntimeFocusRevision((revision) => revision + 1);
         });
 
@@ -257,14 +283,36 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             return;
         }
 
+        const ownerDocument = rootRef.current?.ownerDocument ?? document;
+        const ownerWindow = ownerDocument.defaultView ?? window;
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
+        let delayedFocusTimer: ReturnType<typeof ownerWindow.setTimeout> | undefined;
+        const focusCellEditorElement = () => {
+            const scope = rootRef.current
+                ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
+                : resolveActiveEmbedRuntimeDomScope(ownerDocument);
+            if (shouldPreserveEmbedInteractiveFocus(scope?.embedId, ownerDocument)) {
+                return;
+            }
+
+            focusSheetCellEditorElement(ownerDocument);
+            if (delayedFocusTimer != null) {
+                ownerWindow.clearTimeout(delayedFocusTimer);
+            }
+            delayedFocusTimer = ownerWindow.setTimeout(() => {
+                delayedFocusTimer = undefined;
+                if (shouldPreserveEmbedInteractiveFocus(scope?.embedId, ownerDocument)) {
+                    return;
+                }
+                focusSheetCellEditorElement(ownerDocument);
+            }, 0);
+        };
         const focusEditor = () => {
             if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
                 return;
             }
 
-            const ownerDocument = rootRef.current?.ownerDocument ?? document;
             const scope = rootRef.current
                 ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
                 : resolveActiveEmbedRuntimeDomScope(ownerDocument);
@@ -279,7 +327,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 docSelectionRenderService?.focus();
             }
 
-            focusSheetCellEditorElement();
+            focusCellEditorElement();
         };
 
         focusEditor();
@@ -291,6 +339,9 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         return () => {
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
+            if (delayedFocusTimer != null) {
+                ownerWindow.clearTimeout(delayedFocusTimer);
+            }
         };
     }, [cellEditorResizeService, editorService, visible?.visible]);
 
@@ -349,9 +400,30 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             interactionBoundaryService,
             focusCoordinator,
         }));
+        if (scope.childType === UniverInstanceType.UNIVER_SHEET && scope.childUnitId) {
+            const ownerDocument = rootRef.current.ownerDocument;
+            let pointerRetryFrame = 0;
+            const refocusEditorAfterRuntimePointer = (event: PointerEvent | MouseEvent) => {
+                if (!focusCoordinator.isChildUnitRuntimeEvent(scope.childUnitId, event.target, event) || isEmbedRuntimeEditorOrPopup(event.target)) {
+                    return;
+                }
+
+                cancelAnimationFrame(pointerRetryFrame);
+                pointerRetryFrame = requestAnimationFrame(focusEditor);
+            };
+            ownerDocument.addEventListener('pointerdown', refocusEditorAfterRuntimePointer, true);
+            ownerDocument.addEventListener('pointerup', refocusEditorAfterRuntimePointer, true);
+            ownerDocument.addEventListener('click', refocusEditorAfterRuntimePointer, true);
+            collection.add(toDisposable(() => {
+                cancelAnimationFrame(pointerRetryFrame);
+                ownerDocument.removeEventListener('pointerdown', refocusEditorAfterRuntimePointer, true);
+                ownerDocument.removeEventListener('pointerup', refocusEditorAfterRuntimePointer, true);
+                ownerDocument.removeEventListener('click', refocusEditorAfterRuntimePointer, true);
+            }));
+        }
 
         return () => collection.dispose();
-    }, [editState?.unitId, injector, instanceService, visible?.unitId, visible?.visible]);
+    }, [editState?.unitId, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
 
     useEffect(() => {
         if (visible?.visible || !injector.has(EmbedRuntimeFocusCoordinator)) {
@@ -380,6 +452,25 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             interactionBoundaryService,
             focusCoordinator,
         });
+        const ownerWindow = ownerDocument.defaultView ?? window;
+        let delayedFocusTimer: ReturnType<typeof ownerWindow.setTimeout> | undefined;
+        const focusCellEditorElement = () => {
+            if (shouldPreserveEmbedInteractiveFocus(activeSessionScope.embedId, ownerDocument)) {
+                return;
+            }
+
+            focusSheetCellEditorElement(ownerDocument);
+            if (delayedFocusTimer != null) {
+                ownerWindow.clearTimeout(delayedFocusTimer);
+            }
+            delayedFocusTimer = ownerWindow.setTimeout(() => {
+                delayedFocusTimer = undefined;
+                if (shouldPreserveEmbedInteractiveFocus(activeSessionScope.embedId, ownerDocument)) {
+                    return;
+                }
+                focusSheetCellEditorElement(ownerDocument);
+            }, 0);
+        };
         const focusHiddenEditor = () => {
             if (shouldPreserveEmbedPopupFocus(activeSessionScope.embedId, ownerDocument)) {
                 return;
@@ -391,7 +482,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 docSelectionRenderService?.focus();
             }
 
-            focusSheetCellEditorElement(ownerDocument);
+            focusCellEditorElement();
         };
         let retryFrame = 0;
         let finalRetryFrame = 0;
@@ -402,7 +493,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             focusHiddenEditor();
             finalRetryFrame = requestAnimationFrame(focusHiddenEditor);
         });
-        const refocusHiddenEditorAfterRuntimePointer = (event: PointerEvent) => {
+        const refocusHiddenEditorAfterRuntimePointer = (event: PointerEvent | MouseEvent) => {
             if (!focusCoordinator.isChildUnitRuntimeEvent(childUnitId, event.target, event) || isEmbedRuntimeEditorOrPopup(event.target)) {
                 return;
             }
@@ -411,12 +502,19 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             pointerRetryFrame = requestAnimationFrame(focusHiddenEditor);
         };
         ownerDocument.addEventListener('pointerdown', refocusHiddenEditorAfterRuntimePointer, true);
+        ownerDocument.addEventListener('pointerup', refocusHiddenEditorAfterRuntimePointer, true);
+        ownerDocument.addEventListener('click', refocusHiddenEditorAfterRuntimePointer, true);
 
         return () => {
             cancelAnimationFrame(retryFrame);
             cancelAnimationFrame(finalRetryFrame);
             cancelAnimationFrame(pointerRetryFrame);
+            if (delayedFocusTimer != null) {
+                ownerWindow.clearTimeout(delayedFocusTimer);
+            }
             ownerDocument.removeEventListener('pointerdown', refocusHiddenEditorAfterRuntimePointer, true);
+            ownerDocument.removeEventListener('pointerup', refocusHiddenEditorAfterRuntimePointer, true);
+            ownerDocument.removeEventListener('click', refocusHiddenEditorAfterRuntimePointer, true);
             portalRegistration.dispose();
         };
     }, [editorService, injector, instanceService, runtimeFocusRevision, visible?.visible]);

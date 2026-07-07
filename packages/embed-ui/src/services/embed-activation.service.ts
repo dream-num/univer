@@ -19,6 +19,7 @@ import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedHostMenuOverride } from '../types/embed-ui';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, IContextService, Inject, IUniverInstanceService, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EmbedFocusOwnerService, EmbedHostAdapterRegistryService } from '@univerjs/embed';
+import { ILayoutService } from '@univerjs/ui';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 import { EmbedBlockRegistryService } from './embed-block-registry.service';
 import { EmbedFloatingActiveService } from './embed-floating-active.service';
@@ -41,7 +42,8 @@ export class EmbedActivationService {
         @Inject(EmbedMountService) private readonly _mountService: EmbedMountService,
         @Optional(EmbedBlockRegistryService) private readonly _blockRegistry?: EmbedBlockRegistryService,
         @Optional(EmbedFloatingActiveService) private readonly _floatingActiveService?: EmbedFloatingActiveService,
-        @Optional(IContextService) private readonly _contextService?: IContextService
+        @Optional(IContextService) private readonly _contextService?: IContextService,
+        @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         // noop
     }
@@ -87,6 +89,7 @@ export class EmbedActivationService {
         }
         this._menuOverrideService.clear();
         if (stage === 'stage2') {
+            this._setCurrentUnitForType(descriptor.childUnitId!, descriptor.childType!);
             this._preserveHostGlobalFocusForFloating(descriptor);
         } else {
             this._releaseFloatingHostFocusRestorers();
@@ -205,19 +208,11 @@ export class EmbedActivationService {
     }
 
     private _focusUnit(unitId: string, unitType: UniverInstanceType): void {
-        const getCurrentUnitOfType = (this._univerInstanceService as unknown as {
-            getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
-        }).getCurrentUnitOfType;
+        this._setCurrentUnitForType(unitId, unitType);
         const getFocusedUnit = (this._univerInstanceService as unknown as {
             getFocusedUnit?: () => { getUnitId: () => string } | null | undefined;
         }).getFocusedUnit;
 
-        if (
-            typeof getCurrentUnitOfType !== 'function' ||
-            getCurrentUnitOfType.call(this._univerInstanceService, unitType)?.getUnitId() !== unitId
-        ) {
-            this._univerInstanceService.setCurrentUnitForType(unitId);
-        }
         if (
             typeof getFocusedUnit !== 'function' ||
             getFocusedUnit.call(this._univerInstanceService)?.getUnitId() !== unitId
@@ -229,9 +224,41 @@ export class EmbedActivationService {
         this._contextService?.setContextValue(FOCUSING_DOC, unitType === UniverInstanceType.UNIVER_DOC);
         this._contextService?.setContextValue(FOCUSING_SHEET, unitType === UniverInstanceType.UNIVER_SHEET);
         this._contextService?.setContextValue(FOCUSING_SLIDE, unitType === UniverInstanceType.UNIVER_SLIDE);
+        this._focusLayout();
+    }
+
+    private _setCurrentUnitForType(unitId: string, unitType: UniverInstanceType): void {
+        const getCurrentUnitOfType = (this._univerInstanceService as unknown as {
+            getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
+        }).getCurrentUnitOfType;
+
+        if (
+            typeof getCurrentUnitOfType !== 'function' ||
+            getCurrentUnitOfType.call(this._univerInstanceService, unitType)?.getUnitId() !== unitId
+        ) {
+            this._univerInstanceService.setCurrentUnitForType(unitId);
+        }
+    }
+
+    private _focusLayout(): void {
+        const focus = () => this._layoutService?.focus();
+        focus();
+
+        if (typeof queueMicrotask === 'function') {
+            queueMicrotask(focus);
+        }
+
+        if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(focus);
+        }
     }
 
     private _preserveHostGlobalFocusForFloating(descriptor: IEmbedDescriptor): void {
+        this._releaseFloatingHostFocusRestorers();
+        if (descriptor.entry === 'docs-custom-block') {
+            return;
+        }
+
         const childUnitId = descriptor.childUnitId!;
         const hostUnitId = descriptor.hostUnitId;
         const instanceService = this._univerInstanceService as unknown as {
@@ -253,7 +280,6 @@ export class EmbedActivationService {
             }
         };
 
-        this._releaseFloatingHostFocusRestorers();
         const subscription = instanceService.focused$?.subscribe(restoreHostIfChildFocused);
         this._floatingHostFocusRestorers.set(descriptor.embedId, toDisposable(() => subscription?.unsubscribe()));
         restoreHostIfChildFocused();

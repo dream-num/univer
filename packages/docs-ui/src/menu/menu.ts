@@ -41,6 +41,7 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
+import { EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
     COLOR_PICKER_COMPONENT,
@@ -89,6 +90,31 @@ import { DocOpenPageSettingCommand } from '../commands/operations/open-page-sett
 import { getCommandSkeleton } from '../commands/util';
 import { DocMenuStyleService } from '../services/doc-menu-style.service';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
+
+export function shouldSuppressDocMenuStateRefresh(accessor: IAccessor): boolean {
+    let univerInstanceService: IUniverInstanceService;
+    let focusCoordinator: EmbedRuntimeFocusCoordinator;
+
+    try {
+        univerInstanceService = accessor.get(IUniverInstanceService);
+    } catch (error) {
+        if (isInjectorDisposedError(error)) {
+            return true;
+        }
+
+        throw error;
+    }
+
+    try {
+        focusCoordinator = accessor.get(EmbedRuntimeFocusCoordinator);
+    } catch {
+        return false;
+    }
+
+    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const unitId = docDataModel?.getUnitId();
+    return focusCoordinator.shouldSuppressHostInteraction(unitId);
+}
 
 function getInsertTableHiddenObservable(
     accessor: IAccessor
@@ -364,6 +390,10 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Locale
         tooltip: 'docs-ui.toolbar.bold',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -403,6 +433,10 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Loca
         tooltip: 'docs-ui.toolbar.italic',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -442,6 +476,10 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
         tooltip: 'docs-ui.toolbar.underline',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -481,6 +519,10 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         tooltip: 'docs-ui.toolbar.strikethrough',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -519,6 +561,10 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
         tooltip: 'docs-ui.toolbar.subscript',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -557,6 +603,10 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         tooltip: 'docs-ui.toolbar.superscript',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -613,6 +663,10 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             const defaultValue = DEFAULT_STYLES.ff;
 
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
 
                 if (textRun == null) {
@@ -660,6 +714,10 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         value$: new Observable((subscriber) => {
             const DEFAULT_SIZE = DEFAULT_STYLES.fs;
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const textRun = getFontStyleAtCursor(accessor);
                 if (textRun == null) {
                     subscriber.next(DEFAULT_SIZE);
@@ -712,6 +770,10 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
         value$: new Observable((subscriber) => {
             const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 const paragraph = getParagraphStyleAtCursor(accessor);
                 if (paragraph == null) {
                     subscriber.next(DEFAULT_TYPE);
@@ -823,6 +885,10 @@ export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
         selections: FLOAT_TEXT_STYLE_OPTIONS,
         value$: new Observable((subscriber) => {
             const calc = () => {
+                if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                    return;
+                }
+
                 subscriber.next(normalizeFloatingTextStyleValue(getParagraphStyleAtCursor(accessor)));
             };
 
@@ -868,6 +934,10 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                 value$: new Observable<string>((subscriber) => {
                     const defaultValue = DEFAULT_STYLES.cl.rgb;
                     const calc = () => {
+                        if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                            return;
+                        }
+
                         const textRun = getFontStyleAtCursor(accessor);
 
                         if (!textRun) {
@@ -895,6 +965,10 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetInlineFormatTextColorCommand.id) {
+                    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                        return;
+                    }
+
                     const color = (c.params as { value: string }).value;
                     subscriber.next(color ?? defaultColor);
                 }
@@ -976,6 +1050,10 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                        return;
+                    }
+
                     const paragraph = getParagraphStyleAtCursor(accessor);
 
                     if (paragraph == null) {
@@ -1009,6 +1087,10 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                        return;
+                    }
+
                     const paragraph = getParagraphStyleAtCursor(accessor);
 
                     if (paragraph == null) {
@@ -1043,6 +1125,10 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                        return;
+                    }
+
                     const paragraph = getParagraphStyleAtCursor(accessor);
 
                     if (paragraph == null) {
@@ -1077,6 +1163,10 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                        return;
+                    }
+
                     const paragraph = getParagraphStyleAtCursor(accessor);
 
                     if (paragraph == null) {
@@ -1130,6 +1220,11 @@ export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<Loc
 
     const value$ = new Observable<HorizontalAlign>((subscriber) => {
         const calc = () => {
+            if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                subscriber.next(HorizontalAlign.LEFT);
+                return;
+            }
+
             const paragraph = getParagraphStyleAtCursor(accessor);
 
             subscriber.next(paragraph?.paragraphStyle?.horizontalAlign ?? HorizontalAlign.LEFT);
@@ -1172,6 +1267,10 @@ const listValueFactory$ = (accessor: IAccessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                return;
+            }
+
             if (unitId == null) {
                 return;
             }
@@ -1332,6 +1431,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 value$: new Observable<string>((subscriber) => {
                     const defaultValue = themeService.getColorFromTheme('primary.600');
                     const calc = () => {
+                        if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                            return;
+                        }
+
                         const textRun = getFontStyleAtCursor(accessor);
 
                         if (!textRun) {
@@ -1360,6 +1463,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetInlineFormatTextBackgroundColorCommand.id) {
+                    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                        return;
+                    }
+
                     const color = (c.params as { value: string }).value;
                     subscriber.next(color ?? defaultColor);
                 }
@@ -1374,6 +1481,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 }
 
 function getFontStyleAtCursor(accessor: IAccessor) {
+    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+        return;
+    }
+
     let univerInstanceService: IUniverInstanceService;
     let textSelectionService: DocSelectionManagerService;
     let docMenuStyleService: DocMenuStyleService;
@@ -1433,6 +1544,10 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 }
 
 export function getParagraphStyleAtCursor(accessor: IAccessor) {
+    if (shouldSuppressDocMenuStateRefresh(accessor)) {
+        return;
+    }
+
     let univerInstanceService: IUniverInstanceService;
     let textSelectionService: DocSelectionManagerService;
     try {

@@ -49,10 +49,7 @@ export function createEmbedRibbonBlockContribution(options: ICreateEmbedRibbonBl
         hostChromeMode: EmbedHostChromeMode.RIBBON,
         layoutPolicy: {
             tab: DEFAULT_EMBED_TAB_LAYOUT_POLICY,
-            float: {
-                ...DEFAULT_EMBED_FLOAT_LAYOUT_POLICY,
-                ribbon: 'host',
-            },
+            float: DEFAULT_EMBED_FLOAT_LAYOUT_POLICY,
             docFlow: DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY,
         },
         createRibbonOverride: ({ childUnitId, embedId, injector }) => {

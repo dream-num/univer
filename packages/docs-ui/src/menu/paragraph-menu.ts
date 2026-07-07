@@ -64,6 +64,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     disableMenuWhenNoDocRange,
     getParagraphStyleAtCursor,
+    shouldSuppressDocMenuStateRefresh,
     TextColorSelectorMenuItemFactory,
 } from './menu';
 
@@ -103,6 +104,10 @@ function getHeadingActivatedObservable(accessor: IAccessor, headingType: NamedSt
     return new Observable((subscriber) => {
         const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
         const calc = () => {
+            if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                return;
+            }
+
             const paragraph = getParagraphStyleAtCursor(accessor);
             if (paragraph == null) {
                 subscriber.next(DEFAULT_TYPE === headingType);

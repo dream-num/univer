@@ -145,11 +145,10 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
+        registerSheetsEmbedUIContributions(this._injector);
     }
 
     override onStarting(): void {
-        registerSheetsEmbedUIContributions(this._injector);
-
         this._injector.add([ComponentsController]);
         this._injector.get(ComponentsController);
         registerDependencies(this._injector, mergeOverrideWithDependencies([

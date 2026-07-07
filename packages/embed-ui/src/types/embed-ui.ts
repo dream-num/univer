@@ -264,7 +264,7 @@ export interface IEmbedHostMenuOverride {
     childUnitId: string;
     childType: UniverInstanceType;
     entry: EmbedHostEntry;
-    reason: 'tab-active' | 'float-stage2';
+    reason: 'tab-active';
     portalContainer?: HTMLElement | null;
     hideHostFxBar?: boolean;
     lockHostRibbon?: boolean;

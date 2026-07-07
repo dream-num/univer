@@ -80,8 +80,7 @@ export function calcHighlightRanges(opts: {
     const worksheet = workbook?.getActiveSheet();
     const selectionWithStyle: ISelectionWithStyle[] = [];
     if (!workbook || !worksheet) {
-        refSelectionsService.setSelections(selectionWithStyle);
-        return;
+        return selectionWithStyle;
     }
     const currentSheetId = worksheet.getSheetId();
     const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
@@ -191,6 +190,8 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
         const sheetSkeletonManagerService = currentRender?.with(SheetSkeletonManagerService);
         if (!isEnd && refSelectionsRenderService?.selectionMoving) return;
+        const currentSheetId = currentWorkbook.getActiveSheet()?.getSheetId();
+        if (!currentSheetId) return;
         const selectionWithStyle = calcHighlightRanges({
             unitId,
             subUnitId,
@@ -210,7 +211,7 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
         if (allControls.length === selectionWithStyle.length) {
             refSelectionsRenderService?.resetSelectionsByModelData(selectionWithStyle);
         } else {
-            refSelectionsService.setSelections(selectionWithStyle);
+            refSelectionsService.setSelections(currentWorkbook.getUnitId(), currentSheetId, selectionWithStyle);
         }
         if (isEnd && selectionWithStyle.length) {
             sheetSelectionRenderService?.resetSelectionsByModelData([]);

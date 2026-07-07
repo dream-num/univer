@@ -92,10 +92,10 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/icons-svg": "^1.18.0",
+        "@univerjs/icons-svg": "^1.19.0",
         "@univerjs/sheets-formula": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     }
 }

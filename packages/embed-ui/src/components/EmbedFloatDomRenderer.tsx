@@ -1353,6 +1353,7 @@ export function EmbedFloatDomRenderer(props: {
             data-embed-host-unit-id={data?.hostUnitId}
             data-embed-host-anchor-id={data?.hostAnchorId}
             data-embed-child-unit-id={data?.childUnitId}
+            data-embed-child-type={data?.childType}
             data-embed-interaction-flow={interactionFlow}
         >
             <div

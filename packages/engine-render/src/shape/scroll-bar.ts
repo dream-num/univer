@@ -59,6 +59,7 @@ const DEFAULT_TRACK_SIZE = 10;
 const HOVER_TRACK_SIZE = 10;
 const DEFAULT_THUMB_MARGIN = 2;
 const HOVER_THUMB_MARGIN = 1;
+const BAR_DRAG_SCROLL_THROTTLE_MS = 32;
 
 export class ScrollBar extends Disposable {
     _enableHorizontal: boolean = true;
@@ -86,6 +87,11 @@ export class ScrollBar extends Disposable {
 
     private _isHorizonMove = false;
     private _isVerticalMove = false;
+
+    private _pendingBarDeltaX = 0;
+    private _pendingBarDeltaY = 0;
+    private _pendingBarScrollFrameId: Nullable<number> = null;
+    private _pendingBarScrollThrottleId: Nullable<number> = null;
 
     private _horizonPointerMoveSub: Nullable<Subscription>;
     private _horizonPointerUpSub: Nullable<Subscription>;
@@ -330,6 +336,7 @@ export class ScrollBar extends Disposable {
 
     override dispose() {
         super.dispose();
+        this._flushPendingBarScroll();
         this.horizonScrollTrack?.dispose();
         this.horizonThumbRect?.dispose();
         this.verticalScrollTrack?.dispose();
@@ -349,6 +356,64 @@ export class ScrollBar extends Disposable {
         this._eventSub.unsubscribe();
         this._mainScene = null;
         this._viewport.removeScrollBar();
+    }
+
+    private _scheduleBarScrollDelta(delta: Partial<{ x: number; y: number }>) {
+        this._pendingBarDeltaX += delta.x ?? 0;
+        this._pendingBarDeltaY += delta.y ?? 0;
+
+        if (this._pendingBarScrollFrameId !== null || this._pendingBarScrollThrottleId !== null) {
+            return;
+        }
+
+        this._requestPendingBarScrollFrame();
+    }
+
+    private _requestPendingBarScrollFrame() {
+        this._pendingBarScrollFrameId = requestAnimationFrame(() => {
+            this._pendingBarScrollFrameId = null;
+            this._applyPendingBarScroll({ isBarDragging: true });
+
+            if (!this._isHorizonMove && !this._isVerticalMove) {
+                return;
+            }
+
+            this._pendingBarScrollThrottleId = window.setTimeout(() => {
+                this._pendingBarScrollThrottleId = null;
+                if (this._pendingBarDeltaX !== 0 || this._pendingBarDeltaY !== 0) {
+                    this._requestPendingBarScrollFrame();
+                }
+            }, BAR_DRAG_SCROLL_THROTTLE_MS);
+        });
+    }
+
+    private _flushPendingBarScroll(isBarDragEnd = false) {
+        if (this._pendingBarScrollFrameId !== null) {
+            cancelAnimationFrame(this._pendingBarScrollFrameId);
+            this._pendingBarScrollFrameId = null;
+        }
+        if (this._pendingBarScrollThrottleId !== null) {
+            clearTimeout(this._pendingBarScrollThrottleId);
+            this._pendingBarScrollThrottleId = null;
+        }
+
+        return this._applyPendingBarScroll({ isBarDragEnd });
+    }
+
+    private _applyPendingBarScroll(options?: { isBarDragging?: boolean; isBarDragEnd?: boolean }) {
+        const x = this._pendingBarDeltaX;
+        const y = this._pendingBarDeltaY;
+        if (x === 0 && y === 0) {
+            return false;
+        }
+
+        this._pendingBarDeltaX = 0;
+        this._pendingBarDeltaY = 0;
+        this._viewport.scrollByBarDeltaValue({
+            ...(x === 0 ? null : { x }),
+            ...(y === 0 ? null : { y }),
+        }, true, options);
+        return true;
     }
 
     render(ctx: UniverRenderingContext, left: number = 0, top: number = 0) {
@@ -642,7 +707,7 @@ export class ScrollBar extends Disposable {
             if (!this._isVerticalMove) {
                 return;
             }
-            this._viewport.scrollByBarDeltaValue({
+            this._scheduleBarScrollDelta({
                 y: e.offsetY - this._lastY,
             });
 
@@ -651,7 +716,14 @@ export class ScrollBar extends Disposable {
         });
 
         this._verticalPointerUpSub = mainScene.onPointerUp$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            if (!this._isVerticalMove) {
+                return;
+            }
             const srcElement = this.verticalThumbRect;
+            const hasPendingScroll = this._flushPendingBarScroll(true);
+            if (!hasPendingScroll) {
+                this._viewport.scrollByBarDeltaValue({ y: 0 }, true, { isBarDragEnd: true });
+            }
             this._isVerticalMove = false;
             mainScene.releaseCapturedObject();
             mainScene.enableObjectsEvent();
@@ -755,7 +827,7 @@ export class ScrollBar extends Disposable {
             if (!this._isHorizonMove) {
                 return;
             }
-            this._viewport.scrollByBarDeltaValue({
+            this._scheduleBarScrollDelta({
                 x: e.offsetX - this._lastX,
             });
             this._lastX = e.offsetX;
@@ -763,6 +835,13 @@ export class ScrollBar extends Disposable {
         });
         this._horizonPointerUpSub = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
             ;
+            if (!this._isHorizonMove) {
+                return;
+            }
+            const hasPendingScroll = this._flushPendingBarScroll(true);
+            if (!hasPendingScroll) {
+                this._viewport.scrollByBarDeltaValue({ x: 0 }, true, { isBarDragEnd: true });
+            }
             this._isHorizonMove = false;
             mainScene.releaseCapturedObject();
             mainScene.enableObjectsEvent();

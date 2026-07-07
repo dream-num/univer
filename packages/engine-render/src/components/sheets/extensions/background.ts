@@ -33,6 +33,12 @@ const UNIQUE_KEY = 'DefaultBackgroundExtension';
 const DOC_EXTENSION_Z_INDEX = 21;
 const PRINTING_Z_INDEX = 21;
 
+function getRangeCellCount(ranges: IRange[]) {
+    return ranges.reduce((sum, range) => {
+        return sum + Math.max(range.endRow - range.startRow + 1, 0) * Math.max(range.endColumn - range.startColumn + 1, 0);
+    }, 0);
+}
+
 interface IRenderBGContext {
     ctx: UniverRenderingContext;
     spreadsheetSkeleton: SpreadsheetSkeleton;
@@ -44,6 +50,7 @@ interface IRenderBGContext {
     viewRanges: IRange[];
     diffRanges: IRange[];
     cellInfo: ICellWithCoord;
+    skipRenderRangeCheck?: boolean;
 }
 
 export class Background extends SheetExtension {
@@ -63,7 +70,7 @@ export class Background extends SheetExtension {
         _parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[],
-        { viewRanges, checkOutOfViewBound }: IDrawInfo
+        { viewRanges, checkOutOfViewBound, hasMergeData = true }: IDrawInfo
     ) {
         const { stylesCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
         const { background: bgMatrixCacheByColor, backgroundPositions } = stylesCache;
@@ -90,22 +97,27 @@ export class Background extends SheetExtension {
         } as IRenderBGContext;
 
         const mergeRanges: IRange[] = [];
-        // Currently, viewRanges has only one range.
-        viewRanges.forEach((range) => {
-            // For merge cell.
-            // The background extension is not as strict as the font extension; the font extension must never be redrawn. Therefore, it is not necessary to be that complex.
-            const intersectMergeRangesInViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
-            mergeRanges.push(...intersectMergeRangesInViewRanges);
-        });
+        if (hasMergeData) {
+            // Currently, viewRanges has only one range.
+            viewRanges.forEach((range) => {
+                // For merge cell.
+                // The background extension is not as strict as the font extension; the font extension must never be redrawn. Therefore, it is not necessary to be that complex.
+                const intersectMergeRangesInViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+                mergeRanges.push(...intersectMergeRangesInViewRanges);
+            });
+        }
 
         const renderBGCore = (rgb: string) => {
             const bgColorMatrix = bgMatrixCacheByColor[rgb];
+            const renderRanges = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
             const rangeForEachFn = (row: number, col: number, bgConfigParam?: string) => {
-                const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
-                if (index !== -1) {
-                    return;
+                if (hasMergeData) {
+                    const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
+                    if (index !== -1) {
+                        return;
+                    }
                 }
-                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                const cellInfo = backgroundPositions.getValue(row, col) ?? spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
                 if (!cellInfo) return;
                 const bgConfig = bgConfigParam || bgColorMatrix.getValue(row, col);
                 if (bgConfig) {
@@ -120,17 +132,18 @@ export class Background extends SheetExtension {
             ctx.beginPath();
 
             const matrixSize = bgColorMatrix.getSizeOf();
-            const cellCountInRanges = viewRanges.reduce((sum, range) => {
-                return sum + (range.endRow - range.startRow) * (range.endColumn - range.startColumn);
-            }, 0);
+            const cellCountInRanges = getRangeCellCount(renderRanges);
             // if number of cells in range is over than bg config in matrix, renderBackground by matrix.
-            // otherwise, renderBackground by cells in viewRange.
+            // otherwise, renderBackground by cells in render range.
             if (cellCountInRanges < matrixSize) {
-                // Currently, viewRanges has only one range.
-                viewRanges.forEach((range) => {
+                // Currently, renderRanges has only one range in normal scrolling.
+                renderBGContext.skipRenderRangeCheck = true;
+                renderRanges.forEach((range) => {
                     Range.foreach(range, rangeForEachFn);
                 });
+                renderBGContext.skipRenderRangeCheck = false;
             } else {
+                renderBGContext.skipRenderRangeCheck = false;
                 bgColorMatrix.forValue(rangeForEachFn);
             }
             ctx.fill(backgroundPaths);
@@ -162,13 +175,15 @@ export class Background extends SheetExtension {
         for (let index = 0; index < rgbList.length; index++) {
             const rgb = rgbList[index];
             renderBGCore(rgb);
-            renderBGForMergedCells(rgb);
+            if (hasMergeData) {
+                renderBGForMergedCells(rgb);
+            }
         }
         ctx.restore();
     }
 
     renderBGByCell(bgContext: IRenderBGContext, row: number, col: number) {
-        const { spreadsheetSkeleton, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges, cellInfo } = bgContext;
+        const { spreadsheetSkeleton, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges, cellInfo, skipRenderRangeCheck } = bgContext;
 
         let { startY, endY, startX, endX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
@@ -183,7 +198,7 @@ export class Background extends SheetExtension {
         endX = mergeInfo.endX;
 
         // If curr cell is not in the viewrange (viewport + merged cells), exit early.
-        if ((!isMerged && !isMergedMainCell) && !inViewRanges(renderRange!, row, col)) {
+        if (!skipRenderRangeCheck && (!isMerged && !isMergedMainCell) && !inViewRanges(renderRange!, row, col)) {
             return true;
         }
 

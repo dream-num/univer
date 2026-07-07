@@ -83,6 +83,13 @@ export interface IScrollObserverParam {
     limitX?: number;
     limitY?: number;
     isTrigger?: boolean;
+    isBarDragging?: boolean;
+    isBarDragEnd?: boolean;
+}
+
+interface IScrollByBarOptions {
+    isBarDragging?: boolean;
+    isBarDragEnd?: boolean;
 }
 
 interface IScrollBarPosition {
@@ -549,10 +556,10 @@ export class Viewport {
      * @param delta
      * @returns isLimited
      */
-    scrollByBarDeltaValue(delta: Partial<IScrollBarPosition>, isTrigger = true) {
+    scrollByBarDeltaValue(delta: Partial<IScrollBarPosition>, isTrigger = true, options?: IScrollByBarOptions) {
         const x = this.scrollX + (delta.x || 0);
         const y = this.scrollY + (delta.y || 0);
-        return this._scrollToBarPosCore({ x, y }, isTrigger);
+        return this._scrollToBarPosCore({ x, y }, isTrigger, options);
     }
 
     /**
@@ -1286,7 +1293,7 @@ export class Viewport {
      * @param rawScrollXY Partial<IViewportScrollPosition>
      * @param isTrigger
      */
-    private _scrollToBarPosCore(rawScrollXY: Partial<IScrollBarPosition>, isTrigger: boolean = true) {
+    private _scrollToBarPosCore(rawScrollXY: Partial<IScrollBarPosition>, isTrigger: boolean = true, options?: IScrollByBarOptions) {
         if (this._scrollBar == null) {
             return;
         }
@@ -1314,6 +1321,8 @@ export class Viewport {
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
             isTrigger,
+            isBarDragging: options?.isBarDragging,
+            isBarDragEnd: options?.isBarDragEnd,
         };
         this._scrollBar?.makeDirty(true);
         this.onScrollAfter$.emitEvent(scrollSubParam);
@@ -1329,6 +1338,8 @@ export class Viewport {
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
             isTrigger,
+            isBarDragging: options?.isBarDragging,
+            isBarDragEnd: options?.isBarDragEnd,
         });
         return afterLimit;
     }
@@ -1521,10 +1532,15 @@ export class Viewport {
         const expandX = this.bufferEdgeX;
         const expandY = this.bufferEdgeY;
         for (const bound of additionalAreas) {
-            bound.left = bound.left - expandX;
-            bound.right = bound.right + expandX;
-            bound.top = bound.top - expandY;
-            bound.bottom = bound.bottom + expandY;
+            const isVerticalStrip = bound.left === Math.max(prevBound.left, currBound.left) &&
+                bound.right === Math.min(prevBound.right, currBound.right);
+            const isHorizontalStrip = bound.top === currBound.top && bound.bottom === currBound.bottom;
+            const boundExpandX = isVerticalStrip ? expandX : 0;
+            const boundExpandY = isHorizontalStrip ? expandY : 0;
+            bound.left = bound.left - boundExpandX;
+            bound.right = bound.right + boundExpandX;
+            bound.top = bound.top - boundExpandY;
+            bound.bottom = bound.bottom + boundExpandY;
         }
 
         return additionalAreas;

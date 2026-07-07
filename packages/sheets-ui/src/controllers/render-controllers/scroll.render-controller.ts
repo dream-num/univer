@@ -235,7 +235,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             // get scrollByBar event from viewport and exec ScrollCommand.id.
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
-                if (skeleton == null || param.isTrigger === false) {
+                if (skeleton == null || param.isTrigger === false || (param.isBarDragging && !param.isBarDragEnd)) {
                     return;
                 }
 

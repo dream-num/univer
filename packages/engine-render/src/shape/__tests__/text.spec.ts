@@ -136,6 +136,63 @@ describe('text shape', () => {
         expect(bottomCtx.beginPath).toHaveBeenCalled();
     });
 
+    it('reuses simple text layouts for non-wrapped text', () => {
+        const cache = (Text as any)._layoutCache as Map<string, unknown>;
+        cache.clear();
+        const firstCtx = createCtx();
+        const secondCtx = createCtx();
+
+        Text.drawWith(
+            firstCtx,
+            {
+                text: 'repeat',
+                fontStyle: '12px Arial',
+                width: 100,
+                height: 20,
+                warp: false,
+                hAlign: HorizontalAlign.LEFT,
+                vAlign: VerticalAlign.TOP,
+            } as any
+        );
+        Text.drawWith(
+            secondCtx,
+            {
+                text: 'repeat',
+                fontStyle: '12px Arial',
+                width: 100,
+                height: 20,
+                warp: false,
+                hAlign: HorizontalAlign.LEFT,
+                vAlign: VerticalAlign.TOP,
+            } as any
+        );
+
+        expect(cache.size).toBe(1);
+        expect(firstCtx.fillText).toHaveBeenCalledTimes(1);
+        expect(secondCtx.fillText).toHaveBeenCalledTimes(1);
+    });
+
+    it('draws plain cached text without nested context save and restore', () => {
+        const ctx = createCtx();
+        const height = Text.drawPlainWith(
+            ctx,
+            {
+                text: '123',
+                fontStyle: '12px Arial',
+                width: 100,
+                height: 20,
+                hAlign: HorizontalAlign.RIGHT,
+                vAlign: VerticalAlign.TOP,
+                cellValueType: CellValueType.NUMBER,
+            } as any
+        );
+
+        expect(height).toBeGreaterThanOrEqual(0);
+        expect(ctx.save).not.toHaveBeenCalled();
+        expect(ctx.restore).not.toHaveBeenCalled();
+        expect(ctx.fillText.mock.calls[0][1]).toBeGreaterThanOrEqual(0);
+    });
+
     it('draws underline and strike line decorations', () => {
         const ctx = createCtx();
         const skeleton = createSkeleton([{ text: 'abc', width: 6, height: 10, baseline: 8 }]);

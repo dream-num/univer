@@ -865,4 +865,29 @@ describe('engine scene viewport extra', () => {
         scene.dispose();
         engine.dispose();
     });
+
+    it('expands cache diff strips only across the non-scrolling axis', () => {
+        const { engine, scene, viewport } = createFixture();
+        viewport.bufferEdgeX = 10;
+        viewport.bufferEdgeY = 20;
+
+        const verticalDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 100, bottom: 100 },
+            { left: 0, top: 50, right: 100, bottom: 150 }
+        );
+        expect(verticalDiff).toEqual([
+            { left: -10, top: 100, right: 110, bottom: 150 },
+        ]);
+
+        const horizontalDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 100, bottom: 100 },
+            { left: 50, top: 0, right: 150, bottom: 100 }
+        );
+        expect(horizontalDiff).toEqual([
+            { left: 100, top: -20, right: 150, bottom: 120 },
+        ]);
+
+        scene.dispose();
+        engine.dispose();
+    });
 });

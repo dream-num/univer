@@ -34,9 +34,173 @@ import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
 import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
+import { getSheetRenderProfile, getSheetRenderProfilerNow, incrementSheetRenderCounter, recordSheetRenderMetric } from './render-profiler';
 import { SheetComponent } from './sheet-component';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
+
+interface ISparseExtensionFeatureFlags {
+    hasCustomRender: boolean;
+    hasMarkers: boolean;
+    hasSelectionProtection: boolean;
+    customRenderRanges: IRange[];
+    markerRanges: IRange[];
+    selectionProtectionRanges: IRange[];
+}
+
+function getRangesCellCount(ranges: IRange[] = []) {
+    return ranges.reduce((count, range) => {
+        const rowCount = Math.max(range.endRow - range.startRow + 1, 0);
+        const columnCount = Math.max(range.endColumn - range.startColumn + 1, 0);
+        return count + rowCount * columnCount;
+    }, 0);
+}
+
+function pushSparseCellRange(ranges: IRange[], row: number, col: number) {
+    const last = ranges[ranges.length - 1];
+    if (last && last.startRow === row && last.endRow === row && last.endColumn + 1 === col) {
+        last.endColumn = col;
+        return;
+    }
+
+    ranges.push({
+        startRow: row,
+        endRow: row,
+        startColumn: col,
+        endColumn: col,
+    });
+}
+
+function scanSparseExtensionFeatures(spreadsheetSkeleton: SpreadsheetSkeleton, ranges: IRange[]): ISparseExtensionFeatureFlags | null {
+    const { worksheet } = spreadsheetSkeleton;
+    if (!worksheet || !ranges.length || worksheet.getMergeData().length > 0) {
+        return null;
+    }
+    const profile = getSheetRenderProfile();
+    const profileStart = profile ? getSheetRenderProfilerNow() : 0;
+    let cellVisits = 0;
+    let fontCacheCellHits = 0;
+    let worksheetCellReads = 0;
+
+    const flags: ISparseExtensionFeatureFlags = {
+        hasCustomRender: false,
+        hasMarkers: false,
+        hasSelectionProtection: false,
+        customRenderRanges: [],
+        markerRanges: [],
+        selectionProtectionRanges: [],
+    };
+
+    for (const range of ranges) {
+        for (let row = range.startRow; row <= range.endRow; row++) {
+            if (!worksheet.getRowVisible(row)) {
+                continue;
+            }
+
+            for (let col = range.startColumn; col <= range.endColumn; col++) {
+                if (!worksheet.getColVisible(col)) {
+                    continue;
+                }
+
+                if (profile) {
+                    cellVisits += 1;
+                }
+                const cachedCell = spreadsheetSkeleton.stylesCache.fontMatrix.getValue(row, col)?.cellData as Nullable<{
+                    customRender?: unknown[];
+                    markers?: unknown;
+                    selectionProtection?: unknown[];
+                }>;
+                if (profile && cachedCell) {
+                    fontCacheCellHits += 1;
+                }
+                const cell = cachedCell ?? (worksheet.getCell(row, col) as Nullable<{
+                    customRender?: unknown[];
+                    markers?: unknown;
+                    selectionProtection?: unknown[];
+                }>);
+                if (profile && !cachedCell) {
+                    worksheetCellReads += 1;
+                }
+                if (!cell) {
+                    continue;
+                }
+
+                if (cell.customRender?.length) {
+                    flags.hasCustomRender = true;
+                    pushSparseCellRange(flags.customRenderRanges, row, col);
+                }
+                if (cell.markers) {
+                    flags.hasMarkers = true;
+                    pushSparseCellRange(flags.markerRanges, row, col);
+                }
+                if (cell.selectionProtection?.length) {
+                    flags.hasSelectionProtection = true;
+                    pushSparseCellRange(flags.selectionProtectionRanges, row, col);
+                }
+            }
+        }
+    }
+
+    if (profile) {
+        recordSheetRenderMetric('Spreadsheet.scanSparseExtensionFeatures', getSheetRenderProfilerNow() - profileStart, {
+            cellVisits,
+            fontCacheCellHits,
+            worksheetCellReads,
+        });
+    }
+
+    return flags;
+}
+
+function shouldSkipSparseExtension(uKey: string, flags: ISparseExtensionFeatureFlags | null) {
+    if (!flags) {
+        return false;
+    }
+
+    switch (uKey) {
+        case 'DefaultCustomExtension':
+            return !flags.hasCustomRender;
+        case 'DefaultMarkerExtension':
+            return !flags.hasMarkers;
+        case 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY':
+        case 'RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY':
+            return !flags.hasSelectionProtection;
+        default:
+            return false;
+    }
+}
+
+function hasSparseExtension(extensions: Array<{ uKey: string }>) {
+    return extensions.some((extension) => {
+        switch (extension.uKey) {
+            case 'DefaultCustomExtension':
+            case 'DefaultMarkerExtension':
+            case 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY':
+            case 'RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY':
+                return true;
+            default:
+                return false;
+        }
+    });
+}
+
+function getSparseExtensionDiffRanges(uKey: string, flags: ISparseExtensionFeatureFlags | null, diffRanges: IRange[]) {
+    if (!flags) {
+        return diffRanges;
+    }
+
+    switch (uKey) {
+        case 'DefaultCustomExtension':
+            return flags.customRenderRanges;
+        case 'DefaultMarkerExtension':
+            return flags.markerRanges;
+        case 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY':
+        case 'RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY':
+            return flags.selectionProtectionRanges;
+        default:
+            return diffRanges;
+    }
+}
 
 export class Spreadsheet extends SheetComponent {
     private _backgroundExtension!: Background;
@@ -113,7 +277,10 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-        this._drawAuxiliary(ctx);
+        const profile = getSheetRenderProfile();
+        const drawStart = profile ? getSheetRenderProfilerNow() : 0;
+        const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
+        this._drawAuxiliary(ctx, hasMergeData);
         const parentScale = this.getParentScale();
 
         const diffRanges = this._refreshIncrementalState && viewportInfo.diffBounds
@@ -132,24 +299,61 @@ export class Spreadsheet extends SheetComponent {
             }))
             : viewRanges;
         const extensions = this.getExtensionsByOrder();
+        const sparseExtensionFeatures = !hasMergeData && hasSparseExtension(extensions)
+            ? scanSparseExtensionFeatures(spreadsheetSkeleton, viewRanges)
+            : null;
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
         const scene = this.getScene();
+        const drawContextDetail = profile
+            ? {
+                diffBounds: viewportInfo.diffBounds?.length ?? 0,
+                diffCacheBounds: viewportInfo.diffCacheBounds?.length ?? 0,
+                diffRangeCells: getRangesCellCount(diffRanges),
+                incremental: this._refreshIncrementalState,
+                overflowSafeViewRangeCells: getRangesCellCount(overflowSafeViewRanges),
+                viewRangeCells: getRangesCellCount(viewRanges),
+            }
+            : undefined;
         for (const extension of extensions) {
+            if (shouldSkipSparseExtension(extension.uKey, sparseExtensionFeatures)) {
+                if (profile) {
+                    incrementSheetRenderCounter(`Spreadsheet.draw.extension.skip.${extension.uKey}`);
+                }
+                continue;
+            }
+
             const extensionViewRanges = extension === this._fontExtension || extension === this._borderExtension
                 ? overflowSafeViewRanges
                 : viewRanges;
+            const extensionDiffRanges = getSparseExtensionDiffRanges(extension.uKey, sparseExtensionFeatures, diffRanges);
             const timeKey = `${SHEET_EXTENSION_PREFIX}${extension.uKey}`;
             const st = Tools.now();
-            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
+            const extensionProfileStart = profile ? getSheetRenderProfilerNow() : 0;
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, extensionDiffRanges, {
                 viewRanges: extensionViewRanges,
                 checkOutOfViewBound: true,
+                fontRenderRanges: extension === this._fontExtension ? spreadsheetSkeleton.incrementalFontRenderRanges : undefined,
+                hasMergeData,
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,
                 diffBounds: viewportInfo.diffBounds,
             } as IDrawInfo);
             const cost = Tools.now() - st;
             this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
+            if (profile) {
+                recordSheetRenderMetric(`Spreadsheet.draw.extension.${extension.uKey}`, getSheetRenderProfilerNow() - extensionProfileStart, {
+                    ...drawContextDetail,
+                    extensionDiffRangeCells: getRangesCellCount(extensionDiffRanges),
+                    extensionViewRangeCells: getRangesCellCount(extensionViewRanges),
+                });
+            }
+        }
+        if (profile) {
+            recordSheetRenderMetric('Spreadsheet.draw', getSheetRenderProfilerNow() - drawStart, {
+                ...drawContextDetail,
+                extensionCount: extensions.length,
+            });
         }
     }
 
@@ -252,7 +456,9 @@ export class Spreadsheet extends SheetComponent {
     }
 
     renderByViewports(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty } = viewportInfo as Required<IViewportInfo>;
+        const profile = getSheetRenderProfile();
+        const profileStart = profile ? getSheetRenderProfilerNow() : 0;
+        const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty, shouldCacheUpdate } = viewportInfo as Required<IViewportInfo>;
         const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
@@ -263,18 +469,29 @@ export class Spreadsheet extends SheetComponent {
 
         const isForceDirty = isViewportForceDirty || this.isForceDirty();
         const isDirty = isViewportDirty || this.isDirty();
+        const cachePixelRatio = cacheCanvas.getPixelRatio();
         const isScrollJumpOutsideCache =
-            Math.abs(diffX) * scaleX >= cacheCanvas.getWidth() ||
-            Math.abs(diffY) * scaleY >= cacheCanvas.getHeight();
-        const shouldRefreshCache = isDirty || isForceDirty || isScrollJumpOutsideCache;
+            Math.abs(diffX) * scaleX >= cacheCanvas.getWidth() * cachePixelRatio ||
+            Math.abs(diffY) * scaleY >= cacheCanvas.getHeight() * cachePixelRatio;
+        const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
+        const isScrolling = diffX !== 0 || diffY !== 0;
+        const shouldRefreshCache = isDirty || isForceDirty || isScrollJumpOutsideCache || (hasMergeData && isScrolling) || (shouldCacheUpdate && diffX !== 0);
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || shouldRefreshCache) {
             if (shouldRefreshCache) {
                 this.addRenderTagToScene('scrolling', false);
+                const refreshStart = profile ? getSheetRenderProfilerNow() : 0;
                 this.refreshCacheCanvas(viewportInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
+                if (profile) {
+                    recordSheetRenderMetric('Spreadsheet.refreshCacheCanvas', getSheetRenderProfilerNow() - refreshStart, {
+                        cacheHeight: cacheCanvas.getHeight(),
+                        cacheWidth: cacheCanvas.getWidth(),
+                    });
+                }
             }
         } else if (diffBounds.length !== 0 || diffX !== 0 || diffY !== 0) {
             // scrolling && no dirty
             this.addRenderTagToScene('scrolling', true);
+            const paintStart = profile ? getSheetRenderProfilerNow() : 0;
             this.paintNewAreaForScrolling(viewportInfo, {
                 cacheCanvas,
                 cacheCtx,
@@ -288,6 +505,14 @@ export class Spreadsheet extends SheetComponent {
                 columnHeaderHeightAndMarginTop,
                 rowHeaderWidthAndMarginLeft,
             });
+            if (profile) {
+                recordSheetRenderMetric('Spreadsheet.paintNewAreaForScrolling', getSheetRenderProfilerNow() - paintStart, {
+                    diffBounds: diffBounds.length,
+                    diffCacheBounds: viewportInfo.diffCacheBounds?.length ?? 0,
+                    diffX,
+                    diffY,
+                });
+            }
         }
         // support for browser native zoom (only windows has this problem)
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
@@ -297,6 +522,14 @@ export class Spreadsheet extends SheetComponent {
         const dh = bottom - top + columnHeaderHeightAndMarginTop;
         this._applyCache(cacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
+        if (profile) {
+            recordSheetRenderMetric('Spreadsheet.renderByViewports', getSheetRenderProfilerNow() - profileStart, {
+                diffBounds: diffBounds.length,
+                diffX,
+                diffY,
+                refresh: shouldRefreshCache,
+            });
+        }
     }
 
     paintNewAreaForScrolling(viewportInfo: IViewportInfo, param: IPaintForScrolling) {
@@ -386,6 +619,13 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
+
+        const { viewportKey } = viewportInfo;
+        if (sheetHeaderViewportKeys.includes(viewportKey as SHEET_VIEWPORT_KEY)) {
+            // Header viewports are rendered by row/column header components, not Spreadsheet.
+            return this;
+        }
+
         spreadsheetSkeleton.setStylesCache(viewportInfo);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
@@ -408,7 +648,6 @@ export class Spreadsheet extends SheetComponent {
 
         this.getScene()?.updateTransformerZero(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
 
-        const { viewportKey } = viewportInfo;
         // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
         // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
         // SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
@@ -426,8 +665,6 @@ export class Spreadsheet extends SheetComponent {
             } else {
                 this._draw(mainCtx, viewportInfo);
             }
-        } else if (sheetHeaderViewportKeys.includes(viewportKey as SHEET_VIEWPORT_KEY)) {
-            // doing nothing, other components(SpreadsheetRowHeader...) will render
         } else {
             // embed in doc & slide
             // now there are bugs in embed mode with cache on, 3f12ad80188a83283bcd95c65e6c5dcc2d23ad72
@@ -478,6 +715,8 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
 
         ctx.imageSmoothingEnabled = false;
+        const profile = getSheetRenderProfile();
+        const profileStart = profile ? getSheetRenderProfilerNow() : 0;
         ctx.drawImage(
             cacheCanvas.getCanvasEle(),
             sx * pixelRatio,
@@ -489,6 +728,16 @@ export class Spreadsheet extends SheetComponent {
             dw * pixelRatio,
             dh * pixelRatio
         );
+        if (profile) {
+            recordSheetRenderMetric('Spreadsheet._applyCache', getSheetRenderProfilerNow() - profileStart, {
+                copiedPixels: Math.round(sw * sh * pixelRatio * pixelRatio),
+                dh,
+                dw,
+                pixelRatio,
+                sh,
+                sw,
+            });
+        }
         ctx.restore();
         cacheCtx.restore();
     }
@@ -544,7 +793,7 @@ export class Spreadsheet extends SheetComponent {
      * @param ctx
      */
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _drawAuxiliary(ctx: UniverRenderingContext2D) {
+    private _drawAuxiliary(ctx: UniverRenderingContext2D, hasMergeData = true) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
             return;
@@ -606,25 +855,27 @@ export class Spreadsheet extends SheetComponent {
 
         //#region draw horizontal lines
         for (let r = rowStart; r <= rowEnd; r++) {
-            if (worksheet.getRowVisible(r) === false) {
-                if (mergeVisibleRangeStartRow < r) {
+            if (hasMergeData) {
+                if (worksheet.getRowVisible(r) === false) {
+                    if (mergeVisibleRangeStartRow < r) {
+                        mergeVisibleRanges.push({
+                            startRow: mergeVisibleRangeStartRow,
+                            endRow: r - 1,
+                            startColumn,
+                            endColumn,
+                        });
+                        mergeVisibleRangeStartRow = r + 1;
+                    } else if (mergeVisibleRangeStartRow === r) {
+                        mergeVisibleRangeStartRow = r + 1;
+                    }
+                } else if (r === endRow && mergeVisibleRangeStartRow <= r) {
                     mergeVisibleRanges.push({
                         startRow: mergeVisibleRangeStartRow,
-                        endRow: r - 1,
+                        endRow: r,
                         startColumn,
                         endColumn,
                     });
-                    mergeVisibleRangeStartRow = r + 1;
-                } else if (mergeVisibleRangeStartRow === r) {
-                    mergeVisibleRangeStartRow = r + 1;
                 }
-            } else if (r === endRow && mergeVisibleRangeStartRow <= r) {
-                mergeVisibleRanges.push({
-                    startRow: mergeVisibleRangeStartRow,
-                    endRow: r,
-                    startColumn,
-                    endColumn,
-                });
             }
 
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
@@ -654,9 +905,11 @@ export class Spreadsheet extends SheetComponent {
 
         // clear line of merge cell
         const mergeCellRanges: IRange[] = [];
-        for (const mergeVisibleRange of mergeVisibleRanges) {
-            const mergeRangeInVisible = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
-            mergeCellRanges.push(...mergeRangeInVisible);
+        if (hasMergeData) {
+            for (const mergeVisibleRange of mergeVisibleRanges) {
+                const mergeRangeInVisible = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
+                mergeCellRanges.push(...mergeRangeInVisible);
+            }
         }
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges);
 

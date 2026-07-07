@@ -253,7 +253,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         this.disposeWithMe(
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
-                if (skeleton == null || param.isTrigger === false) {
+                if (skeleton == null || param.isTrigger === false || (param.isBarDragging && !param.isBarDragEnd)) {
                     return;
                 }
 

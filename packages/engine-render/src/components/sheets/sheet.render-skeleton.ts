@@ -54,6 +54,7 @@ import {
     IContextService,
     Inject,
     Injector,
+    isCellCoverable,
     isNullCell,
     isWhiteColor,
     LocaleService,
@@ -77,6 +78,7 @@ import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
+import { getSheetRenderProfile, getSheetRenderProfilerNow, incrementSheetRenderCounter, recordSheetRenderMetric } from './render-profiler';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
 
 interface ICellDocumentModelOption {
@@ -92,6 +94,7 @@ const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
 };
 
 interface IRowColumnRange extends IRowRange, IColumnRange { }
+
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
     fontString: string;
@@ -112,9 +115,69 @@ export const DEFAULT_PADDING_DATA = {
 
 export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 
+function getResolvedRenderHorizontalAlign(
+    horizontalAlign: HorizontalAlign,
+    cellData: Nullable<ICellDataForSheetInterceptor>
+): HorizontalAlign {
+    if (horizontalAlign !== HorizontalAlign.UNSPECIFIED) {
+        return horizontalAlign;
+    }
+
+    if (cellData?.t === CellValueType.NUMBER || (!Tools.isDefine(cellData?.t) && typeof cellData?.v === 'number')) {
+        return HorizontalAlign.RIGHT;
+    }
+
+    if (cellData?.t === CellValueType.BOOLEAN) {
+        return HorizontalAlign.CENTER;
+    }
+
+    return horizontalAlign;
+}
+
+function setRenderTextCache(cacheItem: IFontCacheItem, cellData: Nullable<ICellDataForSheetInterceptor>): void {
+    if (cacheItem.documentSkeleton) {
+        cacheItem.displayText = undefined;
+        cacheItem.resolvedHorizontalAlign = undefined;
+        return;
+    }
+
+    cacheItem.displayText = getDisplayValueFromCell(cellData);
+    cacheItem.resolvedHorizontalAlign = getResolvedRenderHorizontalAlign(
+        cacheItem.horizontalAlign ?? HorizontalAlign.UNSPECIFIED,
+        cellData
+    );
+}
+
+function pushRowRange(ranges: IRange[], row: number, startColumn: number, endColumn: number): void {
+    if (endColumn < startColumn) {
+        return;
+    }
+
+    const last = ranges[ranges.length - 1];
+    if (last && last.startRow === row && last.endRow === row && last.endColumn + 1 === startColumn) {
+        last.endColumn = endColumn;
+        return;
+    }
+
+    ranges.push({
+        startRow: row,
+        endRow: row,
+        startColumn,
+        endColumn,
+    });
+}
+
 export interface ICacheItem {
     bg: boolean;
     border: boolean;
+}
+
+interface ISetStylesCacheForOneCellOptions {
+    mergeRange?: IRange;
+    cacheItem?: ICacheItem;
+    reuseExisting?: boolean;
+    hasMergeData?: boolean;
+    rowVisible?: boolean;
 }
 
 export interface IGetPosByRowColOptions {
@@ -146,6 +209,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     // private _dataMergeCache: IRange[] = [];
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
+
+    private _incrementalFontRenderRanges: IRange[] = [];
     private _stylesCache: IStylesCache = {
         background: {},
         backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -233,6 +298,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     get overflowCache(): ObjectMatrix<IRange> {
         return this._overflowCache;
+    }
+
+    get incrementalFontRenderRanges(): IRange[] {
+        return this._incrementalFontRenderRanges;
     }
 
     get showGridlines(): BooleanNumber {
@@ -349,6 +418,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (!this._worksheetData) return;
         if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
 
+        const profile = getSheetRenderProfile();
+        const profileStart = profile ? getSheetRenderProfilerNow() : 0;
+        let styleRangeCount = 0;
+        let visibleCellVisits = 0;
+        let overflowCellVisits = 0;
+        let mergeCellVisits = 0;
+
         this.updateVisibleRange(vpInfo);
 
         const rowColumnSegment = this._drawingRange;
@@ -359,14 +435,29 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             !!vpInfo.diffX ||
             !!vpInfo.diffY
         );
-        const styleRanges = isIncrementalScroll
+        const hasMergeData = this.worksheet.getMergeData().length > 0;
+        const isScrolling = !!vpInfo && (!!vpInfo.diffX || !!vpInfo.diffY);
+        const shouldRefreshCacheForScroll = isIncrementalScroll && (
+            (hasMergeData && isScrolling) ||
+            (!!vpInfo.shouldCacheUpdate && !!vpInfo.diffX)
+        );
+        const shouldUseIncrementalStyleRange = isIncrementalScroll && !shouldRefreshCacheForScroll;
+        const styleRanges = shouldUseIncrementalStyleRange
             ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])
             : [rowColumnSegment];
+        const visibleCellOptions: ISetStylesCacheForOneCellOptions | null = hasMergeData
+            ? null
+            : { cacheItem: { bg: true, border: true }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true };
+        const overflowCellOptions: ISetStylesCacheForOneCellOptions | null = hasMergeData
+            ? null
+            : { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true };
+        this._incrementalFontRenderRanges = [];
 
         // clear cache out of visible range
         // this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
 
         for (const styleRange of styleRanges) {
+            styleRangeCount += 1;
             const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = styleRange;
 
             if (visibleEndColumn === -1 || visibleEndRow === -1) continue;
@@ -377,6 +468,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
             const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
             const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+            const visibleColumnCount = visibleEndColumn - visibleStartColumn + 1;
             for (let r = visibleStartRow; r <= visibleEndRow; r++) {
                 if (this.worksheet.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
@@ -391,6 +483,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     continue;
                 };
 
+                if (profile) {
+                    visibleCellVisits += visibleColumnCount;
+                }
+
                 if (r === visibleEndRow) {
                     mergeVisibleRanges.push({
                         startRow: mergeVisibleRangeStartRow,
@@ -401,18 +497,41 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 }
 
                 for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
-                    this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: true, border: true } });
+                    this._setStylesCacheForOneCell(r, c, visibleCellOptions ?? { cacheItem: { bg: true, border: true }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
+                }
+                if (shouldUseIncrementalStyleRange) {
+                    pushRowRange(this._incrementalFontRenderRanges, r, visibleStartColumn, visibleEndColumn);
                 }
 
-                // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
-                for (let c = expandStartCol; c < visibleEndColumn; c++) {
-                    this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+                // Calculate text length for overflow cells just outside the visible range.
+                for (let c = visibleStartColumn - 1; c >= expandStartCol; c--) {
+                    if (profile) {
+                        overflowCellVisits += 1;
+                    }
+                    this._setStylesCacheForOneCell(r, c, overflowCellOptions ?? { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
+                    if (shouldUseIncrementalStyleRange) {
+                        pushRowRange(this._incrementalFontRenderRanges, r, c, c);
+                    }
+                    const cell = this.worksheet.getCell(r, c);
+                    if (!isCellCoverable(cell) || (hasMergeData && this.intersectMergeRange(r, c))) {
+                        break;
+                    }
                 }
                 if (visibleEndColumn === 0) continue;
 
-                // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
-                for (let c = visibleEndColumn + 1; c < expandEndCol; c++) {
-                    this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+                // Calculate text length for overflow cells just outside the visible range.
+                for (let c = visibleEndColumn + 1; c <= expandEndCol; c++) {
+                    if (profile) {
+                        overflowCellVisits += 1;
+                    }
+                    this._setStylesCacheForOneCell(r, c, overflowCellOptions ?? { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
+                    if (shouldUseIncrementalStyleRange) {
+                        pushRowRange(this._incrementalFontRenderRanges, r, c, c);
+                    }
+                    const cell = this.worksheet.getCell(r, c);
+                    if (!isCellCoverable(cell) || (hasMergeData && this.intersectMergeRange(r, c))) {
+                        break;
+                    }
                 }
             }
 
@@ -424,8 +543,27 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             for (const mergeRange of mergeRanges) {
                 this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
                     mergeRange,
+                    reuseExisting: shouldUseIncrementalStyleRange,
+                    hasMergeData,
                 });
+                if (shouldUseIncrementalStyleRange) {
+                    pushRowRange(this._incrementalFontRenderRanges, mergeRange.startRow, mergeRange.startColumn, mergeRange.startColumn);
+                }
             }
+            if (profile) {
+                mergeCellVisits += mergeRanges.length;
+            }
+        }
+
+        if (profile) {
+            recordSheetRenderMetric('SpreadsheetSkeleton.setStylesCache', getSheetRenderProfilerNow() - profileStart, {
+                incremental: !!shouldUseIncrementalStyleRange,
+                mergeCellVisits,
+                overflowCellVisits,
+                styleRangeCount,
+                totalCellVisits: visibleCellVisits + overflowCellVisits + mergeCellVisits,
+                visibleCellVisits,
+            });
         }
 
         return this;
@@ -887,6 +1025,37 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         };
     }
 
+    private _isOverflowBlockedByAdjacentCell(row: number, column: number, horizontalAlign: HorizontalAlign, hasMergeData = true): boolean {
+        const leftBlocked = () => this._isOverflowSideBlocked(row, column, -1, hasMergeData);
+        const rightBlocked = () => this._isOverflowSideBlocked(row, column, 1, hasMergeData);
+
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            return leftBlocked() && rightBlocked();
+        }
+
+        if (horizontalAlign === HorizontalAlign.RIGHT) {
+            return leftBlocked();
+        }
+
+        return rightBlocked();
+    }
+
+    private _isOverflowSideBlocked(row: number, column: number, direction: -1 | 1, hasMergeData = true): boolean {
+        const adjacentColumn = column + direction;
+        if (adjacentColumn < 0 || adjacentColumn >= this.getColumnCount()) {
+            return true;
+        }
+
+        const rawAdjacentCell = this._cellData.getValue(row, adjacentColumn);
+        if (rawAdjacentCell && !isCellCoverable(rawAdjacentCell)) {
+            return true;
+        }
+
+        const cachedAdjacentCell = this._stylesCache.fontMatrix.getValue(row, adjacentColumn)?.cellData;
+        const adjacentCell = cachedAdjacentCell ?? this.worksheet.getCell(row, adjacentColumn);
+        return !isCellCoverable(adjacentCell) || (hasMergeData && this.intersectMergeRange(row, adjacentColumn));
+    }
+
     /**
      * Get cell by pos(offsetX, offsetY).
      * @deprecated Please use `getCellWithCoordByOffset` instead.
@@ -1120,7 +1289,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
     // eslint-disable-next-line complexity, max-lines-per-function
-    private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
+    private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem, hasMergeData = true): boolean {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
         const cell = this._cellData.getValue(row, column);
@@ -1137,7 +1306,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 horizontalAlignPos = HorizontalAlign.RIGHT;
             }
         }
-
         /**
          * Numerical and Boolean values are not displayed with overflow.
          */
@@ -1147,8 +1315,18 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             cellValueType !== CellValueType.BOOLEAN &&
             horizontalAlign !== HorizontalAlign.JUSTIFIED
         ) {
+            docsConfig.textFitsCurrentCell = false;
             // Merged cells do not support overflow.
-            if (this.intersectMergeRange(row, column)) {
+            if (hasMergeData && this.intersectMergeRange(row, column)) {
+                return true;
+            }
+
+            const columnStart = this.columnWidthAccumulation[column - 1] || 0;
+            const columnEnd = this.columnWidthAccumulation[column] || columnStart;
+            const currentColumnWidth = columnEnd - columnStart;
+            const rawText = docsConfig.cellData?.p?.body?.dataStream ?? docsConfig.cellData?.v;
+            const mayOverflowCurrentColumn = Boolean(documentSkeleton) || `${rawText ?? ''}`.length * 4 > currentColumnWidth;
+            if (mayOverflowCurrentColumn && this._isOverflowBlockedByAdjacentCell(row, column, horizontalAlignPos, hasMergeData)) {
                 return true;
             }
 
@@ -1184,6 +1362,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 }
             }
 
+            if (contentSize.width < currentColumnWidth) {
+                docsConfig.textFitsCurrentCell = true;
+                incrementSheetRenderCounter('SpreadsheetSkeleton.textFits.string');
+                return true;
+            }
+
             const position = this.getOverflowPosition(contentSize, horizontalAlignPos, row, column, this.getColumnCount());
 
             const { startColumn, endColumn } = position;
@@ -1195,7 +1379,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             this.appendToOverflowCache(row, column, startColumn, endColumn);
         } else if (wrapStrategy === WrapStrategy.WRAP && vertexAngle !== 0) {
             // Merged cells do not support overflow.
-            if (this.intersectMergeRange(row, column)) {
+            if (hasMergeData && this.intersectMergeRange(row, column)) {
                 return true;
             }
 
@@ -1338,15 +1522,19 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const range = ranges[i];
             Range.foreach(range, (row, col) => {
                 this._stylesCache.fontMatrix.realDeleteValue(row, col);
+                this._stylesCache.border.realDeleteValue(row, col);
+                this._stylesCache.backgroundPositions.realDeleteValue(row, col);
+                this._handleBgMatrix.realDeleteValue(row, col);
+                this._handleBorderMatrix.realDeleteValue(row, col);
+                Object.values(this._stylesCache.background ?? {}).forEach((backgroundMatrix) => {
+                    backgroundMatrix.realDeleteValue(row, col);
+                });
             });
         }
         this.makeDirty(true);
     }
 
-    _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
-        mergeRange?: IRange;
-        cacheItem?: ICacheItem;
-    } | undefined) {
+    _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: ISetStylesCacheForOneCellOptions | undefined) {
         const handledThisCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
         if (handledThisCell && !options?.mergeRange) return;
         // by default, style cache should includes border and background info.
@@ -1377,10 +1565,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
-    _setBgStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
-        mergeRange?: IRange;
-        cacheItem?: ICacheItem;
-    } | undefined) {
+    _setBgStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: ISetStylesCacheForOneCellOptions | undefined) {
         const handledThisCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
         if (handledThisCell) return;
         // by default, style cache should includes border and background info.
@@ -1401,7 +1586,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData) {
+    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
         if (isNullCell(cellData)) return;
 
         let config: Partial<IFontCacheItem> = {
@@ -1415,6 +1600,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         } else {
             const cacheItem = cacheValue as IFontCacheItem;
             cacheItem.cellData = cellData;
+            setRenderTextCache(cacheItem, cellData);
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
@@ -1464,8 +1650,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 style,
             };
         }
-        this._calculateOverflowCell(row, col, config as IFontCacheItem);
-        this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
+        const fontCacheItem = config as IFontCacheItem;
+        setRenderTextCache(fontCacheItem, cellData);
+        this._calculateOverflowCell(row, col, fontCacheItem, hasMergeData);
+        this._stylesCache.fontMatrix.setValue(row, col, fontCacheItem);
     }
 
     /**
@@ -1474,7 +1662,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * @param col {number}
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
-    private _setStylesCacheForOneCell(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+    private _setStylesCacheForOneCell(row: number, col: number, options: ISetStylesCacheForOneCellOptions): void {
         // when row/col would be negative ?
         if (row === -1 || col === -1) {
             return;
@@ -1492,13 +1680,30 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             options = { cacheItem: { bg: true, border: true } };
         }
 
-        const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this.worksheet.getCellInfoInMergeData(row, col);
-
-        if (isMerged) {
-            options.mergeRange = { startRow, startColumn, endRow, endColumn };
+        const cacheItem = options.cacheItem;
+        if (options.reuseExisting && cacheItem && !options.mergeRange) {
+            const bgHandled = !cacheItem.bg || Tools.isDefine(this._handleBgMatrix.getValue(row, col));
+            const borderHandled = !cacheItem.border || Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+            if (bgHandled && borderHandled && this._stylesCache.fontMatrix.getValue(row, col)) {
+                return;
+            }
         }
 
-        const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
+        const hasMergeData = options.hasMergeData ?? true;
+        let isMerged = false;
+        let isMergedMainCell = false;
+        if (hasMergeData) {
+            const mergeInfo = this.worksheet.getCellInfoInMergeData(row, col);
+            isMerged = mergeInfo.isMerged;
+            isMergedMainCell = mergeInfo.isMergedMainCell;
+            if (isMerged) {
+                const { startRow, startColumn, endRow, endColumn } = mergeInfo;
+                options.mergeRange = { startRow, startColumn, endRow, endColumn };
+            }
+        }
+
+        const rowVisible = options.rowVisible ?? this.worksheet.getRowVisible(row);
+        const hidden = this.worksheet.getColVisible(col) === false || rowVisible === false;
 
         // hidden and not in mergeRange return.
         if (hidden) {
@@ -1517,7 +1722,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-        this._setFontStylesCache(row, col, { ...cell, ...{ s: style } }, style);
+        this._setFontStylesCache(row, col, { ...cell, ...{ s: style } }, style, options.hasMergeData ?? true);
     }
 
     /**

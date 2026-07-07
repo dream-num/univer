@@ -30,6 +30,12 @@ function createController() {
     const markDirty$ = new Subject<any>();
     const reCalculate = vi.fn();
     const makeDirty = vi.fn();
+    const resetRangeCache = vi.fn();
+    const rowColumnSegment = { startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 };
+    const getRule = vi.fn(() => ({
+        ranges: [{ startRow: 2, endRow: 4, startColumn: 1, endColumn: 3 }],
+    }));
+    const getSubunitRules = vi.fn(() => []);
     const controller = new SheetsCfRenderController(
         {
             intercept: vi.fn((point, config) => {
@@ -54,15 +60,15 @@ function createController() {
         } as never,
         {
             getRenderById: vi.fn(() => ({
-                with: vi.fn(() => ({ reCalculate })),
+                with: vi.fn(() => ({ getCurrentSkeleton: vi.fn(() => ({ resetRangeCache, rowColumnSegment })), reCalculate })),
                 mainComponent: { makeDirty },
             })),
         } as never,
         { markDirty$ } as never,
-        { $ruleChange: ruleChange$ } as never
+        { $ruleChange: ruleChange$, getRule, getSubunitRules } as never
     );
 
-    return { controller, interceptor: () => interceptor, ruleChange$, markDirty$, reCalculate, makeDirty };
+    return { controller, getRule, getSubunitRules, interceptor: () => interceptor, markDirty$, makeDirty, reCalculate, resetRangeCache, rowColumnSegment, ruleChange$ };
 }
 
 describe('SheetsCfRenderController', () => {
@@ -97,14 +103,57 @@ describe('SheetsCfRenderController', () => {
 
     it('marks the active sheet skeleton dirty when conditional formatting changes affect it', async () => {
         vi.useFakeTimers();
-        const { controller, ruleChange$, markDirty$, reCalculate, makeDirty } = createController();
+        const { controller, ruleChange$, markDirty$, reCalculate, makeDirty, resetRangeCache } = createController();
 
-        ruleChange$.next({ unitId: 'unit-1', subUnitId: 'sheet-1' });
+        const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
+        ruleChange$.next({ unitId: 'unit-1', subUnitId: 'sheet-1', rule: { ranges } });
         markDirty$.next({ unitId: 'other-unit', subUnitId: 'sheet-1' });
         await vi.advanceTimersByTimeAsync(20);
 
+        expect(resetRangeCache).toHaveBeenCalledWith(ranges);
         expect(reCalculate).toHaveBeenCalled();
         expect(makeDirty).toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('resets changed ranges found from conditional-formatting dirty cfIds', async () => {
+        vi.useFakeTimers();
+        const { controller, getRule, markDirty$, resetRangeCache, rowColumnSegment } = createController();
+
+        markDirty$.next({ unitId: 'unit-1', subUnitId: 'sheet-1', cfId: 'cf-1' });
+        await vi.advanceTimersByTimeAsync(20);
+
+        expect(getRule).toHaveBeenCalledWith('unit-1', 'sheet-1', 'cf-1');
+        expect(resetRangeCache).toHaveBeenCalledWith([{ startRow: 2, endRow: 4, startColumn: 1, endColumn: 3 }]);
+
+        controller.dispose();
+    });
+
+    it('resets existing active-sheet rule ranges when the controller starts after snapshot rules are loaded', async () => {
+        const { controller, getSubunitRules, resetRangeCache } = createController();
+        const ranges = [{ startRow: 5, endRow: 6, startColumn: 2, endColumn: 4 }];
+        getSubunitRules.mockReturnValue([{ ranges }]);
+
+        await Promise.resolve();
+
+        expect(getSubunitRules).toHaveBeenCalledWith('unit-1', 'sheet-1');
+        expect(resetRangeCache).toHaveBeenCalledWith(ranges);
+
+        controller.dispose();
+    });
+
+    it('clips large conditional-formatting dirty ranges to the current rendered range', async () => {
+        vi.useFakeTimers();
+        const { controller, getRule, markDirty$, resetRangeCache, rowColumnSegment } = createController();
+        getRule.mockReturnValue({
+            ranges: [{ startRow: 0, endRow: 20000, startColumn: 0, endColumn: 48 }],
+        });
+
+        markDirty$.next({ unitId: 'unit-1', subUnitId: 'sheet-1', cfId: 'cf-1' });
+        await vi.advanceTimersByTimeAsync(20);
+
+        expect(resetRangeCache).toHaveBeenCalledWith([rowColumnSegment]);
 
         controller.dispose();
     });

@@ -17,4 +17,5 @@
 export {
     registerSheetsDrawingFloatingHostCapability,
     SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES,
+    touchSheetsDrawingFloatingHostCapabilityWhenReady,
 } from './register-sheets-drawing-floating-host';

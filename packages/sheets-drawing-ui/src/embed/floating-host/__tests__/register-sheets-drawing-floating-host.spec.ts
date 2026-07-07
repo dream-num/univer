@@ -17,7 +17,7 @@
 import { LifecycleService, LifecycleStages } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetCanvasFloatDomManagerService } from '../../../services/canvas-float-dom-manager.service';
-import { registerSheetsDrawingFloatingHostCapability, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES } from '../register-sheets-drawing-floating-host';
+import { registerSheetsDrawingFloatingHostCapability, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES, touchSheetsDrawingFloatingHostCapabilityWhenReady } from '../register-sheets-drawing-floating-host';
 
 const registerDependencies = vi.hoisted(() => vi.fn());
 const touchDependencies = vi.hoisted(() => vi.fn());
@@ -56,6 +56,19 @@ describe('registerSheetsDrawingFloatingHostCapability', () => {
         ]);
     });
 
+    it('does not register the floating host dependency twice', () => {
+        const injector = {
+            has: (token: unknown) => token === SheetCanvasFloatDomManagerService,
+        };
+
+        registerSheetsDrawingFloatingHostCapability(injector as never);
+
+        expect(registerDependencies).not.toHaveBeenCalled();
+        expect(touchDependencies).toHaveBeenCalledWith(injector, [
+            [SheetCanvasFloatDomManagerService],
+        ]);
+    });
+
     it('defers touching the floating host until lifecycle ready', async () => {
         let resolveReady: () => void = () => {};
         const onStage = vi.fn(() => new Promise<void>((resolve) => {
@@ -77,6 +90,39 @@ describe('registerSheetsDrawingFloatingHostCapability', () => {
 
         registerSheetsDrawingFloatingHostCapability(injector as never);
 
+        expect(onStage).toHaveBeenCalledWith(LifecycleStages.Ready);
+        expect(touchDependencies).not.toHaveBeenCalled();
+
+        resolveReady();
+        await Promise.resolve();
+
+        expect(touchDependencies).toHaveBeenCalledWith(injector, [
+            [SheetCanvasFloatDomManagerService],
+        ]);
+    });
+
+    it('allows the full sheets drawing UI plugin to touch an already registered floating host', async () => {
+        let resolveReady: () => void = () => {};
+        const onStage = vi.fn(() => new Promise<void>((resolve) => {
+            resolveReady = resolve;
+        }));
+        const lifecycleService = {
+            stage: LifecycleStages.Starting,
+            onStage,
+        };
+        const injector = {
+            has: (token: unknown) => token === LifecycleService || token === SheetCanvasFloatDomManagerService,
+            get: (token: unknown) => {
+                if (token === LifecycleService) {
+                    return lifecycleService;
+                }
+                throw new Error('Unexpected dependency');
+            },
+        };
+
+        touchSheetsDrawingFloatingHostCapabilityWhenReady(injector as never);
+
+        expect(registerDependencies).not.toHaveBeenCalled();
         expect(onStage).toHaveBeenCalledWith(LifecycleStages.Ready);
         expect(touchDependencies).not.toHaveBeenCalled();
 

@@ -23,7 +23,9 @@ export const SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES: Dependency[] = [
 ];
 
 export function registerSheetsDrawingFloatingHostCapability(injector: Injector): void {
-    registerDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES);
+    if (!injector.has(SheetCanvasFloatDomManagerService)) {
+        registerDependencies(injector, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES);
+    }
     touchSheetsDrawingFloatingHostCapabilityWhenReady(injector);
 }
 
@@ -31,7 +33,7 @@ function touchSheetsDrawingFloatingHostCapability(injector: Injector): void {
     touchDependencies(injector, [[SheetCanvasFloatDomManagerService]]);
 }
 
-function touchSheetsDrawingFloatingHostCapabilityWhenReady(injector: Injector): void {
+export function touchSheetsDrawingFloatingHostCapabilityWhenReady(injector: Injector): void {
     if (!injector.has(LifecycleService)) {
         touchSheetsDrawingFloatingHostCapability(injector);
         return;

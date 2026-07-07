@@ -126,10 +126,12 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             if (allowClear && !(slot && slotRef.current)) setPaddingRight(26);
         }, []); // only enough for init, otherwise it works again when you click it
 
-        const shouldOmitDefaultPaddingRight = direction === 'rtl' && paddingRight === 0;
-        const mergedInputStyle = shouldOmitDefaultPaddingRight
+        const shouldOmitDefaultPadding = direction === 'rtl' && paddingRight === 0;
+        const mergedInputStyle = shouldOmitDefaultPadding
             ? inputStyle
-            : { ...inputStyle, paddingRight };
+            : direction === 'rtl'
+                ? { ...inputStyle, paddingLeft: paddingRight }
+                : { ...inputStyle, paddingRight };
 
         return (
             <div
@@ -151,7 +153,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                           univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
                           dark:!univer-text-gray-500
                         `,
-                        (allowClear && !slot) && 'univer-pr-8',
+                        (allowClear && !slot) && (direction === 'rtl' ? 'univer-pl-8' : 'univer-pr-8'),
                         inputClass
                     )}
                     placeholder={placeholder}
@@ -168,10 +170,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                 />
                 {hasSlotContent && (
                     <div
-                        className={`
-                          univer-absolute univer-right-2 univer-flex univer-items-center univer-gap-1
-                          univer-rounded-full
-                        `}
+                        className={clsx(
+                            'univer-absolute univer-flex univer-items-center univer-gap-1 univer-rounded-full',
+                            direction === 'rtl' ? 'univer-left-2' : 'univer-right-2'
+                        )}
                         ref={slotRef}
                     >
                         {slot}

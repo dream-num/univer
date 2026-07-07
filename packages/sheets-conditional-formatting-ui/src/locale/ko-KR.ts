@@ -45,6 +45,7 @@ const locale: typeof enUS = {
             and: '그리고',
             when: '조건',
             onlyShowIcon: '아이콘만 표시',
+            noCellIcon: '셀 아이콘 없음',
         },
         symbol: {
             greaterThan: '>',

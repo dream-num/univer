@@ -45,6 +45,7 @@ const locale: typeof enUS = {
             and: 'Và',
             when: 'Khi giá trị',
             onlyShowIcon: 'Chỉ hiển thị biểu tượng',
+            noCellIcon: 'Không có biểu tượng ô',
         },
         symbol: {
             greaterThan: '>',

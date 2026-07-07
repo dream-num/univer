@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-import type { IReferencedUnitApiResolverRegistration } from '../services/embed-referenced-unit-api-resolver-registry.service';
 import type { IEmbedResourceRefDataProviderRegistration, IEmbedResourceRefUnitProviderRegistration } from '../services/embed-resource-ref-provider-registry.service';
-import type { IEmbedCapability } from '../types/embed';
-import type { IEmbedHostAdapterContribution } from '../types/host-adapter';
 
 export const EMBED_PLUGIN_CONFIG_KEY = 'embed.config';
 
 export const configSymbol = Symbol(EMBED_PLUGIN_CONFIG_KEY);
 
 export interface IUniverEmbedPluginConfig {
-    useDefaultCapabilities?: boolean;
-    capabilities?: readonly IEmbedCapability[];
-    hostAdapters?: readonly IEmbedHostAdapterContribution[];
     resourceRefUnitProviderRegistrations?: readonly IEmbedResourceRefUnitProviderRegistration[];
     resourceRefDataProviderRegistrations?: readonly IEmbedResourceRefDataProviderRegistration[];
-    referencedUnitApiResolvers?: readonly IReferencedUnitApiResolverRegistration[];
 }
 
 export type EmbedProductPluginConfig = Partial<IUniverEmbedPluginConfig>;

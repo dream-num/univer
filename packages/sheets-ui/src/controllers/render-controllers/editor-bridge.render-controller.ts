@@ -340,7 +340,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _isCurrentSheetFocused(): boolean {
-        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
+        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId ||
+            this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId) === true;
     }
 }
 

@@ -65,7 +65,47 @@ describe('embed-ui contribution register', () => {
 
         expect(register).toHaveBeenCalledTimes(1);
     });
+
+    it('registers each contribution key once per injector', () => {
+        const services = createCompleteRegistryServiceSet();
+        const injector = createInjector(services);
+        const register = vi.fn();
+
+        registerEmbedUIContribution(injector, 'product-ui.embed', register);
+        registerEmbedUIContribution(injector, 'product-ui.embed', register);
+
+        expect(register).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not replay flushed contribution keys', () => {
+        const services = createCompleteRegistryServiceSet();
+        services.delete(EmbedContentSizeRegistryService);
+        const injector = createInjector(services);
+        const register = vi.fn();
+
+        registerEmbedUIContribution(injector, 'product-ui.embed', register);
+        services.add(EmbedContentSizeRegistryService);
+        flushPendingEmbedUIContributions(injector);
+        registerEmbedUIContribution(injector, 'product-ui.embed', register);
+
+        expect(register).toHaveBeenCalledTimes(1);
+    });
 });
+
+function createCompleteRegistryServiceSet(): Set<unknown> {
+    return new Set<unknown>([
+        EmbedHostAdapterRegistryService,
+        EmbedHostContainerRegistryService,
+        EmbedChildViewRegistryService,
+        EmbedBlockRegistryService,
+        EmbedProductMenuRegistryService,
+        EmbedFloatingMenuRegistryService,
+        EmbedFloatPreviewService,
+        EmbedReadonlyPreviewRegistryService,
+        EmbedPassiveViewportRegistryService,
+        EmbedContentSizeRegistryService,
+    ]);
+}
 
 function createInjector(services: Set<unknown>) {
     return {

@@ -24,6 +24,8 @@ import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from '../../commands/mutations/embed-host-anchor-record.mutation';
 import { UniverEmbedPlugin } from '../../plugin';
+import { registerEmbedCapabilities } from '../../services/embed-capability-registry.service';
+import { registerEmbedHostAdapterContributions } from '../../services/embed-host-adapter-registry.service';
 import { FEmbedHostSurface } from '../f-enum';
 import '../index';
 
@@ -105,11 +107,9 @@ function createUniver(): Univer {
     const injector = univer.__getInjector();
     injector.get(IUniverInstanceService).registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
     injector.get(IUniverInstanceService).registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
-    univer.registerPlugin(UniverEmbedPlugin, {
-        useDefaultCapabilities: false,
-        capabilities: createCapabilities(),
-        hostAdapters: createHostAdapters(),
-    });
+    registerEmbedCapabilities(injector, createCapabilities());
+    registerEmbedHostAdapterContributions(injector, createHostAdapters());
+    univer.registerPlugin(UniverEmbedPlugin);
     return univer;
 }
 

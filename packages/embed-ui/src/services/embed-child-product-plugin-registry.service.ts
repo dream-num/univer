@@ -19,6 +19,9 @@ import { Inject, Injector, IUniverInstanceService, Optional, PluginService, toDi
 import { runWithEmbedChildProductCurrentUnit } from './embed-child-product-plugin-lease';
 import { EmbedRuntimeFocusCoordinator } from './embed-runtime-focus-coordinator.service';
 
+const PENDING_CHILD_PRODUCT_PLUGIN_CONTRIBUTIONS = new WeakMap<object, Map<string, { contribution: IEmbedChildProductPluginContribution; index: number }>>();
+let nextPendingChildProductPluginIndex = 0;
+
 export type EmbedChildProductPluginDefinition<T extends PluginCtor = PluginCtor> =
     | T
     | readonly [T]
@@ -45,6 +48,58 @@ export interface IEmbedChildProductPluginPrepareOptions {
     restoreUnitId?: string;
     descriptor?: unknown;
     settleDelayMs?: number;
+}
+
+export function registerEmbedChildProductPluginContribution(
+    injector: Pick<Injector, 'get' | 'has'>,
+    contribution: IEmbedChildProductPluginContribution
+): IDisposable {
+    if (!injector.has(EmbedChildProductPluginRegistryService)) {
+        return registerPendingEmbedChildProductPluginContribution(injector, contribution);
+    }
+
+    return injector.get(EmbedChildProductPluginRegistryService).register(contribution);
+}
+
+export function flushPendingEmbedChildProductPluginContributions(injector: Pick<Injector, 'get' | 'has'>): void {
+    if (!injector.has(EmbedChildProductPluginRegistryService)) {
+        return;
+    }
+
+    const pending = PENDING_CHILD_PRODUCT_PLUGIN_CONTRIBUTIONS.get(injector as object);
+    if (!pending?.size) {
+        return;
+    }
+
+    [...pending.values()]
+        .sort((left, right) => left.index - right.index)
+        .forEach(({ contribution }) => registerEmbedChildProductPluginContribution(injector, contribution));
+    PENDING_CHILD_PRODUCT_PLUGIN_CONTRIBUTIONS.delete(injector as object);
+}
+
+function registerPendingEmbedChildProductPluginContribution(
+    injector: Pick<Injector, 'get' | 'has'>,
+    contribution: IEmbedChildProductPluginContribution
+): IDisposable {
+    const item = { contribution, index: nextPendingChildProductPluginIndex++ };
+    const key = getPendingChildProductPluginContributionKey(contribution, item.index);
+    const injectorKey = injector as object;
+    const pending = PENDING_CHILD_PRODUCT_PLUGIN_CONTRIBUTIONS.get(injectorKey) ?? new Map<string, { contribution: IEmbedChildProductPluginContribution; index: number }>();
+    pending.set(key, item);
+    PENDING_CHILD_PRODUCT_PLUGIN_CONTRIBUTIONS.set(injectorKey, pending);
+
+    return toDisposable(() => {
+        const current = PENDING_CHILD_PRODUCT_PLUGIN_CONTRIBUTIONS.get(injectorKey);
+        if (current?.get(key) === item) {
+            current.delete(key);
+        }
+    });
+}
+
+function getPendingChildProductPluginContributionKey(contribution: IEmbedChildProductPluginContribution, index: number): string {
+    return contribution.id
+        ? `${contribution.childType}:${contribution.id}`
+        : `${contribution.childType}:anonymous:${index}`;
 }
 
 export class EmbedChildProductPluginRegistryService {
@@ -87,6 +142,13 @@ export class EmbedChildProductPluginRegistryService {
 
     getAll(childType: UniverInstanceType): readonly IEmbedChildProductPluginContribution[] {
         return (this._contributions.get(childType) ?? []).map((item) => item.contribution);
+    }
+
+    registerProductPlugins(childType: UniverInstanceType): void {
+        const contributions = this.getAll(childType);
+        for (const contribution of contributions) {
+            this._registerProductPluginsOnce(contribution);
+        }
     }
 
     async prepare(options: IEmbedChildProductPluginPrepareOptions): Promise<void> {

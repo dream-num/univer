@@ -21,6 +21,7 @@ import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, IContextSe
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { BehaviorSubject } from 'rxjs';
 import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE, ensureEmbedDefaultRuntimeSlots, findEmbedRuntimeSlot } from '../common/embed-runtime-slots';
+import { EmbedChildProductPluginRegistryService } from './embed-child-product-plugin-registry.service';
 import { createEmbedChildRuntimeScope } from './embed-child-runtime-scope';
 import { EmbedChildViewRegistryService } from './embed-child-view-registry.service';
 import { EmbedFloatingActiveService } from './embed-floating-active.service';
@@ -147,6 +148,7 @@ export class EmbedMountService {
             [...disposables].reverse().forEach((disposable) => disposable.dispose());
             throw new Error('EMBED_MOUNT_CHILD_NOT_REGISTERED');
         }
+        this._registerChildProductPlugins(descriptor.childType);
 
         const { renderScope, disposable: renderScopeDisposable, setActive } = this._createRenderScope(
             descriptor,
@@ -382,6 +384,14 @@ export class EmbedMountService {
         }
 
         throw new Error('EMBED_MOUNT_LAYOUT_NOT_RESOLVED');
+    }
+
+    private _registerChildProductPlugins(childType: UniverInstanceType): void {
+        if (!this._injector.has(EmbedChildProductPluginRegistryService)) {
+            return;
+        }
+
+        this._injector.get(EmbedChildProductPluginRegistryService).registerProductPlugins(childType);
     }
 
     private _createRenderScope(
@@ -670,6 +680,7 @@ export class EmbedMountService {
             embedId: session.embedId,
             role: 'child-session',
             owner: 'tab-peer-runtime',
+            sessionMode: 'child-tab',
             hostUnitId: session.hostUnitId,
             childUnitId: session.childUnitId,
             childType: session.childType,

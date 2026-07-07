@@ -115,7 +115,8 @@ export class RenderUnit extends Disposable implements IRender {
     ) {
         super();
 
-        this._injector = parentInjector.createChild();
+        const renderParentInjector = init.createUnitOptions?.renderParentInjector ?? parentInjector;
+        this._injector = renderParentInjector.createChild();
 
         this._renderContext = {
             unit: init.unit,

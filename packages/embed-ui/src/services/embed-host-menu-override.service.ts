@@ -47,11 +47,11 @@ export class EmbedHostMenuOverrideService {
         if (reason === 'tab-active' && (!tabConfig || tabConfig.enabled !== true)) {
             throw new Error('EMBED_MENU_OVERRIDE_TAB_REQUIRED');
         }
-        if (reason !== 'tab-active' && reason !== 'float-stage2') {
+        if (reason !== 'tab-active') {
             throw new Error('EMBED_MENU_OVERRIDE_UNSUPPORTED_REASON');
         }
 
-        const ribbonPlacement = options.layoutPolicy?.ribbon ?? (reason === 'tab-active' ? DEFAULT_EMBED_TAB_LAYOUT_POLICY.ribbon : undefined);
+        const ribbonPlacement = options.layoutPolicy?.ribbon ?? DEFAULT_EMBED_TAB_LAYOUT_POLICY.ribbon;
         if (ribbonPlacement !== 'host' && options.allowPlaceholder !== true) {
             this.clear(descriptor.embedId);
             return null;
@@ -65,8 +65,8 @@ export class EmbedHostMenuOverrideService {
             entry: descriptor.entry,
             reason,
             portalContainer: options.portalContainer,
-            hideHostFxBar: reason === 'tab-active' ? tabConfig?.hideHostFxBar : undefined,
-            lockHostRibbon: reason === 'tab-active' ? tabConfig?.lockHostRibbon : undefined,
+            hideHostFxBar: tabConfig?.hideHostFxBar,
+            lockHostRibbon: tabConfig?.lockHostRibbon,
         };
         this._override$.next(override);
         return override;

@@ -724,7 +724,7 @@ describe('formula highlight helpers', () => {
         expect(result?.[0].primary).toBeUndefined();
     });
 
-    it('clears highlight selections when the workbook or active sheet is unavailable', () => {
+    it('returns empty highlight selections when the workbook or active sheet is unavailable', () => {
         const refSelectionsService = {
             getCurrentSelections: vi.fn(() => []),
             setSelections: vi.fn(),
@@ -741,7 +741,7 @@ describe('formula highlight helpers', () => {
             sheetSkeletonManagerService: undefined,
             themeService: { getColorFromTheme: vi.fn(() => '#fff') } as any,
             univerInstanceService: { getUnit: vi.fn(() => null) } as any,
-        })).toBeUndefined();
-        expect(refSelectionsService.setSelections).toHaveBeenCalledWith([]);
+        })).toEqual([]);
+        expect(refSelectionsService.setSelections).not.toHaveBeenCalled();
     });
 });

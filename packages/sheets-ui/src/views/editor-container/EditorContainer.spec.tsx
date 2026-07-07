@@ -334,22 +334,24 @@ describe('EditorContainer embed focus lease', () => {
 
         expect(selectionContainer.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
 
-        const runtimeScope = focusCoordinator.registerRuntimeScope({
-            embedId: 'embed-1',
-            hostUnitId: 'host-doc',
-            childUnitId: 'scoped-child-sheet',
-            childType: UniverInstanceType.UNIVER_SHEET,
-        });
-        const activeSession = focusCoordinator.acquireLease({
-            embedId: 'embed-1',
-            role: 'child-session',
-            owner: 'doc-block-stage2-runtime',
-            hostUnitId: 'host-doc',
-            childUnitId: 'scoped-child-sheet',
-            childType: UniverInstanceType.UNIVER_SHEET,
-        });
+        let runtimeScope: ReturnType<EmbedRuntimeFocusCoordinator['registerRuntimeScope']>;
+        let activeSession: ReturnType<EmbedRuntimeFocusCoordinator['acquireLease']>;
 
         await act(async () => {
+            runtimeScope = focusCoordinator.registerRuntimeScope({
+                embedId: 'embed-1',
+                hostUnitId: 'host-doc',
+                childUnitId: 'scoped-child-sheet',
+                childType: UniverInstanceType.UNIVER_SHEET,
+            });
+            activeSession = focusCoordinator.acquireLease({
+                embedId: 'embed-1',
+                role: 'child-session',
+                owner: 'doc-block-stage2-runtime',
+                hostUnitId: 'host-doc',
+                childUnitId: 'scoped-child-sheet',
+                childType: UniverInstanceType.UNIVER_SHEET,
+            });
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -359,8 +361,8 @@ describe('EditorContainer embed focus lease', () => {
         expect(focusCoordinator.containsElement('embed-1', internalEditor)).toBe(true);
         expect(interactionBoundaryService.contains('embed-1', internalEditor)).toBe(true);
 
-        activeSession.dispose();
-        runtimeScope.dispose();
+        activeSession!.dispose();
+        runtimeScope!.dispose();
         selectionContainer.remove();
     });
 
@@ -399,29 +401,31 @@ describe('EditorContainer embed focus lease', () => {
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
-        const runtimeScope = focusCoordinator.registerRuntimeScope({
-            embedId: 'embed-1',
-            hostUnitId: 'host-doc',
-            childUnitId: 'scoped-child-sheet',
-            childType: UniverInstanceType.UNIVER_SHEET,
-        });
-        const activeSession = focusCoordinator.acquireLease({
-            embedId: 'embed-1',
-            role: 'child-session',
-            owner: 'doc-block-stage2-runtime',
-            hostUnitId: 'host-doc',
-            childUnitId: 'scoped-child-sheet',
-            childType: UniverInstanceType.UNIVER_SHEET,
-        });
+        let runtimeScope: ReturnType<EmbedRuntimeFocusCoordinator['registerRuntimeScope']>;
+        let activeSession: ReturnType<EmbedRuntimeFocusCoordinator['acquireLease']>;
 
         await act(async () => {
+            runtimeScope = focusCoordinator.registerRuntimeScope({
+                embedId: 'embed-1',
+                hostUnitId: 'host-doc',
+                childUnitId: 'scoped-child-sheet',
+                childType: UniverInstanceType.UNIVER_SHEET,
+            });
+            activeSession = focusCoordinator.acquireLease({
+                embedId: 'embed-1',
+                role: 'child-session',
+                owner: 'doc-block-stage2-runtime',
+                hostUnitId: 'host-doc',
+                childUnitId: 'scoped-child-sheet',
+                childType: UniverInstanceType.UNIVER_SHEET,
+            });
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
         expect(document.activeElement).toBe(internalEditor);
 
-        activeSession.dispose();
-        runtimeScope.dispose();
+        activeSession!.dispose();
+        runtimeScope!.dispose();
         selectionContainer.remove();
         hostCanvas.remove();
     });

@@ -26,7 +26,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { EmbedHostAdapterRegistryService, EmbedUnitLeasePolicyService, UniverEmbedPlugin } from '@univerjs/embed';
+import { EmbedUnitLeasePolicyService, UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
@@ -36,7 +36,7 @@ import { EmbedHostAnchorCleanupController } from './controllers/embed-host-ancho
 import { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribbon-override.controller';
 import { EmbedActivationService } from './services/embed-activation.service';
 import { EmbedBlockRegistryService } from './services/embed-block-registry.service';
-import { EmbedChildProductPluginRegistryService } from './services/embed-child-product-plugin-registry.service';
+import { EmbedChildProductPluginRegistryService, flushPendingEmbedChildProductPluginContributions } from './services/embed-child-product-plugin-registry.service';
 import { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
 import { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 import { createDefaultEmbedFloatingMenuContributions } from './services/embed-default-floating-menu';
@@ -81,9 +81,14 @@ export class UniverEmbedUIPlugin extends Plugin {
     override onStarting() {
         this._enableEmbedUnitLeasePolicy();
         this._registerServices();
-        this._registerConfiguredContributions();
+        this._flushPendingContributions();
+        this._registerFloatingMenus();
         this._touchServices();
         this._registerDefaultHostToolbar();
+    }
+
+    override onReady(): void {
+        this._flushPendingContributions();
     }
 
     private _registerServices(): void {
@@ -117,82 +122,16 @@ export class UniverEmbedUIPlugin extends Plugin {
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
     }
 
-    private _registerConfiguredContributions(): void {
+    private _flushPendingContributions(): void {
         flushPendingEmbedUIContributions(this._injector);
         flushPendingEmbedProductMenuContributions(this._injector);
 
-        const hostAdapterRegistry = this._injector.get(EmbedHostAdapterRegistryService);
-        (this._config.hostAdapters ?? []).forEach((contribution) => {
-            if (!hostAdapterRegistry.get(contribution.hostType, contribution.entry)) {
-                hostAdapterRegistry.register(contribution);
-            }
-        });
-
-        const hostContainerRegistry = this._injector.get(EmbedHostContainerRegistryService);
-        (this._config.hostContainers ?? []).forEach((contribution) => {
-            if (!hostContainerRegistry.get(contribution.hostType, contribution.entry)) {
-                hostContainerRegistry.register(contribution);
-            }
-        });
-
-        const childViewRegistry = this._injector.get(EmbedChildViewRegistryService);
-        (this._config.childViews ?? []).forEach((contribution) => {
-            if (!childViewRegistry.get(contribution.childType)) {
-                childViewRegistry.register(contribution);
-            }
-        });
-
-        const blockRegistry = this._injector.get(EmbedBlockRegistryService);
-        (this._config.blocks ?? []).forEach((contribution) => {
-            if (!blockRegistry.get(contribution.childType)) {
-                blockRegistry.register(contribution);
-            }
-        });
-
-        const productMenuRegistry = this._injector.get(EmbedProductMenuRegistryService);
-        (this._config.productMenus ?? []).forEach((contribution) => productMenuRegistry.register(contribution));
-
-        const childProductPluginRegistry = this._injector.get(EmbedChildProductPluginRegistryService);
-        (this._config.childProductPlugins ?? []).forEach((contribution) => childProductPluginRegistry.register(contribution));
-
-        const previewService = this._injector.get(EmbedFloatPreviewService);
-        (this._config.previewProviders ?? []).forEach((provider) => previewService.registerProvider(provider));
-
-        const contentSizeRegistry = this._injector.get(EmbedContentSizeRegistryService);
-        (this._config.contentSizeProviders ?? []).forEach((provider) => {
-            if (!contentSizeRegistry.get(provider.childType)) {
-                contentSizeRegistry.register(provider);
-            }
-        });
-
-        const passiveViewportRegistry = this._injector.get(EmbedPassiveViewportRegistryService);
-        (this._config.passiveViewportProviders ?? []).forEach((provider) => {
-            if (!passiveViewportRegistry.get(provider.childType)) {
-                passiveViewportRegistry.register(provider);
-            }
-        });
-
-        const passiveWheelHandlerRegistry = this._injector.get(EmbedPassiveWheelHandlerRegistryService);
-        (this._config.passiveWheelHandlers ?? []).forEach((handler) => passiveWheelHandlerRegistry.register(handler));
-
-        const readonlyPreviewRegistry = this._injector.get(EmbedReadonlyPreviewRegistryService);
-        (this._config.readonlyPreviewProviders ?? []).forEach((provider) => {
-            if (!readonlyPreviewRegistry.get(provider.childType)) {
-                readonlyPreviewRegistry.register(provider);
-            }
-        });
-
-        this._registerFloatingMenus();
+        flushPendingEmbedChildProductPluginContributions(this._injector);
     }
 
     private _registerFloatingMenus(): void {
         const floatingMenuRegistry = this._injector.get(EmbedFloatingMenuRegistryService);
-        (this._config.floatingMenus ?? []).forEach((contribution) => {
-            if (!floatingMenuRegistry.hasExact(contribution.hostType, contribution.entry, contribution.childType)) {
-                floatingMenuRegistry.register(contribution);
-            }
-        });
-        if (this._config.useDefaultFloatingMenus !== false) {
+        if (this._config.defaults?.floatingMenus !== false) {
             createDefaultEmbedFloatingMenuContributions().forEach((contribution) => {
                 if (!floatingMenuRegistry.hasExact(contribution.hostType, contribution.entry, contribution.childType)) {
                     floatingMenuRegistry.register(contribution);
@@ -231,7 +170,7 @@ export class UniverEmbedUIPlugin extends Plugin {
     }
 
     private _registerDefaultHostToolbar(): void {
-        if (this._config.useDefaultHostToolbar !== false && this._injector.has(IUIPartsService)) {
+        if (this._config.defaults?.hostToolbar !== false && this._injector.has(IUIPartsService)) {
             this.disposeWithMe(
                 this._injector.get(IUIPartsService).registerComponent(
                     BuiltInUIPart.GLOBAL,

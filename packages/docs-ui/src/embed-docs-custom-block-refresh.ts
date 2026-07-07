@@ -62,12 +62,36 @@ export function getCommandUnitId(commandParams: unknown): string | undefined {
 }
 
 export function shouldRefreshDocsCustomBlockSizeForCommand(params: {
+    commandId?: string;
     childUnitIds: Set<string>;
     commandParams: unknown;
     hostUnitId: string;
 }): boolean {
+    if (params.commandId && isDocsCustomBlockLayoutNeutralCommand(params.commandId)) {
+        return false;
+    }
+
     const commandUnitId = getCommandUnitId(params.commandParams);
     return Boolean(commandUnitId && commandUnitId !== params.hostUnitId && params.childUnitIds.has(commandUnitId));
+}
+
+const DOCS_CUSTOM_BLOCK_LAYOUT_NEUTRAL_COMMAND_IDS = new Set([
+    'sheet.command.expand-selection',
+    'sheet.command.move-selection',
+    'sheet.operation.scroll-to-cell',
+    'sheet.operation.scroll-to-range',
+    'sheet.operation.set-activate-cell-edit',
+    'sheet.operation.set-cell-edit-visible',
+    'sheet.operation.set-cell-edit-visible-arrow',
+    'sheet.operation.set-cell-edit-visible-f2',
+    'sheet.operation.set-format-painter',
+    'sheet.operation.set-scroll',
+    'sheet.operation.set-selections',
+    'sheet.operation.set-zoom-ratio',
+]);
+
+function isDocsCustomBlockLayoutNeutralCommand(commandId: string): boolean {
+    return DOCS_CUSTOM_BLOCK_LAYOUT_NEUTRAL_COMMAND_IDS.has(commandId);
 }
 
 export interface IDocsCustomBlockSizeRefreshScheduler {

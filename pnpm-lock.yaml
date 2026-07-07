@@ -1402,8 +1402,8 @@ importers:
         specifier: workspace:*
         version: link:../embed
       '@univerjs/icons':
-        specifier: 1.16.0
-        version: 1.16.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.18.0
+        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -6903,8 +6903,8 @@ packages:
   '@univerjs/icons-svg@1.19.0':
     resolution: {integrity: sha512-W1udOqHTHzFYz3rVJDXY5tOEw1tKrMWq4jVmIT1R7PfSCMCbXZzz54M+7nr9PZhXOs7/PXYhfokfG1P0JNpqDQ==}
 
-  '@univerjs/icons@1.16.0':
-    resolution: {integrity: sha512-eJZMHh7hIpLRZpcL6aXtRRNLalLWnClQ7Ruj/ms7OpkR94yUKicd78bwQFfWiV57/9n2CNCPldPlQGjKeoJBSg==}
+  '@univerjs/icons@1.18.0':
+    resolution: {integrity: sha512-zT8oH9W2oELkz9mD8Zic705TU5/PYB1GedzvlbSQR5lyrK0RCMQCzaC2qZZyD1N13W24takpfyX9j1fIYT6adg==}
     peerDependencies:
       react: 19.2.7
       react-dom: 19.2.7
@@ -14568,7 +14568,7 @@ snapshots:
 
   '@univerjs/icons-svg@1.19.0': {}
 
-  '@univerjs/icons@1.16.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@univerjs/icons@1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)

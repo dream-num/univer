@@ -21,7 +21,7 @@ import type { Observable } from 'rxjs';
 import type { EmbedRuntimeFocusRole } from '../services/embed-runtime-focus-coordinator.service';
 import type { EmbedFloatingStage, EmbedInteractionFlow, IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { EmbedModelService } from '@univerjs/embed';
+import { EmbedModelService, fromResourceRefUnitType, parseResourceRef } from '@univerjs/embed';
 import { GripHorizontalIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -152,16 +152,21 @@ export function EmbedFloatDomRenderer(props: {
         if (!data?.embedId || stageSessionLeaseRef.current) {
             return;
         }
+        const descriptor = data.hostUnitId ? embedModelService.getDescriptor(data.hostUnitId, data.embedId) : undefined;
+        const refChild = resolveChildFromResourceRef(descriptor);
+        const childUnitId = data.childUnitId ?? descriptor?.childUnitId ?? childContextRef.current?.childUnitId ?? refChild?.childUnitId;
+        const childType = data.childType ?? descriptor?.childType ?? childContextRef.current?.childType ?? refChild?.childType;
 
         stageSessionLeaseRef.current = focusCoordinator.acquireLease({
             embedId: data.embedId,
             role: 'child-session',
             owner: interactionFlow === 'doc-block' ? EMBED_DOC_BLOCK_STAGE2_FOCUS_OWNER : EMBED_STAGE2_FOCUS_OWNER,
+            sessionMode: 'child-keyboard',
             hostUnitId: data.hostUnitId,
-            childUnitId: data.childUnitId,
-            childType: data.childType,
+            childUnitId,
+            childType,
         });
-    }, [data?.childType, data?.childUnitId, data?.embedId, data?.hostUnitId, focusCoordinator, interactionFlow]);
+    }, [data?.childType, data?.childUnitId, data?.embedId, data?.hostUnitId, embedModelService, focusCoordinator, interactionFlow]);
     const releaseStage2SessionLeaseIfActivationDoesNotStick = useCallback(() => {
         if (!data?.embedId) {
             return;
@@ -1444,6 +1449,23 @@ export function EmbedFloatDomRenderer(props: {
             </div>
         </div>
     );
+}
+
+function resolveChildFromResourceRef(descriptor: IEmbedDescriptor | undefined): { childUnitId: string; childType: UniverInstanceType } | undefined {
+    const ref = descriptor?.source.ref;
+    if (!ref) {
+        return undefined;
+    }
+
+    try {
+        const parsedRef = typeof ref === 'string' ? parseResourceRef(ref) : ref;
+        return {
+            childUnitId: parsedRef.unit.selector,
+            childType: fromResourceRefUnitType(parsedRef.unit.type),
+        };
+    } catch {
+        return undefined;
+    }
 }
 
 function isPointInsideFloatBlock(container: HTMLElement, event: PointerEvent): boolean {

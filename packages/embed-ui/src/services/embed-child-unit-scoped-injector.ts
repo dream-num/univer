@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable, IExecutionOptions, IUndoRedoItem, UniverInstanceType } from '@univerjs/core';
+import type { IAccessor, IConfigService as IConfigServiceType, IDisposable, IExecutionOptions, IUndoRedoItem } from '@univerjs/core';
 import type { ICreateEmbedCommandParams } from '@univerjs/embed';
 import type { MenuManagerService } from '@univerjs/ui';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import {
     COMMAND_EXECUTION_INJECTOR_KEY,
+    EDITOR_ACTIVATED,
+    FOCUSING_DOC,
+    FOCUSING_SHEET,
+    FOCUSING_SLIDE,
+    FOCUSING_UNIT,
+    FORMULA_EDITOR_ACTIVATED,
     ICommandService,
+    IConfigService,
+    IContextService,
     Injector,
     IUndoRedoService,
     IUniverInstanceService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { CreateEmbedCommand } from '@univerjs/embed';
 import {
@@ -39,7 +48,7 @@ import {
     IRibbonService,
     ISidebarService,
 } from '@univerjs/ui';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, EMPTY, filter, map, merge, Observable, Subject } from 'rxjs';
 import { EmbedInteractionBoundaryService } from './embed-interaction-boundary.service';
 import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
@@ -47,6 +56,17 @@ import {
 } from './embed-runtime-focus-coordinator.service';
 import { EmbedRuntimePolicyService } from './embed-runtime-policy.service';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
+
+const EMBED_SCOPED_LOCAL_IDENTIFIER_KEYS = new Set([
+    'identifier:univer.menu-manager-service',
+    'identifier:univer.ribbon-service',
+    'identifier:ui.contextmenu.service',
+    'identifier:ui.popup.service',
+    'identifier:ui.sidebar.service',
+    'identifier:ui.layout-service',
+]);
+
+export type IEmbedScopedConfigOverrides = ReadonlyMap<string | symbol, (config: unknown) => unknown>;
 
 export function createEmbedChildUnitScopedInjector(
     context: IEmbedChildContainerContext
@@ -118,6 +138,7 @@ export function createEmbedChildUnitScopedInjector(
     });
 
     let scopedInjector: Injector;
+    const shouldSyncParentFocusDuringCommand = shouldSyncParentFocusForScopedCommand(context);
     const commandService = new Proxy(context.injector.get(ICommandService), {
         get(target, property, receiver) {
             if (property === 'dispose') {
@@ -125,6 +146,10 @@ export function createEmbedChildUnitScopedInjector(
             }
             if (property === 'executeCommand') {
                 return async (...args: Parameters<ICommandService['executeCommand']>) => {
+                    if (!shouldSyncParentFocusDuringCommand) {
+                        return await target.executeCommand(args[0], withNestedCreateEmbedGuard(context, args[0], args[1]), withScopedExecutionInjector(args[2], scopedInjector));
+                    }
+
                     const previous = instanceService.getCurrentUnitOfType(context.childType);
                     const previousFocusedUnitId = instanceService.getFocusedUnit()?.getUnitId() ?? null;
                     try {
@@ -141,6 +166,10 @@ export function createEmbedChildUnitScopedInjector(
             }
             if (property === 'syncExecuteCommand') {
                 return (...args: Parameters<ICommandService['syncExecuteCommand']>) => {
+                    if (!shouldSyncParentFocusDuringCommand) {
+                        return target.syncExecuteCommand(args[0], withNestedCreateEmbedGuard(context, args[0], args[1]), withScopedExecutionInjector(args[2], scopedInjector));
+                    }
+
                     const previous = instanceService.getCurrentUnitOfType(context.childType);
                     const previousFocusedUnitId = instanceService.getFocusedUnit()?.getUnitId() ?? null;
                     try {
@@ -169,6 +198,10 @@ export function createEmbedChildUnitScopedInjector(
     const scopedUndoRedoService = createScopedUndoRedoService(context.injector, context.childUnitId);
     if (scopedUndoRedoService) {
         scopedOverrides.set(IUndoRedoService, scopedUndoRedoService);
+    }
+    const scopedContextService = createScopedRuntimeContextService(context.injector, context.childType);
+    if (scopedContextService) {
+        scopedOverrides.set(IContextService, scopedContextService);
     }
 
     scopedInjector = createEmbedScopedInjector(context.injector, scopedOverrides);
@@ -212,6 +245,140 @@ export function createEmbedChildUnitScopedInjector(
     }
 
     return scopedInjector;
+}
+
+export function createEmbedScopedConfigInjector(
+    parentInjector: Injector,
+    configOverrides: IEmbedScopedConfigOverrides
+): Injector | undefined {
+    if (!parentInjector.has(IConfigService)) {
+        return undefined;
+    }
+
+    const configService = parentInjector.get<IConfigServiceType>(IConfigService);
+    return createEmbedScopedInjector(parentInjector, new Map([
+        [IConfigService, createEmbedScopedConfigService(configService, configOverrides)],
+    ]));
+}
+
+function shouldSyncParentFocusForScopedCommand(context: IEmbedChildContainerContext): boolean {
+    if (context.renderScope.fullscreen) {
+        return true;
+    }
+
+    if (context.descriptor.entry === 'docs-custom-block') {
+        return true;
+    }
+
+    return isTabPeerRuntime(context);
+}
+
+function isTabPeerRuntime(context: IEmbedChildContainerContext): boolean {
+    return context.descriptor.entry === 'sheets-sheet-tab' ||
+        context.descriptor.entry === 'bases-table-list-block' ||
+        context.descriptor.entry === 'slides-page-list-block' ||
+        context.layout === 'tab-peer' ||
+        Boolean(context.descriptor.sourceMeta?.tab);
+}
+
+function createScopedRuntimeContextService(
+    injector: Pick<Injector, 'get' | 'has'>,
+    childType: UniverInstanceType
+): IContextService | undefined {
+    if (!injector.has(IContextService)) {
+        return undefined;
+    }
+
+    const contextService = injector.get(IContextService);
+    const scopedContextValues = createInitialScopedRuntimeContextValues(childType);
+    const scopedContextChanged$ = new Subject<Record<string, boolean>>();
+    const parentContextChanged$ = (contextService.contextChanged$ ?? EMPTY).pipe(
+        map((change) => Object.fromEntries(
+            Object.entries(change).filter(([key]) => !isScopedRuntimeContextKey(key))
+        )),
+        filter((change) => Object.keys(change).length > 0)
+    );
+    const contextChanged$ = merge(parentContextChanged$, scopedContextChanged$);
+
+    return new Proxy(contextService, {
+        get(target, property, receiver) {
+            if (property === 'contextChanged$') {
+                return contextChanged$;
+            }
+            if (property === 'getContextValue') {
+                return (key: string) => isScopedRuntimeContextKey(key)
+                    ? getScopedRuntimeContextValue(scopedContextValues, key)
+                    : target.getContextValue(key);
+            }
+            if (property === 'setContextValue') {
+                return (key: string, value: boolean) => {
+                    if (!isScopedRuntimeContextKey(key)) {
+                        target.setContextValue(key, value);
+                        return;
+                    }
+
+                    scopedContextValues.set(key, value);
+                    scopedContextChanged$.next({ [key]: value });
+                };
+            }
+            if (property === 'subscribeContextValue$') {
+                return (key: string) => {
+                    if (!isScopedRuntimeContextKey(key)) {
+                        return target.subscribeContextValue$(key);
+                    }
+
+                    return new Observable<boolean>((observer) => {
+                        const subscription = scopedContextChanged$
+                            .pipe(filter((change) => typeof change[key] !== 'undefined'))
+                            .subscribe((change) => observer.next(change[key]));
+                        observer.next(getScopedRuntimeContextValue(scopedContextValues, key));
+
+                        return () => subscription.unsubscribe();
+                    });
+                };
+            }
+
+            return Reflect.get(target, property, receiver);
+        },
+    });
+}
+
+function createInitialScopedRuntimeContextValues(childType: UniverInstanceType): Map<string, boolean> {
+    return new Map([
+        [FOCUSING_UNIT, true],
+        [FOCUSING_SHEET, childType === UniverInstanceType.UNIVER_SHEET],
+        [FOCUSING_DOC, childType === UniverInstanceType.UNIVER_DOC],
+        [FOCUSING_SLIDE, childType === UniverInstanceType.UNIVER_SLIDE],
+    ]);
+}
+
+function getScopedRuntimeContextValue(scopedContextValues: Map<string, boolean>, key: string): boolean {
+    return scopedContextValues.get(key) ?? false;
+}
+
+function isScopedRuntimeContextKey(key: string): boolean {
+    return key.startsWith('FOCUSING_') ||
+        key === EDITOR_ACTIVATED ||
+        key === FORMULA_EDITOR_ACTIVATED;
+}
+
+function createEmbedScopedConfigService(
+    configService: IConfigServiceType,
+    configOverrides: IEmbedScopedConfigOverrides
+): IConfigServiceType {
+    return new Proxy(configService, {
+        get(target, property, receiver) {
+            if (property === 'getConfig') {
+                return <T>(id: string | symbol): T => {
+                    const config = target.getConfig<T>(id);
+                    const override = configOverrides.get(id);
+                    return (override ? override(config) : config) as T;
+                };
+            }
+
+            return Reflect.get(target, property, receiver);
+        },
+    });
 }
 
 function withScopedExecutionInjector(
@@ -325,7 +492,6 @@ export function createEmbedScopedInjector(
     const localFactories = new Map<unknown, () => unknown>();
     const localDependencyIdentifiers = new Set<unknown>();
     let childInjector: Injector | undefined;
-    let scopedInjector: Injector;
     const getLocal = (identifier: unknown) => {
         if (localOverrides.has(identifier)) {
             return localOverrides.get(identifier);
@@ -342,6 +508,12 @@ export function createEmbedScopedInjector(
         return value;
     };
     const hasLocal = (identifier: unknown) => localOverrides.has(identifier) || localFactories.has(identifier);
+    const hasLocalDependencyIdentifier = (identifier: unknown) =>
+        localDependencyIdentifiers.has(getDependencyIdentifierKey(identifier));
+    const shouldKeepScopedLocalDependency = (identifier: unknown) =>
+        EMBED_SCOPED_LOCAL_IDENTIFIER_KEYS.has(getDependencyIdentifierKey(identifier) as string);
+    const shouldResolveFromParent = (identifier: unknown) =>
+        !hasLocalDependencyIdentifier(identifier) && parentInjector.has(identifier as never);
 
     const getChildInjector = (): Injector | undefined => {
         if (childInjector) {
@@ -355,17 +527,20 @@ export function createEmbedScopedInjector(
 
         childInjector = createChild.call(parentInjector, [
             ...createValueDependencies(localOverrides),
-            [Injector, { useValue: scopedInjector }],
+            [Injector, { useFactory: () => childInjector }],
         ]);
         return childInjector;
     };
 
-    scopedInjector = {
+    const scopedInjector: Injector = {
         has: (identifier: Parameters<Injector['get']>[0]) => {
             if (identifier === Injector) {
                 return true;
             }
             if (hasLocal(identifier)) {
+                return true;
+            }
+            if (shouldResolveFromParent(identifier)) {
                 return true;
             }
 
@@ -379,6 +554,9 @@ export function createEmbedScopedInjector(
             if (hasLocal(identifier)) {
                 return getLocal(identifier);
             }
+            if (shouldResolveFromParent(identifier)) {
+                return parentInjector.get(identifier);
+            }
 
             const child = getChildInjector();
             return child?.get(identifier) ?? parentInjector.get(identifier);
@@ -389,6 +567,9 @@ export function createEmbedScopedInjector(
                     return true;
                 }
                 if (hasLocal(identifier)) {
+                    return true;
+                }
+                if (shouldResolveFromParent(identifier)) {
                     return true;
                 }
 
@@ -402,6 +583,9 @@ export function createEmbedScopedInjector(
                 if (hasLocal(identifier)) {
                     return getLocal(identifier) as never;
                 }
+                if (shouldResolveFromParent(identifier)) {
+                    return parentInjector.get(identifier as never) as never;
+                }
 
                 const child = getChildInjector();
                 return (child?.get(identifier) ?? parentInjector.get(identifier)) as never;
@@ -410,6 +594,10 @@ export function createEmbedScopedInjector(
         add: (dependency: unknown) => {
             const localDependency = parseLocalDependency(dependency);
             if (localDependency) {
+                if (shouldResolveFromParent(localDependency.identifier) && !shouldKeepScopedLocalDependency(localDependency.identifier)) {
+                    return;
+                }
+
                 const dependencyIdentifier = getDependencyIdentifierKey(localDependency.identifier);
                 if (localDependencyIdentifiers.has(dependencyIdentifier)) {
                     return;
@@ -445,6 +633,12 @@ export function createEmbedScopedInjector(
             parentInjector.add(dependency as never);
         },
         createChild: (dependencies: unknown[] = []) => {
+            const child = getChildInjector();
+            const createChild = (child as unknown as { createChild?: (dependencies?: unknown[]) => Injector } | undefined)?.createChild;
+            if (child && typeof createChild === 'function') {
+                return createChild.call(child, dependencies);
+            }
+
             const childScopedInjector = createEmbedScopedInjector(parentInjector, localOverrides, resolvedSharedRootInjector);
             dependencies.forEach((dependency) => {
                 childScopedInjector.add(dependency as never);

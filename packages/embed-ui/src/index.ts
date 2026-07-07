@@ -28,7 +28,11 @@ export { createEmbedNoHeaderBlockContribution, createEmbedRibbonBlockContributio
 export { EmbedBlockRegistryService } from './services/embed-block-registry.service';
 export { runWithEmbedChildProductCurrentUnit } from './services/embed-child-product-plugin-lease';
 export type { IEmbedChildProductCurrentUnitLeaseOptions } from './services/embed-child-product-plugin-lease';
-export { EmbedChildProductPluginRegistryService } from './services/embed-child-product-plugin-registry.service';
+export {
+    EmbedChildProductPluginRegistryService,
+    flushPendingEmbedChildProductPluginContributions,
+    registerEmbedChildProductPluginContribution,
+} from './services/embed-child-product-plugin-registry.service';
 export type {
     EmbedChildProductPluginDefinition,
     IEmbedChildProductPluginContribution,
@@ -36,7 +40,8 @@ export type {
     IEmbedChildProductPluginPrepareOptions,
 } from './services/embed-child-product-plugin-registry.service';
 export { createEmbedChildRuntimeScope } from './services/embed-child-runtime-scope';
-export { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from './services/embed-child-unit-scoped-injector';
+export { createEmbedChildUnitScopedInjector, createEmbedScopedConfigInjector, createEmbedScopedInjector } from './services/embed-child-unit-scoped-injector';
+export type { IEmbedScopedConfigOverrides } from './services/embed-child-unit-scoped-injector';
 export { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
 export { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 export { shouldPassDocsStickyVerticalWheelToHost } from './services/embed-docs-sticky-wheel';

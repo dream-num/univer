@@ -280,6 +280,9 @@ function EmbedFullscreenSurface() {
                       dark:!univer-bg-gray-900
                     "
                     data-embed-fullscreen-viewport="true"
+                    onContextMenuCapture={(event) => {
+                        event.preventDefault();
+                    }}
                 />
                 <div
                     ref={rightSidebarRef}
@@ -433,12 +436,14 @@ export function registerFullscreenRuntimeOwnership(params: {
             hostUnitId: descriptor.hostUnitId,
             childUnitId: descriptor.childUnitId,
             childType: descriptor.childType,
+            sessionMode: 'child-fullscreen',
         }));
         if (descriptor.childUnitId) {
             disposables.push(focusCoordinator.acquireLease({
                 embedId,
                 role: 'child-session',
                 owner: 'fullscreen-runtime',
+                sessionMode: 'child-fullscreen',
                 hostUnitId: descriptor.hostUnitId,
                 childUnitId: descriptor.childUnitId,
                 childType: descriptor.childType,

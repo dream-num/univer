@@ -309,7 +309,7 @@ describe('EditorBridgeRenderController business flows', () => {
     it('opens sheet editing from keyboard input while the sheet is an active embed child session', () => {
         const { commandService, controller, inputBefore$ } = createController({
             focusingSheet: false,
-            focusedUnitId: 'unit-1',
+            focusedUnitId: 'host-unit',
             isEmbedActiveSession: true,
         });
 

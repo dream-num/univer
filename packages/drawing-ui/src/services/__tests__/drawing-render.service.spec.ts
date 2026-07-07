@@ -19,10 +19,12 @@ import type { IGalleryProps } from '@univerjs/design';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
+    BooleanNumber,
     DrawingTypeEnum,
     Injector,
     IUniverInstanceService,
     IURLImageService,
+    PositionedObjectLayoutType,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -597,6 +599,17 @@ describe('DrawingRenderService', () => {
         const { scene, service } = createHarness();
 
         await service.renderImages(imageParam({ behindText: true } as never), scene as unknown as Scene);
+
+        expect(scene.addedObjects[0]?.layerIndex).toBe(DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
+    });
+
+    it('renders Word behindDoc wrap-none images between page background and document text', async () => {
+        const { scene, service } = createHarness();
+
+        await service.renderImages(imageParam({
+            behindDoc: BooleanNumber.TRUE,
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+        } as never), scene as unknown as Scene);
 
         expect(scene.addedObjects[0]?.layerIndex).toBe(DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
     });

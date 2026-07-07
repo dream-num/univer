@@ -90,8 +90,8 @@ export class ScrollBar extends Disposable {
 
     private _pendingBarDeltaX = 0;
     private _pendingBarDeltaY = 0;
-    private _pendingBarScrollFrameId: Nullable<number> = null;
-    private _pendingBarScrollThrottleId: Nullable<number> = null;
+    private _pendingBarScrollFrameId: number | null = null;
+    private _pendingBarScrollThrottleId: number | null = null;
 
     private _horizonPointerMoveSub: Nullable<Subscription>;
     private _horizonPointerUpSub: Nullable<Subscription>;

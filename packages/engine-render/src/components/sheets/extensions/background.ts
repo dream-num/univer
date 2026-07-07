@@ -117,7 +117,7 @@ export class Background extends SheetExtension {
                         return;
                     }
                 }
-                const cellInfo = backgroundPositions.getValue(row, col) ?? spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                const cellInfo = backgroundPositions?.getValue(row, col) ?? spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
                 if (!cellInfo) return;
                 const bgConfig = bgConfigParam || bgColorMatrix.getValue(row, col);
                 if (bgConfig) {

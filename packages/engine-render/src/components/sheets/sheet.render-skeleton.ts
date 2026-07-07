@@ -1522,8 +1522,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const range = ranges[i];
             Range.foreach(range, (row, col) => {
                 this._stylesCache.fontMatrix.realDeleteValue(row, col);
-                this._stylesCache.border.realDeleteValue(row, col);
-                this._stylesCache.backgroundPositions.realDeleteValue(row, col);
+                this._stylesCache.border?.realDeleteValue(row, col);
+                this._stylesCache.backgroundPositions?.realDeleteValue(row, col);
                 this._handleBgMatrix.realDeleteValue(row, col);
                 this._handleBorderMatrix.realDeleteValue(row, col);
                 Object.values(this._stylesCache.background ?? {}).forEach((backgroundMatrix) => {

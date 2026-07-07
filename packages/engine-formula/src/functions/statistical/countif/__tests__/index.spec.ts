@@ -291,8 +291,8 @@ describe('Test countif function', () => {
             expect(await calculate('=COUNTIF(G1:G3,">180d")')).toBe(1);
         });
 
-        it('Includes blank cells in less-than text criteria', async () => {
-            expect(await calculate('=COUNTIF(F1:F2,"<1 hour")')).toBe(2);
+        it('Excludes blank cells in less-than text criteria', async () => {
+            expect(await calculate('=COUNTIF(F1:F2,"<1 hour")')).toBe(0);
         });
 
         it('Does not include same-lower-bound numeric buckets in pipe-delimited less-than criteria', async () => {

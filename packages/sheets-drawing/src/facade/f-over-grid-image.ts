@@ -18,7 +18,15 @@ import type { IRotationSkewFlipTransform, ISize } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
 import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import { ArrangeTypeEnum, DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
+import {
+    ArrangeTypeEnum,
+    DrawingTypeEnum,
+    generateRandomId,
+    ICommandService,
+    ImageSourceType,
+    Inject,
+    Injector,
+} from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, SheetSkeletonService } from '@univerjs/sheets';

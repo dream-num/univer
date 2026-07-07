@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IImageIoServiceParam } from '@univerjs/drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../../commands/commands/set-drawing-arrange.command';
@@ -28,6 +27,8 @@ import {
     FOCUSING_COMMON_DRAWINGS,
     ICommandService,
     IContextService,
+    IImageIoService,
+    ImageUploadStatusType,
     Inject,
     LocaleService,
     ObjectRelativeFromH,
@@ -48,8 +49,6 @@ import {
     getDrawingShapeKeyByDrawingSearch,
     getImageSize,
     IDrawingManagerService,
-    IImageIoService,
-    ImageUploadStatusType,
 } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';

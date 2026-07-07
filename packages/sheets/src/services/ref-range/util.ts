@@ -123,7 +123,7 @@ interface ILine {
 /**
  * see docs/tldr/ref-range/move-rows-cols.tldr
  */
-// eslint-disable-next-line max-lines-per-function
+
 export const handleBaseMoveRowsCols = (
     fromRange: ILine,
     toRange: ILine,

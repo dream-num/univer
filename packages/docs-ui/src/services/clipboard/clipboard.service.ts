@@ -29,6 +29,7 @@ import {
     getBodySlice,
     ICommandService,
     ILogService,
+    ImageSourceType,
     Inject,
     IUniverInstanceService,
     normalizeBody,
@@ -40,7 +41,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { ImageSourceType } from '@univerjs/drawing';
 import {
     FILE__BMP_CLIPBOARD_MIME_TYPE,
     FILE__JPEG_CLIPBOARD_MIME_TYPE,

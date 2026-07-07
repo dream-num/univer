@@ -22,7 +22,7 @@ const locale: typeof enUS = {
             'not-valid-filter-range': "L'intervallo selezionato ha una sola riga e non è valido per il filtro.",
         },
         msg: {
-            'filter-header-forbidden': "Non è possibile spostare la riga di intestazione di un filtro.",
+            'filter-header-forbidden': 'Non è possibile spostare la riga di intestazione di un filtro.',
         },
     },
 };

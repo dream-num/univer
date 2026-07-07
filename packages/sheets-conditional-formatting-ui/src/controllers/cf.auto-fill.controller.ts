@@ -53,7 +53,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
-        // eslint-disable-next-line max-lines-per-function
+
         const loopFunc = (
             sourceStartCell: { row: number; col: number },
             targetStartCell: { row: number; col: number },

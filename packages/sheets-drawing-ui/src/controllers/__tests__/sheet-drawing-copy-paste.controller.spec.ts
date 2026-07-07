@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
-import { ImageSourceType } from '@univerjs/drawing';
+import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
 import { RemoveSheetDrawingCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { COPY_TYPE, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';

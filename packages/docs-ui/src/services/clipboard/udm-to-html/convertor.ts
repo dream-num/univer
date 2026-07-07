@@ -27,11 +27,11 @@ import {
     DocumentBlockRangeType,
     DrawingTypeEnum,
     HorizontalAlign,
+    ImageSourceType,
     NamedStyleType,
     PresetListType,
     Tools,
 } from '@univerjs/core';
-import { ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 const DEFAULT_CLIPBOARD_FONT_FAMILY = 'Arial';

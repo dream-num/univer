@@ -16,8 +16,8 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { FontCache } from '../shaping-engine/font-cache';
 import { measureDocumentNoWrapTextWidth } from '../doc-no-wrap-measure';
+import { FontCache } from '../shaping-engine/font-cache';
 
 function createDocument(dataStream: string): IDocumentData {
     return {

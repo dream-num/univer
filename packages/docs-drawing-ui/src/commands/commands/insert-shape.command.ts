@@ -22,6 +22,7 @@ import {
     DrawingTypeEnum,
     generateRandomId,
     ICommandService,
+    ImageSourceType,
     IUniverInstanceService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -30,7 +31,6 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
-import { ImageSourceType } from '@univerjs/drawing';
 import { InsertDocDrawingCommand } from './insert-doc-drawing.command';
 
 type DocShapeKind = 'rectangle' | 'ellipse';

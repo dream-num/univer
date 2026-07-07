@@ -25,7 +25,6 @@ import { EmbedModelService } from '@univerjs/embed';
 import { FullscreenIcon } from '@univerjs/icons';
 import { CanvasPopup, ContextMenu, Sidebar, useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { of } from 'rxjs';
 import {
     EMBED_CANVAS_ROOT_ATTRIBUTE,
@@ -131,7 +130,6 @@ function EmbedFullscreenSurface() {
             injector: runtimeScope.injector,
             sourceInjector: injector,
             popupContainer: runtimeScope.roots.popup,
-            rightSidebarContainer: rightSidebarSlot,
         });
         const childContext: IEmbedChildContainerContext = {
             ...childContextBase,
@@ -202,7 +200,7 @@ function EmbedFullscreenSurface() {
     };
     const exitLabel = localeService.t<LocaleKey>('embed-ui.fullscreen.exit');
 
-    return createPortal(
+    return (
         <div
             className="
               univer-fixed univer-inset-0 univer-z-[1070] univer-grid univer-grid-rows-[auto_minmax(0,1fr)_auto]
@@ -291,7 +289,9 @@ function EmbedFullscreenSurface() {
                     "
                     data-embed-fullscreen-right-sidebar-slot="true"
                     data-embed-id={session.embedId}
-                />
+                >
+                    {runtimeParts && <EmbedFullscreenRightSidebarParts {...runtimeParts} />}
+                </div>
             </div>
             <div
                 ref={footerRef}
@@ -311,10 +311,10 @@ function EmbedFullscreenSurface() {
                 "
                 data-embed-fullscreen-popup-root="true"
                 {...{ [EMBED_POPUP_ROOT_ATTRIBUTE]: 'true' }}
-            />
-            {runtimeParts && <EmbedFullscreenWorkbenchParts {...runtimeParts} />}
-        </div>,
-        document.body
+            >
+                {runtimeParts && <EmbedFullscreenPopupParts {...runtimeParts} />}
+            </div>
+        </div>
     );
 }
 
@@ -323,38 +323,36 @@ interface IEmbedFullscreenRuntimeParts {
     injector: IInjector;
     sourceInjector: IInjector;
     popupContainer: HTMLElement;
-    rightSidebarContainer: HTMLElement;
 }
 
-export function EmbedFullscreenWorkbenchParts(props: IEmbedFullscreenRuntimeParts) {
-    const { embedId, injector, sourceInjector, popupContainer, rightSidebarContainer } = props;
+export function EmbedFullscreenPopupParts(props: IEmbedFullscreenRuntimeParts) {
+    const { embedId, injector, sourceInjector, popupContainer } = props;
 
     return (
         <>
-            {createPortal(
-                <>
-                    <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
-                        <ContextMenu />
-                        <CanvasPopup />
-                    </EmbedRuntimeProviders>
-                    <EmbedRuntimeProviders injector={sourceInjector} mountContainer={popupContainer} embedId={embedId}>
-                        <CanvasPopup />
-                    </EmbedRuntimeProviders>
-                </>,
-                popupContainer
-            )}
-            {createPortal(
-                <aside className="univer-z-[2] univer-flex univer-h-full">
-                    <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
-                        <Sidebar />
-                    </EmbedRuntimeProviders>
-                    <EmbedRuntimeProviders injector={sourceInjector} mountContainer={popupContainer} embedId={embedId}>
-                        <Sidebar />
-                    </EmbedRuntimeProviders>
-                </aside>,
-                rightSidebarContainer
-            )}
+            <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
+                <ContextMenu />
+                <CanvasPopup />
+            </EmbedRuntimeProviders>
+            <EmbedRuntimeProviders injector={sourceInjector} mountContainer={popupContainer} embedId={embedId}>
+                <CanvasPopup />
+            </EmbedRuntimeProviders>
         </>
+    );
+}
+
+export function EmbedFullscreenRightSidebarParts(props: IEmbedFullscreenRuntimeParts) {
+    const { embedId, injector, sourceInjector, popupContainer } = props;
+
+    return (
+        <aside className="univer-z-[2] univer-flex univer-h-full">
+            <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
+                <Sidebar />
+            </EmbedRuntimeProviders>
+            <EmbedRuntimeProviders injector={sourceInjector} mountContainer={popupContainer} embedId={embedId}>
+                <Sidebar />
+            </EmbedRuntimeProviders>
+        </aside>
     );
 }
 

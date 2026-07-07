@@ -1402,8 +1402,8 @@ importers:
         specifier: workspace:*
         version: link:../embed
       '@univerjs/icons':
-        specifier: 1.18.0
-        version: 1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.19.0
+        version: 1.19.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1424,7 +1424,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^4.1.9
+        specifier: ^4.1.10
         version: 4.1.10(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/engine-formula:
@@ -6902,12 +6902,6 @@ packages:
 
   '@univerjs/icons-svg@1.19.0':
     resolution: {integrity: sha512-W1udOqHTHzFYz3rVJDXY5tOEw1tKrMWq4jVmIT1R7PfSCMCbXZzz54M+7nr9PZhXOs7/PXYhfokfG1P0JNpqDQ==}
-
-  '@univerjs/icons@1.18.0':
-    resolution: {integrity: sha512-zT8oH9W2oELkz9mD8Zic705TU5/PYB1GedzvlbSQR5lyrK0RCMQCzaC2qZZyD1N13W24takpfyX9j1fIYT6adg==}
-    peerDependencies:
-      react: 19.2.7
-      react-dom: 19.2.7
 
   '@univerjs/icons@1.19.0':
     resolution: {integrity: sha512-0aFxjvTtqQBEQt7BFnz4kxBCQTMaDEOi8WhG9lEeoK9JXlRn+GVRDQezwQXfMeqA3AtkNYmjRd9OvOMMqFerMw==}
@@ -14567,11 +14561,6 @@ snapshots:
       eslint-visitor-keys: 5.0.1
 
   '@univerjs/icons-svg@1.19.0': {}
-
-  '@univerjs/icons@1.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
-    dependencies:
-      react: 19.2.7
-      react-dom: 19.2.7(react@19.2.7)
 
   '@univerjs/icons@1.19.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:

@@ -27,6 +27,21 @@ export type { IRichTextEditingMutationParams } from './commands/mutations/core-e
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';
+export { createDocsCustomBlockHostAdapterContribution } from './embed-host-adapter';
+export {
+    createDocsCustomBlockDrawing,
+    createDocsCustomBlockInsertMutation,
+    createDocsCustomBlockRemoveMutation,
+    createEmbedDocsCustomBlockData,
+    createInsertCustomBlockActions,
+    createRemoveCustomBlockActions,
+    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
+    isEmbedDocsCustomBlockData,
+    isSheetLikeDocsCustomBlockChildType,
+    resolveDocsCustomBlockSize,
+    shouldUseInlineTextSelectionForDocsCustomBlockDrawing,
+} from './embed-host-anchor';
+export type { EmbedDocsCustomBlockInteractionMode, IEmbedDocsCustomBlockData, IDocsCustomBlockMutationParams } from './embed-host-anchor';
 export { createDocsEmbedEmptySnapshot, registerDocsEmbedHostCapabilities } from './embed-guest';
 export { UniverDocsPlugin } from './plugin';
 export { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';

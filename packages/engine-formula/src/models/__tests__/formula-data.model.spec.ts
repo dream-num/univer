@@ -255,6 +255,20 @@ describe('Test formula data model', () => {
                     1: {
                         3: null,
                     },
+                    2: {
+                        3: {
+                            f: '=SUM(A3)',
+                            si: 'OSPtzm',
+                        },
+                    },
+                    3: {
+                        3: {
+                            f: '=SUM(A3)',
+                            si: 'OSPtzm',
+                            x: 0,
+                            y: 1,
+                        },
+                    },
                 };
 
                 const newFormulaData = formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
@@ -300,6 +314,12 @@ describe('Test formula data model', () => {
                     },
                     2: {
                         3: null,
+                    },
+                    3: {
+                        3: {
+                            f: '=SUM(A4)',
+                            si: 'OSPtzm',
+                        },
                     },
                 };
 
@@ -960,6 +980,7 @@ describe('Test formula data model', () => {
                         0: {
                             3: {
                                 f: '=SUM(A1)',
+                                si: '3e4r5t',
                             },
                         },
                     },
@@ -970,7 +991,7 @@ describe('Test formula data model', () => {
             expect(formulaData).toStrictEqual(result);
         });
 
-        it('expands Excel shared formula ids with relative offsets', () => {
+        it('preserves Excel shared formula ids with relative offsets', () => {
             const unitId = 'workbook-01';
             const sheetId = 'sheet-0011';
 
@@ -1006,14 +1027,21 @@ describe('Test formula data model', () => {
                 5: {
                     4: {
                         f: '=E$4+$D6',
+                        si: '0',
                     },
                     5: {
-                        f: '=F$4+$D6',
+                        f: '=E$4+$D6',
+                        si: '0',
+                        x: 1,
+                        y: 0,
                     },
                 },
                 8: {
                     5: {
-                        f: '=F$4+$D9',
+                        f: '=E$4+$D6',
+                        si: '0',
+                        x: 1,
+                        y: 3,
                     },
                 },
             });

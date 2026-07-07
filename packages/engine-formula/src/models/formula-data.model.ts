@@ -842,8 +842,6 @@ export function initSheetFormulaData(
     sheetId: string,
     cellMatrix: ObjectMatrix<Nullable<ICellData>>
 ): IFormulaData {
-    const lexerTreeBuilder = new LexerTreeBuilder();
-
     if (!formulaData[unitId]) {
         formulaData[unitId] = {};
     }
@@ -865,6 +863,7 @@ export function initSheetFormulaData(
         if (checkFormulaString && checkFormulaId) {
             sheetFormulaDataMatrix.setValue(r, c, {
                 f: formulaString,
+                si: formulaId,
             });
             formulaIdMap.set(formulaId, { f: formulaString, r, c });
         } else if (checkFormulaString && !checkFormulaId) {
@@ -888,9 +887,9 @@ export function initSheetFormulaData(
             if (formulaInfo) {
                 const x = c - formulaInfo.c;
                 const y = r - formulaInfo.r;
-                const f = lexerTreeBuilder.moveFormulaRefOffset(formulaInfo.f, x, y);
+                const f = formulaInfo.f;
 
-                sheetFormulaDataMatrix.setValue(r, c, { f });
+                sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
             } else {
                 // If the formula ID is not found in the formula ID map, delete the formula ID.
                 // Prevent IDs without corresponding formulas from appearing

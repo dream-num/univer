@@ -896,31 +896,31 @@ describe('Test nested functions', () => {
 
         it('Index formula test', () => {
             const result = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(22-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result).toStrictEqual([['January']]);
+            expect(result).toStrictEqual('January');
 
             const result2 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(23-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result2).toStrictEqual([['February']]);
+            expect(result2).toStrictEqual('February');
 
             const result3 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(24-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result3).toStrictEqual([['March']]);
+            expect(result3).toStrictEqual('March');
 
             const result4 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(25-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result4).toStrictEqual([['April']]);
+            expect(result4).toStrictEqual('April');
 
             const result5 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(26-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result5).toStrictEqual([['June']]);
+            expect(result5).toStrictEqual('June');
 
             const result6 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(27-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result6).toStrictEqual([['July']]);
+            expect(result6).toStrictEqual('July');
 
             const result7 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(28-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result7).toStrictEqual([['August']]);
+            expect(result7).toStrictEqual('August');
 
             const result8 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(29-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result8).toStrictEqual([['October']]);
+            expect(result8).toStrictEqual('October');
 
             const result9 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(30-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result9).toStrictEqual([['December']]);
+            expect(result9).toStrictEqual('December');
         });
 
         it('Left formula compare test', () => {

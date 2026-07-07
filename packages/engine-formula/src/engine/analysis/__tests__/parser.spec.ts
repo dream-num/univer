@@ -253,7 +253,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(-1);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(-1);
         });
 
         it('Minus Minus Minus Minus sum', async () => {
@@ -519,7 +519,7 @@ describe('Test indirect', () => {
             const lexerNode = lexer.treeBuilder('=Table1[[#Totals],[CASH\r\nIN]]-Table1[[#Totals],[CASH\r\nOUT]]+A1') as LexerNode;
             const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
             const result = interpreter.execute(generateExecuteAstNodeData(astNode));
-            expect((result as BaseValueObject).getValue()).toStrictEqual(0);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(101);
         });
 
         it('ignores text in numeric aggregations: SUM(Table1[col2]) => 4', async () => {

@@ -25,7 +25,7 @@ import { ColumnReferenceObject } from '../reference-object/column-reference-obje
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
@@ -447,7 +447,7 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
             (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
             (rangeValueObject == null || rangeValueObject.isNull() || (rangeValueObject.isString() && rangeValueObject.getValue() === ''))
         ) {
-            return StringValueObject.create('').compare(criteriaObject, operator);
+            return BooleanValueObject.create(false);
         }
 
         if (

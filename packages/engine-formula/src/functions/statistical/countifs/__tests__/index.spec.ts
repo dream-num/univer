@@ -389,7 +389,7 @@ describe('Test countifs function', () => {
             expect(result).toBe(0);
         });
 
-        it('Includes blank cells in less-than text criteria', async () => {
+        it('Excludes blank cells in less-than text criteria', async () => {
             const result = await calculate('=COUNTIFS(B5:B8,"<1 hour")');
             expect(result).toBe(2);
         });

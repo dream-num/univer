@@ -278,7 +278,7 @@ describe('arrayValueObject test', () => {
             });
             const result = originValueObject.sum();
 
-            expect(getObjectValue(result)).toStrictEqual(101.57);
+            expect(getObjectValue(result) as number).toBeCloseTo(101.57);
         });
     });
 

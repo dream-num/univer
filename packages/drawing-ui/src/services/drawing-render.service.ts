@@ -45,6 +45,8 @@ interface IDrawingTransformStateWithClipBounds {
 
 type IDrawingParamWithBehindText = (Partial<IDrawingParam> | Partial<IImageData>) & {
     behindText?: boolean | BooleanNumber;
+    behindDoc?: BooleanNumber;
+    layoutType?: PositionedObjectLayoutType;
     docxHeaderFooterDrawing?: boolean;
 };
 
@@ -52,6 +54,7 @@ export const DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX = 1;
 
 export function getDrawingRenderLayerIndex(param: IDrawingParamWithBehindText): number {
     return param.behindText === true || param.behindText === BooleanNumber.TRUE
+        || (param.layoutType === PositionedObjectLayoutType.WRAP_NONE && param.behindDoc === BooleanNumber.TRUE)
         ? DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX
         : DRAWING_OBJECT_LAYER_INDEX;
 }

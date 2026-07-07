@@ -1519,11 +1519,19 @@ export function getLineHeightMetrics(
         && gridType !== GridType.DEFAULT;
 
     if (spacingRule === SpacingRule.AUTO) {
-        const lineSpacingApply = usesDocumentGrid
+        let lineSpacingApply = usesDocumentGrid
             ? lineSpacing * linePitch
             : scaleAutoLineSpacingByGlyphHeight
                 ? lineSpacing * glyphLineHeight
                 : glyphLineHeight;
+        if (
+            !usesDocumentGrid
+            && scaleAutoLineSpacingByGlyphHeight
+            && lineSpacing <= 1.05
+            && glyphLineHeight >= 30
+        ) {
+            lineSpacingApply *= 1.18;
+        }
         const padding = (lineSpacingApply - glyphLineHeight) / 2;
 
         return {

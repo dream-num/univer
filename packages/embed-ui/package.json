@@ -69,7 +69,6 @@
     },
     "peerDependencies": {
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
-        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -82,7 +81,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "react": "18.3.1",
-        "react-dom": "18.3.1",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
         "vitest": "^4.1.10"

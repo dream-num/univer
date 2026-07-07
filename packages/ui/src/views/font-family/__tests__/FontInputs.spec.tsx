@@ -47,10 +47,11 @@ const SetFontFamilyCommand: ICommand<{ value: string }> = {
     },
 };
 
-function renderWithDependencies(element: ReactElement) {
+function renderWithDependencies(element: ReactElement, direction: 'ltr' | 'rtl' = 'ltr') {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([IFontService, { useClass: FontService }]);
+    injector.get(LocaleService).setDirection(direction);
     injector.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
             ui: {
@@ -141,6 +142,19 @@ describe('font input views', () => {
 
         expect(TestState.commandParams).toEqual([]);
         expect(TestState.familyChanges).toEqual(['Times New Roman']);
+        rendered.dispose();
+    });
+
+    it('applies locale direction to the font-family menu list', () => {
+        const rendered = renderWithDependencies(
+            <FontFamilyItem
+                value="Arial"
+                onChange={(value) => TestState.familyChanges.push(value)}
+            />,
+            'rtl'
+        );
+
+        expect(rendered.container.querySelector('ul')?.getAttribute('dir')).toBe('rtl');
         rendered.dispose();
     });
 

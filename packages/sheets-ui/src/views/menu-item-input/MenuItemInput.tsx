@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { KeyboardEvent } from 'react';
 import type { IMenuItemInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
@@ -81,6 +82,10 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
         }
     }
 
+    function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+        event.stopPropagation();
+    }
+
     return (
         <div className="univer-inline-flex univer-items-center univer-gap-1">
             {localeService.t(prefix)}
@@ -93,6 +98,7 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
                     max={max}
                     disabled={disabled}
                     onPressEnter={handlePressEnter}
+                    onKeyDown={handleKeyDown}
                     onChange={handleChange}
                 />
             </div>

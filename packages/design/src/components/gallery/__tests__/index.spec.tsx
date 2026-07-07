@@ -101,6 +101,13 @@ describe('Gallery', () => {
         expect(img).toHaveAttribute('alt', 'Image 2 of 3');
     });
 
+    it('does not render pagination for a single image', () => {
+        render(<Gallery images={[images[0]]} open={true} />);
+
+        expect(document.querySelector('[data-u-comp="pager"]')).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
+    });
+
     it('should zoom with wheel event and keep value in range', () => {
         render(<Gallery images={images} open={true} />);
         const img = screen.getByRole('img');

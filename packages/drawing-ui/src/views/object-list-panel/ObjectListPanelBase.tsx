@@ -19,7 +19,6 @@ import { Button, clsx, Input } from '@univerjs/design';
 import {
     ArrowDownIcon,
     ArrowUpIcon,
-    CloseIcon,
     EyeIcon,
     EyelashIcon,
     LocateFixedIcon,
@@ -159,7 +158,6 @@ export interface IObjectListPanelBaseProps {
     labels: IObjectListPanelLabels;
     showHeader?: boolean;
     capabilities?: IObjectListPanelCapabilities;
-    onClose?: () => void;
     onSelect: (objectId: string, multiSelect: boolean) => void;
     onSetVisible: (objectIds: string[], visible: boolean) => void;
     onCommitName: (objectId: string, value: string) => void;
@@ -215,7 +213,6 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
         labels,
         showHeader = true,
         capabilities,
-        onClose,
         onSelect,
         onSetVisible,
         onCommitName,
@@ -332,7 +329,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
         <div
             className="
               univer-box-border univer-flex univer-size-full univer-min-w-0 univer-max-w-full univer-flex-col
-              univer-gap-3 univer-overflow-hidden univer-p-4 univer-text-gray-700
+              univer-gap-3 univer-overflow-hidden univer-text-gray-700
               dark:!univer-text-gray-200
             "
             data-drawing-object-list-panel="true"
@@ -348,11 +345,6 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                     >
                         {labels.title}
                     </div>
-                    {onClose && (
-                        <Button aria-label={labels.close} className="univer-size-8 univer-shrink-0" size="small" variant="ghost" onClick={onClose}>
-                            <CloseIcon className="univer-size-4" />
-                        </Button>
-                    )}
                 </div>
             )}
 

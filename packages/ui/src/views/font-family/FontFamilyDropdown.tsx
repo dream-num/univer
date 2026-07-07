@@ -16,10 +16,11 @@
 
 import type { MouseEvent, PointerEvent, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import { LocaleService } from '@univerjs/core';
 import { clsx, Dropdown } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { useState } from 'react';
-import { useObservable } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
 import { FontFamily } from './FontFamily';
 import { FontFamilyItem } from './FontFamilyItem';
 
@@ -53,6 +54,8 @@ export function FontFamilyDropdown(props: IFontFamilyDropdownProps) {
         onMouseDown,
         onPointerDown,
     } = props;
+    const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const disabledObservableValue = useObservable(disabled$);
     const disabled = Boolean(disabledProp || disabledObservableValue);
     const [open, setOpen] = useState(false);
@@ -70,6 +73,7 @@ export function FontFamilyDropdown(props: IFontFamilyDropdownProps) {
             onOpenChange={setOpen}
             overlay={(
                 <div
+                    dir={direction}
                     className={clsx(`
                       univer-max-h-72 univer-min-w-44 univer-overflow-y-auto univer-rounded-lg univer-border
                       univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1 univer-shadow-lg
@@ -85,6 +89,7 @@ export function FontFamilyDropdown(props: IFontFamilyDropdownProps) {
                 aria-disabled={disabled}
                 aria-expanded={open}
                 aria-label={ariaLabel}
+                dir={direction}
                 className={clsx(`
                   univer-flex univer-h-6 univer-min-w-0 univer-cursor-default univer-items-center univer-justify-between
                   univer-gap-1 univer-rounded-md univer-px-1.5 univer-text-sm univer-text-gray-900

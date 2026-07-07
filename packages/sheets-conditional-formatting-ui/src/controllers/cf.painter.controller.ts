@@ -113,7 +113,7 @@ export class ConditionalFormattingPainterController extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _initFormattingPainter() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
-        // eslint-disable-next-line max-lines-per-function
+
         const loopFunc = (
             sourceStartCell: { row: number; col: number },
             targetStartCell: { row: number; col: number },

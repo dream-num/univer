@@ -42,7 +42,6 @@ const createDistributeResult = <T, C>() => {
     };
 };
 
-// eslint-disable-next-line max-lines-per-function
 export const MergeInterceptorFactory = <T, C>(config: {
     /**
      *  Filter requests that need to be merged

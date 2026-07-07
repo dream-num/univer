@@ -16,7 +16,15 @@
 
 import type { Injector, Univer } from '@univerjs/core';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
-import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, ImageSourceType, IUndoRedoService, IUniverInstanceService, UndoCommand } from '@univerjs/core';
+import {
+    ArrangeTypeEnum,
+    DrawingTypeEnum,
+    ICommandService,
+    ImageSourceType,
+    IUndoRedoService,
+    IUniverInstanceService,
+    UndoCommand,
+} from '@univerjs/core';
 import { DRAWING_COPY_CONTEXT_KEY, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

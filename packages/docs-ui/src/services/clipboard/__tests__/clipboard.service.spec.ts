@@ -21,11 +21,11 @@ import {
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     ICommandService,
+    ImageSourceType,
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { ImageSourceType } from '@univerjs/drawing';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';

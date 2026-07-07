@@ -16,9 +16,9 @@
 
 import type { DrawingType, IDrawingParam } from '@univerjs/core';
 import type { IUnitDrawingService } from '@univerjs/drawing';
+import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { resolveDrawingRotateEnabled } from '@univerjs/drawing';
-import type { ISheetDrawing } from '../services/sheet-drawing.service';
 
 export function isKnownSheetNonRotatableDrawingType(drawingType: DrawingType): boolean {
     return drawingType === DrawingTypeEnum.DRAWING_CHART;

@@ -20,6 +20,8 @@ import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
+    IImageIoService,
+    ImageSourceType,
     Injector,
     IUniverInstanceService,
     IURLImageService,
@@ -29,8 +31,6 @@ import {
 import {
     getDrawingShapeKeyByDrawingSearch,
     IDrawingManagerService,
-    IImageIoService,
-    ImageSourceType,
 } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';

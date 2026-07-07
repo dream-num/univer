@@ -19,9 +19,11 @@ import {
     ArrangeTypeEnum,
     awaitTime,
     BooleanNumber,
+    CommandType,
     Direction,
     DisposableCollection,
     DrawingTypeEnum,
+    IUndoRedoService,
     ICommandService,
     IUniverInstanceService,
     ObjectRelativeFromH,
@@ -38,7 +40,9 @@ import {
 } from '@univerjs/docs';
 import {
     DocDrawingController as CoreDocDrawingController,
+    DocDrawingAdapterService,
     DocDrawingService,
+    IDocDrawingAdapterService,
     IDocDrawingService,
 } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -124,6 +128,26 @@ function createDrawingDocData(): IDocumentData {
             marginBottom: 72,
             marginRight: 90,
             marginLeft: 90,
+        },
+    };
+}
+
+function createChartDrawingDocData(): IDocumentData {
+    return {
+        ...createDrawingDocData(),
+        drawings: {
+            'shape-1': {
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                chartId: 'chart-1',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            } as never,
         },
     };
 }
@@ -301,6 +325,8 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
 
     injector.add([DocDrawingService]);
     injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
+    injector.add([DocDrawingAdapterService]);
+    injector.add([IDocDrawingAdapterService, { useClass: DocDrawingAdapterService }]);
     injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
     injector.add([DocContentInsertService]);
     injector.add([DocRefreshDrawingsService]);
@@ -438,6 +464,49 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
+    it('uses an explicit text range from command params for drawing insertion', async () => {
+        const insertOffset = 3;
+        const testBed = setupDrawingTestBed(createBaseDocData());
+
+        testBed.selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 0,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+
+        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+            textRange: {
+                startOffset: insertOffset,
+                endOffset: insertOffset,
+                collapsed: true,
+                segmentId: '',
+            },
+            drawings: [{
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            }],
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('Hel\blo\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: insertOffset, blockId: 'shape-1' }]);
+
+        testBed.univer.dispose();
+    });
+
     it('replaces the selected drawing block when inserting a new drawing over a selection', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
 
@@ -494,6 +563,83 @@ describe('docs drawing commands integration', () => {
         expect(doc.getSnapshot().drawingsOrder).toEqual([]);
         expect(testBed.docDrawingService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
         expect(testBed.drawingManagerService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
+
+        testBed.univer.dispose();
+    });
+
+    it('includes drawing adapter resource mutations in the same undo item when deleting a drawing', async () => {
+        const testBed = setupDrawingTestBed(createChartDrawingDocData());
+        const removeResourceMutation = {
+            id: 'test.mutation.remove-doc-chart-resource',
+            type: CommandType.MUTATION,
+            handler: vi.fn(() => true),
+        };
+        const restoreResourceMutation = {
+            id: 'test.mutation.restore-doc-chart-resource',
+            type: CommandType.MUTATION,
+            handler: vi.fn(() => true),
+        };
+        testBed.commandService.registerCommand(removeResourceMutation);
+        testBed.commandService.registerCommand(restoreResourceMutation);
+        const getRemoveDrawingMutationInfos = vi.fn(() => ({
+            redoMutations: [{ id: removeResourceMutation.id, params: { chartId: 'chart-1' } }],
+            undoMutations: [{ id: restoreResourceMutation.id, params: { chartId: 'chart-1' } }],
+        }));
+        testBed.get(IDocDrawingAdapterService).registerAdapter({ getRemoveDrawingMutationInfos });
+
+        testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
+
+        expect(await testBed.commandService.executeCommand(DeleteDocDrawingsCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getRemoveDrawingMutationInfos).toHaveBeenCalledWith({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawing: expect.objectContaining({
+                drawingId: 'shape-1',
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                chartId: 'chart-1',
+            }),
+            removeDrawings: [expect.objectContaining({ drawingId: 'shape-1' })],
+        });
+        expect(removeResourceMutation.handler).toHaveBeenCalled();
+
+        const undoItem = testBed.get(IUndoRedoService).pitchTopUndoElement();
+        expect(undoItem?.redoMutations.map((mutation) => mutation.id)).toEqual([
+            removeResourceMutation.id,
+            RichTextEditingMutation.id,
+        ]);
+        expect(undoItem?.undoMutations.map((mutation) => mutation.id)).toEqual([
+            restoreResourceMutation.id,
+            RichTextEditingMutation.id,
+        ]);
+
+        testBed.univer.dispose();
+    });
+
+    it('does not delete the document drawing when adapter resource removal fails', async () => {
+        const testBed = setupDrawingTestBed(createChartDrawingDocData());
+        const removeResourceMutation = {
+            id: 'test.mutation.remove-doc-chart-resource',
+            type: CommandType.MUTATION,
+            handler: vi.fn(() => false),
+        };
+        testBed.commandService.registerCommand(removeResourceMutation);
+        testBed.get(IDocDrawingAdapterService).registerAdapter({
+            getRemoveDrawingMutationInfos: () => ({
+                redoMutations: [{ id: removeResourceMutation.id, params: { chartId: 'chart-1' } }],
+                undoMutations: [{ id: 'test.mutation.restore-doc-chart-resource', params: { chartId: 'chart-1' } }],
+            }),
+        });
+
+        testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
+
+        expect(await testBed.commandService.executeCommand(DeleteDocDrawingsCommand.id)).toBe(false);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        expect(doc.getSnapshot().drawings?.['shape-1']).toMatchObject({ drawingId: 'shape-1' });
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 0, blockId: 'shape-1' }]);
 
         testBed.univer.dispose();
     });

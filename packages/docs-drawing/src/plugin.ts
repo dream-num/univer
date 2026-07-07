@@ -20,6 +20,7 @@ import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, Uni
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocDrawingController, DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
+import { DocDrawingAdapterService, IDocDrawingAdapterService } from './services/doc-drawing-adapter.service';
 import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 
 export class UniverDocsDrawingPlugin extends Plugin {
@@ -47,6 +48,8 @@ export class UniverDocsDrawingPlugin extends Plugin {
     override onStarting(): void {
         ([
             [DocDrawingController],
+            [DocDrawingAdapterService],
+            [IDocDrawingAdapterService, { useClass: DocDrawingAdapterService }],
             [DocDrawingService],
             [IDocDrawingService, { useClass: DocDrawingService }],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));

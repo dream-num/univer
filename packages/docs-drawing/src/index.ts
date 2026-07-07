@@ -19,6 +19,12 @@ export { DOCS_DRAWING_PLUGIN, getDocDrawingRenderOrder } from './controllers/doc
 export type { IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';
 export { UniverDocsDrawingPlugin } from './plugin';
+export { DocDrawingAdapterService, IDocDrawingAdapterService } from './services/doc-drawing-adapter.service';
+export type {
+    IDocDrawingAdapter,
+    IDocDrawingMutationInfos,
+    IDocDrawingRemoveMutationInfoParams,
+} from './services/doc-drawing-adapter.service';
 export { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 export type { IDocDrawing, IDocImage } from './services/doc-drawing.service';
 export { type IDocFloatDom } from './services/doc-drawing.service';

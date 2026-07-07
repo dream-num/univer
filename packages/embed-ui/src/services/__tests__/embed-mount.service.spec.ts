@@ -36,6 +36,7 @@ import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { IMenuManagerService, IRibbonService, MenuManagerPosition } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { EmbedChildProductPluginRegistryService } from '../embed-child-product-plugin-registry.service';
 import { EmbedChildViewRegistryService } from '../embed-child-view-registry.service';
 import { EmbedFloatingActiveService } from '../embed-floating-active.service';
 import { EmbedFloatingMenuRegistryService } from '../embed-floating-menu-registry.service';
@@ -319,6 +320,30 @@ describe('EmbedMountService', () => {
         expect(hostElement.dataset.embedRenderScopeActive).toBe('false');
     });
 
+    it('registers child product plugins before mounting the child runtime', () => {
+        const calls: string[] = [];
+        const hostElement = document.createElement('div');
+        const childProductPluginRegistry = {
+            registerProductPlugins: vi.fn(() => {
+                calls.push('register-product-plugins');
+            }),
+        };
+        const service = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement })),
+            childRegistry: createChildRegistry(() => {
+                calls.push('mount-child');
+            }),
+            injectorEntries: [
+                [EmbedChildProductPluginRegistryService, childProductPluginRegistry],
+            ],
+        });
+
+        service.mount(createDescriptor());
+
+        expect(childProductPluginRegistry.registerProductPlugins).toHaveBeenCalledWith(UniverInstanceType.UNIVER_SHEET);
+        expect(calls).toEqual(['register-product-plugins', 'mount-child']);
+    });
+
     it('mounts tab sessions without activating them until the child receives focus', () => {
         const firstHost = document.createElement('div');
         const secondHost = document.createElement('div');
@@ -405,6 +430,7 @@ describe('EmbedMountService', () => {
             hostUnitId: 'host-1',
             childUnitId: 'child-1',
             childType: UniverInstanceType.UNIVER_DOC,
+            sessionMode: 'child-tab',
         });
 
         secondHost.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
@@ -415,6 +441,7 @@ describe('EmbedMountService', () => {
             hostUnitId: 'host-1',
             childUnitId: 'child-2',
             childType: UniverInstanceType.UNIVER_SHEET,
+            sessionMode: 'child-tab',
         });
 
         expect(service.deactivateTabSessions('tab-1')).toEqual([firstSession]);

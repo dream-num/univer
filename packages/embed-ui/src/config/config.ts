@@ -14,40 +14,17 @@
  * limitations under the License.
  */
 
-import type { IEmbedHostAdapterContribution } from '@univerjs/embed';
-import type { IEmbedChildProductPluginContribution } from '../services/embed-child-product-plugin-registry.service';
-import type {
-    IEmbedBlockContribution,
-    IEmbedChildViewContribution,
-    IEmbedContentSizeProvider,
-    IEmbedFloatingMenuContribution,
-    IEmbedFloatPreviewProvider,
-    IEmbedHostContainerContribution,
-    IEmbedPassiveViewportProvider,
-    IEmbedPassiveWheelHandlerContribution,
-    IEmbedProductMenuContribution,
-    IEmbedReadonlyPreviewProvider,
-} from '../types/embed-ui';
-
 export const EMBED_UI_PLUGIN_CONFIG_KEY = 'embed-ui.config';
 
 export const configSymbol = Symbol(EMBED_UI_PLUGIN_CONFIG_KEY);
 
+export interface IUniverEmbedUIDefaultsConfig {
+    floatingMenus?: boolean;
+    hostToolbar?: boolean;
+}
+
 export interface IUniverEmbedUIPluginConfig {
-    hostAdapters?: readonly IEmbedHostAdapterContribution[];
-    hostContainers?: readonly IEmbedHostContainerContribution[];
-    childViews?: readonly IEmbedChildViewContribution[];
-    blocks?: readonly IEmbedBlockContribution[];
-    productMenus?: readonly IEmbedProductMenuContribution[];
-    floatingMenus?: readonly IEmbedFloatingMenuContribution[];
-    previewProviders?: readonly IEmbedFloatPreviewProvider<unknown>[];
-    contentSizeProviders?: readonly IEmbedContentSizeProvider[];
-    passiveWheelHandlers?: readonly IEmbedPassiveWheelHandlerContribution[];
-    passiveViewportProviders?: readonly IEmbedPassiveViewportProvider[];
-    readonlyPreviewProviders?: readonly IEmbedReadonlyPreviewProvider<unknown>[];
-    childProductPlugins?: readonly IEmbedChildProductPluginContribution[];
-    useDefaultFloatingMenus?: boolean;
-    useDefaultHostToolbar?: boolean;
+    defaults?: IUniverEmbedUIDefaultsConfig;
 }
 
 export const defaultPluginConfig: IUniverEmbedUIPluginConfig = {};

@@ -608,6 +608,7 @@ describe('embed-ui small services and controllers', () => {
             hostUnitId: 'host-doc',
             childUnitId: 'child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
+            sessionMode: 'child-keyboard',
         });
 
         sessionLease.dispose();
@@ -616,6 +617,58 @@ describe('embed-ui small services and controllers', () => {
 
         runtimeLease.dispose();
         runtimeScope.dispose();
+    });
+
+    it('keeps child keyboard sessions distinct from fullscreen and tab sessions', () => {
+        const service = new EmbedRuntimeFocusCoordinator();
+        const keyboardLease = service.acquireLease({
+            embedId: 'embed-stage2',
+            role: 'child-session',
+            owner: 'stage2-runtime',
+            sessionMode: 'child-keyboard',
+            hostUnitId: 'host-slide',
+            childUnitId: 'stage2-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()).toEqual({
+            embedId: 'embed-stage2',
+            hostUnitId: 'host-slide',
+            childUnitId: 'stage2-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            sessionMode: 'child-keyboard',
+        });
+
+        const tabLease = service.acquireLease({
+            embedId: 'embed-tab',
+            role: 'child-session',
+            owner: 'tab-peer-runtime',
+            sessionMode: 'child-tab',
+            hostUnitId: 'host-slide',
+            childUnitId: 'tab-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()?.embedId).toBe('embed-stage2');
+
+        const fullscreenLease = service.acquireLease({
+            embedId: 'embed-fullscreen',
+            role: 'child-session',
+            owner: 'fullscreen-runtime',
+            sessionMode: 'child-fullscreen',
+            hostUnitId: 'host-slide',
+            childUnitId: 'fullscreen-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(service.resolveActiveChildSessionRuntimeScope()).toMatchObject({
+            embedId: 'embed-fullscreen',
+            sessionMode: 'child-fullscreen',
+        });
+
+        fullscreenLease.dispose();
+        tabLease.dispose();
+        keyboardLease.dispose();
     });
 
     it('resolves active child sessions by interaction priority before recency', () => {

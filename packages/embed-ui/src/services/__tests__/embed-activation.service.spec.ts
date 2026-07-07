@@ -16,7 +16,6 @@
 
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import { UniverInstanceType } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedActivationService } from '../embed-activation.service';
 
@@ -74,8 +73,11 @@ describe('EmbedActivationService', () => {
         expect(mountService.activateSession).toHaveBeenCalledWith('float-doc');
     });
 
-    it('activates stage2 floating embeds without moving global focus away from the host ribbon', () => {
+    it('activates regular stage2 floating embeds without taking host global focus', () => {
         const univerInstanceService = {
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'host-slide' })),
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'host-slide' })),
+            focused$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) },
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
         };
@@ -89,6 +91,7 @@ describe('EmbedActivationService', () => {
         const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
         const menuOverrideService = { activate: vi.fn(), clear: vi.fn() };
         const blockRegistry = { get: vi.fn(() => ({ layoutPolicy: { float: { ribbon: 'host' } } })) };
+        const layoutService = { focus: vi.fn() };
         const service = new EmbedActivationService(
             univerInstanceService as never,
             focusOwnerService as never,
@@ -96,14 +99,16 @@ describe('EmbedActivationService', () => {
             menuOverrideService as never,
             mountService as never,
             blockRegistry as never,
-            floatingActiveService as never
+            floatingActiveService as never,
+            { setContextValue: vi.fn() } as never,
+            layoutService as never
         );
 
         const descriptor: IEmbedDescriptor = {
             embedId: 'float-sheet',
-            hostUnitId: 'host-doc',
-            hostType: UniverInstanceType.UNIVER_DOC,
-            entry: 'docs-custom-block',
+            hostUnitId: 'host-slide',
+            hostType: UniverInstanceType.UNIVER_SLIDE,
+            entry: 'slides-floating-object',
             hostAnchorId: 'drawing-1',
             source: {
                 unitType: UniverInstanceType.UNIVER_SHEET,
@@ -116,18 +121,21 @@ describe('EmbedActivationService', () => {
         service.activateFloating(descriptor, 'stage2');
 
         expect(floatingActiveService.activate).toHaveBeenCalledWith({
-            hostUnitId: 'host-doc',
+            hostUnitId: 'host-slide',
             embedId: 'float-sheet',
             childUnitId: 'child-sheet',
         }, 'stage2');
-        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
         expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+        expect(layoutService.focus).not.toHaveBeenCalled();
         expect(menuOverrideService.clear).toHaveBeenCalledWith();
         expect(menuOverrideService.activate).not.toHaveBeenCalled();
     });
 
-    it('marks the floating runtime active without moving global focus when it enters interactive stage2', () => {
+    it('activates docs custom block children without taking host global focus', () => {
         const univerInstanceService = {
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'host-doc' })),
+            focused$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) },
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn(),
         };
@@ -138,6 +146,7 @@ describe('EmbedActivationService', () => {
         const floatingActiveService = {
             activate: vi.fn(),
         };
+        const layoutService = { focus: vi.fn() };
         const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
         const service = new EmbedActivationService(
             univerInstanceService as never,
@@ -146,7 +155,9 @@ describe('EmbedActivationService', () => {
             { activate: vi.fn(), clear: vi.fn() } as never,
             mountService as never,
             undefined,
-            floatingActiveService as never
+            floatingActiveService as never,
+            undefined,
+            layoutService as never
         );
 
         service.focusFloatingRuntime({
@@ -176,16 +187,24 @@ describe('EmbedActivationService', () => {
             embedId: 'float-sheet',
             childUnitId: 'child-sheet',
         }, 'stage2');
-        expect(univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(univerInstanceService.focused$.subscribe).not.toHaveBeenCalled();
         expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+        expect(layoutService.focus).not.toHaveBeenCalled();
     });
 
-    it('restores host global focus when a stage2 floating child writes focus to itself', () => {
-        const focused$ = new Subject<string>();
-        let focusedUnitId = 'host-doc';
+    it('restores host focus when a stage2 floating child grabs global focus', () => {
+        let focusedUnitId = 'child-sheet';
+        let focusListener: (() => void) | undefined;
         const univerInstanceService = {
-            focused$,
             getFocusedUnit: vi.fn(() => ({ getUnitId: () => focusedUnitId })),
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'host-doc' })),
+            focused$: {
+                subscribe: vi.fn((listener: () => void) => {
+                    focusListener = listener;
+                    return { unsubscribe: vi.fn() };
+                }),
+            },
             setCurrentUnitForType: vi.fn(),
             focusUnit: vi.fn((unitId: string) => {
                 focusedUnitId = unitId;
@@ -202,9 +221,9 @@ describe('EmbedActivationService', () => {
         );
         const descriptor: IEmbedDescriptor = {
             embedId: 'float-sheet',
-            hostUnitId: 'host-doc',
-            hostType: UniverInstanceType.UNIVER_DOC,
-            entry: 'docs-custom-block',
+            hostUnitId: 'host-slide',
+            hostType: UniverInstanceType.UNIVER_SLIDE,
+            entry: 'slides-floating-object',
             hostAnchorId: 'drawing-1',
             source: {
                 unitType: UniverInstanceType.UNIVER_SHEET,
@@ -215,13 +234,16 @@ describe('EmbedActivationService', () => {
         };
 
         service.activateFloating(descriptor, 'stage2');
-        expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('host-slide');
+        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('host-slide');
+        expect(focusedUnitId).toBe('host-slide');
 
         focusedUnitId = 'child-sheet';
-        focused$.next('child-sheet');
+        focusListener?.();
 
-        expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('host-doc');
-        expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('host-doc');
+        expect(univerInstanceService.focusUnit).toHaveBeenLastCalledWith('host-slide');
     });
 
     it('focuses the child unit for fullscreen runtimes without activating floating state', () => {
@@ -241,6 +263,7 @@ describe('EmbedActivationService', () => {
         const menuOverrideService = { activate: vi.fn(), clear: vi.fn() };
         const mountService = { activateSession: vi.fn(), deactivateFloatingSession: vi.fn(), deactivateTabSessions: vi.fn(() => []) };
         const contextService = { setContextValue: vi.fn() };
+        const layoutService = { focus: vi.fn() };
         const service = new EmbedActivationService(
             univerInstanceService as never,
             focusOwnerService as never,
@@ -249,7 +272,8 @@ describe('EmbedActivationService', () => {
             mountService as never,
             undefined,
             floatingActiveService as never,
-            contextService as never
+            contextService as never,
+            layoutService as never
         );
 
         service.activateFullscreen({
@@ -276,6 +300,7 @@ describe('EmbedActivationService', () => {
         expect(univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
         expect(univerInstanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
         expect(contextService.setContextValue).toHaveBeenCalledWith(expect.any(String), true);
+        expect(layoutService.focus).toHaveBeenCalled();
         expect(floatingActiveService.activate).not.toHaveBeenCalled();
         expect(menuOverrideService.activate).not.toHaveBeenCalled();
         expect(mountService.activateSession).not.toHaveBeenCalled();

@@ -19,7 +19,7 @@
 import type { DocumentDataModel, ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IDrawingMapItemData, IDrawingOrderMapParam } from '@univerjs/drawing';
 import {
     Disposable,
     ICommandService,
@@ -117,6 +117,35 @@ function getReOrderedDrawings(actions: JSONXActions): number[] {
     return drawingIndexes;
 }
 
+function collectUpdatedDrawingIds(actions: JSONXActions, drawingIds = new Set<string>()): Set<string> {
+    if (JSONX.isNoop(actions) || !Array.isArray(actions)) {
+        return drawingIds;
+    }
+
+    if (actions[0] === 'drawings') {
+        const drawingKeyOrOps = actions[1];
+        if (typeof drawingKeyOrOps === 'string') {
+            drawingIds.add(drawingKeyOrOps);
+            return drawingIds;
+        }
+
+        actions.slice(1).forEach((action) => {
+            if (Array.isArray(action) && typeof action[0] === 'string') {
+                drawingIds.add(action[0]);
+            }
+        });
+        return drawingIds;
+    }
+
+    actions.forEach((action) => {
+        if (Array.isArray(action)) {
+            collectUpdatedDrawingIds(action as JSONXActions, drawingIds);
+        }
+    });
+
+    return drawingIds;
+}
+
 export class DocDrawingAddRemoveController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -173,6 +202,11 @@ export class DocDrawingAddRemoveController extends Disposable {
 
                 if (reOrderedDrawings.length > 0) {
                     this._updateDrawingsOrder(unitId);
+                }
+
+                const updatedDrawingIds = [...collectUpdatedDrawingIds(actions)];
+                if (updatedDrawingIds.length > 0) {
+                    this._syncDrawingDataFromSnapshot(unitId, updatedDrawingIds);
                 }
             })
         );
@@ -271,5 +305,33 @@ export class DocDrawingAddRemoveController extends Disposable {
             subUnitId: unitId,
             drawingIds: drawingsOrder,
         });
+    }
+
+    private _syncDrawingDataFromSnapshot(unitId: string, drawingIds: string[]) {
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+
+        if (documentDataModel == null) {
+            return;
+        }
+
+        const { drawings = {}, drawingsOrder = [] } = documentDataModel.getSnapshot();
+        const drawingData = drawings as IDrawingMapItemData<IDocDrawing>;
+        const renderOrder = getDocDrawingRenderOrder(drawingsOrder, drawings);
+
+        this._docDrawingService.setDrawingData(unitId, unitId, drawingData);
+        this._drawingManagerService.setDrawingData(unitId, unitId, drawingData);
+        this._docDrawingService.setDrawingOrder(unitId, unitId, drawingsOrder);
+        this._drawingManagerService.setDrawingOrder(unitId, unitId, renderOrder);
+
+        const objects = drawingIds
+            .filter((drawingId) => drawingData[drawingId] != null)
+            .map((drawingId) => ({ unitId, subUnitId: unitId, drawingId }));
+
+        if (objects.length === 0) {
+            return;
+        }
+
+        this._docDrawingService.updateNotification(objects);
+        this._drawingManagerService.updateNotification(objects);
     }
 }

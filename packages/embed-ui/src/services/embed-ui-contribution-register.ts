@@ -29,6 +29,7 @@ import { EmbedReadonlyPreviewRegistryService } from './embed-readonly-preview-re
 type EmbedUIContributionRegister = (injector: Injector) => void;
 
 const PENDING_UI_CONTRIBUTIONS = new WeakMap<object, Map<string, EmbedUIContributionRegister>>();
+const REGISTERED_UI_CONTRIBUTIONS = new WeakMap<object, Set<string>>();
 
 export function registerEmbedUIContribution(
     injector: Injector,
@@ -36,11 +37,15 @@ export function registerEmbedUIContribution(
     register: EmbedUIContributionRegister
 ): void {
     if (hasEmbedUIRegistries(injector)) {
-        register(injector);
+        registerOnce(injector, key, register);
         return;
     }
 
     const injectorKey = injector as object;
+    if (REGISTERED_UI_CONTRIBUTIONS.get(injectorKey)?.has(key)) {
+        return;
+    }
+
     const pending = PENDING_UI_CONTRIBUTIONS.get(injectorKey) ?? new Map<string, EmbedUIContributionRegister>();
     pending.set(key, register);
     PENDING_UI_CONTRIBUTIONS.set(injectorKey, pending);
@@ -57,8 +62,24 @@ export function flushPendingEmbedUIContributions(injector: Injector): void {
         return;
     }
 
-    pending.forEach((register) => register(injector));
+    pending.forEach((register, key) => registerOnce(injector, key, register));
     PENDING_UI_CONTRIBUTIONS.delete(injectorKey);
+}
+
+function registerOnce(
+    injector: Injector,
+    key: string,
+    register: EmbedUIContributionRegister
+): void {
+    const injectorKey = injector as object;
+    const registered = REGISTERED_UI_CONTRIBUTIONS.get(injectorKey) ?? new Set<string>();
+    if (registered.has(key)) {
+        return;
+    }
+
+    register(injector);
+    registered.add(key);
+    REGISTERED_UI_CONTRIBUTIONS.set(injectorKey, registered);
 }
 
 function hasEmbedUIRegistries(injector: Pick<Injector, 'has'>): boolean {

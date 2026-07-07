@@ -18,6 +18,7 @@
  * @vitest-environment jsdom
  */
 
+import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
@@ -54,6 +55,7 @@ describe('EmbedInteractionBoundaryService', () => {
         container.setAttribute('data-embed-id', 'embed-1');
         container.setAttribute('data-embed-host-unit-id', 'host-doc');
         container.setAttribute('data-embed-child-unit-id', 'child-sheet');
+        container.setAttribute('data-embed-child-type', String(UniverInstanceType.UNIVER_SHEET));
         runtimeRoot.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
         editorPortal.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
         container.appendChild(runtimeRoot);
@@ -63,11 +65,13 @@ describe('EmbedInteractionBoundaryService', () => {
             embedId: 'embed-1',
             hostUnitId: 'host-doc',
             childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
         });
         expect(resolveEmbedRuntimeDomScope(editorPortal)).toEqual({
             embedId: 'embed-1',
             hostUnitId: 'host-doc',
             childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
         });
 
         container.remove();
@@ -85,12 +89,14 @@ describe('EmbedInteractionBoundaryService', () => {
         activeContainer.setAttribute('data-embed-id', 'embed-active');
         activeContainer.setAttribute('data-embed-host-unit-id', 'host-doc');
         activeContainer.setAttribute('data-embed-child-unit-id', 'child-sheet');
+        activeContainer.setAttribute('data-embed-child-type', String(UniverInstanceType.UNIVER_SHEET));
         document.body.append(inactiveContainer, activeContainer);
 
         expect(resolveActiveEmbedRuntimeDomScope(document)).toEqual({
             embedId: 'embed-active',
             hostUnitId: 'host-doc',
             childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
         });
 
         inactiveContainer.remove();

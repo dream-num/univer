@@ -18,6 +18,7 @@ import type { ICustomDecoration, ICustomRange, IParagraph } from './i-document-d
 
 export interface ICustomRangeForInterceptor extends ICustomRange {
     active?: boolean;
+    glyphWidthEm?: number;
     show?: boolean;
 }
 

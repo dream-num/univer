@@ -93,7 +93,7 @@
         "@univerjs/embed-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.16.0",
+        "@univerjs/icons": "1.18.0",
         "@univerjs/protocol": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing": "workspace:*",

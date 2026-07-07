@@ -15,6 +15,7 @@
  */
 
 export * from './document-data-model';
+export { getEmptySnapshot as getDocsEmptySnapshot } from './empty-snapshot';
 export * from './preset-list-type';
 export * from './text-x/build-utils';
 export * from './types';

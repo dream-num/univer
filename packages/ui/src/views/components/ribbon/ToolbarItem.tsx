@@ -367,6 +367,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             ref={ref}
             title={tooltipTitle}
             placement="bottom"
+            dropdownKey={id}
         >
             {renderItem()}
         </TooltipWrapper>

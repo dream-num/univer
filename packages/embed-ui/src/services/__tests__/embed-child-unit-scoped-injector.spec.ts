@@ -22,7 +22,18 @@ import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedChildContainerContext } from '../../types/embed-ui';
 import {
     COMMAND_EXECUTION_INJECTOR_KEY,
+    EDITOR_ACTIVATED,
+    FOCUSING_COMMON_DRAWINGS,
+    FOCUSING_DOC,
+    FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_SHAPE_TEXT_EDITOR,
+    FOCUSING_SHEET,
+    FOCUSING_SLIDE,
+    FOCUSING_UNIT,
+    FORMULA_EDITOR_ACTIVATED,
     ICommandService,
+    IConfigService,
+    IContextService,
     Injector,
     IUndoRedoService,
     IUniverInstanceService,
@@ -32,7 +43,7 @@ import { CreateEmbedCommand } from '@univerjs/embed';
 import { ICanvasPopupService, IContextMenuService, ILayoutService, IMenuManagerService, IRibbonService, ISidebarService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from '../embed-child-unit-scoped-injector';
+import { createEmbedChildUnitScopedInjector, createEmbedScopedConfigInjector, createEmbedScopedInjector } from '../embed-child-unit-scoped-injector';
 import { EmbedInteractionBoundaryService } from '../embed-interaction-boundary.service';
 import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
@@ -141,7 +152,7 @@ describe('embed child unit scoped injector', () => {
             [ILayoutService, layoutService],
         ]);
 
-        const childContext = createChildContext(parentInjector as unknown as Injector);
+        const childContext = createTabChildContext(parentInjector as unknown as Injector);
         const scopedInjector = createEmbedChildUnitScopedInjector(childContext);
 
         expect(scopedInjector).toBeDefined();
@@ -242,7 +253,7 @@ describe('embed child unit scoped injector', () => {
         expect(createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector))).toBeUndefined();
     });
 
-    it('focuses the parent instance on the child unit while child scoped commands run', async () => {
+    it('focuses the parent instance on the child unit while tab-peer child scoped commands run', async () => {
         const childUnit = createUnit('child-sheet');
         const hostUnit = createUnit('host-doc');
         let currentSheetUnit = hostUnit;
@@ -288,7 +299,7 @@ describe('embed child unit scoped injector', () => {
             [IUniverInstanceService, instanceService],
             [ICommandService, commandService],
         ]);
-        const scopedInjector = createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector));
+        const scopedInjector = createEmbedChildUnitScopedInjector(createTabChildContext(parentInjector as unknown as Injector));
         const scopedCommandService = scopedInjector?.get(ICommandService) as unknown as IScopedCommandService;
 
         await scopedCommandService.executeCommand('cmd.async');
@@ -300,6 +311,174 @@ describe('embed child unit scoped injector', () => {
         expect(instanceService.focusUnit).toHaveBeenLastCalledWith('host-doc');
         expect(instanceService.getFocusedUnit()).toBe(hostUnit);
         expect(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(hostUnit);
+    });
+
+    it('focuses the parent instance on the child unit while doc-flow child scoped commands run', async () => {
+        const childUnit = createUnit('child-sheet');
+        const hostUnit = createUnit('host-doc');
+        let currentSheetUnit = hostUnit;
+        let focusedUnit: ReturnType<typeof createUnit> | null = hostUnit;
+        const focusedDuringCommand: Array<string | null> = [];
+        const currentDuringCommand: string[] = [];
+        const instanceService = {
+            getUnit: vi.fn(() => childUnit),
+            getCurrentUnitOfType: vi.fn((_type?: UniverInstanceType) => currentSheetUnit),
+            getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject(currentSheetUnit)),
+            setCurrentUnitForType: vi.fn((unitId: string) => {
+                currentSheetUnit = unitId === childUnit.getUnitId() ? childUnit : hostUnit;
+            }),
+            getFocusedUnit: vi.fn(() => focusedUnit),
+            focused$: new Subject<string | null>(),
+            focusUnit: vi.fn((unitId: string | null) => {
+                focusedUnit = unitId === childUnit.getUnitId()
+                    ? childUnit
+                    : unitId === hostUnit.getUnitId()
+                        ? hostUnit
+                        : null;
+            }),
+        };
+        const commandService = {
+            executeCommand: vi.fn(async (_id: string, _params?: object, options?: Record<PropertyKey, unknown>) => {
+                const executionInjector = options?.[COMMAND_EXECUTION_INJECTOR_KEY] as Injector | undefined;
+                const scopedInstanceService = executionInjector?.get(IUniverInstanceService) as IScopedInstanceService | undefined;
+                focusedDuringCommand.push(instanceService.getFocusedUnit()?.getUnitId() ?? null);
+                currentDuringCommand.push(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET).getUnitId());
+                focusedDuringCommand.push((scopedInstanceService?.getFocusedUnit() as ReturnType<typeof createUnit> | null | undefined)?.getUnitId() ?? null);
+                currentDuringCommand.push((scopedInstanceService?.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET) as ReturnType<typeof createUnit> | undefined)?.getUnitId() ?? '');
+                return true;
+            }),
+            syncExecuteCommand: vi.fn(() => true),
+        };
+        const parentInjector = createParentInjector([
+            [IUniverInstanceService, instanceService],
+            [ICommandService, commandService],
+        ]);
+        const scopedInjector = createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector));
+        const scopedCommandService = scopedInjector?.get(ICommandService) as unknown as IScopedCommandService;
+
+        await scopedCommandService.executeCommand('cmd.async');
+
+        expect(currentDuringCommand).toEqual(['child-sheet', 'child-sheet']);
+        expect(focusedDuringCommand).toEqual(['child-sheet', 'child-sheet']);
+        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.focusUnit).toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.focusUnit).toHaveBeenLastCalledWith('host-doc');
+        expect(instanceService.getFocusedUnit()).toBe(hostUnit);
+        expect(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(hostUnit);
+    });
+
+    it('keeps parent focus untouched while floating child scoped commands run', async () => {
+        const childUnit = createUnit('child-sheet');
+        const hostUnit = createUnit('host-sheet');
+        let currentSheetUnit = hostUnit;
+        let focusedUnit: ReturnType<typeof createUnit> | null = hostUnit;
+        const focusedDuringCommand: Array<string | null> = [];
+        const currentDuringCommand: string[] = [];
+        const instanceService = {
+            getUnit: vi.fn(() => childUnit),
+            getCurrentUnitOfType: vi.fn((_type?: UniverInstanceType) => currentSheetUnit),
+            getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject(currentSheetUnit)),
+            setCurrentUnitForType: vi.fn((unitId: string) => {
+                currentSheetUnit = unitId === childUnit.getUnitId() ? childUnit : hostUnit;
+            }),
+            getFocusedUnit: vi.fn(() => focusedUnit),
+            focused$: new Subject<string | null>(),
+            focusUnit: vi.fn((unitId: string | null) => {
+                focusedUnit = unitId === childUnit.getUnitId()
+                    ? childUnit
+                    : unitId === hostUnit.getUnitId()
+                        ? hostUnit
+                        : null;
+            }),
+        };
+        const commandService = {
+            executeCommand: vi.fn(async (_id: string, _params?: object, options?: Record<PropertyKey, unknown>) => {
+                const executionInjector = options?.[COMMAND_EXECUTION_INJECTOR_KEY] as Injector | undefined;
+                const scopedInstanceService = executionInjector?.get(IUniverInstanceService) as IScopedInstanceService | undefined;
+                focusedDuringCommand.push(instanceService.getFocusedUnit()?.getUnitId() ?? null);
+                currentDuringCommand.push(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET).getUnitId());
+                focusedDuringCommand.push((scopedInstanceService?.getFocusedUnit() as ReturnType<typeof createUnit> | null | undefined)?.getUnitId() ?? null);
+                currentDuringCommand.push((scopedInstanceService?.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET) as ReturnType<typeof createUnit> | undefined)?.getUnitId() ?? '');
+                return true;
+            }),
+            syncExecuteCommand: vi.fn(() => true),
+        };
+        const parentInjector = createParentInjector([
+            [IUniverInstanceService, instanceService],
+            [ICommandService, commandService],
+        ]);
+        const scopedInjector = createEmbedChildUnitScopedInjector(createFloatingChildContext(parentInjector as unknown as Injector));
+        const scopedCommandService = scopedInjector?.get(ICommandService) as unknown as IScopedCommandService;
+
+        await scopedCommandService.executeCommand('cmd.async');
+
+        expect(currentDuringCommand).toEqual(['host-sheet', 'child-sheet']);
+        expect(focusedDuringCommand).toEqual(['host-sheet', 'child-sheet']);
+        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.focusUnit).not.toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.getFocusedUnit()).toBe(hostUnit);
+        expect(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(hostUnit);
+    });
+
+    it('keeps child runtime focus context local while passing non-focus context through', () => {
+        const childUnit = createUnit('child-sheet');
+        const parentContextChanges: Record<string, boolean>[] = [];
+        const scopedContextChanges: Record<string, boolean>[] = [];
+        const contextService = {
+            contextChanged$: new Subject<Record<string, boolean>>(),
+            getContextValue: vi.fn((key: string) => key === 'HOST_CONTEXT'),
+            setContextValue: vi.fn((key: string, value: boolean) => {
+                parentContextChanges.push({ [key]: value });
+            }),
+            subscribeContextValue$: vi.fn((key: string) => new BehaviorSubject(key === 'HOST_CONTEXT')),
+        };
+        const parentInjector = createParentInjector([
+            [IUniverInstanceService, {
+                getUnit: vi.fn(() => childUnit),
+                getCurrentUnitOfType: vi.fn(() => childUnit),
+                getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject(childUnit)),
+                setCurrentUnitForType: vi.fn(),
+                getFocusedUnit: vi.fn(() => childUnit),
+                focused$: new Subject<string | null>(),
+                focusUnit: vi.fn(),
+            }],
+            [ICommandService, {
+                executeCommand: vi.fn(async () => true),
+                syncExecuteCommand: vi.fn(() => true),
+            }],
+            [IContextService, contextService],
+        ]);
+        const scopedInjector = createEmbedChildUnitScopedInjector(createFloatingChildContext(parentInjector as unknown as Injector));
+        const scopedContextService = scopedInjector?.get(IContextService) as IContextService;
+
+        scopedContextService.contextChanged$.subscribe((change) => scopedContextChanges.push(change));
+        expect(scopedContextService.getContextValue(FOCUSING_UNIT)).toBe(true);
+        expect(scopedContextService.getContextValue(FOCUSING_SHEET)).toBe(true);
+        expect(scopedContextService.getContextValue(FOCUSING_DOC)).toBe(false);
+        expect(scopedContextService.getContextValue(FOCUSING_SLIDE)).toBe(false);
+        expect(scopedContextService.getContextValue(FOCUSING_FX_BAR_EDITOR)).toBe(false);
+        expect(scopedContextService.getContextValue('HOST_CONTEXT')).toBe(true);
+
+        const fxValues: boolean[] = [];
+        scopedContextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).subscribe((value) => fxValues.push(value)).unsubscribe();
+        scopedContextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+        scopedContextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+        scopedContextService.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, true);
+        scopedContextService.setContextValue(EDITOR_ACTIVATED, true);
+        scopedContextService.setContextValue(FORMULA_EDITOR_ACTIVATED, true);
+        scopedContextService.setContextValue('HOST_CONTEXT', false);
+
+        expect(scopedContextService.getContextValue(FOCUSING_FX_BAR_EDITOR)).toBe(true);
+        expect(parentContextChanges).toEqual([{ HOST_CONTEXT: false }]);
+        expect(contextService.setContextValue).toHaveBeenCalledTimes(1);
+        expect(fxValues).toEqual([false]);
+        expect(scopedContextChanges).toEqual([
+            { [FOCUSING_FX_BAR_EDITOR]: true },
+            { [FOCUSING_COMMON_DRAWINGS]: true },
+            { [FOCUSING_SHAPE_TEXT_EDITOR]: true },
+            { [EDITOR_ACTIVATED]: true },
+            { [FORMULA_EDITOR_ACTIVATED]: true },
+        ]);
     });
 
     it('keeps parent focus on the child after a scoped command when the child owns an active interaction lease', async () => {
@@ -334,7 +513,7 @@ describe('embed child unit scoped injector', () => {
             [ICommandService, commandService],
             [EmbedRuntimeFocusCoordinator, runtimeFocusCoordinator],
         ]);
-        const scopedInjector = createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector));
+        const scopedInjector = createEmbedChildUnitScopedInjector(createTabChildContext(parentInjector as unknown as Injector));
         const scopedCommandService = scopedInjector?.get(ICommandService) as unknown as IScopedCommandService;
 
         const lease = runtimeFocusCoordinator.acquireLease({
@@ -548,6 +727,71 @@ describe('embed child unit scoped injector', () => {
         expect(childInjector.resolvedDependencyCollection.resolvedDependencies.get(overrideToken)).toEqual([ownedInstance]);
     });
 
+    it('reuses parent services instead of registering duplicate scoped dependencies', () => {
+        const sharedToken = Symbol('shared');
+        const localToken = Symbol('local');
+        const childInjector = {
+            has: vi.fn((token: unknown) => token === sharedToken || token === localToken),
+            get: vi.fn((token: unknown) => {
+                if (token === sharedToken) return 'child-shared';
+                if (token === localToken) return 'child-local';
+                return undefined;
+            }),
+            add: vi.fn(),
+            createInstance: vi.fn(),
+            dispose: vi.fn(),
+        };
+        const parentInjector = {
+            has: vi.fn((token: unknown) => token === sharedToken),
+            get: vi.fn((token: unknown) => token === sharedToken ? 'parent-shared' : undefined),
+            add: vi.fn(),
+            createChild: vi.fn(() => childInjector),
+            createInstance: vi.fn(),
+        };
+        const scopedInjector = createEmbedScopedInjector(parentInjector as unknown as Injector, new Map());
+
+        expect(scopedInjector.get(sharedToken as never)).toBe('parent-shared');
+        expect(scopedInjector.get(localToken as never)).toBe('child-local');
+
+        scopedInjector.add([sharedToken, { useValue: 'local-shared' }] as never);
+        expect(scopedInjector.get(sharedToken as never)).toBe('parent-shared');
+        expect(childInjector.add).not.toHaveBeenCalledWith([sharedToken, { useValue: 'local-shared' }]);
+    });
+
+    it('supports explicit scoped config overrides without allowing generic service replacement', () => {
+        const configService = {
+            getConfig: vi.fn((id: string | symbol) => id === 'docs-ui.config'
+                ? { fitToWidth: { mode: 'none', paddingX: 20 } }
+                : { id }),
+            setConfig: vi.fn(),
+            deleteConfig: vi.fn(),
+            subscribeConfigValue$: vi.fn(),
+        };
+        const parentInjector = createParentInjector([
+            [IConfigService, configService],
+        ]);
+        const scopedInjector = createEmbedScopedConfigInjector(parentInjector as unknown as Injector, new Map([
+            ['docs-ui.config', (config) => ({
+                ...(config as object),
+                fitToWidth: { mode: 'fit-width', paddingX: 0 },
+            })],
+        ]));
+
+        expect(scopedInjector).toBeDefined();
+        expect(scopedInjector?.get(IConfigService).getConfig('docs-ui.config')).toEqual({
+            fitToWidth: { mode: 'fit-width', paddingX: 0 },
+        });
+        expect(scopedInjector?.get(IConfigService).getConfig('other')).toEqual({ id: 'other' });
+        expect((parentInjector.get(IConfigService) as IConfigService).getConfig('docs-ui.config')).toEqual({
+            fitToWidth: { mode: 'none', paddingX: 20 },
+        });
+
+        scopedInjector?.add([IConfigService, { useValue: { getConfig: () => ({ broken: true }) } }] as never);
+        expect(scopedInjector?.get(IConfigService).getConfig('docs-ui.config')).toEqual({
+            fitToWidth: { mode: 'fit-width', paddingX: 0 },
+        });
+    });
+
     it('deduplicates identifier decorators by stable name when adding local dependencies', () => {
         const childAdd = vi.fn();
         const factory = vi.fn(() => 'local-render-module');
@@ -607,6 +851,76 @@ function createChildContext(injector: Injector): IEmbedChildContainerContext {
     return {
         descriptor,
         layout: 'doc-width-scale',
+        injector,
+        hostElement: root,
+        container: root,
+        hostUnitId: descriptor.hostUnitId,
+        embedId: descriptor.embedId,
+        childUnitId: descriptor.childUnitId!,
+        childType: descriptor.childType!,
+        renderScope: {
+            rootElement: root,
+            contentRoot,
+        } as never,
+        runtimeScope: {} as never,
+    };
+}
+
+function createFloatingChildContext(injector: Injector): IEmbedChildContainerContext {
+    const descriptor = createDescriptor({
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        entry: 'sheets-floating-object',
+        hostUnitId: 'host-sheet',
+        hostAnchorId: 'drawing-1',
+        sourceMeta: {
+            floating: {
+                enabled: true,
+                layout: 'scroll-contained',
+                fullscreen: true,
+            },
+            tab: false,
+        },
+    });
+    const root = document.createElement('div');
+    const contentRoot = document.createElement('div');
+    root.appendChild(contentRoot);
+    return {
+        descriptor,
+        layout: 'scroll-contained',
+        injector,
+        hostElement: root,
+        container: root,
+        hostUnitId: descriptor.hostUnitId,
+        embedId: descriptor.embedId,
+        childUnitId: descriptor.childUnitId!,
+        childType: descriptor.childType!,
+        renderScope: {
+            rootElement: root,
+            contentRoot,
+        } as never,
+        runtimeScope: {} as never,
+    };
+}
+
+function createTabChildContext(injector: Injector): IEmbedChildContainerContext {
+    const descriptor = createDescriptor({
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        entry: 'sheets-sheet-tab',
+        hostUnitId: 'host-sheet',
+        hostAnchorId: 'sheet-tab-1',
+        sourceMeta: {
+            floating: false,
+            tab: {
+                enabled: true,
+            },
+        },
+    });
+    const root = document.createElement('div');
+    const contentRoot = document.createElement('div');
+    root.appendChild(contentRoot);
+    return {
+        descriptor,
+        layout: 'tab-peer',
         injector,
         hostElement: root,
         container: root,

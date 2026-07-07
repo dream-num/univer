@@ -18,6 +18,7 @@ import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, Injector, IRa
 import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
@@ -391,6 +392,34 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     // #region attach to absolute position
     attachPopupToAbsolutePosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string) {
+        const position$ = new BehaviorSubject(bound);
+        const disposable = this._attachAbsolutePopup(
+            bound,
+            position$.asObservable(),
+            popup,
+            _unitId,
+            _subUnitId,
+            () => position$.complete()
+        );
+        if (!disposable) {
+            position$.complete();
+        }
+
+        return disposable;
+    }
+
+    attachPopupToDynamicAbsolutePosition(bound: IBoundRectNoAngle, anchorRect$: Observable<IBoundRectNoAngle>, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string) {
+        return this._attachAbsolutePopup(bound, anchorRect$, popup, _unitId, _subUnitId);
+    }
+
+    private _attachAbsolutePopup(
+        bound: IBoundRectNoAngle,
+        anchorRect$: Observable<IBoundRectNoAngle>,
+        popup: ICanvasPopup,
+        _unitId?: string,
+        _subUnitId?: string,
+        onDispose?: () => void
+    ) {
         const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
@@ -414,7 +443,6 @@ export class SheetCanvasPopManagerService extends Disposable {
             return;
         }
 
-        const position$ = new BehaviorSubject(bound);
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -422,14 +450,14 @@ export class SheetCanvasPopManagerService extends Disposable {
             subUnitId,
             injector: popupInjector,
             anchorRect: bound,
-            anchorRect$: position$.asObservable(),
+            anchorRect$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 
         return {
             dispose: () => {
                 this._globalPopupManagerService.removePopup(id);
-                position$.complete();
+                onDispose?.();
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };

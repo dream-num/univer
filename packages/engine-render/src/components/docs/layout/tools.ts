@@ -1515,6 +1515,21 @@ export function getFontCreateConfig(
     return result;
 }
 
+export function getCustomRangeGlyphWidth(
+    index: number,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    config: IFontCreateConfig
+): number | undefined {
+    const customRange = viewModel.getCustomRange(index + paragraphNode.startIndex);
+    const glyphWidthEm = customRange?.glyphWidthEm;
+    if (typeof glyphWidthEm !== 'number' || !Number.isFinite(glyphWidthEm) || glyphWidthEm < 0) {
+        return undefined;
+    }
+
+    return glyphWidthEm * config.fontStyle.originFontSize;
+}
+
 // Generate an empty doc skeleton with the initial states.
 export function getNullSkeleton(): IDocumentSkeletonCached {
     return {

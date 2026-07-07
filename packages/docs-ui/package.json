@@ -92,7 +92,7 @@
         "@univerjs/embed": "workspace:*",
         "@univerjs/embed-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.16.0",
+        "@univerjs/icons": "1.18.0",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

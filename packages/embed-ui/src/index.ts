@@ -102,6 +102,14 @@ export { EmbedSceneCanvasCaptureService } from './services/embed-scene-canvas-ca
 export type { EmbedSceneCanvasCaptureResult } from './services/embed-scene-canvas-capture.service';
 export { scrollSceneViewportPassive } from './services/embed-scene-passive-wheel';
 export {
+    captureEmbedContextCanvasScreenshot,
+    EmbedScreenshotService,
+} from './services/embed-screenshot.service';
+export type {
+    EmbedScreenshotProvider,
+    EmbedScreenshotResult,
+} from './services/embed-screenshot.service';
+export {
     flushPendingEmbedUIContributions,
     registerEmbedUIContribution,
 } from './services/embed-ui-contribution-register';

@@ -287,7 +287,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         const ownerWindow = ownerDocument.defaultView ?? window;
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
-        let delayedFocusTimer: ReturnType<typeof ownerWindow.setTimeout> | undefined;
+        let delayedFocusTimer: number | undefined;
         const focusCellEditorElement = () => {
             const scope = rootRef.current
                 ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
@@ -403,6 +403,20 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         if (scope.childType === UniverInstanceType.UNIVER_SHEET && scope.childUnitId) {
             const ownerDocument = rootRef.current.ownerDocument;
             let pointerRetryFrame = 0;
+            const focusEditor = () => {
+                if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) || shouldPreserveEmbedPopupFocus(scope.embedId, ownerDocument)) {
+                    return;
+                }
+
+                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
+
+                if (!docSelectionRenderService?.isFocusing) {
+                    docSelectionRenderService?.focus();
+                }
+
+                focusSheetCellEditorElement(ownerDocument);
+            };
             const refocusEditorAfterRuntimePointer = (event: PointerEvent | MouseEvent) => {
                 if (!focusCoordinator.isChildUnitRuntimeEvent(scope.childUnitId, event.target, event) || isEmbedRuntimeEditorOrPopup(event.target)) {
                     return;
@@ -423,7 +437,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         }
 
         return () => collection.dispose();
-    }, [editState?.unitId, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
+    }, [contextService, editState?.unitId, editorService, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
 
     useEffect(() => {
         if (visible?.visible || !injector.has(EmbedRuntimeFocusCoordinator)) {
@@ -453,7 +467,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             focusCoordinator,
         });
         const ownerWindow = ownerDocument.defaultView ?? window;
-        let delayedFocusTimer: ReturnType<typeof ownerWindow.setTimeout> | undefined;
+        let delayedFocusTimer: number | undefined;
         const focusCellEditorElement = () => {
             if (shouldPreserveEmbedInteractiveFocus(activeSessionScope.embedId, ownerDocument)) {
                 return;

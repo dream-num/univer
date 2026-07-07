@@ -78,7 +78,6 @@ import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
-import { getSheetRenderProfile, getSheetRenderProfilerNow, incrementSheetRenderCounter, recordSheetRenderMetric } from './render-profiler';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
 
 interface ICellDocumentModelOption {
@@ -418,13 +417,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (!this._worksheetData) return;
         if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
 
-        const profile = getSheetRenderProfile();
-        const profileStart = profile ? getSheetRenderProfilerNow() : 0;
-        let styleRangeCount = 0;
-        let visibleCellVisits = 0;
-        let overflowCellVisits = 0;
-        let mergeCellVisits = 0;
-
         this.updateVisibleRange(vpInfo);
 
         const rowColumnSegment = this._drawingRange;
@@ -457,7 +449,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         // this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
 
         for (const styleRange of styleRanges) {
-            styleRangeCount += 1;
             const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = styleRange;
 
             if (visibleEndColumn === -1 || visibleEndRow === -1) continue;
@@ -468,7 +459,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
             const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
             const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
-            const visibleColumnCount = visibleEndColumn - visibleStartColumn + 1;
             for (let r = visibleStartRow; r <= visibleEndRow; r++) {
                 if (this.worksheet.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
@@ -482,10 +472,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     mergeVisibleRangeStartRow = r + 1;
                     continue;
                 };
-
-                if (profile) {
-                    visibleCellVisits += visibleColumnCount;
-                }
 
                 if (r === visibleEndRow) {
                     mergeVisibleRanges.push({
@@ -505,9 +491,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
                 // Calculate text length for overflow cells just outside the visible range.
                 for (let c = visibleStartColumn - 1; c >= expandStartCol; c--) {
-                    if (profile) {
-                        overflowCellVisits += 1;
-                    }
                     this._setStylesCacheForOneCell(r, c, overflowCellOptions ?? { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
@@ -521,9 +504,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
                 // Calculate text length for overflow cells just outside the visible range.
                 for (let c = visibleEndColumn + 1; c <= expandEndCol; c++) {
-                    if (profile) {
-                        overflowCellVisits += 1;
-                    }
                     this._setStylesCacheForOneCell(r, c, overflowCellOptions ?? { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
@@ -550,20 +530,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     pushRowRange(this._incrementalFontRenderRanges, mergeRange.startRow, mergeRange.startColumn, mergeRange.startColumn);
                 }
             }
-            if (profile) {
-                mergeCellVisits += mergeRanges.length;
-            }
-        }
-
-        if (profile) {
-            recordSheetRenderMetric('SpreadsheetSkeleton.setStylesCache', getSheetRenderProfilerNow() - profileStart, {
-                incremental: !!shouldUseIncrementalStyleRange,
-                mergeCellVisits,
-                overflowCellVisits,
-                styleRangeCount,
-                totalCellVisits: visibleCellVisits + overflowCellVisits + mergeCellVisits,
-                visibleCellVisits,
-            });
         }
 
         return this;
@@ -1364,7 +1330,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             if (contentSize.width < currentColumnWidth) {
                 docsConfig.textFitsCurrentCell = true;
-                incrementSheetRenderCounter('SpreadsheetSkeleton.textFits.string');
                 return true;
             }
 

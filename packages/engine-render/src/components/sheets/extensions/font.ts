@@ -48,7 +48,6 @@ import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
-import { getSheetRenderProfile, getSheetRenderProfilerNow, recordSheetRenderMetric } from '../render-profiler';
 import { DEFAULT_PADDING_DATA, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
 import { SheetExtension } from './sheet-extension';
 
@@ -89,34 +88,6 @@ function needsFontRenderExtensionBounds(fontCache: IFontCacheItem) {
     return Boolean(extension?.isSkip || extension?.leftOffset || extension?.rightOffset);
 }
 
-interface IFontRenderProfileStats {
-    cellCandidates: number;
-    clipSetupMs: number;
-    clippedTextCount: number;
-    clippedTextMs: number;
-    coordLookupMs: number;
-    documentCount: number;
-    documentMs: number;
-    extensionSkipCount: number;
-    fontCacheHits: number;
-    mergedCellSkipCount: number;
-    mergeLookupMs: number;
-    outOfViewSkipCount: number;
-    plainFastCount: number;
-    plainFastRejectDecorationCount: number;
-    plainFastRejectDocumentCount: number;
-    plainFastRejectEmptyCount: number;
-    plainFastRejectExtensionCount: number;
-    plainFastRejectFitCount: number;
-    plainFastRejectRotationCount: number;
-    plainFastRejectWrapCount: number;
-    plainFastMs: number;
-    renderCellMs: number;
-    restoreMs: number;
-    renderLoopMs: number;
-    visibilitySkipCount: number;
-}
-
 interface IRenderFontContext {
     ctx: UniverRenderingContext;
     scale: number;
@@ -151,7 +122,6 @@ interface IRenderFontContext {
      */
     endX: number;
     cellInfo: ICellWithCoord;
-    profileStats?: IFontRenderProfileStats;
 }
 
 export class Font extends SheetExtension {
@@ -229,53 +199,17 @@ export class Font extends SheetExtension {
             diffRanges,
             spreadsheetSkeleton,
         } as IRenderFontContext;
-        const profile = getSheetRenderProfile();
-        const profileStats = profile
-            ? {
-                cellCandidates: 0,
-                clipSetupMs: 0,
-                clippedTextCount: 0,
-                clippedTextMs: 0,
-                coordLookupMs: 0,
-                documentCount: 0,
-                documentMs: 0,
-                extensionSkipCount: 0,
-                fontCacheHits: 0,
-                mergedCellSkipCount: 0,
-                mergeLookupMs: 0,
-                outOfViewSkipCount: 0,
-                plainFastCount: 0,
-                plainFastRejectDecorationCount: 0,
-                plainFastRejectDocumentCount: 0,
-                plainFastRejectEmptyCount: 0,
-                plainFastRejectExtensionCount: 0,
-                plainFastRejectFitCount: 0,
-                plainFastRejectRotationCount: 0,
-                plainFastRejectWrapCount: 0,
-                plainFastMs: 0,
-                renderCellMs: 0,
-                restoreMs: 0,
-                renderLoopMs: 0,
-                visibilitySkipCount: 0,
-            }
-            : undefined;
-        renderFontContext.profileStats = profileStats;
         ctx.save();
 
-        const mergeLookupStart = profileStats ? getSheetRenderProfilerNow() : 0;
         const mergeData = spreadsheetSkeleton.worksheet.getMergeData();
         const hasMerge = mergeData.length > 0;
         const uniqueMergeRanges: IRange[] = [];
         const mergeRangeIDSet = hasMerge ? new Set() : null;
         const spanModel = hasMerge ? spreadsheetSkeleton.worksheet.getSpanModel() : null;
-        if (profileStats) {
-            profileStats.mergeLookupMs += getSheetRenderProfilerNow() - mergeLookupStart;
-        }
 
         // Currently, viewRanges has only one range.
         rangesToScan.forEach((range) => {
             if (hasMerge && spanModel && mergeRangeIDSet) {
-                const mergeRangeStart = profileStats ? getSheetRenderProfilerNow() : 0;
                 // collect unique merge ranges intersect with view range.
                 // The ranges in mergeRanges must be unique. Otherwise, the font will render, text redrawing causes jagged edges or artifacts.
                 const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(
@@ -291,37 +225,20 @@ export class Font extends SheetExtension {
                         uniqueMergeRanges.push(mergeRange);
                     }
                 });
-                if (profileStats) {
-                    profileStats.mergeLookupMs += getSheetRenderProfilerNow() - mergeRangeStart;
-                }
             }
 
             const { startRow, endRow, startColumn, endColumn } = range;
-            const renderLoopStart = profileStats ? getSheetRenderProfilerNow() : 0;
             for (let row = startRow; row <= endRow; row++) {
                 for (let col = startColumn; col <= endColumn; col++) {
-                    if (profileStats) {
-                        profileStats.cellCandidates += 1;
-                    }
                     const fontCache = fontMatrix.getValue(row, col);
                     if (!fontCache) {
                         continue;
                     }
-                    if (profileStats) {
-                        profileStats.fontCacheHits += 1;
-                    }
 
                     if (spanModel && spanModel.getMergeDataIndex(row, col) !== -1) {
-                        if (profileStats) {
-                            profileStats.mergedCellSkipCount += 1;
-                        }
                         continue;
                     }
-                    const coordLookupStart = profileStats ? getSheetRenderProfilerNow() : 0;
                     const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
-                    if (profileStats) {
-                        profileStats.coordLookupMs += getSheetRenderProfilerNow() - coordLookupStart;
-                    }
                     if (!cellInfo) {
                         continue;
                     }
@@ -329,9 +246,6 @@ export class Font extends SheetExtension {
                     renderFontContext.cellInfo = cellInfo;
                     this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
                 }
-            }
-            if (profileStats) {
-                profileStats.renderLoopMs += getSheetRenderProfilerNow() - renderLoopStart;
             }
         });
 
@@ -341,61 +255,16 @@ export class Font extends SheetExtension {
                 return;
             }
 
-            const coordLookupStart = profileStats ? getSheetRenderProfilerNow() : 0;
             const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
-            if (profileStats) {
-                profileStats.coordLookupMs += getSheetRenderProfilerNow() - coordLookupStart;
-            }
             renderFontContext.cellInfo = cellInfo;
             this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache);
         });
 
         ctx.restore();
-
-        if (profileStats) {
-            recordSheetRenderMetric('Spreadsheet.font.mergeLookup', profileStats.mergeLookupMs, { hasMerge, mergeRanges: uniqueMergeRanges.length });
-            recordSheetRenderMetric('Spreadsheet.font.coordLookup', profileStats.coordLookupMs, { fontCacheHits: profileStats.fontCacheHits });
-            recordSheetRenderMetric('Spreadsheet.font.renderLoop', profileStats.renderLoopMs, {
-                cellCandidates: profileStats.cellCandidates,
-                clippedTextCount: profileStats.clippedTextCount,
-                documentCount: profileStats.documentCount,
-                extensionSkipCount: profileStats.extensionSkipCount,
-                fontCacheHits: profileStats.fontCacheHits,
-                mergedCellSkipCount: profileStats.mergedCellSkipCount,
-                outOfViewSkipCount: profileStats.outOfViewSkipCount,
-                plainFastCount: profileStats.plainFastCount,
-                plainFastRejectDecorationCount: profileStats.plainFastRejectDecorationCount,
-                plainFastRejectDocumentCount: profileStats.plainFastRejectDocumentCount,
-                plainFastRejectEmptyCount: profileStats.plainFastRejectEmptyCount,
-                plainFastRejectExtensionCount: profileStats.plainFastRejectExtensionCount,
-                plainFastRejectFitCount: profileStats.plainFastRejectFitCount,
-                plainFastRejectRotationCount: profileStats.plainFastRejectRotationCount,
-                plainFastRejectWrapCount: profileStats.plainFastRejectWrapCount,
-                visibilitySkipCount: profileStats.visibilitySkipCount,
-            });
-            recordSheetRenderMetric('Spreadsheet.font.renderCell', profileStats.renderCellMs, {
-                clippedTextCount: profileStats.clippedTextCount,
-                documentCount: profileStats.documentCount,
-                plainFastCount: profileStats.plainFastCount,
-            });
-            recordSheetRenderMetric('Spreadsheet.font.clipSetup', profileStats.clipSetupMs, { clippedTextCount: profileStats.clippedTextCount, documentCount: profileStats.documentCount });
-            recordSheetRenderMetric('Spreadsheet.font.restore', profileStats.restoreMs, { clippedTextCount: profileStats.clippedTextCount, documentCount: profileStats.documentCount });
-            recordSheetRenderMetric('Spreadsheet.font.plainFast', profileStats.plainFastMs, { count: profileStats.plainFastCount });
-            recordSheetRenderMetric('Spreadsheet.font.clippedText', profileStats.clippedTextMs, { count: profileStats.clippedTextCount });
-            recordSheetRenderMetric('Spreadsheet.font.documents', profileStats.documentMs, { count: profileStats.documentCount });
-        }
     }
 
     _renderFontEachCell(renderFontCtx: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>, cacheValue?: IFontCacheItem) {
         const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontCtx;
-        const profileStats = renderFontCtx.profileStats;
-        const renderCellStart = profileStats ? getSheetRenderProfilerNow() : 0;
-        const finish = (result: boolean) => {
-            if (profileStats) {
-                profileStats.renderCellMs += getSheetRenderProfilerNow() - renderCellStart;
-            }
-            return result;
-        };
 
         //#region merged cell
         const { startY, endY, startX, endX } = cellInfo;
@@ -407,10 +276,7 @@ export class Font extends SheetExtension {
 
         // merged, but not primary cell, then skip. DO NOT RENDER AGAIN, or that would cause font blurry.
         if (isMerged && !isMergedMainCell) {
-            if (profileStats) {
-                profileStats.mergedCellSkipCount += 1;
-            }
-            return finish(true);
+            return true;
         }
 
         // merged and primary cell
@@ -424,7 +290,7 @@ export class Font extends SheetExtension {
         //#endregion
 
         const fontCache = cacheValue ?? fontMatrix.getValue(row, col);
-        if (!fontCache) return finish(true);
+        if (!fontCache) return true;
         renderFontCtx.fontCache = fontCache;
 
         //#region overflow
@@ -440,10 +306,7 @@ export class Font extends SheetExtension {
         const notInMergeRange = !isMergedMainCell && !isMerged;
         if (!overflowRange && notInMergeRange) {
             if (!inViewRanges(renderRange, row, col)) {
-                if (profileStats) {
-                    profileStats.outOfViewSkipCount += 1;
-                }
-                return finish(true);
+                return true;
             }
         }
         //#endregion
@@ -451,18 +314,12 @@ export class Font extends SheetExtension {
         if (notInMergeRange) {
             const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
             if (!visibleRow) {
-                if (profileStats) {
-                    profileStats.visibilitySkipCount += 1;
-                }
-                return finish(true);
+                return true;
             }
 
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
             if (!visibleCol) {
-                if (profileStats) {
-                    profileStats.visibilitySkipCount += 1;
-                }
-                return finish(true);
+                return true;
             }
         } else {
             let isAllRowHidden = true;
@@ -476,10 +333,7 @@ export class Font extends SheetExtension {
             }
 
             if (isAllRowHidden) {
-                if (profileStats) {
-                    profileStats.visibilitySkipCount += 1;
-                }
-                return finish(true);
+                return true;
             }
 
             let isAllColHidden = true;
@@ -493,10 +347,7 @@ export class Font extends SheetExtension {
             }
 
             if (isAllColHidden) {
-                if (profileStats) {
-                    profileStats.visibilitySkipCount += 1;
-                }
-                return finish(true);
+                return true;
             }
         }
 
@@ -505,28 +356,19 @@ export class Font extends SheetExtension {
         if (fontCache.cellData?.fontRenderExtension) {
             const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
             if (cellData?.fontRenderExtension?.isSkip) {
-                if (profileStats) {
-                    profileStats.extensionSkipCount += 1;
-                }
-                return finish(true);
+                return true;
             }
         }
 
-        const plainFastStart = profileStats ? getSheetRenderProfilerNow() : 0;
         if (this._renderPlainTextWithoutClip(ctx, renderFontCtx, fontCache)) {
-            if (profileStats) {
-                profileStats.plainFastCount += 1;
-                profileStats.plainFastMs += getSheetRenderProfilerNow() - plainFastStart;
-            }
             renderFontCtx.startX = 0;
             renderFontCtx.startY = 0;
             renderFontCtx.endX = 0;
             renderFontCtx.endY = 0;
             renderFontCtx.overflowRectangle = null;
-            return finish(false);
+            return false;
         }
 
-        const clipSetupStart = profileStats ? getSheetRenderProfilerNow() : 0;
         ctx.save();
         ctx.beginPath();
 
@@ -536,29 +378,12 @@ export class Font extends SheetExtension {
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        if (profileStats) {
-            profileStats.clipSetupMs += getSheetRenderProfilerNow() - clipSetupStart;
-        }
         if (fontCache.documentSkeleton) {
-            const documentStart = profileStats ? getSheetRenderProfilerNow() : 0;
             this._renderDocuments(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
-            if (profileStats) {
-                profileStats.documentCount += 1;
-                profileStats.documentMs += getSheetRenderProfilerNow() - documentStart;
-            }
         } else {
-            const clippedTextStart = profileStats ? getSheetRenderProfilerNow() : 0;
             this._renderText(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
-            if (profileStats) {
-                profileStats.clippedTextCount += 1;
-                profileStats.clippedTextMs += getSheetRenderProfilerNow() - clippedTextStart;
-            }
         }
-        const restoreStart = profileStats ? getSheetRenderProfilerNow() : 0;
         ctx.restore();
-        if (profileStats) {
-            profileStats.restoreMs += getSheetRenderProfilerNow() - restoreStart;
-        }
 
         if (fontCache.documentSkeleton) {
             const documentDataModel = fontCache.documentSkeleton.getViewModel().getDataModel();
@@ -577,38 +402,30 @@ export class Font extends SheetExtension {
         renderFontCtx.endX = 0;
         renderFontCtx.endY = 0;
         renderFontCtx.overflowRectangle = null;
-        return finish(false);
+        return false;
     };
 
     private _renderPlainTextWithoutClip(ctx: UniverRenderingContext, renderFontCtx: IRenderFontContext, fontCache: IFontCacheItem) {
         const { cellData, documentSkeleton, textFitsCurrentCell, vertexAngle = 0, centerAngle = 0, wrapStrategy } = fontCache;
-        const profileStats = renderFontCtx.profileStats;
         if (!textFitsCurrentCell) {
-            if (profileStats) profileStats.plainFastRejectFitCount += 1;
             return false;
         }
         if (documentSkeleton) {
-            if (profileStats) profileStats.plainFastRejectDocumentCount += 1;
             return false;
         }
         if (vertexAngle !== 0 || centerAngle !== 0) {
-            if (profileStats) profileStats.plainFastRejectRotationCount += 1;
             return false;
         }
         if (wrapStrategy === WrapStrategy.WRAP) {
-            if (profileStats) profileStats.plainFastRejectWrapCount += 1;
             return false;
         }
         if (needsFontRenderExtensionBounds(fontCache)) {
-            if (profileStats) profileStats.plainFastRejectExtensionCount += 1;
             return false;
         }
         if (fontCache.style?.st?.s || fontCache.style?.ul?.s) {
-            if (profileStats) profileStats.plainFastRejectDecorationCount += 1;
             return false;
         }
         if (cellData?.v === undefined || cellData?.v === null) {
-            if (profileStats) profileStats.plainFastRejectEmptyCount += 1;
             return false;
         }
 

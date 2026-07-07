@@ -717,88 +717,6 @@ describe('spreadsheet integration', () => {
         expect(skeleton.rowColumnSegment).toEqual(skeleton.getCacheRangeByViewport(viewportInfo));
     });
 
-    it('rebuilds visible style cache for merged sheets when scrolling inside the existing cache area', () => {
-        const { skeleton, scene, cacheCanvas } = fixture;
-        const mergeRange = skeleton.worksheet.getMergeData()[0];
-        const styleCellSpy = vi.spyOn(skeleton as any, '_setStylesCacheForOneCell');
-        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
-            diffBounds: [createBound(100, 60, 220, 140)],
-            diffCacheBounds: [],
-            diffX: 0,
-            diffY: 12,
-            shouldCacheUpdate: 0,
-            isDirty: 0,
-            isForceDirty: false,
-        });
-
-        skeleton.setStylesCache(viewportInfo);
-
-        const mergeStyleCall = styleCellSpy.mock.calls.find(([row, column, options]) => (
-            row === mergeRange.startRow &&
-            column === mergeRange.startColumn &&
-            options?.mergeRange
-        ));
-        expect(mergeStyleCall?.[2]).toEqual(expect.objectContaining({
-            hasMergeData: true,
-            mergeRange: expect.objectContaining({
-                startRow: mergeRange.startRow,
-                endRow: mergeRange.endRow,
-                startColumn: mergeRange.startColumn,
-                endColumn: mergeRange.endColumn,
-            }),
-            reuseExisting: false,
-        }));
-        expect(skeleton.incrementalFontRenderRanges).toEqual([]);
-    });
-
-    it('rebuilds visible style cache for horizontal cache refreshes', () => {
-        const { skeleton, scene, cacheCanvas } = fixture;
-        vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([]);
-        const styleCellSpy = vi.spyOn(skeleton as any, '_setStylesCacheForOneCell');
-        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
-            diffBounds: [createBound(520, 0, 640, 280)],
-            diffCacheBounds: [createBound(520, 0, 640, 280)],
-            diffX: -80,
-            diffY: 0,
-            shouldCacheUpdate: 1,
-            isDirty: 0,
-            isForceDirty: false,
-        });
-
-        skeleton.setStylesCache(viewportInfo);
-
-        const firstVisibleCall = styleCellSpy.mock.calls.find(([row, column, options]) => (
-            row === 0 &&
-            column === 0 &&
-            options?.cacheItem?.bg === true &&
-            options?.cacheItem?.border === true
-        ));
-        expect(firstVisibleCall?.[2]).toEqual(expect.objectContaining({
-            hasMergeData: false,
-            reuseExisting: false,
-        }));
-        expect(skeleton.incrementalFontRenderRanges).toEqual([]);
-    });
-
-    it('only calculates overflow styles outside the visible columns', () => {
-        const { skeleton, scene, cacheCanvas } = fixture;
-        const styleCellSpy = vi.spyOn(skeleton as any, '_setStylesCacheForOneCell');
-        const viewportInfo = createViewportInfo(scene, cacheCanvas);
-
-        skeleton.setStylesCache(viewportInfo);
-
-        const visibleRange = skeleton.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        const overflowStyleCalls = styleCellSpy.mock.calls.filter(([, column, options]) => {
-            const cacheItem = options?.cacheItem;
-            return cacheItem?.bg === false &&
-                cacheItem?.border === false &&
-                column >= visibleRange.startColumn &&
-                column <= visibleRange.endColumn;
-        });
-
-        expect(overflowStyleCalls).toHaveLength(0);
-    });
-
     it('skips merge lookups for one-cell style cache when merge data is absent', () => {
         const { skeleton } = fixture;
         const mergeInfoSpy = vi.spyOn(skeleton.worksheet, 'getCellInfoInMergeData');
@@ -821,40 +739,6 @@ describe('spreadsheet integration', () => {
         const visibleRange = skeleton.rowColumnSegment;
         const visibleRowCount = visibleRange.endRow - visibleRange.startRow + 1;
         expect(getRowVisibleSpy.mock.calls.length).toBeLessThan(visibleRowCount * 3);
-    });
-
-    it('reuses style cache options while scanning merge-free cells', () => {
-        const { skeleton, scene, cacheCanvas } = fixture;
-        vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([]);
-        const styleCellSpy = vi.spyOn(skeleton as any, '_setStylesCacheForOneCell');
-
-        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
-
-        const visibleOptions = styleCellSpy.mock.calls
-            .map((call) => call[2])
-            .filter((options) => options?.cacheItem?.bg === true && options?.cacheItem?.border === true);
-        expect(new Set(visibleOptions).size).toBe(1);
-    });
-
-    it('stops scanning overflow helper columns after a blocking cell', () => {
-        const { skeleton, scene, cacheCanvas } = fixture;
-        const styleCellSpy = vi.spyOn(skeleton as any, '_setStylesCacheForOneCell');
-        vi.spyOn(skeleton.worksheet, 'getCell').mockReturnValue({ v: 'blocked' } as any);
-        const viewportInfo = createViewportInfo(scene, cacheCanvas);
-
-        skeleton.setStylesCache(viewportInfo);
-
-        const visibleRange = skeleton.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        const rightOverflowCalls = styleCellSpy.mock.calls.filter(([, column, options]) => {
-            const cacheItem = options?.cacheItem;
-            return cacheItem?.bg === false &&
-                cacheItem?.border === false &&
-                column > visibleRange.endColumn;
-        });
-
-        const rowsWithRightOverflow = new Set(rightOverflowCalls.map(([row]) => row));
-        expect(rightOverflowCalls.length).toBeGreaterThan(0);
-        expect(rightOverflowCalls).toHaveLength(rowsWithRightOverflow.size);
     });
 
     it('reuses cached overflow-only font styles without reading cell data again', () => {

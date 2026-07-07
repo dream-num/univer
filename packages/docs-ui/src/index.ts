@@ -149,8 +149,8 @@ export { DocRenderController } from './controllers/render-controllers/doc.render
 export { DocUIController } from './controllers/ui.controller';
 export { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
 export {
-    createDocsCustomBlockHostAdapterContribution,
     createDocsCustomBlockHostContainerContribution,
+    createDocsCustomBlockUIHostAdapterContribution,
 } from './embed-host-adapter';
 export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockRenderViewport } from './embed-host-anchor';
 export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockMutationParams, IDocsCustomBlockRenderViewportParams, IEmbedDocsCustomBlockData } from './embed-host-anchor';
@@ -243,3 +243,4 @@ export type {
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
 export type { IRichTextEditorProps } from './views/RichTextEditor';
+export { createDocsCustomBlockHostAdapterContribution } from '@univerjs/docs';

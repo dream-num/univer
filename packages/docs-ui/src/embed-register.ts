@@ -21,7 +21,7 @@ import { createEmbedRenderCanvasPreviewProvider, EmbedBlockRegistryService, Embe
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
-import { createDocsCustomBlockHostAdapterContribution, createDocsCustomBlockHostContainerContribution } from './embed-host-adapter';
+import { createDocsCustomBlockHostContainerContribution, createDocsCustomBlockUIHostAdapterContribution } from './embed-host-adapter';
 import { EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY } from './embed-host-anchor';
 import { createDocsPassiveViewportProvider } from './embed-passive-viewport';
 import { registerDocsEmbedProductMenus } from './embed-product-menu';
@@ -49,7 +49,7 @@ function registerDocsEmbedUIContributionsNow(injector: Injector): void {
         injector.get(ComponentManager).register(EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, EmbedDocsCustomBlockRenderer);
     }
 
-    const adapter = createDocsCustomBlockHostAdapterContribution(anchorModelService, univerInstanceService, renderManagerService);
+    const adapter = createDocsCustomBlockUIHostAdapterContribution(anchorModelService, univerInstanceService, renderManagerService);
     if (!adapterRegistry.get(adapter.hostType, adapter.entry)) {
         adapterRegistry.register(adapter);
     }

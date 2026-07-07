@@ -16,12 +16,12 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { createDocsCustomBlockHostAdapterContribution, createDocsCustomBlockHostContainerContribution } from './embed-host-adapter';
+import { createDocsCustomBlockHostContainerContribution, createDocsCustomBlockUIHostAdapterContribution } from './embed-host-adapter';
 
 describe('docs custom block UI host adapter', () => {
     it('refreshes doc layout after anchor changes', () => {
         const renderManagerService = createRenderManagerService();
-        const adapter = createDocsCustomBlockHostAdapterContribution(undefined, undefined, renderManagerService as never);
+        const adapter = createDocsCustomBlockUIHostAdapterContribution(undefined, undefined, renderManagerService as never);
 
         adapter.afterCreateAnchor?.({ hostUnitId: 'doc-1' } as never);
         adapter.afterRemoveAnchor?.({ hostUnitId: 'doc-1' } as never);

@@ -22,7 +22,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { createDocsCustomBlockHostAdapterContribution as createDocsCustomBlockDataHostAdapterContribution } from '@univerjs/docs';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 
-export function createDocsCustomBlockHostAdapterContribution(
+export function createDocsCustomBlockUIHostAdapterContribution(
     anchorModelService?: EmbedHostAnchorModelService,
     univerInstanceService?: IUniverInstanceService,
     renderManagerService?: IRenderManagerService

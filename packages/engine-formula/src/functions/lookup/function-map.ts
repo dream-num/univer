@@ -15,6 +15,7 @@
  */
 
 import { Address } from './address';
+import { Anchorarray } from './anchorarray';
 import { Areas } from './areas';
 import { Choose } from './choose';
 import { Choosecols } from './choosecols';
@@ -53,6 +54,7 @@ import { Xmatch } from './xmatch';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
+    [Anchorarray, FUNCTION_NAMES_LOOKUP.ANCHORARRAY],
     [Areas, FUNCTION_NAMES_LOOKUP.AREAS],
     [Choose, FUNCTION_NAMES_LOOKUP.CHOOSE],
     [Choosecols, FUNCTION_NAMES_LOOKUP.CHOOSECOLS],

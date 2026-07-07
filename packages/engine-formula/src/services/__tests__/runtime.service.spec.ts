@@ -31,7 +31,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
-import { NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../hyperlink-engine-formula.service';
@@ -229,6 +229,11 @@ describe('FormulaRuntimeService', () => {
         runtime.setRuntimeData(oneCellArray as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(1, 1)?.v).toBe(5);
 
+        runtime.setCurrent(2, 2, 10, 10, 'sheet', 'unit');
+        const blankOneCellArray = createNewArray([[NullValueObject.create()]], 1, 1);
+        runtime.setRuntimeData(blankOneCellArray as never);
+        expect(runtime.getUnitData().unit?.sheet?.getValue(2, 2)?.v).toBe(0);
+
         runtime.setCurrent(3, 3, 10, 10, 'sheet', 'unit');
         const twoByTwo = createNewArray(
             [
@@ -265,6 +270,36 @@ describe('FormulaRuntimeService', () => {
         runtime.setRuntimeData(twoByTwo as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(9, 9)?.v).toBe(ErrorType.SPILL);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(9, 9)?.v).toBe(ErrorType.SPILL);
+    });
+
+    it('should return #VALUE when a declared single-cell array formula produces multiple cells', () => {
+        const { runtime, arrayFormulaRange } = createRuntimeService();
+        arrayFormulaRange.unit.sheet = {
+            1: {
+                1: {
+                    startRow: 1,
+                    startColumn: 1,
+                    endRow: 1,
+                    endColumn: 1,
+                },
+            },
+        };
+
+        runtime.setCurrent(1, 1, 10, 10, 'sheet', 'unit');
+        const twoByTwo = createNewArray(
+            [
+                [NumberValueObject.create(1), NumberValueObject.create(2)],
+                [NumberValueObject.create(3), NumberValueObject.create(4)],
+            ],
+            2,
+            2
+        );
+
+        runtime.setRuntimeData(twoByTwo as never);
+        expect(runtime.getUnitData().unit?.sheet?.getValue(1, 1)?.v).toBe(ErrorType.VALUE);
+        expect(runtime.getRuntimeClearArrayFormulaCellData().unit?.sheet?.getValue(1, 1)?.v).toBe(ErrorType.VALUE);
+        expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(1, 1)?.v).toBe(ErrorType.VALUE);
+        expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(1, 2)).toBeUndefined();
     });
 
     it('should not treat previous cells of the same array formula as spill blockers', () => {

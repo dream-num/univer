@@ -15,6 +15,7 @@
  */
 
 import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { IFormulaData } from '../../basics/common';
 import {
     BaseDataModel,
     BooleanNumber,
@@ -249,20 +250,6 @@ describe('Test formula data model', () => {
                     1: {
                         3: null,
                     },
-                    2: {
-                        3: {
-                            f: '=SUM(A3)',
-                            si: 'OSPtzm',
-                        },
-                    },
-                    3: {
-                        3: {
-                            f: '=SUM(A3)',
-                            si: 'OSPtzm',
-                            x: 0,
-                            y: 1,
-                        },
-                    },
                 };
 
                 const newFormulaData = formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
@@ -308,12 +295,6 @@ describe('Test formula data model', () => {
                     },
                     2: {
                         3: null,
-                    },
-                    3: {
-                        3: {
-                            f: '=SUM(A4)',
-                            si: 'OSPtzm',
-                        },
                     },
                 };
 
@@ -621,6 +602,181 @@ describe('Test formula data model', () => {
                 expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1?.[3]?.[3]?.v).toBe(11);
             });
 
+            it('should initialize array formula range and cached cells from snapshot refs', () => {
+                univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                    id: 'array-test',
+                    appVersion: '3.0.0-alpha',
+                    sheets: {
+                        sheet1: {
+                            id: 'sheet1',
+                            name: 'Sheet1',
+                            rowCount: 20,
+                            columnCount: 20,
+                            cellData: {
+                                5: {
+                                    10: {
+                                        f: '=IF(A1:A6,B1,0)',
+                                        ref: 'K6:K11',
+                                        v: 0,
+                                        t: CellValueType.NUMBER,
+                                    } as ICellData & { ref: string },
+                                },
+                                6: {
+                                    10: {
+                                        ref: 'K6:K11',
+                                        v: -5300,
+                                        t: CellValueType.NUMBER,
+                                    } as ICellData & { ref: string },
+                                },
+                            },
+                        },
+                    },
+                    locale: LocaleType.ZH_CN,
+                    name: '',
+                    sheetOrder: ['sheet1'],
+                    styles: {},
+                });
+
+                formulaDataModel.getFormulaData();
+
+                expect(formulaDataModel.getArrayFormulaRange()['array-test']?.sheet1?.[5]?.[10]).toEqual({
+                    startRow: 5,
+                    startColumn: 10,
+                    endRow: 10,
+                    endColumn: 10,
+                    startAbsoluteRefType: 0,
+                    endAbsoluteRefType: 0,
+                    rangeType: RANGE_TYPE.NORMAL,
+                });
+                expect(formulaDataModel.getArrayFormulaCellData()['array-test']?.sheet1?.[6]?.[10]?.v).toBe(-5300);
+            });
+
+            it('should not initialize a single-cell ref as an array formula range', () => {
+                univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                    id: 'single-ref-test',
+                    appVersion: '3.0.0-alpha',
+                    sheets: {
+                        sheet1: {
+                            id: 'sheet1',
+                            name: 'Sheet1',
+                            rowCount: 20,
+                            columnCount: 20,
+                            cellData: {
+                                11: {
+                                    5: {
+                                        f: '=IFERROR(1/0,"")',
+                                        ref: 'F12',
+                                    } as ICellData & { ref: string },
+                                },
+                            },
+                        },
+                    },
+                    locale: LocaleType.ZH_CN,
+                    name: '',
+                    sheetOrder: ['sheet1'],
+                    styles: {},
+                });
+
+                formulaDataModel.getFormulaData();
+
+                expect(formulaDataModel.getArrayFormulaRange()['single-ref-test']?.sheet1?.[11]?.[5]).toBeUndefined();
+                expect(formulaDataModel.getArrayFormulaCellData()['single-ref-test']?.sheet1?.[11]?.[5]).toBeUndefined();
+            });
+
+            it('should preserve a single-cell ref for array constant formulas', () => {
+                univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                    id: 'single-array-constant-test',
+                    appVersion: '3.0.0-alpha',
+                    sheets: {
+                        sheet1: {
+                            id: 'sheet1',
+                            name: 'Sheet1',
+                            rowCount: 20,
+                            columnCount: 20,
+                            cellData: {
+                                0: {
+                                    1: {
+                                        f: '={1,2;3,4}',
+                                        ref: 'B1',
+                                    } as ICellData & { ref: string },
+                                },
+                            },
+                        },
+                    },
+                    locale: LocaleType.ZH_CN,
+                    name: '',
+                    sheetOrder: ['sheet1'],
+                    styles: {},
+                });
+
+                formulaDataModel.getFormulaData();
+
+                expect(formulaDataModel.getArrayFormulaRange()['single-array-constant-test']?.sheet1?.[0]?.[1]).toEqual({
+                    startRow: 0,
+                    startColumn: 1,
+                    endRow: 0,
+                    endColumn: 1,
+                    startAbsoluteRefType: 0,
+                    endAbsoluteRefType: 0,
+                });
+            });
+
+            it('should initialize array formula range for shared formula followers with refs', () => {
+                univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                    id: 'shared-array-test',
+                    appVersion: '3.0.0-alpha',
+                    sheets: {
+                        sheet1: {
+                            id: 'sheet1',
+                            name: 'Sheet1',
+                            rowCount: 20,
+                            columnCount: 20,
+                            cellData: {
+                                5: {
+                                    6: {
+                                        f: '=SUMIFS($D$6:$D$13,$B$6:$B$13,G5,$C$6:$C$13,$F$10:$F$14)',
+                                        si: '0',
+                                        ref: 'G6:G10',
+                                        v: 0,
+                                        t: CellValueType.NUMBER,
+                                    } as ICellData & { ref: string },
+                                    7: {
+                                        si: '0',
+                                        ref: 'H6:H10',
+                                        v: 0,
+                                        t: CellValueType.NUMBER,
+                                    } as ICellData & { ref: string },
+                                },
+                                6: {
+                                    7: {
+                                        ref: 'H6:H10',
+                                        v: 12,
+                                        t: CellValueType.NUMBER,
+                                    } as ICellData & { ref: string },
+                                },
+                            },
+                        },
+                    },
+                    locale: LocaleType.ZH_CN,
+                    name: '',
+                    sheetOrder: ['sheet1'],
+                    styles: {},
+                });
+
+                formulaDataModel.getFormulaData();
+
+                expect(formulaDataModel.getArrayFormulaRange()['shared-array-test']?.sheet1?.[5]?.[7]).toEqual({
+                    startRow: 5,
+                    startColumn: 7,
+                    endRow: 9,
+                    endColumn: 7,
+                    startAbsoluteRefType: 0,
+                    endAbsoluteRefType: 0,
+                    rangeType: RANGE_TYPE.NORMAL,
+                });
+                expect(formulaDataModel.getArrayFormulaCellData()['shared-array-test']?.sheet1?.[6]?.[7]?.v).toBe(12);
+            });
+
             it('should merge and update image formula data', () => {
                 const imageMatrix = new ObjectMatrix({
                     1: {
@@ -753,7 +909,7 @@ describe('Test formula data model', () => {
             const unitId = 'workbook-01';
             const sheetId = 'sheet-0011';
 
-            const formulaData = {
+            const formulaData: IFormulaData = {
                 [unitId]: {},
             };
 
@@ -799,7 +955,6 @@ describe('Test formula data model', () => {
                         0: {
                             3: {
                                 f: '=SUM(A1)',
-                                si: '3e4r5t',
                             },
                         },
                     },
@@ -808,6 +963,55 @@ describe('Test formula data model', () => {
 
             initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
             expect(formulaData).toStrictEqual(result);
+        });
+
+        it('expands Excel shared formula ids with relative offsets', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+
+            const formulaData: IFormulaData = {
+                [unitId]: {},
+            };
+
+            const cellValue = {
+                5: {
+                    4: {
+                        v: 0,
+                        f: '=E$4+$D6',
+                        si: '0',
+                    },
+                    5: {
+                        v: 1,
+                        si: '0',
+                    },
+                },
+                8: {
+                    5: {
+                        v: 2,
+                        si: '0',
+                    },
+                },
+            };
+
+            const cellMatrix = new ObjectMatrix<Nullable<ICellData>>(cellValue);
+
+            initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+
+            expect(formulaData[unitId]?.[sheetId]).toEqual({
+                5: {
+                    4: {
+                        f: '=E$4+$D6',
+                    },
+                    5: {
+                        f: '=F$4+$D6',
+                    },
+                },
+                8: {
+                    5: {
+                        f: '=F$4+$D9',
+                    },
+                },
+            });
         });
     });
 });

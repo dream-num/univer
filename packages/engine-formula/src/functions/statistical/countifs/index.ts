@@ -38,7 +38,7 @@ export class Countifs extends BaseFunction {
             criteriaMaxRowLength,
             criteriaMaxColumnLength,
             variants: _variants,
-        } = parsePairedRangeAndCriteria(variants);
+        } = parsePairedRangeAndCriteria(this._legacyImplicitDerivedCriteria(variants));
 
         if (isError) {
             return errorObject as ErrorValueObject;
@@ -71,6 +71,46 @@ export class Countifs extends BaseFunction {
             sheetId: this.subUnitId || '',
             row: this.row,
             column: this.column,
+        });
+    }
+
+    private _legacyImplicitDerivedCriteria(variants: FunctionVariantType[]): FunctionVariantType[] {
+        return variants.map((variant, index) => {
+            if (index % 2 === 0 || !variant.isArray()) {
+                return variant;
+            }
+
+            const array = variant as ArrayValueObject;
+            if (array.usesInvertedIndexCache()) {
+                return variant;
+            }
+
+            const startRow = array.getCurrentRow();
+            const startColumn = array.getCurrentColumn();
+            if (startRow < 0 || startColumn < 0) {
+                return variant;
+            }
+
+            const rowCount = array.getRowCount();
+            const columnCount = array.getColumnCount();
+            let rowIndex = -1;
+            let columnIndex = -1;
+            if (rowCount === 1) {
+                rowIndex = 0;
+                columnIndex = this.column - startColumn;
+            } else if (columnCount === 1) {
+                rowIndex = this.row - startRow;
+                columnIndex = 0;
+            } else {
+                rowIndex = this.row - startRow;
+                columnIndex = this.column - startColumn;
+            }
+
+            if (rowIndex < 0 || rowIndex >= rowCount || columnIndex < 0 || columnIndex >= columnCount) {
+                return variant;
+            }
+
+            return array.get(rowIndex, columnIndex) as FunctionVariantType || variant;
         });
     }
 }

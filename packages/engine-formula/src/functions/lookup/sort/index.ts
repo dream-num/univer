@@ -30,11 +30,15 @@ export class Sort extends BaseFunction {
 
     override calculate(array: BaseValueObject, sortIndex?: BaseValueObject, sortOrder?: BaseValueObject, byCol?: BaseValueObject) {
         let _sortIndex = sortIndex ?? NumberValueObject.create(1);
-        const _sortOrder = sortOrder ?? NumberValueObject.create(1);
+        let _sortOrder = sortOrder ?? NumberValueObject.create(1);
         const _byCol = byCol ?? BooleanValueObject.create(false);
 
         if (_sortIndex.isNull()) {
             _sortIndex = NumberValueObject.create(1);
+        }
+
+        if (_sortOrder.isNull()) {
+            _sortOrder = NumberValueObject.create(1);
         }
 
         if (_byCol.isArray()) {

@@ -62,6 +62,18 @@ const getTestWorkbookData = (): IWorkbookData => {
                             v: 5,
                             t: CellValueType.NUMBER,
                         },
+                        5: {
+                            v: '',
+                            t: CellValueType.STRING,
+                        },
+                        6: {
+                            v: '<30d',
+                            t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: '<25|Existing Workforce',
+                            t: CellValueType.STRING,
+                        },
                     },
                     1: {
                         0: {
@@ -83,6 +95,14 @@ const getTestWorkbookData = (): IWorkbookData => {
                         4: {
                             v: 4,
                             t: CellValueType.NUMBER,
+                        },
+                        6: {
+                            v: '>180d',
+                            t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: '<25|New Hire (Last 12 Months)',
+                            t: CellValueType.STRING,
                         },
                     },
                     2: {
@@ -106,6 +126,18 @@ const getTestWorkbookData = (): IWorkbookData => {
                             v: 44,
                             t: CellValueType.NUMBER,
                         },
+                        5: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
+                        6: {
+                            v: '31-90d',
+                            t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: '25-34|Existing Workforce',
+                            t: CellValueType.STRING,
+                        },
                     },
                     3: {
                         0: {
@@ -127,6 +159,10 @@ const getTestWorkbookData = (): IWorkbookData => {
                         4: {
                             v: 444,
                             t: CellValueType.NUMBER,
+                        },
+                        7: {
+                            v: '25-34|New Hire (Last 12 Months)',
+                            t: CellValueType.STRING,
                         },
                     },
                 },
@@ -238,6 +274,29 @@ describe('Test countif function', () => {
 
             const result2 = await calculate(`=COUNTIF(A1:A4,${error})`);
             expect(result2).toBe(0);
+        });
+
+        it('Counts empty strings as non-blank for not-empty criteria', async () => {
+            const result = await calculate('=COUNTIF(F1:F3,"<>")');
+            expect(result).toBe(2);
+        });
+
+        it('Treats a blank cell reference criteria as zero', async () => {
+            const result = await calculate('=COUNTIF(F1:F3,F2)');
+            expect(result).toBe(0);
+        });
+
+        it('Compares text bucket criteria with locale ordering', async () => {
+            expect(await calculate('=COUNTIF(G1:G3,"<30d")')).toBe(2);
+            expect(await calculate('=COUNTIF(G1:G3,">180d")')).toBe(1);
+        });
+
+        it('Includes blank cells in less-than text criteria', async () => {
+            expect(await calculate('=COUNTIF(F1:F2,"<1 hour")')).toBe(2);
+        });
+
+        it('Does not include same-lower-bound numeric buckets in pipe-delimited less-than criteria', async () => {
+            expect(await calculate('=COUNTIF(H1:H4,"<25|New Hire (Last 12 Months)")')).toBe(2);
         });
     });
 });

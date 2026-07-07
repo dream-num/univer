@@ -38,6 +38,24 @@ describe('Test yearfrac function', () => {
             expect(result.getValue()).toStrictEqual(9.102107856556255);
         });
 
+        it('matches Excel basis 0 for February month-end dates', () => {
+            const startDate = NumberValueObject.create(44620);
+            const endDate = NumberValueObject.create(44985);
+
+            const result = testFunction.calculate(startDate, endDate);
+
+            expect(result.getValue()).toStrictEqual(1);
+        });
+
+        it('does not apply the February month-end rule to non-February start dates', () => {
+            const startDate = NumberValueObject.create(44804);
+            const endDate = NumberValueObject.create(44985);
+
+            const result = testFunction.calculate(startDate, endDate);
+
+            expect(result.getValue()).toBeCloseTo(0.494444444444444, 15);
+        });
+
         it('value is normal, endDate < startDate', () => {
             const startDate = StringValueObject.create('2021/3/11');
             const endDate = StringValueObject.create('2012/2/2');

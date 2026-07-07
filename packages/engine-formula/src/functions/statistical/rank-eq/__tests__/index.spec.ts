@@ -158,6 +158,11 @@ describe('Test rank function', () => {
             expect(result).toStrictEqual(4);
         });
 
+        it('Number matching uses tolerance for floating point noise', async () => {
+            const result = await calculate('=RANK.EQ(79.83520122378431,{79.8352012237843,81.08962868646151,80.56857259319648},0)');
+            expect(result).toStrictEqual(3);
+        });
+
         it('Number value test, string/true/false/blankCell/error/null', async () => {
             const result = await calculate('=RANK.EQ("test",A1:H1,0)');
             expect(result).toStrictEqual(ErrorType.VALUE);
@@ -183,7 +188,7 @@ describe('Test rank function', () => {
             expect(result).toStrictEqual(ErrorType.NA);
 
             const result2 = await calculate('=RANK.EQ(A1,{1,2,3},0)');
-            expect(result2).toStrictEqual(ErrorType.NA);
+            expect(result2).toStrictEqual(3);
 
             const result3 = await calculate('=RANK.EQ(A1,A1:I1,0)');
             expect(result3).toStrictEqual(ErrorType.NAME);

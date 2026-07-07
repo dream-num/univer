@@ -25,7 +25,7 @@ import { ColumnReferenceObject } from '../reference-object/column-reference-obje
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
@@ -402,14 +402,14 @@ export function getPairedRangeAndCriteriaResult(
         } else if (formulaName === 'MAXIFS') {
             const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
             if (picked.getColumnCount() === 0) {
-                result = ArrayValueObject.create('0');
+                result = NumberValueObject.create(0);
             } else {
                 result = picked.max();
             }
         } else if (formulaName === 'MINIFS') {
             const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
             if (picked.getColumnCount() === 0) {
-                result = ArrayValueObject.create('0');
+                result = NumberValueObject.create(0);
             } else {
                 result = picked.min();
             }
@@ -429,10 +429,51 @@ export function getPairedRangeAndCriteriaResult(
  * Two ArrayValueObject of the same type can be compared
  */
 export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject): ArrayValueObject {
-    const [operator, criteriaObject] = findCompareToken(`${criteria.getValue()}`);
+    const [operator, criteriaObject] = criteria.isString()
+        ? findCompareToken(`${criteria.getValue()}`)
+        : [compareToken.EQUALS, criteria];
 
     return array.mapValue((valueObject, r, c) => {
         const rangeValueObject = range.get(r, c);
+        const isBlankStringCriteria = criteriaObject.isString() && criteriaObject.getValue() === '';
+
+        if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
+            return BooleanValueObject.create(true);
+        }
+
+        if (
+            criteriaObject.isString() &&
+            criteriaObject.getValue() !== '' &&
+            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
+            (rangeValueObject == null || rangeValueObject.isNull() || (rangeValueObject.isString() && rangeValueObject.getValue() === ''))
+        ) {
+            return StringValueObject.create('').compare(criteriaObject, operator);
+        }
+
+        if (
+            criteriaObject.isString() &&
+            rangeValueObject?.isString() &&
+            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
+            isSameLowerBoundBucket(rangeValueObject.getValue() as string, criteriaObject.getValue() as string)
+        ) {
+            return BooleanValueObject.create(false);
+        }
+
+        if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
+            const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+
+            if (criteriaNumber.isNumber()) {
+                return rangeValueObject.compare(criteriaNumber, operator);
+            }
+        }
+
+        if (criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject?.isString()) {
+            const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+
+            if (rangeNumber.isNumber()) {
+                return rangeNumber.compare(criteriaObject, operator);
+            }
+        }
 
         if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
             return valueObject;
@@ -443,7 +484,7 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
         }
 
         /**
-         * If the operator is '=' or '<>', we can compare numbers and strings directly in COUNTIF, COUNTIFS, SUMIF, SUMIFS, etc.
+         * If the operator is '=' or '<>', we can compare string numbers against numeric criteria directly in COUNTIF, COUNTIFS, SUMIF, SUMIFS, etc.
          * Other operators require both valueObjects to be of the same type.
          * For example:
          * | A1    | B1  |
@@ -455,14 +496,6 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
          * =COUNTIF(A1:B1, '<=123') will return 1
          */
         if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
-            if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
-                const criteriaNumber = criteriaObject.convertToNumberObjectValue();
-
-                if (criteriaNumber.isNumber()) {
-                    return rangeValueObject.compare(criteriaNumber, operator);
-                }
-            }
-
             if (criteriaObject.isNumber() && rangeValueObject?.isString()) {
                 const rangeNumber = rangeValueObject.convertToNumberObjectValue();
 
@@ -482,6 +515,12 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
 
         return BooleanValueObject.create(false);
     });
+}
+
+function isSameLowerBoundBucket(rangeValue: string, criteriaValue: string): boolean {
+    const criteriaMatch = criteriaValue.match(/^(\d+)\|/);
+    const rangeMatch = rangeValue.match(/^(\d+)-/);
+    return criteriaMatch != null && rangeMatch != null && criteriaMatch[1] === rangeMatch[1];
 }
 
 /**

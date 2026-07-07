@@ -14,3 +14,8 @@ overrides:
     basic-ftp: 5.2.0
     react: 19.2.7
     react-dom: 19.2.7
+allowBuilds:
+    '@parcel/watcher': set this to true or false
+    '@swc/core': set this to true or false
+    esbuild: set this to true or false
+    protobufjs: set this to true or false

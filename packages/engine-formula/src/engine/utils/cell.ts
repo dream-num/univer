@@ -34,10 +34,14 @@ export function getCellValue(cell: Nullable<ICellData>) {
         const data = body.dataStream;
         const newDataStream = BuildTextUtils.transform.getPlainText(data);
 
-        return newDataStream;
+        return normalizeRichTextFormulaValue(newDataStream);
     }
 
     return cell?.v ?? 0;
+}
+
+function normalizeRichTextFormulaValue(value: string) {
+    return value.replace(/\r\n|\r|\n/g, '\r\n');
 }
 
 /**

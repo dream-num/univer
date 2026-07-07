@@ -89,6 +89,7 @@ export const functionText = [
     [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
+    [Regexmatch, FUNCTION_NAMES_TEXT.REGEXTEST],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
     [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Replace, FUNCTION_NAMES_TEXT.REPLACE],

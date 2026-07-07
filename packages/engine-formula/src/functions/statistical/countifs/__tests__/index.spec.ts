@@ -28,6 +28,14 @@ import { IFormulaCurrentConfigService } from '../../../../services/current-data.
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { FUNCTION_NAMES_LOGICAL } from '../../../logical/function-names';
+import { If } from '../../../logical/if';
+import { FUNCTION_NAMES_MATH } from '../../../math/function-names';
+import { Sumproduct } from '../../../math/sumproduct';
+import { Compare } from '../../../meta/compare';
+import { FUNCTION_NAMES_META } from '../../../meta/function-names';
+import { Minus } from '../../../meta/minus';
+import { Multiply } from '../../../meta/multiply';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Countifs } from '../index';
@@ -57,6 +65,30 @@ const getTestWorkbookData = (): IWorkbookData => {
                             v: 4,
                             t: CellValueType.NUMBER,
                         },
+                        4: {
+                            v: 'User001',
+                            t: CellValueType.STRING,
+                        },
+                        5: {
+                            v: 'Active',
+                            t: CellValueType.STRING,
+                        },
+                        6: {
+                            v: 'AP_Clerk',
+                            t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: 'AP_Clerk',
+                            t: CellValueType.STRING,
+                        },
+                        8: {
+                            v: 'Vendor_Master',
+                            t: CellValueType.STRING,
+                        },
+                        9: {
+                            v: 'High',
+                            t: CellValueType.STRING,
+                        },
                     },
                     1: {
                         0: {
@@ -74,6 +106,30 @@ const getTestWorkbookData = (): IWorkbookData => {
                         3: {
                             v: 5,
                             t: CellValueType.NUMBER,
+                        },
+                        4: {
+                            v: 'User001',
+                            t: CellValueType.STRING,
+                        },
+                        5: {
+                            v: 'Active',
+                            t: CellValueType.STRING,
+                        },
+                        6: {
+                            v: 'Vendor_Master',
+                            t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: 'AR_Clerk',
+                            t: CellValueType.STRING,
+                        },
+                        8: {
+                            v: 'AR_Manager',
+                            t: CellValueType.STRING,
+                        },
+                        9: {
+                            v: 'Low',
+                            t: CellValueType.STRING,
                         },
                     },
                     2: {
@@ -93,6 +149,30 @@ const getTestWorkbookData = (): IWorkbookData => {
                             v: 6,
                             t: CellValueType.NUMBER,
                         },
+                        4: {
+                            v: 'User001',
+                            t: CellValueType.STRING,
+                        },
+                        5: {
+                            v: 'Active',
+                            t: CellValueType.STRING,
+                        },
+                        6: {
+                            v: 'AR_Clerk',
+                            t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: 'Payroll_Admin',
+                            t: CellValueType.STRING,
+                        },
+                        8: {
+                            v: 'GL_Accountant',
+                            t: CellValueType.STRING,
+                        },
+                        9: {
+                            v: 'Low',
+                            t: CellValueType.STRING,
+                        },
                     },
                     3: {
                         0: {
@@ -109,6 +189,52 @@ const getTestWorkbookData = (): IWorkbookData => {
                         },
                         3: {
                             v: 7,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    4: {
+                        0: {
+                            v: 'Compa',
+                            t: CellValueType.STRING,
+                        },
+                        1: {
+                            v: '<0.90',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: 0.86,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    5: {
+                        0: {
+                            v: 'Compa',
+                            t: CellValueType.STRING,
+                        },
+                        1: {
+                            v: '0.90-1.00',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 5,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    6: {
+                        0: {
+                            v: 'Compa',
+                            t: CellValueType.STRING,
+                        },
+                        1: {
+                            v: '1.00-1.10',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 15,
                             t: CellValueType.NUMBER,
                         },
                     },
@@ -172,7 +298,12 @@ describe('Test countifs function', () => {
         );
 
         functionService.registerExecutors(
-            new Countifs(FUNCTION_NAMES_STATISTICAL.COUNTIFS)
+            new Countifs(FUNCTION_NAMES_STATISTICAL.COUNTIFS),
+            new Sumproduct(FUNCTION_NAMES_MATH.SUMPRODUCT),
+            new If(FUNCTION_NAMES_LOGICAL.IF),
+            new Compare(FUNCTION_NAMES_META.COMPARE),
+            new Multiply(FUNCTION_NAMES_META.MULTIPLY),
+            new Minus(FUNCTION_NAMES_META.MINUS)
         );
 
         calculate = (formula: string) => {
@@ -228,6 +359,39 @@ describe('Test countifs function', () => {
                 [2],
                 [1],
             ]);
+        });
+
+        it('Multiple array criteria are paired by position', async () => {
+            const result = await calculate('=COUNTIFS(A1:A4,">0",C1:C4,{3;5},D1:D4,{4;7})');
+            expect(result).toStrictEqual([
+                [1],
+                [0],
+            ]);
+        });
+
+        it('Array criteria remain paired inside SUMPRODUCT masks', async () => {
+            const result = await calculate('=SUMPRODUCT({0;1;1},COUNTIFS(E1:E3,"User001",F1:F3,"Active",G1:G3,{"AP_Clerk";"AR_Clerk";"Payroll_Admin"}),COUNTIFS(E1:E3,"User001",F1:F3,"Active",G1:G3,{"Vendor_Master";"AR_Manager";"GL_Accountant"}))');
+            expect(result).toBe(0);
+        });
+
+        it('COUNTIFS array results compare element-wise inside SUMPRODUCT masks', async () => {
+            const result = await calculate('=SUMPRODUCT(--({"High";"Low";"Low"}="Low"),--(COUNTIFS(E1:E3,"User001",F1:F3,"Active",G1:G3,{"AP_Clerk";"AR_Clerk";"Payroll_Admin"})>0),--(COUNTIFS(E1:E3,"User001",F1:F3,"Active",G1:G3,{"Vendor_Master";"AR_Manager";"GL_Accountant"})>0))');
+            expect(result).toBe(0);
+        });
+
+        it('COUNTIFS criteria ranges compare element-wise inside SUMPRODUCT masks', async () => {
+            const result = await calculate('=SUMPRODUCT(--(J1:J3="Low"),--(COUNTIFS(E1:E3,"User001",F1:F3,"Active",G1:G3,H1:H3)>0),--(COUNTIFS(E1:E3,"User001",F1:F3,"Active",G1:G3,I1:I3)>0))');
+            expect(result).toBe(0);
+        });
+
+        it('SUMPRODUCT uses scalar IF criteria without shifting range masks', async () => {
+            const result = await calculate('=SUMPRODUCT((A5:A7="Compa")*(B5:B7=IF(D5<0.9,"<0.90",IF(D5<1,"0.90-1.00",IF(D5<1.1,"1.00-1.10",">1.10"))))*C5:C7)');
+            expect(result).toBe(0);
+        });
+
+        it('Includes blank cells in less-than text criteria', async () => {
+            const result = await calculate('=COUNTIFS(B5:B8,"<1 hour")');
+            expect(result).toBe(2);
         });
     });
 });

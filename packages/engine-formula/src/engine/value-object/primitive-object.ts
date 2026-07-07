@@ -311,8 +311,9 @@ export class BooleanValueObject extends BaseValueObject {
             case compareToken.EQUALS:
             case compareToken.LESS_THAN:
             case compareToken.LESS_THAN_OR_EQUAL:
-            case compareToken.NOT_EQUAL:
                 return false;
+            case compareToken.NOT_EQUAL:
+                return true;
         }
     }
 
@@ -1530,17 +1531,19 @@ export class StringValueObject extends BaseValueObject {
     }
 
     private _compareString(currentValue: string, value: string, operator: compareToken): boolean {
+        const compareResult = currentValue.localeCompare(value);
+
         switch (operator) {
             case compareToken.EQUALS:
                 return currentValue === value;
             case compareToken.GREATER_THAN:
-                return currentValue > value;
+                return compareResult > 0;
             case compareToken.GREATER_THAN_OR_EQUAL:
-                return currentValue >= value;
+                return currentValue === value || compareResult > 0;
             case compareToken.LESS_THAN:
-                return currentValue < value;
+                return compareResult < 0;
             case compareToken.LESS_THAN_OR_EQUAL:
-                return currentValue <= value;
+                return currentValue === value || compareResult < 0;
             case compareToken.NOT_EQUAL:
                 return currentValue !== value;
         }
@@ -1574,6 +1577,10 @@ export class StringValueObject extends BaseValueObject {
 
     override convertToNumberObjectValue() {
         const rawValue = this.getValue();
+        if (rawValue.trim() === '') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const parseData = getNumfmtParseValueFilter(rawValue);
 
         if (parseData && parseData.z) {

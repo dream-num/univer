@@ -20,6 +20,7 @@ import { ArrayValueObject, transformToValue, transformToValueObject } from '../.
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import {
     BooleanValueObject,
+    NullValueObject,
     NumberValueObject,
     StringValueObject,
 } from '../../../../engine/value-object/primitive-object';
@@ -71,6 +72,19 @@ describe('Test address', () => {
         it('Absolute reference to another worksheet', async () => {
             expect(calculate(2, 3, 1, false, 'EXCEL SHEET')).toBe("'EXCEL SHEET'!R2C3");
         });
+
+        it('Defaults omitted abs and A1 parameters', async () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(10),
+                NumberValueObject.create(1),
+                NullValueObject.create(),
+                NullValueObject.create(),
+                StringValueObject.create('Krycí List')
+            );
+
+            expect((getObjectValue(result) as string[][])[0][0]).toBe("'Krycí List'!$A$10");
+        });
+
         it('Abs less than 1', async () => {
             expect(calculate(2, 3, 0, false, 'EXCEL SHEET')).toBe(ErrorType.VALUE);
         });

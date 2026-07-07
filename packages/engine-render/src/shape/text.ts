@@ -40,6 +40,12 @@ export interface ITextProps extends IShapeProps {
 export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height', 'color'];
 
 export class Text extends Shape<ITextProps> {
+    private static readonly _MAX_LAYOUT_CACHE_SIZE = 5000;
+    private static readonly _layoutCache = new Map<string, {
+        lines: ReturnType<DocSimpleSkeleton['calculate']>;
+        totalHeight: number;
+    }>();
+
     text: string;
     fontStyle: string;
     warp: boolean;
@@ -68,9 +74,10 @@ export class Text extends Shape<ITextProps> {
 
     static override drawWith(ctx: UniverRenderingContext, props: ITextProps, _skeleton?: DocSimpleSkeleton) {
         const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0, cellValueType } = props;
-        const skeleton = _skeleton ?? new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
-        const lines = skeleton.calculate();
-        const totalHeight = skeleton.getTotalHeight();
+        const cachedLayout = !_skeleton && !warp ? Text._getCachedLayout(text, fontStyle) : null;
+        const skeleton = cachedLayout ? null : _skeleton ?? new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
+        const lines = cachedLayout?.lines ?? skeleton!.calculate();
+        const totalHeight = cachedLayout?.totalHeight ?? skeleton!.getTotalHeight();
         const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;
         let lineTop = top + offsetY;
 
@@ -140,6 +147,63 @@ export class Text extends Shape<ITextProps> {
         ctx.restore();
 
         return totalHeight;
+    }
+
+    static drawPlainWith(ctx: UniverRenderingContext, props: ITextProps) {
+        const { text, fontStyle, hAlign, vAlign, width, height, left = 0, top = 0, cellValueType } = props;
+        const cachedLayout = Text._getCachedLayout(text, fontStyle);
+        const { lines, totalHeight } = cachedLayout;
+        const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;
+        let lineTop = top + offsetY;
+
+        ctx.font = fontStyle;
+        ctx.fillStyle = props.color ?? COLOR_BLACK_RGB;
+
+        for (const line of lines) {
+            const lineWidth = line.width;
+            let lineX = 0;
+            if (!(width < lineWidth && cellValueType === CellValueType.NUMBER)) {
+                switch (hAlign) {
+                    case HorizontalAlign.CENTER:
+                        lineX = (width - lineWidth) / 2;
+                        break;
+                    case HorizontalAlign.RIGHT:
+                        lineX = width - lineWidth;
+                        break;
+                    default:
+                        lineX = 0;
+                }
+            }
+
+            ctx.fillText(line.text, left + lineX, lineTop + line.baseline);
+            lineTop += line.height;
+        }
+
+        return totalHeight;
+    }
+
+    private static _getCachedLayout(text: string, fontStyle: string) {
+        const cacheKey = `${fontStyle}\u0000${text}`;
+        const cached = Text._layoutCache.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+
+        const skeleton = new DocSimpleSkeleton(text, fontStyle, false, 0, Infinity);
+        const layout = {
+            lines: skeleton.calculate(),
+            totalHeight: skeleton.getTotalHeight(),
+        };
+
+        Text._layoutCache.set(cacheKey, layout);
+        if (Text._layoutCache.size > Text._MAX_LAYOUT_CACHE_SIZE) {
+            const oldestKey = Text._layoutCache.keys().next().value;
+            if (oldestKey !== undefined) {
+                Text._layoutCache.delete(oldestKey);
+            }
+        }
+
+        return layout;
     }
 
     /**

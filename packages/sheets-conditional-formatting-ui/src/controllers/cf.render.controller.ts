@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
 import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -49,15 +49,82 @@ export class SheetsCfRenderController extends Disposable {
 
         this._initViewModelInterceptor();
         this._initSkeleton();
+        queueMicrotask(() => this._markActiveSheetRulesDirty());
         this.disposeWithMe(() => {
             this._ruleChangeCacheMap.clear();
         });
     }
 
-    private _markDirtySkeleton() {
-        const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
-        this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
+    private _collectDirtyRanges(items: Array<{ cfId?: string; rule?: IConditionFormattingRule; subUnitId: string; unitId: string }>, unitId: string, subUnitId: string): IRange[] {
+        const ranges: IRange[] = [];
+
+        items.forEach((item) => {
+            if (item.unitId !== unitId || item.subUnitId !== subUnitId) {
+                return;
+            }
+
+            const rule = item.rule ?? (item.cfId ? this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, item.cfId) : null);
+            if (rule?.ranges?.length) {
+                ranges.push(...rule.ranges);
+            }
+        });
+
+        return ranges;
+    }
+
+    private _intersectDirtyRangesWithRenderedRange(ranges: IRange[], renderedRange?: IRange): IRange[] {
+        if (!renderedRange || renderedRange.startRow < 0 || renderedRange.startColumn < 0) {
+            return [];
+        }
+
+        return ranges.map((range) => ({
+            startRow: Math.max(range.startRow, renderedRange.startRow),
+            endRow: Math.min(range.endRow, renderedRange.endRow),
+            startColumn: Math.max(range.startColumn, renderedRange.startColumn),
+            endColumn: Math.min(range.endColumn, renderedRange.endColumn),
+        })).filter((range) => range.startRow <= range.endRow && range.startColumn <= range.endColumn);
+    }
+
+    private _markDirtySkeleton(items: Array<{ cfId?: string; rule?: IConditionFormattingRule; subUnitId: string; unitId: string }>) {
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getActiveSheet();
+        if (!workbook || !worksheet) {
+            return;
+        }
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const render = this._renderManagerService.getRenderById(unitId);
+        const skeletonManagerService = render?.with(SheetSkeletonManagerService);
+        const currentSkeleton = skeletonManagerService?.getCurrentSkeleton();
+        const dirtyRanges = this._intersectDirtyRangesWithRenderedRange(
+            this._collectDirtyRanges(items, unitId, subUnitId),
+            currentSkeleton?.rowColumnSegment
+        );
+
+        if (dirtyRanges.length) {
+            currentSkeleton?.resetRangeCache(dirtyRanges);
+        }
+
+        skeletonManagerService?.reCalculate();
+        render?.mainComponent?.makeDirty();
+    }
+
+    private _markActiveSheetRulesDirty() {
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getActiveSheet();
+        if (!workbook || !worksheet) {
+            return;
+        }
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const rules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) ?? [];
+        if (!rules.length) {
+            return;
+        }
+
+        this._markDirtySkeleton(rules.map((rule) => ({ rule, subUnitId, unitId })));
     }
 
     private _initSkeleton() {
@@ -74,7 +141,7 @@ export class SheetsCfRenderController extends Disposable {
 
                     return v.some((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId());
                 })
-            ).subscribe(() => this._markDirtySkeleton()));
+            ).subscribe((items) => this._markDirtySkeleton(items)));
     }
 
     private _initViewModelInterceptor() {

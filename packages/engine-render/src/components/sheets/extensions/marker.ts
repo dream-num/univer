@@ -17,7 +17,6 @@
 import type { IRange, IScale } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { Range } from '@univerjs/core';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 
@@ -29,6 +28,16 @@ const stringifyRange = (range: IRange) => {
     const { startRow, endRow, startColumn, endColumn } = range;
     return `${startRow}-${endRow}-${startColumn}-${endColumn}`;
 };
+
+function drawTriangleMarker(ctx: UniverRenderingContext, color: string, x: number, y: number, x2: number, y2: number, x3: number, y3: number) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.closePath();
+    ctx.fill();
+}
 
 export class Marker extends SheetExtension {
     protected override Z_INDEX: number = Z_INDEX;
@@ -53,117 +62,87 @@ export class Marker extends SheetExtension {
 
         const mergeCellRendered = new Set<string>();
         const renderRanges = diffRanges?.length ? diffRanges : [rowColumnSegment];
+        const hasMerge = worksheet.getMergeData().length > 0;
 
-        // eslint-disable-next-line max-lines-per-function
         renderRanges.forEach((range) => {
-            // eslint-disable-next-line max-lines-per-function
-            Range.foreach(range, (row, col) => {
-                if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
-                    return;
-                }
-
-                let cellData = worksheet.getCell(row, col);
-                const cellInfo = skeleton.getCellWithCoordByIndex(row, col, false);
-                const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-                let { startY, endY, startX, endX } = cellInfo;
-
-                if (isMergedMainCell || isMerged) {
-                    startY = mergeInfo.startY;
-                    endY = mergeInfo.endY;
-                    startX = mergeInfo.startX;
-                    endX = mergeInfo.endX;
-                }
-
-                if (isMerged) {
-                    const mainCell = {
-                        row: mergeInfo.startRow,
-                        col: mergeInfo.startColumn,
-                    };
-
-                    cellData = worksheet.getCell(mainCell.row, mainCell.col);
-                }
-
-                if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                    return true;
-                }
-
-                if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
-                    const rangeStr = stringifyRange(mergeInfo);
-                    if (mergeCellRendered.has(rangeStr)) {
-                        return;
+            const { startRow, endRow, startColumn, endColumn } = range;
+            for (let row = startRow; row <= endRow; row++) {
+                for (let col = startColumn; col <= endColumn; col++) {
+                    if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                        continue;
                     }
 
-                    mergeCellRendered.add(rangeStr);
-                }
+                    let cellData = worksheet.getCell(row, col);
+                    if (!hasMerge && !cellData?.markers) {
+                        continue;
+                    }
 
-                if (!cellData) {
-                    return;
-                }
+                    const cellInfo = skeleton.getCellWithCoordByIndex(row, col, false);
+                    const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                    let { startY, endY, startX, endX } = cellInfo;
 
-                if (cellData.markers?.tr) {
-                    ctx.save();
-                    const marker = cellData.markers.tr;
-                    const x = endX;
-                    const y = startY;
-                    ctx.fillStyle = marker.color;
-                    ctx.moveTo(x, y);
-                    ctx.beginPath();
-                    ctx.lineTo(x - marker.size, y);
-                    ctx.lineTo(x, y + marker.size);
-                    ctx.lineTo(x, y);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.restore();
-                }
+                    if (isMergedMainCell || isMerged) {
+                        startY = mergeInfo.startY;
+                        endY = mergeInfo.endY;
+                        startX = mergeInfo.startX;
+                        endX = mergeInfo.endX;
+                    }
 
-                if (cellData.markers?.tl) {
-                    ctx.save();
-                    const marker = cellData.markers.tl;
-                    const x = startX;
-                    const y = startY;
-                    ctx.fillStyle = marker.color;
-                    ctx.moveTo(x, y);
-                    ctx.beginPath();
-                    ctx.lineTo(x + marker.size, y);
-                    ctx.lineTo(x, y + marker.size);
-                    ctx.lineTo(x, y);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.restore();
-                }
+                    if (isMerged) {
+                        const mainCell = {
+                            row: mergeInfo.startRow,
+                            col: mergeInfo.startColumn,
+                        };
 
-                if (cellData.markers?.br) {
-                    ctx.save();
-                    const marker = cellData.markers.br;
-                    const x = endX;
-                    const y = endY;
-                    ctx.fillStyle = marker.color;
-                    ctx.moveTo(x, y);
-                    ctx.beginPath();
-                    ctx.lineTo(x - marker.size, y);
-                    ctx.lineTo(x, y - marker.size);
-                    ctx.lineTo(x, y);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.restore();
-                }
+                        cellData = worksheet.getCell(mainCell.row, mainCell.col);
+                    }
 
-                if (cellData.markers?.bl) {
-                    ctx.save();
-                    const marker = cellData.markers.bl;
-                    const x = startX;
-                    const y = endY;
-                    ctx.fillStyle = marker.color;
-                    ctx.moveTo(x, y);
-                    ctx.beginPath();
-                    ctx.lineTo(x + marker.size, y);
-                    ctx.lineTo(x, y - marker.size);
-                    ctx.lineTo(x, y);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.restore();
+                    if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                        continue;
+                    }
+
+                    if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
+                        const rangeStr = stringifyRange(mergeInfo);
+                        if (mergeCellRendered.has(rangeStr)) {
+                            continue;
+                        }
+
+                        mergeCellRendered.add(rangeStr);
+                    }
+
+                    if (!cellData) {
+                        continue;
+                    }
+
+                    if (cellData.markers?.tr) {
+                        const marker = cellData.markers.tr;
+                        const x = endX;
+                        const y = startY;
+                        drawTriangleMarker(ctx, marker.color, x, y, x - marker.size, y, x, y + marker.size);
+                    }
+
+                    if (cellData.markers?.tl) {
+                        const marker = cellData.markers.tl;
+                        const x = startX;
+                        const y = startY;
+                        drawTriangleMarker(ctx, marker.color, x, y, x + marker.size, y, x, y + marker.size);
+                    }
+
+                    if (cellData.markers?.br) {
+                        const marker = cellData.markers.br;
+                        const x = endX;
+                        const y = endY;
+                        drawTriangleMarker(ctx, marker.color, x, y, x - marker.size, y, x, y - marker.size);
+                    }
+
+                    if (cellData.markers?.bl) {
+                        const marker = cellData.markers.bl;
+                        const x = startX;
+                        const y = endY;
+                        drawTriangleMarker(ctx, marker.color, x, y, x + marker.size, y, x, y - marker.size);
+                    }
                 }
-            });
+            }
         });
     }
 }

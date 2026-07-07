@@ -199,6 +199,8 @@ export class FRangePermission extends FBase {
 
     /**
      * List all protection rules that intersect with the current range.
+     * @param {object} [options] Options for listing protection rules.
+     * @param {boolean} [options.ignoreCollaborators] Whether to skip fetching collaborators for performance.
      * @returns {Promise<FRangeProtectionRule[]>} Array of protection rules.
      * @example
      * ```ts

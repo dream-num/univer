@@ -15,19 +15,15 @@
  */
 
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
-import type { FDocumentBody, IFDocumentTextRange } from './f-document-body';
-import type { IFDocumentElementInfo } from './f-document-element';
-import { DocumentBlockType, PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
-import { FDocumentElement } from './f-document-element';
-
-interface IFDocumentParagraphMixin {
-    asParagraph(): FDocumentParagraph;
-}
+import type { FDocument } from './f-document';
+import type { IFDocumentTextRange } from './utils';
+import { PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
 /**
  * Resolved paragraph metadata in the the document body.
  */
-export interface IFDocumentResolvedParagraph {
+export interface IFDocumentParagraphInfo {
     /** The underlying paragraph snapshot object. */
     paragraph: IParagraph;
     /** The current paragraph index in the body paragraph list. */
@@ -47,18 +43,13 @@ export interface IFDocumentResolvedParagraph {
  *
  * @hideconstructor
  */
-export class FDocumentParagraph extends FDocumentElement {
+export class FDocumentParagraph {
     constructor(
-        protected readonly body: FDocumentBody,
-        protected readonly info: IFDocumentElementInfo,
-        protected readonly injector: Injector
-    ) {
-        super(body, info, injector);
-
-        if (this.getType() !== DocumentBlockType.PARAGRAPH) {
-            throw new Error(`Element type is not a paragraph: ${this.getType()}`);
-        }
-    }
+        private readonly _document: FDocument,
+        private readonly _paragraphId: string,
+        private readonly _segmentId = '',
+        private readonly _injector: Injector
+    ) {}
 
     /**
      * Get the persisted paragraph id.
@@ -66,46 +57,52 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   console.log(paragraph.getParagraphId());
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.getId());
      * ```
      */
-    getParagraphId(): string {
-        return this.getKey();
+    getId(): string {
+        return this._paragraphId;
     }
 
     /**
-     * Get the resolved paragraph info for this wrapper.
-     * @returns {IFDocumentResolvedParagraph} The resolved paragraph info, including the paragraph object, its index, and its text range.
+     * Get the segment id of this paragraph.
+     * The main body paragraphs have an empty string segment id.
+     * The header and footer paragraphs have a non-empty string segment id.
+     * @returns {string} The segment id.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   console.log(paragraph.getResolvedParagraphInfo());
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.getSegmentId());
      * ```
      */
-    getResolvedParagraphInfo(): IFDocumentResolvedParagraph {
-        const { paragraphs = [] } = this._body.getBody();
+    getSegmentId(): string {
+        return this._segmentId;
+    }
+
+    /**
+     * Get this paragraph's metadata.
+     * @returns {IFDocumentParagraphInfo} The paragraph info.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.getInfo());
+     * ```
+     */
+    getInfo(): IFDocumentParagraphInfo {
+        const { paragraphs = [] } = this._document.getBody(this._segmentId);
         const matches = paragraphs
             .map((paragraph, paragraphIndex) => ({ paragraph, paragraphIndex }))
-            .filter(({ paragraph }) => paragraph.paragraphId === this.getKey());
+            .filter(({ paragraph }) => paragraph.paragraphId === this._paragraphId);
 
         if (matches.length === 0) {
-            throw new Error(`Document paragraph with id ${this.getKey()} not found`);
+            throw new Error(`Document paragraph with id ${this._paragraphId} not found`);
         }
 
         if (matches.length > 1) {
-            throw new Error(`Multiple document paragraphs with id ${this.getKey()} found`);
+            throw new Error(`Multiple document paragraphs with id ${this._paragraphId} found`);
         }
 
         const { paragraph, paragraphIndex } = matches[0];
@@ -125,19 +122,13 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   const range = paragraph.getRange();
-     *   fDocumentBody.setTextStyle(range, { bl: 1 });
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.getRange());
      * ```
      */
     getRange(): IFDocumentTextRange {
-        const { startOffset, endOffset } = this.getResolvedParagraphInfo();
-        return { startOffset, endOffset, segmentId: this._body.getSegmentId() };
+        const { startOffset, endOffset } = this.getInfo();
+        return { startOffset, endOffset, segmentId: this._segmentId };
     }
 
     /**
@@ -146,18 +137,13 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   console.log(paragraph.getText());
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.getText());
      * ```
      */
     getText(): string {
-        const { dataStream } = this._body.getBody();
-        const { startOffset, endOffset } = this.getResolvedParagraphInfo();
+        const { dataStream } = this._document.getBody(this._segmentId);
+        const { startOffset, endOffset } = this.getInfo();
         return dataStream.slice(startOffset, endOffset);
     }
 
@@ -168,19 +154,23 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   const success = paragraph.setText('Updated title');
-     *   console.log(success ? 'Text updated' : 'Failed to update text');
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * paragraph?.setText('New text');
+     * console.log(paragraph?.getText());
      * ```
      */
     setText(text: string): boolean {
-        const { startOffset, endOffset } = this.getResolvedParagraphInfo();
-        return this._body.replaceRange({ startOffset, endOffset }, text);
+        const { startOffset, endOffset } = this.getInfo();
+        return replaceBodyRange(
+            {
+                startOffset,
+                endOffset,
+                segmentId: this._segmentId,
+            },
+            buildPlainTextInsertBody(text),
+            this._document.getDocumentDataModel(),
+            this._injector
+        );
     }
 
     /**
@@ -190,19 +180,14 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   const success = paragraph.appendText(' Appended text');
-     *   console.log(success ? 'Text appended' : 'Failed to append text');
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * paragraph?.appendText(' Appended text');
+     * console.log(paragraph?.getText());
      * ```
      */
     appendText(text: string): boolean {
-        const { endOffset } = this.getResolvedParagraphInfo();
-        return this._body.insertText(endOffset, text);
+        const { endOffset } = this.getInfo();
+        return this._document.insertText(endOffset, text, this._segmentId);
     }
 
     /**
@@ -212,17 +197,44 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   paragraph.setStyle({ horizontalAlign: 2 });
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * paragraph?.setText('Styled text');
+     * paragraph?.setStyle({
+     *   textStyle: {
+     *     cl: {
+     *       rgb: '#FF0000',
+     *     },
+     *     fs: 14,
+     *   },
+     *   horizontalAlign: 2,
+     * });
+     * console.log(paragraph?.getInfo().paragraph.paragraphStyle);
      * ```
      */
     setStyle(style: IParagraphStyle): boolean {
-        const { paragraph, endOffset } = this.getResolvedParagraphInfo();
+        const { paragraph, startOffset, endOffset } = this.getInfo();
+        let result = true;
+
+        if (style.textStyle && startOffset < endOffset) {
+            result = retainBodyRange(
+                {
+                    startOffset,
+                    endOffset,
+                    segmentId: this._segmentId,
+                },
+                {
+                    dataStream: '',
+                    textRuns: [{
+                        st: 0,
+                        ed: endOffset - startOffset,
+                        ts: style.textStyle,
+                    }],
+                },
+                UpdateDocsAttributeType.COVER,
+                this._document.getDocumentDataModel(),
+                this._injector
+            );
+        }
 
         const updateBody: IDocumentBody = {
             dataStream: '',
@@ -238,11 +250,17 @@ export class FDocumentParagraph extends FDocumentElement {
 
         this._preserveExplicitParagraphIds(updateBody);
 
-        return this._body.retainRange(
-            { startOffset: endOffset, endOffset: endOffset + 1 },
+        return retainBodyRange(
+            {
+                startOffset: endOffset,
+                endOffset: endOffset + 1,
+                segmentId: this._segmentId,
+            },
             updateBody,
-            UpdateDocsAttributeType.REPLACE
-        );
+            UpdateDocsAttributeType.REPLACE,
+            this._document.getDocumentDataModel(),
+            this._injector
+        ) && result;
     }
 
     /**
@@ -251,17 +269,12 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   console.log(paragraph.isListItem() ? 'This is a list item' : 'This is not a list item');
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.isListItem());
      * ```
      */
     isListItem(): boolean {
-        const { paragraph } = this.getResolvedParagraphInfo();
+        const { paragraph } = this.getInfo();
         return Boolean(paragraph.bullet);
     }
 
@@ -271,17 +284,12 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
-     *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   console.log(paragraph.isTask() ? 'This is a task item' : 'This is not a task item');
-     * }
+     * const paragraph = fDocument.getParagraphs()[0];
+     * console.log(paragraph?.isTask());
      * ```
      */
     isTask(): boolean {
-        const { paragraph } = this.getResolvedParagraphInfo();
+        const { paragraph } = this.getInfo();
         const listType = paragraph.bullet?.listType;
         return listType === PresetListType.CHECK_LIST || listType === PresetListType.CHECK_LIST_CHECKED;
     }
@@ -293,16 +301,11 @@ export class FDocumentParagraph extends FDocumentElement {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * const element = fDocumentBody.getElement(0);
+     * const paragraph = fDocument.getParagraphs()[0];
      *
-     * if (element?.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *
-     *   if (paragraph.isTask()) {
-     *     const success = paragraph.setTaskChecked(true);
-     *     console.log(success ? 'Task checked' : 'Failed to check task');
-     *   }
+     * if (paragraph.isTask()) {
+     *   const success = paragraph.setTaskChecked(true);
+     *   console.log(success ? 'Task checked' : 'Failed to check task');
      * }
      * ```
      */
@@ -311,7 +314,7 @@ export class FDocumentParagraph extends FDocumentElement {
             return false;
         }
 
-        const { paragraph, endOffset } = this.getResolvedParagraphInfo();
+        const { paragraph, endOffset } = this.getInfo();
         const bullet = paragraph.bullet!;
 
         const updateBody: IDocumentBody = {
@@ -328,11 +331,37 @@ export class FDocumentParagraph extends FDocumentElement {
 
         this._preserveExplicitParagraphIds(updateBody);
 
-        return this._body.retainRange(
-            { startOffset: endOffset, endOffset: endOffset + 1 },
+        return retainBodyRange(
+            {
+                startOffset: endOffset,
+                endOffset: endOffset + 1,
+                segmentId: this._segmentId,
+            },
             updateBody,
-            UpdateDocsAttributeType.REPLACE
+            UpdateDocsAttributeType.REPLACE,
+            this._document.getDocumentDataModel(),
+            this._injector
         );
+    }
+
+    /**
+     * Remove this paragraph.
+     * @returns {boolean} `true` if the paragraph was removed.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.getParagraphs()[0];
+     * const success = paragraph?.remove();
+     * console.log(success ? 'Paragraph removed' : 'Failed to remove paragraph');
+     * ```
+     */
+    remove(): boolean {
+        const { startOffset, endOffset } = this.getInfo();
+        return this._document.deleteRange({
+            startOffset,
+            endOffset: endOffset + 1,
+            segmentId: this._segmentId,
+        });
     }
 
     private _preserveExplicitParagraphIds(body: IDocumentBody): void {
@@ -340,17 +369,13 @@ export class FDocumentParagraph extends FDocumentElement {
     }
 }
 
-export class FDocumentParagraphMixin extends FDocumentElement {
-    override asParagraph(): FDocumentParagraph {
-        if (this.getType() !== DocumentBlockType.PARAGRAPH) {
-            throw new Error(`Element type is not a paragraph: ${this.getType()}`);
-        }
-        return this._injector.createInstance(FDocumentParagraph, this._body, this.getResolvedInfo(), this._injector);
+export function isParagraphFacade(value: unknown): value is FDocumentParagraph {
+    if (typeof value !== 'object' || value === null) {
+        return false;
     }
-}
 
-FDocumentElement.extend(FDocumentParagraphMixin);
-declare module '@univerjs/docs/facade' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FDocumentElement extends IFDocumentParagraphMixin { }
+    return typeof (value as FDocumentParagraph).getId === 'function' &&
+        typeof (value as FDocumentParagraph).getSegmentId === 'function' &&
+        typeof (value as FDocumentParagraph).getInfo === 'function' &&
+        typeof (value as FDocumentParagraph).getRange === 'function';
 }

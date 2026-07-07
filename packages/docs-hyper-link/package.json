@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-hyper-link",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Hyperlink model and commands for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -69,6 +69,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     }
 }

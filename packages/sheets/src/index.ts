@@ -102,7 +102,7 @@ export type { IClearSelectionContentCommandParams } from './commands/commands/cl
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export type { IClearSelectionFormatCommandParams } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
-export type { ICopySheetCommandParams } from './commands/commands/copy-worksheet.command';
+export type { ICopySheetCommandInterceptorParams, ICopySheetCommandParams } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
 export type { IDeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';

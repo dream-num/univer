@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     PositionedObjectLayoutType,
+    UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
 import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
@@ -69,9 +70,9 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
 
     const { unitId } = drawingParam;
 
-    const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
-    const renderObject = renderManagerService.getRenderById(unitId);
+    const renderObject = renderManagerService.getRenderUnitById(unitId);
     const scene = renderObject?.scene;
     if (scene == null) {
         return null;

@@ -37,7 +37,7 @@ export interface IDeleteCustomRangeParam {
 
 export function deleteCustomRangeTextX(params: IDeleteCustomRangeParam) {
     const { rangeId, segmentId, documentDataModel, insert } = params;
-    const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
+    const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
         return false;
     }

@@ -72,6 +72,7 @@ describe('marker extension', () => {
         const ctx = createCtx();
 
         const worksheet = {
+            getMergeData: vi.fn(() => []),
             getRowVisible: vi.fn(() => true),
             getColVisible: vi.fn(() => true),
             getCell: vi.fn(() => ({
@@ -91,6 +92,13 @@ describe('marker extension', () => {
 
         marker.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
         expect(ctx.fill).toHaveBeenCalledTimes(4);
+        expect(ctx.save).not.toHaveBeenCalled();
+        expect(ctx.restore).not.toHaveBeenCalled();
+        expect(ctx.beginPath).toHaveBeenCalledTimes(4);
+        expect(ctx.moveTo).toHaveBeenCalledWith(10, 0);
+        expect(ctx.moveTo).toHaveBeenCalledWith(0, 0);
+        expect(ctx.moveTo).toHaveBeenCalledWith(10, 20);
+        expect(ctx.moveTo).toHaveBeenCalledWith(0, 20);
 
         worksheet.getRowVisible.mockReturnValue(false);
         marker.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
@@ -113,6 +121,12 @@ describe('marker extension', () => {
         };
 
         const worksheet = {
+            getMergeData: vi.fn(() => [{
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 1,
+            }]),
             getRowVisible: vi.fn(() => true),
             getColVisible: vi.fn(() => true),
             getCell: vi.fn(() => ({
@@ -144,6 +158,7 @@ describe('marker extension', () => {
         const ctx = createCtx();
 
         const worksheet = {
+            getMergeData: vi.fn(() => []),
             getRowVisible: vi.fn(() => true),
             getColVisible: vi.fn(() => true),
             getCell: vi.fn((row: number) => row === 5
@@ -176,5 +191,26 @@ describe('marker extension', () => {
         expect(worksheet.getCell).toHaveBeenCalledTimes(1);
         expect(worksheet.getCell).toHaveBeenCalledWith(5, 0);
         expect(ctx.fill).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips coordinate calculation for no-merge cells without markers', () => {
+        const marker = new Marker();
+        const ctx = createCtx();
+        const worksheet = {
+            getMergeData: vi.fn(() => []),
+            getRowVisible: vi.fn(() => true),
+            getColVisible: vi.fn(() => true),
+            getCell: vi.fn(() => ({ v: 'plain' })),
+        };
+        const skeleton = {
+            worksheet,
+            rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
+        } as any;
+
+        marker.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
+
+        expect(skeleton.getCellWithCoordByIndex).not.toHaveBeenCalled();
+        expect(ctx.fill).not.toHaveBeenCalled();
     });
 });

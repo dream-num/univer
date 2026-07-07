@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBlockRange, IDocumentBody, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IDocumentBlockRange, IDocumentBody, IMultiCommand, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IDeleteTextCommandParams, IRichTextEditingMutationParams, IUpdateTextCommandParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -64,14 +64,13 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
+        const { direction, range, unitId, drawingId } = params;
         const activeRange = docSelectionManagerService.getActiveTextRange();
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (activeRange == null || documentDataModel == null) {
             return false;
         }
-
-        const { direction, range, unitId, drawingId } = params;
 
         const { startOffset, segmentId, style } = activeRange;
 
@@ -161,7 +160,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
         const { segmentId, style } = activeRange;
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (docDataModel == null || originBody == null) {
             return false;
         }
@@ -281,7 +280,7 @@ export const RemoveHorizontalLineCommand: ICommand = {
         }
         const { segmentId, style } = activeRange;
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (docDataModel == null || originBody == null) {
             return false;
         }
@@ -436,7 +435,7 @@ export const DeleteLeftCommand: ICommand = {
 
         let result = true;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -478,7 +477,7 @@ export const DeleteLeftCommand: ICommand = {
 
         const { segmentId, style, segmentPage } = activeRange;
 
-        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (body == null) {
             return false;
@@ -663,7 +662,7 @@ export const DeleteRightCommand: ICommand = {
     handler: async (accessor) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!docDataModel) {
             return false;
         }
@@ -702,7 +701,7 @@ export const DeleteRightCommand: ICommand = {
 
         const { segmentId, style, segmentPage } = activeRange;
 
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (!docDataModel || !body) {
             return false;
         }
@@ -795,7 +794,7 @@ export const DeleteRightCommand: ICommand = {
     },
 };
 
-async function executeDeleteAutoFormat(accessor: Parameters<ICommand['handler']>[0], commandId: string): Promise<boolean | null> {
+async function executeDeleteAutoFormat(accessor: IAccessor, commandId: string): Promise<boolean | null> {
     if (!accessor.has(DocAutoFormatService)) {
         return null;
     }
@@ -887,8 +886,16 @@ function resetEmptyCenteredParagraphAlignment(
     });
 }
 
-export const DeleteCurrentParagraphCommand: ICommand = {
+export interface IDeleteCurrentParagraphCommandParams {
+    unitId?: string;
+    blockRange?: IDocumentBlockRange;
+}
+
+export const DeleteCurrentParagraphCommand: IMultiCommand<IDeleteCurrentParagraphCommandParams> = {
     id: 'doc.command.delete-current-paragraph',
+    name: 'doc.command.delete-current-paragraph',
+    multi: true,
+    priority: 0,
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);

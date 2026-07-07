@@ -19,7 +19,7 @@ import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSe
 import type { LocaleKey } from '../../locale/types';
 import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
-import { DropdownIcon } from '@univerjs/icons';
+import { DownIcon } from '@univerjs/icons';
 import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import {
     AddTableThemeCommand,
@@ -286,7 +286,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                                 background: headerBg,
                                             }}
                                         />
-                                        <DropdownIcon className="univer-size-2" />
+                                        <DownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -336,7 +336,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                             className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: firstRowBg }}
                                         />
-                                        <DropdownIcon className="univer-size-2" />
+                                        <DownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -384,7 +384,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                             className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: secondRowBg }}
                                         />
-                                        <DropdownIcon className="univer-size-2" />
+                                        <DownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -433,7 +433,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                             className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: lastRowBg }}
                                         />
-                                        <DropdownIcon className="univer-size-2" />
+                                        <DownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>

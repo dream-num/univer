@@ -26,8 +26,10 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
+    FOCUSING_FX_BAR_EDITOR,
     HorizontalAlign,
     ICommandService,
+    IContextService,
     Inject,
     IUniverInstanceService,
     Tools,
@@ -76,7 +78,8 @@ export class EditorDataSyncController extends Disposable {
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController,
-        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService
+        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -86,6 +89,7 @@ export class EditorDataSyncController extends Disposable {
     private _initialize() {
         this._syncFormulaEditorContent();
         this._commandExecutedListener();
+        this._syncFormulaRefRenderStyleOnFocusChange();
     }
 
     private _getEditorViewModel(unitId: string): Nullable<DocumentViewModel> {
@@ -239,6 +243,7 @@ export class EditorDataSyncController extends Disposable {
             syncer: parmas.unitId,
         });
 
+        this._checkAndSetRenderStyleConfig(docDataModel);
         docViewModel.reset(docDataModel);
 
         skeleton.calculate();
@@ -291,34 +296,69 @@ export class EditorDataSyncController extends Disposable {
         }
     }
 
-    private _checkAndSetRenderStyleConfig(documentDataModel: DocumentDataModel) {
-        const snapshot = documentDataModel.getSnapshot();
-        const { body } = snapshot;
+    private _syncFormulaRefRenderStyleOnFocusChange() {
+        this.disposeWithMe(this._contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).subscribe(() => {
+            this._refreshRenderStyleConfig(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            this._refreshRenderStyleConfig(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        }));
+    }
 
-        if (snapshot.id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+    private _refreshRenderStyleConfig(unitId: string) {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const docViewModel = this._getEditorViewModel(unitId);
+
+        if (currentRender == null || skeleton == null || docDataModel == null || docViewModel == null) {
             return;
         }
 
-        snapshot.documentStyle = formulaEditorStyle;
+        this._checkAndSetRenderStyleConfig(docDataModel);
+        docViewModel.reset(docDataModel);
+        skeleton.calculate();
+        currentRender.mainComponent?.makeDirty();
+
+        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            this._formulaEditorController.autoScroll();
+        }
+    }
+
+    private _checkAndSetRenderStyleConfig(documentDataModel: DocumentDataModel) {
+        const snapshot = documentDataModel.getSnapshot();
+
+        if (snapshot.id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY && snapshot.id !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
+
+        const isFormulaBar = snapshot.id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        if (isFormulaBar) {
+            snapshot.documentStyle = formulaEditorStyle;
+        } else {
+            snapshot.documentStyle ??= {};
+        }
         let renderConfig = snapshot.documentStyle.renderConfig;
 
         if (renderConfig == null) {
             renderConfig = {};
             snapshot.documentStyle.renderConfig = renderConfig;
         }
-        const position = this._formulaEditorManagerService.getPosition();
-        if (position) {
+        const position = isFormulaBar ? this._formulaEditorManagerService.getPosition() : null;
+        if (isFormulaBar && position) {
             const width = position.width;
             snapshot.documentStyle.pageSize = {
                 width,
                 height: Infinity,
             };
         }
-        if ((body?.dataStream ?? '').startsWith('=')) {
-            renderConfig.isRenderStyle = BooleanNumber.TRUE;
-        } else {
-            renderConfig.isRenderStyle = BooleanNumber.FALSE;
+
+        const isFormula = (snapshot.body?.dataStream ?? '').startsWith('=');
+        if (!isFormula) {
+            renderConfig.isRenderStyle = isFormulaBar ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+            return;
         }
+
+        const isFocusFxBar = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+        renderConfig.isRenderStyle = isFormulaBar === isFocusFxBar ? BooleanNumber.TRUE : BooleanNumber.FALSE;
     }
 
     private _clearParagraph(paragraphs: IParagraph[]) {

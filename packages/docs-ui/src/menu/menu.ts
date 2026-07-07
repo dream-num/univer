@@ -82,7 +82,7 @@ import {
     AlignRightCommand,
 } from '../commands/commands/paragraph-align.command';
 import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
-import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
+// import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
@@ -123,6 +123,56 @@ function getInsertTableHiddenObservable(
     });
 }
 
+export function disableMenuWhenHeaderFooterEditing(accessor: IAccessor): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const renderManagerService = accessor.get(IRenderManagerService);
+
+    return new Observable((subscriber) => {
+        let editAreaSubscription: { unsubscribe: () => void } | null = null;
+        let lastDisabled: boolean | undefined;
+
+        const emit = (disabled: boolean) => {
+            if (disabled !== lastDisabled) {
+                lastDisabled = disabled;
+                subscriber.next(disabled);
+            }
+        };
+
+        const emitByUnit = (unitId?: string | null | void) => {
+            editAreaSubscription?.unsubscribe();
+            editAreaSubscription = null;
+
+            if (!unitId || univerInstanceService.getUnitType(unitId) !== UniverInstanceType.UNIVER_DOC) {
+                emit(true);
+                return;
+            }
+
+            const currentRender = renderManagerService.getRenderById(unitId);
+            const skeletonManager = currentRender?.with(DocSkeletonManagerService);
+            const viewModel = skeletonManager?.getViewModel();
+            if (!viewModel) {
+                emit(true);
+                return;
+            }
+
+            const emitDisabled = (editArea?: Nullable<DocumentEditArea>) => {
+                const currentEditArea = editArea ?? viewModel.getEditArea();
+                emit(currentEditArea === DocumentEditArea.HEADER || currentEditArea === DocumentEditArea.FOOTER);
+            };
+
+            emitDisabled();
+            editAreaSubscription = viewModel.editAreaChange$.subscribe(emitDisabled);
+        };
+
+        const focusedSubscription = univerInstanceService.focused$.subscribe(emitByUnit);
+
+        return () => {
+            editAreaSubscription?.unsubscribe();
+            focusedSubscription.unsubscribe();
+        };
+    });
+}
+
 function getHeaderFooterMenuHiddenObservable(
     accessor: IAccessor
 ): Observable<boolean> {
@@ -148,13 +198,13 @@ function getHeaderFooterMenuHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
             const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
 
             subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
         });
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return subscriber.next(true);
@@ -196,7 +246,7 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
                 return;
             }
 
-            const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+            const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
             if (docDataModel == null) {
                 subscriber.next(true);
@@ -1126,7 +1176,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
                 return;
             }
 
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
             if (docDataModel == null) {
                 return;
             }
@@ -1137,7 +1187,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
             if (range) {
                 const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
 
-                const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '');
+                const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc?.getBody()?.paragraphs ?? [], doc?.getBody()?.dataStream ?? '');
                 let listType: string | undefined;
                 if (paragraphs.every((p) => {
                     if (!listType) {
@@ -1217,33 +1267,33 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
     };
 }
 
-export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
+// export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+//     const commandService = accessor.get(ICommandService);
+//     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    return {
-        id: SwitchDocModeCommand.id,
-        type: MenuItemType.BUTTON,
-        icon: 'KeyboardIcon',
-        tooltip: 'docs-ui.toolbar.documentFlavor',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        activated$: new Observable<boolean>((subscriber) => {
-            const subscription = commandService.onCommandExecuted((c) => {
-                if (c.id === RichTextEditingMutation.id) {
-                    const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+//     return {
+//         id: SwitchDocModeCommand.id,
+//         type: MenuItemType.BUTTON,
+//         icon: 'KeyboardIcon',
+//         tooltip: 'docs-ui.toolbar.documentFlavor',
+//         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+//         activated$: new Observable<boolean>((subscriber) => {
+//             const subscription = commandService.onCommandExecuted((c) => {
+//                 if (c.id === RichTextEditingMutation.id) {
+//                     const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
-                    subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
-                }
-            });
+//                     subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
+//                 }
+//             });
 
-            const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+//             const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
-            subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
+//             subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
 
-            return () => subscription.dispose();
-        }),
-    };
-}
+//             return () => subscription.dispose();
+//         }),
+//     };
+// }
 
 export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
@@ -1347,7 +1397,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     }
 
     const { segmentId } = activeRange;
-    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
     if (body == null) {
         return {
@@ -1375,7 +1425,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
 
-    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     const docRanges = textSelectionService.getDocRanges();
     const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
@@ -1386,7 +1436,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
 
     const { startOffset, segmentId } = activeRange;
 
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs;
 
     if (paragraphs == null) {
         return;

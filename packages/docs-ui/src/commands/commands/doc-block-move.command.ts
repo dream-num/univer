@@ -47,9 +47,11 @@ export const MoveDocBlockCommand: ICommand<IMoveDocBlockCommandParams> = {
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const doc = (params.unitId
-            ? univerInstanceService.getUnit(params.unitId, UniverInstanceType.UNIVER_DOC)
-            : univerInstanceService.getCurrentUniverDocInstance()) as DocumentDataModel | undefined;
+
+        const { unitId, sourceRange, targetOffset } = params;
+        const doc = unitId
+            ? univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC)
+            : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (!doc) {
             return false;
@@ -58,13 +60,13 @@ export const MoveDocBlockCommand: ICommand<IMoveDocBlockCommandParams> = {
         const previousDocumentData = doc.getSnapshot();
         const moveResult = buildMoveDocBlockActions({
             documentData: previousDocumentData,
-            sourceRange: params.sourceRange,
-            targetOffset: params.targetOffset,
+            sourceRange,
+            targetOffset,
         });
         const { nextDocumentData, movedRange } = accessor.get(DocBlockMoveValidatorService).transformMoveResult({
             unitId: doc.getUnitId(),
-            sourceRange: params.sourceRange,
-            targetOffset: params.targetOffset,
+            sourceRange,
+            targetOffset,
             previousDocumentData,
             result: moveResult,
         });

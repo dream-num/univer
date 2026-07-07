@@ -281,14 +281,6 @@ class TestUniverInstanceService {
     getUniverSheetInstance() {
         return this._workbook;
     }
-
-    getUniverDocInstance() {
-        return null;
-    }
-
-    getCurrentUniverDocInstance() {
-        return null;
-    }
 }
 
 class SelectionState {

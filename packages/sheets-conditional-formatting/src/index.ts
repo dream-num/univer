@@ -66,4 +66,3 @@ export * from './utils/anchor';
 export * from './utils/create-cf-id';
 export * from './utils/remove-undefined-attr';
 export * from './utils/type';
-export { isRangesEqual } from '@univerjs/core';

@@ -36,7 +36,7 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
 
         const { segmentId } = activeRange;
         const unitId = docDataModel.getUnitId();
-        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (body == null) {
             return false;
         }

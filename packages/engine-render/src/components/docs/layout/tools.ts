@@ -43,6 +43,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
+import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
@@ -349,8 +350,16 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
-export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
+export function updateBlockIndex(
+    pages: IDocumentSkeletonPage[],
+    start: number = -1,
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
+) {
     let prePageStartIndex = start;
+    // Real docs declare a classic/modern compatibility mode, so their measured layout column
+    // width can be reused. Embedded editors keep the mode unspecified and must fall back to
+    // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
+    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified';
 
     for (const page of pages) {
         const { sections, skeTables, skeColumnGroups = new Map() } = page;
@@ -474,7 +483,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
-                const measuredColumnWidth = Number.isFinite(column.width) && column.width > 0
+                const measuredColumnWidth = shouldUseLayoutColumnWidth && Number.isFinite(column.width) && column.width > 0
                     ? column.width
                     : maxColumnWidth;
                 column.width = measuredColumnWidth;
@@ -670,7 +679,8 @@ export interface IDocumentSkeletonLineContext {
     visualWidth?: number;
 }
 
-export type DocumentSkeletonTableSource = 'page' | 'column';
+export type DocumentSkeletonTableSource = 'page' | 'column' | 'header' | 'footer';
+type HeaderFooterSkeletonMap = Map<string, Map<number, IDocumentSkeletonPage>>;
 
 export interface IDocumentSkeletonTableCellGeometry {
     cell: IDocumentSkeletonPage;
@@ -704,6 +714,8 @@ export interface IDocumentSkeletonTableIteratorOptions {
     docsTop?: number;
     pageMarginTop?: number;
     resolveViewport?: boolean;
+    skeFooters?: HeaderFooterSkeletonMap;
+    skeHeaders?: HeaderFooterSkeletonMap;
     tableCellInsetX?: number;
     unitId?: string;
 }
@@ -717,6 +729,8 @@ export function documentSkeletonTableIterator(
         docsTop = 0,
         pageMarginTop = 0,
         resolveViewport = true,
+        skeFooters,
+        skeHeaders,
         tableCellInsetX = 0,
         unitId = '',
     } = options;
@@ -740,6 +754,42 @@ export function documentSkeletonTableIterator(
             tableCellInsetX,
             unitId,
         });
+
+        const rootPageDocumentTop = rootPageTop - rootPage.marginTop;
+        const rootPageDocumentLeft = docsLeft + rootPage.marginLeft;
+        const headerPage = rootPage.headerId == null ? undefined : skeHeaders?.get(rootPage.headerId)?.get(rootPage.pageWidth);
+        if (headerPage != null) {
+            collectPageTables({
+                contexts,
+                docsLeft,
+                page: headerPage,
+                pageIndex,
+                pageLeft: rootPageDocumentLeft,
+                pageTop: rootPageDocumentTop + headerPage.marginTop,
+                rootPage,
+                source: 'header',
+                resolveViewport,
+                tableCellInsetX,
+                unitId,
+            });
+        }
+
+        const footerPage = rootPage.footerId == null ? undefined : skeFooters?.get(rootPage.footerId)?.get(rootPage.pageWidth);
+        if (footerPage != null) {
+            collectPageTables({
+                contexts,
+                docsLeft,
+                page: footerPage,
+                pageIndex,
+                pageLeft: rootPageDocumentLeft,
+                pageTop: rootPageDocumentTop + rootPage.pageHeight - footerPage.height - footerPage.marginBottom,
+                rootPage,
+                source: 'footer',
+                resolveViewport,
+                tableCellInsetX,
+                unitId,
+            });
+        }
 
         rootPage.skeColumnGroups?.forEach((columnGroup) => {
             columnGroup.columns.forEach((columnGroupColumn) => {
@@ -1459,6 +1509,21 @@ export function getFontCreateConfig(
     return result;
 }
 
+export function getCustomRangeGlyphWidth(
+    index: number,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    config: IFontCreateConfig
+): number | undefined {
+    const customRange = viewModel.getCustomRange(index + paragraphNode.startIndex);
+    const glyphWidthEm = customRange?.glyphWidthEm;
+    if (typeof glyphWidthEm !== 'number' || !Number.isFinite(glyphWidthEm) || glyphWidthEm < 0) {
+        return undefined;
+    }
+
+    return glyphWidthEm * config.fontStyle.originFontSize;
+}
+
 // Generate an empty doc skeleton with the initial states.
 export function getNullSkeleton(): IDocumentSkeletonCached {
     return {
@@ -1753,20 +1818,28 @@ export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (st
             const pageIndex = pathCopy.shift() as number;
             page = skeletonData.pages[pageIndex];
         } else if (field === 'skeTables') {
+            if (page == null) {
+                return null;
+            }
+
             const tableId = pathCopy.shift() as string;
             pathCopy.shift(); // rows
             const rowIndex = pathCopy.shift() as number;
             pathCopy.shift(); // cells
             const cellIndex = pathCopy.shift() as number;
 
-            page = page!.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
+            page = page.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
         } else if (field === 'skeColumnGroups') {
+            if (page == null) {
+                return null;
+            }
+
             const columnGroupId = pathCopy.shift() as string;
             pathCopy.shift(); // columns
             const columnIndex = pathCopy.shift() as number;
             pathCopy.shift(); // page
 
-            page = page!.skeColumnGroups?.get(columnGroupId)?.columns[columnIndex]?.page;
+            page = page.skeColumnGroups?.get(columnGroupId)?.columns[columnIndex]?.page;
         }
     }
 

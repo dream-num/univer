@@ -71,6 +71,17 @@ class MockSlideUnit extends UnitModel {
     override setRev() {}
 }
 
+class MockBoardUnit extends UnitModel {
+    override type = UniverInstanceType.UNIVER_BOARD;
+    override name$ = new BehaviorSubject('');
+    override setName() {}
+    override getSnapshot() { return {}; }
+    override getUnitId() { return 'board-unit'; }
+    override getRev() { return 1; }
+    override incrementRev() {}
+    override setRev() {}
+}
+
 describe('UniverInstanceService', () => {
     let service: UniverInstanceService;
     let contextService: ContextService;
@@ -89,12 +100,15 @@ describe('UniverInstanceService', () => {
         service.registerCtorForType(UniverInstanceType.UNIVER_SHEET, WorkbookModel as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
+        service.registerCtorForType(UniverInstanceType.UNIVER_BOARD, MockBoardUnit as never);
         service.__setCreateHandler((type, data, _ctor, options) => {
             let unit: UnitModel;
             if (type === UniverInstanceType.UNIVER_SHEET) {
                 unit = injector.createInstance(WorkbookModel as never, data as Partial<IWorkbookData>, logService) as UnitModel;
             } else if (type === UniverInstanceType.UNIVER_DOC) {
                 unit = injector.createInstance(DocumentDataModel as never, data as Partial<IDocumentData>) as UnitModel;
+            } else if (type === UniverInstanceType.UNIVER_BOARD) {
+                unit = new MockBoardUnit();
             } else {
                 unit = injector.createInstance(MockSlideUnit);
             }
@@ -168,11 +182,11 @@ describe('UniverInstanceService', () => {
 
         const replacement = new DocumentDataModel(createDocData('doc-unit'));
         service.changeDoc(doc.getUnitId(), replacement);
-        expect(service.getUniverDocInstance('doc-unit')).toBe(replacement);
+        expect(service.getUnit('doc-unit')).toBe(replacement);
 
         expect(service.disposeUnit('doc-unit')).toBe(true);
         expect(disposed).toEqual(['doc-unit']);
-        expect(service.getCurrentUniverDocInstance()).toBeNull();
+        expect(service.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)).toBeNull();
         expect(service.getFocusedUnit()).toBeUndefined();
         expect(service.disposeUnit('missing')).toBe(false);
     });
@@ -191,5 +205,16 @@ describe('UniverInstanceService', () => {
         expect(() => service.setCurrentUnitForType('missing')).toThrow(/no document with unitId missing/);
         expect(currentIds).toContain('sheet-unit');
         expect(currentIds).toContain('sheet-unit-2');
+    });
+
+    it('should create board units as an independent unit type', () => {
+        const board = service.createUnit<object, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, {});
+
+        expect(UniverInstanceType.UNIVER_BOARD).toBe(6);
+        expect(board.getUnitId()).toBe('board-unit');
+        expect(service.getCurrentUnitOfType<MockBoardUnit>(UniverInstanceType.UNIVER_BOARD)?.getUnitId()).toBe('board-unit');
+        expect(service.getUnit<MockBoardUnit>('board-unit', UniverInstanceType.UNIVER_BOARD)).toBe(board);
+        expect(service.getAllUnitsForType<MockBoardUnit>(UniverInstanceType.UNIVER_BOARD)).toEqual([board]);
+        expect(service.getUnitType('board-unit')).toBe(UniverInstanceType.UNIVER_BOARD);
     });
 });

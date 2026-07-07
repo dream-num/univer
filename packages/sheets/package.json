@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Core spreadsheet model and business logic for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -95,6 +95,6 @@
         "@univerjs/network": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     }
 }

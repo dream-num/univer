@@ -45,6 +45,7 @@ const locale: typeof enUS = {
             and: 'かつ',
             when: '次の場合',
             onlyShowIcon: 'アイコンのみ表示',
+            noCellIcon: 'セル アイコンなし',
         },
         symbol: {
             greaterThan: '>',

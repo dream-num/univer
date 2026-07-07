@@ -16,6 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dialog } from '../Dialog';
 import '@testing-library/jest-dom/vitest';
 
@@ -115,5 +116,30 @@ describe('Dialog', () => {
         closeBtn.click();
         expect(onOpenChange).toHaveBeenCalledWith(false);
         expect(onClose).toHaveBeenCalled();
+    });
+
+    it('should render inside the configured mount container with rtl direction', () => {
+        const mountContainer = document.createElement('div');
+        mountContainer.dir = 'rtl';
+        document.body.appendChild(mountContainer);
+
+        render(
+            <ConfigProvider mountContainer={mountContainer} direction="rtl">
+                <Dialog open title="RTL Title">content</Dialog>
+            </ConfigProvider>
+        );
+
+        const dialog = mountContainer.querySelector('[role="dialog"]') as HTMLElement;
+        expect(dialog).toBeInTheDocument();
+        expect(dialog.dir).toBe('rtl');
+
+        const closeButton = dialog.querySelector('[data-slot="close"]') as HTMLElement;
+        expect(closeButton.className).toContain('rtl:univer-left-4');
+        expect(closeButton.className).toContain('rtl:univer-right-auto');
+
+        const header = dialog.querySelector('[data-slot="dialog-header"]') as HTMLElement;
+        expect(header.className).toContain('sm:rtl:!univer-text-right');
+
+        mountContainer.remove();
     });
 });

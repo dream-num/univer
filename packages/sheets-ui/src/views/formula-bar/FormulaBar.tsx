@@ -29,7 +29,7 @@ import {
 import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { CheckMarkIcon, CloseIcon, DropdownIcon, FxIcon } from '@univerjs/icons';
+import { CheckMarkIcon, CloseIcon, DownIcon, FxIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
 import {
     RangeProtectionCache,
@@ -421,7 +421,7 @@ export function FormulaBar(props: IProps) {
                         `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:!univer-text-gray-700': editDisable })}
                         onClick={handleArrowClick}
                     >
-                        <DropdownIcon
+                        <DownIcon
                             className={clsx({
                                 'univer-rotate-180': arrowDirection === ArrowDirection.Up,
                             })}

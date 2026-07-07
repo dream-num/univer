@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-import type { IFBlobSource } from '@univerjs/core/facade';
 import type { IDrawingParam } from '@univerjs/core';
+import type { IFBlobSource } from '@univerjs/core/facade';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } from '@univerjs/core';
+import { isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
-
-const GROUPABLE_DRAWING_TYPES = new Set([
-    DrawingTypeEnum.DRAWING_IMAGE,
-    DrawingTypeEnum.DRAWING_SHAPE,
-    DrawingTypeEnum.DRAWING_GROUP,
-]);
 
 /**
  * @ignore
@@ -511,7 +506,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
         const drawings = uniqueDrawingIds.map((drawingId) => sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId }));
 
         if (drawings.some((drawing) => !drawing)) return null;
-        if (drawings.some((drawing) => !GROUPABLE_DRAWING_TYPES.has(drawing!.drawingType))) return null;
+        if (drawings.some((drawing) => !isGroupableDrawingType(drawing!.drawingType))) return null;
 
         const validDrawings = drawings as ISheetDrawing[];
         const groupTransform = getGroupState(0, 0, validDrawings.map((drawing) => drawing.transform || {}));

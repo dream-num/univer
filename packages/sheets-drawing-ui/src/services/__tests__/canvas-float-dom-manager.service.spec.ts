@@ -15,9 +15,11 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IRender, IRenderManagerService as IRenderManagerServiceType, Scene } from '@univerjs/engine-render';
+import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import type { ICanvasFloatDomInfo } from '../canvas-float-dom-manager.service';
+import type { ICanvasFloatDomInfo, ISheetFloatDomRenderObjectFactoryContext } from '../canvas-float-dom-manager.service';
 import {
     BooleanNumber,
     Disposable,
@@ -29,11 +31,11 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { ISheetDrawingService, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
     calcSheetFloatDomPosition,
@@ -186,8 +188,8 @@ class TestRenderScene {
     readonly canvasEvents: string[] = [];
     readonly onScrollAfter$ = new EventSubject();
     private readonly _transformer = {
-        clearControlByIds: () => undefined,
-        clearSelectedObjects: () => undefined,
+        clearControlByIds: vi.fn(),
+        clearSelectedObjects: vi.fn(),
     };
 
     constructor(private readonly _viewport: {
@@ -222,15 +224,29 @@ class TestRenderScene {
         return this._transformer;
     }
 
-    addObject(object: Rect) {
+    addObject(object: Rect): this {
+        object.parent = this as never;
         this._objects.set(object.oKey, object);
+        return this;
     }
 
-    removeObject(object: Rect) {
-        this._objects.delete(object.oKey);
+    removeObject(object: Rect | string) {
+        this._objects.delete(typeof object === 'string' ? object : object.oKey);
     }
 
     getObject(key: string) {
+        const object = this._objects.get(key);
+        return object && !object.isInGroup ? object : undefined;
+    }
+
+    getObjectIncludeInGroup(key: string) {
+        for (const item of this._objects.values()) {
+            const child = findChildObject(item, key);
+            if (child) {
+                return child;
+            }
+        }
+
         return this._objects.get(key);
     }
 
@@ -242,6 +258,23 @@ class TestRenderScene {
         this._viewport.viewportScrollX = viewportScrollX;
         this._viewport.viewportScrollY = viewportScrollY;
         this.onScrollAfter$.emitEvent({} as never);
+    }
+}
+
+function findChildObject(object: unknown, key: string): Rect | undefined {
+    const getObjects = (object as { getObjects?: () => Rect[] } | undefined)?.getObjects;
+    if (!getObjects) {
+        return;
+    }
+
+    for (const child of getObjects.call(object)) {
+        if (child.oKey === key) {
+            return child;
+        }
+        const nested = findChildObject(child, key);
+        if (nested) {
+            return nested;
+        }
     }
 }
 
@@ -579,6 +612,514 @@ describe('SheetCanvasFloatDomManagerService', () => {
         headerDom.dispose();
         expect(fixture.manager.getFloatDomsBySubUnitId('test', 'sheet1')).toEqual([]);
         expect(findFloatDom(canvasFloatDomService, 'header-card')).toBeUndefined();
+    });
+
+    it('removes and restores float dom layers when the drawing hidden state changes', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+
+        const drawing: ISheetFloatDom = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+            drawingType: DrawingTypeEnum.DRAWING_DOM,
+            componentKey: 'RangeCard',
+            data: { label: 'Range order' },
+            allowTransform: true,
+            transform: { left: 88, top: 34, width: 80, height: 24 },
+            sheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+            },
+            axisAlignSheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+            },
+        };
+        const addOp = fixture.get(ISheetDrawingService).getBatchAddOp([drawing]) as IDrawingJsonUndo1;
+
+        expect(fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: addOp.redo,
+            objects: addOp.objects,
+            type: DrawingApplyType.INSERT,
+        })).toBe(true);
+
+        expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeDefined();
+        const rangeDrawing = fixture.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+        })!;
+        const hiddenOp = fixture.get(ISheetDrawingService).getBatchUpdateOp([{ ...rangeDrawing, hidden: true }]) as IDrawingJsonUndo1;
+        expect(hiddenOp.redo).not.toEqual([]);
+        expect(hiddenOp.redo).not.toBeNull();
+
+        expect(fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: hiddenOp.redo,
+            objects: hiddenOp.objects,
+            type: DrawingApplyType.UPDATE,
+        })).toBe(true);
+
+        expect(fixture.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+        })?.hidden).toBe(true);
+        expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeUndefined();
+
+        const visibleDrawing = fixture.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'range-card',
+        })!;
+        const visibleOp = fixture.get(ISheetDrawingService).getBatchUpdateOp([{ ...visibleDrawing, hidden: false }]) as IDrawingJsonUndo1;
+
+        fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: visibleOp.redo,
+            objects: visibleOp.objects,
+            type: DrawingApplyType.UPDATE,
+        });
+
+        expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeDefined();
+    });
+
+    it('uses the registered render object factory for chart float dom rects without affecting normal float doms', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const contexts: ISheetFloatDomRenderObjectFactoryContext[] = [];
+
+        class TestChartRect extends Rect {
+            readonly createdByChartFactory = true;
+        }
+
+        const disposable = fixture.manager.registerRenderObjectFactory(DrawingTypeEnum.DRAWING_CHART, (context) => {
+            contexts.push(context);
+            return new TestChartRect(context.key, context.config);
+        });
+
+        fixture.manager.addFloatDomToRange({
+            startRow: 1,
+            endRow: 2,
+            startColumn: 1,
+            endColumn: 2,
+        }, {
+            componentKey: 'RegularCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            allowTransform: true,
+        }, {
+            width: 80,
+            height: 24,
+        }, 'regular-card')!;
+
+        const chartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            data: { label: 'Revenue', backgroundColor: '#ffffff', border: '#111111' },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card')!;
+
+        const regularRect = fixture.manager.getFloatDomInfo('regular-card')?.rect;
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+
+        expect(regularRect).toBeInstanceOf(Rect);
+        expect(regularRect).not.toBeInstanceOf(TestChartRect);
+        expect(chartRect).toBeInstanceOf(TestChartRect);
+        expect((chartRect as TestChartRect).createdByChartFactory).toBe(true);
+        expect(contexts).toEqual([
+            expect.objectContaining({
+                key: 'test#-#sheet1#-#chart-card',
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'chart-card',
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                data: { label: 'Revenue', backgroundColor: '#ffffff', border: '#111111' },
+                config: expect.objectContaining({
+                    fill: '#ffffff',
+                    stroke: '#111111',
+                    radius: 8,
+                }),
+            }),
+        ]);
+
+        disposable.dispose();
+        chartDom.dispose();
+        fixture.manager.removeFloatDom('regular-card');
+    });
+
+    it('uses chart data background as the canvas rect fill', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        const chartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            data: { label: 'Revenue', background: '#f5ead7', border: '#111111' },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card')!;
+
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+
+        expect(chartRect?.fill).toBe('#f5ead7');
+        expect(chartRect?.stroke).toBe('#111111');
+
+        chartDom.dispose();
+    });
+
+    it('falls back to the default rect after a chart render object factory is disposed', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        class TestChartRect extends Rect { }
+
+        const disposable = fixture.manager.registerRenderObjectFactory(DrawingTypeEnum.DRAWING_CHART, ({ key, config }) => new TestChartRect(key, config));
+        disposable.dispose();
+
+        const chartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card')!;
+
+        expect(fixture.manager.getFloatDomInfo('chart-card')?.rect).toBeInstanceOf(Rect);
+        expect(fixture.manager.getFloatDomInfo('chart-card')?.rect).not.toBeInstanceOf(TestChartRect);
+
+        chartDom.dispose();
+    });
+
+    it('uses the latest registered render object factory and restores previous factories after dispose', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        class FirstChartRect extends Rect { }
+        class SecondChartRect extends Rect { }
+
+        const firstDisposable = fixture.manager.registerRenderObjectFactory(DrawingTypeEnum.DRAWING_CHART, ({ key, config }) => new FirstChartRect(key, config));
+        const secondDisposable = fixture.manager.registerRenderObjectFactory(DrawingTypeEnum.DRAWING_CHART, ({ key, config }) => new SecondChartRect(key, config));
+
+        const firstChartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card-second')!;
+
+        expect(fixture.manager.getFloatDomInfo('chart-card-second')?.rect).toBeInstanceOf(SecondChartRect);
+        firstChartDom.dispose();
+
+        secondDisposable.dispose();
+        const secondChartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card-first')!;
+
+        expect(fixture.manager.getFloatDomInfo('chart-card-first')?.rect).toBeInstanceOf(FirstChartRect);
+        secondChartDom.dispose();
+
+        firstDisposable.dispose();
+        const fallbackChartDom = fixture.manager.addFloatDomToRange({
+            startRow: 3,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 4,
+        }, {
+            componentKey: 'ChartCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            allowTransform: true,
+            type: DrawingTypeEnum.DRAWING_CHART,
+        }, {
+            width: 120,
+            height: 72,
+        }, 'chart-card-fallback')!;
+
+        expect(fixture.manager.getFloatDomInfo('chart-card-fallback')?.rect).toBeInstanceOf(Rect);
+        expect(fixture.manager.getFloatDomInfo('chart-card-fallback')?.rect).not.toBeInstanceOf(FirstChartRect);
+        fallbackChartDom.dispose();
+    });
+
+    it('inserts grouped chart float dom render objects into the sheet group hierarchy', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const sheetDrawingService = fixture.get(ISheetDrawingService);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'chart-in-group',
+        })?.groupId).toBe('group-1');
+
+        const chartRect = fixture.manager.getFloatDomInfo('chart-in-group')?.rect;
+        const groupObject = (fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#group-1') as { getObjects?: () => Array<{ oKey: string }> } | undefined;
+
+        expect(chartRect?.oKey).toBe('test#-#sheet1#-#chart-in-group');
+        expect((fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#chart-in-group')).toBeUndefined();
+        expect((fixture.scene as unknown as TestRenderScene).getObjectIncludeInGroup('test#-#sheet1#-#chart-in-group')).toBe(chartRect);
+        expect(groupObject?.getObjects?.().map((object) => object.oKey)).toContain('test#-#sheet1#-#chart-in-group');
+    });
+
+    it('removes grouped active chart float dom runtime state and render object', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+        const scene = fixture.scene as unknown as TestRenderScene;
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const chartKey = 'test#-#sheet1#-#chart-in-group';
+        const groupObject = scene.getObject('test#-#sheet1#-#group-1') as { getObjects?: () => Array<{ oKey: string }> } | undefined;
+
+        expect(fixture.manager.getFloatDomInfo('chart-in-group')).toBeDefined();
+        expect(findFloatDom(canvasFloatDomService, 'chart-in-group')).toBeDefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)).toBeDefined();
+
+        fixture.manager.removeFloatDom('chart-in-group');
+
+        expect(fixture.manager.getFloatDomInfo('chart-in-group')).toBeUndefined();
+        expect(findFloatDom(canvasFloatDomService, 'chart-in-group')).toBeUndefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)).toBeUndefined();
+        expect(scene.getObject(chartKey)).toBeUndefined();
+        expect(groupObject?.getObjects?.().map((object) => object.oKey)).not.toContain(chartKey);
+        expect(scene.getTransformer().clearControlByIds).toHaveBeenCalledWith([chartKey]);
+        expect(scene.getTransformer().clearSelectedObjects).toHaveBeenCalled();
+    });
+
+    it('updates a grouped chart fill through float dom props for old drawings without a background seed', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Old grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const chartRect = fixture.manager.getFloatDomInfo('chart-in-group')?.rect as Rect | undefined;
+        const makeDirty = vi.spyOn(chartRect!, 'makeDirty');
+
+        fixture.manager.updateFloatDomProps('test', 'sheet1', 'chart-in-group', { fill: '#fff' });
+
+        expect(chartRect?.fill).toBe('#fff');
+        expect(makeDirty).toHaveBeenCalledWith(true);
+        expect((fixture.scene as unknown as TestRenderScene).getObject('test#-#sheet1#-#chart-in-group')).toBeUndefined();
+    });
+
+    it('prefers an existing grouped chart child over a top-level runtime duplicate when updating props', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const scene = fixture.scene as unknown as TestRenderScene;
+        const chartKey = 'test#-#sheet1#-#chart-in-group';
+        const groupedChartRect = fixture.manager.getFloatDomInfo('chart-in-group')?.rect as Rect;
+        const duplicate = new Rect(chartKey, {
+            left: 144,
+            top: 96,
+            width: 120,
+            height: 72,
+            fill: '#badbad',
+        });
+        scene.addObject(duplicate);
+
+        expect(scene.getObject(chartKey)).toBe(duplicate);
+
+        fixture.manager.updateFloatDomProps('test', 'sheet1', 'chart-in-group', { fill: '#fff' });
+
+        expect(groupedChartRect.fill).toBe('#fff');
+        expect(duplicate.fill).toBe('#badbad');
+        expect(scene.getObject(chartKey)).toBeUndefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)).toBe(groupedChartRect);
+    });
+
+    it('does not create a top-level duplicate when a grouped chart float dom is added again', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                    groupBaseBound: { left: 120, top: 72, width: 120, height: 72 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 120, top: 72, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-in-group',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    data: { label: 'Grouped chart' },
+                    groupId: 'group-1',
+                    transform: { left: 144, top: 96, width: 120, height: 72 },
+                },
+            ],
+        });
+
+        const scene = fixture.scene as unknown as TestRenderScene;
+        const chartKey = 'test#-#sheet1#-#chart-in-group';
+        const groupObject = scene.getObject('test#-#sheet1#-#group-1') as { getObjects?: () => Array<{ oKey: string }> } | undefined;
+        const groupedChildren = groupObject?.getObjects?.().filter((object) => object.oKey === chartKey) ?? [];
+
+        expect(scene.getObject(chartKey)).toBeUndefined();
+        expect(scene.getObjectIncludeInGroup(chartKey)?.isInGroup).toBe(true);
+        expect(groupedChildren).toHaveLength(1);
     });
 
     it('adds a position anchored float dom through the sheet drawing pipeline', async () => {

@@ -79,7 +79,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, connectInjector, IMessageService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, connectInjector, IClipboardInterfaceService, IMessageService, IUIPartsService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -96,6 +96,7 @@ import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import {
     escapeSpecialCode,
+    FORMULA_CLIPBOARD_MIME_TYPE,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME_COPY,
     PREDEFINED_HOOK_NAME_PASTE,
@@ -139,6 +140,7 @@ export class SheetClipboardController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
+        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService
@@ -156,7 +158,7 @@ export class SheetClipboardController extends RxDisposable {
 
     private _pasteWithDoc() {
         const sheetPasteShortKeyFn = (docSelectionRenderService: DocSelectionRenderService) => {
-            docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+            docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe(async (config) => {
                 if (!whenSheetEditorFocused(this._contextService)) {
                     return;
                 }
@@ -168,8 +170,14 @@ export class SheetClipboardController extends RxDisposable {
                 const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
                 const textContent = clipboardEvent.clipboardData?.getData('text/plain');
                 const files = this._resolveClipboardFiles(clipboardEvent.clipboardData);
+                const formulaClipboardPayload = await this._readFormulaClipboardPayload();
 
-                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent, files });
+                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, {
+                    htmlContent,
+                    textContent,
+                    files,
+                    formulaClipboardPayload,
+                });
             });
 
             docSelectionRenderService?.onKeydown$.subscribe((event) => {
@@ -208,6 +216,25 @@ export class SheetClipboardController extends RxDisposable {
             .filter(Boolean) as File[];
 
         return files.length > 0 ? files : undefined;
+    }
+
+    private async _readFormulaClipboardPayload(): Promise<string | undefined> {
+        if (!this._clipboardInterfaceService.supportClipboard) {
+            return undefined;
+        }
+
+        try {
+            const items = await this._clipboardInterfaceService.read();
+            const item = items.find((clipboardItem) => clipboardItem.types.includes(FORMULA_CLIPBOARD_MIME_TYPE));
+            if (!item) {
+                return undefined;
+            }
+
+            const blob = await item.getType(FORMULA_CLIPBOARD_MIME_TYPE);
+            return blob.text();
+        } catch {
+            return undefined;
+        }
     }
 
     private _init(): void {

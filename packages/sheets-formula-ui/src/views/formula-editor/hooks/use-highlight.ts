@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextRange, ITextRun, Workbook } from '@univerjs/core';
+import type { IRange, ITextRange, ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
@@ -38,6 +38,16 @@ export interface IRefSelection {
     startIndex: number;
     endIndex: number;
     index: number;
+}
+
+function isSameSelectionRange(left: IRange | undefined, right: IRange): boolean {
+    return !!left &&
+        left.startRow === right.startRow &&
+        left.startColumn === right.startColumn &&
+        left.endRow === right.endRow &&
+        left.endColumn === right.endColumn &&
+        (!left.sheetId || !right.sheetId || left.sheetId === right.sheetId) &&
+        (!left.unitId || !right.unitId || left.unitId === right.unitId);
 }
 
 // eslint-disable-next-line complexity, max-lines-per-function
@@ -80,6 +90,24 @@ export function calcHighlightRanges(opts: {
     if (!skeleton) return;
     const endIndexes: number[] = [];
     const currentSelections = refSelectionsService.getCurrentSelections();
+    const matchedCurrentSelectionIndexes = new Set<number>();
+    const getPrimaryForRange = (range: IRange, fallbackIndex: number) => {
+        const currentSelection = currentSelections[fallbackIndex];
+        if (isSameSelectionRange(currentSelection?.range, range)) {
+            matchedCurrentSelectionIndexes.add(fallbackIndex);
+            return currentSelection.primary;
+        }
+
+        const matchedIndex = currentSelections.findIndex((selection, index) =>
+            !matchedCurrentSelectionIndexes.has(index) && isSameSelectionRange(selection.range, range)
+        );
+        if (matchedIndex !== -1) {
+            matchedCurrentSelectionIndexes.add(matchedIndex);
+            return currentSelections[matchedIndex].primary;
+        }
+
+        return undefined;
+    };
     for (let i = 0, len = refSelections.length; i < len; i++) {
         const refSelection = refSelections[i];
         const { themeColor, token, refIndex, endIndex } = refSelection;
@@ -107,10 +135,9 @@ export function calcHighlightRanges(opts: {
         const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
         range.unitId = unitId;
         range.sheetId = currentSheetId;
-        const currentSelection = currentSelections[selectionWithStyle.length];
         selectionWithStyle.push({
             range,
-            primary: currentSelection ? currentSelection.primary : undefined,
+            primary: getPrimaryForRange(range, selectionWithStyle.length),
             style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
         });
         endIndexes.push(endIndex);

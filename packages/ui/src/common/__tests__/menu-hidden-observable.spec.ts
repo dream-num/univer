@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, UniverInstanceType } from '@univerjs/core';
-import { DocumentFlavor } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
+import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from '../menu-hidden-observable';
-
-const TARGET_TYPE = 'sheet' as unknown as UniverInstanceType;
-const OTHER_TYPE = 'doc' as unknown as UniverInstanceType;
 
 function createDocModel(flavor: DocumentFlavor) {
     return {
@@ -40,7 +37,7 @@ function createMenuAccessor(options?: {
     currentDocFlavor?: DocumentFlavor | null;
 }) {
     const focused$ = new Subject<string | null>();
-    const unitType = options?.unitType ?? TARGET_TYPE;
+    const unitType = options?.unitType ?? UniverInstanceType.UNIVER_SHEET;
     const hasFocusedUnitId = options != null && Object.prototype.hasOwnProperty.call(options, 'focusedUnitId');
     const focusedUnitId = hasFocusedUnitId ? options.focusedUnitId! : 'unit-1';
     const docFlavorByUnitId = options?.docFlavorByUnitId ?? {};
@@ -51,24 +48,21 @@ function createMenuAccessor(options?: {
         focused$,
         getUnitType: vi.fn(() => unitType),
         getFocusedUnit: vi.fn(() => (focusedUnitId == null ? null : { getUnitId: () => focusedUnitId })),
-        getUniverDocInstance: vi.fn((unitId: string) => {
+        getUnit: vi.fn((unitId: string) => {
             const flavor = docFlavorByUnitId[unitId];
             return flavor == null ? null : createDocModel(flavor);
         }),
         getCurrentUnitOfType: vi.fn((type: UniverInstanceType) => {
-            if (type !== TARGET_TYPE) {
-                return null;
+            if (type === UniverInstanceType.UNIVER_DOC) {
+                if (currentDocFlavor == null) {
+                    return null;
+                }
+                return createDocModel(currentDocFlavor);
             }
             if (focusedUnitId == null) {
                 return null;
             }
             return { getUnitId: () => focusedUnitId };
-        }),
-        getCurrentUniverDocInstance: vi.fn(() => {
-            if (currentDocFlavor == null) {
-                return null;
-            }
-            return createDocModel(currentDocFlavor);
         }),
     };
 
@@ -87,25 +81,25 @@ describe('getMenuHiddenObservable', () => {
     it('should emit true when there is no focused unit initially', () => {
         const { accessor } = createMenuAccessor({ focusedUnitId: null });
         const hiddenValues: boolean[] = [];
-        const sub = getMenuHiddenObservable(accessor, TARGET_TYPE).subscribe((hidden) => hiddenValues.push(hidden));
+        const sub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET).subscribe((hidden) => hiddenValues.push(hidden));
 
         expect(hiddenValues).toEqual([true]);
         sub.unsubscribe();
     });
 
     it('should emit false when focused unit type matches target type', () => {
-        const { accessor } = createMenuAccessor({ unitType: TARGET_TYPE });
+        const { accessor } = createMenuAccessor({ unitType: UniverInstanceType.UNIVER_SHEET });
         const hiddenValues: boolean[] = [];
-        const sub = getMenuHiddenObservable(accessor, TARGET_TYPE).subscribe((hidden) => hiddenValues.push(hidden));
+        const sub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET).subscribe((hidden) => hiddenValues.push(hidden));
 
         expect(hiddenValues).toEqual([false]);
         sub.unsubscribe();
     });
 
     it('should emit true when focused unit type does not match target type', () => {
-        const { accessor } = createMenuAccessor({ unitType: OTHER_TYPE });
+        const { accessor } = createMenuAccessor({ unitType: UniverInstanceType.UNIVER_DOC });
         const hiddenValues: boolean[] = [];
-        const sub = getMenuHiddenObservable(accessor, TARGET_TYPE).subscribe((hidden) => hiddenValues.push(hidden));
+        const sub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET).subscribe((hidden) => hiddenValues.push(hidden));
 
         expect(hiddenValues).toEqual([true]);
         sub.unsubscribe();
@@ -114,7 +108,7 @@ describe('getMenuHiddenObservable', () => {
     it('should hide when focused unit does not match matchUnitId', () => {
         const { accessor, service } = createMenuAccessor({ focusedUnitId: 'expected-unit' });
         const hiddenValues: boolean[] = [];
-        const sub = getMenuHiddenObservable(accessor, TARGET_TYPE, 'expected-unit').subscribe((hidden) => hiddenValues.push(hidden));
+        const sub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET, 'expected-unit').subscribe((hidden) => hiddenValues.push(hidden));
 
         service.focused$.next('other-unit');
 
@@ -127,10 +121,10 @@ describe('getMenuHiddenObservable', () => {
         const hiddenWithString: boolean[] = [];
         const hiddenWithArray: boolean[] = [];
 
-        const sub1 = getMenuHiddenObservable(accessor, TARGET_TYPE, undefined, 'blocked-unit').subscribe((hidden) =>
+        const sub1 = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET, undefined, 'blocked-unit').subscribe((hidden) =>
             hiddenWithString.push(hidden)
         );
-        const sub2 = getMenuHiddenObservable(accessor, TARGET_TYPE, undefined, ['blocked-unit']).subscribe((hidden) =>
+        const sub2 = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET, undefined, ['blocked-unit']).subscribe((hidden) =>
             hiddenWithArray.push(hidden)
         );
 
@@ -146,7 +140,7 @@ describe('getMenuHiddenObservable', () => {
     it('should hide when focused$ emits null unit id', () => {
         const { accessor, service } = createMenuAccessor({ focusedUnitId: 'unit-1' });
         const hiddenValues: boolean[] = [];
-        const sub = getMenuHiddenObservable(accessor, TARGET_TYPE).subscribe((hidden) => hiddenValues.push(hidden));
+        const sub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET).subscribe((hidden) => hiddenValues.push(hidden));
 
         service.focused$.next(null);
 

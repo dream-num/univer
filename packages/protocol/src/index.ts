@@ -18,6 +18,7 @@ export type {
     IDeserializedSheetBlock,
     IGetDeserializedSheetBlockResponse,
 } from './other/sheet-block';
+export type { IBoardMeta } from './ts/univer/board';
 export type {
     IChangeset,
     ICommand,

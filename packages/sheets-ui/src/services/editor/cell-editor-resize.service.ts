@@ -86,6 +86,9 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
+        // Cell editors are embedded docs with unspecified compatibility mode. Reset before
+        // measuring so stale page width from a previous resize does not leak into this editor.
+        documentSkeleton.resetInitialWidth();
 
         const info = this._predictingSize(
             position,
@@ -236,15 +239,17 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const maxHeight = height - startY - EDITOR_BORDER_SIZE * 2;
 
+        const cellWidth = endX - startX;
         let maxWidth = width - startX;
         if (horizontalAlign === HorizontalAlign.CENTER) {
             const rightGap = enginWidth - endX;
             const leftGap = startX;
-            maxWidth = (endX - startX) + Math.min(leftGap, rightGap) * 2;
+            maxWidth = cellWidth + Math.min(leftGap, rightGap) * 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             maxWidth = endX;
         }
         maxWidth = maxWidth - EDITOR_BORDER_SIZE * 2;
+        maxWidth = Math.max(maxWidth, cellWidth);
 
         return {
             height: maxHeight,

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Shared thread comment models, commands, and services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -73,6 +73,6 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     }
 }

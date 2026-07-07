@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/network",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Network service abstractions for Univer runtime integrations.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -84,6 +84,6 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     }
 }

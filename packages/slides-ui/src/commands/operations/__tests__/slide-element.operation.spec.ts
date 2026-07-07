@@ -15,8 +15,16 @@
  */
 
 import type { IPageElement, ISlideData, ISlidePage, SlideDataModel } from '@univerjs/slides';
-import { ICommandService, IUniverInstanceService, LocaleService, Univer, UniverInstanceType } from '@univerjs/core';
-import { IImageIoService, ImageSourceType, ImageUploadStatusType } from '@univerjs/drawing';
+import {
+    ICommandService,
+    IImageIoService,
+    ImageSourceType,
+    ImageUploadStatusType,
+    IUniverInstanceService,
+    LocaleService,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
 import { BasicShapes, PageElementType, PageType, UniverSlidesPlugin } from '@univerjs/slides';
 import { DesktopSidebarService, ILocalFileService, ISidebarService } from '@univerjs/ui';

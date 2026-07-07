@@ -250,6 +250,33 @@ describe('doc skeleton', () => {
         } as any);
         expect(byFooterCoord).toBe(footer.glyphs.glyphB);
 
+        const headerCell = createPage(DocumentSkeletonPageType.CELL, 400, 'header-table-1');
+        const headerRow = { cells: [headerCell.page] } as any;
+        const headerTable = { rows: [headerRow], tableId: 'header-table-1' } as any;
+        headerRow.parent = headerTable;
+        headerCell.page.parent = headerRow;
+        headerTable.parent = header.page;
+        header.page.skeTables = new Map([['header-table-1', headerTable]]);
+        header.page.parent = skeletonData;
+
+        const headerCellPos = skeleton.findPositionByGlyph(headerCell.glyphs.glyphA as any, 0);
+        expect(headerCellPos).toEqual(expect.objectContaining({
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['skeTables', 'header-table-1', 'rows', 0, 'cells', 0],
+            segmentPage: 0,
+        }));
+        expect(skeleton.findGlyphByPosition({
+            ...headerCellPos,
+            isBack: true,
+        } as any)).toBe(headerCell.glyphs.glyphA);
+        expect(skeleton.findNodePositionByCharIndex(401, true, 'header-seg', 0)).toEqual(expect.objectContaining({
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['skeTables', 'header-table-1', 'rows', 0, 'cells', 0],
+            segmentPage: 0,
+        }));
+
         const charIndexBack = skeleton.findCharIndexByPosition({
             pageType: DocumentSkeletonPageType.BODY,
             section: 0,

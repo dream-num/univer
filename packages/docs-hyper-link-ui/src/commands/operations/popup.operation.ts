@@ -101,7 +101,7 @@ export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: stri
         const { unitId, linkId, segmentId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const body = doc?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = doc?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK)?.properties?.url;
 
         if (!isSafeUrl(link)) {

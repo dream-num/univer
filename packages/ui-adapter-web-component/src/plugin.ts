@@ -15,9 +15,11 @@
  */
 
 import type { IComponent } from '@univerjs/ui';
-import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
+import type { IUniverWebComponentAdapterConfig } from './config/config';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
+import { defaultPluginConfig, UI_ADAPTER_WEB_COMPONENT_PLUGIN_CONFIG_KEY } from './config/config';
 
 /**
  * The plugin that allows Univer to use web components as UI components.
@@ -29,21 +31,30 @@ export class UniverWebComponentAdapterPlugin extends Plugin {
     static override version = pkg.version;
 
     constructor(
-        private readonly _config = {},
+        private readonly _config: Partial<IUniverWebComponentAdapterConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager
     ) {
         super();
+
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(UI_ADAPTER_WEB_COMPONENT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         const { createElement, useEffect, useRef } = this._componentManager.reactUtils;
 
         this._componentManager.setHandler('web-component', (component: IComponent['component'], name?: string) => {
-            return () => createElement(WebComponentComponentWrapper, {
+            return (props: Record<string, unknown>) => createElement(WebComponentComponentWrapper, {
                 component,
                 props: {
                     name,
+                    componentProps: props,
                 },
                 reactUtils: { createElement, useEffect, useRef },
             });
@@ -55,11 +66,12 @@ export function WebComponentComponentWrapper(options: {
     component: CustomElementConstructor;
     props?: {
         name?: string;
+        componentProps?: Record<string, unknown>;
     };
     reactUtils: typeof ComponentManager.prototype.reactUtils;
 }) {
     const { component, props, reactUtils } = options;
-    const { name } = props ?? {};
+    const { name, componentProps = {} } = props ?? {};
     const { createElement, useEffect, useRef } = reactUtils;
 
     if (!name) {
@@ -76,12 +88,18 @@ export function WebComponentComponentWrapper(options: {
         if (!domRef.current) return;
 
         const webComponent = document.createElement(name) as HTMLElement;
+        const webComponentWithProps = webComponent as HTMLElement & Record<string, unknown>;
+        Object.entries(componentProps).forEach(([key, value]) => {
+            if (key !== 'key') {
+                webComponentWithProps[key] = value;
+            }
+        });
         domRef.current.appendChild(webComponent);
 
         return () => {
             domRef.current?.removeChild(webComponent);
         };
-    }, []);
+    }, [componentProps]);
 
     return createElement('div', { ref: domRef });
 }

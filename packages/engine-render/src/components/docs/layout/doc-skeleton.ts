@@ -235,6 +235,40 @@ function resolveMostSpecificPageByCharIndex(page: IDocumentSkeletonPage, charInd
     return page;
 }
 
+function getSegmentPageFromRelativePath(
+    skeletonData: IDocumentSkeletonCached,
+    segmentPageIndex: number,
+    path: (string | number)[]
+): Nullable<IDocumentSkeletonPage> {
+    const rootPage = skeletonData.pages[segmentPageIndex];
+    if (rootPage == null) {
+        return null;
+    }
+
+    const { headerId, footerId, pageWidth } = rootPage;
+    const segmentPages = [
+        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth),
+        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth),
+    ];
+
+    for (const segmentPage of segmentPages) {
+        if (segmentPage == null) {
+            continue;
+        }
+
+        const page = getPageFromPath({
+            ...skeletonData,
+            pages: [segmentPage],
+        }, ['pages', 0, ...path]);
+
+        if (page != null) {
+            return page;
+        }
+    }
+
+    return null;
+}
+
 export class DocumentSkeleton extends Skeleton {
     private _dirty$ = new Subject<boolean>();
     readonly dirty$ = this._dirty$.asObservable();
@@ -382,7 +416,7 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             case DocumentSkeletonPageType.CELL: {
-                pageIndex = path[1] as number;
+                pageIndex = typeof path[1] === 'number' ? path[1] : segmentPage;
                 break;
             }
 
@@ -461,7 +495,7 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             case DocumentSkeletonPageType.CELL: {
-                pageIndex = path[1] as number;
+                pageIndex = typeof path[1] === 'number' ? path[1] : segmentPageIndex;
                 break;
             }
 
@@ -528,6 +562,8 @@ export class DocumentSkeleton extends Skeleton {
                     skePage = skeFooter;
                 }
             }
+        } else if (pageType === DocumentSkeletonPageType.CELL && path[0] !== 'pages') {
+            skePage = getSegmentPageFromRelativePath(skeletonData, segmentPage, path);
         } else {
             skePage = getPageFromPath(skeletonData, path);
         }
@@ -1328,7 +1364,7 @@ export class DocumentSkeleton extends Skeleton {
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
             if (sectionType === SectionType.CONTINUOUS && curSkeletonPage != null) {
-                updateBlockIndex(allSkeletonPages);
+                updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
                 this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
             } else if (layoutAnchor == null || curSkeletonPage == null) {
@@ -1379,7 +1415,7 @@ export class DocumentSkeleton extends Skeleton {
             // Calculate page and section position information
             this._iteratorCount = 0;
             removeDupPages(ctx);
-            updateBlockIndex(skeleton.pages);
+            updateBlockIndex(skeleton.pages, -1, ctx.docsConfig.documentCompatibilityPolicy);
             mergeContinuousDuplicatePages(skeleton.pages);
             // Calculate inline drawing position and update.
             updateInlineDrawingCoordsAndBorder(ctx, skeleton.pages);
@@ -1458,9 +1494,8 @@ export class DocumentSkeleton extends Skeleton {
                 } else {
                     continue;
                 }
-            }
-
-            if (segmentId === '') {
+                segmentPage = resolveMostSpecificPageByCharIndex(segmentPage, charIndex);
+            } else {
                 segmentPage = resolveMostSpecificPageByCharIndex(page, charIndex);
             }
 

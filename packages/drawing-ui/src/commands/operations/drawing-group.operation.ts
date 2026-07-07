@@ -17,20 +17,22 @@
 import type { IDrawingParam, IOperation } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { CommandType, DrawingTypeEnum, generateRandomId } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { DRAWING_GROUPABLE_TYPES, IDrawingManagerService, isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 /**
- * Now only support grouping images, shapes, and groups.
+ * Now only support grouping images, shapes, charts, and groups.
  */
-export const DRAWING_GROUP_TYPES = [DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_GROUP];
+export const DRAWING_GROUP_TYPES = DRAWING_GROUPABLE_TYPES;
 
 export interface IDrawingGroupOperationParams {
     drawings?: IDrawingParam[];
 }
 
 /**
- * Group the selected drawings into a new group. The selected drawings must be of type image, shape, or group, and there must be at least 2 drawings selected.
+ * Group the selected drawings into a new group. The selected drawings must be
+ * of type image, shape, chart, or group, and there must be at least 2 drawings
+ * selected.
  */
 export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> = {
     id: 'drawing.operation.set-drawing-group',
@@ -40,7 +42,7 @@ export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> 
         const drawings = params.drawings || drawingManagerService.getFocusDrawings();
 
         if (drawings.length < 2) return false;
-        if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) return false;
+        if (!drawings.every((drawing) => isGroupableDrawingType(drawing.drawingType))) return false;
 
         const { unitId, subUnitId } = drawings[0];
 
@@ -62,11 +64,12 @@ export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> 
 
         const children = drawings.map((drawing) => {
             const transform = drawing.transform || { left: 0, top: 0 };
-            const { unitId, subUnitId, drawingId } = drawing;
+            const { unitId, subUnitId, drawingId, drawingType } = drawing;
             return {
                 unitId,
                 subUnitId,
                 drawingId,
+                drawingType,
                 transform: {
                     ...transform,
                     // left: transform.left! - groupTransform.left,

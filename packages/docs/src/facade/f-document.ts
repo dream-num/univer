@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { IInsertTextCommandParams } from '@univerjs/docs';
+import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IFDocumentTextRange } from './utils';
 import {
+    BooleanNumber,
+    DocumentFlavor,
+    generateRandomId,
     ICommandService,
     Inject,
     Injector,
@@ -26,19 +29,14 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { InsertTextCommand } from '@univerjs/docs';
-import { FDocumentBody } from './f-document-body';
-import {
-    buildPlainTextInsertBody,
-    getNormalizedPlainTextCursorOffset,
-    getParagraphStyleAtOffset,
-} from './utils';
+import { CreateHeaderFooterCommand, HeaderFooterType } from '@univerjs/docs';
+import { FDocumentParagraph } from './f-document-paragraph';
+import { buildPlainTextInsertBody, replaceBodyRange } from './utils';
 
-export interface IDocumentInsertTextFacadeOptions {
-    startOffset?: number;
-    endOffset?: number;
+export interface IFDocumentParagraphQuery {
+    text?: string;
+    paragraphId?: string;
     segmentId?: string;
-    cursorOffset?: number;
 }
 
 /**
@@ -62,43 +60,46 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Get the document data model of the document.
+     * @param {string} segmentId The segment id used to get the header/footer data model. Defaults to an empty string for the document data model of the document.
      * @returns {DocumentDataModel} The document data model.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const documentDataModel = fDocument.getDocumentDataModel();
-     * console.log(documentDataModel);
+     * console.log(fDocument.getDocumentDataModel());
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * console.log(fDocument.getDocumentDataModel(headerSegmentId));
      * ```
      */
-    getDocumentDataModel(): DocumentDataModel {
-        return this._documentDataModel;
+    getDocumentDataModel(segmentId: string = ''): DocumentDataModel {
+        const documentDataModel = this._documentDataModel.getSelfOrHeaderFooterModel(segmentId);
+        if (!documentDataModel) {
+            throw new Error(segmentId === '' ? 'Document data model is not found.' : `Document data model is not found in the segment: ${segmentId}`);
+        }
+        return documentDataModel;
     }
 
     /**
-     * Get the document body facade.
-     *
-     * The returned body facade provides synchronous Google Docs-like element APIs
-     * for reading and editing top-level document body elements. Paragraph elements
-     * use their persisted `paragraphId` values. Persisted elements, such as tables
-     * and custom blocks, use their existing ids.
-     *
-     * @returns {FDocumentBody} The document body API instance.
+     * Get the document body or header/footer body by the segment id.
+     * The main body has an empty segment id.
+     * The header and footer body have their respective segment ids.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {IDocumentBody} The document body.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const fDocumentBody = fDocument.getBody();
-     * console.log(fDocumentBody.getBody());
+     * console.log(fDocument.getBody()); // Get the main body
      *
-     * const element = fDocumentBody.getElement(0);
-     * if (element.isParagraph()) {
-     *   const paragraph = element.asParagraph();
-     *   paragraph.appendText(' updated');
-     *   console.log(paragraph.getText());
-     * }
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * console.log(fDocument.getBody(footerSegmentId)); // Get the footer body
      * ```
      */
-    getBody(): FDocumentBody {
-        return this._injector.createInstance(FDocumentBody, this._documentDataModel, this._injector);
+    getBody(segmentId: string = ''): IDocumentBody {
+        const body = this._documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        if (!body) {
+            throw new Error(segmentId === '' ? 'Body is not found in the document.' : `Body is not found in the segment: ${segmentId}`);
+        }
+        return body;
     }
 
     override dispose(): void {
@@ -111,8 +112,7 @@ export class FDocument extends FBaseInitialable {
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const unitId = fDocument.getId();
-     * console.log(unitId);
+     * console.log(fDocument.getId());
      * ```
      */
     getId(): string {
@@ -125,12 +125,24 @@ export class FDocument extends FBaseInitialable {
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * const name = fDocument.getName();
-     * console.log(name);
+     * console.log(fDocument.getName());
      * ```
      */
     getName(): string {
         return this._documentDataModel.getTitle() || '';
+    }
+
+    /**
+     * Whether the document is a modern document or not.
+     * @returns {boolean} `true` if the document is a modern document, or `false` if it is not.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * console.log(fDocument.isModern());
+     * ```
+     */
+    isModern(): boolean {
+        return this._documentDataModel.getSnapshot().documentStyle.documentFlavor === DocumentFlavor.MODERN;
     }
 
     /**
@@ -178,138 +190,362 @@ export class FDocument extends FBaseInitialable {
     }
 
     /**
-     * Adds the specified text to the end of this text region.
-     * @param {string} text - The text to be added to the end of this text region.
-     * @return {boolean} `true` if the text was successfully appended, or `false` if it failed.
+     * Ensure the page header segment exists and return its segment id.
+     * @param {number} pageIndex The zero-based page index. Defaults to the first page.
+     * @returns {string} The header segment id.
      * @example
-     * ```typescript
+     * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const success = fDocument.appendText('Hello, world!');
-     * console.log(success);
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * fDocument.insertText(0, 'Header text', headerSegmentId);
      * ```
      */
-    appendText(text: string): boolean {
-        const { body } = this.save();
+    ensurePageHeader(pageIndex: number = 0): string {
+        return this._ensureHeaderFooter('header', pageIndex);
+    }
 
-        if (!body) {
-            throw new Error('The document body is empty');
+    /**
+     * Ensure the page footer segment exists and return its segment id.
+     * @param {number} pageIndex The zero-based page index. Defaults to the first page.
+     * @returns {string} The footer segment id.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * fDocument.insertText(0, 'Footer text', footerSegmentId);
+     * ```
+     */
+    ensurePageFooter(pageIndex: number = 0): string {
+        return this._ensureHeaderFooter('footer', pageIndex);
+    }
+
+    /**
+     * Insert plain text at a document body offset.
+     * @param {number} index The zero-based insertion offset.
+     * @param {string} text The plain text to insert.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {boolean} `true` if the edit was applied.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * fDocument.insertText(0, 'Hello ');
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * fDocument.insertText(0, 'Header text', headerSegmentId);
+     * ```
+     */
+    insertText(index: number, text: string, segmentId: string = ''): boolean {
+        return replaceBodyRange(
+            {
+                startOffset: index,
+                endOffset: index,
+                segmentId,
+            },
+            buildPlainTextInsertBody(text),
+            this._documentDataModel,
+            this._injector
+        );
+    }
+
+    /**
+     * Get all paragraphs in the document body or header/footer body by the segment id.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph[]} An array of paragraph facade instances.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraphs = fDocument.getParagraphs();
+     * console.log(paragraphs);
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const headerParagraphs = fDocument.getParagraphs(headerSegmentId);
+     * console.log(headerParagraphs);
+     * ```
+     */
+    getParagraphs(segmentId: string = ''): FDocumentParagraph[] {
+        const { paragraphs = [] } = this.getBody(segmentId);
+        return paragraphs.map((paragraph) => this._createFDocumentParagraph(paragraph.paragraphId, segmentId));
+    }
+
+    /**
+     * Get a paragraph by its paragraph id and segment id.
+     * @param {string} paragraphId The paragraph id.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph | null} The paragraph facade instance, or `null` if the paragraph is not found.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.getParagraph('paragraph-01');
+     * console.log(paragraph);
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const headerParagraph = fDocument.getParagraph('header-paragraph-01', headerSegmentId);
+     * console.log(headerParagraph);
+     * ```
+     */
+    getParagraph(paragraphId: string, segmentId: string = ''): FDocumentParagraph | null {
+        const { paragraphs = [] } = this.getBody(segmentId);
+        const paragraph = paragraphs.find((paragraph) => paragraph.paragraphId === paragraphId);
+        if (!paragraph) {
+            return null;
         }
+        return this._createFDocumentParagraph(paragraphId, segmentId);
+    }
 
-        const lastPosition = body.dataStream.length - 2;
+    /**
+     * Find a paragraph by its text content and segment id.
+     * @param {string} text The text content to search for.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph | null} The paragraph facade instance, or `null` if the paragraph is not found.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.findParagraphByText('Hello');
+     * console.log(paragraph);
+     *
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * const footerParagraph = fDocument.findParagraphByText('Page', footerSegmentId);
+     * console.log(footerParagraph);
+     * ```
+     */
+    findParagraphByText(text: string, segmentId: string = ''): FDocumentParagraph | null {
+        return this.findParagraphs({ text, segmentId })[0] || null;
+    }
 
-        return this.insertText(text, {
-            startOffset: lastPosition,
-            endOffset: lastPosition,
-            segmentId: '',
+    /**
+     * Find paragraphs by a query object, which can include text content, paragraph id, and segment id.
+     * @param {string | IFDocumentParagraphQuery} query The query object or text content to search for.
+     * @returns {FDocumentParagraph[]} An array of paragraph facade instances that match the query.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraphsWithText = fDocument.findParagraphs('Hello');
+     * console.log(paragraphsWithText);
+     *
+     * const paragraphsWithId = fDocument.findParagraphs({ paragraphId: 'paragraph-01' });
+     * console.log(paragraphsWithId);
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const paragraphsWithSegment = fDocument.findParagraphs({ segmentId: headerSegmentId });
+     * console.log(paragraphsWithSegment);
+     * ```
+     */
+    findParagraphs(query: string | IFDocumentParagraphQuery): FDocumentParagraph[] {
+        const normalized = typeof query === 'string' ? { text: query } : query;
+        const { text, paragraphId, segmentId = '' } = normalized;
+
+        return this.getParagraphs(segmentId).filter((paragraph) => {
+            if (paragraphId && paragraph.getId() !== paragraphId) {
+                return false;
+            }
+
+            if (text && !paragraph.getText().includes(text)) {
+                return false;
+            }
+
+            return true;
         });
     }
 
     /**
-     * Inserts text at the provided document range. Defaults to appending before the final section break.
-     * @param {string} text - The text to insert.
-     * @param {IDocumentInsertTextFacadeOptions} options - Optional target range, segment id, and cursor offset.
-     * @returns {boolean} `true` if the text was successfully inserted, or `false` if it failed.
+     * Insert a plain-text paragraph before the paragraph at the given paragraph index.
+     * @param {number} index The zero-based paragraph insertion index.
+     * @param {string} text The paragraph text. Defaults to an empty paragraph.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph} The inserted paragraph facade instance.
      * @example
-     *
-     * // Insert text at a specific range in the document body
-     * ```typescript
+     * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * const success = fDocument.insertText('Hello, world!', {
-     *   startOffset: 5,
-     *   endOffset: 5,
-     *   segmentId: '',
-     *   cursorOffset: 13,
-     * });
-     * console.log(success);
-     * ```
+     * const paragraph = fDocument.insertParagraph(0, 'Document title');
+     * paragraph.appendText(' suffix');
      *
-     * // Insert text at the beginning of a header or footer segment
-     * ```typescript
-     * const fDocument = univerAPI.getActiveDocument();
-     * const snapshot = fDocument.save();
-     * const { headers, footers } = snapshot;
-     *
-     * if (headers) {
-     *   for (const headerId in headers) {
-     *     if (headerId === 'target-header-id') {
-     *       fDocument.insertText('Hello, header!', {
-     *         startOffset: 0,
-     *         endOffset: 0,
-     *         segmentId: headerId,
-     *       });
-     *     }
-     *   }
-     * }
-     *
-     * if (footers) {
-     *   for (const footerId in footers) {
-     *     if (footerId === 'target-footer-id') {
-     *       fDocument.insertText('Hello, footer!', {
-     *         startOffset: 0,
-     *         endOffset: 0,
-     *         segmentId: footerId,
-     *       });
-     *     }
-     *   }
-     * }
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * const headerParagraph = fDocument.insertParagraph(0, 'Header title', headerSegmentId);
+     * headerParagraph.appendText(' suffix');
      * ```
      */
-    insertText(text: string, options: IDocumentInsertTextFacadeOptions = {}): boolean {
-        const unitId = this.id;
-        const { body } = this.save();
+    insertParagraph(index: number, text: string = '', segmentId: string = ''): FDocumentParagraph {
+        const offset = this._getParagraphInsertOffset(index, segmentId);
+        const result = replaceBodyRange(
+            {
+                startOffset: offset,
+                endOffset: offset,
+                segmentId,
+            },
+            buildPlainTextInsertBody(`${text}\r`),
+            this._documentDataModel,
+            this._injector
+        );
 
-        if (!body) {
-            throw new Error('The document body is empty');
+        if (!result) {
+            throw new Error('Failed to insert paragraph.');
         }
 
-        const startOffset = options.startOffset ?? Math.max(0, body.dataStream.length - 2);
-        const endOffset = options.endOffset ?? startOffset;
-        const segmentId = options.segmentId ?? '';
-        const activeRange = {
-            startOffset,
+        const { paragraphs = [] } = this.getBody(segmentId);
+        const paragraph = paragraphs[index];
+        if (!paragraph) {
+            throw new Error('Failed to insert paragraph.');
+        }
+
+        return this._createFDocumentParagraph(paragraph.paragraphId, segmentId);
+    }
+
+    /**
+     * Append a plain-text paragraph at the end of the body.
+     * @param {string} text The paragraph text. Defaults to an empty paragraph.
+     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @returns {FDocumentParagraph} The appended paragraph wrapper.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.appendParagraph('Summary');
+     * console.log(paragraph.getText());
+     *
+     * const footerSegmentId = fDocument.ensurePageFooter();
+     * const footerParagraph = fDocument.appendParagraph('Confidential', footerSegmentId);
+     * console.log(footerParagraph.getText());
+     * ```
+     */
+    appendParagraph(text: string = '', segmentId: string = ''): FDocumentParagraph {
+        const { paragraphs = [] } = this.getBody(segmentId);
+        return this.insertParagraph(paragraphs.length, text, segmentId);
+    }
+
+    /**
+     * Delete a range from the body.
+     * @param {IFDocumentTextRange} range The text range to delete.
+     * @returns {boolean} `true` if the range was deleted.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * fDocument.deleteRange({ startOffset: 0, endOffset: 5 });
+     *
+     * const headerSegmentId = fDocument.ensurePageHeader();
+     * fDocument.deleteRange({ startOffset: 0, endOffset: 5, segmentId: headerSegmentId });
+     * ```
+     */
+    deleteRange(range: IFDocumentTextRange): boolean {
+        const normalizedRange = this._normalizeDeleteRange(range);
+        if (normalizedRange.startOffset >= normalizedRange.endOffset) {
+            return false;
+        }
+
+        return replaceBodyRange(
+            normalizedRange,
+            {
+                dataStream: '',
+            },
+            this._documentDataModel,
+            this._injector
+        );
+    }
+
+    private _createFDocumentParagraph(paragraphId: string, segmentId: string = ''): FDocumentParagraph {
+        return this._injector.createInstance(
+            FDocumentParagraph,
+            this,
+            paragraphId,
+            segmentId,
+            this._injector
+        );
+    }
+
+    private _normalizeDeleteRange(range: IFDocumentTextRange): IFDocumentTextRange {
+        const body = this.getBody(range.segmentId);
+        const protectedEndOffset = body.dataStream.endsWith('\r\n')
+            ? Math.max(0, body.dataStream.length - 2)
+            : body.dataStream.length;
+        const endOffset = Math.min(Math.max(range.endOffset, 0), protectedEndOffset);
+
+        return {
+            ...range,
+            startOffset: Math.min(Math.max(range.startOffset, 0), endOffset),
             endOffset,
-            collapsed: startOffset === endOffset,
-            segmentId,
         };
-        const removeLeadingParagraphBreak = startOffset === 0;
-        const insertBody = buildPlainTextInsertBody(text, {
-            paragraphStyle: getParagraphStyleAtOffset(body, startOffset),
-            removeLeadingParagraphBreak,
-        });
-        const cursorOffset = options.cursorOffset == null
-            ? undefined
-            : getNormalizedPlainTextCursorOffset(text, options.cursorOffset, removeLeadingParagraphBreak);
-
-        return this._commandService.syncExecuteCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
-            unitId,
-            body: insertBody,
-            range: activeRange,
-            segmentId,
-            ...(cursorOffset == null ? {} : { cursorOffset }),
-        });
     }
 
-    /**
-     * Inserts one or more plain-text paragraphs at the provided document range.
-     * @param {string} text - The paragraph text to insert. Newlines are normalized to document paragraph separators.
-     * @param {IDocumentInsertTextFacadeOptions} options - Optional target range, segment id, and cursor offset.
-     * @returns {boolean} `true` if the paragraphs were successfully inserted, or `false` if it failed.
-     * @example
-     * ```typescript
-     * const fDocument = univerAPI.getActiveDocument();
-     * const success = fDocument.insertParagraph('Hello, world! This is a new paragraph.', {
-     *   startOffset: 5,
-     *   endOffset: 5,
-     * });
-     * console.log(success);
-     * ```
-     */
-    insertParagraph(text = '', options: IDocumentInsertTextFacadeOptions = {}): boolean {
-        const dataStream = `${text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').join('\r\n')}\r\n`;
+    private _getParagraphInsertOffset(index: number, segmentId: string = ''): number {
+        if (index <= 0) {
+            return 0;
+        }
 
-        return this.insertText(dataStream, {
-            ...options,
-            cursorOffset: options.cursorOffset ?? dataStream.length,
+        const { dataStream, paragraphs = [] } = this.getBody(segmentId);
+
+        if (paragraphs.length === 0) {
+            return Math.max(0, dataStream.length - 1);
+        }
+
+        if (index >= paragraphs.length) {
+            return paragraphs[paragraphs.length - 1].startIndex + 1;
+        }
+
+        return paragraphs[index - 1].startIndex + 1;
+    }
+
+    private _ensureHeaderFooter(kind: 'header' | 'footer', pageIndex: number): string {
+        if (this.isModern()) {
+            throw new Error('The document is a modern document, header/footer is not supported.');
+        }
+
+        const { createType, segmentId: existingSegmentId } = this._getHeaderFooterCreateInfo(kind, pageIndex);
+        if (existingSegmentId) {
+            return existingSegmentId;
+        }
+
+        const segmentId = generateRandomId(6);
+        const result = this._commandService.syncExecuteCommand(CreateHeaderFooterCommand.id, {
+            unitId: this.getId(),
+            segmentId,
+            createType,
         });
+
+        if (!result) {
+            throw new Error(`Failed to create page ${kind}.`);
+        }
+
+        return segmentId;
+    }
+
+    private _getHeaderFooterCreateInfo(kind: 'header' | 'footer', pageIndex: number): {
+        createType: HeaderFooterType;
+        segmentId: string;
+    } {
+        const { documentStyle } = this._documentDataModel.getSnapshot();
+        const isFirstPage = pageIndex === 0;
+        const isEvenPage = (pageIndex + 1) % 2 === 0;
+
+        if (isFirstPage && documentStyle.useFirstPageHeaderFooter === BooleanNumber.TRUE) {
+            return kind === 'header'
+                ? {
+                    createType: HeaderFooterType.FIRST_PAGE_HEADER,
+                    segmentId: documentStyle.firstPageHeaderId ?? '',
+                }
+                : {
+                    createType: HeaderFooterType.FIRST_PAGE_FOOTER,
+                    segmentId: documentStyle.firstPageFooterId ?? '',
+                };
+        }
+
+        if (isEvenPage && documentStyle.evenAndOddHeaders === BooleanNumber.TRUE) {
+            return kind === 'header'
+                ? {
+                    createType: HeaderFooterType.EVEN_PAGE_HEADER,
+                    segmentId: documentStyle.evenPageHeaderId ?? '',
+                }
+                : {
+                    createType: HeaderFooterType.EVEN_PAGE_FOOTER,
+                    segmentId: documentStyle.evenPageFooterId ?? '',
+                };
+        }
+
+        return kind === 'header'
+            ? {
+                createType: HeaderFooterType.DEFAULT_HEADER,
+                segmentId: documentStyle.defaultHeaderId ?? '',
+            }
+            : {
+                createType: HeaderFooterType.DEFAULT_FOOTER,
+                segmentId: documentStyle.defaultFooterId ?? '',
+            };
     }
 }

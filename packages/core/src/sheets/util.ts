@@ -20,9 +20,9 @@ import type { IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation
 import type { ICellData, IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
-import { createParagraphId } from '../docs/paragraph-id';
 import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
+import { createParagraphId } from '../docs/paragraph-id';
 import { Rectangle } from '../shared';
 import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
 import { CustomRangeType, DocumentFlavor } from '../types/interfaces';
@@ -80,7 +80,10 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
         cellValueType,
     } = config;
 
-    const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || DEFAULT_PADDING_DATA;
+    const marginTop = paddingData?.t ?? DEFAULT_PADDING_DATA.t;
+    const marginRight = paddingData?.r ?? DEFAULT_PADDING_DATA.r;
+    const marginBottom = paddingData?.b ?? DEFAULT_PADDING_DATA.b;
+    const marginLeft = paddingData?.l ?? DEFAULT_PADDING_DATA.l;
     const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
     const documentData: IDocumentData = {
         id: 'd',

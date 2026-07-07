@@ -714,6 +714,11 @@ export class EditingRenderController extends Disposable {
         this._cellEditorManagerService.setState({
             show: param.visible,
         });
+        // Formula range editing mirrors selections into the formula bar while the cell editor is
+        // active. Clear the formula-bar editor on exit so its hidden input/caret cannot remain visible.
+        const formulaBarEditor = this._editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        formulaBarEditor?.setSelectionRanges([], false);
+        formulaBarEditor?.blur();
         const editorObject = this._getEditorObject();
         editorObject?.scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
             viewportScrollX: 0,

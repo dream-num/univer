@@ -422,7 +422,8 @@ export class FThreadComment {
     }
 
     /**
-     * @deprecated use `getRichText` as instead
+     * @deprecated Use `getRichText` instead.
+     * @returns {IDocumentBody} The comment content.
      */
     getContent(): IDocumentBody {
         return this._thread.text;
@@ -474,14 +475,17 @@ export class FThreadComment {
     }
 
     /**
-     * @deprecated use `deleteAsync` as instead.
+     * @deprecated Use `deleteAsync` instead.
+     * @returns {Promise<boolean>} Whether the comment is deleted successfully.
      */
     delete(): Promise<boolean> {
         return this.deleteAsync();
     }
 
     /**
-     * @deprecated use `updateAsync` as instead
+     * @deprecated Use `updateAsync` instead.
+     * @param {IDocumentBody} content The new content of the comment.
+     * @returns {Promise<boolean>} Whether the comment is updated successfully.
      */
     async update(content: IDocumentBody): Promise<boolean> {
         return this.updateAsync(content);
@@ -535,7 +539,9 @@ export class FThreadComment {
     }
 
     /**
-     * @deprecated use `resolveAsync` as instead
+     * @deprecated Use `resolveAsync` instead.
+     * @param {boolean} [resolved] Whether the comment is resolved.
+     * @returns {Promise<boolean>} Set the comment to resolved or not operation result.
      */
     resolve(resolved?: boolean): Promise<boolean> {
         return this.resolveAsync(resolved);

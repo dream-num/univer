@@ -228,6 +228,111 @@ describe('selection convert text range helpers', () => {
         expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(70);
     });
 
+    it('projects header table cell cursors from the segment page without requiring a body page index', () => {
+        const glyph = {
+            bBox: { ba: 8, bd: 2 },
+            count: 1,
+            glyphType: 'LETTER',
+            left: 20,
+            width: 10,
+        };
+        const cell = {
+            left: 30,
+            marginLeft: 0,
+            marginTop: 0,
+            sections: [{
+                columns: [{
+                    left: 0,
+                    lines: [{
+                        asc: 10,
+                        divides: [{
+                            glyphGroup: [glyph],
+                            left: 0,
+                            paddingLeft: 0,
+                        }],
+                        lineHeight: 20,
+                        marginBottom: 0,
+                        marginTop: 0,
+                        paddingTop: 0,
+                        top: 0,
+                    }],
+                }],
+                top: 0,
+            }],
+        };
+        const row = {
+            cells: [cell],
+            height: 20,
+            index: 0,
+            top: 0,
+        };
+        const table = {
+            left: 7,
+            rows: [row],
+            tableId: 'header-table',
+            top: 4,
+        };
+        const headerPage = {
+            marginLeft: 0,
+            marginTop: 12,
+            pageHeight: 100,
+            pageWidth: 420,
+            sections: [],
+            skeTables: new Map([['header-table', table]]),
+            type: DocumentSkeletonPageType.HEADER,
+        };
+        const page = {
+            headerId: 'header-1',
+            marginLeft: 50,
+            marginTop: 100,
+            pageHeight: 500,
+            pageWidth: 600,
+            skeTables: new Map(),
+        };
+
+        (cell as { parent?: unknown }).parent = row;
+        (row as { parent?: unknown }).parent = table;
+        (table as { parent?: unknown }).parent = headerPage;
+
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map([['header-1', new Map([[600, headerPage]])]]),
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'unit-1',
+                }),
+            }),
+        };
+        const position: INodePosition = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+            line: 0,
+            page: -1,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['skeTables', 'header-table', 'rows', 0, 'cells', 0],
+            section: 0,
+            segmentPage: 0,
+        };
+
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(position, position);
+
+        expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(107);
+        expect(getAnchorBounding(result.contentBoxPointGroup).top).toBe(18);
+    });
+
     it('projects column page cursors through the column group offset', () => {
         const glyph = {
             bBox: { ba: 8, bd: 2 },

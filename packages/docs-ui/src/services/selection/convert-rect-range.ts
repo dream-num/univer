@@ -297,10 +297,13 @@ export class NodePositionConvertToRectRange {
             docsLeft: this._documentOffsetConfig.docsLeft ?? 0,
             docsTop: this._documentOffsetConfig.docsTop ?? 0,
             pageMarginTop,
+            skeFooters: skeletonData?.skeFooters,
+            skeHeaders: skeletonData?.skeHeaders,
             unitId,
         });
 
-        const skipPageIndex = pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? startPage : startSegmentPage;
+        const startRootPage = pageType === DocumentSkeletonPageType.CELL && pages[startPage] == null ? startSegmentPage : startPage;
+        const skipPageIndex = pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? startRootPage : startSegmentPage;
 
         for (let p = 0; p < skipPageIndex; p++) {
             const page = pages[p];
@@ -325,14 +328,14 @@ export class NodePositionConvertToRectRange {
             if (table == null) {
                 const nestedTableContext = nestedTableContexts.find((context) => (
                     context.pageIndex === p &&
-                    context.source === 'column' &&
+                    (context.source === 'column' || context.source === 'header' || context.source === 'footer') &&
                     context.tableId.startsWith(tableId)
                 ));
                 if (nestedTableContext) {
                     const nestedTable = nestedTableContext.table;
                     const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
-                    const nestedX = nestedTableContext.tableRect.left - nestedTable.left;
-                    const nestedY = nestedTableContext.tableRect.top;
+                    const nestedX = nestedTableContext.tableRect.left - nestedTable.left - (this._documentOffsetConfig.docsLeft ?? 0);
+                    const nestedY = nestedTableContext.tableRect.top - (this._documentOffsetConfig.docsTop ?? 0);
 
                     if (intersectsMergedCell) {
                         const rows = nestedTable.rows.filter((row) => row.index >= startRow && row.index <= endRow);
@@ -538,15 +541,14 @@ export class NodePositionConvertToRectRange {
         }
 
         const { pages } = skeletonData;
-
         const { path: anchorPath } = anchorPosition;
         const { path: focusPath } = focusPosition;
         if (anchorPath.indexOf('cells') === -1 || focusPath.indexOf('cells') === -1) {
             return;
         }
 
-        const anchorCell = getPageFromPath(skeletonData, anchorPath);
-        const focusCell = getPageFromPath(skeletonData, focusPath);
+        const anchorCell = getCellPageFromPositionPath(skeletonData, anchorPosition);
+        const focusCell = getCellPageFromPositionPath(skeletonData, focusPosition);
 
         if (anchorCell == null || focusCell == null) {
             return;
@@ -661,6 +663,44 @@ function rangeIntersectsMergedCell(table: Nullable<ITable>, range: ITableRange):
             endColumnIndex: columnIndex + columnSpan - 1,
         });
     }));
+}
+
+function getCellPageFromPositionPath(
+    skeletonData: Parameters<typeof getPageFromPath>[0],
+    position: INodePosition
+): Nullable<IDocumentSkeletonPage> {
+    const { path, segmentPage } = position;
+    if (path[0] === 'pages') {
+        return getPageFromPath(skeletonData, path);
+    }
+
+    const rootPage = skeletonData.pages[segmentPage];
+    if (rootPage == null) {
+        return null;
+    }
+
+    const { headerId, footerId, pageWidth } = rootPage;
+    const segmentPages = [
+        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth),
+        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth),
+    ];
+
+    for (const segmentPage of segmentPages) {
+        if (segmentPage == null) {
+            continue;
+        }
+
+        const page = getPageFromPath({
+            ...skeletonData,
+            pages: [segmentPage],
+        }, ['pages', 0, ...path]);
+
+        if (page != null) {
+            return page;
+        }
+    }
+
+    return null;
 }
 
 function normalizeRange(range: ITableRange): ITableRange {

@@ -251,6 +251,7 @@ class TestRenderScene {
     }
 
     addObject(object: Rect) {
+        object.parent = this as never;
         this._objects.set(object.oKey, object);
     }
 
@@ -260,6 +261,10 @@ class TestRenderScene {
 
     getObject(key: string) {
         return this._objects.get(key);
+    }
+
+    getObjectIncludeInGroup(key: string) {
+        return this.getObject(key);
     }
 
     attachTransformerTo() { }

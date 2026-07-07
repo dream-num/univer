@@ -63,8 +63,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const segmentId = docRanges[0].segmentId;
 
         const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const paragraphs = segment.getBody()?.paragraphs ?? [];
-        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraphs = segment?.getBody()?.paragraphs ?? [];
+        const dataStream = segment?.getBody()?.dataStream ?? '';
 
         if (!paragraphs.length) {
             return false;
@@ -127,8 +127,8 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
 
         const { segmentId } = activeRanges[0];
         const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const paragraphs = segment.getBody()?.paragraphs ?? [];
-        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraphs = segment?.getBody()?.paragraphs ?? [];
+        const dataStream = segment?.getBody()?.dataStream ?? '';
 
         if (!paragraphs.length) {
             return false;
@@ -199,8 +199,8 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const { segmentId } = activeRange;
         const selections = docSelectionManagerService.getDocRanges() ?? [];
         const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const paragraphs = segment.getBody()?.paragraphs ?? [];
-        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraphs = segment?.getBody()?.paragraphs ?? [];
+        const dataStream = segment?.getBody()?.dataStream ?? '';
 
         if (!paragraphs.length) {
             return false;
@@ -307,7 +307,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
             return false;
         }
 
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs;
         if (paragraphs == null) {
             return false;
         }

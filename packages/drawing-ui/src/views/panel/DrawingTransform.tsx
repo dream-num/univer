@@ -25,6 +25,8 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import { getUpdateParams } from '../../utils/get-update-params';
+import { resolveDrawingUIRotateEnabled } from '../../utils/rotate-enabled';
+import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotationDisabled } from './drawing-transform-rotation';
 
 export interface IDrawingTransformProps {
     transformShow: boolean;
@@ -80,6 +82,10 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
     const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
+    const rotateEnabled = resolveDrawingUIRotateEnabled(drawingParam, {
+        getChildren: (drawing) => drawingManagerService.getDrawingsByGroup(drawing),
+    });
+    const rotationDisabled = isDrawingTransformRotationDisabled(rotateEnabled);
 
     const checkMoveBoundary = (left: number, top: number, width: number, height: number) => {
         const { width: topSceneWidth, height: topSceneHeight } = topScene;
@@ -330,19 +336,13 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         transformer.refreshControls().changeNotification();
     }, INPUT_DEBOUNCE_TIME);
 
-    const handleRotationChange = (val: number | null) => {
-        if (val == null) {
-            return;
-        }
-
-        const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { angle: val } };
-
-        setRotation(val);
-
-        drawingManagerService.featurePluginUpdateNotification([updateParam]);
-
-        transformer.refreshControls().changeNotification();
-    };
+    const handleRotationChange = createDrawingTransformRotationChangeHandler({
+        rotateEnabled,
+        drawingParam: { unitId, subUnitId, drawingId, drawingType },
+        setRotation,
+        emitUpdate: (updateParams) => drawingManagerService.featurePluginUpdateNotification(updateParams),
+        notifyChange: () => transformer.refreshControls().changeNotification(),
+    });
 
     const handleLockRatioChange = (val: string | number | boolean) => {
         setLockRatio(val as boolean);
@@ -417,6 +417,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         value={rotation}
                         min={RANGE_DRAWING_ROTATION_LIMIT[0]}
                         max={RANGE_DRAWING_ROTATION_LIMIT[1]}
+                        disabled={rotationDisabled}
                         onChange={handleRotationChange}
                     />
                 </div>

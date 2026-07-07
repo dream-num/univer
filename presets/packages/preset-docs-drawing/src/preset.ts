@@ -15,9 +15,10 @@
  */
 
 import type { IPreset } from '@univerjs/presets';
+import { IImageIoService } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
-import { IImageIoService, UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 
 export interface IUniverDocsDrawingPresetConfig {

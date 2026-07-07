@@ -58,7 +58,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         }
 
         const { style, segmentId } = previousActiveRange;
-        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (body == null) {
             return false;

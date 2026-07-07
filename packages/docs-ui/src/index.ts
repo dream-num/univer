@@ -38,12 +38,13 @@ export { getCustomBlockIdsInSelections, getCutActionsFromDocRanges } from './com
 export { buildMoveDocBlockActions, MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
 export type { IMoveDocBlockCommandParams } from './commands/commands/doc-block-move.command';
 export {
+    DeleteCurrentParagraphCommand,
     DeleteCustomBlockCommand,
     DeleteLeftCommand,
     DeleteRightCommand,
     MergeTwoParagraphCommand,
 } from './commands/commands/doc-delete.command';
-export type { IDeleteCustomBlockParams } from './commands/commands/doc-delete.command';
+export type { IDeleteCurrentParagraphCommandParams, IDeleteCustomBlockParams } from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
@@ -150,6 +151,7 @@ export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
+    disableMenuWhenHeaderFooterEditing,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,

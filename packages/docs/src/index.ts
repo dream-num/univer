@@ -20,6 +20,8 @@ export type {
     IInsertTextCommandParams,
     IUpdateTextCommandParams,
 } from './commands/commands/core-editing.command';
+export { CreateHeaderFooterCommand, HeaderFooterType } from './commands/commands/create-header-footer.command';
+export type { HeaderFooterCreateMode, ICreateHeaderFooterCommandParams, IHeaderFooterProps } from './commands/commands/create-header-footer.command';
 export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
@@ -46,3 +48,4 @@ export {
     deleteCustomRangeFactory,
 } from './utils/custom-range-factory';
 export { replaceSelectionFactory } from './utils/replace-selection-factory';
+export { consumeContentInsertRange, isHeaderFooterSelection } from './utils/util';

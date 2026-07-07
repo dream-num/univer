@@ -189,6 +189,7 @@ class TestRenderManagerService {
 
     readonly docSkeleton = {
         calculate: () => { },
+        resetInitialWidth: () => { },
         getActualSize: () => ({ actualWidth: 120, actualHeight: 36 }),
     };
 
@@ -233,6 +234,35 @@ class TestRenderManagerService {
             };
         }
     }
+}
+
+class TestCachedWidthRenderManagerService extends TestRenderManagerService {
+    private _initialWidth = 696;
+
+    override readonly docSkeleton = {
+        calculate: () => { },
+        resetInitialWidth: () => {
+            this._initialWidth = 0;
+        },
+        getActualSize: () => {
+            const actualWidth = Math.max(this._initialWidth, 120);
+            this._initialWidth = actualWidth;
+
+            return { actualWidth, actualHeight: 36 };
+        },
+    };
+}
+
+class TestViewportEdgeRenderManagerService extends TestRenderManagerService {
+    override readonly sheetCanvasElement = {
+        style: { width: '1192px' },
+        getBoundingClientRect: () => ({ left: 30, top: 50, width: 1192, height: 773 }),
+    };
+
+    override readonly sheetEngine = {
+        width: 1192,
+        getCanvasElement: () => this.sheetCanvasElement,
+    };
 }
 
 describe('SheetCellEditorResizeService', () => {
@@ -308,6 +338,37 @@ describe('SheetCellEditorResizeService', () => {
         expect(renderManager.editorDocument.resized).toEqual({ width: 130, height: 44 });
         expect(renderManager.editorEngine.resized).toEqual({ width: 130, height: 44 });
         expect(callbackCalled).toBe(true);
+    });
+
+    it('does not use stale maximum skeleton width when fitting the active cell editor', async () => {
+        vi.stubGlobal('window', new EventTarget());
+        vi.stubGlobal('document', { activeElement: { dataset: {} } });
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([ThemeService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestCachedWidthRenderManagerService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([SheetCellEditorResizeService]);
+
+        injector.get(SheetCellEditorResizeService).fitTextSize();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        expect(editorManager.getState()).toEqual(expect.objectContaining({
+            endX: 250,
+            show: true,
+        }));
     });
 
     it('refits the editor when its container size drifts from the edited cell', async () => {
@@ -389,5 +450,42 @@ describe('SheetCellEditorResizeService', () => {
             endX: 180,
             show: true,
         }));
+    });
+
+    it('keeps a centered merged-cell editor at least as wide as the edited merged range', async () => {
+        vi.stubGlobal('window', new EventTarget());
+        vi.stubGlobal('document', { activeElement: { dataset: {} } });
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([ThemeService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestViewportEdgeRenderManagerService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([SheetCellEditorResizeService]);
+        const editorBridge = injector.get(IEditorBridgeService) as unknown as TestEditorBridgeService;
+        editorBridge.editCellState.position = {
+            startX: 426,
+            startY: 90,
+            endX: 1206,
+            endY: 122,
+        };
+        editorBridge.editCellState.documentLayoutObject.horizontalAlign = HorizontalAlign.CENTER;
+
+        injector.get(SheetCellEditorResizeService).fitTextSize();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        const state = editorManager.getState();
+        expect(state!.endX as number - (state!.startX as number)).toBe(780);
     });
 });

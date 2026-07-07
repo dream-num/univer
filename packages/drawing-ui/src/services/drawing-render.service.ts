@@ -20,6 +20,8 @@ import type { BaseObject, IImageProps, IRectProps, Scene } from '@univerjs/engin
 import {
     BooleanNumber,
     DrawingTypeEnum,
+    IImageIoService,
+    ImageSourceType,
     Inject,
     IUniverInstanceService,
     IURLImageService,
@@ -29,8 +31,6 @@ import {
 import {
     getDrawingShapeKeyByDrawingSearch,
     IDrawingManagerService,
-    IImageIoService,
-    ImageSourceType,
 } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';

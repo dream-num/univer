@@ -1108,14 +1108,7 @@ class ConditionalFormatDataBarRuleBuilder extends ConditionalFormatRuleBaseBuild
 
     /**
      * Set data bar rule.
-     * @param {{
-     *         min: IValueConfig;
-     *         max: IValueConfig;
-     *         isGradient?: boolean;
-     *         positiveColor: string;
-     *         nativeColor: string;
-     *         isShowValue?: boolean;
-     *     }} config - The data bar rule settings.
+     * @param {object} config - The data bar rule settings.
      * @param {IValueConfig} config.min - The minimum value for the data bar.
      * @param {IValueConfig} config.max - The maximum value for the data bar.
      * @param {boolean} [config.isGradient] - Whether the data bar is gradient.
@@ -1606,14 +1599,7 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Set data bar rule.
-     * @param {{
-     *         min: IValueConfig;
-     *         max: IValueConfig;
-     *         isGradient?: boolean;
-     *         positiveColor: string;
-     *         nativeColor: string;
-     *         isShowValue?: boolean;
-     *     }} config - The data bar rule settings.
+     * @param {object} config - The data bar rule settings.
      * @param {IValueConfig} config.min - The minimum value for the data bar.
      * @param {IValueConfig} config.max - The maximum value for the data bar.
      * @param {boolean} [config.isGradient] - Whether the data bar is gradient.

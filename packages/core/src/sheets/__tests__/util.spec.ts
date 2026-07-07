@@ -65,6 +65,19 @@ describe('sheet util helpers', () => {
         expect(documentModel.getDrawingsOrder()).toEqual([]);
     });
 
+    it('should fill missing cell padding sides with defaults when creating document models', () => {
+        const documentModel = createDocumentModelWithStyle('March 5', {}, {
+            paddingData: { l: 5 },
+        });
+
+        expect(documentModel.getSnapshot().documentStyle).toMatchObject({
+            marginTop: 0,
+            marginRight: 2,
+            marginBottom: 2,
+            marginLeft: 5,
+        });
+    });
+
     it('should extract cell style fragments and enrich document links once', () => {
         const style = {
             ff: 'Inter',

@@ -30,7 +30,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocInterceptorService, DocSkeletonManagerService, IDocStateChangeInterceptorService } from '@univerjs/docs';
+import { DocInterceptorService, DocSkeletonManagerService, IDocStateChangeInterceptorService, UniverDocsPlugin } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
 import pkg from '../package.json';
@@ -132,7 +132,7 @@ import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
-import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut, SoftBreakLineShortcut } from './shortcuts/core-editing.shortcut';
+import { BreakLineShortcut, CloseHeaderFooterShortcut, DeleteLeftShortcut, DeleteRightShortcut, SoftBreakLineShortcut } from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDocumentEndShortcut,
     MoveCursorDocumentStartShortcut,
@@ -163,7 +163,7 @@ import {
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 import { H1HeadingShortcut, H2HeadingShortcut, H3HeadingShortcut, H4HeadingShortcut, H5HeadingShortcut, NormalTextHeadingShortcut } from './shortcuts/heading.shortcut';
 
-@DependentOn(UniverRenderEnginePlugin)
+@DependentOn(UniverRenderEnginePlugin, UniverDocsPlugin)
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = 'DOC_UI_PLUGIN';
     static override packageName = pkg.name;
@@ -293,7 +293,6 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertCustomRangeCommand,
             SetParagraphNamedStyleCommand,
             QuickHeadingCommand,
-            DeleteCurrentParagraphCommand,
             DocCopyCurrentParagraphCommand,
             DocCutCurrentParagraphCommand,
             H1HeadingCommand,
@@ -314,7 +313,7 @@ export class UniverDocsUIPlugin extends Plugin {
             this.disposeWithMe(this._commandService.registerCommand(e));
         });
 
-        [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
+        [DocCopyCommand, DocCutCommand, DocPasteCommand, DeleteCurrentParagraphCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
     }
 
     private _initializeShortcut(): void {
@@ -346,6 +345,7 @@ export class UniverDocsUIPlugin extends Plugin {
             SelectAllShortcut,
             DeleteLeftShortcut,
             DeleteRightShortcut,
+            CloseHeaderFooterShortcut,
             BreakLineShortcut,
             SoftBreakLineShortcut,
             ShiftTabShortCut,

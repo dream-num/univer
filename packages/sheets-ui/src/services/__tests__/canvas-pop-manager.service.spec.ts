@@ -349,6 +349,36 @@ describe('SheetCanvasPopManagerService', () => {
         expect(popupService.removedIds).toEqual(['popup-1']);
     });
 
+    it('keeps dynamic absolute-position popups subscribed to caller-provided anchors', () => {
+        const { service, popupService } = createSheetHarness();
+        const bound = { top: 10, left: 20, right: 30, bottom: 40 };
+        const anchorRect$ = new BehaviorSubject(bound);
+
+        const disposable = service.attachPopupToDynamicAbsolutePosition(
+            bound,
+            anchorRect$,
+            { componentKey: 'dynamic-tooltip' } as never,
+            'unit-1',
+            'sheet-1'
+        );
+        const popup = popupService.lastPopup()!;
+        const positions: unknown[] = [];
+        popup.anchorRect$.subscribe((position) => positions.push(position));
+
+        anchorRect$.next({ top: 12, left: 24, right: 34, bottom: 46 });
+
+        expect(popup).toMatchObject({
+            componentKey: 'dynamic-tooltip',
+            anchorRect: bound,
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+        });
+        expect(positions).toContainEqual({ top: 12, left: 24, right: 34, bottom: 46 });
+
+        disposable?.dispose();
+        expect(popupService.removedIds).toEqual(['popup-1']);
+    });
+
     it('anchors a popup to a sheet position and refreshes its hidden freeze area on viewport changes', () => {
         const { service, popupService, commandService, transformChange$ } = createSheetHarness();
 

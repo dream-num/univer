@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IUnitRangeName, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IUnitRangeName, Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -29,7 +29,7 @@ import { useStateRef } from './use-state-ref';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     const univerInstanceService = accssor.get(IUniverInstanceService);
-    const documentModel = univerInstanceService.getCurrentUniverDocInstance();
+    const documentModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     if (!documentModel?.getBody()) {
         return;

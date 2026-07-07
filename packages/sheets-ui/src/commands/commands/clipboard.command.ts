@@ -57,6 +57,7 @@ export interface ISheetPasteByShortKeyParams {
     htmlContent?: string;
     textContent?: string;
     files?: File[];
+    formulaClipboardPayload?: string;
 }
 
 export const SheetPasteCommand: IMultiCommand = {
@@ -97,8 +98,8 @@ export const SheetPasteShortKeyCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISheetPasteByShortKeyParams) => {
         const clipboardService = accessor.get(ISheetClipboardService);
-        const { htmlContent, textContent, files } = params;
-        clipboardService.legacyPaste(htmlContent, textContent, files);
+        const { htmlContent, textContent, files, formulaClipboardPayload } = params;
+        clipboardService.legacyPaste(htmlContent, textContent, files, formulaClipboardPayload);
 
         return true;
     },

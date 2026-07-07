@@ -56,4 +56,21 @@ describe('date-kit', () => {
         expect(dateKit.unix(1704067200).valueOf()).toBe(1704067200000);
         expect(dateKit.isDateKit(dateKit())).toBe(true);
     });
+
+    it('should format dates with Intl locale options', () => {
+        const value = dateKit('2024-01-02 03:04:05');
+
+        expect(value.formatIntl('ar-SA-u-nu-arab', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        })).toMatch(/[٠-٩]/);
+        expect(value.formatIntl('fa-IR-u-nu-arabext', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        })).toMatch(/[۰-۹]/);
+    });
 });

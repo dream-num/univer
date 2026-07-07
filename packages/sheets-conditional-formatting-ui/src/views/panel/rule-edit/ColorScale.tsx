@@ -34,7 +34,7 @@ const createOptionItem = (text: string, localeService: LocaleService) => ({
     value: text,
 });
 
-const TextInput = (props: { id: string; type: CFValueType | 'none'; value: number | string; onChange: (v: number | string) => void; className: string }) => {
+const TextInput = (props: { id: string; type: CFValueType | 'none'; value: number | string; onChange: (v: number | string) => void; className?: string }) => {
     const { type, className, onChange, value } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
@@ -247,7 +247,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.min')}
             </div>
-            <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
+            <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center univer-gap-2">
                 <Select
                     className="univer-flex-shrink-0"
                     options={minOptions}
@@ -316,7 +316,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.medianValue')}
             </div>
-            <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
+            <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center univer-gap-2">
                 <Select
                     className="univer-flex-shrink-0"
                     options={medianOptions}
@@ -389,7 +389,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.max')}
             </div>
-            <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
+            <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center univer-gap-2">
                 <Select
                     className="univer-flex-shrink-0"
                     options={maxOptions}
@@ -413,7 +413,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="max"
-                    className="univer-ml-1"
                     value={maxValue}
                     type={maxType}
                     onChange={(v) => {
@@ -432,7 +431,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
                 <ColorPicker
-                    className="univer-ml-1"
                     color={maxColor}
                     onChange={(v) => {
                         setMaxColor(v);

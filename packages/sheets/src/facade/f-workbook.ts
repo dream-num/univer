@@ -146,6 +146,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Set the name of the workbook.
      * @param {string} name The new name of the workbook.
+     * @returns {FWorkbook} The current FWorkbook instance for chaining.
      * @example
      * ```ts
      * // The code below sets the name of the workbook
@@ -887,7 +888,6 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Insert a defined name by builder param.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
-     * @returns {void}
      * @example
      * ```ts
      * // The code below inserts a defined name by builder param
@@ -907,7 +907,6 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Update the defined name with the given name.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
-     * @returns {void}
      * @example
      * ```ts
      * // The code below updates the defined name with the given name
@@ -990,7 +989,6 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a custom range theme style.
      * @param {RangeThemeStyle} rangeThemeStyle The range theme style to register
-     * @returns {void}
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1014,7 +1012,6 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Unregister a custom range theme style.
      * @param {string} themeName The name of the theme to unregister
-     * @returns {void}
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

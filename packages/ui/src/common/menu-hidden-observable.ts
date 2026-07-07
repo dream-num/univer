@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, UniverInstanceType } from '@univerjs/core';
-import { DocumentFlavor, IUniverInstanceService } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { Observable } from 'rxjs';
 
 export function getMenuHiddenObservable(
@@ -67,13 +67,13 @@ export function getHeaderFooterMenuHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
             const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
 
             subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
         });
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             subscriber.next(true);

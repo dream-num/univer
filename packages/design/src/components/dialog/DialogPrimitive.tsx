@@ -51,12 +51,13 @@ DialogOverlay.displayName = Overlay.displayName;
 interface IDialogContentProps {
     closable?: boolean;
     onClickClose?: () => void;
+    mountContainer?: HTMLElement | null;
 }
 const DialogContent = forwardRef<
     ElementRef<typeof Content>,
     ComponentPropsWithoutRef<typeof Content> & IDialogContentProps
->(({ className, children, closable = true, onClickClose, ...props }, ref) => (
-    <DialogPortal>
+>(({ className, children, closable = true, onClickClose, mountContainer, ...props }, ref) => (
+    <DialogPortal container={mountContainer ?? undefined}>
         <DialogOverlay />
         <Content
             ref={ref}
@@ -82,11 +83,13 @@ const DialogContent = forwardRef<
             {children}
             {closable && (
                 <Close
+                    data-slot="close"
                     className={`
                       univer-absolute univer-right-4 univer-top-4 univer-size-6 univer-cursor-pointer univer-rounded-sm
                       univer-border-none univer-bg-transparent univer-p-0 univer-transition-opacity
                       hover:univer-opacity-100
                       disabled:univer-pointer-events-none
+                      rtl:univer-left-4 rtl:univer-right-auto
                     `}
                     onClick={onClickClose}
                 >
@@ -104,10 +107,12 @@ const DialogHeader = ({
     ...props
 }: HTMLAttributes<HTMLDivElement>) => (
     <div
+        data-slot="dialog-header"
         className={clsx(
             `
               univer-flex univer-flex-col univer-space-y-1.5 univer-text-center
               sm:!univer-text-left
+              sm:rtl:!univer-text-right
             `,
             className
         )}

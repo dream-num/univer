@@ -24,6 +24,7 @@ import { FontService, IFontService } from '../../../services/font.service';
 import { RediProvider } from '../../../utils/di';
 import { FontSize } from '../../font-size/FontSize';
 import { FontFamily } from '../FontFamily';
+import { FontFamilyItem } from '../FontFamilyItem';
 
 class TestState {
     static commandParams: unknown[] = [];
@@ -46,10 +47,11 @@ const SetFontFamilyCommand: ICommand<{ value: string }> = {
     },
 };
 
-function renderWithDependencies(element: ReactElement) {
+function renderWithDependencies(element: ReactElement, direction: 'ltr' | 'rtl' = 'ltr') {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([IFontService, { useClass: FontService }]);
+    injector.get(LocaleService).setDirection(direction);
     injector.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
             ui: {
@@ -58,6 +60,15 @@ function renderWithDependencies(element: ReactElement) {
                     'times-new-roman': 'Times New Roman',
                     tahoma: 'Tahoma',
                     verdana: 'Verdana',
+                    'microsoft-yahei': 'Microsoft YaHei',
+                    simsun: 'SimSun',
+                    simhei: 'SimHei',
+                    kaiti: 'Kaiti',
+                    fangsong: 'FangSong',
+                    nsimsun: 'NSimSun',
+                    stxinwei: 'STXinwei',
+                    stxingkai: 'STXingkai',
+                    stliti: 'STLiti',
                 },
             },
         },
@@ -84,10 +95,9 @@ describe('font input views', () => {
         TestState.reset();
     });
 
-    it('executes the font-family command when the typed text matches a known font', () => {
+    it('emits onChange when the typed text matches a known font', () => {
         const rendered = renderWithDependencies(
             <FontFamily
-                id={SetFontFamilyCommand.id}
                 value="Arial"
                 onChange={(value) => TestState.familyChanges.push(value)}
             />
@@ -97,15 +107,14 @@ describe('font input views', () => {
         fireEvent.change(input, { target: { value: 'times' } });
         fireEvent.keyDown(input, { key: 'Enter' });
 
-        expect(TestState.commandParams).toEqual([{ value: 'Times New Roman' }]);
-        expect(TestState.familyChanges).toEqual([]);
+        expect(TestState.commandParams).toEqual([]);
+        expect(TestState.familyChanges).toEqual(['Times New Roman']);
         rendered.dispose();
     });
 
     it('restores the displayed font when the typed text does not match any font', () => {
         const rendered = renderWithDependencies(
             <FontFamily
-                id={SetFontFamilyCommand.id}
                 value="Arial"
                 onChange={(value) => TestState.familyChanges.push(value)}
             />
@@ -118,6 +127,34 @@ describe('font input views', () => {
         expect(TestState.commandParams).toEqual([]);
         expect(TestState.familyChanges).toEqual([]);
         expect(input.value).toBe('Arial');
+        rendered.dispose();
+    });
+
+    it('emits onChange when a font-family menu item is selected', () => {
+        const rendered = renderWithDependencies(
+            <FontFamilyItem
+                value="Arial"
+                onChange={(value) => TestState.familyChanges.push(value)}
+            />
+        );
+
+        fireEvent.click(rendered.getByText('Times New Roman'));
+
+        expect(TestState.commandParams).toEqual([]);
+        expect(TestState.familyChanges).toEqual(['Times New Roman']);
+        rendered.dispose();
+    });
+
+    it('applies locale direction to the font-family menu list', () => {
+        const rendered = renderWithDependencies(
+            <FontFamilyItem
+                value="Arial"
+                onChange={(value) => TestState.familyChanges.push(value)}
+            />,
+            'rtl'
+        );
+
+        expect(rendered.container.querySelector('ul')?.getAttribute('dir')).toBe('rtl');
         rendered.dispose();
     });
 

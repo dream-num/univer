@@ -55,6 +55,13 @@ describe('MenuManagerService', () => {
         sub.unsubscribe();
     });
 
+    it('returns an empty array for missing menu positions', () => {
+        const service = createService();
+
+        expect(service.getMenuByPositionKey('missing-position')).toEqual([]);
+        expect(service.getFlatMenuByPositionKey('missing-position')).toEqual([]);
+    });
+
     it('identifies selector menu item variants used by menu renderers', () => {
         expect(isMenuSelectorItem({ id: 'font-family', type: MenuItemType.SELECTOR })).toBe(true);
         expect(isMenuSelectorItem({ id: 'more-actions', type: MenuItemType.SUBITEMS })).toBe(true);

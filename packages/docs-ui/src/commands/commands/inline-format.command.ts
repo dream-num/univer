@@ -301,7 +301,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (body == null) {
             return false;

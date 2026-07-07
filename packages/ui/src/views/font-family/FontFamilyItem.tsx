@@ -15,41 +15,31 @@
  */
 
 import type { LocaleKey } from '../../locale/types';
-import type { IFontConfig } from '../../services/font.service';
-import { ICommandService, LocaleService } from '@univerjs/core';
+import type { ICustomComponentProps } from '../../services/menu/menu';
+import { LocaleService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
-import { useEffect, useState } from 'react';
-import { IFontService } from '../../services/font.service';
-import { ILayoutService } from '../../services/layout/layout.service';
-import { useDependency } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
+import { useFontList } from './use-font-list';
 
-export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => {
-    const commandService = useDependency(ICommandService);
-    const fontService = useDependency(IFontService);
-    const layoutService = useDependency(ILayoutService);
+export interface IFontFamilyItemProps extends ICustomComponentProps<string> {
+    value: string;
+}
 
-    const [fonts, setFonts] = useState<IFontConfig[]>([]);
+export const FONT_FAMILY_ITEM_COMPONENT = 'UI_FONT_FAMILY_ITEM_COMPONENT';
 
-    useEffect(() => {
-        const subscription = fontService.fonts$.subscribe((fonts) => {
-            setFonts(fonts);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
-
+export const FontFamilyItem = ({ value, onChange }: IFontFamilyItemProps) => {
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
+    const { fonts, fontService } = useFontList();
 
-    function handleSelectFont(value: string) {
-        layoutService.focus();
-        commandService.executeCommand(id, { value });
+    function handleSelectFont(nextValue: string) {
+        onChange(nextValue);
     }
 
     return (
         <ul
+            dir={direction}
             className="univer-m-0 univer-list-none univer-p-0 univer-text-sm"
             style={{ fontFamily: value }}
         >

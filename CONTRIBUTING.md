@@ -53,6 +53,8 @@ pnpm dev
 
 Please refer to [Architecture](https://docs.univer.ai/guides/recipes/architecture/univer), and also [ISOMORPHIC.md](./docs/ISOMORPHIC.md) for more guidance on how to set up plugins.
 
+For public API compatibility expectations, experimental APIs, internal APIs, and deprecation rules, read [API_STABILITY.md](./docs/API_STABILITY.md).
+
 ### Source code organization
 
 The structure of the repository is as follows:
@@ -233,8 +235,9 @@ Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING-FACADE.md)
 
 ### Deprecate API
 
-If you are going to deprecate an API, please follow the steps below:
+If you are going to deprecate an API, follow the [API Stability Policy](./docs/API_STABILITY.md) and the steps below:
 
 1. Mark the API as deprecated in the JSDoc, and use `{@link}` to refer to the new API.
 2. In the implementation, call `deprecate` of `ILogService` to log a deprecation message.
-3. Remove the API in the next minor version. If the API is considered heavily used, you can remove it in the next major version, e.g. 1.0.0.
+3. Document the migration path in the relevant guide, README, changelog, or release notes when the API is broadly used.
+4. Deprecated stable APIs should remain available until the next major release unless the API is unsafe, broken, or impossible to preserve. In pre-1.0 releases, removals may happen in a minor release, but they should be documented as breaking changes.

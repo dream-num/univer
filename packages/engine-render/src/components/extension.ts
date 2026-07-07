@@ -34,6 +34,8 @@ export interface IDrawInfo {
     viewRanges: IRange[];
     viewportKey: string;
     checkOutOfViewBound?: boolean;
+    fontRenderRanges?: IRange[];
+    hasMergeData?: boolean;
     viewBound?: IBoundRectNoAngle;
 }
 export class ComponentExtension<T, U, V> {

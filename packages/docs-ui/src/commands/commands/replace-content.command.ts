@@ -59,7 +59,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const prevSnapshot = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getSnapshot();
+        const prevSnapshot = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getSnapshot();
 
         if (docDataModel == null || prevSnapshot == null) {
             return false;
@@ -202,7 +202,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
+        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || prevBody == null) {
             return false;
@@ -253,7 +253,7 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const docDatModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDatModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         const prevBody = docDatModel?.getSnapshot().body;
 
@@ -381,7 +381,7 @@ export const ReplaceTextRunsCommand: ICommand<IReplaceContentCommandParams> = {
         // const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
+        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || prevBody == null) {
             return false;

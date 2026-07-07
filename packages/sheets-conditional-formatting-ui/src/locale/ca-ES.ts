@@ -45,6 +45,7 @@ const locale: typeof enUS = {
             and: 'I',
             when: 'Quan',
             onlyShowIcon: 'Mostra només la icona',
+            noCellIcon: 'Sense icona de cel·la',
         },
         symbol: {
             greaterThan: '>',

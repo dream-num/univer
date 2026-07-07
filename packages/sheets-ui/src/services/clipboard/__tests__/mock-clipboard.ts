@@ -48,6 +48,7 @@ interface IMockClipboardProps {
     'text/plain'?: string;
     'text/html'?: string;
     'image/png'?: string;
+    [key: string]: string | undefined;
 }
 
 export class MockClipboard {

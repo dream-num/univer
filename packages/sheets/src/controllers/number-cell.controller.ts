@@ -60,6 +60,12 @@ export class NumberCellDisplayController extends Disposable {
 
                         cell.v = stripErrorMargin(Number(cell.v));
 
+                        // If the cell format is General and the value is a scientific notation number, prevent it from displaying lowercase e.
+                        const text = String(cell.v);
+                        if (text.includes('e')) {
+                            cell.v = text.toUpperCase();
+                        }
+
                         return next(cell);
                     }
 

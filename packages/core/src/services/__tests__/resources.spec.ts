@@ -49,6 +49,12 @@ interface ITestSlideData {
     resources?: IResources;
 }
 
+interface ITestBoardData {
+    id: string;
+    name?: string;
+    resources?: IResources;
+}
+
 class MockSlideUnit extends UnitModel<ITestSlideData> {
     override type = UniverInstanceType.UNIVER_SLIDE;
     override name$ = new BehaviorSubject('');
@@ -74,6 +80,43 @@ class MockSlideUnit extends UnitModel<ITestSlideData> {
     }
 
     override getSnapshot(): ITestSlideData {
+        return this._snapshot;
+    }
+
+    override getRev(): number {
+        return 1;
+    }
+
+    override incrementRev(): void { }
+
+    override setRev(): void { }
+}
+
+class MockBoardUnit extends UnitModel<ITestBoardData, UniverInstanceType.UNIVER_BOARD> {
+    override readonly type = UniverInstanceType.UNIVER_BOARD;
+    override name$ = new BehaviorSubject('');
+    private readonly _snapshot: ITestBoardData;
+
+    constructor(snapshot: Partial<ITestBoardData> = {}) {
+        super();
+        this._snapshot = {
+            id: 'board-resource',
+            name: '',
+            ...snapshot,
+        };
+        this.name$.next(this._snapshot.name ?? '');
+    }
+
+    override getUnitId(): string {
+        return this._snapshot.id;
+    }
+
+    override setName(name: string): void {
+        this._snapshot.name = name;
+        this.name$.next(name);
+    }
+
+    override getSnapshot(): ITestBoardData {
         return this._snapshot;
     }
 
@@ -230,6 +273,68 @@ describe('Test resources service', () => {
         });
 
         expect(loads).toEqual([['slide-late-resource', 'late']]);
+    });
+
+    it('should load and unload board resources through the real unit lifecycle', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const resourceLoaderService = injector.get(IResourceLoaderService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const pluginName = 'BOARD_TEST_PLUGIN' as never;
+        const loads: Array<[string, string]> = [];
+        const unloads: string[] = [];
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BOARD, MockBoardUnit);
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName,
+            businesses: [UniverInstanceType.UNIVER_BOARD],
+            onLoad: (unitId, resource) => loads.push([unitId, resource.kind]),
+            onUnLoad: (unitId) => unloads.push(unitId),
+            toJson: (unitId) => JSON.stringify({ kind: `saved:${unitId}` }),
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        const board = univer.createUnit<ITestBoardData, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, {
+            id: 'board-resource',
+            resources: [
+                { name: pluginName, data: '{"kind":"loaded"}' },
+            ],
+        });
+
+        expect(loads).toContainEqual(['board-resource', 'loaded']);
+        expect(resourceLoaderService.saveUnit<ITestBoardData>('board-resource')?.resources).toEqual([
+            { name: pluginName, data: '{"kind":"saved:board-resource"}' },
+        ]);
+
+        expect(univerInstanceService.disposeUnit(board.getUnitId())).toBe(true);
+        expect(unloads).toEqual(['board-resource']);
+    });
+
+    it('should load resources for existing board units when hooks register later', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const pluginName = 'BOARD_LATE_PLUGIN' as never;
+        const loads: Array<[string, string]> = [];
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BOARD, MockBoardUnit);
+        univer.createUnit<ITestBoardData, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, {
+            id: 'board-late-resource',
+            resources: [
+                { name: pluginName, data: '{"kind":"late"}' },
+            ],
+        });
+
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName,
+            businesses: [UniverInstanceType.UNIVER_BOARD],
+            onLoad: (unitId, resource) => loads.push([unitId, resource.kind]),
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        expect(loads).toEqual([['board-late-resource', 'late']]);
     });
 
     it('should load array-shaped slide plugin resources through the unit lifecycle', () => {

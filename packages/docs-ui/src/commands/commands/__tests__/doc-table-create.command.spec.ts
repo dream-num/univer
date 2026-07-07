@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDocumentData, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService } from '@univerjs/core';
 import {
     DocContentInsertService,
     DocSelectionManagerService,
@@ -25,6 +25,7 @@ import {
 import { afterEach, describe, expect, it } from 'vitest';
 import {
     buildDocTableInsertBody,
+    canInsertTableAtOffset,
     CreateDocTableCommand,
     normalizeTableInsertOffset,
     shouldCreateParagraphBeforeTable,
@@ -625,6 +626,89 @@ describe('doc table create command helpers', () => {
         expect(snapshot.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_END);
         expect(snapshot.tableSource?.[tableId].tableRows).toHaveLength(1);
         expect(snapshot.tableSource?.[tableId].tableColumns.map((column) => column.size.width.v)).toEqual([180, 180]);
+    });
+
+    it('does not create a table inside a block range', async () => {
+        const documentData = createParagraphDocument(`${DataStreamTreeTokenType.BLOCK_START}Callout\r${DataStreamTreeTokenType.BLOCK_END}\r\n`);
+        const testBed = createTableCreationBed({
+            ...documentData,
+            body: {
+                ...documentData.body!,
+                paragraphs: [{ paragraphId: 'para_block_range', startIndex: 8 }],
+                sectionBreaks: [{ startIndex: 11 }],
+                blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 9 }],
+            },
+        });
+        const commandService = testBed.get(ICommandService);
+        setActiveTableRange(testBed, 2);
+        setCommandSkeletonPage(testBed, 2, {
+            pageWidth: 540,
+            marginLeft: 90,
+            marginRight: 90,
+        });
+
+        await expect(commandService.executeCommand(CreateDocTableCommand.id, {
+            rowCount: 1,
+            colCount: 1,
+        })).resolves.toBe(false);
+
+        expect(testBed.doc.getSnapshot().body?.tables).toBeUndefined();
+        expect(testBed.doc.getSnapshot().tableSource).toEqual({});
+    });
+
+    it('does not create a table inside an existing table range', async () => {
+        const fixture = createTableFixture(1, 1);
+        const testBed = createTableCreationBed(fixture.documentData);
+        const commandService = testBed.get(ICommandService);
+        const insertOffset = fixture.cellRanges[0].startIndex + 1;
+        setActiveTableRange(testBed, insertOffset);
+        setCommandSkeletonPage(testBed, insertOffset, {
+            pageWidth: 540,
+            marginLeft: 90,
+            marginRight: 90,
+        });
+
+        await expect(commandService.executeCommand(CreateDocTableCommand.id, {
+            rowCount: 1,
+            colCount: 1,
+        })).resolves.toBe(false);
+
+        expect(testBedSnapshotTableIds(testBed)).toEqual([TABLE_ID]);
+    });
+
+    it('allows insertion immediately after an existing table range', () => {
+        const fixture = createTableFixture(1, 1);
+        const tableEndOffset = fixture.documentData.body!.tables![0].endIndex;
+
+        expect(canInsertTableAtOffset(fixture.documentData.body!, tableEndOffset)).toBe(true);
+    });
+
+    it('does not create a table on a custom block', async () => {
+        const testBed = createTableCreationBed({
+            ...createParagraphDocument('A\b\r\n'),
+            body: {
+                dataStream: 'A\b\r\n',
+                textRuns: [{ st: 0, ed: 2, ts: {} }],
+                paragraphs: [{ paragraphId: 'para_custom_block', startIndex: 2 }],
+                sectionBreaks: [{ startIndex: 3 }],
+                customBlocks: [{ startIndex: 1, blockId: 'custom-block-1' }],
+            },
+        });
+        const commandService = testBed.get(ICommandService);
+        setActiveTableRange(testBed, 1);
+        setCommandSkeletonPage(testBed, 1, {
+            pageWidth: 540,
+            marginLeft: 90,
+            marginRight: 90,
+        });
+
+        await expect(commandService.executeCommand(CreateDocTableCommand.id, {
+            rowCount: 1,
+            colCount: 1,
+        })).resolves.toBe(false);
+
+        expect(testBed.doc.getSnapshot().body?.tables).toBeUndefined();
+        expect(testBed.doc.getSnapshot().tableSource).toEqual({});
     });
 
     it('does not create a table without a render skeleton for the cursor', async () => {

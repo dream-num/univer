@@ -108,6 +108,7 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
     /**
      * Subscribe to comment events.
      * @param callback Callback function, param contains comment info and target cell.
+     * @returns {IDisposable} A disposable used to remove the listener.
      */
     onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);

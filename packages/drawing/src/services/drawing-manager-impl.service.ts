@@ -42,6 +42,38 @@ enum DrawingMapItemType {
     order = 'order',
 }
 
+function isNonEmptyOp(op: JSONOp): boolean {
+    return Array.isArray(op) && op.length > 0;
+}
+
+function isJsonValueEqual(left: unknown, right: unknown): boolean {
+    if (left === right) {
+        return true;
+    }
+
+    if (left == null || right == null || typeof left !== 'object' || typeof right !== 'object') {
+        return false;
+    }
+
+    if (Array.isArray(left) || Array.isArray(right)) {
+        if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
+            return false;
+        }
+
+        return left.every((item, index) => isJsonValueEqual(item, right[index]));
+    }
+
+    const leftRecord = left as Record<string, unknown>;
+    const rightRecord = right as Record<string, unknown>;
+    const leftKeys = Object.keys(leftRecord);
+    const rightKeys = Object.keys(rightRecord);
+    if (leftKeys.length !== rightKeys.length) {
+        return false;
+    }
+
+    return leftKeys.every((key) => Object.prototype.hasOwnProperty.call(rightRecord, key) && isJsonValueEqual(leftRecord[key], rightRecord[key]));
+}
+
 interface IDrawingRefreshMetadata {
     behindText?: unknown;
 }
@@ -255,11 +287,25 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return this.getBatchRemoveOp(removeParams);
     }
 
-    getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
-        // Expand group drawings to include all nested group nodes and leaf children.
-        // Non-group drawings are kept as-is.
+    private _getExpandedBatchRemoveParams(removeParams: IDrawingSearch[]): IDrawingSearch[] {
         const seenIds = new Set<string>();
         const allToRemove: IDrawingSearch[] = [];
+        const addDrawing = (drawing: IDrawingParam) => {
+            if (seenIds.has(drawing.drawingId)) {
+                return;
+            }
+
+            seenIds.add(drawing.drawingId);
+            allToRemove.push({ unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawingId: drawing.drawingId });
+        };
+        const addSearch = (search: IDrawingSearch) => {
+            if (seenIds.has(search.drawingId)) {
+                return;
+            }
+
+            seenIds.add(search.drawingId);
+            allToRemove.push(search);
+        };
         removeParams.forEach((removeParam) => {
             const drawing = this.getDrawingByParam(removeParam);
             if (drawing?.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
@@ -267,22 +313,29 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
                 if (nested) {
                     const { flatChildren, groups } = nested;
                     [...(flatChildren ?? []), ...groups].forEach((d) => {
-                        if (!seenIds.has(d.drawingId)) {
-                            seenIds.add(d.drawingId);
-                            allToRemove.push({ unitId: d.unitId, subUnitId: d.subUnitId, drawingId: d.drawingId });
-                        }
+                        addDrawing(d);
                     });
-                } else if (!seenIds.has(removeParam.drawingId)) {
-                    seenIds.add(removeParam.drawingId);
-                    allToRemove.push(removeParam);
+                } else {
+                    addDrawing(drawing);
                 }
-            } else if (!seenIds.has(removeParam.drawingId)) {
-                seenIds.add(removeParam.drawingId);
-                allToRemove.push(removeParam);
+            } else if (drawing) {
+                addDrawing(drawing);
+            } else {
+                addSearch(removeParam);
             }
         });
 
-        const { unitId, subUnitId } = allToRemove[0] ?? removeParams[0];
+        return allToRemove;
+    }
+
+    getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
+        // Expand group drawings to include all nested group nodes and leaf children.
+        // Non-group drawings are kept as-is.
+        const allToRemove = this._getExpandedBatchRemoveParams(removeParams);
+        const { unitId, subUnitId } = allToRemove[0] ?? removeParams[0] ?? { unitId: '', subUnitId: '' };
+        if (allToRemove.length === 0) {
+            return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId, subUnitId, objects: [] };
+        }
 
         // Sort ascending by order index so that, with the unshift trick below,
         // composition applies removals from highest index to lowest (back-to-front).
@@ -328,10 +381,19 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         const invertOps: JSONOp[] = [];
         updateParams.forEach((updateParam) => {
             const { op, invertOp } = this._updateByParam(updateParam);
+            if (!isNonEmptyOp(op)) {
+                return;
+            }
+
             objects.push({ unitId: updateParam.unitId, subUnitId: updateParam.subUnitId, drawingId: updateParam.drawingId });
             ops.push(op);
             invertOps.push(invertOp);
         });
+
+        if (ops.length === 0) {
+            const { unitId, subUnitId } = updateParams[0];
+            return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId, subUnitId, objects };
+        }
 
         const op = ops.reduce(json1.type.compose, null);
         const invertOp = invertOps.reduce(json1.type.compose, null);
@@ -853,6 +915,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         // this.drawingManagerInfo[unitId][subUnitId][drawingId] = newObject;
 
+        if (ops.length === 0) {
+            return { op: [] as unknown as JSONOp, invertOp: [] as unknown as JSONOp };
+        }
+
         const op = ops.reduce(json1.type.compose, null);
 
         const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
@@ -873,16 +939,38 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         const ops: JSONOp[] = [];
         Object.keys(newParam as IDrawingParam).forEach((key) => {
             const newVal = newParam[key as keyof IDrawingParam];
-
+            const hasOldKey = Object.prototype.hasOwnProperty.call(oldParam, key);
             const oldVal = oldParam[key as keyof IDrawingParam];
 
-            if (oldVal === newVal) {
+            if (hasOldKey && isJsonValueEqual(oldVal, newVal)) {
                 return;
             }
 
-            ops.push(
-                json1.replaceOp([unitId, subUnitId, DrawingMapItemType.data, drawingId, key], oldVal as unknown as json1.Doc, newVal as unknown as json1.Doc)
-            );
+            const path = [unitId, subUnitId, DrawingMapItemType.data, drawingId, key];
+            if (!hasOldKey) {
+                if (newVal === undefined) {
+                    return;
+                }
+
+                const op = json1.insertOp(path, newVal as unknown as json1.Doc);
+                if (isNonEmptyOp(op)) {
+                    ops.push(op);
+                }
+                return;
+            }
+
+            if (newVal === undefined) {
+                const op = json1.removeOp(path, true);
+                if (isNonEmptyOp(op)) {
+                    ops.push(op);
+                }
+                return;
+            }
+
+            const op = json1.replaceOp(path, oldVal as unknown as json1.Doc, newVal as unknown as json1.Doc);
+            if (isNonEmptyOp(op)) {
+                ops.push(op);
+            }
         });
         return ops;
     }

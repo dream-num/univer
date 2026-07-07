@@ -669,9 +669,9 @@ export interface IBullet {
 export interface IDocDrawingBase extends IDrawingParam {
     drawingId: string;
 
-    title: string;
+    title?: string;
 
-    description: string;
+    description?: string;
 
     // embeddedObjectBorder?: IDocsBorder;
 

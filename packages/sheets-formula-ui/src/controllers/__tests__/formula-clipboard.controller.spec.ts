@@ -437,6 +437,7 @@ describe('Test cut command with formulas', () => {
     beforeEach(() => {
         const testBed = clipboardTestBed(createFormulaClipboardWorkbookData(), [
             [UpdateFormulaController],
+            [FormulaClipboardController],
         ]);
 
         univer = testBed.univer;
@@ -452,6 +453,7 @@ describe('Test cut command with formulas', () => {
         sheetClipboardService = get(ISheetClipboardService);
 
         get(UpdateFormulaController);
+        get(FormulaClipboardController);
 
         getValues = (
             startRow: number,
@@ -469,6 +471,90 @@ describe('Test cut command with formulas', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('pastes cross-page formula payload with relative reference offsets', async () => {
+        get(SheetsSelectionsService).addSelections([
+            {
+                range: { startRow: 4, startColumn: 3, endRow: 4, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        const formulaItem = {
+            types: ['web application/x-univer-sheets-formula', 'text/html'],
+            getType: async (type: string) => {
+                if (type === 'web application/x-univer-sheets-formula') {
+                    return new Blob([JSON.stringify({
+                        rowCount: 1,
+                        columnCount: 1,
+                        origin: {
+                            row: 1,
+                            column: 1,
+                        },
+                        formulas: [
+                            {
+                                row: 0,
+                                column: 0,
+                                f: '=C2',
+                            },
+                        ],
+                    })], { type });
+                }
+
+                return new Blob([
+                    '<google-sheets-html-origin><table><tbody><tr><td>formula result</td></tr></tbody></table></google-sheets-html-origin>',
+                ], { type });
+            },
+        } as unknown as ClipboardItem;
+
+        await sheetClipboardService.paste(formulaItem);
+
+        expect(getValues(4, 3, 4, 3)?.[0][0]?.f).toBe('=E5');
+    });
+
+    it('keeps non-formula html cells when formula payload restores formulas', async () => {
+        get(SheetsSelectionsService).addSelections([
+            {
+                range: { startRow: 4, startColumn: 3, endRow: 4, endColumn: 4, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        const formulaItem = {
+            types: ['web application/x-univer-sheets-formula', 'text/html'],
+            getType: async (type: string) => {
+                if (type === 'web application/x-univer-sheets-formula') {
+                    return new Blob([JSON.stringify({
+                        rowCount: 1,
+                        columnCount: 2,
+                        origin: {
+                            row: 1,
+                            column: 1,
+                        },
+                        formulas: [
+                            {
+                                row: 0,
+                                column: 1,
+                                f: '=B2',
+                            },
+                        ],
+                    })], { type });
+                }
+
+                return new Blob([
+                    '<google-sheets-html-origin><table><tbody><tr><td>10</td><td>10</td></tr></tbody></table></google-sheets-html-origin>',
+                ], { type });
+            },
+        } as unknown as ClipboardItem;
+
+        await sheetClipboardService.paste(formulaItem);
+
+        const values = getValues(4, 3, 4, 4);
+        expect(values?.[0][0]?.v).toBe(10);
+        expect(values?.[0][1]?.f).toBe('=D5');
     });
 
     async function cutPaste(

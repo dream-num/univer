@@ -27,7 +27,7 @@ import {
     startWithEmoji,
 } from '../../../../../basics/tools';
 import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
-import { getFontCreateConfig } from '../../tools';
+import { getCustomRangeGlyphWidth, getFontCreateConfig } from '../../tools';
 
 // Handle English word, English punctuation, number characters.
 // https://en.wikipedia.org/wiki/CJK_characters
@@ -55,7 +55,7 @@ export function otherHandler(
         }
 
         const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-        const glyph = createSkeletonLetterGlyph(char, config);
+        const glyph = createSkeletonLetterGlyph(char, config, getCustomRangeGlyphWidth(index + step, viewModel, paragraphNode, config));
 
         glyphGroup.push(glyph);
 

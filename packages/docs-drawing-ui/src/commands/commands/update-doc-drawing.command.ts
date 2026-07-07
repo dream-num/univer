@@ -31,6 +31,7 @@ import {
     TextX,
     TextXActionType,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -102,8 +103,8 @@ function getDeleteAndInsertCustomBlockActions(
     const jsonX = JSONX.getInstance();
     const rawActions: JSONXActions = [];
 
-    const oldBody = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId).getBody();
-    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+    const oldBody = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId)?.getBody();
+    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
     if (oldBody == null || body == null) {
         return;
@@ -270,7 +271,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             .getSkeletonData();
         const viewModel = renderObject?.with(DocSkeletonManagerService).getViewModel();
         const scene = renderObject?.scene;
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null || skeletonData == null || scene == null || viewModel == null) {
             return false;
@@ -452,12 +453,11 @@ export const UpdateDocDrawingDistanceCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const { drawings, dist, unitId } = params;
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (documentDataModel == null) {
             return false;
         }
-
-        const { drawings, dist, unitId } = params;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -523,12 +523,11 @@ export const UpdateDocDrawingWrapTextCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const { drawings, wrapText, unitId } = params;
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (documentDataModel == null) {
             return false;
         }
-
-        const { drawings, wrapText, unitId } = params;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -599,19 +598,19 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
 
-        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const { drawings, unitId } = params;
+        const renderObject = renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
         if (scene == null) {
             return false;
         }
+
         const transformer = scene.getTransformerByCreate();
 
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (documentDataModel == null) {
             return false;
         }
-
-        const { drawings, unitId } = params;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -679,27 +678,28 @@ export const IMoveInlineDrawingCommand: ICommand = {
             return false;
         }
 
+        const { drawing, unitId, offset, segmentId: newSegmentId, segmentPage, needRefreshDrawings } = params;
+
         const renderManagerService = accessor.get(IRenderManagerService);
-        const docSelectionRenderService = renderManagerService.getRenderById(params.unitId)?.with(DocSelectionRenderService);
+        const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
 
         const docRefreshDrawingsService = accessor.get(DocRefreshDrawingsService);
-        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const renderObject = renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
         const skeleton = renderObject?.with(DocSkeletonManagerService).getSkeleton();
         if (scene == null || docSelectionRenderService == null) {
             return false;
         }
+
         const transformer = scene.getTransformerByCreate();
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (documentDataModel == null) {
             return false;
         }
-
-        const { drawing, unitId, offset, segmentId: newSegmentId, segmentPage, needRefreshDrawings } = params;
 
         // Need to refresh drawings if not find the anchor position.
         if (needRefreshDrawings) {
@@ -779,26 +779,27 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
             return false;
         }
 
+        const { drawing, unitId, offset, docTransform, segmentId: newSegmentId, segmentPage } = params;
+
         const renderManagerService = accessor.get(IRenderManagerService);
+        const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
 
-        const docSelectionRenderService = renderManagerService.getRenderById(params.unitId)?.with(DocSelectionRenderService);
-
-        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const renderObject = renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
         if (scene == null || docSelectionRenderService == null) {
             return false;
         }
+
         const transformer = scene.getTransformerByCreate();
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (documentDataModel == null) {
             return false;
         }
 
-        const { drawing, unitId, offset, docTransform, segmentId: newSegmentId, segmentPage } = params;
         const rawActions: JSONXActions = [];
 
         const { drawingId } = drawing;

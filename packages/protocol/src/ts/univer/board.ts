@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
-import type { ICustomComponentProps } from '../../services/menu/menu';
+import type { IResource } from './resource';
 
-export interface IFontFamilyProps extends ICustomComponentProps<string> {
-    id: string;
-
-    value: string;
-
-    disabled$?: Observable<boolean>;
+export interface IBoardMeta {
+    unitID: string;
+    rev: number;
+    creator: string;
+    name: string;
+    resources: IResource[];
+    /** The original meta data in JSON format. */
+    originalMeta: Uint8Array;
 }
-
-export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';
-
-export const FONT_FAMILY_ITEM_COMPONENT = 'UI_FONT_FAMILY_ITEM_COMPONENT';

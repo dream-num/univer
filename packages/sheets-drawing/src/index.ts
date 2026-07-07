@@ -33,6 +33,7 @@ export type { ISetDrawingCommandParams } from './commands/commands/set-sheet-dra
 export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
 export type { ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
 export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
+export { isKnownSheetNonRotatableDrawingType, resolveSheetDrawingRotateEnabled } from './common/rotate-enabled';
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';

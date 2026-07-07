@@ -23,8 +23,12 @@ import { COLOR_PICKER_COMPONENT } from '../views/color-picker/interface';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../views/CommonLabel';
 import { ShortcutPanel } from '../views/components/shortcut-panel/ShortcutPanel';
 import { EMOJI_PICKER_COMPONENT, EmojiPicker } from '../views/emoji-picker/index';
-import { FontFamily, FontFamilyItem } from '../views/font-family/index';
-import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../views/font-family/interface';
+import {
+    FONT_FAMILY_COMPONENT,
+    FONT_FAMILY_ITEM_COMPONENT,
+    FontFamily,
+    FontFamilyItem,
+} from '../views/font-family/index';
 import { FontSize } from '../views/font-size/FontSize';
 import { FONT_SIZE_COMPONENT } from '../views/font-size/interface';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../views/index';

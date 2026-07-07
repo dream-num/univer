@@ -82,7 +82,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    const body = doc.getSelfOrHeaderFooterModel(textRanges[0].segmentId).getBody();
+    const body = doc.getSelfOrHeaderFooterModel(textRanges[0].segmentId)?.getBody();
     if (!body) {
         return true;
     }

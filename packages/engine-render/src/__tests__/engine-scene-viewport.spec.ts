@@ -568,6 +568,36 @@ describe('engine scene viewport extra', () => {
         transformer.dispose();
     });
 
+    it('expands transformer border spacing symmetrically around object bounds', () => {
+        const transformer = new Transformer({
+            getEngine: () => ({ activeScene: null }),
+        } as any, {
+            anchorSize: 8,
+            anchorStyle: 'canva',
+            borderSpacing: 2,
+            borderStrokeWidth: 1,
+        });
+
+        expect((transformer as any)._getOutlinePosition(100, 50, 2, 1)).toEqual({
+            left: -3,
+            top: -3,
+            width: 104,
+            height: 54,
+        });
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerResizeLM__', 50, 100, {
+            transformerConfig: {
+                anchorSize: 8,
+                borderSpacing: 2,
+                borderStrokeWidth: 1,
+            },
+        })).toEqual({
+            left: -7,
+            top: 21,
+        });
+
+        transformer.dispose();
+    });
+
     it('supports bottom rotate control without a connector line', () => {
         const { engine, scene } = createFixture();
         engine.setActiveScene(scene.sceneKey);
@@ -831,6 +861,31 @@ describe('engine scene viewport extra', () => {
         );
 
         expect(diffBounds).toEqual([currentBound]);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('expands cache diff strips across both axes to avoid exposing blank cache gaps', () => {
+        const { engine, scene, viewport } = createFixture();
+        viewport.bufferEdgeX = 10;
+        viewport.bufferEdgeY = 20;
+
+        const verticalDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 100, bottom: 100 },
+            { left: 0, top: 50, right: 100, bottom: 150 }
+        );
+        expect(verticalDiff).toEqual([
+            { left: -10, top: 80, right: 110, bottom: 170 },
+        ]);
+
+        const horizontalDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 100, bottom: 100 },
+            { left: 50, top: 0, right: 150, bottom: 100 }
+        );
+        expect(horizontalDiff).toEqual([
+            { left: 90, top: -20, right: 160, bottom: 120 },
+        ]);
 
         scene.dispose();
         engine.dispose();

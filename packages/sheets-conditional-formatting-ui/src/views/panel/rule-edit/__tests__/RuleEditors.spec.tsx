@@ -35,6 +35,7 @@ import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../../../__tests__/create-cf-ui-test-bed';
+import enUS from '../../../../locale/en-US';
 import { ColorScaleStyleEditor } from '../ColorScale';
 import { DataBarStyleEditor } from '../DataBar';
 import { FormulaStyleEditor } from '../Formula';
@@ -114,7 +115,7 @@ function createEditorTestBed() {
     testBed.injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
     testBed.injector.add([IContextMenuService, { useClass: TestContextMenuService as never }]);
     testBed.injector.add([LexerTreeBuilder]);
-    testBed.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+    testBed.get(LocaleService).load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: {} });
 
     return testBed;
 }
@@ -156,6 +157,17 @@ async function selectOption(selectIndex: number, optionText: string) {
     }
 
     option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
+async function openDropdown(dropdownIndex: number) {
+    const dropdown = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="popover-trigger"]'))[dropdownIndex];
+    if (!dropdown) {
+        throw new Error(`Dropdown ${dropdownIndex} was not rendered`);
+    }
+
+    dropdown.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+    dropdown.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
 }
 
 describe('conditional formatting rule editors', () => {

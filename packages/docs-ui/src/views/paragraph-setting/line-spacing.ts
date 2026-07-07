@@ -15,26 +15,13 @@
  */
 
 import type { LocaleService } from '@univerjs/core';
+import type { IDocumentSkeletonLine } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_STYLES, SpacingRule } from '@univerjs/core';
 
 interface ILineSpacingMetrics {
     glyphLineHeight: number;
     renderedLineHeight: number;
-}
-
-interface ILineSpacingLike {
-    contentHeight?: number;
-    paddingTop?: number;
-    paddingBottom?: number;
-    divides?: Array<{
-        glyphGroup?: Array<{
-            bBox?: {
-                ba?: number;
-                bd?: number;
-            };
-        }>;
-    }>;
 }
 
 const AUTO_LINE_SPACING_CONFIG = { min: 1, max: 5, step: 0.1 } as const;
@@ -69,7 +56,7 @@ export function convertDisplayLineSpacingToStoredValue(lineSpacing: number, spac
     return spacingRule === SpacingRule.AUTO ? lineSpacing : round(lineSpacing, 4);
 }
 
-export function getLineSpacingMetrics(lineNode?: ILineSpacingLike | null): ILineSpacingMetrics | null {
+export function getLineSpacingMetrics(lineNode?: IDocumentSkeletonLine): ILineSpacingMetrics | null {
     if (!lineNode) {
         return null;
     }

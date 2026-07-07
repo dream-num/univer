@@ -884,8 +884,8 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getBody()?.dataStream).toBe('AB\r\n');
         expect(doc.getBody()?.customBlocks).toEqual([]);
-        expect(header.getBody()?.dataStream).toBe('He\bader\r\n');
-        expect(header.getBody()?.customBlocks).toEqual([{ startIndex: 2, blockId: 'shape-1' }]);
+        expect(header?.getBody()?.dataStream).toBe('He\bader\r\n');
+        expect(header?.getBody()?.customBlocks).toEqual([{ startIndex: 2, blockId: 'shape-1' }]);
         expect(testBed.refreshControls).toHaveBeenCalled();
 
         testBed.univer.dispose();

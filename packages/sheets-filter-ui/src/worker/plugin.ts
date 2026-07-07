@@ -15,9 +15,11 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { IUniverSheetsFilterUIConfig } from '../config/config';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { fromModule, IRPCChannelService } from '@univerjs/rpc';
 import pkg from '../../package.json';
+import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME, SheetsGenerateFilterValuesService } from './generate-filter-values.service';
 
 export class UniverSheetsFilterUIWorkerPlugin extends Plugin {
@@ -27,11 +29,19 @@ export class UniverSheetsFilterUIWorkerPlugin extends Plugin {
     static override version = pkg.version;
 
     constructor(
-        private readonly _config: unknown,
+        private readonly _config: Partial<IUniverSheetsFilterUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @IRPCChannelService private readonly _rpcChannelService: IRPCChannelService
     ) {
         super();
+
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {

@@ -44,9 +44,11 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    CreateHeaderFooterCommand,
     DeleteTextCommand,
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    HeaderFooterType,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
     UpdateTextCommand,
@@ -55,7 +57,6 @@ import { DocumentEditArea, GlyphType, IRenderManagerService } from '@univerjs/en
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { HeaderFooterType } from '../../../controllers/doc-header-footer.controller';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
@@ -317,8 +318,13 @@ function createCenteredEmptyParagraphDoc(): IDocumentData {
 }
 
 function createHeaderFooterDoc(): IDocumentData {
+    const doc = createBaseDoc();
     return {
-        ...createBaseDoc(),
+        ...doc,
+        documentStyle: {
+            ...doc.documentStyle!,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        },
         headers: {},
         footers: {},
     };
@@ -978,17 +984,15 @@ describe('misc document commands', () => {
     it('deletes the current paragraph through rich text editing', async () => {
         ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
         commandService = get(ICommandService);
-        commandService.registerCommand(DeleteCurrentParagraphCommand);
+        expect(DeleteCurrentParagraphCommand).toMatchObject({
+            multi: true,
+            name: DeleteCurrentParagraphCommand.id,
+        });
+        commandService.registerMultipleCommand(DeleteCurrentParagraphCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(2);
 
-        expect(await commandService.executeCommand(DeleteCurrentParagraphCommand.id)).toEqual(expect.objectContaining({
-            unitId: 'test-doc',
-            textRanges: [expect.objectContaining({
-                startOffset: 2,
-                endOffset: 2,
-            })],
-        }));
+        expect(await commandService.executeCommand(DeleteCurrentParagraphCommand.id)).toBe(true);
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('Body\r\n');
@@ -1478,6 +1482,7 @@ describe('misc document commands', () => {
         ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
         commandService = get(ICommandService);
         commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(CreateHeaderFooterCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         const result = await commandService.executeCommand(CoreHeaderFooterCommand.id, {
@@ -1508,6 +1513,7 @@ describe('misc document commands', () => {
         ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
         commandService = get(ICommandService);
         commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(CreateHeaderFooterCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
@@ -1527,6 +1533,7 @@ describe('misc document commands', () => {
         ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
         commandService = get(ICommandService);
         commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(CreateHeaderFooterCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
@@ -1566,6 +1573,7 @@ describe('misc document commands', () => {
         ({ univer, get } = createCommandTestBed(doc));
         commandService = get(ICommandService);
         commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(CreateHeaderFooterCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
@@ -1590,6 +1598,7 @@ describe('misc document commands', () => {
         ({ univer, get } = createCommandTestBed(doc));
         commandService = get(ICommandService);
         commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(CreateHeaderFooterCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
@@ -1683,6 +1692,67 @@ describe('misc document commands', () => {
         }));
         expect(sidebarService.visible).toBe(false);
         subscription.unsubscribe();
+    });
+
+    it('closes header footer editing from the current document for shortcuts', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [ISidebarService, { useClass: TestSidebarService }],
+        ]));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CloseHeaderFooterCommand);
+        commandService.registerCommand(SidebarDocHeaderFooterPanelOperation);
+
+        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        const mutableRender = render as unknown as {
+            scene: { getTransformerByCreate?: () => { clearSelectedObjects: () => void } };
+            mainComponent: unknown;
+            with: (dependency: unknown) => unknown;
+        };
+        mutableRender.scene.getTransformerByCreate = () => ({
+            clearSelectedObjects: () => undefined,
+        });
+        mutableRender.mainComponent = {
+            makeDirty: () => undefined,
+        };
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as {
+            getSkeleton: () => unknown;
+            getViewModel: () => { getEditArea: () => DocumentEditArea; setEditArea: (area: DocumentEditArea) => void };
+        };
+        skeletonManager.getSkeleton = () => ({
+            calculate: () => undefined,
+        });
+        skeletonManager.getViewModel().setEditArea(DocumentEditArea.FOOTER);
+
+        const originalWith = mutableRender.with.bind(mutableRender);
+        mutableRender.with = (dependency: unknown) => {
+            if (dependency === DocSkeletonManagerService) {
+                return skeletonManager;
+            }
+            if (dependency === DocSelectionRenderService) {
+                return {
+                    setSegment: () => undefined,
+                    setSegmentPage: () => undefined,
+                };
+            }
+            return originalWith(dependency);
+        };
+
+        expect(await commandService.executeCommand(CloseHeaderFooterCommand.id)).toBe(true);
+        expect(skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);
+    });
+
+    it('does not close header footer editing while already editing the body', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CloseHeaderFooterCommand);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as {
+            getViewModel: () => { getEditArea: () => DocumentEditArea };
+        };
+
+        expect(skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);
+        expect(await commandService.executeCommand(CloseHeaderFooterCommand.id)).toBe(false);
     });
 
     it('opens and closes the header footer sidebar panel through commands and operations', async () => {

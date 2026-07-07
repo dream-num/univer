@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/protocol",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.2",
     "private": false,
     "description": "Shared protocol types, generated service interfaces, and data contracts for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -64,12 +64,12 @@
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "dependencies": {
-        "@grpc/grpc-js": "^1.14.3"
+        "@grpc/grpc-js": "^1.14.4"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     }
 }

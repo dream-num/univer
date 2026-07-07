@@ -51,7 +51,11 @@ export const SheetBar = () => {
     const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId)?.id));
 
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-    const { show: addSheetButtonShow = true, defaultRowCount = DEFAULT_WORKSHEET_ROW_COUNT, defaultColumnCount = DEFAULT_WORKSHEET_COLUMN_COUNT } = (config?.footer || {}).addSheetButtonConfig || {};
+    const {
+        show: addSheetButtonShow = true,
+        defaultRowCount = DEFAULT_WORKSHEET_ROW_COUNT,
+        defaultColumnCount = DEFAULT_WORKSHEET_COLUMN_COUNT,
+    } = (config?.footer || {}).addSheetButtonConfig || {};
 
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;
@@ -113,10 +117,13 @@ export const SheetBar = () => {
             {/* Scroll arrows */}
             {(!leftScrollState || !rightScrollState) && (
                 <div
+                    data-u-comp="sheet-bar-scroll-buttons"
                     className={`
                       univer-relative univer-flex univer-items-center univer-px-2
                       after:univer-absolute after:univer-right-0 after:univer-top-1/2 after:univer-h-4 after:univer-w-px
                       after:-univer-translate-y-1/2 after:univer-bg-gray-200 after:univer-content-[""]
+                      rtl:univer-flex-row-reverse
+                      rtl:after:univer-left-0 rtl:after:univer-right-auto
                     `}
                 >
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>

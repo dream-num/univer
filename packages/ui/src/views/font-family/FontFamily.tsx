@@ -15,33 +15,35 @@
  */
 
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import type { IFontConfig } from '../../services/font.service';
-import type { IFontFamilyProps } from './interface';
-import { ICommandService, LocaleService } from '@univerjs/core';
+import type { Observable } from 'rxjs';
+import type { ICustomComponentProps } from '../../services/menu/menu';
+import { LocaleService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 
-import { useEffect, useMemo, useState } from 'react';
-import { IFontService } from '../../services/font.service';
+import { useMemo, useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
+import { useFontList } from './use-font-list';
 
-export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
-    const disabled = useObservable(disabled$);
+export interface IFontFamilyProps extends ICustomComponentProps<string> {
+    className?: string;
 
-    const commandService = useDependency(ICommandService);
+    disabled?: boolean;
+
+    value: string;
+
+    disabled$?: Observable<boolean>;
+}
+
+export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';
+
+export const FontFamily = ({ className, disabled: disabledProp, value, disabled$, onChange }: IFontFamilyProps) => {
+    const disabledObservableValue = useObservable(disabled$);
+    const disabled = Boolean(disabledProp || disabledObservableValue);
+
     const localeService = useDependency(LocaleService);
-    const fontService = useDependency(IFontService);
+    const { fonts } = useFontList();
 
-    const [inputValue, setInputValue] = useState('');
-    const [fonts, setFonts] = useState<IFontConfig[]>([]);
-
-    useEffect(() => {
-        const subscription = fontService.fonts$.subscribe((fonts) => {
-            setFonts(fonts);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
+    const [draftValue, setDraftValue] = useState<string | null>(null);
 
     const viewValue = useMemo(() => {
         if (value == null) return '';
@@ -56,17 +58,14 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
 
         return localeService.t(font.label);
     }, [value, fonts, localeService]);
-
-    useMemo(() => {
-        setInputValue(viewValue);
-    }, [value]);
+    const inputValue = draftValue ?? viewValue;
 
     function resetValue() {
-        setInputValue(viewValue);
+        setDraftValue(null);
     }
 
     function handleChangeSelection(e: ChangeEvent<HTMLInputElement>) {
-        setInputValue(e.target.value);
+        setDraftValue(e.target.value);
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -83,7 +82,7 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
     }
 
     function handleBlur() {
-        if (inputValue !== value) resetValue();
+        if (draftValue !== null && inputValue !== viewValue) resetValue();
     }
 
     function confirm() {
@@ -95,18 +94,19 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
         if (!font) {
             resetValue();
             return;
-        };
+        }
 
         handleSelectFont(font.value);
     }
 
-    function handleSelectFont(value: string) {
-        commandService.executeCommand(id, { value });
+    function handleSelectFont(nextValue: string) {
+        resetValue();
+        onChange(nextValue);
     }
 
     return (
         <div
-            className="univer-w-32 univer-truncate univer-text-sm"
+            className={clsx('univer-w-32 univer-truncate univer-text-sm', className)}
             style={{ fontFamily: value as string }}
         >
             <input

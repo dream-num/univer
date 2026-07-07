@@ -140,6 +140,11 @@ export interface ICopySheetCommandParams {
     subUnitId?: string;
 }
 
+export interface ICopySheetCommandInterceptorParams extends ICopySheetCommandParams {
+    targetSubUnitId: string;
+    copyContext: Map<string, unknown>;
+}
+
 const COPY_SHEET_COMMAND_ID = 'sheet.command.copy-sheet';
 
 interface IBuildCopySheetResult {
@@ -218,9 +223,10 @@ function buildCopySheetMutations(
         insertSheetMutationParams
     );
 
+    const copyContext = new Map<string, unknown>();
     const intercepted = sheetInterceptorService.onCommandExecute({
         id: COPY_SHEET_COMMAND_ID,
-        params: { unitId, subUnitId, targetSubUnitId: config.id },
+        params: { unitId, subUnitId, targetSubUnitId: config.id, copyContext } satisfies ICopySheetCommandInterceptorParams,
     });
 
     // Redos only include InsertSheetMutation (with first chunk), remaining mutations are scheduled

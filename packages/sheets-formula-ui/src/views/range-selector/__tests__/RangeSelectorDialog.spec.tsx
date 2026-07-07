@@ -222,6 +222,18 @@ describe('RangeSelectorDialog', () => {
         expect(RangeDialogState.closed).toBe(1);
     });
 
+    it('provides rtl-aware layout classes for dialog actions and range rows', () => {
+        renderRangeDialog(root, createRangeDialogTestBed());
+
+        const cancelButton = Array.from(document.body.querySelectorAll('button'))
+            .find((node) => node.textContent === 'Cancel') as HTMLButtonElement | undefined;
+        expect(cancelButton).toBeDefined();
+        expect(cancelButton!.closest('footer')?.className).toContain('rtl:univer-flex-row-reverse');
+
+        const firstInput = document.body.querySelector('input') as HTMLInputElement;
+        expect(firstInput.closest('.univer-mb-2')?.className).toContain('rtl:univer-flex-row-reverse');
+    });
+
     it('confirms only the remaining ranges after a typed range is removed', async () => {
         renderRangeDialog(root, createRangeDialogTestBed());
 

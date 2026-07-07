@@ -562,14 +562,13 @@ const EMBED_FLOATING_MENU_POPUP_ATTRIBUTE = 'data-embed-floating-menu-popup';
 const FloatingToolbarTrigger = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & {
     children: ReactNode;
     title: string;
-}>(({ children, className, onClick, onMouseDown, onPointerDown, ...restProps }, ref) => (
+}>(({ children, className, title: _title, onClick, onMouseDown, onPointerDown, ...restProps }, ref) => (
     <Button
         ref={ref}
         type="button"
         size="small"
         variant="ghost"
         className={clsx(SHEET_FLOATING_TOOLBAR_SELECTOR_CLASS, className)}
-        aria-label={restProps.title}
         onPointerDown={(event) => {
             event.stopPropagation();
             onPointerDown?.(event);
@@ -595,7 +594,7 @@ const FloatingToolbarSplitTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HT
     disabled?: boolean;
     open?: boolean;
     onPrimaryClick: () => void;
-}>(({ title, primary, disabled, open, onPrimaryClick, onMouseDown, onPointerDown, onClick, ...restProps }, ref) => (
+}>(({ title: _title, primary, disabled, open, onPrimaryClick, onMouseDown, onPointerDown, onClick, ...restProps }, ref) => (
     <div
         ref={ref}
         className={clsx(`
@@ -608,10 +607,6 @@ const FloatingToolbarSplitTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HT
             'univer-bg-gray-100 dark:!univer-bg-gray-700': open,
             'univer-cursor-not-allowed univer-opacity-60': disabled,
         })}
-        role="group"
-        aria-label={title}
-        aria-disabled={disabled}
-        title={title}
         onPointerDown={(event) => {
             event.stopPropagation();
             onPointerDown?.(event);
@@ -636,8 +631,6 @@ const FloatingToolbarSplitTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HT
               dark:!univer-text-white
               dark:hover:!univer-bg-gray-600
             "
-            aria-label={title}
-            title={title}
             disabled={disabled}
             onClick={(event) => {
                 event.stopPropagation();
@@ -662,8 +655,6 @@ const FloatingToolbarSplitTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HT
               dark:!univer-text-white
               dark:hover:!univer-bg-gray-600
             "
-            aria-label={title}
-            title={title}
             disabled={disabled}
         >
             <MoreDownIcon className={SHEET_FLOATING_TOOLBAR_MORE_ICON_CLASS} />
@@ -684,8 +675,6 @@ function MenuButton(props: {
         <Tooltip title={props.title} placement="bottom">
             <ToolbarButton
                 className={clsx(SHEET_FLOATING_TOOLBAR_ICON_BUTTON_CLASS, props.className)}
-                title={props.title}
-                aria-label={props.title}
                 disabled={props.disabled}
                 active={props.active}
                 onClick={props.onClick}
@@ -1491,8 +1480,6 @@ function InlineFloatingDropdown(props: {
         >
             <FloatingToolbarTrigger
                 title={props.title}
-                aria-haspopup="dialog"
-                aria-expanded={open}
                 data-state={open ? 'open' : 'closed'}
                 disabled={props.disabled}
                 className={props.triggerClassName}
@@ -1582,7 +1569,6 @@ function PanelButton(props: { title: string; active?: boolean; disabled?: boolea
         <Tooltip title={props.title} placement="bottom">
             <ToolbarButton
                 className={SHEET_FLOATING_TOOLBAR_PANEL_BUTTON_CLASS}
-                aria-label={props.title}
                 disabled={props.disabled}
                 active={props.active}
                 onClick={props.onClick}

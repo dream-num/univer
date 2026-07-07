@@ -72,16 +72,15 @@ describe('Ribbon override chrome', () => {
             }],
         ]);
 
-        const { container } = render(
+        const { container, getByText } = render(
             <RediProvider value={{ injector }}>
                 <Ribbon ribbonType="classic" />
             </RediProvider>
         );
 
-        const placeholder = container.querySelector('[data-u-comp="ribbon-override-placeholder"]');
-        expect(placeholder?.textContent).toBe('Bases');
+        const placeholder = getByText('Bases');
         expect(placeholder?.parentElement?.className).toContain('univer-justify-center');
-        expect(container.querySelector('[data-u-comp="ribbon-toolbar"]')).toBeNull();
+        expect(container.querySelectorAll('[data-embed-ribbon-override="true"]')).toHaveLength(1);
         expect(observeCount).toBe(0);
     });
 });

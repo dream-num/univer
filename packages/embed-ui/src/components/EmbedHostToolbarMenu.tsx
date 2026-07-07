@@ -246,8 +246,6 @@ function EmbedFullscreenSurface() {
                           [&_svg]:!univer-size-3.5
                         "
                         data-embed-fullscreen-close="true"
-                        aria-label={exitLabel}
-                        title={exitLabel}
                         onClick={exitFullscreen}
                     >
                         <FullscreenIcon />
@@ -346,7 +344,7 @@ export function EmbedFullscreenWorkbenchParts(props: IEmbedFullscreenRuntimePart
                 popupContainer
             )}
             {createPortal(
-                <aside data-u-comp="right-sidebar" className="univer-z-[2] univer-flex univer-h-full">
+                <aside className="univer-z-[2] univer-flex univer-h-full">
                     <EmbedRuntimeProviders injector={injector} mountContainer={popupContainer} embedId={embedId}>
                         <Sidebar />
                     </EmbedRuntimeProviders>

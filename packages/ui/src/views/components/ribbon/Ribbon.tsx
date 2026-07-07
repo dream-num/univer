@@ -248,7 +248,6 @@ export function Ribbon(props: IRibbonProps) {
                               univer-rounded-t univer-bg-primary-50 univer-px-3 univer-text-sm univer-font-medium
                               univer-text-primary-600
                             "
-                            data-u-comp="ribbon-override-placeholder"
                         >
                             {ribbonOverride.placeholderTitle}
                         </span>
@@ -299,13 +298,10 @@ export function Ribbon(props: IRibbonProps) {
                     )}
 
                     <div
-                        data-u-comp="ribbon-toolbar"
                         ref={containerRef}
                         className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
                             'univer-justify-center': ribbonType === 'classic',
                         })}
-                        role="toolbar"
-                        aria-label={localeService.t(activatedTabTitle)}
                     >
                         <ToolbarDropdownProvider>
                             {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
@@ -326,7 +322,6 @@ export function Ribbon(props: IRibbonProps) {
                             {/* More functions dropdown */}
                             {collapsedIds.length > 0 && (
                                 <div
-                                    data-u-comp="ribbon-toolbar-more"
                                     className={`
                                       univer-pl-2
                                       rtl:univer-pr-2
@@ -364,8 +359,6 @@ export function Ribbon(props: IRibbonProps) {
                                         <button
                                             type="button"
                                             className={toolbarButtonClassName}
-                                            aria-label={localeService.t('ui.ribbon.more')}
-                                            aria-haspopup="true"
                                         >
                                             <MoreVerticalIcon />
                                         </button>

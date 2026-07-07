@@ -26,11 +26,10 @@ export interface IEmbedFloatFullscreenButtonProps {
     hostUnitId?: string;
     embedId?: string;
     className?: string;
-    title?: string;
 }
 
 export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonProps) {
-    const { hostUnitId, embedId, className, title = 'Fullscreen' } = props;
+    const { hostUnitId, embedId, className } = props;
     const buttonRef = useRef<HTMLButtonElement>(null);
     const embedModelService = useDependency(EmbedModelService);
     const activationService = useDependency(EmbedActivationService);
@@ -85,8 +84,6 @@ export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonPro
                 className,
             ].filter(Boolean).join(' ')}
             data-embed-float-fullscreen-button="true"
-            aria-label="Fullscreen embed block"
-            title={title}
         >
             <FullscreenIcon className="univer-size-3.5" />
         </button>

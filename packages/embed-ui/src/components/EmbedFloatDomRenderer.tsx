@@ -1440,10 +1440,8 @@ export function EmbedFloatDomRenderer(props: {
                         showDragHandle ? 'univer-inline-flex univer-cursor-move' : 'univer-hidden',
                     ].filter(Boolean).join(' ')}
                     data-embed-float-drag-handle="true"
-                    aria-label="Move embed block"
                 >
                     <GripHorizontalIcon
-                        aria-hidden="true"
                         className="univer-size-[23px] univer-fill-current"
                     />
                 </button>

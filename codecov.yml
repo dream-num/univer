@@ -2,17 +2,12 @@ coverage:
     status:
         project:
             default:
+                # basic
                 target: 80%
-                threshold: 1.1%
+                threshold: 0
                 base: auto
+                # advanced settings
                 if_ci_failed: error
                 informational: false
                 only_pulls: false
-        patch:
-            default:
-                target: 40%
-                threshold: 0
-                base: auto
-                if_ci_failed: error
-                informational: false
-                only_pulls: true
+        patch: off

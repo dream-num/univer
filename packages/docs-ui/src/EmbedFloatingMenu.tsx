@@ -111,8 +111,6 @@ function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
                   univer-size-6 univer-p-0 univer-text-red-500
                   hover:univer-text-red-600
                 "
-                title="Delete embed block"
-                aria-label="Delete embed block"
                 onClick={removeEmbed}
             >
                 <DeleteIcon />

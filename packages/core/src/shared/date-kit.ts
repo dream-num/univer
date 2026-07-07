@@ -100,6 +100,7 @@ interface IDateParts {
 export interface IDateKit {
     isValid(): boolean;
     format(template?: string): string;
+    formatIntl(locale?: string | string[], options?: Intl.DateTimeFormatOptions): string;
     valueOf(): number;
     toDate(): Date;
     add(value: number, unit?: DateKitUnitType): IDateKit;
@@ -129,6 +130,21 @@ class DateKitImpl implements IDateKit {
             return 'Invalid Date';
         }
         return formatDate(this._date, template, this._isUTC);
+    }
+
+    formatIntl(locale?: string | string[], options: Intl.DateTimeFormatOptions = {}) {
+        if (!this.isValid()) {
+            return 'Invalid Date';
+        }
+        if (typeof Intl === 'undefined' || typeof Intl.DateTimeFormat !== 'function') {
+            return this.format();
+        }
+
+        const formatOptions = this._isUTC && !options.timeZone
+            ? { ...options, timeZone: 'UTC' }
+            : options;
+
+        return new Intl.DateTimeFormat(locale, formatOptions).format(this._date);
     }
 
     valueOf() {

@@ -19,7 +19,7 @@ import type { ICustomComponentProps } from '../../services/menu/menu';
 import { LocaleService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
-import { useDependency } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
 import { useFontList } from './use-font-list';
 
 export interface IFontFamilyItemProps extends ICustomComponentProps<string> {
@@ -30,6 +30,7 @@ export const FONT_FAMILY_ITEM_COMPONENT = 'UI_FONT_FAMILY_ITEM_COMPONENT';
 
 export const FontFamilyItem = ({ value, onChange }: IFontFamilyItemProps) => {
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const { fonts, fontService } = useFontList();
 
     function handleSelectFont(nextValue: string) {
@@ -38,6 +39,7 @@ export const FontFamilyItem = ({ value, onChange }: IFontFamilyItemProps) => {
 
     return (
         <ul
+            dir={direction}
             className="univer-m-0 univer-list-none univer-p-0 univer-text-sm"
             style={{ fontFamily: value }}
         >

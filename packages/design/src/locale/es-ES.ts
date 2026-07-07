@@ -19,8 +19,8 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     design: {
         Confirm: {
-            cancel: 'cancel·la',
-            confirm: 'ok',
+            cancel: 'Cancelar',
+            confirm: 'Aceptar',
         },
         CascaderList: {
             empty: 'Cap',
@@ -53,20 +53,20 @@ const locale: typeof enUS = {
             empty: 'Cap',
         },
         ColorPicker: {
-            more: 'Més colors',
-            cancel: 'cancel·la',
-            confirm: 'ok',
+            more: 'Más colores',
+            cancel: 'Cancelar',
+            confirm: 'Aceptar',
         },
         GradientColorPicker: {
             linear: 'Lineal',
             radial: 'Radial',
             angular: 'Angular',
-            diamond: 'Diamant',
-            offset: 'Desplaçament',
-            angle: 'Angle',
-            flip: 'Girar',
+            diamond: 'Diamante',
+            offset: 'Desplazamiento',
+            angle: 'Ángulo',
+            flip: 'Invertir',
             delete: 'Eliminar',
-            transparency: 'Transparency',
+            transparency: 'Transparencia',
         },
     },
 };

@@ -68,7 +68,7 @@ export function Pager(props: IPagerProps) {
                             data-u-comp="pager-left-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
-                              univer-border-none univer-bg-transparent univer-p-0
+                              univer-border-none univer-bg-transparent univer-p-0 univer-text-current
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-600
                             `}
@@ -76,14 +76,14 @@ export function Pager(props: IPagerProps) {
                             role="button"
                             onClick={onClickLeftArrow}
                         >
-                            <MoreLeftIcon />
+                            <MoreLeftIcon className="rtl:univer-rotate-180" />
                         </button>
                         <span className="univer-mx-1">{text}</span>
                         <button
                             data-u-comp="pager-right-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
-                              univer-border-none univer-bg-transparent univer-p-0
+                              univer-border-none univer-bg-transparent univer-p-0 univer-text-current
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-600
                             `}
@@ -91,7 +91,7 @@ export function Pager(props: IPagerProps) {
                             role="button"
                             onClick={onClickRightArrow}
                         >
-                            <MoreRightIcon />
+                            <MoreRightIcon className="rtl:univer-rotate-180" />
                         </button>
                     </>
                 )

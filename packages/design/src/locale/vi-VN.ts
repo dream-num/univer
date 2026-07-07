@@ -66,7 +66,7 @@ const locale: typeof enUS = {
             angle: 'Góc',
             flip: 'Lật',
             delete: 'Xóa',
-            transparency: 'Transparency',
+            transparency: 'Độ trong suốt',
         },
     },
 };

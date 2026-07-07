@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: 'I',
             when: 'Gdy',
             onlyShowIcon: 'Pokaż tylko ikonę',
+            noCellIcon: 'Brak ikony komórki',
         },
         symbol: {
             greaterThan: '>',

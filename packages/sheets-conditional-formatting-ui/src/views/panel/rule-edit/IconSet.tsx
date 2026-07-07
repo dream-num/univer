@@ -35,7 +35,7 @@ import {
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
+import { ILayoutService, useDependency, useObservable, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
 const getIcon = (iconType: IIconSetType, iconId: string | number) => {
@@ -117,12 +117,13 @@ interface IIconGroupListProps {
 const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, ref) => {
     const { onClick } = props;
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     const handleClick = (iconType: IIconSetType) => {
         onClick(iconType);
     };
     return (
-        <div ref={ref} className="univer-w-80">
+        <div ref={ref} dir={direction} className="univer-w-80">
             {iconGroup.map((group, index) => {
                 return (
                     <div key={index} className="univer-mb-3">
@@ -134,7 +135,10 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
                                 return (
                                     <div
                                         key={groupItem.name}
-                                        className="univer-mb-1 univer-flex univer-w-1/2 univer-items-center"
+                                        className="
+                                          univer-mb-1 univer-flex univer-w-1/2 univer-items-center
+                                          rtl:univer-flex-row-reverse rtl:univer-justify-end
+                                        "
                                         onClick={() => { handleClick(groupItem.name); }}
                                     >
                                         <a
@@ -157,7 +161,6 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
                                 );
                             })}
                         </div>
-
                     </div>
                 );
             })}
@@ -167,6 +170,8 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
 
 const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string) => void; iconType?: IIconSetType; iconId: string }) => {
     const { onClick } = props;
+    const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     const list = useMemo(() => {
         const result: { iconType: IIconSetType; iconId: string; base64: string }[] = [];
@@ -189,21 +194,25 @@ const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string)
     };
 
     return (
-        <div>
+        <div dir={direction}>
             <div
-                className="univer-mb-2.5 univer-flex univer-cursor-pointer univer-items-center univer-pl-1"
+                data-u-comp="cf-icon-set-no-icon-option"
+                className="
+                  univer-mb-2.5 univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-text-sm
+                "
                 onClick={() => handleClick({ iconType: IIconSetType.empty, iconId: '', base64: '' })}
             >
-                <SlashDoubleIcon className="univer-size-5" />
-                <span className="univer-ml-2">无单元格图标</span>
+                {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.noCellIcon')}
             </div>
-            <div className="univer-flex univer-w-64 univer-flex-wrap">
+            <div
+                className="univer-flex univer-w-64 univer-flex-wrap univer-gap-2"
+            >
                 {list.map((item) => (
                     <div
                         key={`${item.iconType}_${item.iconId}`}
                         className={`
-                          univer-mb-2 univer-mr-2 univer-flex univer-cursor-pointer univer-items-center
-                          univer-justify-center univer-rounded
+                          univer-mb-2 univer-flex univer-cursor-pointer univer-items-center univer-justify-center
+                          univer-rounded
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `}
@@ -322,7 +331,13 @@ const IconSetRuleEdit = (props: {
                             </>
                         </div>
                     </div>
-                    <div className="univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4">
+                    <div
+                        data-u-comp="cf-icon-set-rule-grid"
+                        className="
+                          univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4
+                          rtl:univer-grid-flow-dense
+                        "
+                    >
                         <div className="univer-flex univer-items-center">
                             <Dropdown
                                 overlay={(
@@ -418,6 +433,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const { interceptorManager } = props;
     const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const [errorMap, setErrorMap] = useState<Record<string, string>>({});
     const [currentIconType, setCurrentIconType] = useState<IIconSetType>(() => {
         const defaultV = Object.keys(iconMap)[0] as IIconSetType;
@@ -463,7 +479,13 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             return getIcon(item.iconType, item.iconId);
         });
         return (
-            <div className="univer-flex univer-items-center">
+            <div
+                data-u-comp="cf-icon-set-preview"
+                className="
+                  univer-flex univer-items-center
+                  rtl:univer-flex-row-reverse
+                "
+            >
                 {list.map((icon, index) => (icon
                     ? (
                         <img
@@ -575,14 +597,14 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     useScrollYOverContainer(iconGroupListEl, layoutService.rootContainerElement);
 
     return (
-        <div>
+        <div data-u-comp="cf-icon-set-editor" dir={direction}>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
                 <Dropdown
                     overlay={(
-                        <div className="univer-rounded-lg univer-p-4">
+                        <div dir={direction} className="univer-rounded-lg univer-p-4">
                             <IconGroupList
                                 ref={(el) => {
                                     !iconGroupListEl && el && setIconGroupListEl(el);
@@ -606,12 +628,23 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     </div>
                 </Dropdown>
             </div>
-            <div className="univer-mt-3 univer-flex univer-items-center univer-gap-3 univer-text-xs">
-                <div className="univer-flex univer-items-center univer-text-xs">
+            <div
+                className="
+                  univer-mt-3 univer-flex univer-items-center univer-gap-2 univer-text-xs
+                  rtl:univer-flex-row-reverse rtl:univer-justify-end
+                "
+            >
+                <div
+                    data-u-comp="cf-icon-set-option-row"
+                    className="univer-flex univer-items-center univer-text-xs"
+                >
                     <Checkbox onChange={reverseIcon} />
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
                 </div>
-                <div className="univer-flex univer-items-center univer-text-xs">
+                <div
+                    data-u-comp="cf-icon-set-option-row"
+                    className="univer-flex univer-items-center univer-text-xs"
+                >
                     <Checkbox checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }} />
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
                 </div>

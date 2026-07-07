@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: 'Und',
             when: 'Wenn',
             onlyShowIcon: 'Nur Symbol anzeigen',
+            noCellIcon: 'Kein Zellsymbol',
         },
         symbol: {
             greaterThan: '>',

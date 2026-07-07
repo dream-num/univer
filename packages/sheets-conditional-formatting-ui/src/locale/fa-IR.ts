@@ -45,6 +45,7 @@ const locale: typeof enUS = {
             and: 'و',
             when: 'هنگامی که',
             onlyShowIcon: 'فقط نمایش آیکون',
+            noCellIcon: 'بدون نماد سلول',
         },
         symbol: {
             greaterThan: '>',

@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: 'A',
             when: 'Keď',
             onlyShowIcon: 'Zobraziť iba ikonu',
+            noCellIcon: 'Bez ikony bunky',
         },
         symbol: {
             greaterThan: '>',

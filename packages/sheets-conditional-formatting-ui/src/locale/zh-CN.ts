@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: '且',
             when: '当值',
             onlyShowIcon: '仅显示图标',
+            noCellIcon: '无单元格图标',
         },
         symbol: {
             greaterThan: '>',

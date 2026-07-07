@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: 'و',
             when: 'عندما',
             onlyShowIcon: 'إظهار الأيقونة فقط',
+            noCellIcon: 'بدون أيقونة خلية',
         },
         symbol: {
             greaterThan: '>',

@@ -44,6 +44,7 @@ const locale = {
             and: 'And',
             when: 'When',
             onlyShowIcon: 'Only Show Icon',
+            noCellIcon: 'No Cell Icon',
         },
         symbol: {
             greaterThan: '>',

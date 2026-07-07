@@ -78,6 +78,12 @@ class TestCellPopupManagerService {
 }
 
 class TestResizeObserver {
+    static callback: ResizeObserverCallback | undefined;
+
+    constructor(callback: ResizeObserverCallback) {
+        TestResizeObserver.callback = callback;
+    }
+
     observe(): void {}
 
     unobserve(): void {}
@@ -172,6 +178,16 @@ function inputText(textarea: HTMLTextAreaElement, value: string) {
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function resizeTextarea(textarea: HTMLTextAreaElement, width: number, height: number) {
+    textarea.style.width = `${width}px`;
+    textarea.style.height = `${height}px`;
+    TestResizeObserver.callback?.([{
+        target: {
+            getBoundingClientRect: () => ({ width, height }),
+        },
+    } as unknown as ResizeObserverEntry], {} as ResizeObserver);
+}
+
 async function renderNote(root: Root, testBed: ReturnType<typeof createNoteViewTestBed>, row = 2, col = 3) {
     await act(async () => {
         root.render(
@@ -254,6 +270,37 @@ describe('SheetsNote', () => {
         expect(note?.note).toBe('Follow up with finance');
         expect(note?.width).toBe(180);
         expect(note?.height).toBe(96);
+    });
+
+    it('moves an RTL note left while resizing wider, but reopens at the anchored position with the saved size', async () => {
+        const testBed = createMountedNote();
+        testBed.injector.get(LocaleService).setDirection('rtl');
+
+        await renderNote(root!, testBed);
+        await act(async () => {
+            await awaitTime(350);
+        });
+
+        let textarea = container!.querySelector('textarea') as HTMLTextAreaElement;
+
+        await act(async () => {
+            resizeTextarea(textarea, 220, 96);
+            await awaitTime(350);
+        });
+
+        expect(textarea.style.transform).toBe('translateX(-40px)');
+        expect(testBed.noteModel.getNote(UNIT_ID, SUB_UNIT_ID, { row: 2, col: 3 })?.width).toBe(220);
+
+        act(() => {
+            root!.unmount();
+        });
+        root = createRoot(container!);
+
+        await renderNote(root!, testBed);
+
+        textarea = container!.querySelector('textarea') as HTMLTextAreaElement;
+        expect(textarea.style.width).toBe('220px');
+        expect(textarea.style.transform).toBe('');
     });
 
     it('closes the popup when creating the initial note cannot be saved', async () => {

@@ -15,10 +15,12 @@
  */
 
 import type { CSSProperties } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 type ItemValue = string | number;
+const SEGMENTED_PADDING = 4;
 
 interface ISegmentedItem<T extends ItemValue = ItemValue> {
     label: string;
@@ -40,6 +42,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
     onChange,
     className = '',
 }: ISegmentedProps<T>) {
+    const { direction } = useContext(ConfigContext);
     const [selectedItem, setSelectedItem] = useState<T>(
         value !== undefined ? value : (defaultValue || items[0].value)
     );
@@ -62,21 +65,23 @@ export function Segmented<T extends ItemValue = ItemValue>({
             const containerRect = containerRef.current.getBoundingClientRect();
             const newRect = newItemElement.getBoundingClientRect();
 
-            // Calculate position relative to container's padding
-            const newLeft = newRect.left - containerRect.left - 4; // Subtract padding-left (p-1 = 4px)
+            // Calculate position relative to the fixed physical-left slider origin.
+            const newLeft = newRect.left - containerRect.left - SEGMENTED_PADDING;
 
             if (oldItemElement) {
                 const oldRect = oldItemElement.getBoundingClientRect();
-                const oldLeft = oldRect.left - containerRect.left - 4;
+                const oldLeft = oldRect.left - containerRect.left - SEGMENTED_PADDING;
 
                 setSlideStyle({
                     '--slide-from': `${oldLeft}px`,
                     '--slide-to': `${newLeft}px`,
+                    left: `${SEGMENTED_PADDING}px`,
                     width: `${newRect.width}px`,
                     transform: `translateX(${newLeft}px)`,
                 } as CSSProperties);
             } else {
                 setSlideStyle({
+                    left: `${SEGMENTED_PADDING}px`,
                     width: `${newRect.width}px`,
                     transform: `translateX(${newLeft}px)`,
                 } as CSSProperties);
@@ -86,7 +91,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
 
     useEffect(() => {
         updateSliderPosition(selectedItem);
-    }, [selectedItem]);
+    }, [direction, selectedItem]);
 
     const handleClick = (itemValue: T) => {
         const oldValue = selectedItem;
@@ -98,6 +103,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
     return (
         <div
             data-u-comp="segmented"
+            dir={direction}
             ref={containerRef}
             className={clsx(`
               univer-relative univer-box-border univer-flex univer-min-w-0 univer-gap-1 univer-rounded-lg

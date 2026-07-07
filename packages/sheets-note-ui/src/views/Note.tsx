@@ -49,9 +49,21 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
     }
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const initialWidthRef = useRef<number | null>(null);
     const currentRender = renderManagerService.getRenderById(activePopup.unitId)!;
 
     const [note, setNote] = useState<Partial<ISheetNote> | null>(null);
+    const applyResizeOffset = useCallback((width: number) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        if (localeService.getDirection() === 'rtl' && initialWidthRef.current != null) {
+            const offset = initialWidthRef.current - width;
+            textarea.style.transform = offset ? `translateX(${offset}px)` : '';
+        } else {
+            textarea.style.transform = '';
+        }
+    }, [localeService]);
 
     useEffect(() => {
         const { unitId, subUnitId, row, col } = activePopup;
@@ -73,8 +85,10 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
         }
 
         if (textareaRef.current) {
+            initialWidthRef.current = width;
             textareaRef.current.style.width = `${width}px`;
             textareaRef.current.style.height = `${height}px`;
+            textareaRef.current.style.transform = '';
         }
     }, [activePopup, textareaRef]);
 
@@ -127,12 +141,13 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
 
     const handleResize = useCallback((width: number, height: number) => {
         if (!note) return;
+        applyResizeOffset(width);
         if (width === note.width && height === note.height) return;
 
         const newNote = { ...note, width, height };
         setNote(newNote);
         updateNote(newNote);
-    }, [note]);
+    }, [applyResizeOffset, note]);
 
     return (
         <Textarea

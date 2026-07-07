@@ -37,7 +37,7 @@ import { previewClassName } from './styles';
 
 const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.valueType.${text}`), value: text });
 
-const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
+const InputText = (props: { disabled?: boolean; id: string; className?: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
@@ -68,7 +68,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
     if (type === CFValueType.formula) {
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
-            <div className="univer-ml-3 univer-w-full">
+            <div className="univer-w-full">
                 <FormulaEditor
                     ref={formulaEditorRef}
                     className={clsx(`
@@ -294,7 +294,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.fillType')}
                 </div>
 
-                <div className="univer-ml-1 univer-mt-3 univer-flex univer-items-center">
+                <div className="univer-mt-3 univer-flex univer-items-center univer-gap-3">
                     <RadioGroup
                         value={isGradient}
                         onChange={(v) => {
@@ -318,7 +318,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             <span className="univer-text-xs">{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.gradient')}</span>
                         </Radio>
                     </RadioGroup>
-                    <div className="univer-ml-6 univer-flex univer-items-center univer-text-xs">
+                    <div className="univer-flex univer-items-center univer-text-xs">
                         <Checkbox
                             checked={!isShowValue}
                             onChange={(v) => {
@@ -348,7 +348,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 >
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.colorSet')}
                 </div>
-                <div className="univer-ml-1 univer-mt-3 univer-flex univer-items-center">
+                <div className="univer-mt-3 univer-flex univer-items-center univer-gap-2">
                     <div className="univer-flex univer-items-center">
                         <div className="univer-text-xs">
                             {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.native')}
@@ -358,7 +358,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             onChange={handleNativeColorChange}
                         />
                     </div>
-                    <div className="univer-ml-3 univer-flex univer-items-center">
+                    <div className="univer-flex univer-items-center univer-gap-3">
                         <div className="univer-text-xs">
                             {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.positive')}
                         </div>
@@ -379,7 +379,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 >
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.min')}
                 </div>
-                <div className="univer-mt-3 univer-flex univer-items-center">
+                <div className="univer-mt-3 univer-flex univer-items-center univer-gap-2">
                     <Select
                         className="univer-w-1/2 univer-flex-shrink-0"
                         options={minOptions}
@@ -403,7 +403,6 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
 
                     <InputText
                         id="min"
-                        className="univer-ml-3"
                         disabled={!isShowInput(minValueType)}
                         type={minValueType}
                         value={minValue}
@@ -430,7 +429,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 >
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.max')}
                 </div>
-                <div className="univer-mt-3 univer-flex univer-items-center">
+                <div className="univer-mt-3 univer-flex univer-items-center univer-gap-2">
                     <Select
                         className="univer-w-1/2 univer-flex-shrink-0"
                         options={maxOptions}
@@ -452,7 +451,6 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     />
                     <InputText
-                        className="univer-ml-3"
                         disabled={!isShowInput(maxValueType)}
                         id="max"
                         type={maxValueType}

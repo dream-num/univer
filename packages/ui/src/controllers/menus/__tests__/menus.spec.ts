@@ -15,14 +15,16 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, IContextService, IUndoRedoService } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, IContextService, IUndoRedoService, LocaleService } from '@univerjs/core';
+import { BehaviorSubject, isObservable, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from '../menus';
 
 function createAccessor() {
     const undoRedoStatus$ = new BehaviorSubject({ undos: 1, redos: 1 });
     const contextChanged$ = new Subject<void>();
+    const direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
     const contextStore: Record<string, boolean> = {
         [EDITOR_ACTIVATED]: false,
         [FOCUSING_FX_BAR_EDITOR]: false,
@@ -33,16 +35,18 @@ function createAccessor() {
         contextChanged$,
         getContextValue: (key: string) => contextStore[key] ?? false,
     };
+    const localeService = { direction$ };
 
     const accessor = {
         get: (token: unknown) => {
             if (token === IUndoRedoService) return undoRedoService;
             if (token === IContextService) return contextService;
+            if (token === LocaleService) return localeService;
             throw new Error('Unknown token');
         },
     } as unknown as IAccessor;
 
-    return { accessor, undoRedoStatus$, contextChanged$, contextStore };
+    return { accessor, undoRedoStatus$, contextChanged$, contextStore, direction$ };
 }
 
 describe('menus controller factories', () => {
@@ -93,5 +97,37 @@ describe('menus controller factories', () => {
         expect(values.at(-1)).toBe(false);
 
         sub.unsubscribe();
+    });
+
+    it('should use rtl-specific undo and redo icons when locale direction changes', () => {
+        const { accessor, direction$ } = createAccessor();
+        const undoItem = UndoMenuItemFactory(accessor);
+        const redoItem = RedoMenuItemFactory(accessor);
+        const undoIcon$ = undoItem.icon as Observable<string>;
+        const redoIcon$ = redoItem.icon as Observable<string>;
+        const undoIcons: string[] = [];
+        const redoIcons: string[] = [];
+
+        expect(isObservable(undoItem.icon)).toBe(true);
+        expect(isObservable(redoItem.icon)).toBe(true);
+
+        const undoSub = undoIcon$.subscribe((icon) => undoIcons.push(icon));
+        const redoSub = redoIcon$.subscribe((icon) => redoIcons.push(icon));
+
+        expect(undoIcons.at(-1)).toBe('UndoIcon');
+        expect(redoIcons.at(-1)).toBe('RedoIcon');
+
+        direction$.next('rtl');
+
+        expect(undoIcons.at(-1)).toBe('RedoIcon');
+        expect(redoIcons.at(-1)).toBe('UndoIcon');
+
+        direction$.next('ltr');
+
+        expect(undoIcons.at(-1)).toBe('UndoIcon');
+        expect(redoIcons.at(-1)).toBe('RedoIcon');
+
+        undoSub.unsubscribe();
+        redoSub.unsubscribe();
     });
 });

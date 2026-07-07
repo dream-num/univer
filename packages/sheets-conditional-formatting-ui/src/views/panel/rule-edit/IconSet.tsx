@@ -606,12 +606,12 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     </div>
                 </Dropdown>
             </div>
-            <div className="univer-mt-3 univer-flex univer-items-center univer-text-xs">
+            <div className="univer-mt-3 univer-flex univer-items-center univer-gap-3 univer-text-xs">
                 <div className="univer-flex univer-items-center univer-text-xs">
                     <Checkbox onChange={reverseIcon} />
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
                 </div>
-                <div className="univer-ml-6 univer-flex univer-items-center univer-text-xs">
+                <div className="univer-flex univer-items-center univer-text-xs">
                     <Checkbox checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }} />
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
                 </div>

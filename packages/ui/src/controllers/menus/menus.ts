@@ -22,6 +22,7 @@ import {
     FOCUSING_FX_BAR_EDITOR,
     IContextService,
     IUndoRedoService,
+    LocaleService,
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
@@ -41,11 +42,17 @@ const undoRedoDisableFactory$ = (accessor: IAccessor, isUndo: boolean) => {
     }));
 };
 
+const rtlIconFactory$ = (accessor: IAccessor, ltrIcon: string, rtlIcon: string) => {
+    const localeService = accessor.get(LocaleService);
+
+    return localeService.direction$.pipe(map((direction) => direction === 'rtl' ? rtlIcon : ltrIcon));
+};
+
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: UndoCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'UndoIcon',
+        icon: rtlIconFactory$(accessor, 'UndoIcon', 'RedoIcon'),
         title: 'ui.shortcut.undo',
         tooltip: 'ui.shortcut.undo',
         disabled$: undoRedoDisableFactory$(accessor, true),
@@ -56,7 +63,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Locale
     return {
         id: RedoCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'RedoIcon',
+        icon: rtlIconFactory$(accessor, 'RedoIcon', 'UndoIcon'),
         title: 'ui.shortcut.redo',
         tooltip: 'ui.shortcut.redo',
         disabled$: undoRedoDisableFactory$(accessor, false),

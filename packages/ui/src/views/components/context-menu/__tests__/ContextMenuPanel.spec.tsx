@@ -36,6 +36,17 @@ import {
     shouldShowContextMenuGroupSeparator,
 } from '../ContextMenuPanel';
 
+vi.mock('@univerjs/icons', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@univerjs/icons')>();
+
+    return {
+        ...actual,
+        CheckMarkIcon: ({ className }: { className?: string }) => <span className={className} data-icon="check-mark" />,
+        MoreLeftIcon: ({ className }: { className?: string }) => <span className={className} data-icon="more-left" />,
+        MoreRightIcon: ({ className }: { className?: string }) => <span className={className} data-icon="more-right" />,
+    };
+});
+
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 class TestMenuManagerService {
@@ -536,6 +547,40 @@ describe('ContextMenuPanel', () => {
         expect(submenu.style.left).toBe('142px');
         expect(submenu.style.paddingRight).toBe('20px');
         expect(submenu.style.paddingLeft).toBe('0px');
+    });
+
+    it('renders the submenu affordance toward the opening side in rtl', () => {
+        renderWithDependencies(
+            <ContextMenuPanel menuType="submenu-root" />,
+            {
+                'submenu-root': [
+                    {
+                        key: 'insert',
+                        order: 0,
+                        item: {
+                            id: 'insert',
+                            type: MenuItemType.SUBITEMS,
+                            title: 'docs-ui.insert',
+                            tooltip: 'docs-ui.insert',
+                        },
+                    },
+                ],
+                insert: [
+                    createButtonItem('insert-row', {
+                        title: 'docs-ui.insertRow',
+                        tooltip: 'docs-ui.insertRow',
+                    }),
+                ],
+            },
+            (injector) => {
+                (injector.get(LocaleService) as unknown as TestLocaleService).direction$.next('rtl');
+            }
+        );
+
+        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insert' });
+
+        expect(insertButton.querySelector('[data-icon="more-left"]')).not.toBeNull();
+        expect(insertButton.querySelector('[data-icon="more-right"]')).toBeNull();
     });
 
     it('keeps row navigation on the same visual row until the row boundary', () => {

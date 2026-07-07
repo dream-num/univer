@@ -35,6 +35,7 @@ import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../../../__tests__/create-cf-ui-test-bed';
+import enUS from '../../../../locale/en-US';
 import { ColorScaleStyleEditor } from '../ColorScale';
 import { DataBarStyleEditor } from '../DataBar';
 import { FormulaStyleEditor } from '../Formula';
@@ -114,7 +115,7 @@ function createEditorTestBed() {
     testBed.injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
     testBed.injector.add([IContextMenuService, { useClass: TestContextMenuService as never }]);
     testBed.injector.add([LexerTreeBuilder]);
-    testBed.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+    testBed.get(LocaleService).load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: {} });
 
     return testBed;
 }
@@ -156,6 +157,17 @@ async function selectOption(selectIndex: number, optionText: string) {
     }
 
     option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
+async function openDropdown(dropdownIndex: number) {
+    const dropdown = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="popover-trigger"]'))[dropdownIndex];
+    if (!dropdown) {
+        throw new Error(`Dropdown ${dropdownIndex} was not rendered`);
+    }
+
+    dropdown.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+    dropdown.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
 }
 
 describe('conditional formatting rule editors', () => {
@@ -506,6 +518,49 @@ describe('conditional formatting rule editors', () => {
                 },
             ],
         });
+    });
+
+    it('localizes the no-icon option and provides RTL layout hooks for icon set controls', async () => {
+        currentTestBed = createEditorTestBed();
+        currentTestBed.get(LocaleService).setLocale(LocaleType.EN_US);
+        currentTestBed.get(LocaleService).setDirection('rtl');
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <IconSet
+                        interceptorManager={interceptorManager}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const iconSetRoot = container.querySelector('[data-u-comp="cf-icon-set-editor"]') as HTMLElement | null;
+        const preview = container.querySelector('[data-u-comp="cf-icon-set-preview"]') as HTMLElement | null;
+        const optionRows = Array.from(container.querySelectorAll<HTMLElement>('[data-u-comp="cf-icon-set-option-row"]'));
+        const ruleGrid = container.querySelector('[data-u-comp="cf-icon-set-rule-grid"]') as HTMLElement | null;
+
+        expect(iconSetRoot?.getAttribute('dir')).toBe('rtl');
+        expect(preview?.className).toContain('rtl:univer-flex-row-reverse');
+        expect(optionRows[0]?.className).toContain('rtl:univer-flex-row-reverse');
+        expect(ruleGrid?.className).toContain('rtl:univer-grid-flow-dense');
+
+        await act(async () => {
+            await openDropdown(1);
+        });
+
+        const noIconOption = Array.from(document.querySelectorAll<HTMLElement>('[data-u-comp="cf-icon-set-no-icon-option"]')).at(-1);
+        expect(noIconOption?.getAttribute('dir')).toBe('rtl');
+        expect(noIconOption?.textContent).toContain('No Cell Icon');
+        expect(noIconOption?.className).toContain('rtl:univer-pl-0');
+        expect(noIconOption?.querySelector('span')?.className).toContain('rtl:univer-mr-2');
+        expect(document.body.textContent).not.toContain('无单元格图标');
     });
 
     it('preserves an existing number highlight rule when reopening the editor', async () => {

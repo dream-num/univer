@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: 'Dan',
             when: 'Ketika',
             onlyShowIcon: 'Tampilkan Ikon Saja',
+            noCellIcon: 'Tanpa Ikon Sel',
         },
         symbol: {
             greaterThan: '>',

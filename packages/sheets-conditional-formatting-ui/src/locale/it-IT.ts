@@ -46,6 +46,7 @@ const locale: typeof enUS = {
             and: 'E',
             when: 'Quando',
             onlyShowIcon: 'Mostra Solo Icona',
+            noCellIcon: 'Nessuna icona cella',
         },
         symbol: {
             greaterThan: '>',

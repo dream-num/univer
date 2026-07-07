@@ -131,6 +131,53 @@ describe('Input', () => {
         }
     });
 
+    it('should observe slot mutations and apply slot paddingLeft in rtl', () => {
+        const observe = vi.fn();
+        class MockMutationObserver {
+            private _callback: MutationCallback;
+
+            constructor(callback: MutationCallback) {
+                this._callback = callback;
+            }
+
+            observe(...args: unknown[]) {
+                observe(...args);
+                this._callback([], {} as MutationObserver);
+            }
+
+            disconnect() {
+            }
+        }
+
+        vi.stubGlobal('MutationObserver', MockMutationObserver);
+
+        const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+        Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+            configurable: true,
+            get() {
+                return 20;
+            },
+        });
+
+        const { container } = render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <Input value="x" slot={<span>slot</span>} />
+            </ConfigProvider>
+        );
+        const input = container.querySelector('input') as HTMLInputElement;
+        const slot = container.querySelector('[data-u-comp="input"] > div') as HTMLDivElement;
+
+        expect(observe).toHaveBeenCalled();
+        expect(input.style.paddingLeft).toBe('28px');
+        expect(input.style.paddingRight).toBe('');
+        expect(slot.className).toContain('univer-left-2');
+        expect(slot.className).not.toContain('univer-right-2');
+
+        if (originalOffsetWidth) {
+            Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
+        }
+    });
+
     it('should set default allowClear padding when no slot exists', () => {
         const { container } = render(<Input allowClear value="x" />);
         const input = container.querySelector('input') as HTMLInputElement;

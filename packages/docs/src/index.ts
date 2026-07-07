@@ -21,12 +21,17 @@ export type {
     IUpdateTextCommandParams,
 } from './commands/commands/core-editing.command';
 export { CreateHeaderFooterCommand, HeaderFooterType } from './commands/commands/create-header-footer.command';
-export type { HeaderFooterCreateMode, ICreateHeaderFooterCommandParams, IHeaderFooterProps } from './commands/commands/create-header-footer.command';
+export type {
+    HeaderFooterCreateMode,
+    ICreateHeaderFooterCommandParams,
+    IHeaderFooterProps,
+} from './commands/commands/create-header-footer.command';
 export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';
+export { createDocsEmbedEmptySnapshot, registerDocsEmbedHostCapabilities } from './embed-guest';
 export { createDocsCustomBlockHostAdapterContribution } from './embed-host-adapter';
 export {
     createDocsCustomBlockDrawing,
@@ -41,11 +46,20 @@ export {
     resolveDocsCustomBlockSize,
     shouldUseInlineTextSelectionForDocsCustomBlockDrawing,
 } from './embed-host-anchor';
-export type { EmbedDocsCustomBlockInteractionMode, IEmbedDocsCustomBlockData, IDocsCustomBlockMutationParams } from './embed-host-anchor';
-export { createDocsEmbedEmptySnapshot, registerDocsEmbedHostCapabilities } from './embed-guest';
+export type {
+    EmbedDocsCustomBlockInteractionMode,
+    IDocsCustomBlockMutationParams,
+    IEmbedDocsCustomBlockData,
+} from './embed-host-anchor';
 export { UniverDocsPlugin } from './plugin';
 export { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
-export type { DocBlockMoveTransformer, DocBlockMoveValidator, IDocBlockMoveResult, IDocBlockMoveTransformContext, IDocBlockMoveValidationContext } from './services/doc-block-move-validator.service';
+export type {
+    DocBlockMoveTransformer,
+    DocBlockMoveValidator,
+    IDocBlockMoveResult,
+    IDocBlockMoveTransformContext,
+    IDocBlockMoveValidationContext,
+} from './services/doc-block-move-validator.service';
 export { DocContentInsertService } from './services/doc-content-insert.service';
 export type { IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import { INTERCEPTOR_POINT } from '@univerjs/sheets';
 import { DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import { Subject } from 'rxjs';
@@ -24,6 +25,10 @@ afterEach(() => {
     vi.useRealTimers();
 });
 
+interface ITestConditionFormattingRule {
+    ranges: IRange[];
+}
+
 function createController() {
     let interceptor: any;
     const ruleChange$ = new Subject<any>();
@@ -32,10 +37,10 @@ function createController() {
     const makeDirty = vi.fn();
     const resetRangeCache = vi.fn();
     const rowColumnSegment = { startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 };
-    const getRule = vi.fn(() => ({
+    const getRule = vi.fn<() => ITestConditionFormattingRule>(() => ({
         ranges: [{ startRow: 2, endRow: 4, startColumn: 1, endColumn: 3 }],
     }));
-    const getSubunitRules = vi.fn(() => []);
+    const getSubunitRules = vi.fn<() => ITestConditionFormattingRule[]>(() => []);
     const controller = new SheetsCfRenderController(
         {
             intercept: vi.fn((point, config) => {

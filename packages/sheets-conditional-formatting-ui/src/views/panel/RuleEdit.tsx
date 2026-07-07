@@ -301,9 +301,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 rule={props.rule?.rule as any}
                 onChange={onStyleChange}
             />
-            <div className="univer-mt-4 univer-flex univer-justify-end">
+            <div className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
                 <Button onClick={handleCancel}>{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.cancel')}</Button>
-                <Button className="univer-ml-3" variant="primary" onClick={handleSubmit}>
+                <Button variant="primary" onClick={handleSubmit}>
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.submit')}
                 </Button>
             </div>

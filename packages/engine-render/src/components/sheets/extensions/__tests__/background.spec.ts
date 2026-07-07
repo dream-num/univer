@@ -129,6 +129,135 @@ describe('background extension', () => {
         expect(bgByMatrix.forValue).toHaveBeenCalled();
     });
 
+    it('reuses cached background cell positions when drawing backgrounds', () => {
+        const extension = new Background();
+        const ctx = createCtx();
+        const bgMatrix = createBgMatrix([[0, 0, '1']], 99);
+        const backgroundPositions = new ObjectMatrix();
+        backgroundPositions.setValue(0, 0, createCellInfo());
+
+        const skeleton = {
+            worksheet: {
+                getMergedCellRange: vi.fn(() => []),
+                getRowVisible: vi.fn(() => true),
+                getColVisible: vi.fn(() => true),
+                getSpanModel: vi.fn(() => ({
+                    getMergeDataIndex: vi.fn(() => -1),
+                })),
+            },
+            stylesCache: {
+                background: { '#ff0000': bgMatrix },
+                backgroundPositions,
+            },
+            rowHeightAccumulation: [20],
+            columnWidthAccumulation: [40],
+            columnTotalWidth: 40,
+            rowTotalHeight: 20,
+            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
+            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
+        } as any;
+
+        extension.draw(
+            ctx,
+            { scaleX: 1, scaleY: 1 } as any,
+            skeleton,
+            [],
+            {
+                viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+                checkOutOfViewBound: true,
+            } as any
+        );
+
+        expect(skeleton.getCellByIndexWithNoHeader).not.toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalled();
+    });
+
+    it('skips merge lookups when drawing merge-free backgrounds', () => {
+        const extension = new Background();
+        const ctx = createCtx();
+        const bgMatrix = createBgMatrix([[0, 0, '1']], 99);
+        const getMergeDataIndex = vi.fn(() => -1);
+        const worksheet = {
+            getMergedCellRange: vi.fn(() => []),
+            getRowVisible: vi.fn(() => true),
+            getColVisible: vi.fn(() => true),
+            getSpanModel: vi.fn(() => ({
+                getMergeDataIndex,
+            })),
+        };
+        const skeleton = {
+            worksheet,
+            stylesCache: {
+                background: { '#ff0000': bgMatrix },
+                backgroundPositions: new ObjectMatrix(),
+            },
+            rowHeightAccumulation: [20],
+            columnWidthAccumulation: [40],
+            columnTotalWidth: 40,
+            rowTotalHeight: 20,
+            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
+            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
+        } as any;
+
+        extension.draw(
+            ctx,
+            { scaleX: 1, scaleY: 1 } as any,
+            skeleton,
+            [],
+            {
+                viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+                checkOutOfViewBound: true,
+                hasMergeData: false,
+            } as any
+        );
+
+        expect(worksheet.getMergedCellRange).not.toHaveBeenCalled();
+        expect(worksheet.getSpanModel).not.toHaveBeenCalled();
+        expect(getMergeDataIndex).not.toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalled();
+    });
+
+    it('uses diff ranges to choose background iteration during incremental drawing', () => {
+        const extension = new Background();
+        const ctx = createCtx();
+        const bgMatrix = createBgMatrix([[1, 1, '1']], 4);
+
+        const skeleton = {
+            worksheet: {
+                getMergedCellRange: vi.fn(() => []),
+                getRowVisible: vi.fn(() => true),
+                getColVisible: vi.fn(() => true),
+                getSpanModel: vi.fn(() => ({
+                    getMergeDataIndex: vi.fn(() => -1),
+                })),
+            },
+            stylesCache: {
+                background: { '#ff0000': bgMatrix },
+                backgroundPositions: new ObjectMatrix(),
+            },
+            rowHeightAccumulation: [20, 40],
+            columnWidthAccumulation: [40, 80],
+            columnTotalWidth: 80,
+            rowTotalHeight: 40,
+            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
+            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
+        } as any;
+
+        extension.draw(
+            ctx,
+            { scaleX: 1, scaleY: 1 } as any,
+            skeleton,
+            [{ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 }],
+            {
+                viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
+                checkOutOfViewBound: true,
+            } as any
+        );
+
+        expect(bgMatrix.forValue).not.toHaveBeenCalled();
+        expect(bgMatrix.getValue).toHaveBeenCalledWith(1, 1);
+    });
+
     it('draws merged cell backgrounds and handles early draw exits', () => {
         const extension = new Background();
         const ctx = createCtx();
@@ -200,6 +329,14 @@ describe('background extension', () => {
         skeleton.worksheet.getRowVisible = vi.fn(() => false);
         const rowHidden = extension.renderBGByCell(bgContext, 0, 0);
         expect(rowHidden).toBe(true);
+
+        skeleton.worksheet.getRowVisible = vi.fn(() => true);
+        bgContext.viewRanges = [{ startRow: 10, endRow: 10, startColumn: 10, endColumn: 10 }];
+        bgContext.skipRenderRangeCheck = true;
+        const skippedRangeCheck = extension.renderBGByCell(bgContext, 0, 0);
+        expect(skippedRangeCheck).toBeUndefined();
+        expect(rect).toHaveBeenCalled();
+        bgContext.skipRenderRangeCheck = false;
 
         bgContext.cellInfo = createCellInfo({
             isMergedMainCell: true,

@@ -38,7 +38,6 @@ import {
     CellValueType,
     getDisplayValueFromCell,
     HorizontalAlign,
-    Range,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -61,6 +60,32 @@ function rotatedBoundingBox(width: number, height: number, angleDegrees: number)
     const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
     const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
     return { rotatedWidth, rotatedHeight };
+}
+
+function getResolvedRenderHorizontalAlign(fontCache: IFontCacheItem, cellData: ICellDataForSheetInterceptor): HorizontalAlign {
+    if (fontCache.resolvedHorizontalAlign !== undefined) {
+        return fontCache.resolvedHorizontalAlign;
+    }
+
+    const { horizontalAlign } = fontCache;
+    if (horizontalAlign !== HorizontalAlign.UNSPECIFIED) {
+        return horizontalAlign;
+    }
+
+    if (cellData.t === CellValueType.NUMBER || (!Tools.isDefine(cellData.t) && typeof cellData.v === 'number')) {
+        return HorizontalAlign.RIGHT;
+    }
+
+    if (cellData.t === CellValueType.BOOLEAN) {
+        return HorizontalAlign.CENTER;
+    }
+
+    return horizontalAlign;
+}
+
+function needsFontRenderExtensionBounds(fontCache: IFontCacheItem) {
+    const extension = fontCache.cellData?.fontRenderExtension;
+    return Boolean(extension?.isSkip || extension?.leftOffset || extension?.rightOffset);
 }
 
 interface IRenderFontContext {
@@ -153,7 +178,7 @@ export class Font extends SheetExtension {
         }
 
         const scale = this._getScale(parentScale);
-        const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
+        const { fontRenderRanges, viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const lastRowIndex = spreadsheetSkeleton.getRowCount() - 1;
         const lastColIndex = spreadsheetSkeleton.getColumnCount() - 1;
         const expandedViewRanges = viewRanges.map((range) => clampRange({
@@ -161,6 +186,7 @@ export class Font extends SheetExtension {
             startColumn: range.startColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW,
             endColumn: range.endColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW,
         }, lastRowIndex, lastColIndex));
+        const rangesToScan = fontRenderRanges?.length ? fontRenderRanges : expandedViewRanges;
         const renderFontContext = {
             ctx,
             scale,
@@ -168,59 +194,76 @@ export class Font extends SheetExtension {
             columnTotalWidth,
             // columnWidthAccumulation,
             rowTotalHeight,
-            viewRanges: expandedViewRanges,
+            viewRanges: fontRenderRanges?.length ? viewRanges : expandedViewRanges,
             checkOutOfViewBound: checkOutOfViewBound || true,
             diffRanges,
             spreadsheetSkeleton,
         } as IRenderFontContext;
         ctx.save();
 
+        const mergeData = spreadsheetSkeleton.worksheet.getMergeData();
+        const hasMerge = mergeData.length > 0;
         const uniqueMergeRanges: IRange[] = [];
-        const mergeRangeIDSet = new Set();
+        const mergeRangeIDSet = hasMerge ? new Set() : null;
+        const spanModel = hasMerge ? spreadsheetSkeleton.worksheet.getSpanModel() : null;
 
         // Currently, viewRanges has only one range.
-        expandedViewRanges.forEach((range) => {
-            // collect unique merge ranges intersect with view range.
-            // The ranges in mergeRanges must be unique. Otherwise, the font will render, text redrawing causes jagged edges or artifacts.
-            const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(
-                range.startRow,
-                range.startColumn,
-                range.endRow,
-                range.endColumn
-            );
-            intersectMergeRangesWithViewRanges.forEach((mergeRange) => {
-                const mergeRangeIndex = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(mergeRange.startRow, mergeRange.startColumn);
-                if (!mergeRangeIDSet.has(mergeRangeIndex)) {
-                    mergeRangeIDSet.add(mergeRangeIndex);
-                    uniqueMergeRanges.push(mergeRange);
-                }
-            });
+        rangesToScan.forEach((range) => {
+            if (hasMerge && spanModel && mergeRangeIDSet) {
+                // collect unique merge ranges intersect with view range.
+                // The ranges in mergeRanges must be unique. Otherwise, the font will render, text redrawing causes jagged edges or artifacts.
+                const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(
+                    range.startRow,
+                    range.startColumn,
+                    range.endRow,
+                    range.endColumn
+                );
+                intersectMergeRangesWithViewRanges.forEach((mergeRange) => {
+                    const mergeRangeIndex = spanModel.getMergeDataIndex(mergeRange.startRow, mergeRange.startColumn);
+                    if (!mergeRangeIDSet.has(mergeRangeIndex)) {
+                        mergeRangeIDSet.add(mergeRangeIndex);
+                        uniqueMergeRanges.push(mergeRange);
+                    }
+                });
+            }
 
-            Range.foreach(range, (row, col) => {
-                const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
-                if (index !== -1) {
-                    return;
-                }
-                const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
-                if (!cellInfo) {
-                    return;
-                }
+            const { startRow, endRow, startColumn, endColumn } = range;
+            for (let row = startRow; row <= endRow; row++) {
+                for (let col = startColumn; col <= endColumn; col++) {
+                    const fontCache = fontMatrix.getValue(row, col);
+                    if (!fontCache) {
+                        continue;
+                    }
 
-                renderFontContext.cellInfo = cellInfo;
-                this._renderFontEachCell(renderFontContext, row, col, fontMatrix);
-            });
+                    if (spanModel && spanModel.getMergeDataIndex(row, col) !== -1) {
+                        continue;
+                    }
+                    const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
+                    if (!cellInfo) {
+                        continue;
+                    }
+
+                    renderFontContext.cellInfo = cellInfo;
+                    this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
+                }
+            }
         });
 
         uniqueMergeRanges.forEach((range) => {
+            const fontCache = fontMatrix.getValue(range.startRow, range.startColumn);
+            if (!fontCache) {
+                return;
+            }
+
             const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
-            this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix);
+            this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache);
         });
 
         ctx.restore();
     }
 
-    _renderFontEachCell(renderFontCtx: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+    _renderFontEachCell(renderFontCtx: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>, cacheValue?: IFontCacheItem) {
         const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontCtx;
 
         //#region merged cell
@@ -246,7 +289,7 @@ export class Font extends SheetExtension {
 
         //#endregion
 
-        const fontCache = fontMatrix.getValue(row, col);
+        const fontCache = cacheValue ?? fontMatrix.getValue(row, col);
         if (!fontCache) return true;
         renderFontCtx.fontCache = fontCache;
 
@@ -270,10 +313,14 @@ export class Font extends SheetExtension {
 
         if (notInMergeRange) {
             const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
-            if (!visibleRow) return true;
+            if (!visibleRow) {
+                return true;
+            }
 
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
-            if (!visibleCol) return true;
+            if (!visibleCol) {
+                return true;
+            }
         } else {
             let isAllRowHidden = true;
 
@@ -285,7 +332,9 @@ export class Font extends SheetExtension {
                 }
             }
 
-            if (isAllRowHidden) return true;
+            if (isAllRowHidden) {
+                return true;
+            }
 
             let isAllColHidden = true;
 
@@ -297,15 +346,27 @@ export class Font extends SheetExtension {
                 }
             }
 
-            if (isAllColHidden) return true;
+            if (isAllColHidden) {
+                return true;
+            }
         }
 
-        // Since we cannot predict when fontRenderExtension?.isSkip might change,
-        // we must check it every time and retrieve cell data directly from the worksheet,
-        // not from the cache to ensure accuracy.
-        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        if (cellData?.fontRenderExtension?.isSkip) {
-            return true;
+        // For cells with render extensions, isSkip may be updated by render interceptors.
+        // Plain cells avoid the extra worksheet lookup on every scroll repaint.
+        if (fontCache.cellData?.fontRenderExtension) {
+            const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+            if (cellData?.fontRenderExtension?.isSkip) {
+                return true;
+            }
+        }
+
+        if (this._renderPlainTextWithoutClip(ctx, renderFontCtx, fontCache)) {
+            renderFontCtx.startX = 0;
+            renderFontCtx.startY = 0;
+            renderFontCtx.endX = 0;
+            renderFontCtx.endY = 0;
+            renderFontCtx.overflowRectangle = null;
+            return false;
         }
 
         ctx.save();
@@ -322,7 +383,6 @@ export class Font extends SheetExtension {
         } else {
             this._renderText(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
         }
-        ctx.closePath();
         ctx.restore();
 
         if (fontCache.documentSkeleton) {
@@ -344,6 +404,57 @@ export class Font extends SheetExtension {
         renderFontCtx.overflowRectangle = null;
         return false;
     };
+
+    private _renderPlainTextWithoutClip(ctx: UniverRenderingContext, renderFontCtx: IRenderFontContext, fontCache: IFontCacheItem) {
+        const { cellData, documentSkeleton, textFitsCurrentCell, vertexAngle = 0, centerAngle = 0, wrapStrategy } = fontCache;
+        if (!textFitsCurrentCell) {
+            return false;
+        }
+        if (documentSkeleton) {
+            return false;
+        }
+        if (vertexAngle !== 0 || centerAngle !== 0) {
+            return false;
+        }
+        if (wrapStrategy === WrapStrategy.WRAP) {
+            return false;
+        }
+        if (needsFontRenderExtensionBounds(fontCache)) {
+            return false;
+        }
+        if (fontCache.style?.st?.s || fontCache.style?.ul?.s) {
+            return false;
+        }
+        if (cellData?.v === undefined || cellData?.v === null) {
+            return false;
+        }
+
+        const padding = fontCache.style?.pd ?? DEFAULT_PADDING_DATA;
+        const paddingLeft = padding.l ?? DEFAULT_PADDING_DATA.l;
+        const paddingRight = padding.r ?? DEFAULT_PADDING_DATA.r;
+        const paddingTop = padding.t ?? DEFAULT_PADDING_DATA.t;
+        const paddingBottom = padding.b ?? DEFAULT_PADDING_DATA.b;
+        const text = fontCache.displayText ?? getDisplayValueFromCell(cellData);
+        const { startX, startY, endX, endY } = renderFontCtx;
+        const cellWidth = endX - startX - paddingLeft - paddingRight;
+        const cellHeight = endY - startY - paddingTop - paddingBottom;
+        const hAlign = getResolvedRenderHorizontalAlign(fontCache, cellData);
+
+        Text.drawPlainWith(ctx, {
+            text,
+            fontStyle: fontCache.fontString,
+            hAlign,
+            vAlign: fontCache.verticalAlign,
+            width: cellWidth,
+            height: cellHeight,
+            left: startX + FIX_ONE_PIXEL_BLUR_OFFSET + paddingLeft,
+            top: startY + FIX_ONE_PIXEL_BLUR_OFFSET + paddingTop,
+            color: fontCache.style?.cl?.rgb,
+            cellValueType: cellData.t,
+        });
+
+        return true;
+    }
 
     private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
         const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
@@ -547,24 +658,13 @@ export class Font extends SheetExtension {
         const paddingBottom = padding.b ?? DEFAULT_PADDING_DATA.b;
         const { vertexAngle = 0, wrapStrategy, cellData } = fontCache;
         if (cellData?.v === undefined || cellData?.v === null) return;
-        const text = getDisplayValueFromCell(cellData);
+        const text = fontCache.displayText ?? getDisplayValueFromCell(cellData);
         const { startX, startY, endX, endY } = renderFontCtx;
         const cellWidth = endX - startX - paddingLeft - paddingRight;
         const cellHeight = endY - startY - paddingTop - paddingBottom;
+        const hAlign = getResolvedRenderHorizontalAlign(fontCache, cellData);
 
-        // If the horizontal alignment is not specified, we need to determine it based on the cell value type.
-        let hAlign = fontCache.horizontalAlign;
-        if (fontCache.horizontalAlign === HorizontalAlign.UNSPECIFIED) {
-            if (cellData.t === CellValueType.NUMBER || (!Tools.isDefine(cellData.t) && typeof cellData.v === 'number')) {
-                // If the cell value is a number, default to right alignment.
-                hAlign = HorizontalAlign.RIGHT;
-            } else if (cellData.t === CellValueType.BOOLEAN) {
-                // If the cell value is a boolean, default to center alignment.
-                hAlign = HorizontalAlign.CENTER;
-            }
-        }
-
-        Text.drawWith(ctx, {
+        const textProps = {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,
@@ -579,7 +679,14 @@ export class Font extends SheetExtension {
             underline: Boolean(fontCache.style?.ul?.s),
             underlineType: fontCache.style?.ul?.t,
             cellValueType: cellData.t,
-        });
+        };
+
+        if (!textProps.warp && !textProps.strokeLine && !textProps.underline) {
+            Text.drawPlainWith(ctx, textProps);
+            return;
+        }
+
+        Text.drawWith(ctx, textProps);
     }
 
     private _renderDocuments(

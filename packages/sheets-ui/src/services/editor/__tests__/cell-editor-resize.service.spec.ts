@@ -253,6 +253,18 @@ class TestCachedWidthRenderManagerService extends TestRenderManagerService {
     };
 }
 
+class TestViewportEdgeRenderManagerService extends TestRenderManagerService {
+    override readonly sheetCanvasElement = {
+        style: { width: '1192px' },
+        getBoundingClientRect: () => ({ left: 30, top: 50, width: 1192, height: 773 }),
+    };
+
+    override readonly sheetEngine = {
+        width: 1192,
+        getCanvasElement: () => this.sheetCanvasElement,
+    };
+}
+
 describe('SheetCellEditorResizeService', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
@@ -438,5 +450,42 @@ describe('SheetCellEditorResizeService', () => {
             endX: 180,
             show: true,
         }));
+    });
+
+    it('keeps a centered merged-cell editor at least as wide as the edited merged range', async () => {
+        vi.stubGlobal('window', new EventTarget());
+        vi.stubGlobal('document', { activeElement: { dataset: {} } });
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([ThemeService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestViewportEdgeRenderManagerService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([SheetCellEditorResizeService]);
+        const editorBridge = injector.get(IEditorBridgeService) as unknown as TestEditorBridgeService;
+        editorBridge.editCellState.position = {
+            startX: 426,
+            startY: 90,
+            endX: 1206,
+            endY: 122,
+        };
+        editorBridge.editCellState.documentLayoutObject.horizontalAlign = HorizontalAlign.CENTER;
+
+        injector.get(SheetCellEditorResizeService).fitTextSize();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        const state = editorManager.getState();
+        expect(state!.endX as number - (state!.startX as number)).toBe(780);
     });
 });

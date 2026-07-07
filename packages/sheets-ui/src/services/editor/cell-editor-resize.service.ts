@@ -239,15 +239,17 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const maxHeight = height - startY - EDITOR_BORDER_SIZE * 2;
 
+        const cellWidth = endX - startX;
         let maxWidth = width - startX;
         if (horizontalAlign === HorizontalAlign.CENTER) {
             const rightGap = enginWidth - endX;
             const leftGap = startX;
-            maxWidth = (endX - startX) + Math.min(leftGap, rightGap) * 2;
+            maxWidth = cellWidth + Math.min(leftGap, rightGap) * 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             maxWidth = endX;
         }
         maxWidth = maxWidth - EDITOR_BORDER_SIZE * 2;
+        maxWidth = Math.max(maxWidth, cellWidth);
 
         return {
             height: maxHeight,

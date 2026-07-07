@@ -18,6 +18,7 @@ export * from './preset';
 export * from '@univerjs/design';
 export * from '@univerjs/docs';
 export * from '@univerjs/docs-ui';
+export { createDocsCustomBlockHostAdapterContribution } from '@univerjs/docs-ui';
 export * from '@univerjs/engine-formula';
 export * from '@univerjs/engine-render';
 export * from '@univerjs/network';

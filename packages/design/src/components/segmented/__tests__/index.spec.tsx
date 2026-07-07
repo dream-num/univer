@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Segmented } from '../Segmented';
 import '@testing-library/jest-dom/vitest';
 
@@ -51,5 +52,57 @@ describe('Segmented', () => {
         expect(getByText('A')).toHaveClass('univer-text-gray-900', { exact: false });
         rerender(<Segmented items={items} value="c" />);
         expect(getByText('C')).toHaveClass('univer-text-gray-900', { exact: false });
+    });
+
+    it('should apply rtl direction from ConfigProvider', () => {
+        const { container } = render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <Segmented items={items} />
+            </ConfigProvider>
+        );
+
+        expect(container.querySelector('[data-u-comp="segmented"]')?.getAttribute('dir')).toBe('rtl');
+    });
+
+    it('should position the selected slider from a stable physical left origin in rtl', () => {
+        const { container, getByText } = render(
+            <ConfigProvider mountContainer={document.body} direction="rtl">
+                <Segmented items={items} />
+            </ConfigProvider>
+        );
+        const root = container.querySelector('[data-u-comp="segmented"]') as HTMLDivElement;
+        const slider = root.firstElementChild as HTMLDivElement;
+        const buttonB = getByText('B') as HTMLButtonElement;
+
+        vi.spyOn(root, 'getBoundingClientRect').mockReturnValue({
+            x: 100,
+            y: 0,
+            top: 0,
+            left: 100,
+            width: 180,
+            height: 32,
+            right: 280,
+            bottom: 32,
+            toJSON: () => ({}),
+        } as DOMRect);
+        vi.spyOn(buttonB, 'getBoundingClientRect').mockReturnValue({
+            x: 156,
+            y: 4,
+            top: 4,
+            left: 156,
+            width: 48,
+            height: 24,
+            right: 204,
+            bottom: 28,
+            toJSON: () => ({}),
+        } as DOMRect);
+
+        fireEvent.click(buttonB);
+
+        expect(slider).toHaveStyle({
+            left: '4px',
+            width: '48px',
+            transform: 'translateX(52px)',
+        });
     });
 });

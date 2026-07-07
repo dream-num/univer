@@ -92,6 +92,11 @@ const TEST_WORKBOOK_DATA_EXTRA: IWorkbookData = {
                 3: {
                     0: { f: '=A4' },
                 },
+                4: {
+                    0: { f: '=A5', v: '' },
+                    1: { f: '=B5', v: 0 },
+                    2: { f: '=C5', v: '0' },
+                },
             },
         },
     },

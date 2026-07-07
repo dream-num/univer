@@ -26,7 +26,7 @@ import type {
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon, MoreRightIcon } from '@univerjs/icons';
+import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
@@ -1255,6 +1255,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const canExecuteItem = menuItem.type === MenuItemType.BUTTON || menuItem.type === MenuItemType.BUTTON_SELECTOR;
     const renderAsContainer = isNonSelectableLabel(menuItem.label);
+    const SubmenuAffordanceIcon = direction === 'rtl' ? MoreLeftIcon : MoreRightIcon;
     const interactiveItemClassName = clsx(itemClassName, isNonHoverableLabel(menuItem.label) && `
       hover:univer-bg-transparent
       dark:hover:!univer-bg-transparent
@@ -1298,7 +1299,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     >
                         {contentNode}
                         {hasSubmenu && (
-                            <MoreRightIcon
+                            <SubmenuAffordanceIcon
                                 className={`
                                   ${sizeVariant === 'paragraph-t' ? 'univer-size-4' : 'univer-size-3.5'}
                                   univer-text-gray-400
@@ -1356,7 +1357,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     >
                         {contentNode}
                         {hasSubmenu && !compact && (
-                            <MoreRightIcon
+                            <SubmenuAffordanceIcon
                                 className={`
                                   ${sizeVariant === 'paragraph-t' ? 'univer-size-4' : 'univer-size-3.5'}
                                   univer-text-gray-400

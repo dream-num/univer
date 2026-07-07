@@ -32,9 +32,9 @@
     },
     "dependencies": {
         "@tsdown/css": "^0.22.3",
-        "@typescript-eslint/parser": "^8.62.1",
-        "@vitest/coverage-istanbul": "^4.1.9",
-        "autoprefixer": "^10.5.0",
+        "@typescript-eslint/parser": "^8.63.0",
+        "@vitest/coverage-istanbul": "^4.1.10",
+        "autoprefixer": "^10.5.2",
         "eslint-plugin-better-tailwindcss": "^4.6.1",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-no-barrel-import": "^0.0.2",
@@ -48,11 +48,11 @@
         "tailwindcss": "3.4.18",
         "tsdown": "^0.22.3",
         "unplugin-vue": "^7.2.0",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     },
     "devDependencies": {
-        "@univerjs/icons": "1.18.0",
-        "@univerjs/icons-svg": "^1.18.0",
+        "@univerjs/icons": "1.19.0",
+        "@univerjs/icons-svg": "^1.19.0",
         "typescript": "^6.0.3",
         "vue-tsc": "^3.3.6"
     }

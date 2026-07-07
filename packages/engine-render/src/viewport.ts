@@ -1529,18 +1529,11 @@ export class Viewport {
                 right: Math.min(prevBound.right, currBound.right),
             });
         }
-        const expandX = this.bufferEdgeX;
-        const expandY = this.bufferEdgeY;
         for (const bound of additionalAreas) {
-            const isVerticalStrip = bound.left === Math.max(prevBound.left, currBound.left) &&
-                bound.right === Math.min(prevBound.right, currBound.right);
-            const isHorizontalStrip = bound.top === currBound.top && bound.bottom === currBound.bottom;
-            const boundExpandX = isVerticalStrip ? expandX : 0;
-            const boundExpandY = isHorizontalStrip ? expandY : 0;
-            bound.left = bound.left - boundExpandX;
-            bound.right = bound.right + boundExpandX;
-            bound.top = bound.top - boundExpandY;
-            bound.bottom = bound.bottom + boundExpandY;
+            bound.left = bound.left - this.bufferEdgeX;
+            bound.right = bound.right + this.bufferEdgeX;
+            bound.top = bound.top - this.bufferEdgeY;
+            bound.bottom = bound.bottom + this.bufferEdgeY;
         }
 
         return additionalAreas;

@@ -15,36 +15,36 @@
  */
 
 import type { ITableStringFilterInfo } from '../../types/type';
-import { createREGEXFromWildChar } from '@univerjs/core';
+import { regexp } from '@univerjs/core';
 import { TableStringCompareTypeEnum } from '../../types/enum';
 
 export const textEqual = (compareValue: string, expectedValue: string) => {
-    const regex = createREGEXFromWildChar(expectedValue);
+    const regex = regexp.createFromWildcard(expectedValue);
     return regex.test(compareValue);
 };
 
 export const textNotEqual = (compareValue: string, expectedValue: string) => {
-    const regex = createREGEXFromWildChar(expectedValue);
+    const regex = regexp.createFromWildcard(expectedValue);
     return !regex.test(compareValue);
 };
 
 export const textContain = (compareValue: string, expectedValue: string) => {
-    const regex = createREGEXFromWildChar(`*${expectedValue}*`);
+    const regex = regexp.createFromWildcard(`*${expectedValue}*`);
     return regex.test(compareValue);
 };
 
 export const textNotContain = (compareValue: string, expectedValue: string) => {
-    const regex = createREGEXFromWildChar(`*${expectedValue}*`);
+    const regex = regexp.createFromWildcard(`*${expectedValue}*`);
     return !regex.test(compareValue);
 };
 
 export const textStartWith = (compareValue: string, expectedValue: string) => {
-    const regex = createREGEXFromWildChar(`${expectedValue}*`);
+    const regex = regexp.createFromWildcard(`${expectedValue}*`);
     return regex.test(compareValue);
 };
 
 export const textEndWith = (compareValue: string, expectedValue: string) => {
-    const regex = createREGEXFromWildChar(`*${expectedValue}`);
+    const regex = regexp.createFromWildcard(`*${expectedValue}`);
     return regex.test(compareValue);
 };
 

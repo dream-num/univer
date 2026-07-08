@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDocumentData, IRange, Nullable, Worksheet } from '@univerjs/core';
-import { CellValueType, escapeRegExp, Range } from '@univerjs/core';
+import { CellValueType, Range, regexp } from '@univerjs/core';
 
 /**
  * The default delimiter to split the text.
@@ -128,7 +128,7 @@ function getDelimiterRegexItem(delimiter: SplitDelimiterEnum, treatMultipleDelim
 
     let str = '';
     for (const delimiter of delimiterList) {
-        str += escapeRegExp(delimiter);
+        str += regexp.escapeRegExp(delimiter);
     }
     let allStr = '['.concat(str, ']');
 

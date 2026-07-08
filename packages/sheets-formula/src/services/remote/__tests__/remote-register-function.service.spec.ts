@@ -30,14 +30,29 @@ function createService(): { service: IRemoteRegisterFunctionService; functionSer
 }
 
 describe('RemoteRegisterFunctionService', () => {
-    it('registers remote formula executors and removes them with their metadata', async () => {
+    it('rejects serialized remote formula executors without evaluating them', async () => {
         const { service, functionService } = createService();
+        const marker = '__REMOTE_REGISTER_FUNCTION_SERVICE_POC_EXECUTED__';
 
-        await service.registerFunctions([['(value) => value + 1', 'REMOTE_ADD_ONE']]);
-        expect(functionService.hasExecutor('REMOTE_ADD_ONE')).toBe(true);
+        delete (globalThis as Record<string, unknown>)[marker];
 
-        await service.registerAsyncFunctions([['async (value) => value * 2', 'REMOTE_DOUBLE']]);
-        expect(functionService.hasExecutor('REMOTE_DOUBLE')).toBe(true);
+        await expect(service.registerFunctions([
+            [`(() => { globalThis.${marker} = true; return (value) => value + 1; })()`, 'REMOTE_ADD_ONE'],
+        ])).rejects.toThrow('Remote custom function registration is disabled');
+
+        await expect(service.registerAsyncFunctions([
+            [`(() => { globalThis.${marker} = true; return async (value) => value * 2; })()`, 'REMOTE_DOUBLE'],
+        ])).rejects.toThrow('Remote custom function registration is disabled');
+
+        expect((globalThis as Record<string, unknown>)[marker]).toBeUndefined();
+        expect(functionService.hasExecutor('REMOTE_ADD_ONE')).toBe(false);
+        expect(functionService.hasExecutor('REMOTE_DOUBLE')).toBe(false);
+
+        delete (globalThis as Record<string, unknown>)[marker];
+    });
+
+    it('removes remote formula executors and their metadata', async () => {
+        const { service, functionService } = createService();
 
         functionService.registerDescriptions({
             functionName: 'REMOTE_ADD_ONE',

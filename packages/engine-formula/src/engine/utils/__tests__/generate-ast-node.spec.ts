@@ -188,6 +188,38 @@ describe('generateAstNode defined name cache invalidation', () => {
         expect(harness.getParseCount()).toBe(2);
     });
 
+    it('treats dirty super table names as literal text when building cache invalidation patterns', () => {
+        const harness = createHarness({}, {
+            'unit-1': {
+                'Sales.Table+': '1',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(Sales.Table+[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(SalesXTable+[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(SalesXTable+[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(2);
+    });
+
     it('reuses cache when formula references a dirty super table in another unit', () => {
         const harness = createHarness({}, {
             'unit-2': {

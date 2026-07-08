@@ -23,7 +23,7 @@ import type { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode } from '../ast-node/ast-root-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../dependency/dependency-tree';
-import { escapeRegExp } from '@univerjs/core';
+import { regexp } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -129,12 +129,11 @@ function getNormalizedDirtyDefinedNameSet(unitDefinedNameMap: IDirtyStringMap): 
 function getDirtySuperTableReferencePattern(unitSuperTableMap: IDirtyStringMap): RegExp | null {
     let tableReferencePattern = DIRTY_SUPER_TABLE_PATTERN_CACHE.get(unitSuperTableMap);
     if (tableReferencePattern === undefined) {
-        const escapedTableNames = Object.keys(unitSuperTableMap)
-            .filter((tableName) => tableName.length > 0)
-            .map(escapeRegExp);
+        const tableNames = Object.keys(unitSuperTableMap)
+            .filter((tableName) => tableName.length > 0);
 
-        tableReferencePattern = escapedTableNames.length > 0
-            ? new RegExp(`(^|[^A-Za-z0-9_])(?:${escapedTableNames.join('|')})(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
+        tableReferencePattern = tableNames.length > 0
+            ? regexp.createRegExpFromSafeFragment(`(^|[^A-Za-z0-9_])${regexp.or(...tableNames)}(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
             : null;
         DIRTY_SUPER_TABLE_PATTERN_CACHE.set(unitSuperTableMap, tableReferencePattern);
     }

@@ -16,10 +16,9 @@
 
 import type { IDisposable, ILocales } from '@univerjs/core';
 import type { FormulaFunctionResultValueType, FormulaFunctionValueType, IFunctionInfo } from '@univerjs/engine-formula';
-import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, toDisposable } from '@univerjs/core';
 import { AsyncCustomFunction, CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { IDescriptionService } from './description.service';
-import { IRemoteRegisterFunctionService } from './remote/remote-register-function.service';
 
 export type IRegisterFunction = (
     ...arg: Array<FormulaFunctionValueType>
@@ -129,9 +128,7 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @IFunctionService private readonly _functionService: IFunctionService,
-        @Optional(IRemoteRegisterFunctionService)
-        private readonly _remoteRegisterFunctionService?: IRemoteRegisterFunctionService
+        @IFunctionService private readonly _functionService: IFunctionService
     ) {
         super();
     }
@@ -169,9 +166,6 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
 
         // calculation
         disposables.add(this._registerLocalExecutors(calculate));
-        if (this._remoteRegisterFunctionService) {
-            disposables.add(this._registerRemoteExecutors(calculate));
-        }
 
         return disposables;
     }
@@ -207,14 +201,6 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         disposables.add(toDisposable(() => this._functionService.unregisterDescriptions(name)));
         disposables.add(toDisposable(() => this._functionService.deleteFormulaAstCacheKey(name)));
 
-        // Handle remote registration if available
-        if (this._remoteRegisterFunctionService) {
-            this._remoteRegisterFunctionService.registerAsyncFunctions([[func.toString(), name]]);
-            disposables.add(
-                toDisposable(() => this._remoteRegisterFunctionService!.unregisterFunctions([name]))
-            );
-        }
-
         return disposables;
     }
 
@@ -228,16 +214,5 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
 
         this._functionService.registerExecutors(...functions);
         return toDisposable(() => this._functionService.unregisterExecutors(...names));
-    }
-
-    private _registerRemoteExecutors(list: IRegisterFunctionList): IDisposable {
-        const functionNameList: string[] = []; // used to unregister functions
-        const functions = list.map(([func, name]) => {
-            functionNameList.push(name);
-            return [func.toString(), name] as [string, string];
-        });
-
-        this._remoteRegisterFunctionService!.registerFunctions(functions);
-        return toDisposable(() => this._remoteRegisterFunctionService!.unregisterFunctions(functionNameList));
     }
 }

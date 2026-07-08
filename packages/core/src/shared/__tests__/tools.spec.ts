@@ -15,7 +15,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createREGEXFromWildChar, Tools } from '../tools';
+import { Tools } from '../tools';
 
 class CustomProto {
     value = 1;
@@ -110,13 +110,9 @@ describe('Tools extra coverage', () => {
         expect(({} as any).polluted).toBeUndefined();
     });
 
-    it('should read timing, ids and wildcard regex helpers', () => {
+    it('should read timing helpers', () => {
         vi.spyOn(globalThis.performance, 'now').mockReturnValue(123.456);
 
         expect(Tools.now()).toBe(123.456);
-
-        const regex = createREGEXFromWildChar('file-??-*.ts');
-        expect(regex.test('file-ab-index.ts')).toBe(true);
-        expect(regex.test('file-a-index.ts')).toBe(false);
     });
 });

@@ -18,7 +18,7 @@ import type { IUniverInstanceService, Workbook } from '@univerjs/core';
 import type { IDefinedNamesService, IFunctionService, ISuperTableService } from '@univerjs/engine-formula';
 import { Tools, UniverInstanceType } from '@univerjs/core';
 import { isReferenceStringWithEffectiveColumn } from '@univerjs/engine-formula';
-import { hasCJKText } from '@univerjs/engine-render';
+import { cjk } from '@univerjs/engine-render';
 
 interface IValidateDefinedNameOptions {
     unitId: string;
@@ -58,7 +58,7 @@ export function validateDefinedName(name: string, options: IValidateDefinedNameO
     if (
         !Tools.isValidParameter(name) ||
         isReferenceStringWithEffectiveColumn(name) ||
-        (!Tools.isStartValidPosition(name) && !hasCJKText(name.substring(0, 1)))
+        (!Tools.isStartValidPosition(name) && !cjk.hasCJKText(name.substring(0, 1)))
     ) {
         return 'sheets.definedName.nameInvalid';
     }

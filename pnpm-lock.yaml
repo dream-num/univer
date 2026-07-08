@@ -289,9 +289,6 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@univerjs/uniscript':
-        specifier: workspace:*
-        version: link:../../packages/uniscript
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -667,18 +664,12 @@ importers:
       '@univerjs/ui-adapter-web-component':
         specifier: workspace:*
         version: link:../packages/ui-adapter-web-component
-      '@univerjs/uniscript':
-        specifier: workspace:*
-        version: link:../packages/uniscript
       '@univerjs/watermark':
         specifier: workspace:*
         version: link:../packages/watermark
       lit:
         specifier: ^3.3.3
         version: 3.3.3
-      monaco-editor:
-        specifier: 0.55.1
-        version: 0.55.1
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -2917,49 +2908,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
-
-  packages/uniscript:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      monaco-editor:
-        specifier: 0.55.1
-        version: 0.55.1
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      postcss:
-        specifier: ^8.5.16
-        version: 8.5.16
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      tailwindcss:
-        specifier: 3.4.18
-        version: 3.4.18
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -7932,9 +7880,6 @@ packages:
     resolution: {integrity: sha512-GrwoxYN+uWlzO8uhUXRl0P+kHE4GtVPfYzVLcUxPL7KNdHKj66vvlhiweIHqYYXWlw+T8iLMp42Lm67ghw4WMQ==}
     engines: {node: '>= 4'}
 
-  dompurify@3.2.7:
-    resolution: {integrity: sha512-WhL/YuveyGXJaerVlMYGWhvQswa7myDG17P7Vu65EWC05o8vfeNbvNf4d/BOvH99+ZW+LlQsc1GDKMa1vNK6dw==}
-
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
 
@@ -9369,11 +9314,6 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
-  marked@14.0.0:
-    resolution: {integrity: sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==}
-    engines: {node: '>= 18'}
-    hasBin: true
-
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
@@ -9597,9 +9537,6 @@ packages:
 
   module-replacements@3.0.0-beta.8:
     resolution: {integrity: sha512-sc8TepP9elxoOBXEpxmhPzKKjTjbswHVcmsKGbgvm3k6jZlLu/WMV/Lfmga6IGMgHU/V3WtY2s6VEgM4nTElUQ==}
-
-  monaco-editor@0.55.1:
-    resolution: {integrity: sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==}
 
   moo-color@1.0.3:
     resolution: {integrity: sha512-i/+ZKXMDf6aqYtBhuOcej71YSlbjT3wCO/4H1j8rPvxDJEifdwgg5MaFyu6iYAT8GBZJg2z0dkgK4YMzvURALQ==}
@@ -15644,10 +15581,6 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.2.7:
-    optionalDependencies:
-      '@types/trusted-types': 2.0.7
-
   domutils@2.8.0:
     dependencies:
       dom-serializer: 1.4.1
@@ -17314,8 +17247,6 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
-  marked@14.0.0: {}
-
   math-intrinsics@1.1.0: {}
 
   md5@2.3.0:
@@ -17726,11 +17657,6 @@ snapshots:
       ufo: 1.6.3
 
   module-replacements@3.0.0-beta.8: {}
-
-  monaco-editor@0.55.1:
-    dependencies:
-      dompurify: 3.2.7
-      marked: 14.0.0
 
   moo-color@1.0.3:
     dependencies:

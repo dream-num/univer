@@ -7,7 +7,6 @@ import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
-import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 
 /* eslint-disable-next-line node/prefer-global/process */
@@ -27,23 +26,6 @@ export default function getVeryLazyPlugins() {
         plugins.push([UniverDebuggerPlugin, {
             fabEntryUnitType: UniverInstanceType.UNIVER_SHEET,
             localeLoader: loadDebuggerLocale,
-        }]);
-        plugins.push([UniverUniscriptPlugin, {
-            getWorkerUrl(_: string, label: string) {
-                if (label === 'json') {
-                    return '/vs/language/json/json.worker.js';
-                }
-                if (label === 'css' || label === 'scss' || label === 'less') {
-                    return '/vs/language/css/css.worker.js';
-                }
-                if (label === 'html' || label === 'handlebars' || label === 'razor') {
-                    return '/vs/language/html/html.worker.js';
-                }
-                if (label === 'typescript' || label === 'javascript') {
-                    return '/vs/language/typescript/ts.worker.js';
-                }
-                return '/vs/editor/editor.worker.js';
-            },
         }]);
     }
 

@@ -4,7 +4,7 @@ import detect from 'detect-port';
 import esbuild from 'esbuild';
 import minimist from 'minimist';
 import { createBuildConfig } from './scripts/esbuild/build-config.mts';
-import { monacoBuildTask, nodeBuildTask } from './scripts/esbuild/build-tasks.mts';
+import { nodeBuildTask } from './scripts/esbuild/build-tasks.mts';
 import { createLogger, formatDuration } from './scripts/esbuild/logger.mts';
 
 const args = minimist(process.argv.slice(2));
@@ -75,8 +75,6 @@ async function main() {
         e2e: isE2E,
         all: !!args.all,
     });
-
-    await monacoBuildTask();
 
     if (args.watch) {
         const watchStatus = createWatchStatusPlugin();

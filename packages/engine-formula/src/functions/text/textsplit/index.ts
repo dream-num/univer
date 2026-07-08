@@ -15,7 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { escapeRegExp } from '@univerjs/core';
+import { regexp } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -274,7 +274,7 @@ export class Textsplit extends BaseFunction {
 
         value += '';
 
-        return escapeRegExp(value);
+        return regexp.escapeRegExp(value);
     }
 
     private _isBlankScalarDelimiter(valueObject: BaseValueObject): boolean {

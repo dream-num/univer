@@ -40,9 +40,6 @@ import {
     hasAllLatin,
     hasArabic,
     hasBasicLatin,
-    hasCJK,
-    hasCJKPunctuation,
-    hasCJKText,
     hasLatinExtendedA,
     hasLatinExtendedB,
     hasLatinOneSupplement,
@@ -189,9 +186,6 @@ describe('tools extra', () => {
         expect(superscript.fontSize).toBeCloseTo(7.2);
         expect(baselineSpy).toHaveBeenCalled();
 
-        expect(hasCJKText('中文')).toBe(true);
-        expect(hasCJK('。')).toBe(true);
-        expect(hasCJKPunctuation('，')).toBe(true);
         expect(hasAllLatin('abc')).toBe(true);
         expect(hasBasicLatin('A')).toBe(true);
         expect(hasLatinOneSupplement('é')).toBe(true);

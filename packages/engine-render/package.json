@@ -71,7 +71,6 @@
         "@floating-ui/dom": "^1.7.6",
         "@floating-ui/utils": "^0.2.11",
         "@univerjs/core": "workspace:*",
-        "cjk-regex": "^3.4.0",
         "franc-min": "^6.2.0",
         "opentype.js": "^2.0.0"
     },

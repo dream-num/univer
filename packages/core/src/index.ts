@@ -51,6 +51,7 @@ export * from './common/lodash';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
 export { isNumeric, isSafeNumeric, willLoseNumericPrecision } from './common/number';
+export { regexp } from './common/regexp';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
 export { sequence, sequenceAsync } from './common/sequence';

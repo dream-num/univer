@@ -1404,9 +1404,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      cjk-regex:
-        specifier: ^3.4.0
-        version: 3.4.0
       franc-min:
         specifier: ^6.2.0
         version: 6.2.0
@@ -7529,10 +7526,6 @@ packages:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
 
-  cjk-regex@3.4.0:
-    resolution: {integrity: sha512-m+gbmlIP6gAG7tDvo2kpeSPAz/uh5wY5/zx10ymjdpbbiTHNTNoYnP2lCiyqtmbLxwhEdq8/lsVbsy4GTc9oUw==}
-    engines: {node: '>=16'}
-
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
 
@@ -10441,10 +10434,6 @@ packages:
     resolution: {integrity: sha512-iETxpjK6YoRWJG5o6hXLwvjYAoW+FEZn9os0PD/b6AP6xQwsa/Y7lCVgIixBbUPMfhu+i2LtdeAqVTgGlQarfA==}
     hasBin: true
 
-  regexp-util@2.0.3:
-    resolution: {integrity: sha512-GP6h9OgJmhAZpb3dbNbXTfRWVnGcoMhWRZv/HxgM4/qCVqs1P9ukQdYxaUhjWBSAs9oJ/uPXUUvGT1VMe0Bs0Q==}
-    engines: {node: '>=16'}
-
   regexp.prototype.flags@1.5.4:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
@@ -11182,10 +11171,6 @@ packages:
   undici@7.28.0:
     resolution: {integrity: sha512-cRZYrTDwWznlnRiPjggAGxZXanty6M8RV1ff8Wm4LWXBp7/IG8v5DnOm74DtUBp9OONpK75YlPnIjQqX0dBDtA==}
     engines: {node: '>=20.18.1'}
-
-  unicode-regex@4.2.0:
-    resolution: {integrity: sha512-fEYz7CCnvHDAdrb8OYAP7qlQCWzXBO5cHXQ3XI+HoZaBpiAwyC6b2nixMGl91yrDYEIRm7NDskgTvnLZ7mqrKQ==}
-    engines: {node: '>=16'}
 
   unicount@1.1.0:
     resolution: {integrity: sha512-RlwWt1ywVW4WErPGAVHw/rIuJ2+MxvTME0siJ6lk9zBhpDfExDbspe6SRlWT3qU6AucNjotPl9qAJRVjP7guCQ==}
@@ -15275,11 +15260,6 @@ snapshots:
 
   ci-info@4.4.0: {}
 
-  cjk-regex@3.4.0:
-    dependencies:
-      regexp-util: 2.0.3
-      unicode-regex: 4.2.0
-
   cjs-module-lexer@1.4.3: {}
 
   class-validator@0.14.3:
@@ -18733,8 +18713,6 @@ snapshots:
 
   regexp-tree@0.1.27: {}
 
-  regexp-util@2.0.3: {}
-
   regexp.prototype.flags@1.5.4:
     dependencies:
       call-bind: 1.0.8
@@ -19597,10 +19575,6 @@ snapshots:
   undici@6.26.0: {}
 
   undici@7.28.0: {}
-
-  unicode-regex@4.2.0:
-    dependencies:
-      regexp-util: 2.0.3
 
   unicount@1.1.0: {}
 

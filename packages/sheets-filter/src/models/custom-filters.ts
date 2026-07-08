@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, Nullable } from '@univerjs/core';
-import { createREGEXFromWildChar, isNumeric } from '@univerjs/core';
+import { isNumeric, regexp } from '@univerjs/core';
 import { CustomFilterOperator } from './types';
 
 export interface IFilterFn<P extends unknown[]> {
@@ -115,7 +115,7 @@ export const notEquals: ICustomFilterFn<TwoParameters<number | string>> = {
             };
 
             const ensuredString = ensureString(value);
-            if (ensuredString && isWildCardString(compare)) return !createREGEXFromWildChar(compare as string).test(ensuredString);
+            if (ensuredString && isWildCardString(compare)) return !regexp.createFromWildcard(compare as string).test(ensuredString);
             return ensuredString !== compare;
         }
 
@@ -146,7 +146,7 @@ export const textMatch: ICustomFilterFn<TwoParameters<string>> = {
             return false;
         }
 
-        return createREGEXFromWildChar(compare).test(ensured);
+        return regexp.createFromWildcard(compare).test(ensured);
     },
 };
 

@@ -15,6 +15,7 @@
  */
 
 import * as numfmt from 'numfmt';
+import { regexp } from '../common/regexp';
 
 export * as numfmt from 'numfmt';
 
@@ -126,7 +127,7 @@ const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
 export const currencySymbols = ['Rp', 'zł', 'NT$', 'R$', 'HK$', '$', '£', '¥', '¤', '֏', '؋', '৳', '฿', '៛', '₡', '₦', '₩', '₪', '₫', '€', '₭', '₮', '₱', '₲', '₴', '₸', '₹', '₺', '₼', '₽', '₾', '₿', '﷼'];
 
-const currencySymbolSet = new Set(currencySymbols);
+const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${regexp.charset(...Array.from(new Set(currencySymbols.join(''))))}+`);
 
 /**
  * Get the numfmt parse value, and filter out the parse error.
@@ -162,7 +163,7 @@ export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | nul
         if (z.includes('#,##0')) {
             if (/[.,]$/.test(value)) return null;
 
-            const normalized = value.replace(new RegExp(`^[${[...currencySymbolSet].join('')}]+`), '').trim();
+            const normalized = value.replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim();
 
             if (normalized.includes(',')) {
                 const validGrouping = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/.test(normalized);

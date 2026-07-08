@@ -74,3 +74,25 @@ export const AccordionBasic = {
         );
     },
 };
+
+export const AccordionWithCustomSpacing = {
+    render() {
+        const items = [{
+            label: 'Accordion A',
+            children: <div>Content A</div>,
+        }, {
+            label: 'Accordion B',
+            children: <div>Content B</div>,
+        }];
+
+        return (
+            <Accordion
+                classNames={{
+                    trigger: 'univer-px-4 univer-py-3',
+                    contentInner: 'univer-px-4 univer-py-2',
+                }}
+                items={items}
+            />
+        );
+    },
+};

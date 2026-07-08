@@ -17,7 +17,7 @@
 import './global.css';
 
 export { Accordion } from './components/accordion/Accordion';
-export type { IAccordionProps } from './components/accordion/Accordion';
+export type { IAccordionClassNames, IAccordionProps } from './components/accordion/Accordion';
 export { Avatar } from './components/avatar/Avatar';
 export type { IAvatarProps } from './components/avatar/Avatar';
 export { Badge } from './components/badge/Badge';

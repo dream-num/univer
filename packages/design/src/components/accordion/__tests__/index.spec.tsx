@@ -50,4 +50,32 @@ describe('Accordion', () => {
         fireEvent.click(getByText('Item 2'));
         expect(queryByText('Content 2')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
     });
+
+    it('does not apply global horizontal padding to triggers or content', () => {
+        const { getByText } = render(<Accordion items={[{ label: 'Item 1', children: <div>Content 1</div> }]} />);
+
+        const trigger = getByText('Item 1').closest('button');
+        const contentInner = getByText('Content 1').parentElement;
+
+        expect(trigger?.className).not.toContain('univer-p-4');
+        expect(contentInner?.className).not.toContain('univer-px-4');
+        expect(contentInner?.className).toContain('univer-py-1.5');
+    });
+
+    it('accepts scoped classes for accordion slots', () => {
+        const { getByText } = render(
+            <Accordion
+                classNames={{
+                    trigger: 'test-trigger-padding',
+                    contentInner: 'test-content-padding',
+                    label: 'test-label',
+                }}
+                items={[{ label: 'Item 1', children: <div>Content 1</div> }]}
+            />
+        );
+
+        expect(getByText('Item 1').closest('button')?.className).toContain('test-trigger-padding');
+        expect(getByText('Item 1').className).toContain('test-label');
+        expect(getByText('Content 1').parentElement?.className).toContain('test-content-padding');
+    });
 });

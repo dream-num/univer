@@ -25,8 +25,18 @@ interface IAccordionItem {
     children: ReactNode;
 }
 
+export interface IAccordionClassNames {
+    item?: string;
+    trigger?: string;
+    icon?: string;
+    label?: string;
+    content?: string;
+    contentInner?: string;
+}
+
 export interface IAccordionProps {
     className?: string;
+    classNames?: IAccordionClassNames;
     items: IAccordionItem[];
     defaultOpenIndex?: number | null;
     openIndex?: number | null;
@@ -34,7 +44,7 @@ export interface IAccordionProps {
 }
 
 export function Accordion(props: IAccordionProps) {
-    const { className, defaultOpenIndex = null, items, onOpenIndexChange } = props;
+    const { className, classNames, defaultOpenIndex = null, items, onOpenIndexChange } = props;
     const [innerOpenIndex, setInnerOpenIndex] = useState<number | null>(defaultOpenIndex);
     const openIndex = props.openIndex ?? innerOpenIndex;
 
@@ -55,38 +65,37 @@ export function Accordion(props: IAccordionProps) {
             `, className)}
         >
             {items.map((item, index) => (
-                <div key={item.id ?? index}>
+                <div key={item.id ?? index} className={classNames?.item}>
                     <button
-                        className={`
+                        className={clsx(`
                           univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
-                          univer-gap-1.5 univer-border-none univer-bg-transparent univer-p-4 univer-text-left
-                          univer-text-gray-700
+                          univer-gap-1.5 univer-border-none univer-bg-transparent univer-text-left univer-text-gray-700
                           hover:univer-text-gray-900
                           focus:univer-outline-none
                           dark:!univer-text-gray-200
                           dark:hover:!univer-text-white
-                        `}
+                        `, classNames?.trigger)}
                         type="button"
                         onClick={() => toggleItem(index)}
                     >
                         <DownIcon
-                            className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
+                            className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', classNames?.icon, {
                                 '-univer-rotate-90': openIndex !== index,
                                 'univer-rotate-0': openIndex === index,
                             })}
                         />
-                        <span className="univer-font-medium">{item.label}</span>
+                        <span className={clsx('univer-font-medium', classNames?.label)}>{item.label}</span>
                     </button>
                     <div
                         className={clsx(`
                           univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-500
                           univer-ease-in-out
-                        `, {
+                        `, classNames?.content, {
                             'univer-max-h-screen': openIndex === index,
                             'univer-max-h-0': openIndex !== index,
                         })}
                     >
-                        <div className="univer-box-border univer-px-4 univer-py-1.5">{item.children}</div>
+                        <div className={clsx('univer-box-border univer-py-1.5', classNames?.contentInner)}>{item.children}</div>
                     </div>
                 </div>
             ))}

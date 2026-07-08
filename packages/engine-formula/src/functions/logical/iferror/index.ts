@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -24,7 +25,12 @@ export class Iferror extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(value: BaseValueObject, valueIfError: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(value: FunctionVariantType, valueIfError: FunctionVariantType) {
+        value = this._toValueObject(value);
+        valueIfError = this._toValueObject(valueIfError);
+
         if (!value.isArray()) {
             return value.isError() ? valueIfError : value;
         }
@@ -51,5 +57,19 @@ export class Iferror extends BaseFunction {
         });
 
         return valueArray;
+    }
+
+    private _toValueObject(value: FunctionVariantType): BaseValueObject {
+        if (!value.isReferenceObject()) {
+            return value as BaseValueObject;
+        }
+
+        const reference = value as BaseReferenceObject;
+
+        if (reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
+            return reference.getCellByPosition();
+        }
+
+        return reference.toArrayValueObject();
     }
 }

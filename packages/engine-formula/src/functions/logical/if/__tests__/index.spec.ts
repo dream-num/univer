@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
@@ -38,6 +39,18 @@ describe('Test if function', () => {
             const valueIfFalse = NumberValueObject.create(2);
             const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(getObjectValue(result)).toBe(2);
+        });
+
+        it('LogicalTest coerces Excel-compatible scalar values', () => {
+            const valueIfTrue = StringValueObject.create('yes');
+            const valueIfFalse = StringValueObject.create('no');
+
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(0), valueIfTrue, valueIfFalse))).toBe('no');
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(2), valueIfTrue, valueIfFalse))).toBe('yes');
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('FALSE'), valueIfTrue, valueIfFalse))).toBe('no');
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('TRUE'), valueIfTrue, valueIfFalse))).toBe('yes');
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create(''), valueIfTrue, valueIfFalse))).toBe(ErrorType.VALUE);
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('0'), valueIfTrue, valueIfFalse))).toBe(ErrorType.VALUE);
         });
 
         it('LogicalTest is array', () => {
@@ -102,6 +115,96 @@ describe('Test if function', () => {
             });
             const result = testFunction.calculate(logicTest, valueIfTrue);
             expect(getObjectValue(result)).toBe(false);
+        });
+
+        it('Direct IF preserves selected reference-derived array for scalar condition', () => {
+            testFunction.setRefInfo('unit', 'summary', 11, 0);
+
+            const logicTest = BooleanValueObject.create(false);
+            const valueIfTrue = NumberValueObject.create(1);
+            const valueIfFalse = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [false],
+                    [true],
+                    [false],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 10,
+                column: 3,
+            });
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            expect(getObjectValue(result)).toStrictEqual([[false], [true], [false]]);
+        });
+
+        it('Direct IF implicitly intersects selected reference-derived array when logical test was implicitly intersected', () => {
+            testFunction.setRefInfo('unit', 'summary', 11, 0);
+
+            const logicTest = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [true],
+                    [false],
+                    [true],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 10,
+                column: 0,
+            });
+            const valueIfTrue = StringValueObject.create('blank');
+            const valueIfFalse = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['first'],
+                    ['second'],
+                    ['third'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 10,
+                column: 0,
+            });
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            expect(getObjectValue(result)).toBe('second');
+        });
+
+        it('Direct IF preserves arrays for array formula ranges', () => {
+            testFunction.setRefInfo('unit', 'summary', 23, 0, 3, 1);
+
+            const logicTest = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [false],
+                    [false],
+                    [true],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 12,
+                column: 0,
+            });
+            const valueIfTrue = StringValueObject.create('blank');
+            const valueIfFalse = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['first'],
+                    ['second'],
+                    ['third'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 12,
+                column: 0,
+            });
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            expect(getObjectValue(result)).toStrictEqual([['first'], ['second'], ['blank']]);
         });
 
         it('ValueIfFalse is array', () => {

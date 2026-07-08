@@ -28,6 +28,8 @@ export class Linest extends BaseFunction {
 
     override maxParams = 4;
 
+    override returnsLegacyArrayAsScalar = true;
+
     override calculate(knownYs: BaseValueObject, knownXs?: BaseValueObject, constb?: BaseValueObject, stats?: BaseValueObject): BaseValueObject {
         const { isError, errorObject } = checkKnownsArrayDimensions(knownYs, knownXs);
 

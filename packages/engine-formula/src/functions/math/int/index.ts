@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { stripErrorMargin } from '../../../engine/utils/math-kit';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -43,7 +44,7 @@ export class Int extends BaseFunction {
             return _number;
         }
 
-        const numberValue = Math.floor(+_number.getValue());
+        const numberValue = Math.floor(stripErrorMargin(+_number.getValue()));
 
         return NumberValueObject.create(numberValue);
     }

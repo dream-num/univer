@@ -158,7 +158,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         if (this._checkIfWorksheetMiss()) {
-            return callback(ErrorValueObject.create(ErrorType.VALUE), startRow, startColumn);
+            return callback(ErrorValueObject.create(ErrorType.REF), startRow, startColumn);
         }
 
         const unitId = this._forcedUnitId || this._defaultUnitId;
@@ -172,7 +172,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
                 const cell = this.getCellData(r, c)!;
                 let result: Nullable<boolean> = false;
-                if (isNullCell(cell)) {
+                if (isNullCell(cell) && !isTypedEmptyStringCell(cell)) {
                     result = callback(null, r, c);
                     continue;
                 }
@@ -200,7 +200,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getFirstCell() {
         if (this._checkIfWorksheetMiss()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const { startRow, startColumn } = this.getRangePosition();
@@ -442,11 +442,12 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getCellValueObject(cell: ICellData) {
         const value = getCellValue(cell);
+        const cellValueType = Number(cell.t);
         if (ERROR_TYPE_SET.has(value as ErrorType)) {
             return ErrorValueObject.create(value as ErrorType);
         }
 
-        if (cell.t === CellValueType.NUMBER) {
+        if (cellValueType === CellValueType.NUMBER) {
             const pattern = this._getPatternByCell(cell);
 
             if (isTextFormat(pattern)) {
@@ -455,11 +456,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
             return createNumberValueObjectByRawValue(value, pattern);
         }
-        if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {
+        if (cellValueType === CellValueType.STRING || cellValueType === CellValueType.FORCE_STRING) {
             // A1 is `"test"`, =A1 also needs to get `"test"`
             return StringValueObject.create(value.toString());
         }
-        if (cell.t === CellValueType.BOOLEAN) {
+        if (cellValueType === CellValueType.BOOLEAN) {
             return createBooleanValueObjectByRawValue(value);
         }
 
@@ -574,7 +575,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const cell = this.getCellData(row, column);
 
         if (!cell) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return NullValueObject.create();
         }
 
         return this.getCellValueObject(cell);
@@ -660,6 +661,7 @@ export class BaseReferenceObject extends ObjectClassType {
             sheetId: this.getSheetId(),
             row: startRow,
             column: startColumn,
+            useInvertedIndexCache: true,
         };
 
         const arrayValueObject = ArrayValueObject.create(arrayValueObjectData);
@@ -697,6 +699,10 @@ export class BaseReferenceObject extends ObjectClassType {
 
         return ArrayValueObject.create(arrayValueObjectData);
     }
+}
+
+function isTypedEmptyStringCell(cell: Nullable<ICellData>): boolean {
+    return cell?.v === '' && (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING);
 }
 
 export class AsyncObject extends ObjectClassType {

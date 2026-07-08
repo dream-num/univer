@@ -35,6 +35,7 @@ export class Lexer extends Disposable {
 
         return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, {
             unitId: this._formulaCurrentConfigService.getExecuteUnitId(),
+            sheetId: this._formulaCurrentConfigService.getExecuteSubUnitId(),
             getValueByName: this._definedNamesService.getValueByName.bind(this._definedNamesService),
             getDirtyDefinedNameMap: this._formulaCurrentConfigService.getDirtyDefinedNameMap.bind(this._formulaCurrentConfigService),
             getSheetName: this._formulaCurrentConfigService.getSheetName.bind(this._formulaCurrentConfigService),

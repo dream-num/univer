@@ -44,6 +44,20 @@ describe('Test cell', () => {
         expect(getCellValue(cell3)).toBe(0);
     });
 
+    it('normalizes rich text line breaks for formula values', () => {
+        const cell: ICellData = {
+            p: {
+                id: 'p',
+                body: {
+                    dataStream: 'line 1\rline 2\r\n',
+                },
+                documentStyle: {},
+            },
+        };
+
+        expect(getCellValue(cell)).toBe('line 1\r\nline 2');
+    });
+
     it('Function extractFormulaError', () => {
         expect(extractFormulaError({ v: ErrorType.DIV_BY_ZERO, f: '=1/0' })).toBe(ErrorType.DIV_BY_ZERO);
         expect(extractFormulaError({ v: ErrorType.NAME, f: '=S' })).toBe(ErrorType.NAME);

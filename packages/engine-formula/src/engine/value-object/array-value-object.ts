@@ -152,6 +152,10 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _currentColumn: number = -1;
 
+    private _useInvertedIndexCache: boolean = false;
+
+    private _legacyImplicitForAggregate: boolean = false;
+
     private _sliceCache = new Map<string, ArrayValueObject>();
 
     private _flattenCache: Nullable<ArrayValueObject>;
@@ -239,6 +243,18 @@ export class ArrayValueObject extends BaseValueObject {
 
     getCurrentColumn() {
         return this._currentColumn;
+    }
+
+    usesInvertedIndexCache() {
+        return this._useInvertedIndexCache;
+    }
+
+    usesLegacyImplicitForAggregate() {
+        return this._legacyImplicitForAggregate;
+    }
+
+    setLegacyImplicitForAggregate(value: boolean) {
+        this._legacyImplicitForAggregate = value;
     }
 
     override getArrayValue() {
@@ -656,6 +672,8 @@ export class ArrayValueObject extends BaseValueObject {
             let matchObject: Nullable<BaseValueObject>;
             if (isFuzzyMatching === true) {
                 matchObject = itemValue.compare(valueObject as StringValueObject, compareToken.EQUALS);
+            } else if (searchType === ArrayOrderSearchType.NORMAL && itemValue.isNumber() && valueObject.isNumber()) {
+                matchObject = BooleanValueObject.create(Number(itemValue.getValue()) === Number(valueObject.getValue()));
             } else {
                 matchObject = itemValue.isEqual(valueObject);
             }
@@ -869,9 +887,7 @@ export class ArrayValueObject extends BaseValueObject {
                 return true; // continue
             }
 
-            const result = accumulatorAll.isLessThan(valueObject) as BooleanValueObject;
-
-            if (result.getValue()) {
+            if (Number(accumulatorAll.getValue()) < Number(valueObject.getValue())) {
                 accumulatorAll = valueObject as NumberValueObject;
             }
         });
@@ -945,8 +961,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override getNegative(): BaseValueObject {
-        const arrayValueObject = ArrayValueObject.create('{0}');
-        return arrayValueObject.minus(this);
+        return this.mapValue((valueObject) => NumberValueObject.create(0).minus(valueObject));
     }
 
     override getReciprocal(): BaseValueObject {
@@ -1023,12 +1038,11 @@ export class ArrayValueObject extends BaseValueObject {
             const rowList: BaseValueObject[] = [];
             for (let c = 0; c < columnCount; c++) {
                 const row = this._values?.[r];
+                const currentValue = this.getValueOrDefault(r, c);
 
-                if (row == null) {
+                if (row == null && currentValue == null) {
                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                 } else {
-                    const currentValue = row[c] || this._defaultValue;
-
                     if (currentValue) {
                         rowList[c] = callbackFn(currentValue, r, c);
                     } else {
@@ -1526,7 +1540,7 @@ export class ArrayValueObject extends BaseValueObject {
          * If comparison operations are conducted for a single numerical value,
          * then retrieve the judgment from the inverted index. This enhances performance.
          */
-        if (batchOperatorType === BatchOperatorType.COMPARE) {
+        if (batchOperatorType === BatchOperatorType.COMPARE && this._useInvertedIndexCache) {
             const { rowsInCache, rowsNotInCache } = CELL_INVERTED_INDEX_CACHE.canUseCache(
                 unitId,
                 sheetId,
@@ -1620,13 +1634,15 @@ export class ArrayValueObject extends BaseValueObject {
                             );
                         }
 
-                        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
-                            unitId,
-                            sheetId,
-                            column + startColumn,
-                            start,
-                            end
-                        );
+                        if (this._useInvertedIndexCache) {
+                            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                                unitId,
+                                sheetId,
+                                column + startColumn,
+                                start,
+                                end
+                            );
+                        }
                     }
                 }
 
@@ -1650,13 +1666,15 @@ export class ArrayValueObject extends BaseValueObject {
             );
         }
 
-        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
-            unitId,
-            sheetId,
-            column + startColumn,
-            startRow,
-            startRow + rowCount - 1
-        );
+        if (this._useInvertedIndexCache) {
+            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                unitId,
+                sheetId,
+                column + startColumn,
+                startRow,
+                startRow + rowCount - 1
+            );
+        }
     }
 
     // eslint-disable-next-line
@@ -1736,13 +1754,15 @@ export class ArrayValueObject extends BaseValueObject {
             result[r][column] = ErrorValueObject.create(ErrorType.NA);
         }
 
-        CELL_INVERTED_INDEX_CACHE.set(
-            unitId,
-            sheetId,
-            column + startColumn,
-            currentValue?.isNull() ? null : currentValue?.getValue(),
-            r + startRow
-        );
+        if (this._useInvertedIndexCache) {
+            CELL_INVERTED_INDEX_CACHE.set(
+                unitId,
+                sheetId,
+                column + startColumn,
+                currentValue?.isNull() ? null : currentValue?.getValue(),
+                r + startRow
+            );
+        }
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -1859,7 +1879,12 @@ export class ArrayValueObject extends BaseValueObject {
             result.push(rowList);
         }
 
-        return this._createNewArray(result, rowCount, columnCount);
+        const newArray = this._createNewArray(result, rowCount, columnCount);
+        if (batchOperatorType === BatchOperatorType.PLUS) {
+            newArray.setLegacyImplicitForAggregate(true);
+        }
+
+        return newArray;
     }
 
     private _checkArrayCalculateType(valueObject: ArrayValueObject) {
@@ -1892,6 +1917,10 @@ export class ArrayValueObject extends BaseValueObject {
             this._currentRow = rawValue.row;
 
             this._currentColumn = rawValue.column;
+
+            this._useInvertedIndexCache = rawValue.useInvertedIndexCache === true;
+
+            this._legacyImplicitForAggregate = rawValue.legacyImplicitForAggregate === true;
 
             return rawValue.calculateValueList;
         }
@@ -1928,8 +1957,8 @@ export class ArrayValueObject extends BaseValueObject {
         result: Nullable<BaseValueObject>[][],
         rowCount: number,
         columnCount: number,
-        row: number = -1,
-        column: number = -1
+        row: number = this._currentRow,
+        column: number = this._currentColumn
     ) {
         if (this._currentColumn === -1 || this._currentRow === -1) {
             row = -1;

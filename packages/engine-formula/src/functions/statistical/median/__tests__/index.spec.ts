@@ -59,7 +59,10 @@ describe('Test median function', () => {
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
 
             const result3 = testFunction.calculate(number, number2, number3, number6);
-            expect(getObjectValue(result3)).toStrictEqual(0);
+            expect(getObjectValue(result3)).toStrictEqual(1);
+
+            const result4 = testFunction.calculate(BooleanValueObject.create(false));
+            expect(getObjectValue(result4)).toStrictEqual(0);
         });
 
         it('Value is not has number', () => {

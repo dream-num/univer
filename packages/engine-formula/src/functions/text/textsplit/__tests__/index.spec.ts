@@ -108,6 +108,18 @@ describe('Test textsplit function', () => {
             expect(getObjectValue(result7)).toStrictEqual([
                 ['To be ', ' not to be'],
             ]);
+
+            const colDelimiter8 = NullValueObject.create();
+            const rowDelimiter8 = StringValueObject.create(' ');
+            const result8 = testFunction.calculate(text, colDelimiter8, rowDelimiter8);
+            expect(getObjectValue(result8)).toStrictEqual([
+                ['To'],
+                ['be'],
+                ['or'],
+                ['not'],
+                ['to'],
+                ['be'],
+            ]);
         });
 
         it('ignoreEmpty value is true', () => {

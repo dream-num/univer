@@ -104,5 +104,12 @@ describe('Test regexmatch function', () => {
             result = testFunction.calculate(text, regularExpression); ;
             expect(getObjectValue(result)).toStrictEqual(true);
         });
+
+        it('supports REGEXTEST positive lookahead password patterns', () => {
+            const regularExpression = StringValueObject.create('^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^\\w\\s])[^\\s]{8,15}$');
+
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('Passw0rd!'), regularExpression))).toStrictEqual(true);
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('password'), regularExpression))).toStrictEqual(false);
+        });
     });
 });

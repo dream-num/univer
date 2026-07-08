@@ -130,9 +130,12 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         for (let i = 0; i < parameterArray.length; i++) {
             const parameter = parameterArray[i];
             if (parameter instanceof LexerNode) {
-                const variant = parameter.getChildren()[0] as string;
+                const variant = getLambdaParameterName(parameter);
+                if (variant == null) {
+                    return ErrorNode.create(ErrorType.VALUE);
+                }
                 parameter.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER);
-                currentLambdaPrivacyVar.set(variant.trim(), undefined);
+                currentLambdaPrivacyVar.set(variant, undefined);
             } else {
                 return ErrorNode.create(ErrorType.VALUE);
             }
@@ -165,4 +168,24 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
     ) {
         updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
     }
+}
+
+function getLambdaParameterName(parameter: LexerNode): Nullable<string> {
+    const children = parameter.getChildren();
+    for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (typeof child === 'string') {
+            const token = child.trim();
+            if (token.length > 0) {
+                return token;
+            }
+        } else {
+            const token = getLambdaParameterName(child);
+            if (token != null) {
+                return token;
+            }
+        }
+    }
+
+    return null;
 }

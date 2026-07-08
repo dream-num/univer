@@ -192,6 +192,11 @@ describe('Test minifs function', () => {
             expect(result).toBe(3);
         });
 
+        it('Value is zero when no cells match criteria', async () => {
+            const result = await calculate('=MINIFS(A1:A4,B1:B4,">9")');
+            expect(result).toBe(0);
+        });
+
         it('Value is array', async () => {
             const result = await calculate('=MINIFS({1;2;3;4},B1:B4,">3")');
             expect(result).toBe(ErrorType.VALUE);

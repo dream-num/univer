@@ -196,6 +196,7 @@ describe('Test math kit', () => {
         expect(equals(1.1, 1.2)).toBe(false);
         expect(equals(1.11, 1.11)).toBe(true);
         expect(equals(1.11, 1.12)).toBe(false);
+        expect(equals(11567.362145082292, 11567.362145082274)).toBe(true);
     });
     // test greaterThan
     it('Function greaterThan', () => {
@@ -208,6 +209,7 @@ describe('Test math kit', () => {
         expect(greaterThan(1.11, 1.11)).toBe(false);
         expect(greaterThan(1.11, 1.12)).toBe(false);
         expect(greaterThan(1.12, 1.11)).toBe(true);
+        expect(greaterThan(11567.362145082292, 11567.362145082274)).toBe(false);
     });
     // test greaterThanOrEquals
     it('Function greaterThanOrEquals', () => {
@@ -220,6 +222,7 @@ describe('Test math kit', () => {
         expect(greaterThanOrEquals(1.11, 1.11)).toBe(true);
         expect(greaterThanOrEquals(1.11, 1.12)).toBe(false);
         expect(greaterThanOrEquals(1.12, 1.11)).toBe(true);
+        expect(greaterThanOrEquals(11567.362145082292, 11567.362145082274)).toBe(true);
     });
     // test lessThan
     it('Function lessThan', () => {
@@ -231,6 +234,7 @@ describe('Test math kit', () => {
         expect(lessThan(1.2, 1.1)).toBe(false);
         expect(lessThan(1.11, 1.11)).toBe(false);
         expect(lessThan(1.11, 1.12)).toBe(true);
+        expect(lessThan(11567.362145082274, 11567.362145082292)).toBe(false);
     });
     // test lessThanOrEquals
     it('Function lessThanOrEquals', () => {
@@ -242,6 +246,7 @@ describe('Test math kit', () => {
         expect(lessThanOrEquals(1.2, 1.1)).toBe(false);
         expect(lessThanOrEquals(1.11, 1.11)).toBe(true);
         expect(lessThanOrEquals(1.11, 1.12)).toBe(true);
+        expect(lessThanOrEquals(11567.362145082274, 11567.362145082292)).toBe(true);
     });
 
     it('Function getFractionalPart', () => {

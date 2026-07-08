@@ -37,9 +37,23 @@ type IDirtyStringMap = Record<string, string>;
 const DIRTY_DEFINED_NAME_SET_CACHE = new WeakMap<IDirtyStringMap, Set<string>>();
 const DIRTY_SUPER_TABLE_PATTERN_CACHE = new WeakMap<IDirtyStringMap, RegExp | null>();
 
-export function generateAstNode(unitId: string, formulaString: string, lexer: Lexer, astTreeBuilder: AstTreeBuilder, currentConfigService: IFormulaCurrentConfigService): AstRootNode {
+export function generateAstNode(
+    unitId: string,
+    formulaString: string,
+    lexer: Lexer,
+    astTreeBuilder: AstTreeBuilder,
+    currentConfigService: IFormulaCurrentConfigService,
+    subUnitId?: string
+): AstRootNode {
+    if (subUnitId) {
+        currentConfigService.setExecuteUnitId(unitId);
+        currentConfigService.setExecuteSubUnitId(subUnitId);
+    }
+
+    const executeSubUnitId = subUnitId ?? currentConfigService.getExecuteSubUnitId() ?? '';
+    const cacheKey = `${unitId}:${executeSubUnitId}:${formulaString}`;
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
-    let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(`${unitId}${formulaString}`);
+    let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(cacheKey);
 
     const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService) || checkIsChangedBySuperTable(unitId, formulaString, currentConfigService);
 
@@ -65,7 +79,7 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
 
     // astNode.setRefOffset(refOffsetX, refOffsetY);
     if (!noCache) {
-        FORMULA_AST_CACHE.set(`${unitId}${formulaString}`, astNode);
+        FORMULA_AST_CACHE.set(cacheKey, astNode);
     }
 
     return astNode;

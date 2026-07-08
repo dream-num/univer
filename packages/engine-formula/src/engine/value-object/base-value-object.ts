@@ -31,6 +31,8 @@ export interface IArrayValueObject {
     sheetId: string;
     row: number;
     column: number;
+    legacyImplicitForAggregate?: boolean;
+    useInvertedIndexCache?: boolean;
 }
 export class BaseValueObject extends ObjectClassType {
     private _customData: CustomData;
@@ -270,7 +272,7 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
-        let currentValue = this.getValue().toString();
+        let currentValue = formatValueForFormulaText(this.getValue());
         if (typeof value === 'string') {
             if (concatenateType === ConcatenateType.FRONT) {
                 currentValue = value + currentValue;
@@ -278,10 +280,11 @@ export class BaseValueObject extends ObjectClassType {
                 currentValue += value;
             }
         } else if (typeof value === 'number') {
+            const numberString = formatNumberForFormulaText(value);
             if (concatenateType === ConcatenateType.FRONT) {
-                currentValue = value.toString() + currentValue;
+                currentValue = numberString + currentValue;
             } else {
-                currentValue += value.toString();
+                currentValue += numberString;
             }
         } else if (typeof value === 'boolean') {
             const booleanString = value ? 'TRUE' : 'FALSE';
@@ -488,6 +491,27 @@ export class BaseValueObject extends ObjectClassType {
     }
 }
 
+export function formatValueForFormulaText(value: string | number | boolean | null): string {
+    if (typeof value === 'number') {
+        return formatNumberForFormulaText(value);
+    }
+
+    if (typeof value === 'boolean') {
+        return value ? 'TRUE' : 'FALSE';
+    }
+
+    return value == null ? '' : value.toString();
+}
+
+export function formatNumberForFormulaText(value: number): string {
+    if (!Number.isFinite(value)) {
+        return value.toString();
+    }
+
+    const rounded = Number(value.toPrecision(15));
+    return Object.is(rounded, -0) ? '0' : rounded.toString();
+}
+
 const Error_CACHE_LRU_COUNT = 1000;
 
 export const ErrorValueObjectCache = new FormulaAstLRU<ErrorValueObject>(Error_CACHE_LRU_COUNT);
@@ -531,5 +555,13 @@ export class ErrorValueObject extends BaseValueObject {
 
     override isError() {
         return true;
+    }
+
+    override concatenateFront(_valueObject: BaseValueObject): BaseValueObject {
+        return this;
+    }
+
+    override concatenateBack(_valueObject: BaseValueObject): BaseValueObject {
+        return this;
     }
 }

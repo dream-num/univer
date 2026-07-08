@@ -225,6 +225,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             this._establishDrawingMap(unitId, subUnitId);
 
             const subUnitData = data[subUnitId];
+            if (subUnitData?.data == null) {
+                return;
+            }
 
             Object.keys(subUnitData.data).forEach((drawingId) => {
                 const drawing = subUnitData.data[drawingId];

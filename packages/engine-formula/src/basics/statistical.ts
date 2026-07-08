@@ -1465,7 +1465,16 @@ export function getArrayValuesByAggregateIgnoreOptions(
                     return valueObject as ErrorValueObject;
                 }
 
-                if (!valueObject || valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
+                if (!valueObject || valueObject.isNull() || valueObject.isString()) {
+                    continue;
+                }
+
+                if (!array.isArray() && valueObject.isBoolean()) {
+                    values.push(valueObject.getValue() ? 1 : 0);
+                    continue;
+                }
+
+                if (valueObject.isBoolean()) {
                     continue;
                 }
 

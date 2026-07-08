@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -39,11 +40,7 @@ export class Concat extends BaseFunction {
                         return false; // break
                     }
 
-                    if (valueObject.isBoolean()) {
-                        concatenatedString += `${valueObject.getValue()}`.toLocaleUpperCase();
-                    } else if (valueObject.isString() || valueObject.isNumber()) {
-                        concatenatedString += valueObject.getValue();
-                    }
+                    concatenatedString += formatValueForFormulaText(valueObject.getValue());
                 });
 
                 if (isError) {
@@ -51,7 +48,7 @@ export class Concat extends BaseFunction {
                 }
             } else if (!textValue.isError() && !textValue.isNull()) {
                 // Direct concatenation if it's a single value
-                concatenatedString += textValue.getValue();
+                concatenatedString += formatValueForFormulaText(textValue.getValue());
             }
         }
 

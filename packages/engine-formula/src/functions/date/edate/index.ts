@@ -84,7 +84,8 @@ export class Edate extends BaseFunction {
             const month = _startDate.getUTCMonth() + monthsValue;
             const day = _startDate.getUTCDate();
 
-            const resultDate = new Date(Date.UTC(year, month, day));
+            const lastDayOfTargetMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+            const resultDate = new Date(Date.UTC(year, month, Math.min(day, lastDayOfTargetMonth)));
             const currentSerial = excelDateSerial(resultDate);
 
             return NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);

@@ -39,6 +39,7 @@ import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
+import { NumberValueObject } from '../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { IHyperlinkEngineFormulaService } from './hyperlink-engine-formula.service';
 
@@ -98,6 +99,10 @@ export interface IFormulaRuntimeService {
 
     currentColumn: number;
 
+    currentRowCount: number;
+
+    currentColumnCount: number;
+
     currentSubUnitId: string;
 
     currentUnitId: string;
@@ -114,6 +119,8 @@ export interface IFormulaRuntimeService {
         sheetId: string,
         unitId: string
     ): void;
+
+    setFunctionRefInfoOverride(rowCount: number, columnCount: number): () => void;
 
     registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
 
@@ -209,6 +216,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _currentRowCount: number = Number.NEGATIVE_INFINITY;
     private _currentColumnCount: number = Number.NEGATIVE_INFINITY;
 
+    private _functionRefInfoOverrideStack: Array<{ rowCount: number; columnCount: number }> = [];
+
     private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';
 
@@ -265,11 +274,13 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     get currentRowCount() {
-        return this._currentRowCount;
+        return this._functionRefInfoOverrideStack[this._functionRefInfoOverrideStack.length - 1]?.rowCount ??
+            this._currentRowCount;
     }
 
     get currentColumnCount() {
-        return this._currentColumnCount;
+        return this._functionRefInfoOverrideStack[this._functionRefInfoOverrideStack.length - 1]?.columnCount ??
+            this._currentColumnCount;
     }
 
     get currentSubUnitId() {
@@ -395,6 +406,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._isCycleDependency = false;
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
+        this._functionRefInfoOverrideStack = [];
 
         this.clearReferenceAndNumberformatCache();
     }
@@ -412,6 +424,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._currentColumnCount = columnCount;
         this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
+    }
+
+    setFunctionRefInfoOverride(rowCount: number, columnCount: number) {
+        this._functionRefInfoOverrideStack.push({ rowCount, columnCount });
+
+        return () => {
+            this._functionRefInfoOverrideStack.pop();
+        };
     }
 
     clearFunctionDefinitionPrivacyVar() {
@@ -551,7 +571,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
              * then it is not treated as an array range and is directly assigned.
              */
             if (startRow === endRow && startColumn === endColumn) {
-                const firstCell = objectValueRefOrArray.getFirstCell();
+                const firstCellRaw = objectValueRefOrArray.getFirstCell();
+                const firstCell = firstCellRaw.isNull()
+                    ? NumberValueObject.create(0)
+                    : firstCellRaw;
                 // TODO @Dushusir set pattern style
                 const valueObject = this._getValueObjectOfRuntimeData(firstCell);
                 sheetData.setValue(row, column, valueObject);
@@ -563,6 +586,24 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     sheetId,
                     column,
                     firstCell.getValue(),
+                    row,
+                    true
+                );
+
+                return;
+            }
+
+            if (this._isCurrentSingleCellArrayFormulaRange(unitId, sheetId, row, column)) {
+                const errorObject = this._getValueObjectOfRuntimeData(ErrorValueObject.create(ErrorType.VALUE));
+                sheetData.setValue(row, column, errorObject);
+                clearArrayUnitData.setValue(row, column, errorObject);
+                runtimeArrayUnitData.setValue(row, column, errorObject);
+
+                CELL_INVERTED_INDEX_CACHE.set(
+                    unitId,
+                    sheetId,
+                    column,
+                    ErrorType.VALUE,
                     row,
                     true
                 );
@@ -923,6 +964,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         });
 
         return isCellOverlapping;
+    }
+
+    private _isCurrentSingleCellArrayFormulaRange(unitId: string, sheetId: string, row: number, column: number) {
+        const range = this._currentConfigService.getArrayFormulaRange()[unitId]?.[sheetId]?.[row]?.[column];
+
+        return range != null &&
+            range.startRow === range.endRow &&
+            range.startColumn === range.endColumn;
     }
 
     private _isInArrayFormulaRange(range: Nullable<IRange>, r: number, c: number) {

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ERROR_TYPE_SET } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {
@@ -38,6 +41,26 @@ export class Compare extends BaseFunction {
             return variant2;
         }
 
+        const variant1Error = this._coerceErrorLiteral(variant1);
+        if (variant1Error) {
+            return variant1Error;
+        }
+
+        const variant2Error = this._coerceErrorLiteral(variant2);
+        if (variant2Error) {
+            return variant2Error;
+        }
+
         return variant1.compare(variant2, this._compareType);
+    }
+
+    private _coerceErrorLiteral(variant: BaseValueObject) {
+        const value = variant.getValue();
+
+        if (typeof value === 'string' && ERROR_TYPE_SET.has(value as ErrorType)) {
+            return ErrorValueObject.create(value as ErrorType);
+        }
+
+        return null;
     }
 }

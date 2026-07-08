@@ -136,7 +136,7 @@ export class InvertedIndexCache {
 
         if (ERROR_TYPE_SET.has(_value as ErrorType)) {
             result.errorType = _value as ErrorType;
-        } else if (_value === 0 || _value === DEFAULT_EMPTY_CELL_KEY) {
+        } else if (_value === 0) {
             const rows = [];
 
             const rowsForZero = columnMap.get(0);
@@ -150,6 +150,8 @@ export class InvertedIndexCache {
             }
 
             result.matchingRows = rows.filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+        } else if (_value === DEFAULT_EMPTY_CELL_KEY) {
+            result.matchingRows = Array.from(columnMap.get(DEFAULT_EMPTY_CELL_KEY) ?? []).filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
         } else {
             result.matchingRows = Array.from(columnMap.get(_value) ?? []).filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
         }

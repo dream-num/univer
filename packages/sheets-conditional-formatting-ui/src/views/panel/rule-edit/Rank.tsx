@@ -165,7 +165,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 }}
             />
             {['isNotBottom', 'isBottom'].includes(type) && (
-                <div className="univer-mt-3 univer-flex univer-items-center">
+                <div className="univer-mt-3 univer-flex univer-items-center univer-gap-2">
                     <InputNumber
                         min={1}
                         max={1000}
@@ -177,7 +177,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     />
                     <div
-                        className="univer-ml-3 univer-flex univer-items-center univer-text-xs"
+                        className="univer-flex univer-items-center univer-text-xs"
                     >
                         <Checkbox
                             checked={isPercent}

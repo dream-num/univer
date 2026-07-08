@@ -146,5 +146,23 @@ describe('Test max function', () => {
             const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0);
         });
+
+        it('uses raw double ordering for close numeric array values', () => {
+            const values = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[
+                    5530.857777777777,
+                    5530.857777777777,
+                    5530.857777777778,
+                ]]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(values);
+            expect(result.getValue()).toBe(5530.857777777778);
+        });
     });
 });

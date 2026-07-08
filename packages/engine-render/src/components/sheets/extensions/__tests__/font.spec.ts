@@ -32,6 +32,7 @@ function createCtx() {
         rectByPrecision: vi.fn(),
         drawImage: vi.fn(),
         fillRectByPrecision: vi.fn(),
+        fillText: vi.fn(),
         getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
     } as any;
 }
@@ -86,6 +87,7 @@ function createSpreadsheetSkeleton() {
         getRowVisible: vi.fn(() => true),
         getColVisible: vi.fn(() => true),
         getCell: vi.fn(() => ({ v: 'A', t: CellValueType.STRING })),
+        getMergeData: vi.fn(() => []),
         getSpanModel: vi.fn(() => ({
             getMergeDataIndex: vi.fn(() => -1),
         })),
@@ -211,6 +213,7 @@ describe('font extension', () => {
 
     it('covers text render alignment and wrap branches', () => {
         const drawWithSpy = vi.spyOn(Text as any, 'drawWith').mockImplementation((..._args: any[]) => undefined);
+        const drawPlainSpy = vi.spyOn(Text as any, 'drawPlainWith').mockImplementation((..._args: any[]) => undefined);
         const font = new Font() as any;
         const ctx = createCtx();
         const overflow = new ObjectMatrix<any>();
@@ -243,20 +246,40 @@ describe('font extension', () => {
             cellData: { v: true, t: CellValueType.BOOLEAN },
         });
         font._renderText(ctx, 0, 0, renderFontCtx, overflow);
-        expect(drawWithSpy).toHaveBeenLastCalledWith(
+        expect(drawPlainSpy).toHaveBeenLastCalledWith(
             ctx,
             expect.objectContaining({
                 hAlign: HorizontalAlign.CENTER,
+                text: 'TRUE',
+                warp: false,
+            })
+        );
+
+        renderFontCtx.fontCache = createFontCache({
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            resolvedHorizontalAlign: HorizontalAlign.LEFT,
+            displayText: 'cached text',
+            wrapStrategy: WrapStrategy.OVERFLOW,
+            cellData: { v: 123, t: CellValueType.NUMBER },
+        });
+        font._renderText(ctx, 0, 0, renderFontCtx, overflow);
+        expect(drawPlainSpy).toHaveBeenLastCalledWith(
+            ctx,
+            expect.objectContaining({
+                hAlign: HorizontalAlign.LEFT,
+                text: 'cached text',
                 warp: false,
             })
         );
 
         const before = drawWithSpy.mock.calls.length;
+        const beforePlain = drawPlainSpy.mock.calls.length;
         renderFontCtx.fontCache = createFontCache({
             cellData: { v: null, t: CellValueType.STRING },
         });
         font._renderText(ctx, 0, 0, renderFontCtx, overflow);
         expect(drawWithSpy.mock.calls.length).toBe(before);
+        expect(drawPlainSpy.mock.calls.length).toBe(beforePlain);
     });
 
     it('covers documents render branches and missing documents error', () => {
@@ -599,6 +622,151 @@ describe('font extension', () => {
         } as any);
         expect(ctx.save).toHaveBeenCalled();
         expect(ctx.restore).toHaveBeenCalled();
+    });
+
+    it('does not read live cell data for plain cached font cells', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        fontMatrix.setValue(0, 0, createFontCache({
+            cellData: { v: 'text', t: CellValueType.STRING },
+        }));
+        const getCellSpy = vi.spyOn(spreadsheetSkeleton.worksheet, 'getCell');
+        vi.spyOn(font, '_renderText').mockImplementation(() => undefined);
+
+        const result = font._renderFontEachCell({
+            ctx,
+            scale: 1,
+            columnTotalWidth: 120,
+            rowTotalHeight: 60,
+            viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+            diffRanges: [],
+            spreadsheetSkeleton,
+            cellInfo: createCellInfo(),
+        } as any, 0, 0, fontMatrix);
+
+        expect(result).toBe(false);
+        expect(getCellSpy).not.toHaveBeenCalled();
+    });
+
+    it('draws fitting plain text without clipping', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        fontMatrix.setValue(0, 0, createFontCache({
+            cellData: { v: 123, t: CellValueType.NUMBER },
+            displayText: 'cached fit',
+            resolvedHorizontalAlign: HorizontalAlign.LEFT,
+            textFitsCurrentCell: true,
+        }));
+        const drawPlainSpy = vi.spyOn(Text, 'drawPlainWith').mockImplementation(() => 10);
+        const clipSpy = vi.spyOn(font, '_clipByRenderBounds').mockImplementation(() => undefined);
+        const renderTextSpy = vi.spyOn(font, '_renderText').mockImplementation(() => undefined);
+
+        const result = font._renderFontEachCell({
+            ctx,
+            scale: 1,
+            columnTotalWidth: 120,
+            rowTotalHeight: 60,
+            viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+            diffRanges: [],
+            spreadsheetSkeleton,
+            cellInfo: createCellInfo(),
+        } as any, 0, 0, fontMatrix);
+
+        expect(result).toBe(false);
+        expect(drawPlainSpy).toHaveBeenCalledOnce();
+        expect(drawPlainSpy).toHaveBeenCalledWith(
+            ctx,
+            expect.objectContaining({
+                text: 'cached fit',
+                hAlign: HorizontalAlign.LEFT,
+            })
+        );
+        expect(clipSpy).not.toHaveBeenCalled();
+        expect(renderTextSpy).not.toHaveBeenCalled();
+        expect(ctx.save).not.toHaveBeenCalled();
+    });
+
+    it('checks live cell data for cached font render extensions', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        fontMatrix.setValue(0, 0, createFontCache({
+            cellData: { v: 'text', t: CellValueType.STRING, fontRenderExtension: {} },
+        }));
+        vi.spyOn(spreadsheetSkeleton.worksheet, 'getCell').mockReturnValue({
+            v: 'text',
+            t: CellValueType.STRING,
+            fontRenderExtension: { isSkip: true },
+        } as any);
+        const renderTextSpy = vi.spyOn(font, '_renderText').mockImplementation(() => undefined);
+
+        const result = font._renderFontEachCell({
+            ctx,
+            scale: 1,
+            columnTotalWidth: 120,
+            rowTotalHeight: 60,
+            viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+            diffRanges: [],
+            spreadsheetSkeleton,
+            cellInfo: createCellInfo(),
+        } as any, 0, 0, fontMatrix);
+
+        expect(result).toBe(true);
+        expect(renderTextSpy).not.toHaveBeenCalled();
+    });
+
+    it('skips coordinate calculation for cells without font cache', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        fontMatrix.setValue(0, 0, createFontCache());
+        spreadsheetSkeleton.stylesCache = { fontMatrix };
+        spreadsheetSkeleton.columnTotalWidth = 120;
+        spreadsheetSkeleton.rowTotalHeight = 60;
+        const renderCellSpy = vi.spyOn(font, '_renderFontEachCell').mockReturnValue(true);
+
+        font.draw(ctx, { scaleX: 1, scaleY: 1 } as any, spreadsheetSkeleton, [], {
+            viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
+            checkOutOfViewBound: true,
+            viewportKey: 'viewMain',
+        } as any);
+
+        expect(spreadsheetSkeleton.getCellWithCoordByIndex).toHaveBeenCalledOnce();
+        expect(spreadsheetSkeleton.getCellWithCoordByIndex).toHaveBeenCalledWith(0, 0, false);
+        expect(renderCellSpy).toHaveBeenCalledOnce();
+    });
+
+    it('skips merge lookup work when the sheet has no merged cells', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        fontMatrix.setValue(0, 0, createFontCache());
+        spreadsheetSkeleton.stylesCache = { fontMatrix };
+        spreadsheetSkeleton.columnTotalWidth = 120;
+        spreadsheetSkeleton.rowTotalHeight = 60;
+        const getSpanModelSpy = vi.spyOn(spreadsheetSkeleton.worksheet, 'getSpanModel');
+        const getMergedCellRangeSpy = vi.spyOn(spreadsheetSkeleton.worksheet, 'getMergedCellRange');
+        const renderCellSpy = vi.spyOn(font, '_renderFontEachCell').mockReturnValue(true);
+
+        font.draw(ctx, { scaleX: 1, scaleY: 1 } as any, spreadsheetSkeleton, [], {
+            viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
+            checkOutOfViewBound: true,
+            viewportKey: 'viewMain',
+        } as any);
+
+        expect(getSpanModelSpy).not.toHaveBeenCalled();
+        expect(getMergedCellRangeSpy).not.toHaveBeenCalled();
+        expect(renderCellSpy).toHaveBeenCalledOnce();
     });
 
     it('does not mutate shared view ranges when expanding text overflow bounds', () => {

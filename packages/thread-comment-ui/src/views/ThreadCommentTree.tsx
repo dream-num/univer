@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IUser, UniverInstanceType } from '@univerjs/core';
+import type { IUser, LocaleType, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
-import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
+import { dateKit, generateRandomId, ICommandService, LOCALE_META, LocaleService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, SuccessIcon, SuccessOutlineIcon } from '@univerjs/icons';
 import {
@@ -85,6 +85,20 @@ export interface IThreadCommentItemProps {
 
 const MOCK_ID = '__mock__';
 
+function formatCommentDateTime(value: string, locale: LocaleType): string {
+    const date = dateKit(value);
+    const localeTag = LOCALE_META[locale].tag;
+
+    return date.formatIntl(localeTag, {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+}
+
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment, type, threadCommentEditorId } = props;
     const commandService = useDependency(ICommandService);
@@ -97,6 +111,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const [showReply, setShowReply] = useState(false);
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const avatarFallback = uiConfig?.avatarFallback;
+    const currentLocale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const dateText = formatCommentDateTime(item.dT, currentLocale);
 
     const handleDeleteItem = () => {
         if (onDeleteComment?.(item) === false) {
@@ -117,11 +133,19 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     };
 
     return (
-        <div className="univer-relative univer-mb-3 univer-pl-[30px]" onMouseLeave={() => setShowReply(false)} onMouseEnter={() => setShowReply(true)}>
+        <div
+            className="
+              univer-relative univer-mb-3 univer-pl-[30px]
+              rtl:univer-pl-0 rtl:univer-pr-[30px]
+            "
+            onMouseLeave={() => setShowReply(false)}
+            onMouseEnter={() => setShowReply(true)}
+        >
             <div
                 className={`
                   univer-absolute univer-left-0 univer-top-0 univer-size-6 univer-rounded-full univer-bg-cover
                   univer-bg-center univer-bg-no-repeat
+                  rtl:univer-left-auto rtl:univer-right-0
                 `}
                 style={{
                     backgroundImage: `url(${user?.avatar || avatarFallback})`,
@@ -145,6 +169,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                   univer-items-center univer-justify-center univer-rounded-sm
                                                   univer-text-base
                                                   hover:univer-bg-gray-50
+                                                  rtl:univer-ml-0 rtl:univer-mr-1
                                                   dark:hover:!univer-bg-gray-800
                                                 `}
                                                 onClick={() => onReply(user)}
@@ -194,6 +219,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                               univer-items-center univer-justify-center univer-rounded-sm
                                               univer-text-base
                                               hover:univer-bg-gray-50
+                                              rtl:univer-ml-0 rtl:univer-mr-1
                                               dark:hover:!univer-bg-gray-800
                                             `}
                                         >
@@ -207,12 +233,13 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 )
                 : null}
             <time
+                dir="ltr"
                 className={`
-                  univer-mb-1 univer-text-xs/normal univer-text-gray-600
+                  univer-mb-1 univer-block univer-text-xs/normal univer-text-gray-600
                   dark:!univer-text-gray-200
                 `}
             >
-                {item.dT}
+                {dateText}
             </time>
             {editing
                 ? (
@@ -421,6 +448,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         className={`
                           univer-mr-2 univer-h-3.5 univer-w-[3px] univer-flex-shrink-0 univer-flex-grow-0
                           univer-rounded-sm univer-bg-yellow-500
+                          rtl:univer-ml-2 rtl:univer-mr-0
                         `}
                     />
                     <Tooltip showIfEllipsis title={title}>
@@ -438,6 +466,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                               univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer univer-items-center
                               univer-justify-center univer-rounded-[3px] univer-text-base
                               hover:univer-bg-gray-50
+                              rtl:univer-ml-0 rtl:univer-mr-1
                               dark:hover:!univer-bg-gray-800
                             `, {
                                 'univer-text-green-500': resolved,
@@ -453,6 +482,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                       univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
                                       hover:univer-bg-gray-50
+                                      rtl:univer-ml-0 rtl:univer-mr-1
                                       dark:hover:!univer-bg-gray-800
                                     `}
                                     onClick={handleDeleteRoot}

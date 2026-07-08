@@ -24,6 +24,7 @@ import {
     ConfigService,
     ContextService,
     createIdentifier,
+    dateKit,
     DesktopLogService,
     ICommandService,
     IConfigService,
@@ -33,7 +34,9 @@ import {
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
+    LOCALE_META,
     LocaleService,
+    LocaleType,
     LogLevel,
     toDisposable,
     UniverInstanceType,
@@ -89,8 +92,19 @@ class TestState {
 }
 
 class TestLocaleService {
+    private readonly _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
+    readonly currentLocale$ = this._currentLocale$.asObservable();
+
     t(key: string) {
         return key;
+    }
+
+    setLocale(locale: LocaleType) {
+        this._currentLocale$.next(locale);
+    }
+
+    getCurrentLocale() {
+        return this._currentLocale$.getValue();
     }
 }
 
@@ -519,6 +533,57 @@ describe('ThreadCommentTree', () => {
         container?.remove();
         root = undefined;
         container = undefined;
+    });
+
+    it('provides mirrored layout hooks for RTL comment rows', () => {
+        const testBed = createTreeTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: '2026/07/07 20:35' }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        const tree = getTree(container, 'root-thread');
+        const header = tree.firstElementChild as HTMLElement;
+        const titleAccent = header.firstElementChild?.firstElementChild as HTMLElement;
+        const resolveAction = getResolveAction(container, 'root-thread');
+        const item = getRootCommentItem(container, 'root-thread');
+        const avatar = item.firstElementChild as HTMLElement;
+        const time = item.querySelector('time');
+
+        expect(titleAccent.className).toContain('rtl:univer-ml-2');
+        expect(titleAccent.className).toContain('rtl:univer-mr-0');
+        expect(resolveAction.className).toContain('rtl:univer-ml-0');
+        expect(resolveAction.className).toContain('rtl:univer-mr-1');
+        expect(item.className).toContain('rtl:univer-pl-0');
+        expect(item.className).toContain('rtl:univer-pr-[30px]');
+        expect(avatar.className).toContain('rtl:univer-left-auto');
+        expect(avatar.className).toContain('rtl:univer-right-0');
+        expect(time?.getAttribute('dir')).toBe('ltr');
+    });
+
+    it('formats comment timestamps with dateKit intl using the current locale', () => {
+        const testBed = createTreeTestBed();
+        const rawDate = '2026/07/07 20:35';
+        testBed.injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: rawDate }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        const time = getRootCommentItem(container, 'root-thread').querySelector('time');
+        const expected = dateKit(rawDate).formatIntl(LOCALE_META[LocaleType.EN_US].tag, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+
+        expect(time?.textContent).toBe(expected);
+        expect(time?.textContent).not.toBe(rawDate);
     });
 
     it('adds a reply through the tree editor and stores it under the root thread', async () => {

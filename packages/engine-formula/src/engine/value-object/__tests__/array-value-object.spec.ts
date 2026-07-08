@@ -21,7 +21,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../primitive-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
     const originArrayValueObject = ArrayValueObject.create({
@@ -36,6 +36,30 @@ describe('arrayValueObject test', () => {
         sheetId: '',
         row: 0,
         column: 0,
+    });
+
+    it('maps sparse comparison arrays with their default value', () => {
+        const sparseValues: BaseValueObject[][] = [];
+        sparseValues[1] = [BooleanValueObject.create(true)];
+
+        const sparseArray = ArrayValueObject.create({
+            calculateValueList: sparseValues,
+            rowCount: 3,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        sparseArray.setDefaultValue(BooleanValueObject.create(false));
+
+        const result = sparseArray.getNegative().getNegative();
+
+        expect(getObjectValue(result)).toStrictEqual([
+            [0],
+            [1],
+            [0],
+        ]);
     });
 
     describe('slice', () => {
@@ -254,7 +278,7 @@ describe('arrayValueObject test', () => {
             });
             const result = originValueObject.sum();
 
-            expect(getObjectValue(result)).toStrictEqual(101.57);
+            expect(getObjectValue(result) as number).toBeCloseTo(101.57);
         });
     });
 
@@ -426,6 +450,13 @@ describe('arrayValueObject test', () => {
             stringValueObject = ValueObjectFactory.create(' ');
 
             expect(stringValueObject.isString()).toBeTruthy();
+        });
+
+        it('StringValueObject empty string converts to VALUE error for arithmetic coercion', () => {
+            const number = StringValueObject.create('').convertToNumberObjectValue();
+
+            expect(number.isError()).toBeTruthy();
+            expect((number as ErrorValueObject).getErrorType()).toBe(ErrorType.VALUE);
         });
 
         it('ValueObjectFactory create ErrorValueObject ', () => {

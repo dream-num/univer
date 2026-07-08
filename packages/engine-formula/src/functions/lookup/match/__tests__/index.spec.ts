@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Match } from '../index';
 
@@ -42,6 +42,29 @@ describe('Test match', () => {
             const resultObject = testFunction.calculate(lookupValue, lookupArray);
             expect(resultObject.getValue()).toBe(2);
         });
+
+        it('treats an empty third argument as exact match', async () => {
+            const lookupValue = BooleanValueObject.create(true);
+            const lookupArray = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [false, false, false],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const emptyThirdArgument = NullValueObject.create();
+            const exactResult = testFunction.calculate(lookupValue, lookupArray, emptyThirdArgument);
+            const omittedResult = testFunction.calculate(lookupValue, lookupArray);
+
+            expect(exactResult.getValue()).toBe(ErrorType.NA);
+            expect(omittedResult.getValue()).toBe(3);
+        });
+
         it('LookupArray asc, matchType is 1', async () => {
             const lookupValue = NumberValueObject.create(5);
             const lookupArray = ArrayValueObject.create({
@@ -98,6 +121,25 @@ describe('Test match', () => {
 
             const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
             expect(resultObject.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('uses strict numeric equality for exact match', async () => {
+            const lookupValue = NumberValueObject.create(5530.857777777778);
+            const lookupArray = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [5530.857777777777, 5530.857777777777, 5530.857777777778],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const matchType = NumberValueObject.create(0);
+
+            const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
+            expect(resultObject.getValue()).toBe(3);
         });
 
         it('LookupArray asc, matchType is -1', async () => {

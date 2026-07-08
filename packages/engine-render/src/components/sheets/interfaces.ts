@@ -52,6 +52,9 @@ export interface IFontCacheItem {
     cellData: Nullable<ICellDataForSheetInterceptor>;
     fontString: string;
     style?: Nullable<IStyleData>;
+    displayText?: string;
+    resolvedHorizontalAlign?: HorizontalAlign;
+    textFitsCurrentCell?: boolean;
 }
 
 type colorString = string;

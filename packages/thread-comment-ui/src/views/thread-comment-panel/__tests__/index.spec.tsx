@@ -34,6 +34,7 @@ import {
     LifecycleService,
     LifecycleStages,
     LocaleService,
+    LocaleType,
     LogLevel,
     toDisposable,
     UniverInstanceType,
@@ -78,8 +79,15 @@ interface IEditorRecord {
 }
 
 class TestLocaleService {
+    private readonly _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
+    readonly currentLocale$ = this._currentLocale$.asObservable();
+
     t(key: string) {
         return key;
+    }
+
+    getCurrentLocale() {
+        return this._currentLocale$.getValue();
     }
 }
 

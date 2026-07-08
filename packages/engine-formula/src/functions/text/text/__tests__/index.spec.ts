@@ -74,6 +74,14 @@ describe('Test text function', () => {
             expect(getObjectValue(result)).toBe(expectedWeekday);
         });
 
+        it('Text normalizes Excel Swedish weekday token to English weekday', () => {
+            const text1 = NumberValueObject.create(44926);
+            const formatText = StringValueObject.create('\u00C5\u00C5\u00C5\u00C5-MM-DD');
+            const result = testFunction.calculate(text1, formatText);
+
+            expect(getObjectValue(result)).toBe('Saturday-12-31');
+        });
+
         it('Text is array, format text is array', () => {
             const text1 = new ArrayValueObject({
                 calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null, 0, '100', '2.34', 'test', -3, ErrorType.NAME]]),

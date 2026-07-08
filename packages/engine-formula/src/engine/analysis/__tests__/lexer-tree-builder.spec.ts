@@ -31,6 +31,14 @@ describe('lexer nodeMaker test', () => {
     const lexerTreeBuilder = new LexerTreeBuilder();
 
     describe('lexer', () => {
+        it('preserves empty string comparison inside IF parameter', () => {
+            const node = lexerTreeBuilder.treeBuilder('=IF(A1="","blank","not blank")') as LexerNode;
+
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                String.raw`{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"IF","st":0,"ed":1,"children":[{"token":"P_1","st":-1,"ed":1,"children":["A1","\"\"","="]},{"token":"P_1","st":5,"ed":7,"children":["\"blank\""]},{"token":"P_1","st":13,"ed":15,"children":["\"not blank\""]}]}]}`
+            );
+        });
+
         it('lambda simple1', () => {
             const node = lexerTreeBuilder.treeBuilder(
                 '=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)'

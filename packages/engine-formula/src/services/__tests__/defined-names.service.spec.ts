@@ -81,6 +81,28 @@ describe('DefinedNamesService', () => {
         expect(service.getDefinedNameMap('unit-2')).toBeUndefined();
     });
 
+    it('should prefer sheet-local defined names over workbook-scope names', () => {
+        const { service } = createDefinedNamesService();
+        service.registerDefinedNames('unit-local', {
+            local: {
+                id: 'local',
+                name: 'date_begin',
+                localSheetId: 'sheet-weekly',
+                formulaOrRefString: 'Weekly!$F$4',
+            },
+            global: {
+                id: 'global',
+                name: 'date_begin',
+                localSheetId: 'AllDefaultWorkbook',
+                formulaOrRefString: 'Report!$F$4',
+            },
+        });
+
+        expect(service.getValueByName('unit-local', 'date_begin', 'sheet-weekly')?.id).toBe('local');
+        expect(service.getValueByName('unit-local', 'date_begin', 'sheet-report')?.id).toBe('global');
+        expect(service.getValueByName('unit-local', 'DATE_BEGIN')?.id).toBe('global');
+    });
+
     it('should emit update/current/focus streams', () => {
         const { service } = createDefinedNamesService();
         let updateCount = 0;

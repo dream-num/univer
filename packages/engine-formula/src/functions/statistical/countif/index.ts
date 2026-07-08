@@ -40,6 +40,10 @@ export class Countif extends BaseFunction {
 
         if (criteria.isReferenceObject()) {
             _criteria = (criteria as BaseReferenceObject).toArrayValueObject();
+            if ((_criteria as ArrayValueObject).getRowCount() === 1 && (_criteria as ArrayValueObject).getColumnCount() === 1) {
+                const firstCriteria = (_criteria as ArrayValueObject).get(0, 0) as BaseValueObject;
+                _criteria = firstCriteria.isNull() ? NumberValueObject.create(0) : firstCriteria;
+            }
         }
 
         if (_criteria.isArray()) {

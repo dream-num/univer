@@ -21,7 +21,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { createNewArray, expandArrayValueObject } from '../../../engine/utils/array-object';
 import { isSingleValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Vlookup extends BaseFunction {
@@ -194,9 +194,35 @@ export class Vlookup extends BaseFunction {
         rangeLookupValue: number
     ) {
         if (rangeLookupValue === 0) {
-            return this.equalSearch(value, searchArray, resultArray);
+            if (value.isNull()) {
+                return this._equalSearchBlankLookupValue(searchArray, resultArray);
+            }
+
+            return this._blankResultAsZero(this.equalSearch(value, searchArray, resultArray));
         }
 
         return this.binarySearch(value, searchArray, resultArray);
+    }
+
+    private _equalSearchBlankLookupValue(searchArray: ArrayValueObject, resultArray: ArrayValueObject) {
+        const zero = NumberValueObject.create(0);
+        const matched = searchArray.mapValue((value) => {
+            if (value.isNull()) {
+                return BooleanValueObject.create(false);
+            }
+
+            return value.isEqual(zero);
+        }) as ArrayValueObject;
+        const resultArrayValue = resultArray.pickRaw(matched);
+
+        return this._blankResultAsZero(resultArrayValue[0]?.[0] || ErrorValueObject.create(ErrorType.NA));
+    }
+
+    private _blankResultAsZero(value: BaseValueObject) {
+        if (value.isNull()) {
+            return NumberValueObject.create(0);
+        }
+
+        return value;
     }
 }

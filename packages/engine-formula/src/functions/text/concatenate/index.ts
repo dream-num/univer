@@ -18,7 +18,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject, formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -43,6 +43,19 @@ export class Concatenate extends BaseFunction {
         });
 
         let result: BaseValueObject | null = null;
+        const referenceSource = textValues.find((textValue) => {
+            if (!textValue.isArray()) {
+                return false;
+            }
+
+            const arrayValue = textValue as ArrayValueObject;
+            return (
+                arrayValue.getUnitId() !== '' &&
+                arrayValue.getSheetId() !== '' &&
+                arrayValue.getCurrentRow() >= 0 &&
+                arrayValue.getCurrentColumn() >= 0
+            );
+        }) as ArrayValueObject | undefined;
 
         for (const textValue of textValues) {
             const textValueArray = expandArrayValueObject(maxRowLength, maxColumnLength, textValue, ErrorValueObject.create(ErrorType.NA));
@@ -57,19 +70,8 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                let resultValue = resultValueObject?.getValue();
-                let textValue = textValueObject?.getValue();
-
-                if (resultValueObject?.isBoolean()) {
-                    resultValue = `${resultValue}`.toLocaleUpperCase();
-                }
-
-                if (textValueObject?.isBoolean()) {
-                    textValue = `${textValue}`.toLocaleUpperCase();
-                }
-
-                const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValue ?? '';
-                const textValueObjectString = textValueObject?.isNull() ? '' : textValue ?? '';
+                const resultValueObjectString = resultValueObject?.isNull() ? '' : formatValueForFormulaText(resultValueObject?.getValue() ?? null);
+                const textValueObjectString = textValueObject?.isNull() ? '' : formatValueForFormulaText(textValueObject?.getValue() ?? null);
 
                 return StringValueObject.create(`${resultValueObjectString}${textValueObjectString}`);
             });
@@ -77,6 +79,13 @@ export class Concatenate extends BaseFunction {
 
         if (!result) {
             return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (referenceSource && result.isArray()) {
+            const resultArray = result as ArrayValueObject;
+            resultArray.setUnitId(referenceSource.getUnitId());
+            resultArray.setSheetId(referenceSource.getSheetId());
+            resultArray.setCurrent(referenceSource.getCurrentRow(), referenceSource.getCurrentColumn());
         }
 
         return result;

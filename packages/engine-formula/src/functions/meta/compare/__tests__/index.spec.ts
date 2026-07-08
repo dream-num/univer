@@ -68,6 +68,15 @@ describe('Test compare function', () => {
             expect(result.getValue()).toBe(true);
         });
 
+        it('Comparing error literal propagates error', () => {
+            const value1 = StringValueObject.create(ErrorType.DIV_BY_ZERO);
+            const value2 = StringValueObject.create('Data Error');
+
+            testFunction.setCompareType(compareToken.EQUALS);
+            const result = testFunction.calculate(value1, value2);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+
         it('Array contains multi types cell, compare number', () => {
             const value1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -16,6 +16,7 @@
 
 import type { IRange, LocaleType, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
+import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type {
     BaseReferenceObject,
     FunctionVariantType,
@@ -46,6 +47,8 @@ export class BaseFunction {
     private _subUnitId: Nullable<string>;
     private _row: number = -1;
     private _column: number = -1;
+    private _currentFormulaRowCount: number = 1;
+    private _currentFormulaColumnCount: number = 1;
     private _definedNames: Nullable<IDefinedNameMapItem>;
     private _locale: LocaleType;
     private _sheetOrder: string[];
@@ -90,6 +93,17 @@ export class BaseFunction {
     needsFilteredOutRows: boolean = false;
 
     /**
+     * Whether the function needs unevaluated AST children.
+     */
+    needsAstChildren: boolean = false;
+
+    /**
+     * Legacy CSE-style array functions should write only the first result cell
+     * when they are used as a top-level normal formula.
+     */
+    returnsLegacyArrayAsScalar: boolean = false;
+
+    /**
      * Minimum number of parameters
      */
     minParams: number = -1;
@@ -123,6 +137,14 @@ export class BaseFunction {
         return this._column;
     }
 
+    get currentFormulaRowCount() {
+        return this._currentFormulaRowCount;
+    }
+
+    get currentFormulaColumnCount() {
+        return this._currentFormulaColumnCount;
+    }
+
     dispose() {
 
     }
@@ -138,8 +160,9 @@ export class BaseFunction {
         if (nameMap == null) {
             return null;
         }
+        const normalizedName = name.toLowerCase();
         return Object.values(nameMap).find((value) => {
-            return value.name === name;
+            return value.name.toLowerCase() === normalizedName;
         });
     }
 
@@ -198,11 +221,13 @@ export class BaseFunction {
         return false;
     }
 
-    setRefInfo(unitId: string, subUnitId: string, row: number, column: number) {
+    setRefInfo(unitId: string, subUnitId: string, row: number, column: number, rowCount: number = 1, columnCount: number = 1) {
         this._unitId = unitId;
         this._subUnitId = subUnitId;
         this._row = row;
         this._column = column;
+        this._currentFormulaRowCount = rowCount;
+        this._currentFormulaColumnCount = columnCount;
     }
 
     calculateCustom(
@@ -212,6 +237,13 @@ export class BaseFunction {
     }
 
     calculate(...arg: BaseValueObject[]): NodeValueType {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    calculateAst(
+        _children: BaseAstNode[],
+        _getVariant: (node: BaseAstNode) => Nullable<FunctionVariantType>
+    ): NodeValueType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 

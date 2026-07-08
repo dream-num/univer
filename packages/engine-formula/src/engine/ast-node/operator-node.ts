@@ -75,11 +75,11 @@ export class OperatorNode extends BaseAstNode {
         }
 
         if (object1.isReferenceObject()) {
-            object1 = (object1 as BaseReferenceObject).toArrayValueObject();
+            object1 = this._referenceToOperatorValue(object1 as BaseReferenceObject);
         }
 
         if (object2.isReferenceObject()) {
-            object2 = (object2 as BaseReferenceObject).toArrayValueObject();
+            object2 = this._referenceToOperatorValue(object2 as BaseReferenceObject);
         }
 
         const result = this._functionExecutor.calculate(
@@ -90,6 +90,15 @@ export class OperatorNode extends BaseAstNode {
         this._setEmbeddedArrayFormulaToResult(result);
 
         this.setValue(result);
+    }
+
+    private _referenceToOperatorValue(reference: BaseReferenceObject): BaseValueObject {
+        const array = reference.toArrayValueObject();
+        if (array.getRowCount() === 1 && array.getColumnCount() === 1) {
+            return array.get(0, 0) as BaseValueObject;
+        }
+
+        return array;
     }
 
     /**

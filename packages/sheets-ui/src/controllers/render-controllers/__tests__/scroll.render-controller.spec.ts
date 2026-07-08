@@ -140,6 +140,8 @@ describe('SheetsScrollRenderController', () => {
 
         expect(viewMain.limitedScroll).toHaveBeenCalledWith(0, 2);
         expect(preventDefault).toHaveBeenCalled();
+        expect(viewMain.scrollY).toBe(-34);
+        expect(viewMain.viewportScrollY).toBe(20);
 
         void controller;
     });
@@ -223,6 +225,44 @@ describe('SheetsScrollRenderController', () => {
         expect(scrollManagerService.validViewportScrollInfo$.next).toHaveBeenCalled();
 
         viewMain.onScrollByBar$.emit({ isTrigger: true, viewportScrollX: 250, viewportScrollY: 45 }, {});
+        expect(executeSpy).toHaveBeenCalledWith(ScrollCommand.id, {
+            sheetViewStartRow: 2,
+            sheetViewStartColumn: 2,
+            offsetX: 50,
+            offsetY: 5,
+        });
+
+        void controller;
+    });
+
+    it('defers ScrollCommand for intermediate scrollbar drag events until drag end', () => {
+        const scrollManagerService = createScrollManagerServiceMock();
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+        });
+        const { context, viewportMap } = testBed;
+        const commandService = testBed.get(ICommandService);
+        const executeSpy = vi.spyOn(commandService, 'executeCommand');
+
+        const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
+        const viewMain = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN) as any;
+
+        viewMain.onScrollByBar$.emit({
+            isTrigger: true,
+            isBarDragging: true,
+            viewportScrollX: 250,
+            viewportScrollY: 45,
+        }, {});
+
+        expect(executeSpy).not.toHaveBeenCalledWith(ScrollCommand.id, expect.anything());
+
+        viewMain.onScrollByBar$.emit({
+            isTrigger: true,
+            isBarDragEnd: true,
+            viewportScrollX: 250,
+            viewportScrollY: 45,
+        }, {});
+
         expect(executeSpy).toHaveBeenCalledWith(ScrollCommand.id, {
             sheetViewStartRow: 2,
             sheetViewStartColumn: 2,

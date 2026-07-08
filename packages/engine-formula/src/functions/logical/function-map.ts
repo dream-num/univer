@@ -19,6 +19,7 @@ import { Bycol } from './bycol';
 import { Byrow } from './byrow';
 import { False } from './false';
 import { FUNCTION_NAMES_LOGICAL } from './function-names';
+import { Groupby } from './groupby';
 import { If } from './if';
 import { Iferror } from './iferror';
 import { Ifna } from './ifna';
@@ -29,6 +30,7 @@ import { Makearray } from './makearray';
 import { Map } from './map';
 import { Not } from './not';
 import { Or } from './or';
+import { Percentof } from './percentof';
 import { Reduce } from './reduce';
 import { Scan } from './scan';
 import { Switch } from './switch';
@@ -40,6 +42,7 @@ export const functionLogical = [
     [Bycol, FUNCTION_NAMES_LOGICAL.BYCOL],
     [Byrow, FUNCTION_NAMES_LOGICAL.BYROW],
     [False, FUNCTION_NAMES_LOGICAL.FALSE],
+    [Groupby, FUNCTION_NAMES_LOGICAL.GROUPBY],
     [If, FUNCTION_NAMES_LOGICAL.IF],
     [Iferror, FUNCTION_NAMES_LOGICAL.IFERROR],
     [Ifna, FUNCTION_NAMES_LOGICAL.IFNA],
@@ -50,6 +53,7 @@ export const functionLogical = [
     [Map, FUNCTION_NAMES_LOGICAL.MAP],
     [Not, FUNCTION_NAMES_LOGICAL.NOT],
     [Or, FUNCTION_NAMES_LOGICAL.OR],
+    [Percentof, FUNCTION_NAMES_LOGICAL.PERCENTOF],
     [Reduce, FUNCTION_NAMES_LOGICAL.REDUCE],
     [Scan, FUNCTION_NAMES_LOGICAL.SCAN],
     [Switch, FUNCTION_NAMES_LOGICAL.SWITCH],

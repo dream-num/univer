@@ -32,6 +32,7 @@ import type {
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 import { BooleanNumber, CellValueType, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+import { deserializeRangeWithSheet } from '../engine/utils/reference';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
 export interface IRangeChange {
@@ -175,6 +176,7 @@ export class FormulaDataModel extends Disposable {
                 const cellMatrix = worksheet.getCellMatrix();
                 const sheetId = worksheet.getSheetId();
 
+                this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
                 initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
             }
         }
@@ -244,6 +246,7 @@ export class FormulaDataModel extends Disposable {
 
         const cellMatrix = worksheet.getCellMatrix();
 
+        this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
         initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
         return formulaData[unitId][sheetId];
@@ -687,7 +690,7 @@ export class FormulaDataModel extends Disposable {
 
                         // Calculation is only required when there is only a formula and no value
                         const isFormula = isFormulaString(currentCell?.f) || isFormulaId(currentCell?.si);
-                        const noValue = currentCell?.v === undefined || currentCell?.v === null || currentCell?.v === '' || currentCell?.v === 0 || currentCell?.v === '0';
+                        const noValue = currentCell?.v === undefined || currentCell?.v === null;
 
                         if (!(isFormula && noValue)) continue;
 
@@ -757,6 +760,80 @@ export class FormulaDataModel extends Disposable {
 
         return formulaIdMap;
     }
+
+    private _initSheetArrayFormulaData(unitId: string, sheetId: string, cellMatrix: ObjectMatrix<Nullable<ICellData>>) {
+        let arrayFormulaRangeMatrix: Nullable<ObjectMatrix<IRange>>;
+        let arrayFormulaCellDataMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>>;
+        const formulaIds = new Set<string>();
+
+        cellMatrix.forValue((_, __, cell) => {
+            const formulaId = cell?.si;
+            if (isFormulaString(cell?.f) && isFormulaId(formulaId)) {
+                formulaIds.add(String(formulaId));
+            }
+        });
+
+        cellMatrix.forValue((row, column, cell) => {
+            const ref = (cell as (ICellData & { ref?: string }) | null)?.ref;
+            const formula = cell?.f;
+            const formulaId = cell?.si;
+            const hasOwnFormula = isFormulaString(formula);
+            const hasSharedFormula = isFormulaId(formulaId) && formulaIds.has(String(formulaId));
+
+            if ((!hasOwnFormula && !hasSharedFormula) || typeof ref !== 'string' || ref.length === 0) {
+                return true;
+            }
+
+            const { range } = deserializeRangeWithSheet(ref);
+            if (!Number.isFinite(range.startRow) || !Number.isFinite(range.startColumn) || !Number.isFinite(range.endRow) || !Number.isFinite(range.endColumn)) {
+                return true;
+            }
+
+            if (
+                range.startRow === row &&
+                range.endRow === row &&
+                range.startColumn === column &&
+                range.endColumn === column &&
+                !isArrayConstantFormula(formula)
+            ) {
+                return true;
+            }
+
+            if (!this._arrayFormulaRange[unitId]) {
+                this._arrayFormulaRange[unitId] = {};
+            }
+            if (!this._arrayFormulaCellData[unitId]) {
+                this._arrayFormulaCellData[unitId] = {};
+            }
+
+            arrayFormulaRangeMatrix ??= new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId]?.[sheetId]);
+            arrayFormulaCellDataMatrix ??= new ObjectMatrix<Nullable<ICellData>>(this._arrayFormulaCellData[unitId]?.[sheetId]);
+
+            if (arrayFormulaRangeMatrix.getValue(row, column) == null) {
+                arrayFormulaRangeMatrix.setValue(row, column, range);
+            }
+
+            for (let r = range.startRow; r <= range.endRow; r++) {
+                for (let c = range.startColumn; c <= range.endColumn; c++) {
+                    if (arrayFormulaCellDataMatrix.getValue(r, c) != null) {
+                        continue;
+                    }
+
+                    const rangeCell = cellMatrix.getValue(r, c);
+                    if (rangeCell != null) {
+                        arrayFormulaCellDataMatrix.setValue(r, c, { ...rangeCell });
+                    }
+                }
+            }
+        });
+
+        if (arrayFormulaRangeMatrix && this._arrayFormulaRange[unitId]) {
+            this._arrayFormulaRange[unitId]![sheetId] = arrayFormulaRangeMatrix.getData();
+        }
+        if (arrayFormulaCellDataMatrix && this._arrayFormulaCellData[unitId]) {
+            this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellDataMatrix.getData();
+        }
+    }
 }
 
 export function initSheetFormulaData(
@@ -808,9 +885,9 @@ export function initSheetFormulaData(
         if (isFormulaId(formulaId) && !isFormulaString(formulaString)) {
             const formulaInfo = formulaIdMap.get(formulaId);
             if (formulaInfo) {
-                const f = formulaInfo.f;
                 const x = c - formulaInfo.c;
                 const y = r - formulaInfo.r;
+                const f = formulaInfo.f;
 
                 sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
             } else {
@@ -959,6 +1036,10 @@ function inferBaseRuntimeCellType(value: IBaseCellData['v']): CellValueType | nu
         return CellValueType.STRING;
     }
     return null;
+}
+
+function isArrayConstantFormula(formula: unknown): formula is string {
+    return typeof formula === 'string' && /^=\s*\{/.test(formula);
 }
 
 function isBaseCellData(value: unknown): value is IBaseCellData {

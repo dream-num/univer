@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Vlookup } from '../index';
@@ -122,6 +122,37 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(0)
             ) as BaseValueObject;
             expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.NA]]);
+        });
+
+        it('Blank return cell should be returned as zero', async () => {
+            const tableArray = ArrayValueObject.createByArray([
+                [1, null],
+            ]);
+
+            const resultObject = testFunction.calculate(
+                NumberValueObject.create(1),
+                tableArray,
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+
+            expect(getObjectValue(resultObject)).toStrictEqual([[0]]);
+        });
+
+        it('Blank lookup value should not match blank cells in the lookup column', async () => {
+            const tableArray = ArrayValueObject.createByArray([
+                [null, 'Blank'],
+                [0, 'Zero'],
+            ]);
+
+            const resultObject = testFunction.calculate(
+                NullValueObject.create(),
+                tableArray,
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+
+            expect(getObjectValue(resultObject)).toStrictEqual([['Zero']]);
         });
 
         it('LookupValue is array, colIndexNum is single cell', async () => {

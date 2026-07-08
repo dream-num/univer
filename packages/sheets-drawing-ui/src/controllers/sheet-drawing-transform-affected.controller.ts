@@ -1465,11 +1465,11 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             const removeDrawings: IDrawingParam[] = [];
 
             // TODO@weird94: should add a iterating function
-            Object.keys(drawingMap).forEach((unitId) => {
-                const subUnitMap = drawingMap[unitId];
+            Object.keys(drawingMap ?? {}).forEach((unitId) => {
+                const subUnitMap = drawingMap[unitId] ?? {};
 
                 Object.keys(subUnitMap).forEach((subUnitId) => {
-                    const drawingData = subUnitMap[subUnitId].data;
+                    const drawingData = subUnitMap[subUnitId]?.data ?? {};
 
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === selfUnitId) {
@@ -1492,11 +1492,11 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             const insertDrawings: IDrawingParam[] = [];
             const removeDrawings: IDrawingParam[] = [];
 
-            Object.keys(drawingMap).forEach((unitId) => {
-                const subUnitMap = drawingMap[unitId];
+            Object.keys(drawingMap ?? {}).forEach((unitId) => {
+                const subUnitMap = drawingMap[unitId] ?? {};
 
                 Object.keys(subUnitMap).forEach((subUnitId) => {
-                    const drawingData = subUnitMap[subUnitId].data;
+                    const drawingData = subUnitMap[subUnitId]?.data ?? {};
 
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
@@ -1561,13 +1561,16 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
 
     private _refreshDrawingTransform(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
-        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId) ?? {};
         const updateDrawings: ISheetDrawing[] = [];
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
             const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
             if (anchorType === SheetDrawingAnchorType.None) {
+                return true;
+            }
+            if (!sheetTransform) {
                 return true;
             }
 

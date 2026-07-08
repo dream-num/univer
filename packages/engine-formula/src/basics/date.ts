@@ -158,6 +158,57 @@ export function parseFormattedTime(value: string) {
     return numfmt.parseTime(value);
 }
 
+function parseEnglishMonthNameDate(value: string): Date | null {
+    const match = value.trim().match(/^(\d{1,2})\s*([A-Za-z]{3,9})\s*(\d{2,4})$/);
+
+    if (!match) {
+        return null;
+    }
+
+    const [, dayText, monthText, yearText] = match;
+    const monthMap: Record<string, number> = {
+        jan: 0,
+        january: 0,
+        feb: 1,
+        february: 1,
+        mar: 2,
+        march: 2,
+        apr: 3,
+        april: 3,
+        may: 4,
+        jun: 5,
+        june: 5,
+        jul: 6,
+        july: 6,
+        aug: 7,
+        august: 7,
+        sep: 8,
+        sept: 8,
+        september: 8,
+        oct: 9,
+        october: 9,
+        nov: 10,
+        november: 10,
+        dec: 11,
+        december: 11,
+    };
+    const month = monthMap[monthText.toLowerCase()];
+
+    if (month == null) {
+        return null;
+    }
+
+    const day = Number(dayText);
+    const year = Number(yearText.length === 2 ? `20${yearText}` : yearText);
+    const date = new Date(Date.UTC(year, month, day));
+
+    if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) {
+        return null;
+    }
+
+    return date;
+}
+
 export function isDate(format: string) {
     return numfmt.getFormatInfo(format).isDate;
 }
@@ -297,6 +348,8 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
             dateSerial = parseFormattedDate(`${dateValue}`)!.v;
         } else if (parseFormattedTime(`${dateValue}`)) {
             dateSerial = parseFormattedTime(`${dateValue}`)!.v;
+        } else if (parseEnglishMonthNameDate(`${dateValue}`)) {
+            dateSerial = parseEnglishMonthNameDate(`${dateValue}`)!;
         } else if (isRealNum(dateValue)) {
             dateSerial = +dateValue;
         } else {
@@ -386,19 +439,19 @@ function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: numbe
     let endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
     let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
 
+    const startIsLastDayOfFebruary = startMonth === 2 && startDay === getDaysInMonth(startYear, startMonth - 1);
+
     // If the starting date is the last day of a month, it becomes equal to the 30th day of the same month.
     // If the ending date is the last day of a month and the starting date is earlier than the 30th day of a month, the ending date becomes equal to the 1st day of the next month; otherwise the ending date becomes equal to the 30th day of the same month.
-    if (startMonth === 2) {
-        const startDateAfterDay = excelSerialToDate(startDateSerialNumber + 1);
-
-        if (startDateAfterDay.getUTCMonth() + 1 === 3) {
-            startDay = 30;
-        }
+    if (startIsLastDayOfFebruary) {
+        startDay = 30;
     } else if (startDay === 31) {
         startDay = 30;
     }
 
-    if (endDay === 31) {
+    if (endMonth === 2 && endDay === getDaysInMonth(endYear, endMonth - 1) && startIsLastDayOfFebruary) {
+        endDay = 30;
+    } else if (endDay === 31) {
         if (startDay < 30) {
             endDateDate = excelSerialToDate(endDateSerialNumber + 1);
             endYear = endDateDate.getUTCFullYear();

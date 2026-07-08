@@ -29,7 +29,7 @@ export function deserializeRangeWithSheetWithCache(refString: string): IUnitRang
 
     referenceToRangeCache.set(refString, result);
 
-    return deserializeRangeWithSheet(refString); ;
+    return result;
 }
 
 export function clearReferenceToRangeCache() {

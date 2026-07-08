@@ -33,6 +33,12 @@ describe('Test int function', () => {
             expect(getObjectValue(result)).toBe(8);
         });
 
+        it('Value is near integer from floating point arithmetic', () => {
+            const number = NumberValueObject.create(5.999999999999999);
+            const result = testFunction.calculate(number);
+            expect(getObjectValue(result)).toBe(6);
+        });
+
         it('Value is number negative', () => {
             const number = NumberValueObject.create(-8.9);
             const result = testFunction.calculate(number);

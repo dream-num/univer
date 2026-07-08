@@ -20,6 +20,7 @@ import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { LexerNode } from '../analysis/lexer-node';
 import { ValueObjectFactory } from '../value-object/array-value-object';
+import { StringValueObject } from '../value-object/primitive-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -34,12 +35,19 @@ export class ValueNode extends BaseAstNode {
     }
 
     override execute(): void {
+        const token = this.getToken();
+        const tokenTrim = token.trim();
+        if (tokenTrim.startsWith('"') && tokenTrim.endsWith('"')) {
+            this.setValue(StringValueObject.create(tokenTrim.slice(1, -1).replace(/""/g, '"')));
+            return;
+        }
+
         const parent = this.getParent();
         let isIgnoreNumberPattern = true;
         if (parent?.nodeType === NodeType.FUNCTION) {
             isIgnoreNumberPattern = (parent as FunctionNode).isFunctionExecutorArgumentsIgnoreNumberPattern?.() ?? true;
         }
-        this.setValue(ValueObjectFactory.create(this.getToken(), isIgnoreNumberPattern));
+        this.setValue(ValueObjectFactory.create(token, isIgnoreNumberPattern));
     }
 }
 

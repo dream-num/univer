@@ -27,11 +27,16 @@ import { generateExecuteAstNodeData } from '../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { DateFunction } from '../date/date';
 import { Day } from '../date/day';
 import { Edate } from '../date/edate';
 import { FUNCTION_NAMES_DATE } from '../date/function-names';
+import { Month } from '../date/month';
+import { NetworkdaysIntl } from '../date/networkdays-intl';
 import { Today } from '../date/today';
+import { Year } from '../date/year';
 import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
+import { If } from '../logical/if';
 import { Iferror } from '../logical/iferror';
 import { Address } from '../lookup/address';
 import { Choose } from '../lookup/choose';
@@ -52,7 +57,9 @@ import { Compare } from '../meta/compare';
 import { Divided } from '../meta/divided';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
 import { Minus } from '../meta/minus';
+import { Multiply } from '../meta/multiply';
 import { Plus } from '../meta/plus';
+import { Countif } from '../statistical/countif';
 import { FUNCTION_NAMES_STATISTICAL } from '../statistical/function-names';
 import { Max } from '../statistical/max';
 import { Min } from '../statistical/min';
@@ -94,6 +101,14 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             v: '"test"',
                             t: 1,
                         },
+                        20: {
+                            v: '',
+                            t: CellValueType.STRING,
+                        },
+                        21: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
                     },
                     1: {
                         0: {
@@ -111,6 +126,27 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         3: {
                             v: 500,
                             t: 2,
+                        },
+                        20: {
+                            v: '0',
+                            t: CellValueType.NUMBER,
+                        },
+                        21: {
+                            v: 21,
+                            t: CellValueType.NUMBER,
+                        },
+                        22: {
+                            v: 21,
+                            t: CellValueType.NUMBER,
+                        },
+                        23: {
+                            v: '43497',
+                            t: CellValueType.NUMBER,
+                        },
+                        24: {
+                            v: '43497',
+                            t: CellValueType.NUMBER,
+                            f: '=DATE(YEAR(W2),MONTH(W2)+1,1)',
                         },
                     },
                     2: {
@@ -323,6 +359,12 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             },
                         },
                     },
+                    13: {
+                        3: {
+                            v: ErrorType.DIV_BY_ZERO,
+                            t: CellValueType.STRING,
+                        },
+                    },
                     20: {
                         0: {
                             v: 'ID',
@@ -445,6 +487,10 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         },
                     },
                     53: {
+                        0: {
+                            v: 44613,
+                            t: CellValueType.NUMBER,
+                        },
                         1: {
                             v: '2026-01-05 23:25:23 UTC',
                             t: CellValueType.STRING,
@@ -490,6 +536,11 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         1: {
                             v: '2026-01-04 03:47:28 UTC',
                             t: CellValueType.STRING,
+                        },
+                    },
+                    98: {
+                        25: {
+                            s: 'style-only-blank',
                         },
                     },
                 },
@@ -552,14 +603,19 @@ describe('Test nested functions', () => {
         );
 
         functionService.registerExecutors(
+            new If(FUNCTION_NAMES_LOGICAL.IF),
             new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
             new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP),
             new Max(FUNCTION_NAMES_STATISTICAL.MAX),
             new Sumif(FUNCTION_NAMES_MATH.SUMIF),
             new Sumifs(FUNCTION_NAMES_MATH.SUMIFS),
             new Edate(FUNCTION_NAMES_DATE.EDATE),
+            new DateFunction(FUNCTION_NAMES_DATE.DATE),
             new Today(FUNCTION_NAMES_DATE.TODAY),
             new Day(FUNCTION_NAMES_DATE.DAY),
+            new Month(FUNCTION_NAMES_DATE.MONTH),
+            new Year(FUNCTION_NAMES_DATE.YEAR),
+            new NetworkdaysIntl(FUNCTION_NAMES_DATE.NETWORKDAYS_INTL),
             new Address(FUNCTION_NAMES_LOOKUP.ADDRESS),
             new Xmatch(FUNCTION_NAMES_LOOKUP.XMATCH),
             new Min(FUNCTION_NAMES_STATISTICAL.MIN),
@@ -571,6 +627,7 @@ describe('Test nested functions', () => {
             new Len(FUNCTION_NAMES_TEXT.LEN),
             new Compare(FUNCTION_NAMES_META.COMPARE),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
+            new Multiply(FUNCTION_NAMES_META.MULTIPLY),
             new Product(FUNCTION_NAMES_MATH.PRODUCT),
             new Fact(FUNCTION_NAMES_MATH.FACT),
             new T(FUNCTION_NAMES_TEXT.T),
@@ -579,6 +636,7 @@ describe('Test nested functions', () => {
             new Row(FUNCTION_NAMES_LOOKUP.ROW),
             new Match(FUNCTION_NAMES_LOOKUP.MATCH),
             new Index(FUNCTION_NAMES_LOOKUP.INDEX),
+            new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF),
             new Left(FUNCTION_NAMES_TEXT.LEFT)
         );
 
@@ -622,6 +680,84 @@ describe('Test nested functions', () => {
                 [103],
                 [104],
             ]);
+        });
+
+        it('Nested functions IFERROR,INDEX,XMATCH catches no-match array lookup errors', () => {
+            const result = calculate('=IFERROR(INDEX(D2:D4,XMATCH(1,(B2:B4=999)*(A2:A4=45688),0)),"")');
+
+            expect(result).toBe('');
+        });
+
+        it('Nested functions IFERROR,INDEX catches errors from referenced cells', () => {
+            const result = calculate('=IFERROR(INDEX(D14:D14,1),"")');
+
+            expect(result).toBe('');
+        });
+
+        it('Nested functions IFERROR,INDEX converts blank referenced cells to zero', () => {
+            const result = calculate('=IFERROR(INDEX(Z99:Z99,1),"")');
+
+            expect(result).toBe(0);
+        });
+
+        it('Nested functions IF,INDEX converts selected blank referenced cells to zero', () => {
+            const result = calculate('=IF(FALSE,1,INDEX(Z99:Z99,1))');
+
+            expect(result).toBe(0);
+        });
+
+        it('Nested functions IF,INDEX writes selected style-only blank references as zero', () => {
+            const result = calculateByRuntime('=IF(FALSE,1,INDEX(Z99:Z99,1))');
+
+            expect(result?.v).toBe(0);
+            expect(result?.t).toBe(CellValueType.NUMBER);
+        });
+
+        it('Nested functions NETWORKDAYS.INTL ignores non-date values in dynamic holiday ranges', () => {
+            expect(calculate('=NETWORKDAYS.INTL(44613,44613,"0000000",A1:A54)')).toBe(0);
+            expect(calculate('=NETWORKDAYS.INTL(44613,44613,"0000000",A1:INDEX(A:A,MATCH(9E+99,A:A),1))')).toBe(0);
+        });
+
+        it('Nested date functions treat numeric-string cell values as serial numbers', () => {
+            expect(calculate('=DATE(YEAR(43497),MONTH(43497)+1,1)')).toBe(43525);
+            expect(calculate('=DATE(YEAR(X2),MONTH(X2)+1,1)')).toBe(43525);
+            expect(calculate('=DATE(YEAR(Y2),MONTH(Y2)+1,1)')).toBe(43525);
+        });
+
+        it('Nested functions MATCH keeps lazy IF selected reference branches as lookup arrays', () => {
+            const result = calculate('=MATCH(102,IF(@A1:A3=A1,B1:B3),0)');
+
+            expect(result).toBe(3);
+        });
+
+        it('Nested functions IF keeps selected single-cell references scalar', () => {
+            const result = calculate('=IF(TRUE,B2,0)');
+
+            expect(result).toBe(101);
+        });
+
+        it('Nested functions XMATCH keeps Formula2 binary lookup ranges as arrays', () => {
+            const result = calculate('=INDEX(C2:C4,XMATCH(1,(@A2:A4=A3)*(@B2:B4=B3),0))');
+
+            expect(result).toStrictEqual([[3]]);
+        });
+
+        it('Nested functions MATCH keeps bare Formula2 at ranges scalar in lookup products', () => {
+            const result = calculate('=IFERROR(INDEX(C2:C4,MATCH(44928,(@B2:B4=B3)*(@A2:A4),0)),"")');
+
+            expect(result).toBe('');
+        });
+
+        it('Nested functions INDEX,MATCH,COUNTIF returns the first unseen value from a range', () => {
+            const result = calculate('=INDEX(V1:V2,MATCH(0,COUNTIF($U$1:U2,V1:V2),0))');
+
+            expect(result).toStrictEqual([[21]]);
+        });
+
+        it('Nested functions INDEX,MATCH,COUNTIF skips blank criteria already present in the counted range', () => {
+            const result = calculate('=INDEX(W1:W2,MATCH(0,COUNTIF($U$1:U2,W1:W2),0))');
+
+            expect(result).toStrictEqual([[21]]);
         });
 
         it('Nested functions ADDRESS,XMATCH,MIN,SUMIFS,EDATE,TODAY,DAY', () => {
@@ -760,31 +896,31 @@ describe('Test nested functions', () => {
 
         it('Index formula test', () => {
             const result = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(22-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result).toStrictEqual([['January']]);
+            expect(result).toStrictEqual('January');
 
             const result2 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(23-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result2).toStrictEqual([['February']]);
+            expect(result2).toStrictEqual('February');
 
             const result3 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(24-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result3).toStrictEqual([['March']]);
+            expect(result3).toStrictEqual('March');
 
             const result4 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(25-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result4).toStrictEqual([['April']]);
+            expect(result4).toStrictEqual('April');
 
             const result5 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(26-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result5).toStrictEqual([['June']]);
+            expect(result5).toStrictEqual('June');
 
             const result6 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(27-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result6).toStrictEqual([['July']]);
+            expect(result6).toStrictEqual('July');
 
             const result7 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(28-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result7).toStrictEqual([['August']]);
+            expect(result7).toStrictEqual('August');
 
             const result8 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(29-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result8).toStrictEqual([['October']]);
+            expect(result8).toStrictEqual('October');
 
             const result9 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(30-ROW($D$21),$A$22:$A$33,0)),"")');
-            expect(result9).toStrictEqual([['December']]);
+            expect(result9).toStrictEqual('December');
         });
 
         it('Left formula compare test', () => {

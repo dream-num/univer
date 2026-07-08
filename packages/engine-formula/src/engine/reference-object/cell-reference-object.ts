@@ -23,6 +23,9 @@ import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 import { RangeReferenceObject } from './range-reference-object';
 
+const EXCEL_MAX_ROWS = 1_048_576;
+const EXCEL_MAX_COLUMNS = 16_384;
+
 export class CellReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
@@ -34,6 +37,15 @@ export class CellReferenceObject extends BaseReferenceObject {
 
     override isCell() {
         return true;
+    }
+
+    override isExceedRange() {
+        if ((this.getForcedSheetId() == null || this.getForcedSheetId()?.length === 0) && this.getForcedSheetName().length > 0) {
+            return true;
+        }
+
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+        return startRow < 0 || startColumn < 0 || endRow >= EXCEL_MAX_ROWS || endColumn >= EXCEL_MAX_COLUMNS;
     }
 
     override unionBy(referenceObject: BaseReferenceObject) {

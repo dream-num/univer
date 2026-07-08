@@ -59,9 +59,9 @@ export class Address extends BaseFunction {
             return sheetText;
         }
 
-        const _absNumber = absNumber ?? NumberValueObject.create(1);
-        const _a1 = a1 ?? BooleanValueObject.create(true);
-        const _sheetText = sheetText ?? StringValueObject.create('');
+        const _absNumber = absNumber == null || absNumber.isNull() ? NumberValueObject.create(1) : absNumber;
+        const _a1 = a1 == null || a1.isNull() ? BooleanValueObject.create(true) : a1;
+        const _sheetText = sheetText == null || sheetText.isNull() ? StringValueObject.create('') : sheetText;
 
         // get max row length
         const maxRowLength = Math.max(

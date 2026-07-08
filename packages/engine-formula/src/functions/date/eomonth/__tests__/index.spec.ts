@@ -64,6 +64,13 @@ describe('Test eomonth function', () => {
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
+        it('parses compact English month date strings like Excel', () => {
+            const startDate = StringValueObject.create('1Feb2016');
+            const months = NumberValueObject.create(0);
+            const result = testFunction.calculate(startDate, months);
+            expect(result.getValue()).toStrictEqual(42429);
+        });
+
         it('value is array', () => {
             const startDate = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

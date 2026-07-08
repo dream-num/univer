@@ -28,6 +28,8 @@ import { IFormulaCurrentConfigService } from '../../../../services/current-data.
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { FUNCTION_NAMES_LOGICAL } from '../../../logical/function-names';
+import { If } from '../../../logical/if';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_COMPATIBILITY } from '../../function-names';
 import { Rank } from '../index';
@@ -68,6 +70,34 @@ const getTestWorkbookData = (): IWorkbookData => {
                         6: {
                             v: ErrorType.NAME,
                             t: CellValueType.STRING,
+                        },
+                        7: {
+                            v: 7,
+                            t: CellValueType.NUMBER,
+                        },
+                        8: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    1: {
+                        7: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        8: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    2: {
+                        7: {
+                            v: 9,
+                            t: CellValueType.NUMBER,
+                        },
+                        8: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
                         },
                     },
                 },
@@ -130,7 +160,8 @@ describe('Test rank function', () => {
         );
 
         functionService.registerExecutors(
-            new Rank(FUNCTION_NAMES_COMPATIBILITY.RANK)
+            new Rank(FUNCTION_NAMES_COMPATIBILITY.RANK),
+            new If(FUNCTION_NAMES_LOGICAL.IF)
         );
 
         calculate = (formula: string) => {
@@ -148,6 +179,21 @@ describe('Test rank function', () => {
         it('Value is normal', async () => {
             const result = await calculate('=RANK(A1,A1:F1,0)');
             expect(result).toStrictEqual(3);
+        });
+
+        it('Number matching uses tolerance for floating point noise', async () => {
+            const result = await calculate('=RANK(79.83520122378431,{79.8352012237843,81.08962868646151,80.56857259319648},0)');
+            expect(result).toStrictEqual(3);
+        });
+
+        it('Integer rank values are not tied with near-integer floating tails', async () => {
+            const result = await calculate('=RANK(43,{41,60,55.00000000000001,43,55.99999999999999,43.00000000000001,76,63.000000000000014},0)');
+            expect(result).toStrictEqual(7);
+        });
+
+        it('Accepts array returned by nested IF as ref', async () => {
+            const result = await calculate('=RANK(H1,IF(I1:I3,H1:H3),0)');
+            expect(result).toStrictEqual(2);
         });
 
         it('Number value test, string/true/false/blankCell/error/null', async () => {
@@ -175,7 +221,7 @@ describe('Test rank function', () => {
             expect(result).toStrictEqual(ErrorType.NA);
 
             const result2 = await calculate('=RANK(A1,{1,2,3},0)');
-            expect(result2).toStrictEqual(ErrorType.NA);
+            expect(result2).toStrictEqual(3);
 
             const result3 = await calculate('=RANK(A1,A1:G1,0)');
             expect(result3).toStrictEqual(ErrorType.NAME);
@@ -206,6 +252,11 @@ describe('Test rank function', () => {
             expect(result).toStrictEqual([
                 [3, 2, ErrorType.NA, ErrorType.NAME],
             ]);
+        });
+
+        it('Accepts array results and ignores non-number items in ref', async () => {
+            const result = await calculate('=RANK(H1,IF({TRUE;FALSE;TRUE},H1:H3),0)');
+            expect(result).toStrictEqual(2);
         });
     });
 });

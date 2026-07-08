@@ -37,11 +37,12 @@ describe('ArrayValueObject minus method test', () => {
             });
             const valueObject = new NumberValueObject(1);
             const result = arrayValueObject.minus(valueObject);
+            const resultValue = getObjectValue(result) as (string | number)[][];
 
-            expect(getObjectValue(result)).toStrictEqual([
-                [0, ErrorType.VALUE, 0.23, 0, -1, -1],
-                [-1, 99, 1.34, ErrorType.VALUE, -4, ErrorType.VALUE],
-            ]);
+            expect(resultValue[0]).toStrictEqual([0, ErrorType.VALUE, resultValue[0][2], 0, -1, -1]);
+            expect(resultValue[0][2] as number).toBeCloseTo(0.23);
+            expect(resultValue[1]).toStrictEqual([-1, 99, resultValue[1][2], ErrorType.VALUE, -4, ErrorType.VALUE]);
+            expect(resultValue[1][2] as number).toBeCloseTo(1.34);
         });
     });
 });

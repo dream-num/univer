@@ -27,6 +27,8 @@ describe('generateAstNode defined name cache invalidation', () => {
         dirtySuperTableMap: Record<string, Record<string, string>> = {}
     ) {
         let parseCount = 0;
+        let executeUnitId = 'unit-1';
+        let executeSubUnitId = 'sheet-1';
         const node = {
             hasDefinedName: () => false,
         };
@@ -43,7 +45,14 @@ describe('generateAstNode defined name cache invalidation', () => {
         const currentConfigService = {
             getDirtyDefinedNameMap: () => dirtyDefinedNameMap,
             getDirtySuperTableMap: () => dirtySuperTableMap,
-            getExecuteUnitId: () => 'unit-1',
+            getExecuteUnitId: () => executeUnitId,
+            getExecuteSubUnitId: () => executeSubUnitId,
+            setExecuteUnitId: (unitId: string) => {
+                executeUnitId = unitId;
+            },
+            setExecuteSubUnitId: (subUnitId: string) => {
+                executeSubUnitId = subUnitId;
+            },
         };
 
         return {
@@ -202,5 +211,28 @@ describe('generateAstNode defined name cache invalidation', () => {
         );
 
         expect(harness.getParseCount()).toBe(1);
+    });
+
+    it('does not reuse cache across sheets in the same unit', () => {
+        const harness = createHarness({});
+
+        generateAstNode(
+            'unit-1',
+            '=date_begin+6',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never,
+            'sheet-1'
+        );
+        generateAstNode(
+            'unit-1',
+            '=date_begin+6',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never,
+            'sheet-2'
+        );
+
+        expect(harness.getParseCount()).toBe(2);
     });
 });

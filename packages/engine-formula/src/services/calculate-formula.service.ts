@@ -298,7 +298,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         const treeCount = treeList.length;
         while (treeList.length > 0) {
             const tree = treeList.pop()!;
-            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
+            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService, tree.subUnitId);
             const nodeData = {
                 node,
                 refOffsetX: tree.refOffsetX,

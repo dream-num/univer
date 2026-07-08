@@ -64,4 +64,13 @@ describe('handleRegExp', () => {
         expect(result.regExp).not.toBeNull();
         expect(result.regExp?.test('(')).toBe(true);
     });
+
+    it('should accept positive lookahead patterns used by REGEXTEST', () => {
+        const result = handleRegExp('^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^\\w\\s])[^\\s]{8,15}$', false);
+
+        expect(result.isError).toBe(false);
+        expect(result.regExp).not.toBeNull();
+        expect(result.regExp?.test('Passw0rd!')).toBe(true);
+        expect(result.regExp?.test('password')).toBe(false);
+    });
 });

@@ -217,6 +217,27 @@ describe('Test sort function', () => {
             expect(getObjectValue(resultObject)).toStrictEqual([
                 ['T-16-6-2', 'T-16-7-4'],
             ]);
+
+            const array2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [3, 1, 2],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const resultObject2 = testFunction.calculate(
+                array2,
+                NullValueObject.create(),
+                NullValueObject.create(),
+                BooleanValueObject.create(true)
+            );
+            expect(getObjectValue(resultObject2)).toStrictEqual([
+                [1, 2, 3],
+            ]);
         });
     });
 });

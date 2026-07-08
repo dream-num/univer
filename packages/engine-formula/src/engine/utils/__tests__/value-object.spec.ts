@@ -17,6 +17,7 @@
 import { cellToRange, CellValueType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { compareToken } from '../../../basics/token';
 import { CellReferenceObject } from '../../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../../reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../reference-object/range-reference-object';
@@ -30,6 +31,11 @@ describe('Test object cover', () => {
     it('Function convertTonNumber', () => {
         expect(convertTonNumber(BooleanValueObject.create(true)).getValue()).toBe(1);
         expect(convertTonNumber(BooleanValueObject.create(false)).getValue()).toBe(0);
+    });
+
+    it('Boolean values are not equal to text values', () => {
+        expect(BooleanValueObject.create(false).compare(StringValueObject.create(''), compareToken.EQUALS).getValue()).toBe(false);
+        expect(BooleanValueObject.create(false).compare(StringValueObject.create(''), compareToken.NOT_EQUAL).getValue()).toBe(true);
     });
 
     it('Function isSingleValueObject', () => {

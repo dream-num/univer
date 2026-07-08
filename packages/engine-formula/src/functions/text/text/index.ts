@@ -101,8 +101,9 @@ export class Text extends BaseFunction {
             }
 
             const formatTextValueString = `${formatTextValue.getValue()}`;
+            const normalizedFormatTextValueString = normalizeExcelWeekdayFormat(formatTextValueString);
 
-            const previewText = getFormatPreview(formatTextValueString, textValueNumber);
+            const previewText = getFormatPreview(normalizedFormatTextValueString, textValueNumber);
 
             return StringValueObject.create(formatTextValueString === ' ' ? previewText.trimEnd() : previewText);
         });
@@ -113,4 +114,12 @@ export class Text extends BaseFunction {
 
         return resultArray;
     }
+}
+
+function normalizeExcelWeekdayFormat(formatText: string): string {
+    if (!formatText.includes('\u00C5')) {
+        return formatText;
+    }
+
+    return formatText.replace(/\u00C5{4,}/g, 'dddd').replace(/\u00C5{1,3}/g, 'ddd');
 }

@@ -56,7 +56,7 @@ export class Match extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const matchTypeValue = this.getMatchTypeValue(matchType);
+        const matchTypeValue = matchType?.isNull() ? 0 : this.getMatchTypeValue(matchType);
 
         if (matchTypeValue == null) {
             return ErrorValueObject.create(ErrorType.VALUE);

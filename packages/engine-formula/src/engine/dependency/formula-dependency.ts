@@ -522,7 +522,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     protected _getTreeNode(tree: IFormulaDependencyTree) {
-        return generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
+        return generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService, tree.subUnitId);
     }
 
     // eslint-disable-next-line style/generator-star-spacing

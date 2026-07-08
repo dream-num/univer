@@ -26,8 +26,6 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./services/referenced-unit/referenced-unit.service": "./src/services/referenced-unit/referenced-unit.service.ts",
-        "./services/referenced-unit/resource-ref": "./src/services/referenced-unit/resource-ref.ts",
         "./*": "./src/*",
         "./facade": "./src/facade/index.ts"
     },

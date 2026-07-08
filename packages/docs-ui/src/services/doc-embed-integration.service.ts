@@ -67,7 +67,7 @@ export class EmbedInteractionBoundaryService implements IDocEmbedInteractionBoun
         }
 
         return this._roots.get(embedId)?.has(target) === true ||
-            this._roots.get(embedId) != null && [...this._roots.get(embedId)!].some((root) => root.contains(target));
+            (this._roots.get(embedId) != null && [...this._roots.get(embedId)!].some((root) => root.contains(target)));
     }
 
     hasRecentInteraction(): boolean {

@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, Injector } from '@univerjs/core';
-import { DocumentDataModel, DocumentFlavor, UniverInstanceType } from '@univerjs/core';
+import { DocumentDataModel, DocumentFlavor } from '@univerjs/core';
 
 export function registerDocsEmbedHostCapabilities(injector: Injector): void {
     void injector;

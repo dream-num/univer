@@ -147,8 +147,6 @@ export {
 } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export { DocUIController } from './controllers/ui.controller';
-export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize } from './embed-host-anchor';
-export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockMutationParams, IDocsCustomBlockRenderViewportParams, IEmbedDocsCustomBlockData } from './embed-host-anchor';
 export {
     createDefaultDocsTableLikeCustomBlockBleedViewport,
     resolveDocsTableLikeCustomBlockBleedViewport,
@@ -159,6 +157,8 @@ export type { IDocsCustomBlockBleedViewport, IDocsCustomBlockBleedViewportHint }
 export { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
 export { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 export type { IDocsTableLikeCustomBlockScrollOptions } from './embed-docs-custom-block-scroll';
+export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize } from './embed-host-anchor';
+export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockMutationParams, IDocsCustomBlockRenderViewportParams, IEmbedDocsCustomBlockData } from './embed-host-anchor';
 export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
@@ -215,6 +215,7 @@ export type { IDocPrintComponentContext, IDocPrintContext } from './services/doc
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
+export { DocFloatMenuService } from './services/float-menu.service';
 export {
     isInSameTableCell,
     isValidRectRange,
@@ -224,7 +225,6 @@ export { NodePositionConvertToCursor } from './services/selection/convert-text-r
 export { getOneTextSelectionRange } from './services/selection/convert-text-range';
 export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';
 export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
-export { DocFloatMenuService } from './services/float-menu.service';
 export type { IDocRange } from './services/selection/range-interface';
 export { convertPositionsToRectRanges, RectRange } from './services/selection/rect-range';
 export { getCanvasOffsetByEngine } from './services/selection/selection-utils';

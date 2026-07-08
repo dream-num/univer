@@ -47,6 +47,12 @@ import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univer
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
+import {
+    IFormulaEmbedInteractionBoundaryService,
+    IFormulaEmbedRuntimeFocusCoordinator,
+    resolveActiveFormulaEmbedRuntimeDomScope,
+    resolveFormulaEmbedRuntimeDomScope,
+} from './formula-embed-integration.service';
 import { HelpFunction } from './help-function/HelpFunction';
 import { hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, useFocus } from './hooks/use-focus';
 import { getSelectionAfterLaggingFormulaInput, useFormulaSelecting } from './hooks/use-formula-selection';
@@ -60,12 +66,6 @@ import { useStateRef } from './hooks/use-state-ref';
 import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
 import { SearchFunction } from './search-function/SearchFunction';
-import {
-    IFormulaEmbedInteractionBoundaryService,
-    IFormulaEmbedRuntimeFocusCoordinator,
-    resolveActiveFormulaEmbedRuntimeDomScope,
-    resolveFormulaEmbedRuntimeDomScope,
-} from './formula-embed-integration.service';
 import { getFormulaText } from './utils/get-formula-text';
 
 export interface IFormulaEditorProps {
@@ -181,6 +181,10 @@ export function registerFormulaEditorRuntimePortal(options: {
         registeredPortalRoot = portalRoot;
         if (options.interactionBoundaryService) {
             rootRegistration.add(options.interactionBoundaryService.registerOwnedElement(options.embedId, portalRoot));
+            const editorElement = ownerDocument.getElementById(`__editor_${options.editorId}`) as HTMLElement | null;
+            if (editorElement && editorElement !== portalRoot) {
+                rootRegistration.add(options.interactionBoundaryService.registerOwnedElement(options.embedId, editorElement));
+            }
         }
 
         if (options.focusCoordinator) {

@@ -82,7 +82,6 @@ import { SheetsZoomRenderController } from './controllers/render-controllers/zoo
 import { RepeatLastActionController } from './controllers/repeat-last-action.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { SheetUIController } from './controllers/ui.controller';
-import { registerSheetsEmbedUIContributions } from './embed-register';
 import { AutoHeightService } from './services/auto-height.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -145,7 +144,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
-        registerSheetsEmbedUIContributions(this._injector);
     }
 
     override onStarting(): void {

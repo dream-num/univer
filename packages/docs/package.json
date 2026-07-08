@@ -79,7 +79,6 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/embed": "workspace:*",
         "@univerjs/engine-render": "workspace:*"
     },
     "devDependencies": {

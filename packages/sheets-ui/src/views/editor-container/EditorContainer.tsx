@@ -19,7 +19,6 @@ import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedFloatingGeometryService, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, resolveActiveEmbedRuntimeDomScope, resolveEmbedRuntimeDomScope } from '@univerjs/embed-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import * as React from 'react';
@@ -29,6 +28,15 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import {
+    ISheetEmbedFloatingGeometryService,
+    ISheetEmbedInteractionBoundaryService,
+    ISheetEmbedRuntimeFocusCoordinator,
+    resolveActiveSheetEmbedRuntimeDomScope,
+    resolveSheetEmbedRuntimeDomScope,
+    SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+} from '../../services/sheet-embed-integration.service';
 import { focusSheetCellEditorElement, registerSheetCellEditorRuntimePortal } from './focus-editor';
 import { useKeyEventConfig } from './hooks';
 
@@ -84,14 +92,14 @@ export function shouldRefocusCellEditorAfterPointerDown(options: {
         return true;
     }
 
-    const owner = root.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`);
-    const embedId = owner?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+    const owner = root.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`);
+    const embedId = owner?.getAttribute(SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
     if (!embedId) {
         return true;
     }
 
-    const targetInOwner = target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) != null;
-    const activeOwnerElement = activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
+    const targetInOwner = target.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) != null;
+    const activeOwnerElement = activeElement.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
     if (targetInOwner && activeOwnerElement && isEmbedRuntimeInteractiveElement(activeElement)) {
         return false;
     }
@@ -100,12 +108,12 @@ export function shouldRefocusCellEditorAfterPointerDown(options: {
         return true;
     }
 
-    return target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) == null ||
+    return target.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`) == null ||
         activeOwnerElement == null;
 }
 
 function isEmbedRuntimeInteractiveElement(element: HTMLElement): boolean {
-    const role = element.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+    const role = element.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
     return role === 'child-editor' ||
         role === 'child-popup' ||
@@ -122,13 +130,13 @@ function shouldPreserveEmbedPopupFocus(embedId: string | undefined, ownerDocumen
         return false;
     }
 
-    const ownerElement = activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
+    const ownerElement = activeElement.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
     if (!ownerElement) {
         return false;
     }
 
-    const role = activeElement.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
-        activeElement.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+    const role = activeElement.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
+        activeElement.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
     return role === 'child-popup' || role === 'floating-menu';
 }
@@ -143,13 +151,13 @@ function shouldPreserveEmbedInteractiveFocus(embedId: string | undefined, ownerD
         return false;
     }
 
-    const ownerElement = activeElement.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
+    const ownerElement = activeElement.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
     if (!ownerElement) {
         return false;
     }
 
-    const role = activeElement.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
-        activeElement.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+    const role = activeElement.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
+        activeElement.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
     return (role == null && activeElement.tagName !== 'CANVAS') ||
         role === 'child-editor' ||
@@ -162,8 +170,8 @@ function isEmbedRuntimeEditorOrPopup(target: EventTarget | null | undefined): bo
         return false;
     }
 
-    const role = target.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
-        target.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+    const role = target.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
+        target.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
     return role === 'child-editor' || role === 'child-popup' || role === 'floating-menu';
 }
@@ -243,11 +251,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
-        if (!injector.has(EmbedFloatingGeometryService)) {
+        if (!injector.has(ISheetEmbedFloatingGeometryService)) {
             return undefined;
         }
 
-        const geometryService = injector.get(EmbedFloatingGeometryService);
+        const geometryService = injector.get(ISheetEmbedFloatingGeometryService);
         const subscription = geometryService.geometryInvalidated$.subscribe(() => {
             cellEditorResizeService.resizeCellEditor();
         });
@@ -256,11 +264,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, [cellEditorResizeService, injector]);
 
     useEffect(() => {
-        if (!injector.has(EmbedRuntimeFocusCoordinator)) {
+        if (!injector.has(ISheetEmbedRuntimeFocusCoordinator)) {
             return undefined;
         }
 
-        const subscription = injector.get(EmbedRuntimeFocusCoordinator).runtimeSessionChanged$.subscribe(() => {
+        const subscription = injector.get(ISheetEmbedRuntimeFocusCoordinator).runtimeSessionChanged$.subscribe(() => {
             setRuntimeFocusRevision((revision) => revision + 1);
         });
 
@@ -290,8 +298,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         let delayedFocusTimer: number | undefined;
         const focusCellEditorElement = () => {
             const scope = rootRef.current
-                ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
-                : resolveActiveEmbedRuntimeDomScope(ownerDocument);
+                ? resolveSheetEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveSheetEmbedRuntimeDomScope(ownerDocument)
+                : resolveActiveSheetEmbedRuntimeDomScope(ownerDocument);
             if (shouldPreserveEmbedInteractiveFocus(scope?.embedId, ownerDocument)) {
                 return;
             }
@@ -314,8 +322,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             }
 
             const scope = rootRef.current
-                ? resolveEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveEmbedRuntimeDomScope(ownerDocument)
-                : resolveActiveEmbedRuntimeDomScope(ownerDocument);
+                ? resolveSheetEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveSheetEmbedRuntimeDomScope(ownerDocument)
+                : resolveActiveSheetEmbedRuntimeDomScope(ownerDocument);
             if (shouldPreserveEmbedPopupFocus(scope?.embedId, ownerDocument)) {
                 return;
             }
@@ -346,13 +354,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, [cellEditorResizeService, editorService, visible?.visible]);
 
     useEffect(() => {
-        if (!visible?.visible || !rootRef.current || !injector.has(EmbedRuntimeFocusCoordinator)) {
+        if (!visible?.visible || !rootRef.current || !injector.has(ISheetEmbedRuntimeFocusCoordinator)) {
             return undefined;
         }
 
-        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
+        const focusCoordinator = injector.get(ISheetEmbedRuntimeFocusCoordinator);
         const focusedUnitId = instanceService.getFocusedUnit()?.getUnitId();
-        const rootRuntimeScope = resolveEmbedRuntimeDomScope(rootRef.current);
+        const rootRuntimeScope = resolveSheetEmbedRuntimeDomScope(rootRef.current);
         const unitRuntimeScope = [editState?.unitId, visible.unitId, focusedUnitId]
             .map((unitId) => focusCoordinator.resolveRuntimeScopeByChildUnitId(unitId))
             .find((resolvedScope) => resolvedScope != null);
@@ -368,14 +376,14 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
         const scope = explicitRuntimeScope ??
             activeSessionScope ??
-            resolveActiveEmbedRuntimeDomScope(rootRef.current.ownerDocument);
+            resolveActiveSheetEmbedRuntimeDomScope(rootRef.current.ownerDocument);
         if (!scope) {
             return undefined;
         }
 
         const collection = new DisposableCollection();
-        const interactionBoundaryService = injector.has(EmbedInteractionBoundaryService)
-            ? injector.get(EmbedInteractionBoundaryService)
+        const interactionBoundaryService = injector.has(ISheetEmbedInteractionBoundaryService)
+            ? injector.get(ISheetEmbedInteractionBoundaryService)
             : undefined;
         const editorRoot = rootRef.current;
         collection.add(focusCoordinator.acquireLease({
@@ -440,11 +448,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, [contextService, editState?.unitId, editorService, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
 
     useEffect(() => {
-        if (visible?.visible || !injector.has(EmbedRuntimeFocusCoordinator)) {
+        if (visible?.visible || !injector.has(ISheetEmbedRuntimeFocusCoordinator)) {
             return undefined;
         }
 
-        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
+        const focusCoordinator = injector.get(ISheetEmbedRuntimeFocusCoordinator);
         const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
         const childUnitId = activeSessionScope?.childUnitId;
         if (
@@ -457,8 +465,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         }
 
         const ownerDocument = rootRef.current?.ownerDocument ?? document;
-        const interactionBoundaryService = injector.has(EmbedInteractionBoundaryService)
-            ? injector.get(EmbedInteractionBoundaryService)
+        const interactionBoundaryService = injector.has(ISheetEmbedInteractionBoundaryService)
+            ? injector.get(ISheetEmbedInteractionBoundaryService)
             : undefined;
         const portalRegistration = registerSheetCellEditorRuntimePortal({
             embedId: activeSessionScope.embedId,

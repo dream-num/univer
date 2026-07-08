@@ -15,15 +15,8 @@
  */
 
 import type { IDisposable, Injector } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
-import { registerEmbedProductMenuContribution } from '@univerjs/embed-ui';
-import { menuSchema } from './menu/schema';
 
 export function registerSheetsEmbedProductMenus(injector: Pick<Injector, 'get' | 'has'>): IDisposable | undefined {
-    return registerEmbedProductMenuContribution(injector, {
-        id: 'sheets-ui.ribbon',
-        childType: UniverInstanceType.UNIVER_SHEET,
-        surface: 'ribbon',
-        menuSchema,
-    });
+    void injector;
+    return undefined;
 }

@@ -670,7 +670,10 @@ export class SheetCanvasPopManagerService extends Disposable {
         const updatePosition = () => position$.next(this._calcCellPositionByCell(row, col, currentRender, skeleton, activeViewport));
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: () => updatePosition(),
+            error: () => {},
+        }));
         disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(() => updatePosition()));
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
@@ -785,7 +788,10 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: () => updatePosition(),
+            error: () => {},
+        }));
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {

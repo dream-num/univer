@@ -20,7 +20,7 @@ import type { IDisposable, IDocumentData } from '@univerjs/core';
 import type { Mock } from 'vitest';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../doc-embed-integration.service';
 import { GlyphType, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

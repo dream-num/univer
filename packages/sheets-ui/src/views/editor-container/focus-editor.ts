@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, toDisposable } from '@univerjs/core';
+import type { ISheetEmbedInteractionBoundaryService, ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 
 const SHEET_CELL_EDITOR_ELEMENT_ID = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
 const SHEET_CELL_EDITOR_SELECTION_CONTAINER_ID = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
@@ -40,8 +40,8 @@ export function focusSheetCellEditorElement(ownerDocument: Document = document):
 export function registerSheetCellEditorRuntimePortal(options: {
     embedId: string;
     ownerDocument?: Document;
-    interactionBoundaryService?: EmbedInteractionBoundaryService;
-    focusCoordinator?: EmbedRuntimeFocusCoordinator;
+    interactionBoundaryService?: ISheetEmbedInteractionBoundaryService;
+    focusCoordinator?: ISheetEmbedRuntimeFocusCoordinator;
 }): IDisposable {
     const ownerDocument = options.ownerDocument ?? (typeof document === 'undefined' ? undefined : document);
     if (!ownerDocument) {

@@ -37,7 +37,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { EmbedFloatingGeometryService } from '@univerjs/embed-ui';
+import { EmbedFloatingGeometryService } from '../../sheet-embed-integration.service';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';

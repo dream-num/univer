@@ -77,7 +77,6 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@univerjs/embed": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },

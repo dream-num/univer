@@ -113,7 +113,7 @@ export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-p
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export { getCellRealRange, getViewportByCell } from './common/utils';
-export { type IUniverSheetsUIConfig } from './config/config';
+export { SHEETS_UI_PLUGIN_CONFIG_KEY, type IUniverSheetsUIConfig } from './config/config';
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
@@ -157,22 +157,10 @@ export {
 } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
-export { createEmbedSheetsFloatingDrawing, createEmbedSheetsFloatingDrawingFromDescriptor, createEmbedSheetsFloatingObjectData, getEmbedSheetsFloatingObjectData, isEmbedSheetsFloatingDrawing } from './embed-floating-anchor';
+export { createEmbedSheetsFloatingDrawing, createEmbedSheetsFloatingDrawingFromDescriptor, createEmbedSheetsFloatingObjectData, EMBED_SHEETS_FLOATING_COMPONENT_KEY, getEmbedSheetsFloatingObjectData, isEmbedSheetsFloatingDrawing } from './embed-floating-anchor';
 export type { IEmbedSheetsFloatingObjectData, IEmbedSheetsFloatingObjectParams } from './embed-floating-anchor';
-export {
-    createSheetsFloatingObjectHostAdapterContribution,
-    createSheetsFloatingObjectHostContainerContribution,
-    createSheetsSheetTabHostAdapterContribution,
-    createSheetsSheetTabHostContainerContribution,
-    EMBED_SHEETS_FLOATING_COMPONENT_KEY,
-} from './embed-host-adapter';
-export { registerSheetsEmbedProductMenus } from './embed-product-menu';
-export { registerSheetsEmbedUIContributions } from './embed-register';
 export { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot, createEmbedSheetsTabSnapshotFromDescriptor, EMBED_SHEETS_TAB_CUSTOM_KEY, getEmbedSheetsTabCustomData, isEmbedSheetsTabSnapshot } from './embed-tab-anchor';
 export type { IEmbedSheetsTabCustomData, IEmbedSheetsTabSnapshotParams } from './embed-tab-anchor';
-export { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './EmbedBlock';
-export { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems } from './EmbedFloatingMenu';
-export type { SheetFloatingToolbarItem } from './EmbedFloatingMenu';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export {
     COPY_SPECIAL_MENU_ID,
@@ -255,6 +243,25 @@ export type { RepeatableCommandHandler } from './services/repeat-last-action.ser
 export { SheetScrollManagerService } from './services/scroll-manager.service';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
 export {
+    ISheetEmbedFloatingGeometryService,
+    ISheetEmbedInteractionBoundaryService,
+    ISheetEmbedRuntimeFocusCoordinator,
+    resolveActiveSheetEmbedRuntimeDomScope,
+    resolveSheetEmbedRuntimeDomScope,
+    SHEET_EMBED_CHILD_TYPE_ATTRIBUTE,
+    SHEET_EMBED_CHILD_UNIT_ID_ATTRIBUTE,
+    SHEET_EMBED_FLOAT_DOM_ATTRIBUTE,
+    SHEET_EMBED_HOST_UNIT_ID_ATTRIBUTE,
+    SHEET_EMBED_ID_ATTRIBUTE,
+    SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+} from './services/sheet-embed-integration.service';
+export type { ISheetEmbedRuntimeDomScope } from './services/sheet-embed-integration.service';
+export { ISheetEmbedRuntimeService } from './services/sheet-embed-runtime.service';
+export type { ISheetEmbedTabMountParams } from './services/sheet-embed-runtime.service';
+export { ISheetHostChromeOverrideService } from './services/sheet-host-chrome-override.service';
+export type { ISheetHostChromeOverride } from './services/sheet-host-chrome-override.service';
+export {
     BaseSelectionRenderService,
     genSelectionByRange,
     selectionDataForSelectAll as getAllSelection,
@@ -274,10 +281,16 @@ export {
     getCustomRangePosition,
     getEditingCustomRangePosition,
 } from './services/utils/doc-skeleton-util';
-export { useKeyEventConfig } from './views/editor-container';
+export { EditorContainer, useKeyEventConfig } from './views/editor-container';
+export { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMenu';
+export { BorderLine } from './views/border-panel/border-line/BorderLine';
+export { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './views/border-panel/interface';
+export { FormulaBar } from './views/formula-bar';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './views/hook';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { type IPermissionDetailUserPartProps } from './views/permission/panel-detail/PermissionDetailUserPart';
+export { SheetBar } from './views/sheet-bar/SheetBar';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export { SHEET_FOOTER_BAR_HEIGHT } from './views/sheet-container/SheetContainer';
 export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
 export { functionDisplayNames } from './views/status-bar/CopyableStatisticItem';

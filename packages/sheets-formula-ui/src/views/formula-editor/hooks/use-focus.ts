@@ -17,8 +17,8 @@
 import type { Editor } from '@univerjs/docs-ui';
 import { Tools } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { isEventTargetInSameEmbedInteractionBoundary } from '@univerjs/embed-ui';
 import { useDependency, useEvent } from '@univerjs/ui';
+import { isEventTargetInSameFormulaEmbedInteractionBoundary } from '../formula-embed-integration.service';
 
 export function focusFormulaEditor(
     editorService: Pick<IEditorService, 'focus'>,
@@ -75,7 +75,7 @@ export function shouldRefocusFormulaEditorOnMouseUp(options: {
 
 export function hasActiveFormulaEmbedInteraction(scopeElement: HTMLElement | null | undefined): boolean {
     const ownerDocument = scopeElement?.ownerDocument;
-    return isEventTargetInSameEmbedInteractionBoundary(scopeElement, ownerDocument?.activeElement);
+    return isEventTargetInSameFormulaEmbedInteractionBoundary(scopeElement, ownerDocument?.activeElement);
 }
 
 export const useFocus = (editor?: Editor) => {

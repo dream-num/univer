@@ -33,12 +33,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { IEditorService } from '../../services/editor/editor-manager.service';
+import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
@@ -52,8 +52,8 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Optional(EmbedInteractionBoundaryService) _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
-        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
+        @Optional(IDocEmbedInteractionBoundaryService) _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -341,7 +341,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
 
 function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
     const target = (evt as Event).target;
-    if (typeof Element !== 'undefined' && target instanceof Element && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
+    if (typeof Element !== 'undefined' && target instanceof Element && target.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
         return true;
     }
 
@@ -356,7 +356,7 @@ function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
         return false;
     }
 
-    return document.elementFromPoint(clientX, clientY)?.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
+    return document.elementFromPoint(clientX, clientY)?.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
 }
 
 function getEventClientPoint(evt: IPointerEvent | IMouseEvent, target: EventTarget | null): { clientX: number; clientY: number } | undefined {

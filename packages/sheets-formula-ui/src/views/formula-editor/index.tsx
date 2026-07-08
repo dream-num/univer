@@ -41,7 +41,6 @@ import {
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { createEditorUndoRedoKeyboardConfig, DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
-import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, resolveActiveEmbedRuntimeDomScope, resolveEmbedRuntimeDomScope } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
@@ -61,6 +60,12 @@ import { useStateRef } from './hooks/use-state-ref';
 import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
 import { SearchFunction } from './search-function/SearchFunction';
+import {
+    IFormulaEmbedInteractionBoundaryService,
+    IFormulaEmbedRuntimeFocusCoordinator,
+    resolveActiveFormulaEmbedRuntimeDomScope,
+    resolveFormulaEmbedRuntimeDomScope,
+} from './formula-embed-integration.service';
 import { getFormulaText } from './utils/get-formula-text';
 
 export interface IFormulaEditorProps {
@@ -139,8 +144,8 @@ export function registerFormulaEditorRuntimePortal(options: {
     embedId: string;
     editorId: string;
     ownerDocument?: Document;
-    interactionBoundaryService?: EmbedInteractionBoundaryService;
-    focusCoordinator?: EmbedRuntimeFocusCoordinator;
+    interactionBoundaryService?: IFormulaEmbedInteractionBoundaryService;
+    focusCoordinator?: IFormulaEmbedRuntimeFocusCoordinator;
 }): IDisposable {
     const ownerDocument = options.ownerDocument ?? (typeof document === 'undefined' ? undefined : document);
     if (!ownerDocument) {
@@ -468,21 +473,21 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
     useEffect(() => {
         const formulaEditorContainer = formulaEditorContainerRef.current;
-        if (!isFocus || !formulaEditorContainer || !injector.has(EmbedRuntimeFocusCoordinator)) {
+        if (!isFocus || !formulaEditorContainer || !injector.has(IFormulaEmbedRuntimeFocusCoordinator)) {
             return undefined;
         }
 
-        const focusCoordinator = injector.get(EmbedRuntimeFocusCoordinator);
-        const scope = resolveEmbedRuntimeDomScope(formulaEditorContainer) ??
+        const focusCoordinator = injector.get(IFormulaEmbedRuntimeFocusCoordinator);
+        const scope = resolveFormulaEmbedRuntimeDomScope(formulaEditorContainer) ??
             focusCoordinator.resolveRuntimeScopeByChildUnitId(editorId) ??
-            resolveActiveEmbedRuntimeDomScope(formulaEditorContainer.ownerDocument);
+            resolveActiveFormulaEmbedRuntimeDomScope(formulaEditorContainer.ownerDocument);
         if (!scope) {
             return undefined;
         }
 
         const collection = new DisposableCollection();
-        const interactionBoundaryService = injector.has(EmbedInteractionBoundaryService)
-            ? injector.get(EmbedInteractionBoundaryService)
+        const interactionBoundaryService = injector.has(IFormulaEmbedInteractionBoundaryService)
+            ? injector.get(IFormulaEmbedInteractionBoundaryService)
             : undefined;
 
         collection.add(focusCoordinator.acquireLease({

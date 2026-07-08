@@ -39,6 +39,37 @@ class RenderModuleB extends Disposable implements IRenderModule {
     }
 }
 
+class RenderModuleC extends Disposable implements IRenderModule {
+    static calls = 0;
+
+    constructor(readonly context: IRenderContext) {
+        super();
+        RenderModuleC.calls += 1;
+    }
+}
+
+class EarlyResolvingRenderModule extends Disposable implements IRenderModule {
+    static resolve?: () => void;
+
+    constructor(readonly context: IRenderContext) {
+        super();
+        EarlyResolvingRenderModule.resolve?.();
+    }
+}
+
+class ReentrantRenderModule extends Disposable implements IRenderModule {
+    static calls = 0;
+    static renderUnit: RenderUnit | undefined;
+    static token: unknown;
+    static resolvedDuringConstruction: unknown;
+
+    constructor(readonly context: IRenderContext) {
+        super();
+        ReentrantRenderModule.calls += 1;
+        ReentrantRenderModule.resolvedDuringConstruction = ReentrantRenderModule.renderUnit?.with(ReentrantRenderModule.token as never);
+    }
+}
+
 function createRenderUnit(createUnitOptions?: any) {
     const parentInjector = new Injector();
     const unit = {
@@ -130,6 +161,49 @@ describe('render unit', () => {
         expect(RenderModuleB.calls).toBe(1);
         expect(renderUnit.with(tokenA as never)).toBeInstanceOf(RenderModuleB);
 
+        renderUnit.dispose();
+    });
+
+    it('does not initialize a render dependency twice when another module resolves it early', () => {
+        RenderModuleC.calls = 0;
+        const renderUnit = createRenderUnit();
+        const tokenA = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        const tokenB = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        EarlyResolvingRenderModule.resolve = () => {
+            expect(renderUnit.with(tokenA as never)).toBeInstanceOf(RenderModuleC);
+        };
+
+        expect(() => renderUnit.addRenderDependencies([
+            EarlyResolvingRenderModule,
+            [tokenB, { useClass: RenderModuleC }],
+            [tokenA, { useClass: RenderModuleC }],
+        ] as any)).not.toThrow();
+
+        expect(RenderModuleC.calls).toBe(1);
+        expect(renderUnit.with(tokenA as never)).toBeInstanceOf(RenderModuleC);
+
+        EarlyResolvingRenderModule.resolve = undefined;
+        renderUnit.dispose();
+    });
+
+    it('does not re-enter the same render dependency while it is being constructed', () => {
+        ReentrantRenderModule.calls = 0;
+        ReentrantRenderModule.resolvedDuringConstruction = undefined;
+        const renderUnit = createRenderUnit();
+        const token = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        ReentrantRenderModule.renderUnit = renderUnit;
+        ReentrantRenderModule.token = token;
+
+        expect(() => renderUnit.addRenderDependencies([
+            [token, { useClass: ReentrantRenderModule }],
+        ] as any)).not.toThrow();
+
+        expect(ReentrantRenderModule.calls).toBe(1);
+        expect(ReentrantRenderModule.resolvedDuringConstruction).toBeUndefined();
+        expect(renderUnit.with(token as never)).toBeInstanceOf(ReentrantRenderModule);
+
+        ReentrantRenderModule.renderUnit = undefined;
+        ReentrantRenderModule.token = undefined;
         renderUnit.dispose();
     });
 

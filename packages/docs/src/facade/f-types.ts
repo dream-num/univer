@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-import type {} from '@univerjs/embed/facade';
-import type { FDocument } from './f-document';
-
-declare module '@univerjs/embed/facade' {
-
-    interface IUnitFacadeMap {
-        // UniverInstanceType.UNIVER_DOC
-        1: FDocument;
-    }
-}
-
 export type FDocEmbedUnitFacadeMapAugmentation = never;

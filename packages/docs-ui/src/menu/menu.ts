@@ -41,7 +41,6 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
     COLOR_PICKER_COMPONENT,
@@ -89,11 +88,12 @@ import { DocCreateTableOperation } from '../commands/operations/doc-create-table
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
 import { DocMenuStyleService } from '../services/doc-menu-style.service';
+import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
 
 export function shouldSuppressDocMenuStateRefresh(accessor: IAccessor): boolean {
     let univerInstanceService: IUniverInstanceService;
-    let focusCoordinator: EmbedRuntimeFocusCoordinator;
+    let focusCoordinator: IDocEmbedRuntimeFocusCoordinator;
 
     try {
         univerInstanceService = accessor.get(IUniverInstanceService);
@@ -106,7 +106,7 @@ export function shouldSuppressDocMenuStateRefresh(accessor: IAccessor): boolean 
     }
 
     try {
-        focusCoordinator = accessor.get(EmbedRuntimeFocusCoordinator);
+        focusCoordinator = accessor.get(IDocEmbedRuntimeFocusCoordinator);
     } catch {
         return false;
     }

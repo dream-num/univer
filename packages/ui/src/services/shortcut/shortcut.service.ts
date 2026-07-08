@@ -19,11 +19,10 @@ import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { fromGlobalEvent } from '../../common/lifecycle';
+import { isEmbedBoundaryTarget } from '../../utils/embed-boundary';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
 import { KeyCode, KeyCodeToChar, MetaKeys } from './keycode';
-
-const EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
 
 /**
  * A shortcut item that could be registered to the {@link IShortcutService}.
@@ -365,6 +364,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
             target instanceof HTMLInputElement ||
             target instanceof HTMLTextAreaElement;
 
-        return isNativeTextEditor && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
+        return isNativeTextEditor && isEmbedBoundaryTarget(target);
     }
 }

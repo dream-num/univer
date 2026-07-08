@@ -16,9 +16,9 @@
 
 // @vitest-environment jsdom
 
-import type { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
+import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
 import { CURSOR_TYPE, DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';

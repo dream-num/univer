@@ -19,11 +19,11 @@ import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/e
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, Optional, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
-import { EmbedFloatingGeometryService } from '@univerjs/embed-ui';
 import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IEditorBridgeService } from '../editor-bridge.service';
+import { ISheetEmbedFloatingGeometryService } from '../sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ICellEditorManagerService } from './cell-editor-manager.service';
 
@@ -44,7 +44,7 @@ export class SheetCellEditorResizeService extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IConfigService private readonly _configService: IConfigService,
-        @Optional(EmbedFloatingGeometryService) private readonly _embedFloatingGeometryService?: EmbedFloatingGeometryService
+        @Optional(ISheetEmbedFloatingGeometryService) private readonly _embedFloatingGeometryService?: ISheetEmbedFloatingGeometryService
     ) {
         super();
     }

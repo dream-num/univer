@@ -20,10 +20,10 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
-import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
@@ -35,8 +35,8 @@ export class DocInputController extends Disposable implements IRenderModule {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocMenuStyleService) private readonly _docMenuStyleService: DocMenuStyleService,
-        @Optional(EmbedInteractionBoundaryService) _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
-        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
+        @Optional(IDocEmbedInteractionBoundaryService) _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
 

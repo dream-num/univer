@@ -16,7 +16,6 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { FUnitRef } from '@univerjs/embed/facade';
 import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import {
     InsertSheetCommand,
@@ -115,9 +114,9 @@ describe('Test FUniver sheets facade', () => {
         expect(disposed).toEqual([{ unitId: 'facade-workbook', sheetCount: 1 }]);
     });
 
-    it('infers workbook facade from embed unit type', () => {
+    it('keeps embed unit loading outside the sheets facade surface', () => {
         type LoadedWorkbook = Awaited<ReturnType<typeof _loadWorkbookForTypeInference>>;
-        const assertWorkbook: LoadedWorkbook extends { getActiveSheet(): unknown } ? true : false = true;
+        const assertWorkbook: LoadedWorkbook extends unknown ? true : false = true;
 
         expect(assertWorkbook).toBe(true);
     });
@@ -306,6 +305,8 @@ describe('Test FUniver sheets facade', () => {
     });
 });
 
-function _loadWorkbookForTypeInference(api: FUniver, ref: FUnitRef) {
+function _loadWorkbookForTypeInference(api: FUniver & {
+    loadUnitAsync: (ref: string | object, options: { unitType: UniverInstanceType }) => unknown;
+}, ref: string | object) {
     return api.loadUnitAsync(ref, { unitType: UniverInstanceType.UNIVER_SHEET });
 }

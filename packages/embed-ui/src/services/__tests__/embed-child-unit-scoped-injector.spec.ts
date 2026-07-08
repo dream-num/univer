@@ -37,6 +37,8 @@ import {
     Injector,
     IUndoRedoService,
     IUniverInstanceService,
+    LookUp,
+    setDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
 import { CreateEmbedCommand } from '@univerjs/embed';
@@ -49,7 +51,6 @@ import {
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
     EmbedRuntimeFocusCoordinator,
 } from '../embed-runtime-focus-coordinator.service';
-import { EmbedUndoBridgeService } from '../embed-undo-bridge.service';
 
 interface IScopedInstanceService {
     getCurrentUnitOfType: (type: UniverInstanceType) => unknown;
@@ -64,19 +65,8 @@ interface IScopedCommandService {
     syncExecuteCommand: (id: string, params?: object) => boolean;
 }
 
-interface IScopedUndoRedoService {
-    pushUndoRedo: (item: { unitID: string }) => void;
-    __tempBatchingUndoRedo: (unitId: string) => string;
-    clearUndoRedo: (unitId: string) => void;
-    rollback: (id: string, unitId?: string) => string;
-    pitchTopUndoElement: () => string;
-    pitchTopRedoElement: () => string;
-    popUndoToRedo: () => string;
-    popRedoToUndo: () => string;
-}
-
 describe('embed child unit scoped injector', () => {
-    it('scopes instance, command, undo redo, menu, and context menu services to the child unit', async () => {
+    it('scopes instance, command, menu, and context menu services to the child unit', async () => {
         const childUnit = createUnit('child-sheet');
         const previousUnit = createUnit('previous-sheet');
         const focusedUnit = createUnit('focused-host');
@@ -102,10 +92,6 @@ describe('embed child unit scoped injector', () => {
             pitchTopRedoElement: vi.fn(() => 'redo'),
             popUndoToRedo: vi.fn(() => 'undo-to-redo'),
             popRedoToUndo: vi.fn(() => 'redo-to-undo'),
-        };
-        const undoBridgeService = {
-            resolveStackUnitId: vi.fn((unitId: string) => unitId === 'child-sheet' ? 'host-stack' : unitId),
-            pushUndoRedoForChild: vi.fn(),
         };
         const scopedMenuManager = {
             scoped: true,
@@ -144,7 +130,6 @@ describe('embed child unit scoped injector', () => {
             [IUniverInstanceService, instanceService],
             [ICommandService, commandService],
             [IUndoRedoService, undoRedoService],
-            [EmbedUndoBridgeService, undoBridgeService],
             [EmbedInteractionBoundaryService, interactionBoundaryService],
             [EmbedRuntimeFocusCoordinator, runtimeFocusCoordinator],
             [IMenuManagerService, menuManagerService],
@@ -215,21 +200,7 @@ describe('embed child unit scoped injector', () => {
         expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('previous-sheet');
         expect(scopedCommandService.syncExecuteCommand('cmd.sync')).toBe(true);
 
-        const scopedUndoRedoService = scopedInjector?.get(IUndoRedoService) as unknown as IScopedUndoRedoService;
-        scopedUndoRedoService.pushUndoRedo({ unitID: 'child-sheet' } as never);
-        scopedUndoRedoService.pushUndoRedo({ unitID: 'other' } as never);
-        expect(undoBridgeService.pushUndoRedoForChild).toHaveBeenCalledWith({ unitID: 'child-sheet' });
-        expect(undoRedoService.pushUndoRedo).toHaveBeenCalledWith({ unitID: 'other' });
-        expect(scopedUndoRedoService.__tempBatchingUndoRedo('child-sheet')).toBe('batch:host-stack');
-        scopedUndoRedoService.clearUndoRedo('child-sheet');
-        expect(undoRedoService.clearUndoRedo).toHaveBeenCalledWith('host-stack');
-        expect(scopedUndoRedoService.rollback('r1')).toBe('rollback:r1:host-stack');
-        expect(scopedUndoRedoService.pitchTopUndoElement()).toBe('undo');
-        expect(scopedUndoRedoService.pitchTopRedoElement()).toBe('redo');
-        expect(scopedUndoRedoService.popUndoToRedo()).toBe('undo-to-redo');
-        expect(scopedUndoRedoService.popRedoToUndo()).toBe('redo-to-undo');
-        expect(instanceService.focusUnit).toHaveBeenCalledWith('host-stack');
-        expect(instanceService.focusUnit).toHaveBeenCalledWith('focused-host');
+        expect(scopedInjector?.get(IUndoRedoService)).toBe(undoRedoService);
 
         const scopedContextMenuService = scopedInjector?.get(IContextMenuService) as typeof contextMenuService;
         scopedContextMenuService.disabled = true;
@@ -759,6 +730,7 @@ describe('embed child unit scoped injector', () => {
     });
 
     it('supports explicit scoped config overrides without allowing generic service replacement', () => {
+        const configTokenFromRenderModule = Object.assign(() => undefined, { decoratorName: IConfigService.decoratorName });
         const configService = {
             getConfig: vi.fn((id: string | symbol) => id === 'docs-ui.config'
                 ? { fitToWidth: { mode: 'none', paddingX: 20 } }
@@ -767,10 +739,10 @@ describe('embed child unit scoped injector', () => {
             deleteConfig: vi.fn(),
             subscribeConfigValue$: vi.fn(),
         };
-        const parentInjector = createParentInjector([
-            [IConfigService, configService],
+        const parentInjector = new Injector([
+            [IConfigService, { useValue: configService }],
         ]);
-        const scopedInjector = createEmbedScopedConfigInjector(parentInjector as unknown as Injector, new Map([
+        const scopedInjector = createEmbedScopedConfigInjector(parentInjector, new Map([
             ['docs-ui.config', (config) => ({
                 ...(config as object),
                 fitToWidth: { mode: 'fit-width', paddingX: 0 },
@@ -790,15 +762,54 @@ describe('embed child unit scoped injector', () => {
         expect(scopedInjector?.get(IConfigService).getConfig('docs-ui.config')).toEqual({
             fitToWidth: { mode: 'fit-width', paddingX: 0 },
         });
+
+        class RenderConfigConsumer {
+            readonly context: string;
+
+            constructor(context: string, readonly scopedConfigService: IConfigService) {
+                this.context = context;
+            }
+        }
+        setDependencies(RenderConfigConsumer, [configTokenFromRenderModule as never], 1);
+        const renderInjector = scopedInjector!.createChild();
+        renderInjector.add([RenderConfigConsumer, {
+            useFactory: () => renderInjector.createInstance(RenderConfigConsumer, 'render-context'),
+        }] as never);
+        const consumer = renderInjector.get(RenderConfigConsumer as never, LookUp.SELF) as RenderConfigConsumer;
+
+        expect(consumer.context).toBe('render-context');
+        expect(consumer.scopedConfigService).toBe(renderInjector.get(IConfigService));
+        expect(consumer.scopedConfigService.getConfig('docs-ui.config')).toEqual({
+            fitToWidth: { mode: 'fit-width', paddingX: 0 },
+        });
+    });
+
+    it('preserves value dependencies passed to createChild even when the parent has that service', () => {
+        class CreateChildValueService {}
+        const token = CreateChildValueService;
+        const parentInjector = new Injector([
+            [token, { useValue: 'parent-value' }],
+        ]);
+        const scopedInjector = createEmbedScopedInjector(parentInjector, new Map());
+        const child = scopedInjector.createChild([
+            [token, { useValue: 'child-value' }],
+        ] as never);
+
+        expect(child.get(token as never)).toBe('child-value');
+        expect(parentInjector.get(token as never)).toBe('parent-value');
     });
 
     it('deduplicates identifier decorators by stable name when adding local dependencies', () => {
         const childAdd = vi.fn();
         const factory = vi.fn(() => 'local-render-module');
+        let childValue: unknown;
         const childInjector = {
             has: vi.fn(() => false),
-            get: vi.fn(() => undefined),
-            add: childAdd,
+            get: vi.fn((candidate: unknown) => candidate === tokenA ? childValue : undefined),
+            add: childAdd.mockImplementation((dependency: unknown) => {
+                const [, options] = dependency as [unknown, { useFactory?: () => unknown }];
+                childValue = options.useFactory?.();
+            }),
             createInstance: vi.fn(),
             dispose: vi.fn(),
         };
@@ -818,11 +829,27 @@ describe('embed child unit scoped injector', () => {
         scopedInjector.add(firstDep as never);
         scopedInjector.add(duplicateDep as never);
 
-        expect(childAdd).not.toHaveBeenCalled();
+        expect(childAdd).toHaveBeenCalledTimes(1);
+        expect(childAdd).toHaveBeenCalledWith(firstDep);
         expect(scopedInjector.get(tokenA as never)).toBe('local-render-module');
         expect(scopedInjector.get(tokenA as never)).toBe('local-render-module');
         expect(factory).toHaveBeenCalledTimes(1);
-        expect(childInjector.get).not.toHaveBeenCalledWith(tokenA);
+        expect(childInjector.get).toHaveBeenCalledWith(tokenA);
+    });
+
+    it('reuses resolved child dependencies by stable identifier decorator name', () => {
+        const factory = vi.fn(() => 'resolved-selection-render-service');
+        const parentInjector = new Injector();
+        const scopedInjector = createEmbedScopedInjector(parentInjector, new Map());
+        const renderInjector = scopedInjector.createChild();
+        const tokenA = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        const tokenB = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+
+        renderInjector.add([tokenA, { useFactory: factory }] as never);
+
+        expect(renderInjector.get(tokenA as never, LookUp.SELF)).toBe('resolved-selection-render-service');
+        expect(renderInjector.get(tokenB as never, LookUp.SELF)).toBe('resolved-selection-render-service');
+        expect(factory).toHaveBeenCalledTimes(1);
     });
 });
 

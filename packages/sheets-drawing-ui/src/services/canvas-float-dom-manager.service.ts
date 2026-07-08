@@ -2268,7 +2268,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: () => updatePosition(),
+            error: () => {},
+        }));
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {

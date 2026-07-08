@@ -35,10 +35,10 @@ import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
+import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -161,8 +161,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         @ILogService private readonly _logService: ILogService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Optional(EmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
-        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
+        @Optional(IDocEmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
         this._initDOM();
@@ -1486,7 +1486,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return undefined;
         }
 
-        return element.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ?? undefined;
+        return element.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ?? undefined;
     }
 
     private _containsOwnEditorElement(element: HTMLElement): boolean {

@@ -19,7 +19,7 @@
  */
 
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DocInputController } from '../doc-input.controller';

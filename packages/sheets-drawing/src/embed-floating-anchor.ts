@@ -15,9 +15,15 @@
  */
 
 import type { Serializable } from '@univerjs/core';
-import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { ISheetDrawingPosition, ISheetFloatDom } from './services/sheet-drawing.service';
 import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
+
+interface IEmbedDescriptor {
+    embedId: string;
+    hostUnitId: string;
+    hostAnchorId: string;
+    childType?: UniverInstanceType;
+}
 
 export const EMBED_SHEETS_FLOATING_COMPONENT_KEY = 'UniverEmbedSheetsFloatingObject';
 

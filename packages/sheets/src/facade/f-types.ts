@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-import type {} from '@univerjs/embed/facade';
-import type { FWorkbook } from './f-workbook';
-
-declare module '@univerjs/embed/facade' {
-
-    interface IUnitFacadeMap {
-        // UniverInstanceType.UNIVER_SHEET
-        2: FWorkbook;
-    }
-}
-
 export type FSheetEmbedUnitFacadeMapAugmentation = never;

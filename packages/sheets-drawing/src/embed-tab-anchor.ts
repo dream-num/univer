@@ -15,8 +15,12 @@
  */
 
 import type { IWorksheetData } from '@univerjs/core';
-import type { IEmbedDescriptor } from '@univerjs/embed';
 import { BooleanNumber } from '@univerjs/core';
+
+interface IEmbedDescriptor {
+    embedId: string;
+    hostAnchorId: string;
+}
 
 export const EMBED_SHEETS_TAB_CUSTOM_KEY = 'UNIVER_EMBED_SHEETS_TAB';
 

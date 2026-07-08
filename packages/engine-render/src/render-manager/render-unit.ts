@@ -98,6 +98,7 @@ export class RenderUnit extends Disposable implements IRender {
     private readonly _injector: Injector;
 
     private _renderContext: IRenderContext<UnitModel>;
+    private readonly _dependencyService: RenderUnitDependencyService;
 
     set isMainScene(is: boolean) { this._renderContext.isMainScene = is; }
     get isMainScene(): boolean { return this._renderContext.isMainScene; }
@@ -117,6 +118,10 @@ export class RenderUnit extends Disposable implements IRender {
 
         const renderParentInjector = init.createUnitOptions?.renderParentInjector ?? parentInjector;
         this._injector = renderParentInjector.createChild();
+        this._dependencyService = new RenderUnitDependencyService(
+            this._injector,
+            () => this._renderContext
+        );
 
         this._renderContext = {
             unit: init.unit,
@@ -160,7 +165,7 @@ export class RenderUnit extends Disposable implements IRender {
      * Get a dependency from the RenderUnit's injector.
      */
     with<T>(dependency: DependencyIdentifier<T>): T {
-        return this._injector.get(dependency, LookUp.SELF);
+        return this._dependencyService.resolve(dependency);
     }
 
     getInjector(): Injector {
@@ -176,28 +181,8 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     private _initDependencies(dependencies: Dependency[]): void {
-        const j = this._injector;
-        const uniqueDependencies = dedupeRenderDependencies(dependencies);
-
-        uniqueDependencies.forEach((dep) => {
-            const [identifier, implOrNull] = Array.isArray(dep) ? dep : [dep, null];
-
-            if (!implOrNull) {
-                j.add([identifier, {
-                    useFactory: (): IRenderModule => j.createInstance(identifier, this._renderContext),
-                }]);
-            } else if (isClassDependencyItem(implOrNull)) {
-                j.add([identifier, {
-                    useFactory: (): IRenderModule => j.createInstance(implOrNull.useClass, this._renderContext),
-                }]);
-            } else {
-                throw new Error('[RenderUnit]: render dependency could only be an class!');
-            }
-        });
-
-        uniqueDependencies.forEach((dep) => {
-            const [identifier] = Array.isArray(dep) ? dep : [dep, null];
-            j.get(identifier, LookUp.SELF);
+        this._dependencyService.register(dependencies).forEach((record) => {
+            this._dependencyService.resolveRecord(record);
         });
     }
 
@@ -214,18 +199,131 @@ export class RenderUnit extends Disposable implements IRender {
     }
 }
 
-function dedupeRenderDependencies(dependencies: Dependency[]): Dependency[] {
-    const seen = new Set<unknown>();
-    return dependencies.filter((dependency) => {
-        const identifier = Array.isArray(dependency) ? dependency[0] : dependency;
-        const key = getRenderDependencyIdentifierKey(identifier);
-        if (seen.has(key)) {
-            return false;
+interface IRenderDependencyRecord {
+    key: unknown;
+    identifier: DependencyIdentifier<unknown>;
+    create: () => IRenderModule;
+}
+
+class RenderUnitDependencyService {
+    private readonly _records = new Map<unknown, IRenderDependencyRecord>();
+    private readonly _resolved = new Map<unknown, unknown>();
+    private readonly _resolving = new Set<unknown>();
+
+    constructor(
+        private readonly _injector: Injector,
+        private readonly _getRenderContext: () => IRenderContext<UnitModel>
+    ) { }
+
+    register(dependencies: Dependency[]): IRenderDependencyRecord[] {
+        const records: IRenderDependencyRecord[] = [];
+        const seen = new Set<unknown>();
+
+        dependencies.forEach((dependency) => {
+            const parsed = this._parseDependency(dependency);
+            const key = getRenderDependencyIdentifierKey(parsed.identifier);
+            const existing = this._records.get(key);
+            const record = existing ?? this._addRecord(key, parsed.identifier, parsed.create);
+            if (seen.has(record.key)) {
+                return;
+            }
+
+            seen.add(record.key);
+            records.push(record);
+        });
+
+        return records;
+    }
+
+    resolve<T>(dependency: DependencyIdentifier<T>): T {
+        const key = getRenderDependencyIdentifierKey(dependency);
+        if (this._resolved.has(key)) {
+            return this._resolved.get(key) as T;
         }
 
-        seen.add(key);
-        return true;
-    });
+        if (this._resolving.has(key)) {
+            return undefined as T;
+        }
+
+        const record = this._records.get(key);
+        if (record) {
+            return this.resolveRecord(record) as T;
+        }
+
+        return this._injector.get(dependency, LookUp.SELF);
+    }
+
+    resolveRecord(record: IRenderDependencyRecord): unknown {
+        if (this._resolved.has(record.key)) {
+            return this._resolved.get(record.key);
+        }
+
+        if (this._resolving.has(record.key)) {
+            return undefined;
+        }
+
+        this._resolving.add(record.key);
+        try {
+            return this._injector.get(record.identifier, LookUp.SELF);
+        } finally {
+            this._resolving.delete(record.key);
+        }
+    }
+
+    private _addRecord(
+        key: unknown,
+        identifier: DependencyIdentifier<unknown>,
+        create: () => IRenderModule
+    ): IRenderDependencyRecord {
+        const record: IRenderDependencyRecord = { key, identifier, create };
+        this._records.set(key, record);
+        this._injector.add([identifier, {
+            useFactory: () => this._create(record),
+        }]);
+
+        return record;
+    }
+
+    private _create(record: IRenderDependencyRecord): IRenderModule {
+        if (this._resolved.has(record.key)) {
+            return this._resolved.get(record.key) as IRenderModule;
+        }
+
+        const alreadyResolving = this._resolving.has(record.key);
+        if (!alreadyResolving) {
+            this._resolving.add(record.key);
+        }
+
+        try {
+            const instance = record.create();
+            this._resolved.set(record.key, instance);
+            return instance;
+        } finally {
+            if (!alreadyResolving) {
+                this._resolving.delete(record.key);
+            }
+        }
+    }
+
+    private _parseDependency(dependency: Dependency): Pick<IRenderDependencyRecord, 'identifier' | 'create'> {
+        const [identifier, implOrNull] = Array.isArray(dependency) ? dependency : [dependency, null];
+
+        if (!implOrNull) {
+            return {
+                identifier,
+                create: () => this._injector.createInstance(identifier, this._getRenderContext()),
+            };
+        }
+
+        if (isClassDependencyItem(implOrNull)) {
+            return {
+                identifier,
+                create: () => this._injector.createInstance(implOrNull.useClass, this._getRenderContext()),
+            };
+        }
+
+        throw new Error('[RenderUnit]: render dependency could only be an class!');
+    }
 }
 
 function getRenderDependencyIdentifierKey(identifier: unknown): unknown {

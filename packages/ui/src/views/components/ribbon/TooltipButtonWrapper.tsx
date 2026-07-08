@@ -33,6 +33,7 @@ import {
 } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { getEmbedBoundaryOwner } from '../../../utils/embed-boundary';
 import { useDependency } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
@@ -45,8 +46,6 @@ const ToolbarDropdownContext = createContext<{
     openDropdownKey: string | null;
     setOpenDropdownKey: (key: string | null) => void;
 } | null>(null);
-
-const EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
 
 export interface ITooltipWrapperRef {
     el: HTMLSpanElement | null;
@@ -444,14 +443,4 @@ function keepDropdownOpenForSameEmbedBoundary(event: { currentTarget: EventTarge
     if (getEmbedBoundaryOwner(event.target) === owner) {
         event.preventDefault();
     }
-}
-
-function getEmbedBoundaryOwner(target: EventTarget | null): string | undefined {
-    if (!(target instanceof HTMLElement)) {
-        return undefined;
-    }
-
-    return target.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ??
-        target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ??
-        undefined;
 }

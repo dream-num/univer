@@ -15,83 +15,11 @@
  */
 
 import type { Injector, IWorkbookData, IWorksheetData } from '@univerjs/core';
-import type { IEmbedCapability } from '@univerjs/embed';
-import { BooleanNumber, generateRandomId, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { registerEmbedCapabilities } from '@univerjs/embed';
+import { BooleanNumber, generateRandomId, LocaleType } from '@univerjs/core';
 import pkg from '../package.json';
 
-const SHEETS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_SHEET,
-        entry: 'sheets-floating-object',
-        mode: 'float',
-        renderHost: 'sheets-drawing-dom',
-        layout: 'scroll-contained',
-        menuBehavior: 'floating',
-        nestedEmbed: false,
-    },
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_DOC,
-        entry: 'sheets-floating-object',
-        mode: 'float',
-        renderHost: 'sheets-drawing-dom',
-        layout: 'doc-width-scale',
-        menuBehavior: 'floating',
-        nestedEmbed: false,
-    },
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_SLIDE,
-        entry: 'sheets-floating-object',
-        mode: 'float',
-        renderHost: 'sheets-drawing-dom',
-        layout: 'aspect-fit',
-        menuBehavior: 'floating',
-        nestedEmbed: false,
-    },
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_BASE,
-        entry: 'sheets-floating-object',
-        mode: 'float',
-        renderHost: 'sheets-drawing-dom',
-        layout: 'scroll-contained',
-        menuBehavior: 'floating',
-        nestedEmbed: false,
-    },
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_BASE,
-        entry: 'sheets-sheet-tab',
-        mode: 'tab',
-        layout: 'tab-peer',
-        menuBehavior: 'host-override',
-        nestedEmbed: false,
-    },
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_DOC,
-        entry: 'sheets-sheet-tab',
-        mode: 'tab',
-        layout: 'tab-peer',
-        menuBehavior: 'host-override',
-        nestedEmbed: false,
-    },
-    {
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        childType: UniverInstanceType.UNIVER_SLIDE,
-        entry: 'sheets-sheet-tab',
-        mode: 'tab',
-        layout: 'tab-peer',
-        menuBehavior: 'host-override',
-        nestedEmbed: false,
-    },
-];
-
 export function registerSheetsEmbedHostCapabilities(injector: Injector): void {
-    registerEmbedCapabilities(injector, SHEETS_HOST_EMBED_CAPABILITIES);
+    void injector;
 }
 
 export function createSheetsEmbedEmptySnapshot(config: Record<string, unknown> = {}): IWorkbookData {

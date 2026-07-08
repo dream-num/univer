@@ -32,7 +32,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, ILayoutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';

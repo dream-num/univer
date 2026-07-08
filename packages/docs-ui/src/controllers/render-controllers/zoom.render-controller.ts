@@ -32,7 +32,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
 import { getNextWheelZoomRatio, IRenderManagerService } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.command';
@@ -40,6 +39,7 @@ import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-rat
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { IDocEmbedInteractionBoundaryService } from '../../services/doc-embed-integration.service';
 import { DocViewScaleService } from '../../services/doc-view-scale';
 import { DEFAULT_MODERN_DOC_ZOOM_RATIO, getDocEffectiveZoomRatio } from '../../services/doc-zoom';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -68,7 +68,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService,
-        @Optional(EmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
+        @Optional(IDocEmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService
     ) {
         super();
 

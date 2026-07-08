@@ -24,7 +24,6 @@ import {
     Optional,
     UniverInstanceType,
 } from '@univerjs/core';
-import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     BuiltInUIPart,
@@ -37,6 +36,7 @@ import {
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
+import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
@@ -66,8 +66,8 @@ export class DocUIController extends Disposable {
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
         @IConfigService protected readonly _configService: IConfigService,
-        @Optional(EmbedInteractionBoundaryService) _embedInteractionBoundaryService?: EmbedInteractionBoundaryService,
-        @Optional(EmbedRuntimeFocusCoordinator) protected readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
+        @Optional(IDocEmbedInteractionBoundaryService) _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) protected readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
 

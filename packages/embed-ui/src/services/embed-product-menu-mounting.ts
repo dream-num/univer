@@ -69,7 +69,7 @@ export function createEmbedProductMenuInjector(
     const instanceService = injector.get(IUniverInstanceService);
     const scopedInstanceService = createScopedEmbedProductInstanceService(instanceService, childType, childUnitId);
     const actionServiceTokenSet = new Set<DependencyIdentifier<unknown>>(scopedActionServiceTokens ?? []);
-    const actionServiceProxies = new WeakMap<object, unknown>();
+    const scopedActionServices = new WeakMap<object, unknown>();
     let scopedInjector: Pick<Injector, 'invoke' | 'get' | 'has'>;
     const commandService = createScopedEmbedProductCommandService(
         injector.get(ICommandService),
@@ -125,7 +125,7 @@ export function createEmbedProductMenuInjector(
                 childUnitId,
                 embedId,
                 () => scopedInjector,
-                actionServiceProxies
+                scopedActionServices
             );
         }
 
@@ -266,59 +266,47 @@ function createScopedEmbedProductInstanceService(
         )
         : instanceService.focused$;
 
-    return new Proxy(instanceService, {
-        get(target, property, receiver) {
-            if (property === 'focused$') {
-                return scopedFocused$;
-            }
-            if (property === 'focused') {
-                return getChildUnit() ?? target.getFocusedUnit();
-            }
-            if (property === 'getCurrentUnitOfType') {
-                return (type: UniverInstanceType) => type === childType && childUnitId
-                    ? getChildUnit()
-                    : target.getCurrentUnitOfType(type);
-            }
-            if (property === 'getCurrentTypeOfUnit$') {
-                return (type: UniverInstanceType) => type === childType && childUnitId
-                    ? merge(
-                        of(undefined),
-                        target.getTypeOfUnitAdded$(childType),
-                        target.getTypeOfUnitDisposed$(childType)
-                    ).pipe(map(() => getChildUnit()))
-                    : target.getCurrentTypeOfUnit$(type);
-            }
-            if (property === 'getFocusedUnit') {
-                return () => getChildUnit() ?? target.getFocusedUnit();
-            }
-
-            return Reflect.get(target, property, receiver);
-        },
+    const scopedInstanceService = Object.create(instanceService) as IUniverInstanceService & { focused?: unknown };
+    Object.defineProperty(scopedInstanceService, 'focused$', {
+        value: scopedFocused$,
+        configurable: true,
     });
+    Object.defineProperty(scopedInstanceService, 'focused', {
+        get: () => getChildUnit() ?? instanceService.getFocusedUnit(),
+        configurable: true,
+    });
+    scopedInstanceService.getCurrentUnitOfType = ((type: UniverInstanceType) => type === childType && childUnitId
+        ? getChildUnit()
+        : instanceService.getCurrentUnitOfType(type)) as IUniverInstanceService['getCurrentUnitOfType'];
+    scopedInstanceService.getCurrentTypeOfUnit$ = ((type: UniverInstanceType) => {
+        if (type !== childType || !childUnitId) {
+            return instanceService.getCurrentTypeOfUnit$(type);
+        }
+
+        return merge(
+            of(undefined),
+            instanceService.getTypeOfUnitAdded$(childType),
+            instanceService.getTypeOfUnitDisposed$(childType)
+        ).pipe(map(() => getChildUnit()));
+    }) as IUniverInstanceService['getCurrentTypeOfUnit$'];
+    scopedInstanceService.getFocusedUnit = () => getChildUnit() ?? instanceService.getFocusedUnit();
+    return scopedInstanceService;
 }
 
 function createScopedEmbedProductContextService(
     contextService: IContextService,
     childType: UniverInstanceType
 ): IContextService {
-    return new Proxy(contextService, {
-        get(target, property, receiver) {
-            if (property === 'getContextValue') {
-                return (key: string) => {
-                    const value = getScopedEmbedProductFocusContextValue(key, childType);
-                    return value ?? target.getContextValue(key);
-                };
-            }
-            if (property === 'subscribeContextValue$') {
-                return (key: string) => {
-                    const value = getScopedEmbedProductFocusContextValue(key, childType);
-                    return value == null ? target.subscribeContextValue$(key) : of(value);
-                };
-            }
-
-            return Reflect.get(target, property, receiver);
-        },
-    });
+    const scopedContextService = Object.create(contextService) as IContextService;
+    scopedContextService.getContextValue = (key: string) => {
+        const value = getScopedEmbedProductFocusContextValue(key, childType);
+        return value ?? contextService.getContextValue(key);
+    };
+    scopedContextService.subscribeContextValue$ = (key: string) => {
+        const value = getScopedEmbedProductFocusContextValue(key, childType);
+        return value == null ? contextService.subscribeContextValue$(key) : of(value);
+    };
+    return scopedContextService;
 }
 
 function getScopedEmbedProductFocusContextValue(key: string, childType: UniverInstanceType): boolean | undefined {
@@ -359,34 +347,26 @@ function createScopedEmbedProductCommandService(
         return commandService;
     }
 
-    return new Proxy(commandService, {
-        get(target, property, receiver) {
-            if (property === 'executeCommand') {
-                return async (...args: Parameters<ICommandService['executeCommand']>) => {
-                    const previous = instanceService.getCurrentUnitOfType(childType);
-                    try {
-                        instanceService.setCurrentUnitForType(childUnitId);
-                        return await target.executeCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
-                    } finally {
-                        restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
-                    }
-                };
-            }
-            if (property === 'syncExecuteCommand') {
-                return (...args: Parameters<ICommandService['syncExecuteCommand']>) => {
-                    const previous = instanceService.getCurrentUnitOfType(childType);
-                    try {
-                        instanceService.setCurrentUnitForType(childUnitId);
-                        return target.syncExecuteCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
-                    } finally {
-                        restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
-                    }
-                };
-            }
-
-            return Reflect.get(target, property, receiver);
-        },
-    });
+    const scopedCommandService = Object.create(commandService) as ICommandService;
+    scopedCommandService.executeCommand = (async (...args: Parameters<ICommandService['executeCommand']>) => {
+        const previous = instanceService.getCurrentUnitOfType(childType);
+        try {
+            instanceService.setCurrentUnitForType(childUnitId);
+            return await commandService.executeCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
+        } finally {
+            restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
+        }
+    }) as ICommandService['executeCommand'];
+    scopedCommandService.syncExecuteCommand = ((...args: Parameters<ICommandService['syncExecuteCommand']>) => {
+        const previous = instanceService.getCurrentUnitOfType(childType);
+        try {
+            instanceService.setCurrentUnitForType(childUnitId);
+            return commandService.syncExecuteCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
+        } finally {
+            restoreEmbedProductMenuCurrentUnit(instanceService, childUnitId, previous, embedId, getScopedInjector);
+        }
+    }) as ICommandService['syncExecuteCommand'];
+    return scopedCommandService;
 }
 
 function createScopedEmbedProductActionService<T>(
@@ -396,39 +376,61 @@ function createScopedEmbedProductActionService<T>(
     childUnitId: string,
     embedId?: string,
     getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined,
-    proxies?: WeakMap<object, unknown>
+    scopedActionServices?: WeakMap<object, unknown>
 ): T {
     if ((typeof service !== 'object' && typeof service !== 'function') || service == null) {
         return service;
     }
 
     const target = service as object;
-    const cached = proxies?.get(target);
+    const cached = scopedActionServices?.get(target);
     if (cached) {
         return cached as T;
     }
 
-    const proxy = new Proxy(target, {
-        get(rawTarget, property, receiver) {
-            const value = Reflect.get(rawTarget, property, receiver);
-            if (typeof value !== 'function') {
-                return value;
-            }
+    const scopedService = Object.create(Object.getPrototypeOf(target)) as T & Record<string, unknown>;
+    Object.assign(scopedService as object, target);
+    copyScopedActionServiceMethods(target, scopedService, instanceService, childType, childUnitId, embedId, getScopedInjector);
+    scopedActionServices?.set(target, scopedService);
 
-            return (...args: unknown[]) => runWithEmbedProductMenuChildUnit(
-                instanceService,
-                childType,
-                childUnitId,
-                embedId,
-                getScopedInjector,
-                () => value.apply(rawTarget, args)
-            );
-        },
-    }) as T;
+    return scopedService;
+}
 
-    proxies?.set(target, proxy);
+function copyScopedActionServiceMethods<T>(
+    target: object,
+    scopedService: T & Record<string, unknown>,
+    instanceService: IUniverInstanceService,
+    childType: UniverInstanceType,
+    childUnitId: string,
+    embedId?: string,
+    getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined
+): void {
+    const copyMethod = (methodName: string) => {
+        if (methodName === 'constructor') {
+            return;
+        }
 
-    return proxy;
+        const value = (target as Record<string, unknown>)[methodName];
+        if (typeof value !== 'function') {
+            return;
+        }
+
+        const scopedRecord = scopedService as Record<string, unknown>;
+        scopedRecord[methodName] = (...args: unknown[]) => runWithEmbedProductMenuChildUnit(
+            instanceService,
+            childType,
+            childUnitId,
+            embedId,
+            getScopedInjector,
+            () => value.apply(target, args)
+        );
+    };
+
+    Object.keys(target).forEach(copyMethod);
+    const prototype = Object.getPrototypeOf(target);
+    if (prototype && prototype !== Object.prototype) {
+        Object.getOwnPropertyNames(prototype).forEach(copyMethod);
+    }
 }
 
 function runWithEmbedProductMenuChildUnit<T>(

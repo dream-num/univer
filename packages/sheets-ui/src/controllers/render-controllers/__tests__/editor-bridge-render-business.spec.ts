@@ -16,10 +16,10 @@
 
 // @vitest-environment jsdom
 
-import type { EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
+import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';

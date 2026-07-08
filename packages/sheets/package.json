@@ -85,7 +85,6 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/embed": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/protocol": "workspace:*",

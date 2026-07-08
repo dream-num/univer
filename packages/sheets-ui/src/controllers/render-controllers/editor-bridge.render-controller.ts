@@ -22,7 +22,6 @@ import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '..
 import type { ISheetObjectParam } from '../utils/component-tools';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, Optional, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ClearSelectionFormatCommand,
@@ -34,6 +33,7 @@ import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.comm
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { ISheetEmbedRuntimeFocusCoordinator, SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE } from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 
@@ -51,7 +51,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @IContextService private readonly _contextService: IContextService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Optional(EmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
+        @Optional(ISheetEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: ISheetEmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -360,7 +360,7 @@ function isEmbedCellEditorInteractionTarget(target: EventTarget | null | undefin
         return false;
     }
 
-    return target.closest(`[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}="child-editor"]`) != null ||
+    return target.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}="child-editor"]`) != null ||
         target.closest('[data-u-comp="editor"]') != null ||
         target.closest('[id^="__editor___INTERNAL_EDITOR__"]') != null ||
         target.closest('[id^="univer-doc-selection-container-__INTERNAL_EDITOR__"]') != null;
@@ -391,7 +391,7 @@ function isEmbedCellEditorInteractionPoint(evt: { clientX?: number; clientY?: nu
     }
 
     const editorRoots = document.querySelectorAll<HTMLElement>([
-        `[${EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}="child-editor"]`,
+        `[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}="child-editor"]`,
         '[data-u-comp="editor"]',
         '[id^="__editor___INTERNAL_EDITOR__"]',
         '[id^="univer-doc-selection-container-__INTERNAL_EDITOR__"]',

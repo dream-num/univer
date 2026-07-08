@@ -16,10 +16,14 @@
 
 // @vitest-environment jsdom
 
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, isEventTargetInSameEmbedInteractionBoundary } from '@univerjs/embed-ui';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, toDisposable } from '@univerjs/core';
 import { sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it, vi } from 'vitest';
+import {
+    FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+    isEventTargetInSameFormulaEmbedInteractionBoundary,
+} from '../../formula-embed-integration.service';
 import { registerFormulaEditorRuntimePortal } from '../..';
 import { focusFormulaEditor, hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, shouldSkipFormulaEditorMouseUpFocus } from '../use-focus';
 import { FormulaSelectingType, resolveFormulaSelectingIntent, resolveFormulaSelectionCursorIndex, resolveFormulaSelectionDataStream, resolveFormulaSelectionWorkbook, shouldSkipReferenceEditingByPointer } from '../use-formula-selection';
@@ -112,7 +116,7 @@ describe('formula selection update helpers', () => {
         sheetCanvas.tabIndex = -1;
         sheetCanvas.focus();
 
-        expect(isEventTargetInSameEmbedInteractionBoundary(editorHost, sheetCanvas)).toBe(true);
+        expect(isEventTargetInSameFormulaEmbedInteractionBoundary(editorHost, sheetCanvas)).toBe(true);
         expect(hasActiveFormulaEmbedInteraction(editorHost)).toBe(true);
 
         block.remove();
@@ -127,8 +131,30 @@ describe('formula selection update helpers', () => {
         portalRoot.appendChild(editorElement);
         document.body.appendChild(portalRoot);
 
-        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
-        const interactionBoundaryService = new EmbedInteractionBoundaryService();
+        const registeredFocusElements = new Set<Element>();
+        const registeredBoundaryElements = new Set<Element>();
+        const focusCoordinator = {
+            resolveRuntimeScopeByChildUnitId: () => undefined,
+            acquireLease: () => toDisposable(() => {}),
+            registerElement: ({ element, role }: { element: HTMLElement; role: string }) => {
+                registeredFocusElements.add(element);
+                element.setAttribute(FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, role);
+                return toDisposable(() => {
+                    registeredFocusElements.delete(element);
+                    element.removeAttribute(FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
+                });
+            },
+        };
+        const interactionBoundaryService = {
+            registerOwnedElement: (embedId: string, element: Element) => {
+                registeredBoundaryElements.add(element);
+                element.setAttribute(FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, embedId);
+                return toDisposable(() => {
+                    registeredBoundaryElements.delete(element);
+                    element.removeAttribute(FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+                });
+            },
+        };
         const disposable = registerFormulaEditorRuntimePortal({
             embedId: 'embed-1',
             editorId,
@@ -136,17 +162,17 @@ describe('formula selection update helpers', () => {
             focusCoordinator,
         });
 
-        expect(portalRoot.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
-        expect(editorElement.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
-        expect(portalRoot.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
-        expect(editorElement.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
-        expect(interactionBoundaryService.contains('embed-1', editorElement)).toBe(true);
-        expect(focusCoordinator.containsElement('embed-1', editorElement)).toBe(true);
+        expect(portalRoot.getAttribute(FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(editorElement.getAttribute(FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+        expect(portalRoot.getAttribute(FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
+        expect(editorElement.getAttribute(FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
+        expect(registeredBoundaryElements.has(editorElement)).toBe(true);
+        expect(registeredFocusElements.has(editorElement)).toBe(true);
 
         disposable.dispose();
 
-        expect(portalRoot.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
-        expect(editorElement.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
+        expect(portalRoot.hasAttribute(FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
+        expect(editorElement.hasAttribute(FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
         portalRoot.remove();
     });
 

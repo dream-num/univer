@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { afterEach, describe, expect, it } from 'vitest';
 import { focusSheetCellEditorElement, registerSheetCellEditorRuntimePortal, resolveSheetCellEditorPortalRoot } from './focus-editor';
 

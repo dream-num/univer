@@ -43,16 +43,6 @@
                 "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
-            "./services/referenced-unit/referenced-unit.service": {
-                "import": "./lib/es/services/referenced-unit/referenced-unit.service.js",
-                "require": "./lib/cjs/services/referenced-unit/referenced-unit.service.js",
-                "types": "./lib/types/services/referenced-unit/referenced-unit.service.d.ts"
-            },
-            "./services/referenced-unit/resource-ref": {
-                "import": "./lib/es/services/referenced-unit/resource-ref.js",
-                "require": "./lib/cjs/services/referenced-unit/resource-ref.js",
-                "types": "./lib/types/services/referenced-unit/resource-ref.d.ts"
-            },
             "./*": {
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",

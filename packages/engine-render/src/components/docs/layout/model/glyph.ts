@@ -24,10 +24,9 @@ import type {
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
+import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
-    hasCJK,
-    hasCJKText,
     isCjkCenterAlignedPunctuation,
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
@@ -48,7 +47,7 @@ export function isJustifiable(
 ) {
     // punctuation style is not relevant here.
     return isSpace(content)
-        || hasCJKText(content)
+        || cjk.hasCJKText(content)
         || isCjkLeftAlignedPunctuation(content)
         || isCjkRightAlignedPunctuation(content)
         || isCjkCenterAlignedPunctuation(content);
@@ -231,7 +230,7 @@ export function _createSkeletonWordOrLetter(
     if (validationGrid(gridType, snapToGrid)) {
         // When text also needs to align to the grid, process it
         // const multiple = Math.ceil(contentWidth / charSpace);
-        width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
+        width = contentWidth + (cjk.hasCJK(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
             xOffset = (width - contentWidth) / 2;
         }

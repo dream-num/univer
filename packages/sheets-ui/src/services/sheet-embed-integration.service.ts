@@ -120,17 +120,38 @@ export class EmbedInteractionBoundaryService implements ISheetEmbedInteractionBo
 }
 
 export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoordinator {
-    private readonly _leases = new Set<{ embedId: string; role: string; owner?: string; childUnitId?: string; hostUnitId?: string; childType?: UniverInstanceType }>();
+    private readonly _leases = new Set<{
+        embedId: string;
+        role: string;
+        owner?: string;
+        childUnitId?: string;
+        hostUnitId?: string;
+        childType?: UniverInstanceType;
+        associatedChildUnitIds?: string[];
+    }>();
+
     private readonly _elements = new Map<string, Set<HTMLElement>>();
     readonly runtimeSessionChanged$ = new Subject<void>();
 
-    acquireLease(options: { embedId: string; role: string; owner?: string; childUnitId?: string; hostUnitId?: string; childType?: UniverInstanceType }): IDisposable {
+    acquireLease(options: {
+        embedId: string;
+        role: string;
+        owner?: string;
+        childUnitId?: string;
+        hostUnitId?: string;
+        childType?: UniverInstanceType;
+        associatedChildUnitIds?: string[];
+    }): IDisposable {
         this._leases.add(options);
-        this.runtimeSessionChanged$.next();
+        if (options.role === 'child-session') {
+            this.runtimeSessionChanged$.next();
+        }
 
         return toDisposable(() => {
             this._leases.delete(options);
-            this.runtimeSessionChanged$.next();
+            if (options.role === 'child-session') {
+                this.runtimeSessionChanged$.next();
+            }
         });
     }
 
@@ -175,7 +196,7 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
     }
 
     resolveRuntimeScopeByChildUnitId(childUnitId: string | undefined): ISheetEmbedRuntimeDomScope | undefined {
-        const lease = [...this._leases].find((item) => item.childUnitId === childUnitId);
+        const lease = [...this._leases].find((item) => matchesChildUnitId(item, childUnitId));
         return lease ? { embedId: lease.embedId, hostUnitId: lease.hostUnitId, childUnitId: lease.childUnitId, childType: lease.childType } : undefined;
     }
 
@@ -185,7 +206,7 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
     }
 
     isChildUnitInActiveSession(unitId: string | undefined): boolean {
-        return [...this._leases].some((lease) => lease.role !== 'runtime' && (!lease.childUnitId || lease.childUnitId === unitId));
+        return [...this._leases].some((lease) => lease.role !== 'runtime' && (!lease.childUnitId || matchesChildUnitId(lease, unitId)));
     }
 
     isChildUnitRuntimeEvent(unitId: string | undefined, target: EventTarget | null | undefined): boolean {
@@ -194,6 +215,10 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
             target.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null
         );
     }
+}
+
+function matchesChildUnitId(lease: { childUnitId?: string; associatedChildUnitIds?: string[] }, unitId: string | undefined): boolean {
+    return unitId != null && (lease.childUnitId === unitId || lease.associatedChildUnitIds?.includes(unitId) === true);
 }
 
 export class EmbedFloatingGeometryService implements ISheetEmbedFloatingGeometryService {

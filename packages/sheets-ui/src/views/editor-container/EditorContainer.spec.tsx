@@ -32,7 +32,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, ILayoutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -43,6 +42,7 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, ISheetEmbedInteractionBoundaryService, ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { EditorContainer, shouldRefocusCellEditorAfterPointerDown } from './EditorContainer';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -190,8 +190,8 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     injector.add([SheetCellEditorResizeService, { useValue: cellEditorResizeService as never }]);
     injector.add([ILayoutService, { useValue: { focus: vi.fn() } as never }]);
     injector.add([ISidebarService, { useValue: { getContainer: () => null } as never }]);
-    injector.add([EmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
-    injector.add([EmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
+    injector.add([ISheetEmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
+    injector.add([ISheetEmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
 
     return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService };
 }
@@ -203,6 +203,9 @@ describe('EditorContainer embed focus lease', () => {
     afterEach(() => {
         act(() => root?.unmount());
         container?.remove();
+        document.getElementById(`univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`)?.remove();
+        document.getElementById(`__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`)?.remove();
+        vi.useRealTimers();
         root = undefined;
         container = undefined;
     });
@@ -233,7 +236,7 @@ describe('EditorContainer embed focus lease', () => {
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
-        expect(injector.has(EmbedRuntimeFocusCoordinator)).toBe(true);
+        expect(injector.has(ISheetEmbedRuntimeFocusCoordinator)).toBe(true);
         expect(container.querySelector('.univer-absolute')?.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
         expect(selectionContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
         expect(internalEditor.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');

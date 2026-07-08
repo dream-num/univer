@@ -267,6 +267,8 @@ describe('SheetsScrollRenderController', () => {
         }, {});
 
         expect(executeSpy).toHaveBeenCalledWith(ScrollCommand.id, {
+            unitId: 'test',
+            sheetId: 'sheet1',
             sheetViewStartRow: 2,
             sheetViewStartColumn: 2,
             offsetX: 50,

@@ -14,15 +14,32 @@
  * limitations under the License.
  */
 
-export {
-    createEmbedSheetsTabCustomData,
-    createEmbedSheetsTabSnapshot,
-    createEmbedSheetsTabSnapshotFromDescriptor,
-    EMBED_SHEETS_TAB_CUSTOM_KEY,
-    getEmbedSheetsTabCustomData,
-    isEmbedSheetsTabSnapshot,
-} from '@univerjs/sheets-drawing';
-export type {
-    IEmbedSheetsTabCustomData,
-    IEmbedSheetsTabSnapshotParams,
-} from '@univerjs/sheets-drawing';
+import type { IWorksheetData } from '@univerjs/core';
+
+const EMBED_SHEETS_TAB_CUSTOM_KEY = 'UNIVER_EMBED_SHEETS_TAB';
+
+interface IEmbedSheetsTabCustomData {
+    version: 1;
+    embedId: string;
+    hostAnchorId: string;
+}
+
+export function getEmbedSheetsTabCustomData(snapshot: Pick<IWorksheetData, 'custom'>): IEmbedSheetsTabCustomData | undefined {
+    const value = snapshot.custom?.[EMBED_SHEETS_TAB_CUSTOM_KEY];
+    if (!isEmbedSheetsTabCustomData(value)) {
+        return undefined;
+    }
+
+    return value;
+}
+
+function isEmbedSheetsTabCustomData(value: unknown): value is IEmbedSheetsTabCustomData {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    const candidate = value as Partial<IEmbedSheetsTabCustomData>;
+    return candidate.version === 1 &&
+        typeof candidate.embedId === 'string' &&
+        typeof candidate.hostAnchorId === 'string';
+}

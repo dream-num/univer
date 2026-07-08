@@ -158,10 +158,6 @@ export {
 } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
-export { createEmbedSheetsFloatingDrawing, createEmbedSheetsFloatingDrawingFromDescriptor, createEmbedSheetsFloatingObjectData, EMBED_SHEETS_FLOATING_COMPONENT_KEY, getEmbedSheetsFloatingObjectData, isEmbedSheetsFloatingDrawing } from './embed-floating-anchor';
-export type { IEmbedSheetsFloatingObjectData, IEmbedSheetsFloatingObjectParams } from './embed-floating-anchor';
-export { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot, createEmbedSheetsTabSnapshotFromDescriptor, EMBED_SHEETS_TAB_CUSTOM_KEY, getEmbedSheetsTabCustomData, isEmbedSheetsTabSnapshot } from './embed-tab-anchor';
-export type { IEmbedSheetsTabCustomData, IEmbedSheetsTabSnapshotParams } from './embed-tab-anchor';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export {
     COPY_SPECIAL_MENU_ID,

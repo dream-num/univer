@@ -2629,9 +2629,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-drawing':
-        specifier: workspace:*
-        version: link:../sheets-drawing
       '@univerjs/telemetry':
         specifier: workspace:*
         version: link:../telemetry

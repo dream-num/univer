@@ -94,7 +94,6 @@
         "@univerjs/icons": "1.19.0",
         "@univerjs/protocol": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

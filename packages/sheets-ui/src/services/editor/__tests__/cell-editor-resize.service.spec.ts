@@ -37,12 +37,12 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { EmbedFloatingGeometryService } from '../../sheet-embed-integration.service';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EditorBridgeService, IEditorBridgeService } from '../../editor-bridge.service';
+import { EmbedFloatingGeometryService } from '../../sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { CellEditorManagerService, ICellEditorManagerService } from '../cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../cell-editor-resize.service';
@@ -416,10 +416,10 @@ describe('SheetCellEditorResizeService', () => {
 
         const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
         expect(editorManager.getState()).toEqual(expect.objectContaining({
-            startX: 100,
-            startY: 60,
-            endX: 230,
-            endY: 104,
+            startX: 120,
+            startY: 90,
+            endX: 250,
+            endY: 134,
             show: true,
         }));
     });

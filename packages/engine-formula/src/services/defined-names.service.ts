@@ -238,12 +238,16 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
                 if (item.name.toLowerCase() !== normalizedName) {
                     continue;
                 }
-                firstMatch ??= item;
+                if (firstMatch == null) {
+                    firstMatch = item;
+                }
                 if (item.localSheetId === sheetId) {
                     return item;
                 }
                 if (item.localSheetId === 'AllDefaultWorkbook' || item.localSheetId == null) {
-                    workbookScope ??= item;
+                    if (workbookScope == null) {
+                        workbookScope = item;
+                    }
                 }
             }
 

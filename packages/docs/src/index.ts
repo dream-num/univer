@@ -31,8 +31,6 @@ export type { IRichTextEditingMutationParams } from './commands/mutations/core-e
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';
-export { createDocsEmbedEmptySnapshot, registerDocsEmbedHostCapabilities } from './embed-guest';
-export { createDocsCustomBlockHostAdapterContribution } from './embed-host-adapter';
 export {
     createDocsCustomBlockDrawing,
     createDocsCustomBlockInsertMutation,

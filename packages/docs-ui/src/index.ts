@@ -249,4 +249,3 @@ export type {
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
 export type { IRichTextEditorProps } from './views/RichTextEditor';
-export { createDocsCustomBlockHostAdapterContribution } from '@univerjs/docs';

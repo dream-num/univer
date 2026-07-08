@@ -26,7 +26,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*.ts",
+        "./services/referenced-unit/*": "./src/services/referenced-unit/*.ts",
+        "./*": "./src/*",
         "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",

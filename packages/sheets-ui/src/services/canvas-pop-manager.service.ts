@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, IDisposable, INeedCheckDisposable, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
@@ -317,13 +317,16 @@ export class SheetCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(disposable);
+        disposableCollection.add(toDisposable(() => {
+            this._globalPopupManagerService.removePopup(id);
+            position$.complete();
+        }));
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 
         return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                position$.complete();
-                disposable.dispose();
-            },
+            dispose: () => trackedDisposable.dispose(),
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
@@ -373,18 +376,21 @@ export class SheetCanvasPopManagerService extends Disposable {
             hiddenRects$: rects$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(disposable);
+        disposableCollection.add(rectsObserverDisposable);
+        disposableCollection.add(toDisposable(() => {
+            this._globalPopupManagerService.removePopup(id);
+            position$.complete();
+            //@ts-ignore
+            workbook = null;
+            //@ts-ignore
+            worksheet = null;
+        }));
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 
         return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                position$.complete();
-                disposable.dispose();
-                rectsObserverDisposable.dispose();
-                //@ts-ignore
-                workbook = null;
-                //@ts-ignore
-                worksheet = null;
-            },
+            dispose: () => trackedDisposable.dispose(),
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
@@ -453,12 +459,15 @@ export class SheetCanvasPopManagerService extends Disposable {
             anchorRect$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(toDisposable(() => {
+            this._globalPopupManagerService.removePopup(id);
+            onDispose?.();
+        }));
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 
         return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                onDispose?.();
-            },
+            dispose: () => trackedDisposable.dispose(),
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
@@ -536,9 +545,10 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange: IRange = { startRow: row, endRow: row, startColumn: col, endColumn: col };
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
             if (!after) {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
             } else {
                 updateRowCol(after.startRow, after.startColumn);
             }
@@ -546,7 +556,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         return {
             dispose() {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
                 //@ts-ignore
                 worksheet = null;
                 //@ts-ignore
@@ -625,9 +635,10 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange = { ...range };
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
             if (!after) {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
             } else {
                 updateRange(after);
             }
@@ -635,7 +646,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         return {
             dispose() {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
@@ -645,6 +656,28 @@ export class SheetCanvasPopManagerService extends Disposable {
         return this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true
             ? currentRender.getInjector?.()
             : undefined;
+    }
+
+    private _trackPopupDisposable(disposable: IDisposable): IDisposable {
+        let disposed = false;
+        const registration = this.disposeWithMe({
+            dispose: () => {
+                disposed = true;
+                disposable.dispose();
+            },
+        }) as { dispose: (notDisposeSelf?: boolean) => void };
+
+        return {
+            dispose: () => {
+                if (disposed) {
+                    return;
+                }
+
+                disposed = true;
+                disposable.dispose();
+                registration.dispose(true);
+            },
+        };
     }
 
     /**

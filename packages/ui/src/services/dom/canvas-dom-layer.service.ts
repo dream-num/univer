@@ -16,6 +16,7 @@
 
 import type { IPosition, Serializable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { Disposable } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IFloatDomLayout extends IPosition {
@@ -63,7 +64,7 @@ export function shouldRenderFloatDomLayer(layer: Pick<IFloatDom, 'unitId' | 'pre
     return layer.unitId === currentUnitId || layer.preserveOnFocusChange === true;
 }
 
-export class CanvasFloatDomService {
+export class CanvasFloatDomService extends Disposable {
     private _domLayerMap = new Map<string, IFloatDom>();
     private _domLayers$ = new BehaviorSubject<[string, IFloatDom][]>([]);
 
@@ -105,6 +106,13 @@ export class CanvasFloatDomService {
         this._domLayerMap.clear();
         this._notice();
     }
+
+    override dispose(): void {
+        this._domLayerMap.clear();
+        this._domLayers$.next([]);
+        this._domLayers$.complete();
+        super.dispose();
+    }
 }
 
 export interface ICanvasFloatDomPreview {
@@ -120,7 +128,7 @@ export interface ICanvasFloatDomPreviewRequest {
     data?: unknown;
 }
 
-export class CanvasFloatDomPreviewService {
+export class CanvasFloatDomPreviewService extends Disposable {
     readonly previewUpdated$ = new Subject<ICanvasFloatDomPreview>();
     readonly previewRequested$ = new Subject<ICanvasFloatDomPreviewRequest>();
 
@@ -149,5 +157,13 @@ export class CanvasFloatDomPreviewService {
     requestPreview(request: ICanvasFloatDomPreviewRequest): void {
         this._requestMap.set(request.id, request);
         this.previewRequested$.next(request);
+    }
+
+    override dispose(): void {
+        this._previewMap.clear();
+        this._requestMap.clear();
+        this.previewUpdated$.complete();
+        this.previewRequested$.complete();
+        super.dispose();
     }
 }

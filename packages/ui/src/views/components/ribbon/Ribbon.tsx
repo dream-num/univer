@@ -58,10 +58,10 @@ export function Ribbon(props: IRibbonProps) {
         itemOrder: number;
     }>>({});
 
-    const ribbonData = useObservable(() => ribbonService.ribbon$, [], undefined, [ribbonService]);
-    const activatedTab = useObservable(() => ribbonService.activatedTab$, RibbonPosition.START, undefined, [ribbonService]);
-    const collapsedIds = useObservable(() => ribbonService.collapsedIds$, [], undefined, [ribbonService]);
-    const fakeToolbarVisible = useObservable(() => ribbonService.fakeToolbarVisible$, false, undefined, [ribbonService]);
+    const ribbonData = useObservable(ribbonService.ribbon$, []);
+    const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
+    const collapsedIds = useObservable(ribbonService.collapsedIds$, []);
+    const fakeToolbarVisible = useObservable(ribbonService.fakeToolbarVisible$, false);
     const hideToolbar = ribbonOverride?.hideToolbar === true;
 
     const ribbon = useMemo(() => {
@@ -298,10 +298,13 @@ export function Ribbon(props: IRibbonProps) {
                     )}
 
                     <div
+                        data-u-comp="ribbon-toolbar"
                         ref={containerRef}
                         className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
                             'univer-justify-center': ribbonType === 'classic',
                         })}
+                        role="toolbar"
+                        aria-label={localeService.t(activatedTabTitle)}
                     >
                         <ToolbarDropdownProvider>
                             {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (

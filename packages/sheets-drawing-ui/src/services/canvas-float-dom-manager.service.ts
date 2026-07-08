@@ -712,6 +712,23 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return Array.from(this._domLayerInfoMap.values()).filter((info) => info.subUnitId === subUnitId && info.unitId === unitId);
     }
 
+    private _createFloatDomDisposable(id: string): IDisposable & { id: string } {
+        const manager = new WeakRef(this);
+        let disposed = false;
+
+        return {
+            id,
+            dispose() {
+                if (disposed) {
+                    return;
+                }
+
+                disposed = true;
+                manager.deref()?._removeDom(id, true);
+            },
+        };
+    }
+
     private _bindEmbedFloatDragHandleEvent(): void {
         if (typeof document === 'undefined') {
             return;
@@ -1682,12 +1699,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         this._add$.next({ unitId, subUnitId, id });
 
-        return {
-            id,
-            dispose: () => {
-                this._removeDom(id, true);
-            },
-        };
+        return this._createFloatDomDisposable(id);
     }
 
     private _removeDom(id: string, removeDrawing = false) {
@@ -1983,12 +1995,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
         }
 
-        return {
-            id,
-            dispose: () => {
-                this._removeDom(id, true);
-            },
-        };
+        return this._createFloatDomDisposable(id);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -2228,12 +2235,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
         }
 
-        return {
-            id,
-            dispose: () => {
-                this._removeDom(id, true);
-            },
-        };
+        return this._createFloatDomDisposable(id);
     }
 
     /**

@@ -460,6 +460,19 @@ describe('SheetCanvasPopManagerService', () => {
         expect(disposable?.canDispose()).toBe(true);
     });
 
+    it('disposes tracked cell popups when the manager is disposed', () => {
+        const { service, popupService, refRangeService, viewport } = createSheetHarness();
+
+        service.attachPopupToCell(1, 1, { componentKey: 'cell-action' } as never, 'unit-1', 'sheet-1', viewport as never);
+
+        expect(popupService.popups.size).toBe(1);
+        service.dispose();
+
+        expect(popupService.removedIds).toEqual(['popup-1']);
+        expect(popupService.popups.size).toBe(0);
+        expect(refRangeService.watchedRanges[0].disposed).toBe(true);
+    });
+
     it('updates cell and range anchors when sheet geometry changes', () => {
         const { service, popupService, commandService, clientRect$, transformChange$, refRangeService, viewport } = createSheetHarness();
 

@@ -195,20 +195,10 @@ export interface IExecutionOptions {
      * The actual execution will be handled asynchronously via onlyLocal.
      */
     syncOnly?: boolean;
-    /**
-     * Execute the command handler against a scoped injector for this invocation.
-     * This is intentionally stored under a symbol so sync/remote serializers that
-     * stringify execution options do not treat the injector as command payload.
-     */
-    [COMMAND_EXECUTION_INJECTOR_KEY]?: Injector;
-    [key: string]: string | number | boolean | undefined;
-    [key: number]: string | number | boolean | undefined;
-    [key: symbol]: unknown;
+    [key: PropertyKey]: string | number | boolean | undefined;
 }
 
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;
-
-export const COMMAND_EXECUTION_INJECTOR_KEY = Symbol('univer.command.execution-injector');
 
 /**
  * The identifier of the command service.
@@ -608,8 +598,7 @@ export class CommandService extends Disposable implements ICommandService {
         this._commandExecutingLevel++;
         let result: R | boolean;
         try {
-            const injector = options?.[COMMAND_EXECUTION_INJECTOR_KEY] ?? this._injector;
-            result = await injector.invoke(command.handler, params, options);
+            result = await this._injector.invoke(command.handler, params, options);
             this._commandExecutingLevel--;
         } catch (e) {
             result = false;
@@ -636,8 +625,7 @@ export class CommandService extends Disposable implements ICommandService {
         this._commandExecutingLevel++;
         let result: R | boolean;
         try {
-            const injector = options?.[COMMAND_EXECUTION_INJECTOR_KEY] ?? this._injector;
-            result = injector.invoke(command.handler, params, options) as R;
+            result = this._injector.invoke(command.handler, params, options) as R;
             if (result instanceof Promise) {
                 throw new TypeError('[CommandService]: Command handler should not return a promise.');
             }

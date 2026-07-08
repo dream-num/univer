@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ComponentProps, ComponentPropsWithoutRef } from 'react';
+import type { ComponentProps } from 'react';
 import {
     CheckboxItem,
     Content,
@@ -33,10 +33,8 @@ import {
     Trigger,
 } from '@radix-ui/react-dropdown-menu';
 import { CheckMarkIcon, MoreRightIcon } from '@univerjs/icons';
-import { useContext } from 'react';
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { ConfigContext } from '../config-provider/ConfigProvider';
 
 function DropdownMenuPrimitive({
     ...props
@@ -45,13 +43,10 @@ function DropdownMenuPrimitive({
 }
 
 function DropdownMenuPortal({
-    container,
     ...props
 }: ComponentProps<typeof Portal>) {
-    const { mountContainer } = useContext(ConfigContext);
-
     return (
-        <Portal data-slot="dropdown-menu-portal" container={container ?? mountContainer ?? undefined} {...props} />
+        <Portal data-slot="dropdown-menu-portal" {...props} />
     );
 }
 
@@ -160,7 +155,7 @@ function DropdownMenuContent({
     ...props
 }: ComponentProps<typeof Content>) {
     return (
-        <DropdownMenuPortal>
+        <Portal>
             <Content
                 data-slot="dropdown-menu-content"
                 sideOffset={sideOffset}
@@ -185,7 +180,7 @@ function DropdownMenuContent({
                 )}
                 {...props}
             />
-        </DropdownMenuPortal>
+        </Portal>
     );
 }
 
@@ -352,7 +347,7 @@ function DropdownMenuSeparator({
 function DropdownMenuShortcut({
     className,
     ...props
-}: ComponentPropsWithoutRef<'span'>) {
+}: ComponentProps<'span'>) {
     return (
         <span
             className={clsx('univer-ml-auto univer-text-sm univer-tracking-widest univer-opacity-60', className)}

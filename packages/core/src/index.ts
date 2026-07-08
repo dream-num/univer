@@ -108,7 +108,6 @@ export type { IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export {
-    COMMAND_EXECUTION_INJECTOR_KEY,
     COMMAND_LOG_EXECUTION_CONFIG_KEY,
     CommandService,
     CommandType,
@@ -163,8 +162,6 @@ export { mergeOverrideWithDependencies } from './services/plugin/plugin-override
 export type { DependencyOverride } from './services/plugin/plugin-override';
 export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
-export * from './services/referenced-unit/referenced-unit.service';
-export * from './services/referenced-unit/resource-ref';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook, IResources } from './services/resource-manager/type';

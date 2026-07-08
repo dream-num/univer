@@ -30,6 +30,10 @@
  * limitations under the License.
  */
 
+/**
+ * @vitest-environment jsdom
+ */
+
 import { ICommandService, IContextService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ILayoutService } from '../../layout/layout.service';

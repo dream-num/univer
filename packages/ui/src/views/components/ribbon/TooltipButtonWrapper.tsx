@@ -33,8 +33,8 @@ import {
 } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import { getEmbedBoundaryOwner } from '../../../utils/embed-boundary';
 import { useDependency } from '../../../utils/di';
+import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const TooltipWrapperContext = createContext({
@@ -244,7 +244,7 @@ export function DropdownMenuWrapper({
     }
 
     function handleEmbedBoundaryFocusOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
-        keepDropdownOpenForSameEmbedBoundary(event);
+        keepInteractionInsideSameEmbedBoundary(event);
     }
 
     function handleOptionSelect(option: IValueOption) {
@@ -431,16 +431,5 @@ export function DropdownMenuWrapper({
                 {children}
             </DropdownMenu>
         );
-    }
-}
-
-function keepDropdownOpenForSameEmbedBoundary(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }): void {
-    const owner = getEmbedBoundaryOwner(event.currentTarget);
-    if (!owner) {
-        return;
-    }
-
-    if (getEmbedBoundaryOwner(event.target) === owner) {
-        event.preventDefault();
     }
 }

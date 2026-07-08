@@ -37,6 +37,21 @@ export function isEmbedBoundaryTarget(target: EventTarget | null): boolean {
     return hasClosest(target) && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
 }
 
+export function keepInteractionInsideSameEmbedBoundary(event: {
+    currentTarget: EventTarget | null;
+    target: EventTarget | null;
+    preventDefault: () => void;
+}): void {
+    const owner = getEmbedBoundaryOwner(event.currentTarget);
+    if (!owner) {
+        return;
+    }
+
+    if (getEmbedBoundaryOwner(event.target) === owner) {
+        event.preventDefault();
+    }
+}
+
 function hasClosest(target: EventTarget | null): target is EventTarget & Pick<IEmbedBoundaryElementLike, 'closest'> {
     return !!target &&
         typeof (target as Partial<IEmbedBoundaryElementLike>).closest === 'function';

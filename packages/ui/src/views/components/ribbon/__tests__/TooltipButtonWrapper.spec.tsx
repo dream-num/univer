@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @vitest-environment jsdom
+ */
+
 import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';

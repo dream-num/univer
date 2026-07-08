@@ -196,9 +196,6 @@ importers:
       '@univerjs/drawing-ui':
         specifier: workspace:*
         version: link:../../packages/drawing-ui
-      '@univerjs/embed-ui':
-        specifier: workspace:*
-        version: link:../../packages/embed-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
@@ -936,9 +933,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../embed
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -1259,12 +1253,6 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../embed
-      '@univerjs/embed-ui':
-        specifier: workspace:*
-        version: link:../embed-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -1364,59 +1352,6 @@ importers:
       tailwindcss:
         specifier: 3.4.18
         version: 3.4.18
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
-
-  packages/embed:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.0)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
-
-  packages/embed-ui:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../embed
-      '@univerjs/icons':
-        specifier: 1.19.0
-        version: 1.19.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1619,9 +1554,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../embed
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -1892,9 +1824,6 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../embed
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -2135,9 +2064,6 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
-      '@univerjs/embed-ui':
-        specifier: workspace:*
-        version: link:../embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -2691,12 +2617,6 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../embed
-      '@univerjs/embed-ui':
-        specifier: workspace:*
-        version: link:../embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -3074,12 +2994,6 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../../packages/docs-ui
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../../../packages/embed
-      '@univerjs/embed-ui':
-        specifier: workspace:*
-        version: link:../../../packages/embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../../../packages/engine-formula
@@ -3296,12 +3210,6 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../../packages/docs-ui
-      '@univerjs/embed':
-        specifier: workspace:*
-        version: link:../../../packages/embed
-      '@univerjs/embed-ui':
-        specifier: workspace:*
-        version: link:../../../packages/embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../../../packages/engine-formula
@@ -4913,9 +4821,6 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
-
-  '@jridgewell/trace-mapping@0.3.30':
-    resolution: {integrity: sha512-GQ7Nw5G2lTu/BtHTKfXhKHok2WGetd4XYcVKGx00SjAk8GMwgJM3zr6zORiPGuOE+/vkc90KtTosSSvaCjKb2Q==}
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
@@ -7413,11 +7318,6 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  browserslist@4.28.4:
-    resolution: {integrity: sha512-MTc8i/x9jBQd1iMw2CFGS+rwMa07eYjLR0CCTLDACl9xhxy+nIs3KeML/biicXtk9JrZ6dnnTatmc7ErPXIxqw==}
-    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
-
   browserslist@4.28.5:
     resolution: {integrity: sha512-Cu2E6QejHWzuDMTkuwgpABFgDfZrXLQq5V13YOACZx4mFAG4IwGTbTfHPMr4WtxlHoXSM8FIuRwYYCz5XiabaQ==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -8006,9 +7906,6 @@ packages:
   electron-to-chromium@1.5.338:
     resolution: {integrity: sha512-KVQQ3xko9/coDX3qXLUEEbqkKT8L+1DyAovrtu0Khtrt9wjSZ+7CZV4GVzxFy9Oe1NbrIU1oVXCwHJruIA1PNg==}
 
-  electron-to-chromium@1.5.387:
-    resolution: {integrity: sha512-TaxwufTFDufvPEoXdhwVrA3UdFWBeWGkYoJ1K8ldF1xe6gKfth6iRNS5lTQ5JPNOHdGQm8PT1QYKUqFLCiUefQ==}
-
   electron-to-chromium@1.5.388:
     resolution: {integrity: sha512-Pl/aJaqOOxYxda3vcx1IKSJimwYXHDkEnGn0F+kG2EE68dDtx2uCinaS+Vih8Z91B9t8CSAbiF/HKyWcnXjhzw==}
 
@@ -8084,9 +7981,6 @@ packages:
 
   es-module-lexer@1.7.0:
     resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
-
-  es-module-lexer@2.1.0:
-    resolution: {integrity: sha512-n27zTYMjYu1aj4MjCWzSP7G9r75utsaoc8m61weK+W8JMBGGQybd43GstCXZ3WNmSFtGT9wi59qQTW6mhTR5LQ==}
 
   es-module-lexer@2.3.0:
     resolution: {integrity: sha512-KLdwQm2NvGLDkQDCGvmiQrhkd0JbMzXthwQAUgWjQuQdBLFa3eiBP5arXZyA+f8x+x7OXgud6bq2rxjGtHV2tw==}
@@ -10227,10 +10121,6 @@ packages:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
     engines: {node: '>=4'}
 
-  postcss-selector-parser@7.1.0:
-    resolution: {integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA==}
-    engines: {node: '>=4'}
-
   postcss-selector-parser@7.1.1:
     resolution: {integrity: sha512-orRsuYpJVw8LdAwqqLykBj9ecS5/cRHlI5+nvTo8LcCKmzDmqVORXtOIYEEQuL9D4BxtA1lm5isAqzQZCoQ6Eg==}
     engines: {node: '>=4'}
@@ -11808,7 +11698,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.29.7
       '@babel/helper-validator-option': 7.29.7
-      browserslist: 4.28.4
+      browserslist: 4.28.5
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -12872,12 +12762,12 @@ snapshots:
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
-      '@jridgewell/trace-mapping': 0.3.30
+      '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/remapping@2.3.5':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
-      '@jridgewell/trace-mapping': 0.3.30
+      '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -12887,11 +12777,6 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
-
-  '@jridgewell/trace-mapping@0.3.30':
-    dependencies:
-      '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.5
 
   '@jridgewell/trace-mapping@0.3.31':
     dependencies:
@@ -12916,13 +12801,6 @@ snapshots:
       '@types/react': 19.2.17
       react: 19.2.7
 
-  '@napi-rs/wasm-runtime@1.1.5(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
-    dependencies:
-      '@emnapi/core': 1.11.0
-      '@emnapi/runtime': 1.11.0
-      '@tybys/wasm-util': 0.10.2
-    optional: true
-
   '@napi-rs/wasm-runtime@1.1.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
       '@emnapi/core': 1.11.1
@@ -12941,6 +12819,13 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
+      '@tybys/wasm-util': 0.10.3
+    optional: true
+
+  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
+    dependencies:
+      '@emnapi/core': 1.11.0
+      '@emnapi/runtime': 1.11.0
       '@tybys/wasm-util': 0.10.3
     optional: true
 
@@ -13092,7 +12977,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.0
       '@emnapi/runtime': 1.11.0
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
     optional: true
 
   '@oxc-resolver/binding-win32-arm64-msvc@11.21.3':
@@ -14879,9 +14764,9 @@ snapshots:
     dependencies:
       acorn: 8.15.0
 
-  acorn-import-phases@1.0.4(acorn@8.16.0):
+  acorn-import-phases@1.0.4(acorn@8.17.0):
     dependencies:
-      acorn: 8.16.0
+      acorn: 8.17.0
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
@@ -15156,14 +15041,6 @@ snapshots:
       electron-to-chromium: 1.5.338
       node-releases: 2.0.37
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
-
-  browserslist@4.28.4:
-    dependencies:
-      baseline-browser-mapping: 2.10.42
-      caniuse-lite: 1.0.30001802
-      electron-to-chromium: 1.5.387
-      node-releases: 2.0.50
-      update-browserslist-db: 1.2.3(browserslist@4.28.4)
 
   browserslist@4.28.5:
     dependencies:
@@ -15706,8 +15583,6 @@ snapshots:
 
   electron-to-chromium@1.5.338: {}
 
-  electron-to-chromium@1.5.387: {}
-
   electron-to-chromium@1.5.388: {}
 
   emoji-regex@10.6.0: {}
@@ -15835,8 +15710,6 @@ snapshots:
       safe-array-concat: 1.1.3
 
   es-module-lexer@1.7.0: {}
-
-  es-module-lexer@2.1.0: {}
 
   es-module-lexer@2.3.0: {}
 
@@ -18288,13 +18161,13 @@ snapshots:
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.16)
       postcss: 8.5.16
-      postcss-selector-parser: 7.1.0
+      postcss-selector-parser: 7.1.1
       postcss-value-parser: 4.2.0
 
   postcss-modules-scope@3.2.1(postcss@8.5.16):
     dependencies:
       postcss: 8.5.16
-      postcss-selector-parser: 7.1.0
+      postcss-selector-parser: 7.1.1
 
   postcss-modules-values@4.0.0(postcss@8.5.16):
     dependencies:
@@ -18443,11 +18316,6 @@ snapshots:
       postcss-selector-parser: 7.1.1
 
   postcss-selector-parser@6.1.2:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
-
-  postcss-selector-parser@7.1.0:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
@@ -19687,12 +19555,6 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  update-browserslist-db@1.2.3(browserslist@4.28.4):
-    dependencies:
-      browserslist: 4.28.4
-      escalade: 3.2.0
-      picocolors: 1.1.1
-
   update-browserslist-db@1.2.3(browserslist@4.28.5):
     dependencies:
       browserslist: 4.28.5
@@ -19865,12 +19727,12 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@webassemblyjs/wasm-edit': 1.14.1
       '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.16.0
-      acorn-import-phases: 1.0.4(acorn@8.16.0)
-      browserslist: 4.28.2
+      acorn: 8.17.0
+      acorn-import-phases: 1.0.4(acorn@8.17.0)
+      browserslist: 4.28.5
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.24.1
-      es-module-lexer: 2.1.0
+      es-module-lexer: 2.3.0
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1

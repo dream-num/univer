@@ -40,7 +40,6 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
-        "@univerjs-pro/embed-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -72,8 +71,7 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@univerjs/uniscript": "workspace:*",
-        "@univerjs/embed-ui": "workspace:*"
+        "@univerjs/uniscript": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

@@ -20,8 +20,7 @@ export function createRegExpFromSafeFragment(fragment: string, flags?: string): 
     const safeFlags = normalizeRegExpFlags(flags);
 
     // Fragments passed here must come from regexp helpers that escape literals or normalize charsets.
-    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-    return new RegExp(fragment, safeFlags);
+    return new RegExp(fragment, safeFlags); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
 }
 
 function normalizeRegExpFlags(flags: string | undefined): string | undefined {

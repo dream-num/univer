@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuTriggerContext {
-    injector?: Injector;
+    unitId?: string;
 }
 
 export interface IContextMenuHandler {

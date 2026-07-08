@@ -21,7 +21,9 @@ import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
-import { useDependency, useInjector } from '../../../utils/di';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { IUIRuntimeScopeService } from '../../../services/runtime-scope/ui-runtime-scope.service';
+import { useDependency } from '../../../utils/di';
 import { AnchoredContextMenu } from './AnchoredContextMenu';
 
 const DESKTOP_CONTEXT_MENU_HOST_ID = 'desktop-context-menu';
@@ -34,7 +36,9 @@ export function DesktopContextMenu() {
     const visibleRef = useRef(visible);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
-    const injector = useInjector();
+    const layoutService = useDependency(ILayoutService);
+    const menuManagerService = useDependency(IMenuManagerService);
+    const runtimeScopeService = useDependency(IUIRuntimeScopeService);
     visibleRef.current = visible;
 
     useEffect(() => {
@@ -72,31 +76,36 @@ export function DesktopContextMenu() {
         setVisible(false);
     }
 
+    const activeScope = runtimeScopeService.get(menuContext?.unitId);
+    const activeMenuManagerService = activeScope?.has(IMenuManagerService)
+        ? activeScope.get<IMenuManagerService>(IMenuManagerService)
+        : menuManagerService;
+    const activeCommandService = activeScope?.has(ICommandService)
+        ? activeScope.get<ICommandService>(ICommandService)
+        : commandService;
+    const activeLayoutService = activeScope?.has(ILayoutService)
+        ? activeScope.get<ILayoutService>(ILayoutService)
+        : layoutService;
+
     return (
         <AnchoredContextMenu
             hostId={DESKTOP_CONTEXT_MENU_HOST_ID}
             visible={visible}
             anchorRect={anchorRect}
             menuType={menuType}
-            menuInjector={menuContext?.injector}
+            menuManagerService={activeMenuManagerService}
+            layoutService={activeLayoutService}
             onRequestClose={handleClose}
             onOptionSelect={(params) => {
                 const { label: id, commandId, value } = params;
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
-                const activeInjector = menuContext?.injector;
-                const activeCommandService = activeInjector?.has(ICommandService)
-                    ? activeInjector.get(ICommandService)
-                    : commandService;
 
                 if (activeCommandService) {
                     activeCommandService.executeCommand(commandId ?? id as string, commandParams);
                 }
 
-                const layoutService = activeInjector?.has(ILayoutService)
-                    ? activeInjector.get(ILayoutService)
-                    : injector.get(ILayoutService);
-                layoutService.focus();
+                activeLayoutService.focus();
 
                 handleClose();
             }}

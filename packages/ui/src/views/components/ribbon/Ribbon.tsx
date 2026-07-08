@@ -24,7 +24,7 @@ import { Fragment, useCallback, useContext, useEffect, useMemo, useRef } from 'r
 import { RibbonPosition } from '../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
-import { RediProvider, useDependency, useObservable } from '../../../utils/di';
+import { connectInjector, useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ClassicMenu } from './ribbon-menu/ClassicMenu';
 import { DefaultMenu } from './ribbon-menu/DefaultMenu';
@@ -388,20 +388,46 @@ function RibbonOverrideRuntimeProvider(props: {
 }) {
     const { override, children } = props;
     const config = useContext(ConfigContext);
+    const injector = override?.injector;
+    const ConnectedRibbonOverrideConfigProvider = useMemo(
+        () => injector
+            ? connectInjector(RibbonOverrideConfigProvider, injector as never) as ComponentType<IRibbonOverrideConfigProviderProps>
+            : null,
+        [injector]
+    );
 
-    if (!override?.injector) {
+    if (!override || !ConnectedRibbonOverrideConfigProvider) {
         return children;
     }
 
     return (
-        <RediProvider value={{ injector: override.injector as never }}>
-            <ConfigProvider
-                locale={config.locale}
-                direction={config.direction}
-                mountContainer={override.portalContainer ?? config.mountContainer}
-            >
-                {children}
-            </ConfigProvider>
-        </RediProvider>
+        <ConnectedRibbonOverrideConfigProvider
+            locale={config.locale}
+            direction={config.direction}
+            mountContainer={override.portalContainer ?? config.mountContainer}
+        >
+            {children}
+        </ConnectedRibbonOverrideConfigProvider>
+    );
+}
+
+interface IRibbonOverrideConfigProviderProps {
+    children: ReactNode;
+    locale?: unknown;
+    direction?: 'ltr' | 'rtl';
+    mountContainer: HTMLElement | null;
+}
+
+function RibbonOverrideConfigProvider(props: IRibbonOverrideConfigProviderProps) {
+    const { children, locale, direction, mountContainer } = props;
+
+    return (
+        <ConfigProvider
+            locale={locale}
+            direction={direction}
+            mountContainer={mountContainer}
+        >
+            {children}
+        </ConfigProvider>
     );
 }

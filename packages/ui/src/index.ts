@@ -116,6 +116,8 @@ export type { IPopup } from './services/popup/canvas-popup.service';
 export { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
 export type { IRibbonOverride } from './services/ribbon/ribbon-override.service';
 export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
+export { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtime-scope/ui-runtime-scope.service';
+export type { IUIRuntimeScope } from './services/runtime-scope/ui-runtime-scope.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';

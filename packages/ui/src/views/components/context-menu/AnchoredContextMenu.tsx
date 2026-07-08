@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { ILayoutService } from '../../../services/layout/layout.service';
 import type { IValueOption } from '../../../services/menu/menu';
+import type { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { Popup } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
-import { RediProvider, useDependency } from '../../../utils/di';
+import { useDependency } from '../../../utils/di';
 import { CONTEXT_MENU_SUBMENU_PORTAL_ATTR, ContextMenuPanel } from './ContextMenuPanel';
 
 export interface IContextMenuAnchorRect {
@@ -35,7 +36,8 @@ export interface IAnchoredContextMenuProps {
     menuType: string;
     anchorVertical?: 'top' | 'bottom';
     menuOffset?: number;
-    menuInjector?: Injector;
+    menuManagerService?: IMenuManagerService;
+    layoutService?: ILayoutService;
     onRequestClose: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
@@ -48,7 +50,8 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         menuType,
         anchorVertical = 'bottom',
         menuOffset = 0,
-        menuInjector,
+        menuManagerService,
+        layoutService,
         onRequestClose,
         onOptionSelect,
     } = props;
@@ -162,23 +165,13 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         >
             <section ref={contentRef}>
                 {menuType && (
-                    menuInjector
-                        ? (
-                            <RediProvider value={{ injector: menuInjector }}>
-                                <ContextMenuPanel
-                                    menuType={menuType}
-                                    menuSessionVersion={menuSessionVersionRef.current}
-                                    onOptionSelect={onOptionSelect}
-                                />
-                            </RediProvider>
-                        )
-                        : (
-                            <ContextMenuPanel
-                                menuType={menuType}
-                                menuSessionVersion={menuSessionVersionRef.current}
-                                onOptionSelect={onOptionSelect}
-                            />
-                        )
+                    <ContextMenuPanel
+                        menuType={menuType}
+                        menuManagerService={menuManagerService}
+                        layoutService={layoutService}
+                        menuSessionVersion={menuSessionVersionRef.current}
+                        onOptionSelect={onOptionSelect}
+                    />
                 )}
             </section>
         </Popup>

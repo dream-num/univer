@@ -53,6 +53,7 @@ import { IPlatformService, PlatformService } from './services/platform/platform.
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 import { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
 import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtime-scope/ui-runtime-scope.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -113,6 +114,7 @@ export class UniverUIPlugin extends Plugin {
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [IContextMenuService, { useClass: ContextMenuService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IGalleryService, { useClass: DesktopGalleryService, lazy: true }],

@@ -49,6 +49,8 @@ export class SheetCanvasPopManagerService extends Disposable {
     // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
     private _popupMenuOffsetMap = new Map<DrawingTypeEnum, { offsetX: number; offsetY: number }>();
+    private readonly _popupDisposables = new Set<IDisposable>();
+
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -122,6 +124,8 @@ export class SheetCanvasPopManagerService extends Disposable {
     }
 
     override dispose(): void {
+        Array.from(this._popupDisposables).forEach((disposable) => disposable.dispose());
+        this._popupDisposables.clear();
         super.dispose();
         this._popupMenuFeatureMap.clear();
         this._popupMenuOffsetMap.clear();
@@ -660,23 +664,22 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     private _trackPopupDisposable(disposable: IDisposable): IDisposable {
         let disposed = false;
-        const registration = this.disposeWithMe({
-            dispose: () => {
-                disposed = true;
-                disposable.dispose();
-            },
-        }) as { dispose: (notDisposeSelf?: boolean) => void };
-
-        return {
+        const trackedDisposables = this._popupDisposables;
+        const trackedDisposable = {
             dispose: () => {
                 if (disposed) {
                     return;
                 }
 
                 disposed = true;
+                trackedDisposables.delete(trackedDisposable);
                 disposable.dispose();
-                registration.dispose(true);
             },
+        };
+
+        trackedDisposables.add(trackedDisposable);
+        return {
+            dispose: () => trackedDisposable.dispose(),
         };
     }
 

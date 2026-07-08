@@ -118,6 +118,30 @@ export interface ISheetFloatDomRenderObjectFactoryContext {
  */
 export type SheetFloatDomRenderObjectFactory = (context: ISheetFloatDomRenderObjectFactoryContext) => Rect;
 
+function createExternalRuntimeDisposable<TOwner extends object>(
+    owner: TOwner,
+    id: string,
+    disposeById: (owner: TOwner, id: string) => void
+): IDisposable & { id: string } {
+    const ownerRef = new WeakRef(owner);
+    let disposed = false;
+
+    return {
+        id,
+        dispose() {
+            if (disposed) {
+                return;
+            }
+
+            disposed = true;
+            const currentOwner = ownerRef.deref();
+            if (currentOwner) {
+                disposeById(currentOwner, id);
+            }
+        },
+    };
+}
+
 export interface IDOMAnchor {
     width: number;
     height: number;
@@ -712,21 +736,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return Array.from(this._domLayerInfoMap.values()).filter((info) => info.subUnitId === subUnitId && info.unitId === unitId);
     }
 
+    private static _disposeExternalFloatDom(manager: SheetCanvasFloatDomManagerService, id: string): void {
+        manager._removeDom(id, true);
+    }
+
     private _createFloatDomDisposable(id: string): IDisposable & { id: string } {
-        const manager = new WeakRef(this);
-        let disposed = false;
-
-        return {
-            id,
-            dispose() {
-                if (disposed) {
-                    return;
-                }
-
-                disposed = true;
-                manager.deref()?._removeDom(id, true);
-            },
-        };
+        return createExternalRuntimeDisposable(this, id, SheetCanvasFloatDomManagerService._disposeExternalFloatDom);
     }
 
     private _bindEmbedFloatDragHandleEvent(): void {

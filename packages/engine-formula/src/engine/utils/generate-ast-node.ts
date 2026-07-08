@@ -133,7 +133,7 @@ function getDirtySuperTableReferencePattern(unitSuperTableMap: IDirtyStringMap):
             .filter((tableName) => tableName.length > 0);
 
         tableReferencePattern = tableNames.length > 0
-            ? new RegExp(`(^|[^A-Za-z0-9_])${regexp.or(...tableNames)}(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
+            ? regexp.createRegExpFromSafeFragment(`(^|[^A-Za-z0-9_])${regexp.or(...tableNames)}(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
             : null;
         DIRTY_SUPER_TABLE_PATTERN_CACHE.set(unitSuperTableMap, tableReferencePattern);
     }

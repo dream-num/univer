@@ -15,7 +15,8 @@
  */
 
 import { Charset, charset } from './charset';
-import { createFromWildcard, escapeRegExp } from './escape';
+import { createFromWildcard, createLiteralRegExp, escapeRegExp } from './escape';
+import { createRegExpFromSafeFragment } from './factory';
 import { Or, or } from './or';
 
 /**
@@ -31,6 +32,8 @@ export const regexp = {
     Or,
     charset,
     or,
+    createRegExpFromSafeFragment,
     escapeRegExp,
+    createLiteralRegExp,
     createFromWildcard,
 };

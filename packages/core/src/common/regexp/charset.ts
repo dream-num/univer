@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { createRegExpFromSafeFragment } from './factory';
+
 export type CharsetDataUnit = [number, number];
 
 /**
@@ -122,7 +124,7 @@ export class Charset {
      * Creates a `RegExp` from this charset fragment with optional flags.
      */
     toRegExp(flags?: string): RegExp {
-        return new RegExp(this.toString(), flags);
+        return createRegExpFromSafeFragment(this.toString(), flags);
     }
 }
 

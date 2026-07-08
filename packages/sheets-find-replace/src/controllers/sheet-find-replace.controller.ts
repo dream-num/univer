@@ -953,7 +953,7 @@ export class SheetFindModel extends FindModel {
                 return null;
             }
 
-            const newContent = currentContent!.f!.replace(new RegExp(regexp.escapeRegExp(findString), replaceFlag), replaceString);
+            const newContent = currentContent!.f!.replace(regexp.createLiteralRegExp(findString, replaceFlag), replaceString);
             return { f: newContent, v: null };
         }
 
@@ -966,7 +966,7 @@ export class SheetFindModel extends FindModel {
         }
 
         // replace plain text string
-        const newContent = currentContent.v!.toString().replace(new RegExp(regexp.escapeRegExp(findString), replaceFlag), replaceString!);
+        const newContent = currentContent.v!.toString().replace(regexp.createLiteralRegExp(findString, replaceFlag), replaceString!);
         return { v: newContent };
     }
 }

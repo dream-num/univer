@@ -32,6 +32,12 @@ describe('regexp utilities', () => {
         expect(regex.test('file-a-index.ts')).toBe(false);
     });
 
+    it('builds literal regexes from text containing regex syntax', () => {
+        const regex = regexp.createLiteralRegExp('a.b+(test)?', 'g');
+
+        expect('a.b+(test)? aXb+(test)?'.replace(regex, 'hit')).toBe('hit aXb+(test)?');
+    });
+
     it('builds character sets with union, subtraction, and intersection', () => {
         const letters = regexp.charset(['a', 'f']).subtract('b', ['d', 'e']);
         const reg = letters.toRegExp();
@@ -46,6 +52,15 @@ describe('regexp utilities', () => {
 
         const intersection = regexp.charset(['a', 'z']).intersect(['m', 'p']);
         expect(intersection.toString()).toBe('[m-p]');
+    });
+
+    it('validates dynamic regexp flags before constructing regexes', () => {
+        expect(regexp.charset(['a', 'z']).toRegExp('iu').flags).toBe('iu');
+        expect(regexp.or('SUM', 'AVERAGE').toRegExp('i').test('sum')).toBe(true);
+
+        expect(() => regexp.charset(['a', 'z']).toRegExp('ii')).toThrow('Invalid regular expression flags');
+        expect(() => regexp.charset(['a', 'z']).toRegExp('x')).toThrow('Invalid regular expression flags');
+        expect(() => regexp.or('SUM').toRegExp('gg')).toThrow('Invalid regular expression flags');
     });
 
     it('builds alternatives from strings and character sets', () => {

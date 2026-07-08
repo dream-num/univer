@@ -17,6 +17,7 @@
 import type { CharsetInput } from './charset';
 import { Charset, charset } from './charset';
 import { escapeRegExp } from './escape';
+import { createRegExpFromSafeFragment } from './factory';
 
 /**
  * A literal string, existing `Or`, or character-set input used to build alternatives.
@@ -97,7 +98,7 @@ export class Or {
      * Creates a `RegExp` from this alternation fragment with optional flags.
      */
     toRegExp(flags?: string): RegExp {
-        return new RegExp(this.toString(), flags);
+        return createRegExpFromSafeFragment(this.toString(), flags);
     }
 }
 

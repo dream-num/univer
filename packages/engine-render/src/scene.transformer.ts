@@ -184,6 +184,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     borderStrokeWidth = 1;
     borderDash: number[] = [];
     borderSpacing = 0;
+    borderOutlineInset: number | undefined;
 
     anchorFill = 'rgb(255, 255, 255)';
     anchorStroke = 'rgb(185, 185, 185)';
@@ -378,6 +379,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             borderStrokeWidth,
             borderDash,
             borderSpacing,
+            borderOutlineInset,
             anchorFill,
             anchorStroke,
             anchorStrokeWidth,
@@ -426,6 +428,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             borderStrokeWidth = objectTransformerConfig.borderStrokeWidth ?? borderStrokeWidth;
             borderDash = objectTransformerConfig.borderDash ?? borderDash;
             borderSpacing = objectTransformerConfig.borderSpacing ?? borderSpacing;
+            borderOutlineInset = objectTransformerConfig.borderOutlineInset ?? borderOutlineInset;
             anchorFill = objectTransformerConfig.anchorFill ?? anchorFill;
             anchorStroke = objectTransformerConfig.anchorStroke ?? anchorStroke;
             anchorStrokeWidth = objectTransformerConfig.anchorStrokeWidth ?? anchorStrokeWidth;
@@ -475,6 +478,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             borderStrokeWidth,
             borderDash,
             borderSpacing,
+            borderOutlineInset,
             anchorFill,
             anchorStroke,
             anchorStrokeWidth,
@@ -1313,7 +1317,26 @@ export class Transformer extends Disposable implements ITransformerConfig {
         });
     }
 
-    private _getOutlinePosition(width: number, height: number, borderSpacing: number, borderStrokeWidth: number) {
+    private _getOutlinePosition(
+        width: number,
+        height: number,
+        borderSpacing: number,
+        borderStrokeWidth: number,
+        borderOutlineInset?: number
+    ) {
+        if (typeof borderOutlineInset === 'number' && Number.isFinite(borderOutlineInset)) {
+            const maxInset = Math.max(0, (Math.min(width, height) - 1) / 2);
+            const inset = Math.min(Math.max(0, borderOutlineInset), maxInset);
+            const pathOffset = borderStrokeWidth / 2;
+
+            return {
+                left: inset - pathOffset,
+                top: inset - pathOffset,
+                width: Math.max(1, width - inset * 2),
+                height: Math.max(1, height - inset * 2),
+            };
+        }
+
         return {
             left: -borderSpacing - borderStrokeWidth,
             top: -borderSpacing - borderStrokeWidth,
@@ -1379,7 +1402,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _getCopperAnchorPosition(type: TransformerManagerType, height: number, width: number, applyObject: BaseObject) {
-        const { borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
+        const { borderStrokeWidth, borderSpacing, borderOutlineInset, anchorSize } = this._getConfig(applyObject);
+        const outlinePosition = this._getOutlinePosition(width, height, borderSpacing, borderStrokeWidth, borderOutlineInset);
+        const outlineRight = outlinePosition.left + outlinePosition.width;
+        const outlineBottom = outlinePosition.top + outlinePosition.height;
 
         let left = 0;
         let top = 0;
@@ -1389,42 +1415,42 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         switch (type) {
             case TransformerManagerType.RESIZE_LT:
-                left += -borderSpacing - borderStrokeWidth;
-                top += -borderSpacing - borderStrokeWidth;
+                left += outlinePosition.left;
+                top += outlinePosition.top;
                 break;
             case TransformerManagerType.RESIZE_CT:
                 left += width / 2 - longEdge / 2;
-                top += -borderSpacing - borderStrokeWidth;
+                top += outlinePosition.top;
 
                 break;
             case TransformerManagerType.RESIZE_RT:
-                left += width + borderSpacing - borderStrokeWidth - longEdge;
-                top += -borderSpacing - borderStrokeWidth;
+                left += outlineRight - longEdge;
+                top += outlinePosition.top;
 
                 break;
             case TransformerManagerType.RESIZE_LM:
-                left += -borderSpacing - borderStrokeWidth;
+                left += outlinePosition.left;
                 top += height / 2 - longEdge / 2;
 
                 break;
             case TransformerManagerType.RESIZE_RM:
-                left += width + borderSpacing - borderStrokeWidth - shortEdge;
+                left += outlineRight - shortEdge;
                 top += height / 2 - longEdge / 2;
 
                 break;
             case TransformerManagerType.RESIZE_LB:
-                left += -borderSpacing - borderStrokeWidth;
-                top += height + borderSpacing - borderStrokeWidth - longEdge;
+                left += outlinePosition.left;
+                top += outlineBottom - longEdge;
 
                 break;
             case TransformerManagerType.RESIZE_CB:
                 left += width / 2 - longEdge / 2;
-                top += height + borderSpacing - borderStrokeWidth - shortEdge;
+                top += outlineBottom - shortEdge;
 
                 break;
             case TransformerManagerType.RESIZE_RB:
-                left += width + borderSpacing - borderStrokeWidth - longEdge;
-                top += height + borderSpacing - borderStrokeWidth - longEdge;
+                left += outlineRight - longEdge;
+                top += outlineBottom - longEdge;
 
                 break;
         }
@@ -1436,7 +1462,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number, applyObject: BaseObject) {
-        const { rotateAnchorOffset, rotateAnchorPosition, rotateSize, borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
+        const { rotateAnchorOffset, rotateAnchorPosition, rotateSize, borderStrokeWidth, borderSpacing, borderOutlineInset, anchorSize } = this._getConfig(applyObject);
+        const outlinePosition = this._getOutlinePosition(width, height, borderSpacing, borderStrokeWidth, borderOutlineInset);
+        const outlineRight = outlinePosition.left + outlinePosition.width;
+        const outlineBottom = outlinePosition.top + outlinePosition.height;
+        const hasCustomOutline = typeof borderOutlineInset === 'number' && Number.isFinite(borderOutlineInset);
         const isBottomRotateAnchor = rotateAnchorPosition === 'bottom';
 
         let left = -anchorSize / 2;
@@ -1446,54 +1476,62 @@ export class Transformer extends Disposable implements ITransformerConfig {
             case TransformerManagerType.ROTATE:
                 left = width / 2 - rotateSize / 2;
                 top = isBottomRotateAnchor
-                    ? height + rotateAnchorOffset + borderSpacing + borderStrokeWidth * 2
-                    : -rotateAnchorOffset - borderSpacing - borderStrokeWidth * 2 - rotateSize;
+                    ? hasCustomOutline
+                        ? outlineBottom + rotateAnchorOffset + borderStrokeWidth
+                        : height + rotateAnchorOffset + borderSpacing + borderStrokeWidth * 2
+                    : hasCustomOutline
+                        ? outlinePosition.top - rotateAnchorOffset - borderStrokeWidth - rotateSize
+                        : -rotateAnchorOffset - borderSpacing - borderStrokeWidth * 2 - rotateSize;
 
                 break;
             case TransformerManagerType.ROTATE_LINE:
                 left = width / 2;
                 top = isBottomRotateAnchor
-                    ? height + borderSpacing + borderStrokeWidth
-                    : -rotateAnchorOffset - borderSpacing - borderStrokeWidth;
+                    ? hasCustomOutline
+                        ? outlineBottom
+                        : height + borderSpacing + borderStrokeWidth
+                    : hasCustomOutline
+                        ? outlinePosition.top - rotateAnchorOffset
+                        : -rotateAnchorOffset - borderSpacing - borderStrokeWidth;
 
                 break;
             case TransformerManagerType.RESIZE_LT:
-                left += -borderSpacing - borderStrokeWidth;
-                top += -borderSpacing - borderStrokeWidth;
+                left += outlinePosition.left;
+                top += outlinePosition.top;
                 break;
             case TransformerManagerType.RESIZE_CT:
                 left += width / 2;
-                top += -borderSpacing - borderStrokeWidth;
+                top += outlinePosition.top;
 
                 break;
             case TransformerManagerType.RESIZE_RT:
-                left += width + borderSpacing - borderStrokeWidth;
-                top += -borderSpacing - borderStrokeWidth;
+                left += outlineRight;
+                top += outlinePosition.top;
 
                 break;
             case TransformerManagerType.RESIZE_LM:
-                left += -borderSpacing - borderStrokeWidth;
+                left += outlinePosition.left;
                 top += height / 2;
 
                 break;
             case TransformerManagerType.RESIZE_RM:
-                left += width + borderSpacing - borderStrokeWidth;
+                left += outlineRight;
                 top += height / 2;
 
                 break;
             case TransformerManagerType.RESIZE_LB:
-                left += -borderSpacing - borderStrokeWidth;
-                top += height + borderSpacing - borderStrokeWidth;
+                left += outlinePosition.left;
+                top += outlineBottom;
 
                 break;
             case TransformerManagerType.RESIZE_CB:
                 left += width / 2;
-                top += height + borderSpacing - borderStrokeWidth;
+                top += outlineBottom;
 
                 break;
             case TransformerManagerType.RESIZE_RB:
-                left += width + borderSpacing - borderStrokeWidth;
-                top += height + borderSpacing - borderStrokeWidth;
+                left += outlineRight;
+                top += outlineBottom;
 
                 break;
         }
@@ -1831,6 +1869,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             borderStroke,
             borderStrokeWidth,
             borderSpacing,
+            borderOutlineInset,
             enabledAnchors,
         } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
@@ -1847,7 +1886,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 evented: false,
                 strokeWidth: borderStrokeWidth,
                 stroke: borderStroke,
-                ...this._getOutlinePosition(width, height, borderSpacing, borderStrokeWidth),
+                ...this._getOutlinePosition(width, height, borderSpacing, borderStrokeWidth, borderOutlineInset),
             });
             groupElements.push(outline);
         }

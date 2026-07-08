@@ -598,6 +598,57 @@ describe('engine scene viewport extra', () => {
         transformer.dispose();
     });
 
+    it('supports object-specific transformer border outline inset', () => {
+        const transformer = new Transformer({
+            getEngine: () => ({ activeScene: null }),
+        } as any, {
+            anchorSize: 8,
+            anchorStyle: 'canva',
+            borderSpacing: 2,
+            borderStrokeWidth: 1,
+        });
+
+        const outlinePosition = (transformer as any)._getOutlinePosition(100, 50, 2, 1, 1);
+
+        expect(outlinePosition).toEqual({
+            left: 0.5,
+            top: 0.5,
+            width: 98,
+            height: 48,
+        });
+        expect({
+            left: outlinePosition.left + 0.5,
+            top: outlinePosition.top + 0.5,
+            width: outlinePosition.width,
+            height: outlinePosition.height,
+        }).toEqual({
+            left: 1,
+            top: 1,
+            width: 98,
+            height: 48,
+        });
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerResizeLT__', 50, 100, {
+            transformerConfig: {
+                anchorSize: 8,
+                borderOutlineInset: 1,
+            },
+        })).toEqual({
+            left: -3.5,
+            top: -3.5,
+        });
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerResizeRB__', 50, 100, {
+            transformerConfig: {
+                anchorSize: 8,
+                borderOutlineInset: 1,
+            },
+        })).toEqual({
+            left: 94.5,
+            top: 44.5,
+        });
+
+        transformer.dispose();
+    });
+
     it('supports bottom rotate control without a connector line', () => {
         const { engine, scene } = createFixture();
         engine.setActiveScene(scene.sceneKey);

@@ -46,6 +46,7 @@ export interface ITransformerConfig {
     borderStrokeWidth?: number;
     borderDash?: number[];
     borderSpacing?: number;
+    borderOutlineInset?: number;
 
     resizeEnabled?: boolean;
     enabledAnchors?: number[];

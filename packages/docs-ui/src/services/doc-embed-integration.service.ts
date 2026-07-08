@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier, toDisposable } from '@univerjs/core';
+import { toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
 export const DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
@@ -27,15 +27,11 @@ export interface IDocEmbedInteractionBoundaryService {
     hasRecentInteractionFor?(embedId: string | undefined, ownerDocument?: Document): boolean;
 }
 
-export const IDocEmbedInteractionBoundaryService = createIdentifier<IDocEmbedInteractionBoundaryService>('docs-ui.embed-interaction-boundary.service');
-
 export interface IDocEmbedRuntimeFocusCoordinator {
     isChildUnitRuntimeEvent(unitId: string | undefined, target: EventTarget | null | undefined, event?: Event): boolean;
     isChildUnitInActiveSession(unitId: string | undefined): boolean;
     shouldSuppressHostInteraction(unitId: string | undefined, target?: EventTarget | null, event?: Event): boolean;
 }
-
-export const IDocEmbedRuntimeFocusCoordinator = createIdentifier<IDocEmbedRuntimeFocusCoordinator>('docs-ui.embed-runtime-focus-coordinator');
 
 export class EmbedInteractionBoundaryService implements IDocEmbedInteractionBoundaryService {
     private readonly _roots = new Map<string, Set<HTMLElement>>();
@@ -79,6 +75,8 @@ export class EmbedInteractionBoundaryService implements IDocEmbedInteractionBoun
     }
 }
 
+export const IDocEmbedInteractionBoundaryService = EmbedInteractionBoundaryService;
+
 export class EmbedRuntimeFocusCoordinator implements IDocEmbedRuntimeFocusCoordinator {
     private readonly _leases = new Set<{ embedId?: string; childUnitId?: string; hostUnitId?: string; role: string; owner?: string }>();
     private readonly _elements = new Map<string, Set<HTMLElement>>();
@@ -113,15 +111,13 @@ export class EmbedRuntimeFocusCoordinator implements IDocEmbedRuntimeFocusCoordi
         return toDisposable(() => {});
     }
 
-    isChildUnitRuntimeEvent(unitId: string | undefined, target: EventTarget | null | undefined): boolean {
-        return this.isChildUnitInActiveSession(unitId) || (
-            target instanceof HTMLElement &&
-            target.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null
-        );
+    isChildUnitRuntimeEvent(_unitId: string | undefined, target: EventTarget | null | undefined): boolean {
+        return target instanceof HTMLElement &&
+            target.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
     }
 
     isChildUnitInActiveSession(unitId: string | undefined): boolean {
-        return [...this._leases].some((lease) => lease.role !== 'runtime' && (!lease.childUnitId || lease.childUnitId === unitId));
+        return [...this._leases].some((lease) => lease.role !== 'runtime' && lease.childUnitId === unitId);
     }
 
     shouldSuppressHostInteraction(unitId: string | undefined, target?: EventTarget | null): boolean {
@@ -129,6 +125,14 @@ export class EmbedRuntimeFocusCoordinator implements IDocEmbedRuntimeFocusCoordi
             return false;
         }
 
-        return this.isChildUnitInActiveSession(unitId);
+        return [...this._leases].some((lease) => {
+            if (lease.role === 'runtime' || lease.childUnitId === unitId) {
+                return false;
+            }
+
+            return lease.hostUnitId === unitId || (!lease.hostUnitId && !lease.childUnitId);
+        });
     }
 }
+
+export const IDocEmbedRuntimeFocusCoordinator = EmbedRuntimeFocusCoordinator;

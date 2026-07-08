@@ -37,8 +37,8 @@ import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerj
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
@@ -353,6 +353,10 @@ function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
     const clientX = point?.clientX;
     const clientY = point?.clientY;
     if (typeof clientX !== 'number' || typeof clientY !== 'number' || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
+        return false;
+    }
+
+    if (typeof document.elementFromPoint !== 'function') {
         return false;
     }
 

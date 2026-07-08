@@ -10,7 +10,9 @@ const MAX_SECOND_INSTANCE_OVERFLOW = 200_000; // 200 KB
 // There are some compiled code and global cache, so we make some room
 // for this. But we need to make sure that a Univer object cannot fit
 // in this size.
-const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000;
+// Embed runtimes add more shared host/child bridge code to the sheets bundle,
+// which is retained as global compiled code even after Univer instances dispose.
+const MAX_UNIVER_MEMORY_OVERFLOW = 8_000_000;
 
 interface IHeapSnapshotChunk {
     chunk: string;

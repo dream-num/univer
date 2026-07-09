@@ -28,8 +28,8 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
@@ -42,6 +42,7 @@ import { takeUntil } from 'rxjs';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing-floating-toolbar-adapter.service';
 
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
@@ -55,6 +56,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextService private readonly _contextService: IContextService,
         @IDocDrawingAdapterService private readonly _drawingAdapterService: IDocDrawingAdapterService,
+        @Inject(DocDrawingFloatingToolbarAdapterService) private readonly _floatingToolbarAdapterService: DocDrawingFloatingToolbarAdapterService,
         @ICommandService private readonly _commandService: ICommandService
 
     ) {
@@ -189,7 +191,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                         direction: isImage ? 'top-center' : 'horizontal',
                         offset: isImage ? [0, 8] : [2, 0],
                         extraProps: {
-                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
+                            menuItems: this._getDrawingPopupMenuItems(unitId, subUnitId, drawingId, drawingType),
                             variant: isImage ? 'doc-floating-toolbar' : undefined,
                             unitId,
                             subUnitId,
@@ -242,8 +244,15 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         );
     }
 
-    private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
+    private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         const drawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IDocDrawing | null;
+        const floatingToolbarMenuItems = drawing
+            ? this._floatingToolbarAdapterService.getItems({ unitId, subUnitId, drawing })
+            : null;
+        if (floatingToolbarMenuItems) {
+            return floatingToolbarMenuItems;
+        }
+
         const editCommandInfo = drawing
             ? this._drawingAdapterService.getEditDrawingCommandInfo({ unitId, subUnitId, drawing })
             : null;

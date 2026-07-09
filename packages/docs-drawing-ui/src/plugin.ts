@@ -37,6 +37,7 @@ import {
 } from './controllers/render-controllers/doc-drawing-update.render-controller';
 import { DocDrawingUIController } from './controllers/ui.controller';
 import { DocDrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
+import { DocDrawingFloatingToolbarAdapterService } from './services/doc-drawing-floating-toolbar-adapter.service';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
 
 @DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
@@ -71,6 +72,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingTransformerController],
             [DocDrawingAddRemoveController],
             [DocRefreshDrawingsService],
+            [DocDrawingFloatingToolbarAdapterService],
             [DocFloatDomController],
             [DocDrawingPrintingController],
         ];

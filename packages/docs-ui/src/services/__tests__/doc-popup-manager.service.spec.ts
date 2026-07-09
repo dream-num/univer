@@ -212,12 +212,12 @@ describe('DocCanvasPopManagerService', () => {
         const { service, popupService, renderManagerService, univerInstanceService } = createService();
 
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'normal-popup' }, 'doc-1');
-        expect(popupService.popups.get('popup-1')?.injector).toBeUndefined();
+        expect(popupService.popups.get('popup-1')?.connectorInjector).toBeUndefined();
         expect(renderManagerService.getInjector).not.toHaveBeenCalled();
 
         univerInstanceService.embeddedUnitIds.add('doc-1');
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'embed-popup' }, 'doc-1');
-        expect(popupService.popups.get('popup-2')?.injector).toBe(renderManagerService.popupInjector);
+        expect(popupService.popups.get('popup-2')?.connectorInjector).toBe(renderManagerService.popupInjector);
         expect(renderManagerService.getInjector).toHaveBeenCalledTimes(1);
     });
 

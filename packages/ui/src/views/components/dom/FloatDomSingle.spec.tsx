@@ -18,14 +18,14 @@
  * @vitest-environment jsdom
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { IFloatDom, IFloatDomLayout } from '../../../services/dom/canvas-dom-layer.service';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
-import { RediProvider } from '../../../utils/di';
+import { connectInjector } from '../../../utils/di';
 import { FloatDom, FloatDomSingle } from './FloatDom';
 
 function TestFloatDomContent(_props: { hostFloatDomLayout$?: IFloatDom['position$'] }) {
@@ -42,11 +42,8 @@ function renderWithDependencies(element: ReactElement, focusedUnit: unknown = nu
         } as never,
     }]);
 
-    const result = render(
-        <RediProvider value={{ injector }}>
-            {element}
-        </RediProvider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
+    const result = render(<ConnectedTestRoot />);
 
     return {
         ...result,

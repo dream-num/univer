@@ -18,6 +18,7 @@
  * @vitest-environment jsdom
  */
 
+import type { ComponentType } from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { Injector, LocaleService } from '@univerjs/core';
 import { of } from 'rxjs';
@@ -25,7 +26,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common';
 import { IRibbonOverrideService } from '../../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
-import { RediProvider } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import { Ribbon } from '../Ribbon';
 
 describe('Ribbon override chrome', () => {
@@ -72,11 +73,8 @@ describe('Ribbon override chrome', () => {
             }],
         ]);
 
-        const { container, getByText } = render(
-            <RediProvider value={{ injector }}>
-                <Ribbon ribbonType="classic" />
-            </RediProvider>
-        );
+        const ConnectedRibbon = connectInjector(Ribbon, injector) as ComponentType<{ ribbonType: 'classic' }>;
+        const { container, getByText } = render(<ConnectedRibbon ribbonType="classic" />);
 
         const placeholder = getByText('Bases');
         expect(placeholder?.parentElement?.className).toContain('univer-justify-center');

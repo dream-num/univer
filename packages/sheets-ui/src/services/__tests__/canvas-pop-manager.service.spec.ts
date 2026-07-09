@@ -390,12 +390,12 @@ describe('SheetCanvasPopManagerService', () => {
         const bound = { top: 10, left: 20, right: 30, bottom: 40 };
 
         service.attachPopupToAbsolutePosition(bound, { componentKey: 'normal-popup' } as never, 'unit-1', 'sheet-1');
-        expect(popupService.lastPopup()?.injector).toBeUndefined();
+        expect(popupService.lastPopup()?.connectorInjector).toBeUndefined();
         expect(render.getInjector).not.toHaveBeenCalled();
 
         univerInstanceService.embeddedUnitIds.add('unit-1');
         service.attachPopupToAbsolutePosition(bound, { componentKey: 'embed-popup' } as never, 'unit-1', 'sheet-1');
-        expect(popupService.lastPopup()?.injector).toBeDefined();
+        expect(popupService.lastPopup()?.connectorInjector).toBeDefined();
         expect(render.getInjector).toHaveBeenCalledTimes(1);
     });
 

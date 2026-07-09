@@ -19,6 +19,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { ComponentType } from 'react';
 import type { Root } from 'react-dom/client';
 import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import type { ICellEditorBoundingClientRect, ICellEditorManagerParam } from '../../services/editor/cell-editor-manager.service';
@@ -33,7 +34,7 @@ import {
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { ComponentManager, ILayoutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { ComponentManager, connectInjector, ILayoutService, ISidebarService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, of } from 'rxjs';
@@ -196,6 +197,11 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService };
 }
 
+function renderEditorContainer(root: Root, injector: Injector): void {
+    const ConnectedTestRoot = connectInjector(EditorContainer, injector) as ComponentType;
+    root.render(<ConnectedTestRoot />);
+}
+
 describe('EditorContainer embed focus lease', () => {
     let root: Root | undefined;
     let container: HTMLElement | undefined;
@@ -228,11 +234,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -292,11 +294,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -327,11 +325,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -396,11 +390,7 @@ describe('EditorContainer embed focus lease', () => {
         hostCanvas.focus();
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -460,11 +450,7 @@ describe('EditorContainer embed focus lease', () => {
         hostCanvas.focus();
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -535,11 +521,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -561,11 +543,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -580,11 +558,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -604,11 +578,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -622,11 +592,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await new Promise((resolve) => setTimeout(resolve, 0));
         });
 
@@ -645,11 +611,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await Promise.resolve();
         });
 
@@ -673,11 +635,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await Promise.resolve();
         });
 
@@ -707,11 +665,7 @@ describe('EditorContainer embed focus lease', () => {
         root = createRoot(container);
 
         await act(async () => {
-            root!.render(
-                <RediContext.Provider value={{ injector }}>
-                    <EditorContainer />
-                </RediContext.Provider>
-            );
+            renderEditorContainer(root!, injector);
             await Promise.resolve();
         });
         await act(async () => {

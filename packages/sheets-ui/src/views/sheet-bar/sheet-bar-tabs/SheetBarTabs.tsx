@@ -190,8 +190,10 @@ export function SheetBarTabs() {
         return true;
     }, [localeService, openSheetNameErrorDialog]);
 
-    const nameRepeatCheck = useCallback((name: string) => {
-        const currentSheetName = workbook.getActiveSheet()?.getName();
+    const nameRepeatCheck = useCallback((name: string, subUnitId?: string) => {
+        const currentSheetName = subUnitId
+            ? workbook.getSheetBySheetId(subUnitId)?.getName()
+            : workbook.getActiveSheet()?.getName();
         if (currentSheetName === name) {
             return false;
         }
@@ -518,8 +520,8 @@ export function SheetBarTabs() {
             onScroll: (state: IScrollState) => {
                 sheetBarService.setScroll(state);
             },
-            onNameCheckAlert: (name: string) => {
-                return nameEmptyCheck(name) || sheetNameSpecCharCheck(name) || nameRepeatCheck(name);
+            onNameCheckAlert: (name: string, subUnitId?: string) => {
+                return nameEmptyCheck(name) || sheetNameSpecCharCheck(name) || nameRepeatCheck(name, subUnitId);
             },
             onNameChangeCheck: canRenameActiveSheet,
         });

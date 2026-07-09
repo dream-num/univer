@@ -55,6 +55,26 @@ export class DrawingGroupObject extends Group {
         return { ...this._baseBound };
     }
 
+    private _getRenderMatrix() {
+        const realBound = this.getRealBound();
+        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
+        const m = this.transform.getMatrix();
+        const centerX = realLeft + realWidth / 2;
+        const centerY = realTop + realHeight / 2;
+
+        return {
+            matrix: [
+                m[0],
+                m[1],
+                m[2],
+                m[3],
+                centerX,
+                centerY,
+            ],
+            realBound,
+        };
+    }
+
     /**
      * Override ancestorTransform to use the same render transform as render(),
      * which uses [m[0], m[1], m[2], m[3], centerX, centerY] from realBound
@@ -63,12 +83,8 @@ export class DrawingGroupObject extends Group {
      * parent.ancestorTransform get the correct coordinate space.
      */
     override get ancestorTransform(): Transform {
-        const realBound = this.getRealBound();
-        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
-        const m = this.transform.getMatrix();
-        const centerX = realLeft + realWidth / 2;
-        const centerY = realTop + realHeight / 2;
-        const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
+        const { matrix } = this._getRenderMatrix();
+        const renderTransform = new Transform(matrix);
 
         const parent = this.getParent();
         if (this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP) {
@@ -82,13 +98,9 @@ export class DrawingGroupObject extends Group {
     // }
 
     override render(ctx: UniverRenderingContext, bounds: IViewportInfo): void {
-        const realBound = this.getRealBound();
-        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
         ctx.save();
-        const m = this.transform.getMatrix();
-        const centerX = realLeft + realWidth / 2;
-        const centerY = realTop + realHeight / 2;
-        ctx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
+        const { matrix } = this._getRenderMatrix();
+        ctx.transform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
         const objects = this.getObjectsByOrder();
 
         // ctx.rect(0, 0, this.width, this.height);
@@ -112,12 +124,9 @@ export class DrawingGroupObject extends Group {
     override isHit(coord: Vector2): boolean {
         // Build the same render transform used in render():
         // [m[0], m[1], m[2], m[3], centerX, centerY]
-        const realBound = this.getRealBound();
+        const { matrix, realBound } = this._getRenderMatrix();
         const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
-        const m = this.transform.getMatrix();
-        const centerX = realLeft + realWidth / 2;
-        const centerY = realTop + realHeight / 2;
-        const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
+        const renderTransform = new Transform(matrix);
 
         // Account for parent group transforms if applicable
         const parent = this.getParent();

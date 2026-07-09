@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SlideTabBar, SlideTabItem } from '../slide-tab-bar';
 
 const originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -133,6 +133,7 @@ function createBar(root: HTMLDivElement, events: TestSlideEvents, currentIndex =
 
 describe('slide-tab-bar', () => {
     afterEach(() => {
+        vi.useRealTimers();
         window.requestAnimationFrame = originalRequestAnimationFrame;
         window.cancelAnimationFrame = originalCancelAnimationFrame;
         console.error = originalConsoleError;
@@ -216,6 +217,63 @@ describe('slide-tab-bar', () => {
         expect(frameState.cancellations).toEqual([1]);
     });
 
+    it('keeps tab interactions available after finishing sheet name editing', () => {
+        const { root, events, bar: barElement } = setupDOM();
+        const bar = createBar(root, events);
+        const firstItem = bar.getSlideTabItems()[0];
+        const firstEditor = firstItem.getEditor() as HTMLSpanElement;
+        const secondTab = barElement.querySelectorAll<HTMLElement>('.tab-item')[1];
+
+        firstItem.setEditor();
+        firstEditor.textContent = 'Renamed';
+        firstEditor.dispatchEvent(new FocusEvent('focusout'));
+
+        secondTab.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+
+        expect(events.changedTabs).toEqual([{ event: expect.any(PointerEvent), id: 'sheet-1' }]);
+    });
+
+    it('does not start delayed dragging after a double click enters name editing', () => {
+        vi.useFakeTimers();
+        const { root, bar: barElement } = setupDOM();
+        createBar(root, new TestSlideEvents());
+
+        const tabElement = barElement.querySelector<HTMLElement>('.tab-item')!;
+        const editor = tabElement.querySelector<HTMLSpanElement>('span')!;
+        const originalSetPointerCapture = tabElement.setPointerCapture;
+        const originalReleasePointerCapture = tabElement.releasePointerCapture;
+        const originalHasPointerCapture = tabElement.hasPointerCapture;
+
+        tabElement.setPointerCapture = () => {};
+        tabElement.releasePointerCapture = () => {};
+        tabElement.hasPointerCapture = () => true;
+
+        const dispatchPointer = (type: 'pointerdown' | 'pointerup') => {
+            tabElement.dispatchEvent(new PointerEvent(type, {
+                bubbles: true,
+                clientX: 8,
+                clientY: 8,
+                pointerId: 1,
+            }));
+        };
+
+        dispatchPointer('pointerdown');
+        dispatchPointer('pointerup');
+        dispatchPointer('pointerdown');
+        expect(editor.getAttribute('contentEditable')).toBe('true');
+        dispatchPointer('pointerup');
+
+        editor.dispatchEvent(new FocusEvent('focusout'));
+        vi.advanceTimersByTime(SlideTabBar.LongPressDelay + 1);
+
+        expect(tabElement.parentElement).not.toBe(document.body);
+        expect(tabElement.style.position).toBe('');
+
+        tabElement.setPointerCapture = originalSetPointerCapture;
+        tabElement.releasePointerCapture = originalReleasePointerCapture;
+        tabElement.hasPointerCapture = originalHasPointerCapture;
+    });
+
     it('starts or closes edge auto-scroll during sheet tab dragging', () => {
         const { root, events } = setupDOM();
         const frameState = new TestAnimationFrameState();
@@ -243,6 +301,22 @@ describe('slide-tab-bar', () => {
         expect(frameState.requests.length).toBeGreaterThan(0);
         expect(frameState.requests.every((frameId) => frameId === 2)).toBe(true);
         expect(frameState.cancellations).toContain(2);
+    });
+
+    it('includes sheet bar scroll delta when calculating the drag target index', () => {
+        const { root } = setupDOM();
+        const bar = createBar(root, new TestSlideEvents(), 1);
+        const active = bar.getSlideTabItems()[1];
+
+        (bar as unknown as { _activeTabItem: SlideTabItem })._activeTabItem = active;
+        (bar as unknown as { _activeTabItemIndex: number })._activeTabItemIndex = 1;
+        (bar as unknown as { _dragStartScrollX: number })._dragStartScrollX = 0;
+        (bar as unknown as { _moveActionX: number })._moveActionX = 0;
+
+        bar.getScrollbar().scrollX(50);
+        (bar as unknown as { _updateDragSortState: () => void })._updateDragSortState();
+
+        expect((bar as unknown as { _compareIndex: number })._compareIndex).toBe(2);
     });
 
     it('handles static text-selection and slide-skip helpers', () => {

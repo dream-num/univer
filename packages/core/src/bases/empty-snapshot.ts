@@ -15,6 +15,9 @@
  */
 
 import type { IBaseSnapshot, IFieldSnapshot, IRecordSnapshot, ITableSnapshot, IViewSnapshot } from './typedef';
+import pkg from '../../package.json';
+import { generateRandomId } from '../shared';
+import { LocaleType } from '../types/enum';
 
 export interface ICreateDefaultBaseTableSnapshotOptions {
     id: string;
@@ -90,16 +93,19 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
     };
 }
 
-export function getEmptyBaseSnapshot(
-    unitID = '',
-    name = ''
+export function getEmptySnapshot(
+    unitId: string = generateRandomId(),
+    name: string = '',
+    locale: LocaleType = LocaleType.ZH_CN
 ): IBaseSnapshot {
     const now = Date.now();
     const tableId = 'table-1';
 
     return {
-        id: unitID,
+        id: unitId,
         name,
+        locale,
+        appVersion: pkg.version,
         schemaVersion: 1,
         tableOrder: [tableId],
         tables: {
@@ -112,6 +118,5 @@ export function getEmptyBaseSnapshot(
         },
         createdAt: now,
         updatedAt: now,
-        rev: 1,
     };
 }

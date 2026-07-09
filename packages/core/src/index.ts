@@ -59,50 +59,7 @@ export type { ISequenceExecuteResult } from './common/sequence';
 export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
-export * from './docs/data-model';
-export { JSON1, JSONX } from './docs/data-model/json-x/json-x';
-export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
-export { replaceInDocumentBody } from './docs/data-model/replacement';
-export {
-    ParagraphStyleBuilder,
-    ParagraphStyleValue,
-    RichTextBuilder,
-    RichTextValue,
-    TextDecorationBuilder,
-    TextStyleBuilder,
-    TextStyleValue,
-} from './docs/data-model/rich-text-builder';
-export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
-export { ActionIterator } from './docs/data-model/text-x/action-iterator';
-export { TextXActionType } from './docs/data-model/text-x/action-types';
-export type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './docs/data-model/text-x/action-types';
-export { normalizeTextRuns, RESTORE_INSERTED_PARAGRAPH_IDS } from './docs/data-model/text-x/apply-utils/common';
-export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
-export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
-export { getPlainText } from './docs/data-model/text-x/build-utils/parse';
-export { TextX } from './docs/data-model/text-x/text-x';
-export type { TPriority } from './docs/data-model/text-x/text-x';
-export {
-    composeBody,
-    getBodySlice,
-    getCustomBlockSlice,
-    getCustomDecorationSlice,
-    getCustomRangeSlice,
-    getParagraphsSlice,
-    getRichTextEditPath,
-    getSectionBreakSlice,
-    getTableSlice,
-    getTextRunSlice,
-    normalizeBody,
-    SliceBodyType,
-} from './docs/data-model/text-x/utils';
-export {
-    cloneBodyWithFreshParagraphIds,
-    cloneParagraphWithId,
-    createParagraphId,
-    PARAGRAPH_ID_PREFIX,
-} from './docs/paragraph-id';
-export type { IParagraphIdScope } from './docs/paragraph-id';
+export * from './docs';
 export { EventState, EventSubject, fromEventSubject } from './observer/observable';
 export type { IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
@@ -202,40 +159,7 @@ export {
 } from './shared/rxjs';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
-export * from './sheets/clone';
-export { Range } from './sheets/range';
-export { getCellCoordByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
-export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
-export * from './sheets/sheet-skeleton';
-export {
-    DEFAULT_WORKSHEET_COLUMN_COUNT,
-    DEFAULT_WORKSHEET_COLUMN_COUNT_KEY,
-    DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
-    DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT_KEY,
-    DEFAULT_WORKSHEET_COLUMN_WIDTH,
-    DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
-    DEFAULT_WORKSHEET_ROW_COUNT,
-    DEFAULT_WORKSHEET_ROW_COUNT_KEY,
-    DEFAULT_WORKSHEET_ROW_HEIGHT,
-    DEFAULT_WORKSHEET_ROW_HEIGHT_KEY,
-    DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
-    DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY,
-    mergeWorksheetSnapshotWithDefault,
-} from './sheets/sheet-snapshot-utils';
-export { Styles } from './sheets/styles';
-export * from './sheets/typedef';
-export type { IPosition } from './sheets/typedef';
-export {
-    addLinkToDocumentModel,
-    getEmptyCell,
-    isNotNullOrUndefined,
-    isRangesEqual,
-    isUnitRangesEqual,
-} from './sheets/util';
-export { createDocumentModelWithStyle } from './sheets/util';
-export { SheetViewModel } from './sheets/view-model';
-export { getWorksheetUID, Workbook } from './sheets/workbook';
-export { extractPureTextFromCell, getDisplayValueFromCell, getOriginCellValue, Worksheet } from './sheets/worksheet';
+export * from './sheets';
 export { Skeleton } from './skeleton';
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';

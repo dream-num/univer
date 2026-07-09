@@ -15,7 +15,11 @@
  */
 
 export { BaseDataModel } from './base-data-model';
-export { createDefaultBaseTableSnapshot, getEmptyBaseSnapshot, type ICreateDefaultBaseTableSnapshotOptions } from './empty-snapshot';
+export {
+    createDefaultBaseTableSnapshot,
+    getEmptySnapshot as getBasesEmptySnapshot,
+    type ICreateDefaultBaseTableSnapshotOptions,
+} from './empty-snapshot';
 export type {
     BaseCellData,
     BaseCellMatrix,

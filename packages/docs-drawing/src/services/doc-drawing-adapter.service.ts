@@ -43,6 +43,25 @@ export interface IDocDrawingEditCommandInfo {
     disable?: boolean;
 }
 
+export interface IDocDrawingFloatingToolbarMenuOption {
+    label: unknown;
+    value: string;
+}
+
+export interface IDocDrawingFloatingToolbarMenuItem {
+    type?: 'button' | 'select';
+    label: string;
+    index: number;
+    commandId: string;
+    commandParams?: object;
+    commandParamsFactory?: (value: string) => object;
+    disable: boolean;
+    hideOnClick?: boolean;
+    icon?: string;
+    value?: string;
+    options?: IDocDrawingFloatingToolbarMenuOption[];
+}
+
 export interface IDocDrawingAdapter {
     getRemoveDrawingMutationInfos?: (
         params: IDocDrawingRemoveMutationInfoParams
@@ -50,12 +69,16 @@ export interface IDocDrawingAdapter {
     getEditDrawingCommandInfo?: (
         params: IDocDrawingEditCommandInfoParams
     ) => IDocDrawingEditCommandInfo | null | undefined;
+    getFloatingToolbarMenuItems?: (
+        params: IDocDrawingEditCommandInfoParams
+    ) => readonly IDocDrawingFloatingToolbarMenuItem[] | null | undefined;
 }
 
 export interface IDocDrawingAdapterService {
     registerAdapter(adapter: IDocDrawingAdapter): IDisposable;
     getRemoveDrawingMutationInfos(params: IDocDrawingRemoveMutationInfoParams): IDocDrawingMutationInfos;
     getEditDrawingCommandInfo(params: IDocDrawingEditCommandInfoParams): IDocDrawingEditCommandInfo | null;
+    getFloatingToolbarMenuItems(params: IDocDrawingEditCommandInfoParams): IDocDrawingFloatingToolbarMenuItem[] | null;
 }
 
 export const IDocDrawingAdapterService = createIdentifier<IDocDrawingAdapterService>('doc.drawing-adapter.service');
@@ -98,6 +121,17 @@ export class DocDrawingAdapterService implements IDocDrawingAdapterService {
             const commandInfo = adapter.getEditDrawingCommandInfo?.(params);
             if (commandInfo) {
                 return commandInfo;
+            }
+        }
+
+        return null;
+    }
+
+    getFloatingToolbarMenuItems(params: IDocDrawingEditCommandInfoParams): IDocDrawingFloatingToolbarMenuItem[] | null {
+        for (const adapter of this._adapters) {
+            const menuItems = adapter.getFloatingToolbarMenuItems?.(params);
+            if (menuItems) {
+                return [...menuItems].sort((a, b) => a.index - b.index);
             }
         }
 

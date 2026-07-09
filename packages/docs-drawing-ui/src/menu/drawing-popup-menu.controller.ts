@@ -28,8 +28,8 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
@@ -244,6 +244,13 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         const drawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IDocDrawing | null;
+        const floatingToolbarMenuItems = drawing
+            ? this._drawingAdapterService.getFloatingToolbarMenuItems({ unitId, subUnitId, drawing })
+            : null;
+        if (floatingToolbarMenuItems) {
+            return floatingToolbarMenuItems;
+        }
+
         const editCommandInfo = drawing
             ? this._drawingAdapterService.getEditDrawingCommandInfo({ unitId, subUnitId, drawing })
             : null;

@@ -22,6 +22,8 @@ export { UniverDocsDrawingPlugin } from './plugin';
 export { DocDrawingAdapterService, IDocDrawingAdapterService } from './services/doc-drawing-adapter.service';
 export type {
     IDocDrawingAdapter,
+    IDocDrawingFloatingToolbarMenuItem,
+    IDocDrawingFloatingToolbarMenuOption,
     IDocDrawingMutationInfos,
     IDocDrawingRemoveMutationInfoParams,
 } from './services/doc-drawing-adapter.service';

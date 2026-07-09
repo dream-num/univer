@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { IPopup } from '../../../../services/popup/canvas-popup.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ConfigService, IConfigService, Injector, LocaleService } from '@univerjs/core';
@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common';
 import { CanvasPopupService, ICanvasPopupService } from '../../../../services/popup/canvas-popup.service';
-import { RediProvider } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import { CanvasPopup } from '../CanvasPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -48,11 +48,8 @@ function renderWithDependencies(element: ReactElement) {
 
     injector.get(ComponentManager).register('test-popup', TestPopup);
 
-    const result = render(
-        <RediProvider value={{ injector }}>
-            {element}
-        </RediProvider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
+    const result = render(<ConnectedTestRoot />);
 
     return {
         ...result,

@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, Tools, UniverInstanceType } from '@univerjs/core';
+import { CommandType, getBodySliceForTextXAction, ICommandService, IUniverInstanceService, JSONX, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocBlockMoveValidatorService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IMoveDocBlockCommandParams {
@@ -36,6 +36,30 @@ export interface IMoveDocBlockActionResult {
         endOffset: number;
     };
 }
+
+export interface IMoveDocBlockTextChange {
+    movedRange: {
+        startOffset: number;
+        endOffset: number;
+    };
+    sourceRange: {
+        startOffset: number;
+        endOffset: number;
+    };
+    targetOffset: number;
+}
+
+const DOC_BLOCK_MOVE_BODY_PATCH_KEYS = [
+    'paragraphs',
+    'sectionBreaks',
+    'tables',
+    'columnGroups',
+    'customBlocks',
+    'blockRanges',
+    'customRanges',
+    'customDecorations',
+    'textRuns',
+] as const satisfies Array<keyof NonNullable<IDocumentData['body']>>;
 
 export const MoveDocBlockCommand: ICommand<IMoveDocBlockCommandParams> = {
     id: 'doc.command.move-block',
@@ -70,7 +94,11 @@ export const MoveDocBlockCommand: ICommand<IMoveDocBlockCommandParams> = {
             previousDocumentData,
             result: moveResult,
         });
-        const actions = buildReplaceDocumentBodyActions(previousDocumentData, nextDocumentData);
+        const actions = buildReplaceDocumentBodyActions(previousDocumentData, nextDocumentData, {
+            sourceRange,
+            targetOffset,
+            movedRange,
+        });
 
         if (!actions) {
             return false;
@@ -140,7 +168,7 @@ export function buildMoveDocBlockActions(params: {
     };
 }
 
-function buildReplaceDocumentBodyActions(previousDocumentData: IDocumentData, nextDocumentData: IDocumentData): JSONXActions | null {
+export function buildReplaceDocumentBodyActions(previousDocumentData: IDocumentData, nextDocumentData: IDocumentData, move?: IMoveDocBlockTextChange): JSONXActions | null {
     const jsonX = JSONX.getInstance();
     const previousBody = previousDocumentData.body;
     const nextBody = nextDocumentData.body;
@@ -149,20 +177,214 @@ function buildReplaceDocumentBodyActions(previousDocumentData: IDocumentData, ne
         return null;
     }
 
-    const rawActions = [
-        jsonX.replaceOp(['body', 'dataStream'], previousBody.dataStream, nextBody.dataStream),
-        jsonX.replaceOp(['body', 'paragraphs'], previousBody.paragraphs, nextBody.paragraphs),
-        jsonX.replaceOp(['body', 'sectionBreaks'], previousBody.sectionBreaks, nextBody.sectionBreaks),
-        jsonX.replaceOp(['body', 'tables'], previousBody.tables, nextBody.tables),
-        jsonX.replaceOp(['body', 'columnGroups'], previousBody.columnGroups, nextBody.columnGroups),
-        jsonX.replaceOp(['body', 'customBlocks'], previousBody.customBlocks, nextBody.customBlocks),
-        jsonX.replaceOp(['body', 'blockRanges'], previousBody.blockRanges, nextBody.blockRanges),
-        jsonX.replaceOp(['body', 'customRanges'], previousBody.customRanges, nextBody.customRanges),
-        jsonX.replaceOp(['body', 'customDecorations'], previousBody.customDecorations, nextBody.customDecorations),
-        jsonX.replaceOp(['body', 'textRuns'], previousBody.textRuns, nextBody.textRuns),
-    ].filter(Boolean) as JSONXActions[];
+    const rawActions: JSONXActions[] = [];
+    let intermediateDocumentData = Tools.deepClone(previousDocumentData);
+
+    const moveTextAction = move ? buildMoveBodyTextAction(previousBody, nextBody, move) : null;
+    if (moveTextAction) {
+        rawActions.push(moveTextAction);
+        intermediateDocumentData = JSONX.apply(intermediateDocumentData, moveTextAction) as unknown as IDocumentData;
+    }
+
+    const residualTextAction = buildSingleBodyTextChangeAction(intermediateDocumentData.body, nextBody);
+    if (residualTextAction) {
+        rawActions.push(residualTextAction);
+        intermediateDocumentData = JSONX.apply(intermediateDocumentData, residualTextAction) as unknown as IDocumentData;
+    }
+
+    if (!moveTextAction) {
+        collectBodyPatchActions(intermediateDocumentData.body, nextBody, rawActions);
+    }
 
     return rawActions.reduce((acc, cur) => JSONX.compose(acc, cur), null as JSONXActions);
+}
+
+function buildMoveBodyTextAction(previousBody: IDocumentBody, nextBody: IDocumentBody, move: IMoveDocBlockTextChange): JSONXActions | null {
+    const dataStreamLength = previousBody.dataStream.length;
+    const startOffset = clamp(move.sourceRange.startOffset, 0, dataStreamLength);
+    const endOffset = clamp(move.sourceRange.endOffset, startOffset, dataStreamLength);
+    const targetOffset = clamp(move.targetOffset, 0, dataStreamLength);
+    const moveLength = endOffset - startOffset;
+
+    if (moveLength <= 0 || (targetOffset >= startOffset && targetOffset <= endOffset)) {
+        return null;
+    }
+
+    const textX = new TextX();
+    const insertOffset = move.movedRange.startOffset;
+    const insertBody = getBodySliceForTextXAction(nextBody, insertOffset, insertOffset + moveLength, false);
+
+    if (targetOffset < startOffset) {
+        textX.retain(targetOffset);
+        textX.insert(moveLength, insertBody);
+        textX.retain(startOffset - targetOffset);
+        textX.delete(moveLength);
+    } else {
+        textX.retain(startOffset);
+        textX.delete(moveLength);
+        textX.retain(targetOffset - endOffset);
+        textX.insert(moveLength, insertBody);
+    }
+
+    return JSONX.getInstance().editOp(textX.serialize(), ['body']);
+}
+
+function buildSingleBodyTextChangeAction(previousBody: IDocumentBody | undefined, nextBody: IDocumentBody): JSONXActions | null {
+    const textChange = getSingleDataStreamChange(previousBody?.dataStream, nextBody.dataStream);
+
+    if (!textChange) {
+        return null;
+    }
+
+    const textX = new TextX();
+    textX.retain(textChange.start);
+    if (textChange.insertLength > 0) {
+        textX.insert(
+            textChange.insertLength,
+            getBodySliceForTextXAction(nextBody, textChange.start, textChange.start + textChange.insertLength, false)
+        );
+    }
+    if (textChange.deleteLength > 0) {
+        textX.delete(textChange.deleteLength);
+    }
+
+    return JSONX.getInstance().editOp(textX.serialize(), ['body']);
+}
+
+function getSingleDataStreamChange(previousDataStream: string | undefined, nextDataStream: string | undefined): { start: number; deleteLength: number; insertLength: number } | null {
+    if (previousDataStream == null || nextDataStream == null || previousDataStream === nextDataStream) {
+        return null;
+    }
+
+    let start = 0;
+    while (
+        start < previousDataStream.length &&
+        start < nextDataStream.length &&
+        previousDataStream[start] === nextDataStream[start]
+    ) {
+        start++;
+    }
+
+    let previousEnd = previousDataStream.length;
+    let nextEnd = nextDataStream.length;
+    while (
+        previousEnd > start &&
+        nextEnd > start &&
+        previousDataStream[previousEnd - 1] === nextDataStream[nextEnd - 1]
+    ) {
+        previousEnd--;
+        nextEnd--;
+    }
+
+    return {
+        start,
+        deleteLength: previousEnd - start,
+        insertLength: nextEnd - start,
+    };
+}
+
+function collectBodyPatchActions(previousBody: IDocumentBody | undefined, nextBody: IDocumentBody, actions: JSONXActions[]): void {
+    for (const key of DOC_BLOCK_MOVE_BODY_PATCH_KEYS) {
+        collectPatchActions(
+            JSONX.getInstance(),
+            ['body', key],
+            previousBody?.[key],
+            nextBody[key],
+            actions
+        );
+    }
+}
+
+function collectPatchActions(
+    jsonX: JSONX,
+    path: (string | number)[],
+    oldValue: unknown,
+    newValue: unknown,
+    actions: JSONXActions[]
+): void {
+    if (isEmptyArrayEquivalent(oldValue, newValue)) {
+        return;
+    }
+
+    if (Tools.diffValue(oldValue, newValue)) {
+        return;
+    }
+
+    if (oldValue == null) {
+        actions.push(jsonX.insertOp(path, newValue));
+        return;
+    }
+
+    if (newValue == null) {
+        actions.push(jsonX.removeOp(path, oldValue));
+        return;
+    }
+
+    if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+        collectArrayPatchActions(jsonX, path, oldValue, newValue, actions);
+        return;
+    }
+
+    if (isPlainObject(oldValue) && isPlainObject(newValue)) {
+        const keys = new Set([...Object.keys(oldValue), ...Object.keys(newValue)]);
+
+        keys.forEach((key) => {
+            collectPatchActions(
+                jsonX,
+                [...path, key],
+                (oldValue as Record<string, unknown>)[key],
+                (newValue as Record<string, unknown>)[key],
+                actions
+            );
+        });
+        return;
+    }
+
+    actions.push(jsonX.replaceOp(path, oldValue, newValue));
+}
+
+function collectArrayPatchActions(
+    jsonX: JSONX,
+    path: (string | number)[],
+    oldItems: unknown[],
+    newItems: unknown[],
+    actions: JSONXActions[]
+): void {
+    if (oldItems.length === newItems.length) {
+        oldItems.forEach((item, index) => collectPatchActions(jsonX, [...path, index], item, newItems[index], actions));
+        return;
+    }
+
+    let prefix = 0;
+    while (prefix < oldItems.length && prefix < newItems.length && Tools.diffValue(oldItems[prefix], newItems[prefix])) {
+        prefix++;
+    }
+
+    let oldSuffix = oldItems.length - 1;
+    let newSuffix = newItems.length - 1;
+    while (oldSuffix >= prefix && newSuffix >= prefix && Tools.diffValue(oldItems[oldSuffix], newItems[newSuffix])) {
+        oldSuffix--;
+        newSuffix--;
+    }
+
+    for (let index = oldSuffix; index >= prefix; index--) {
+        actions.push(jsonX.removeOp([...path, index], oldItems[index]));
+    }
+
+    for (let index = prefix; index <= newSuffix; index++) {
+        actions.push(jsonX.insertOp([...path, index], newItems[index]));
+    }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isEmptyArrayEquivalent(oldValue: unknown, newValue: unknown): boolean {
+    return (
+        (oldValue == null && Array.isArray(newValue) && newValue.length === 0) ||
+        (newValue == null && Array.isArray(oldValue) && oldValue.length === 0)
+    );
 }
 
 function remapBodyIndexesAfterMove(

@@ -25,7 +25,7 @@ import {
 } from '@univerjs/core';
 import { DocBlockMoveValidatorService, RichTextEditingMutation } from '@univerjs/docs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { buildMoveDocBlockActions, MoveDocBlockCommand } from '../doc-block-move.command';
+import { buildMoveDocBlockActions, buildReplaceDocumentBodyActions, MoveDocBlockCommand } from '../doc-block-move.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('buildMoveDocBlockActions', () => {
@@ -244,9 +244,9 @@ describe('MoveDocBlockCommand', () => {
                 { paragraphId: 'para_docs_ui_fixture_36', startIndex: 1 },
                 { paragraphId: 'para_docs_ui_fixture_37', startIndex: 5 },
                 { paragraphId: 'para_docs_ui_fixture_38', startIndex: 9 },
-                { paragraphId: 'para_docs_ui_fixture_39', startIndex: 12 },
+                { paragraphId: 'para_docs_ui_fixture_39', startIndex: 13 },
             ],
-            sectionBreaks: [{ startIndex: 13 }],
+            sectionBreaks: [{ startIndex: 14 }],
             columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 12 }],
         }));
         const commandService = testBed.get(ICommandService);
@@ -313,6 +313,34 @@ describe('MoveDocBlockCommand', () => {
         })).resolves.toBe(false);
 
         expect(testBed.doc.getSnapshot().body?.dataStream).toBe('A\r\n');
+    });
+});
+
+describe('buildReplaceDocumentBodyActions', () => {
+    it('uses TextX and local body patches instead of replacing whole body fields', () => {
+        const previousDocumentData = createDocument('A\rB\rC\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_42', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_43', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_44', startIndex: 5 }],
+            sectionBreaks: [{ startIndex: 6 }],
+        });
+        const sourceRange = { startOffset: 0, endOffset: 2 };
+        const targetOffset = 6;
+        const { nextDocumentData, movedRange } = buildMoveDocBlockActions({
+            documentData: previousDocumentData,
+            sourceRange,
+            targetOffset,
+        });
+
+        const actions = buildReplaceDocumentBodyActions(previousDocumentData, nextDocumentData, {
+            movedRange,
+            sourceRange,
+            targetOffset,
+        });
+        const serializedActions = JSON.stringify(actions);
+
+        expect(actions).not.toBeNull();
+        expect(serializedActions).not.toContain('["body","dataStream"');
+        expect(serializedActions).not.toContain('["body","paragraphs",{"r"');
+        expect(serializedActions).toContain('"et":"text-x"');
     });
 });
 

@@ -19,7 +19,7 @@
 import type { TextXAction } from './action-types';
 import { Tools } from '../../../shared/tools';
 import { TextXActionType } from './action-types';
-import { getBodySlice } from './utils';
+import { getBodySliceForSplitTextXAction } from './utils';
 
 export class ActionIterator {
     private _index = 0;
@@ -73,7 +73,7 @@ export class ActionIterator {
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,
-                    body: getBodySlice(nextAction.body!, offset, offset + length, false),
+                    body: getBodySliceForSplitTextXAction(nextAction.body!, offset, offset + length, false),
                 });
             }
         } else {

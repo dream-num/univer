@@ -52,7 +52,7 @@ export interface IReplaceSnapshotCommandParams {
 export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
     id: 'doc.command-replace-snapshot',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
+
     handler: (accessor, params: IReplaceSnapshotCommandParams) => {
         const { unitId, snapshot, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -104,69 +104,25 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             doMutation.params.options = options;
         }
 
-        const rawActions: JSONXActions = [];
-
-        const jsonX = JSONX.getInstance();
-
-        if (!Tools.diffValue(prevDocumentStyle, documentStyle)) {
-            const actions = jsonX.replaceOp(['documentStyle'], prevDocumentStyle, documentStyle);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(body, prevBody)) {
-            const actions = jsonX.replaceOp(['body'], prevBody, body);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(tableSource, prevTableSource)) {
-            const actions = jsonX.replaceOp(['tableSource'], prevTableSource, tableSource);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(footers, prevFooters)) {
-            const actions = jsonX.replaceOp(['footers'], prevFooters, footers);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(headers, prevHeaders)) {
-            const actions = jsonX.replaceOp(['headers'], prevHeaders, headers);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(lists, prevLists)) {
-            const actions = jsonX.replaceOp(['lists'], prevLists, lists);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(drawings, prevDrawings)) {
-            const actions = jsonX.replaceOp(['drawings'], prevDrawings, drawings);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        if (!Tools.diffValue(drawingsOrder, prevDrawingsOrder)) {
-            const actions = jsonX.replaceOp(['drawingsOrder'], prevDrawingsOrder, drawingsOrder);
-            if (actions != null) {
-                rawActions.push(actions);
-            }
-        }
-
-        doMutation.params.actions = rawActions.reduce((acc, cur) => {
-            return JSONX.compose(acc, cur as JSONXActions);
-        }, null as JSONXActions);
+        doMutation.params.actions = buildReplaceSnapshotActions({
+            body: prevBody,
+            documentStyle: prevDocumentStyle,
+            tableSource: prevTableSource,
+            footers: prevFooters,
+            headers: prevHeaders,
+            lists: prevLists,
+            drawings: prevDrawings,
+            drawingsOrder: prevDrawingsOrder,
+        } as IDocumentData, {
+            body,
+            documentStyle,
+            tableSource,
+            footers,
+            headers,
+            lists,
+            drawings,
+            drawingsOrder,
+        } as IDocumentData);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -177,6 +133,60 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
     },
 
 };
+
+export function buildReplaceSnapshotActions(previousSnapshot: IDocumentData, snapshot: IDocumentData): JSONXActions | null {
+    const jsonX = JSONX.getInstance();
+    const rawActions: JSONXActions[] = [];
+
+    const bodyAction = buildReplaceSnapshotBodyAction(previousSnapshot.body, snapshot.body);
+    if (bodyAction) {
+        rawActions.push(bodyAction);
+    }
+
+    collectTopLevelReplaceAction(jsonX, rawActions, ['documentStyle'], previousSnapshot.documentStyle, snapshot.documentStyle);
+    collectTopLevelReplaceAction(jsonX, rawActions, ['tableSource'], previousSnapshot.tableSource, snapshot.tableSource);
+    collectTopLevelReplaceAction(jsonX, rawActions, ['footers'], previousSnapshot.footers, snapshot.footers);
+    collectTopLevelReplaceAction(jsonX, rawActions, ['headers'], previousSnapshot.headers, snapshot.headers);
+    collectTopLevelReplaceAction(jsonX, rawActions, ['lists'], previousSnapshot.lists, snapshot.lists);
+    collectTopLevelReplaceAction(jsonX, rawActions, ['drawings'], previousSnapshot.drawings, snapshot.drawings);
+    collectTopLevelReplaceAction(jsonX, rawActions, ['drawingsOrder'], previousSnapshot.drawingsOrder, snapshot.drawingsOrder);
+
+    return rawActions.reduce((acc, cur) => JSONX.compose(acc, cur as JSONXActions), null as JSONXActions);
+}
+
+function buildReplaceSnapshotBodyAction(previousBody: IDocumentBody | undefined, body: IDocumentBody | undefined): JSONXActions | null {
+    if (!previousBody || !body || Tools.diffValue(previousBody, body)) {
+        return null;
+    }
+
+    const textX = new TextX();
+    if (previousBody.dataStream.length > 0) {
+        textX.delete(previousBody.dataStream.length);
+    }
+
+    if (body.dataStream.length > 0) {
+        textX.insert(body.dataStream.length, body);
+    }
+
+    return JSONX.getInstance().editOp(textX.serialize(), ['body']);
+}
+
+function collectTopLevelReplaceAction(
+    jsonX: JSONX,
+    rawActions: JSONXActions[],
+    path: string[],
+    previousValue: unknown,
+    value: unknown
+): void {
+    if (Tools.diffValue(previousValue, value)) {
+        return;
+    }
+
+    const action = jsonX.replaceOp(path, previousValue, value);
+    if (action != null) {
+        rawActions.push(action);
+    }
+}
 
 interface IReplaceContentCommandParams {
     unitId: string;

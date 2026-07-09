@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IExecutionOptions, IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
-import { CommandType, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, JSONX, UniverInstanceType, validateDocBodyStructure } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
@@ -42,6 +42,41 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
+
+function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string) {
+    if (!segmentId) {
+        return 'body' as const;
+    }
+
+    const { headers, footers } = documentDataModel.getSnapshot();
+    if (headers?.[segmentId]) {
+        return 'header' as const;
+    }
+
+    if (footers?.[segmentId]) {
+        return 'footer' as const;
+    }
+
+    return 'body' as const;
+}
+
+function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segmentId: string) {
+    const segmentModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
+    const body = segmentModel?.getBody();
+    if (!body) {
+        return;
+    }
+
+    const segmentType = getSegmentType(documentDataModel, segmentId);
+    const issues = validateDocBodyStructure(body, { segmentType, segmentId: segmentId || undefined });
+    if (!issues.length) {
+        return;
+    }
+
+    const detail = issues.map((issue) => `${issue.code}${issue.index == null ? '' : `@${issue.index}`}`).join(', ');
+    const segmentLabel = segmentId ? `${segmentType} ${segmentId}` : segmentType;
+    throw new Error(`[DocStructure] ${segmentLabel}: ${detail}`);
+}
 
 /**
  * The core mutator to change rich text actions. The execution result would be undo mutation params. Could be directly
@@ -99,6 +134,12 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
+        try {
+            assertValidDocBodyStructure(documentDataModel, segmentId);
+        } catch (error) {
+            documentDataModel.apply(undoActions);
+            throw error;
+        }
 
         // Step 2: Update Doc View Model.
         documentViewModel?.reset(documentDataModel);

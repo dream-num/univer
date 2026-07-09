@@ -345,11 +345,11 @@ export class Editor extends Disposable implements IEditor {
                 body: {
                     dataStream: `${text}\r\n`,
                     paragraphs: [{
-                        startIndex: 0,
+                        startIndex: text.length,
                         paragraphId: createParagraphId(new Set()),
                     }],
                     customRanges: [],
-                    sectionBreaks: [],
+                    sectionBreaks: [{ startIndex: text.length + 1 }],
                     tables: [],
                     textRuns: [],
                 },

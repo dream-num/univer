@@ -19,7 +19,7 @@ import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
-import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, NamedStyleType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, JSONX, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { describe, expect, it } from 'vitest';
 import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
@@ -29,6 +29,7 @@ import { AlignCenterCommand } from '../../commands/commands/paragraph-align.comm
 import { H2HeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
 import { DOC_PARAGRAPH_T_EDIT_MENU_ID, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
 import {
+    buildUnwrapBlockRangeActions,
     getParagraphFormattingRange,
     getParagraphMenuCommandParams,
     getParagraphMenuCommandTargetRange,
@@ -248,6 +249,33 @@ describe('ParagraphMenu command behavior', () => {
         });
     });
 
+    it('builds unwrap actions with TextX and local patches instead of replacing whole body fields', () => {
+        const blockRange = {
+            blockId: 'block-1',
+            blockType: DocumentBlockRangeType.CODE,
+            startIndex: 0,
+            endIndex: 2,
+        };
+        const previousBody = blockRangeBody(DocumentBlockRangeType.CODE, {
+            indentStart: { v: 12 },
+            indentEnd: { v: 8 },
+            spaceAbove: { v: 4 },
+            spaceBelow: { v: 6 },
+            textStyle: { ff: 'monospace', fs: 12 },
+        });
+        const { body } = unwrapBlockRangeBody(previousBody, blockRange);
+
+        const actions = buildUnwrapBlockRangeActions(previousBody, body, blockRange);
+        const serializedActions = JSON.stringify(actions);
+
+        expect(actions).not.toBeNull();
+        expect(serializedActions).toContain('"et":"text-x"');
+        expect(serializedActions).not.toContain('["body","dataStream"');
+        expect(serializedActions).not.toContain('["body","paragraphs",{"r"');
+        const appliedBody = (JSONX.apply({ id: 'doc-1', body: previousBody, documentStyle: {} }, actions!) as unknown as { body: IDocumentBody }).body;
+        expect(normalizeOptionalArrays(appliedBody)).toEqual(normalizeOptionalArrays(body));
+    });
+
     it('routes explicit and declared insert actions below the active block', () => {
         expect(shouldUseInsertBelowRange('doc.command.insert-image', { id: 'image' })).toBe(true);
         expect(shouldUseInsertBelowRange('docs.operation.insert-embed', { id: 'docs.operation.insert-embed.below' })).toBe(true);
@@ -289,3 +317,9 @@ describe('ParagraphMenu command behavior', () => {
         }]);
     });
 });
+
+function normalizeOptionalArrays(body: IDocumentBody): IDocumentBody {
+    return Object.fromEntries(
+        Object.entries(body).filter(([, value]) => !Array.isArray(value) || value.length > 0)
+    ) as IDocumentBody;
+}

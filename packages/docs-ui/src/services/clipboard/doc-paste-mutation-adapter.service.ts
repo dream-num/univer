@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IDrawingParam, IDisposable, IMutationInfo } from '@univerjs/core';
+import type { IDisposable, IDocumentBody, IDocumentData, IDrawingParam, IMutationInfo } from '@univerjs/core';
 import { createIdentifier, toDisposable } from '@univerjs/core';
 
 export interface IDocClipboardPasteCustomBlockMapping {

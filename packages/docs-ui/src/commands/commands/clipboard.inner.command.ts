@@ -19,10 +19,10 @@ import type {
     IAccessor,
     ICommand,
     ICustomTable,
+    IDisposable,
     IDocumentBody,
     IDocumentData,
     IDrawingParam,
-    IDisposable,
     IMutationInfo,
     ITextRange,
     JSONXActions,
@@ -48,10 +48,8 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
-import {
-    IDocClipboardPasteAdapterService,
-    type IDocClipboardPasteCustomBlockMapping,
-} from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import type { IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import { IDocClipboardPasteAdapterService } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 

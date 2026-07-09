@@ -20,7 +20,7 @@ import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
 import { CellValueType } from '../types/enum';
-import { getEmptyBaseSnapshot } from './empty-snapshot';
+import { getEmptySnapshot } from './empty-snapshot';
 
 const BASE_LIST_VALUE_SEPARATOR = ', ';
 const BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR = '\u001F';
@@ -36,21 +36,7 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
     constructor(snapshot: Partial<IBaseSnapshot> = {}) {
         super();
 
-        const now = Date.now();
-
-        const defaultSnapshot = Tools.isEmptyObject(snapshot)
-            ? getEmptyBaseSnapshot()
-            : {
-                id: '',
-                name: '',
-                schemaVersion: 1,
-                tables: {},
-                tableOrder: [],
-                createdAt: now,
-                updatedAt: now,
-                rev: 1,
-            };
-
+        const defaultSnapshot = getEmptySnapshot();
         this._snapshot = normalizeBaseSnapshot(Tools.commonExtend(defaultSnapshot, snapshot));
 
         if (!this._snapshot.id) {

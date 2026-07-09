@@ -21,7 +21,7 @@ import { createIdentifier } from '../../common/di';
 
 export type IResources = Array<{ id?: string; name: string; data: string }>;
 
-type IBusinessName = 'SHEET' | 'DOC' | 'SLIDE';
+type IBusinessName = 'SHEET' | 'DOC' | 'SLIDE' | 'BASE' | 'UNIVER';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
 export interface IResourceHook<T = any> {
     pluginName: IResourceName;

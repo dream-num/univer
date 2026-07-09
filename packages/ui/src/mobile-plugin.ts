@@ -35,7 +35,7 @@ import { ContextMenuHostService, IContextMenuHostService } from './services/cont
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
-import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
@@ -52,6 +52,7 @@ import { IUIPartsService, UIPartsService } from './services/parts/parts.service'
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtime-scope/ui-runtime-scope.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -111,6 +112,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [IContextMenuService, { useClass: ContextMenuService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IGalleryService, { useClass: DesktopGalleryService, lazy: true }],
@@ -124,6 +126,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IFontService, { useClass: FontService }],
             [CanvasFloatDomService],
+            [CanvasFloatDomPreviewService],
 
             [
                 IUIController,

@@ -62,6 +62,8 @@ class TestRenderManagerService {
         style: { width: '1000px' },
     };
 
+    popupInjector = new Injector();
+    getInjector = vi.fn(() => this.popupInjector);
     readonly onTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
 
@@ -78,6 +80,7 @@ class TestRenderManagerService {
             engine: {
                 getCanvasElement: () => this.canvasElement,
             },
+            getInjector: this.getInjector,
             mainComponent: {
                 getOffsetConfig: () => ({
                     docsLeft: 0,
@@ -113,8 +116,14 @@ class TestRenderManagerService {
 }
 
 class TestUniverInstanceService {
+    embeddedUnitIds = new Set<string>();
+
     getUnit(unitId: string) {
         return unitId === 'missing-doc-data' ? undefined : {};
+    }
+
+    getUnitCreateOptions(unitId: string) {
+        return this.embeddedUnitIds.has(unitId) ? { embeddedRender: true } : undefined;
     }
 }
 
@@ -152,6 +161,7 @@ function createService() {
         service: injector.get(DocCanvasPopManagerService),
         popupService: injector.get(ICanvasPopupService) as unknown as TestCanvasPopupService,
         renderManagerService: injector.get(IRenderManagerService) as unknown as TestRenderManagerService,
+        univerInstanceService: injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService,
         commandService: injector.get(ICommandService) as unknown as TestCommandService,
     };
 }
@@ -198,6 +208,19 @@ describe('DocCanvasPopManagerService', () => {
         expect(anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
     });
 
+    it('uses a scoped popup injector only for embedded document render units', () => {
+        const { service, popupService, renderManagerService, univerInstanceService } = createService();
+
+        service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'normal-popup' }, 'doc-1');
+        expect(popupService.popups.get('popup-1')?.connectorInjector).toBeUndefined();
+        expect(renderManagerService.getInjector).not.toHaveBeenCalled();
+
+        univerInstanceService.embeddedUnitIds.add('doc-1');
+        service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'embed-popup' }, 'doc-1');
+        expect(popupService.popups.get('popup-2')?.connectorInjector).toBe(renderManagerService.popupInjector);
+        expect(renderManagerService.getInjector).toHaveBeenCalledTimes(1);
+    });
+
     it('refreshes function-based rect popup anchors after scroll and rich text changes', () => {
         const { service, popupService, renderManagerService, commandService } = createService();
         const rect = { left: 10, right: 110, top: 20, bottom: 40 };
@@ -215,6 +238,44 @@ describe('DocCanvasPopManagerService', () => {
         rect.right = 130;
         commandService.emit(RichTextEditingMutation.id);
         expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 10, bottom: 30 });
+    });
+
+    it('does not refresh rect popup anchors for rich text changes from another document', () => {
+        const { service, popupService, commandService } = createService();
+        const rect = { left: 10, right: 110, top: 20, bottom: 40 };
+        const getRect = vi.fn(() => rect);
+
+        service.attachPopupToRect(getRect, { componentKey: 'dynamic-rect' }, 'doc-1');
+        const popup = popupService.popups.get('popup-1');
+        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+
+        rect.left = 30;
+        rect.right = 130;
+        commandService.emit(RichTextEditingMutation.id, { unitId: 'slide-shape-editor' });
+
+        expect(getRect).toHaveBeenCalledTimes(1);
+        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
+    });
+
+    it('keeps the last rect popup anchor when a stale dynamic rect throws during refresh', () => {
+        const { service, popupService, commandService } = createService();
+        let stale = false;
+        const getRect = vi.fn(() => {
+            if (stale) {
+                throw new TypeError('Cannot read properties of null (reading clone)');
+            }
+
+            return { left: 10, right: 110, top: 20, bottom: 40 };
+        });
+
+        service.attachPopupToRect(getRect, { componentKey: 'stale-dynamic-rect' }, 'doc-1');
+        const popup = popupService.popups.get('popup-1');
+        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+
+        stale = true;
+
+        expect(() => commandService.emit(RichTextEditingMutation.id, { unitId: 'doc-1' })).not.toThrow();
+        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
     });
 
     it('ignores stale rect popup updates after the render canvas is released', () => {

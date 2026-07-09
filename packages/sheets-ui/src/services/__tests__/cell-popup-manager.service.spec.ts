@@ -97,4 +97,33 @@ describe('CellPopupManagerService', () => {
         expect(directions.includes('horizontal')).toBe(true);
         expect(directions.includes('vertical')).toBe(true);
     });
+
+    it('clears all popups for a workbook unit', () => {
+        const disposables = [{ dispose: vi.fn() }, { dispose: vi.fn() }];
+        const sheetPopupService = {
+            attachPopupToCell: vi
+                .fn()
+                .mockReturnValueOnce(disposables[0])
+                .mockReturnValueOnce(disposables[1]),
+        };
+        const service = new CellPopupManagerService(sheetPopupService as any);
+
+        service.showPopup({ unitId: 'unit-3', subUnitId: 'sheet-a', row: 1, col: 1 }, {
+            id: 'a',
+            componentKey: 'a',
+            priority: 1,
+        } as any);
+        service.showPopup({ unitId: 'unit-3', subUnitId: 'sheet-b', row: 2, col: 2 }, {
+            id: 'b',
+            componentKey: 'b',
+            priority: 1,
+        } as any);
+
+        service.hidePopupsForUnit('unit-3');
+
+        expect(disposables[0].dispose).toHaveBeenCalledTimes(1);
+        expect(disposables[1].dispose).toHaveBeenCalledTimes(1);
+        expect(service.getPopups('unit-3', 'sheet-a', 1, 1, 'horizontal')).toEqual([]);
+        expect(service.getPopups('unit-3', 'sheet-b', 2, 2, 'horizontal')).toEqual([]);
+    });
 });

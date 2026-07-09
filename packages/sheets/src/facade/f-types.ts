@@ -14,17 +14,4 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import {
-    DOC_TABLE_BLOCK_MENU_ID,
-    INSERT_BELLOW_MENU_ID,
-    ParagraphMenuInsertBelowSubmenuItemFactory,
-} from '../index';
-
-describe('docs-ui public exports', () => {
-    it('re-exports table block paragraph menu ids and factories', () => {
-        expect(DOC_TABLE_BLOCK_MENU_ID).toBe('doc.menu.table-block');
-        expect(INSERT_BELLOW_MENU_ID).toBe('doc.menu.insert-bellow');
-        expect(ParagraphMenuInsertBelowSubmenuItemFactory).toBeTypeOf('function');
-    });
-});
+export type FSheetEmbedUnitFacadeMapAugmentation = never;

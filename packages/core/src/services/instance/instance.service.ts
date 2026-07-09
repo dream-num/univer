@@ -38,6 +38,28 @@ export interface ICreateUnitOptions {
      * @default true
      */
     makeCurrent?: boolean;
+    /**
+     * If product UI render services should skip their default main-canvas render
+     * creation. Embedded units create their render explicitly into a host-owned
+     * container instead.
+     *
+     * @default false
+     */
+    skipAutoRender?: boolean;
+    /**
+     * If render services should create the render unit as an embedded/non-main
+     * render. Embedded renders are mounted explicitly by a host container and
+     * must not mutate global workbench state while resolving their local view.
+     *
+     * @default false
+     */
+    embeddedRender?: boolean;
+    /**
+     * Optional parent injector for an embedded render unit. Render modules will
+     * resolve their dependencies from this injector before falling back to the
+     * root injector.
+     */
+    renderParentInjector?: Injector;
 }
 
 interface ICreateUnitEvent<T extends UnitModel = UnitModel> {
@@ -84,6 +106,8 @@ export interface IUniverInstanceService {
 
     /** Create a unit with snapshot info. */
     createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: Partial<T>, options?: ICreateUnitOptions): U;
+    /** Get the options originally used to create a unit. */
+    getUnitCreateOptions(unitId: string): Nullable<ICreateUnitOptions>;
     /** Dispose a unit  */
     disposeUnit(unitId: string): boolean;
 
@@ -103,6 +127,7 @@ export interface IUniverInstanceService {
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
     private readonly _unitsByType = new Map<UniverInstanceType, UnitModel[]>();
+    private readonly _unitCreateOptions = new Map<string, ICreateUnitOptions>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -122,6 +147,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._currentUnits.forEach((unit) => unit?.dispose());
         this._currentUnits.clear();
         this._unitsByType.clear();
+        this._unitCreateOptions.clear();
     }
 
     private _createHandler!: (
@@ -169,6 +195,9 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     setCurrentUnitForType(unitId: string): void {
         const result = this._getUnitById(unitId);
         if (!result) throw new Error(`[UniverInstanceService]: no document with unitId ${unitId}!`);
+        if (this._currentUnits.get(result[1]) === result[0]) {
+            return;
+        }
 
         this._currentUnits.set(result[1], result[0]);
         this._currentUnits$.next(this._currentUnits);
@@ -202,6 +231,9 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
 
         units.push(unit);
+        if (options) {
+            this._unitCreateOptions.set(newUnitId, { ...options });
+        }
         this._unitAdded$.next({ unit, options });
 
         if (options?.makeCurrent ?? true) {
@@ -219,6 +251,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const unit = this._getUnitById(id)?.[0] as Nullable<T>;
         if (type && unit?.type !== type) return null;
         return unit;
+    }
+
+    getUnitCreateOptions(unitId: string): Nullable<ICreateUnitOptions> {
+        return this._unitCreateOptions.get(unitId) ?? null;
     }
 
     getUniverSheetInstance(unitId: string): Nullable<Workbook> {
@@ -251,6 +287,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     focusUnit(id: string | null): void {
+        if (this._focused$.getValue() === id) {
+            return;
+        }
+
         this._focused$.next(id);
 
         if (this.focused instanceof Workbook) {
@@ -308,6 +348,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._tryResetFocusOnRemoval(unitId);
 
         this._unitDisposed$.next(unit);
+        this._unitCreateOptions.delete(unitId);
 
         unit.dispose();
 

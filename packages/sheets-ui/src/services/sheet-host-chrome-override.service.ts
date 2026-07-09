@@ -14,4 +14,17 @@
  * limitations under the License.
  */
 
-export { menuSchema } from './schema';
+import type { Observable } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
+
+export interface ISheetHostChromeOverride {
+    entry?: string;
+    hostUnitId?: string;
+}
+
+export interface ISheetHostChromeOverrideService {
+    readonly override$: Observable<ISheetHostChromeOverride | null>;
+    getOverride?(): ISheetHostChromeOverride | null;
+}
+
+export const ISheetHostChromeOverrideService = createIdentifier<ISheetHostChromeOverrideService>('sheet-ui.host-chrome-override.service');

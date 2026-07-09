@@ -20,7 +20,7 @@ import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
+import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
 export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
@@ -48,7 +48,9 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
     const layerProps: any = useMemo(() => ({
         data: layer.data,
         ...layer.props,
-    }), [layer.data, layer.props]);
+        hostFloatDomLayout$: layer.position$,
+    }), [layer.data, layer.position$, layer.props]);
+    const floatDomOverflow = resolveFloatDomOverflow(layerProps);
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
@@ -129,27 +131,35 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 width: Math.max(position.endX - position.startX - 2, 0),
                 height: Math.max(position.endY - position.startY - 2, 0),
                 transform: transformRef.current,
-                overflow: 'hidden',
+                overflow: floatDomOverflow.outerOverflow,
                 transformOrigin: 'center center',
             }}
             onPointerMove={(e) => {
-                layer.onPointerMove(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerMove(e.nativeEvent);
+                }
             }}
             onPointerDown={(e) => {
-                layer.onPointerDown(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerDown(e.nativeEvent);
+                }
             }}
             onPointerUp={(e) => {
-                layer.onPointerUp(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerUp(e.nativeEvent);
+                }
             }}
             onWheel={(e) => {
-                layer.onWheel(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onWheel(e.nativeEvent);
+                }
             }}
         >
             <div
                 id={id}
                 ref={innerDomRef}
                 className="univer-absolute univer-overflow-hidden"
-                style={{ ...innerStyle.current }}
+                style={{ ...innerStyle.current, overflow: floatDomOverflow.innerOverflow }}
             >
                 {component}
             </div>
@@ -162,9 +172,9 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
     const focusUnit = useObservable(instanceService.focused$);
-    const currentUnitId = unitId || focusUnit;
+    const currentUnitId = resolveFloatDomCurrentUnitId(unitId, focusUnit);
 
-    return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
+    return layers?.filter((layer) => shouldRenderFloatDomLayer(layer[1], currentUnitId))?.map((layer) => (
         <FloatDomSingle
             id={layer[1].domId ?? layer[0]}
             layer={layer[1]}
@@ -172,3 +182,46 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
         />
     ));
 };
+
+export function resolveFloatDomCurrentUnitId(unitId: string | undefined, focusedUnit: unknown): string | null {
+    if (typeof unitId === 'string') {
+        return unitId;
+    }
+
+    if (typeof focusedUnit === 'string') {
+        return focusedUnit;
+    }
+
+    if (
+        focusedUnit != null &&
+        typeof focusedUnit === 'object' &&
+        'getUnitId' in focusedUnit &&
+        typeof focusedUnit.getUnitId === 'function'
+    ) {
+        const focusedUnitId = focusedUnit.getUnitId();
+        return typeof focusedUnitId === 'string' ? focusedUnitId : null;
+    }
+
+    return null;
+}
+
+export function resolveFloatDomOverflow(props: {
+    customBlockRenderViewport?: {
+        bleedLeft?: number;
+        bleedWidth?: number;
+    };
+}): { outerOverflow: CSSProperties['overflow']; innerOverflow: CSSProperties['overflow'] } {
+    const viewport = props.customBlockRenderViewport;
+    const hasBleedViewport = Number.isFinite(viewport?.bleedWidth) && (viewport?.bleedWidth ?? 0) > 0;
+    if (!hasBleedViewport) {
+        return {
+            outerOverflow: 'hidden',
+            innerOverflow: 'hidden',
+        };
+    }
+
+    return {
+        outerOverflow: 'visible',
+        innerOverflow: 'visible',
+    };
+}

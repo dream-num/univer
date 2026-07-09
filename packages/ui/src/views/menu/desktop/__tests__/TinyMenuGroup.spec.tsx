@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { IValueOption } from '../../../../services/menu/menu';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -23,7 +23,7 @@ import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { IconManager } from '../../../../common/icon-manager';
 import { MenuItemType } from '../../../../services/menu/menu';
-import { RediContext } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import { getVisibleTinyMenuChildren, resolveMenuItemActiveState, UITinyMenuGroup } from '../TinyMenuGroup';
 
 class TestLocaleService {
@@ -46,7 +46,7 @@ class TestState {
     }
 }
 
-function createTinyMenuInjector() {
+function createTinyMenuTestInjector() {
     const injector = new Injector();
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ILogService, { useClass: TestLogService as never }]);
@@ -63,11 +63,8 @@ function createTinyMenuInjector() {
 }
 
 function renderWithDependencies(element: ReactElement) {
-    return render(
-        <RediContext.Provider value={{ injector: createTinyMenuInjector() }}>
-            {element}
-        </RediContext.Provider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, createTinyMenuTestInjector()) as ComponentType;
+    return render(<ConnectedTestRoot />);
 }
 
 function createChild(

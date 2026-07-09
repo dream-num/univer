@@ -103,6 +103,7 @@ export abstract class SingleUnitUIController extends Disposable {
     private _currentRenderId: string | null = null;
     private _changeRenderUnit(rendererId: string, contentElement: HTMLElement): boolean {
         if (this._currentRenderId === rendererId) return false;
+        if (this._instanceService.getUnitCreateOptions(rendererId)?.embeddedRender) return false;
 
         const renderer = this._renderManagerService.getRenderById(rendererId)!;
         if (!renderer || !renderer.unitId || isInternalEditorID(renderer.unitId)) return false;

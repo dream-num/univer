@@ -19,6 +19,7 @@ import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { memo, useMemo, useRef } from 'react';
 import { ComponentManager } from '../../../common';
+import { shouldForwardFloatDomEvents } from '../../../services/dom/canvas-dom-layer.service';
 
 export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; position: IFloatDomLayout }) => {
     const { layer, id, position } = props;
@@ -80,16 +81,24 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
                 transform: transformRef.current,
             }}
             onPointerMove={(e) => {
-                layer.onPointerMove(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerMove(e.nativeEvent);
+                }
             }}
             onPointerDown={(e) => {
-                layer.onPointerDown(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerDown(e.nativeEvent);
+                }
             }}
             onPointerUp={(e) => {
-                layer.onPointerUp(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerUp(e.nativeEvent);
+                }
             }}
             onWheel={(e) => {
-                layer.onWheel(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onWheel(e.nativeEvent);
+                }
             }}
         >
             <div

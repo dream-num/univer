@@ -28,6 +28,7 @@ export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing
 export type { IUniverSheetsDrawingUIConfig } from './config/config';
 export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
+export { registerSheetsDrawingFloatingHostCapability, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES } from './embed';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { BatchSaveImagesService, FileNamePart, IBatchSaveImagesService } from './services/batch-save-images.service';

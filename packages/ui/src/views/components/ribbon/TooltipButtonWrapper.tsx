@@ -34,6 +34,7 @@ import {
 import { combineLatest, of } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../utils/di';
+import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const TooltipWrapperContext = createContext({
@@ -103,6 +104,14 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         el: spanRef.current,
     }));
 
+    const content = (
+        <span ref={spanRef}>
+            <TooltipWrapperContext.Provider value={contextValue}>
+                {children}
+            </TooltipWrapperContext.Provider>
+        </span>
+    );
+
     return tooltipProps.title
         ? (
             <Tooltip
@@ -110,20 +119,10 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
                 onVisibleChange={handleChangeTooltipVisible}
                 {...tooltipProps}
             >
-                <span ref={spanRef}>
-                    <TooltipWrapperContext.Provider value={contextValue}>
-                        {children}
-                    </TooltipWrapperContext.Provider>
-                </span>
+                {content}
             </Tooltip>
         )
-        : (
-            <span ref={spanRef}>
-                <TooltipWrapperContext.Provider value={contextValue}>
-                    {children}
-                </TooltipWrapperContext.Provider>
-            </span>
-        );
+        : content;
 });
 
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
@@ -242,6 +241,10 @@ export function DropdownMenuWrapper({
 
     function handleVisibleChange(visible: boolean) {
         setDropdownVisible(visible);
+    }
+
+    function handleEmbedBoundaryFocusOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
+        keepInteractionInsideSameEmbedBoundary(event);
     }
 
     function handleOptionSelect(option: IValueOption) {
@@ -372,6 +375,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onFocusOutside={handleEmbedBoundaryFocusOutside}
+                onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
                 {children}
             </DropdownMenu>
@@ -420,6 +425,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onFocusOutside={handleEmbedBoundaryFocusOutside}
+                onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
                 {children}
             </DropdownMenu>

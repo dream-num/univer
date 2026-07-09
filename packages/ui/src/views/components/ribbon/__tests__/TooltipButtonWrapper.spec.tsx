@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { ReactElement } from 'react';
+/**
+ * @vitest-environment jsdom
+ */
+
+import type { ComponentType, ReactElement } from 'react';
 import { render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
-import { RediContext } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import { DropdownMenuLabel } from '../TooltipButtonWrapper';
 
 class TestLocaleService {
@@ -40,11 +44,8 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ComponentManager]);
     injector.add([IconManager]);
 
-    return render(
-        <RediContext.Provider value={{ injector }}>
-            {element}
-        </RediContext.Provider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
+    return render(<ConnectedTestRoot />);
 }
 
 describe('DropdownMenuLabel', () => {

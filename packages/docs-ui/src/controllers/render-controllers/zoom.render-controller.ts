@@ -28,6 +28,7 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -38,6 +39,7 @@ import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-rat
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { IDocEmbedInteractionBoundaryService } from '../../services/doc-embed-integration.service';
 import { DocViewScaleService } from '../../services/doc-view-scale';
 import { DEFAULT_MODERN_DOC_ZOOM_RATIO, getDocEffectiveZoomRatio } from '../../services/doc-zoom';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -65,7 +67,8 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService
+        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService,
+        @Optional(IDocEmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService
     ) {
         super();
 
@@ -147,14 +150,23 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             this._docPageLayoutService.calculatePagePosition();
         }
 
-        if (needRefreshSelection && !this._editorService.isEditor(this._context.unitId)) {
+        if (
+            needRefreshSelection &&
+            !this._editorService.isEditor(this._context.unitId) &&
+            !this._embedInteractionBoundaryService?.hasRecentInteraction()
+        ) {
             this._textSelectionManagerService.refreshSelection();
         }
 
-        if (isInternalEditorID(this._context.unitId)) {
-            return;
+        if (!isInternalEditorID(this._context.unitId)) {
+            docObject.scene.getTransformer()?.clearSelectedObjects();
         }
-        docObject.scene.getTransformer()?.clearSelectedObjects();
+
+        const createOptions = this._univerInstanceService.getUnitCreateOptions(this._context.unitId);
+        if (createOptions?.embeddedRender === true || createOptions?.skipAutoRender === true) {
+            this._context.scene.makeDirty();
+            this._context.scene.render();
+        }
     }
 
     private _initZoomEventListener() {

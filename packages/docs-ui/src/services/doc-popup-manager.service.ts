@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
+import type { INeedCheckDisposable, Injector, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
@@ -138,6 +138,15 @@ export class DocCanvasPopManagerService extends Disposable {
         super();
     }
 
+    private _shouldUpdateForCommand(commandInfo: { id: string; params?: unknown }, unitId: string): boolean {
+        if (commandInfo.id !== SetDocZoomRatioOperation.id && commandInfo.id !== RichTextEditingMutation.id) {
+            return false;
+        }
+
+        const params = commandInfo.params as { unitId?: string } | undefined;
+        return params?.unitId == null || params.unitId === unitId;
+    }
+
     private _createRectPositionObserver(rect: IBoundRectNoAngle | (() => IBoundRectNoAngle), currentRender: IRender) {
         const calc = () => {
             const { scene, engine } = currentRender;
@@ -170,31 +179,33 @@ export class DocCanvasPopManagerService extends Disposable {
 
         const position$ = new BehaviorSubject<IBoundRectNoAngle>(position);
         const disposable = new DisposableCollection();
-
-        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetDocZoomRatioOperation.id || commandInfo.id === RichTextEditingMutation.id) {
+        const updatePosition = () => {
+            try {
                 const newPosition = calc();
                 if (newPosition) {
                     position$.next(newPosition);
                 }
+            } catch {
+                // The popup may outlive an embedded render while its host switches tabs.
+                // Keep the last anchor until the popup is disposed.
+            }
+        };
+
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
+            if (this._shouldUpdateForCommand(commandInfo, currentRender.unitId)) {
+                updatePosition();
             }
         }));
 
         const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-                const newPosition = calc();
-                if (newPosition) {
-                    position$.next(newPosition);
-                }
+                updatePosition();
             }));
         }
 
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
-            const newPosition = calc();
-            if (newPosition) {
-                position$.next(newPosition);
-            }
+            updatePosition();
         }));
 
         return {
@@ -268,12 +279,14 @@ export class DocCanvasPopManagerService extends Disposable {
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
 
         const { position, position$, disposable } = this._createRectPositionObserver(rect, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
+            connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -301,12 +314,14 @@ export class DocCanvasPopManagerService extends Disposable {
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
 
         const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
+            connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -341,6 +356,7 @@ export class DocCanvasPopManagerService extends Disposable {
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
         const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
@@ -349,6 +365,7 @@ export class DocCanvasPopManagerService extends Disposable {
             ...popup,
             unitId,
             subUnitId: 'default',
+            connectorInjector: popupInjector,
             anchorRect: direction.includes('top') ? bounds[0] : bounds[bounds.length - 1],
             anchorRect$: position$,
             excludeRects: bounds,
@@ -371,4 +388,10 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
     // #endregion
+
+    private _resolveEmbeddedPopupInjector(unitId: string, currentRender: IRender): Injector | undefined {
+        return this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true
+            ? currentRender.getInjector?.()
+            : undefined;
+    }
 }

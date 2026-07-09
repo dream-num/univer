@@ -30,6 +30,7 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -38,8 +39,24 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
+    applyFloatDomTransformerConfig,
     calcSheetFloatDomPosition,
+    createFloatDomHostClickIntent,
+    createFloatDomMoveDragState,
+    isCanvasFloatDomDrawingType,
+    resolveFloatDomMoveDragTransform,
     SheetCanvasFloatDomManagerService,
+    shouldActivateStage2FromHostClickIntent,
+    shouldActivateStage2FromHostPointer,
+    shouldAutoMountFloatDomRuntime,
+    shouldForwardSheetHostedEmbedFloatDomEvent,
+    shouldPassThroughFloatDomActivationEvent,
+    shouldPassThroughFloatDomRuntimeEvents,
+    shouldPreserveFloatDomOnFocusChange,
+    shouldStartFloatDomMoveFromHandle,
+    shouldUpdateFloatDomLayerOnRuntimeStageChange,
+    shouldUseFloatDomPreviewObject,
+    syncFloatDomHostSelectionOnStageEnter,
     transformBound2DOMBound,
 } from '../canvas-float-dom-manager.service';
 
@@ -54,6 +71,26 @@ const BASE_WORKBOOK_DATA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             name: 'Sheet1',
+            rowCount: 20,
+            columnCount: 20,
+            defaultColumnWidth: 72,
+            defaultRowHeight: 24,
+            rowHeader: { width: 46 },
+            columnHeader: { height: 28 },
+            cellData: {},
+            hidden: BooleanNumber.FALSE,
+        },
+    },
+};
+
+const TWO_SHEET_WORKBOOK_DATA: IWorkbookData = {
+    ...BASE_WORKBOOK_DATA,
+    sheetOrder: ['sheet1', 'sheet2'],
+    sheets: {
+        ...BASE_WORKBOOK_DATA.sheets,
+        sheet2: {
+            id: 'sheet2',
+            name: 'Sheet2',
             rowCount: 20,
             columnCount: 20,
             defaultColumnWidth: 72,
@@ -332,8 +369,621 @@ function expectLayout(layout: IFloatDomLayout, expected: IFloatDomLayout): void 
     expect(layout).toEqual(expected);
 }
 
+function createService(drawing: unknown) {
+    const dispose = vi.fn();
+    const removeObject = vi.fn();
+    const disposeRenderObject = vi.fn();
+    const transformer = {
+        clearControlByIds: vi.fn(),
+        clearSelectedObjects: vi.fn(),
+    };
+    const renderObject = {
+        id: 'rect-1',
+        oKey: 'rect-1',
+        dispose: disposeRenderObject,
+    };
+    const syncExecuteCommand = vi.fn(() => true);
+    const getDrawingByParam = vi.fn(() => drawing);
+    const getBatchRemoveOp = vi.fn(() => ({
+        unitId: 'unit-1',
+        subUnitId: 'sheet-1',
+        redo: ['redo-op'],
+        objects: ['object-1'],
+    }));
+    const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
+
+    service._domLayerInfoMap = new Map([
+        ['float-dom-1', {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            dispose: { dispose },
+            rect: renderObject,
+        }],
+    ]);
+    service._drawingManagerService = { getDrawingByParam };
+    service._commandService = { syncExecuteCommand };
+    service._sheetDrawingService = { getBatchRemoveOp };
+    service._getSceneAndTransformerByDrawingSearch = vi.fn(() => ({
+        scene: {
+            getObjectIncludeInGroup: vi.fn(() => renderObject),
+            getTransformer: vi.fn(() => transformer),
+            removeObject,
+        },
+        transformer,
+    }));
+
+    return { service, dispose, disposeRenderObject, removeObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp, transformer };
+}
+
 describe('SheetCanvasFloatDomManagerService', () => {
     const disposables: Array<ReturnType<typeof setup>> = [];
+
+    it('treats embed block drawings as canvas float dom drawings', () => {
+        expect(isCanvasFloatDomDrawingType(DrawingTypeEnum.DRAWING_BLOCK)).toBe(true);
+        expect(isCanvasFloatDomDrawingType(DrawingTypeEnum.DRAWING_DOM)).toBe(true);
+        expect(isCanvasFloatDomDrawingType(DrawingTypeEnum.DRAWING_CHART)).toBe(true);
+        expect(isCanvasFloatDomDrawingType(DrawingTypeEnum.DRAWING_IMAGE)).toBe(false);
+    });
+
+    it('only defers auto mounting for same-sheet embed float doms that opt into stage2 runtime mounting', () => {
+        expect(shouldAutoMountFloatDomRuntime({
+            data: {
+                version: 1,
+                embedId: 'embed-sheet',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(false);
+        expect(shouldAutoMountFloatDomRuntime({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+    });
+
+    it('keeps existing float doms auto mounted by default', () => {
+        expect(shouldAutoMountFloatDomRuntime({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+            },
+        } as any)).toBe(true);
+        expect(shouldAutoMountFloatDomRuntime({
+            data: {
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+    });
+
+    it('keeps embed float dom layers rendered when focus moves into child units', () => {
+        expect(shouldPreserveFloatDomOnFocusChange({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+        expect(shouldPreserveFloatDomOnFocusChange({
+            data: { label: 'plain sheet float dom' },
+        } as any)).toBe(false);
+    });
+
+    it('uses host scene preview image objects only for same-sheet stage2-only embed float doms', () => {
+        expect(shouldUseFloatDomPreviewObject({
+            data: {
+                version: 1,
+                embedId: 'embed-sheet',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+        expect(shouldUseFloatDomPreviewObject({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(false);
+        expect(shouldUseFloatDomPreviewObject({
+            data: {
+                version: 1,
+                embedId: 'embed-legacy',
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(false);
+    });
+
+    it('allows host event pass-through before stage2 so sheet-hosted embed blocks can be selected', () => {
+        const floatDomParam = {
+            data: {
+                version: 1,
+                embedId: 'embed-base',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_BASE,
+                runtimeMountMode: 'stage2',
+            },
+        };
+
+        expect(shouldPassThroughFloatDomRuntimeEvents(floatDomParam as any, 'inactive')).toBe(true);
+        expect(shouldPassThroughFloatDomRuntimeEvents(floatDomParam as any, 'stage1')).toBe(true);
+    });
+
+    it('disables host event pass-through for every sheet-hosted stage2 embed runtime', () => {
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                version: 1,
+                embedId: 'embed-base',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_BASE,
+                runtimeMountMode: 'stage2',
+            },
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+                runtimeMountMode: 'stage2',
+            },
+        } as any, 'stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomRuntimeEvents({
+            data: {
+                label: 'plain sheet float dom',
+            },
+        } as any, 'stage2')).toBe(true);
+    });
+
+    it('keeps auto-mounted sheet embed runtimes stable across stage changes', () => {
+        expect(shouldUpdateFloatDomLayerOnRuntimeStageChange({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+                runtimeMountMode: 'auto',
+            },
+        } as any)).toBe(false);
+        expect(shouldUpdateFloatDomLayerOnRuntimeStageChange({
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'auto',
+            },
+        } as any)).toBe(false);
+        expect(shouldUpdateFloatDomLayerOnRuntimeStageChange({
+            data: {
+                version: 1,
+                embedId: 'embed-sheet',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        } as any)).toBe(true);
+    });
+
+    it('blocks sheet-host event forwarding from active stage2 embed runtimes', () => {
+        const runtime = document.createElement('div');
+        runtime.dataset.embedFloatDom = 'true';
+        runtime.dataset.embedFloatStage = 'stage2';
+        const target = document.createElement('button');
+        runtime.appendChild(target);
+
+        expect(shouldForwardSheetHostedEmbedFloatDomEvent({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+            },
+        } as any, { target } as any)).toBe(false);
+
+        runtime.dataset.embedFloatStage = 'stage1';
+        expect(shouldForwardSheetHostedEmbedFloatDomEvent({
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SLIDE,
+            },
+        } as any, { target } as any)).toBe(true);
+    });
+
+    it('applies embed transformer config with visual padding and aspect-ratio locking', () => {
+        const rect = {};
+
+        applyFloatDomTransformerConfig(rect as any, {
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                resizeBehavior: 'aspect-ratio',
+            },
+        } as any);
+
+        expect((rect as any).transformerConfig).toEqual(expect.objectContaining({
+            borderEnabled: true,
+            borderSpacing: 2,
+            keepRatio: true,
+            rotateEnabled: false,
+            resizeEnabled: true,
+        }));
+    });
+
+    it('mounts and unmounts lazy float dom runtime from stored runtime config', () => {
+        const addFloatDom = vi.fn();
+        const removeFloatDom = vi.fn();
+        const updateFloatDom = vi.fn();
+        const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
+        const floatDomConfig = {
+            id: 'float-dom-1',
+            componentKey: 'Component',
+            unitId: 'unit-1',
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_SHEET,
+                runtimeMountMode: 'stage2',
+            },
+        };
+        service._canvasFloatDomService = {
+            addFloatDom,
+            removeFloatDom,
+            updateFloatDom,
+            domLayers: [['float-dom-1', floatDomConfig]],
+        };
+        service._domLayerInfoMap = new Map([
+            ['float-dom-1', {
+                id: 'float-dom-1',
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                floatDomConfig,
+                runtimeMounted: false,
+            }],
+        ]);
+
+        expect(service.isFloatDomRuntimeMounted('float-dom-1')).toBe(false);
+        expect(service.mountFloatDomRuntime('float-dom-1')).toBe(true);
+        expect(service.isFloatDomRuntimeMounted('float-dom-1')).toBe(true);
+        expect(addFloatDom).not.toHaveBeenCalled();
+        expect(updateFloatDom).toHaveBeenCalledWith('float-dom-1', expect.objectContaining({
+            eventPassThrough: false,
+            props: expect.objectContaining({ initialStage: 'stage2' }),
+        }));
+
+        expect(service.mountFloatDomRuntime('float-dom-1')).toBe(true);
+        expect(updateFloatDom).toHaveBeenCalledTimes(1);
+
+        service.unmountFloatDomRuntime('float-dom-1');
+        expect(removeFloatDom).not.toHaveBeenCalled();
+        expect(updateFloatDom).toHaveBeenLastCalledWith('float-dom-1', {
+            eventPassThrough: true,
+            props: undefined,
+        });
+        expect(service.isFloatDomRuntimeMounted('float-dom-1')).toBe(false);
+    });
+
+    it('promotes lazy float dom runtime from inactive to stage2 on the second activation', () => {
+        const addFloatDom = vi.fn();
+        const updateFloatDom = vi.fn();
+        const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
+        const floatDomConfig = {
+            id: 'float-dom-1',
+            componentKey: 'Component',
+            unitId: 'unit-1',
+            data: {
+                version: 1,
+                embedId: 'embed-slide',
+                runtimeMountMode: 'stage2',
+            },
+        };
+        service._canvasFloatDomService = {
+            addFloatDom,
+            updateFloatDom,
+            removeFloatDom: vi.fn(),
+            domLayers: [['float-dom-1', floatDomConfig]],
+        };
+        service._domLayerInfoMap = new Map([
+            ['float-dom-1', {
+                id: 'float-dom-1',
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                floatDomConfig,
+                runtimeMounted: false,
+            }],
+        ]);
+
+        expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage1');
+        expect(addFloatDom).not.toHaveBeenCalled();
+        expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage2');
+        expect(addFloatDom).not.toHaveBeenCalled();
+        expect(updateFloatDom).toHaveBeenCalledWith('float-dom-1', expect.objectContaining({
+            eventPassThrough: false,
+            props: expect.objectContaining({ initialStage: 'stage2' }),
+        }));
+    });
+
+    it('keeps auto-mounted sheet-hosted embed runtime stage changes inside the runtime layer', () => {
+        const updateFloatDom = vi.fn();
+        const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
+        const floatDomConfig = {
+            id: 'float-dom-1',
+            componentKey: 'Component',
+            unitId: 'unit-1',
+            data: {
+                version: 1,
+                embedId: 'embed-base',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_BASE,
+                runtimeMountMode: 'stage2',
+            },
+        };
+        service._canvasFloatDomService = {
+            updateFloatDom,
+        };
+        service._domLayerInfoMap = new Map([
+            ['float-dom-1', {
+                id: 'float-dom-1',
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                floatDomConfig,
+                runtimeMounted: true,
+                runtimeStage: 'inactive',
+            }],
+        ]);
+
+        expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage1');
+        expect(updateFloatDom).not.toHaveBeenCalled();
+
+        expect(service.promoteFloatDomRuntimeStage('float-dom-1')).toBe('stage2');
+        expect(updateFloatDom).not.toHaveBeenCalled();
+    });
+
+    it('lets stage1 activation continue to host selection but stops stage2 activation', () => {
+        expect(shouldPassThroughFloatDomActivationEvent('stage1')).toBe(true);
+        expect(shouldPassThroughFloatDomActivationEvent('stage2')).toBe(false);
+        expect(shouldPassThroughFloatDomActivationEvent(undefined)).toBe(true);
+    });
+
+    it('syncs host transformer when a lazy float dom enters stage1 or stage2', () => {
+        const attachTransformerTo = vi.fn();
+        const clearControlByIds = vi.fn();
+        const clearSelectedObjects = vi.fn();
+        const transformer = {
+            cleared: false,
+            clearSelectedObjects() {
+                this.cleared = true;
+                clearSelectedObjects();
+            },
+        };
+        const renderObject = {
+            transformer: { clearControlByIds },
+            scene: {
+                attachTransformerTo,
+                getTransformer: () => transformer,
+            },
+        };
+        const rect = { oKey: 'rect-key-1' };
+
+        syncFloatDomHostSelectionOnStageEnter('stage1', renderObject as any, rect as any);
+        expect(attachTransformerTo).toHaveBeenCalledWith(rect);
+
+        syncFloatDomHostSelectionOnStageEnter('stage2', renderObject as any, rect as any);
+        expect(clearControlByIds).toHaveBeenCalledWith(['rect-key-1']);
+        expect(clearSelectedObjects).toHaveBeenCalled();
+        expect(transformer.cleared).toBe(true);
+    });
+
+    it('allows host-level block body clicks to activate stage2 after stage1 selection', () => {
+        const info = {
+            runtimeMounted: false,
+            runtimeStage: 'stage1',
+            position$: {
+                getValue: () => ({
+                    startX: 100,
+                    endX: 420,
+                    startY: 80,
+                    endY: 260,
+                }),
+            },
+            rect: {
+                left: 1000,
+                top: 800,
+                width: 320,
+                height: 180,
+            },
+        };
+
+        expect(shouldActivateStage2FromHostPointer(info as any, { offsetX: 120, offsetY: 100 } as any)).toBe(true);
+        expect(shouldActivateStage2FromHostPointer(info as any, { offsetX: 20, offsetY: 100 } as any)).toBe(false);
+        expect(shouldActivateStage2FromHostPointer({ ...info, runtimeStage: 'inactive' } as any, { offsetX: 120, offsetY: 100 } as any)).toBe(false);
+    });
+
+    it('activates stage2 from host only on pointerup click intent', () => {
+        const info = createStage1FloatDomInfo();
+        const intent = createFloatDomHostClickIntent(info as any, {
+            type: 'pointerdown',
+            pointerId: 1,
+            offsetX: 120,
+            offsetY: 100,
+        } as any);
+
+        expect(intent).toEqual(expect.objectContaining({
+            pointerId: 1,
+            startOffsetX: 120,
+            startOffsetY: 100,
+        }));
+        expect(shouldActivateStage2FromHostClickIntent(info as any, intent, {
+            type: 'pointerdown',
+            pointerId: 1,
+            offsetX: 120,
+            offsetY: 100,
+        } as any)).toBe(false);
+        expect(shouldActivateStage2FromHostClickIntent(info as any, intent, {
+            type: 'pointerup',
+            pointerId: 1,
+            offsetX: 121,
+            offsetY: 101,
+        } as any)).toBe(true);
+    });
+
+    it('does not activate stage2 from host after drag intent', () => {
+        const info = createStage1FloatDomInfo();
+        const intent = createFloatDomHostClickIntent(info as any, {
+            type: 'pointerdown',
+            pointerId: 1,
+            offsetX: 120,
+            offsetY: 100,
+        } as any);
+
+        expect(shouldActivateStage2FromHostClickIntent(info as any, intent, {
+            type: 'pointerup',
+            pointerId: 1,
+            offsetX: 140,
+            offsetY: 100,
+        } as any)).toBe(false);
+    });
+
+    it('starts host float dom moving only from the matching drag handle event', () => {
+        const info = {
+            id: 'anchor-1',
+            unitId: 'host-1',
+            rect: {
+                left: 100,
+                top: 40,
+            },
+        };
+
+        expect(shouldStartFloatDomMoveFromHandle(info as any, {
+            hostAnchorId: 'anchor-1',
+            hostUnitId: 'host-1',
+            clientX: 20,
+            clientY: 30,
+            button: 0,
+        })).toBe(true);
+        expect(shouldStartFloatDomMoveFromHandle(info as any, {
+            hostAnchorId: 'other-anchor',
+            hostUnitId: 'host-1',
+            clientX: 20,
+            clientY: 30,
+            button: 0,
+        })).toBe(false);
+        expect(shouldStartFloatDomMoveFromHandle(info as any, {
+            hostAnchorId: 'anchor-1',
+            hostUnitId: 'other-host',
+            clientX: 20,
+            clientY: 30,
+            button: 0,
+        })).toBe(false);
+        expect(shouldStartFloatDomMoveFromHandle(info as any, {
+            hostAnchorId: 'anchor-1',
+            hostUnitId: 'host-1',
+            clientX: 20,
+            clientY: 30,
+            button: 2,
+        })).toBe(false);
+    });
+
+    it('resolves host float dom drag deltas through the scene scale', () => {
+        const dragState = createFloatDomMoveDragState({
+            rect: {
+                left: 100,
+                top: 40,
+            },
+        } as any, {
+            pointerId: 1,
+            clientX: 20,
+            clientY: 30,
+        });
+
+        expect(dragState).toEqual(expect.objectContaining({
+            pointerId: 1,
+            startLeft: 100,
+            startTop: 40,
+        }));
+        expect(resolveFloatDomMoveDragTransform(dragState!, {
+            clientX: 40,
+            clientY: 42,
+        } as any, {
+            getAncestorScale: () => ({ scaleX: 2, scaleY: 3 }),
+        } as any)).toEqual({
+            left: 110,
+            top: 44,
+        });
+    });
+
+    it('removes drawing-backed float doms through the shared remove path', () => {
+        const drawing = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'float-dom-1',
+        };
+        const { service, dispose, disposeRenderObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp, transformer } = createService(drawing);
+
+        service.removeFloatDom('float-dom-1');
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(disposeRenderObject).toHaveBeenCalledTimes(1);
+        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['rect-1']);
+        expect(transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
+        expect(getDrawingByParam).toHaveBeenCalledWith({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'float-dom-1',
+        });
+        expect(getBatchRemoveOp).toHaveBeenCalledWith([drawing]);
+        expect(syncExecuteCommand).toHaveBeenCalledWith(SetDrawingApplyMutation.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            op: ['redo-op'],
+            objects: ['object-1'],
+            type: DrawingApplyType.REMOVE,
+        });
+        expect(service.getFloatDomInfo('float-dom-1')).toBeUndefined();
+    });
+
+    it('removes runtime-only float doms directly', () => {
+        const { service, dispose, disposeRenderObject, syncExecuteCommand, transformer } = createService(null);
+
+        service.removeFloatDom('float-dom-1');
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(disposeRenderObject).toHaveBeenCalledTimes(1);
+        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['rect-1']);
+        expect(transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
+        expect(syncExecuteCommand).not.toHaveBeenCalled();
+        expect(service.getFloatDomInfo('float-dom-1')).toBeUndefined();
+    });
 
     afterEach(() => {
         while (disposables.length > 0) {
@@ -600,7 +1250,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         ]);
 
         fixture.manager.updateFloatDomProps('test', 'sheet1', 'range-card', { fill: '#ff0000' });
-        expect(fixture.manager.getFloatDomInfo('range-card')?.rect.fill).toBe('#ff0000');
+        expect(fixture.manager.getFloatDomInfo('range-card')?.rect.toJson().fill).toBe('#ff0000');
 
         rangeDom.dispose();
         expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeUndefined();
@@ -735,7 +1385,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         }, 'chart-card')!;
 
         const regularRect = fixture.manager.getFloatDomInfo('regular-card')?.rect;
-        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect as { fill?: string; stroke?: string } | undefined;
 
         expect(regularRect).toBeInstanceOf(Rect);
         expect(regularRect).not.toBeInstanceOf(TestChartRect);
@@ -782,7 +1432,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
             height: 72,
         }, 'chart-card')!;
 
-        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect;
+        const chartRect = fixture.manager.getFloatDomInfo('chart-card')?.rect as unknown as { fill?: string; stroke?: string } | undefined;
 
         expect(chartRect?.fill).toBe('#f5ead7');
         expect(chartRect?.stroke).toBe('#111111');
@@ -1181,6 +1831,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         expect(findFloatDom(canvasFloatDomService, 'position-card')).toEqual(expect.objectContaining({
             componentKey: 'PositionCard',
             data: { label: 'Pinned note' },
+            preserveOnFocusChange: false,
             unitId: 'test',
         }));
         findFloatDom(canvasFloatDomService, 'position-card')?.onPointerDown(new MouseEvent('pointerdown'));
@@ -1268,6 +1919,75 @@ describe('SheetCanvasFloatDomManagerService', () => {
         disposable.unsubscribe();
     });
 
+    it('creates the dom binding when the host rect already exists in the scene', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+        const drawingId = 'existing-rect-card';
+        const rectShapeKey = getDrawingShapeKeyByDrawingSearch({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId,
+        });
+
+        fixture.scene.addObject(new Rect(rectShapeKey, {
+            left: 76,
+            top: 30,
+            width: 100,
+            height: 40,
+        }));
+
+        fixture.manager.addFloatDomToPosition({
+            componentKey: 'ExistingRectCard',
+            initPosition: {
+                startX: 76,
+                startY: 30,
+                endX: 176,
+                endY: 70,
+            },
+            data: { label: 'Existing rect' },
+            allowTransform: true,
+        }, drawingId)!;
+        await Promise.resolve();
+
+        expect(findFloatDom(canvasFloatDomService, drawingId)).toEqual(expect.objectContaining({
+            componentKey: 'ExistingRectCard',
+            data: { label: 'Existing rect' },
+            unitId: 'test',
+        }));
+        expect(fixture.manager.getFloatDomInfo(drawingId)?.rect).toBe(fixture.scene.getObject(rectShapeKey));
+    });
+
+    it('preserves embed float dom layers while child units own focus', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+
+        fixture.manager.addFloatDomToPosition({
+            componentKey: 'EmbedCard',
+            initPosition: {
+                startX: 76,
+                startY: 30,
+                endX: 176,
+                endY: 70,
+            },
+            data: {
+                version: 1,
+                embedId: 'embed-doc',
+                hostType: UniverInstanceType.UNIVER_SHEET,
+                childType: UniverInstanceType.UNIVER_DOC,
+                runtimeMountMode: 'stage2',
+            },
+            allowTransform: true,
+        }, 'embed-card')!;
+        await Promise.resolve();
+
+        expect(findFloatDom(canvasFloatDomService, 'embed-card')).toEqual(expect.objectContaining({
+            componentKey: 'EmbedCard',
+            preserveOnFocusChange: true,
+        }));
+    });
+
     it('refreshes float dom position when the sheet viewport scrolls', () => {
         const fixture = setup();
         disposables.push(fixture);
@@ -1311,6 +2031,40 @@ describe('SheetCanvasFloatDomManagerService', () => {
 
         subscription.unsubscribe();
     });
+
+    it('hides worksheet-scoped float doms when another sheet tab becomes active', async () => {
+        const fixture = setup(TWO_SHEET_WORKBOOK_DATA);
+        disposables.push(fixture);
+        fixture.get(LifecycleService).stage = LifecycleStages.Rendered;
+        const canvasFloatDomService = fixture.get(CanvasFloatDomService);
+
+        fixture.manager.addFloatDomToPosition({
+            componentKey: 'SheetScopedCard',
+            initPosition: {
+                startX: 76,
+                startY: 30,
+                endX: 176,
+                endY: 70,
+            },
+            data: { label: 'Sheet scoped' },
+            allowTransform: true,
+        }, 'sheet-scoped-card')!;
+        await Promise.resolve();
+
+        expect(findFloatDom(canvasFloatDomService, 'sheet-scoped-card')).toBeDefined();
+
+        (fixture.manager as unknown as {
+            _syncFloatDomVisibilityForActiveSheet: (unitId: string, activeSubUnitId: string) => void;
+        })._syncFloatDomVisibilityForActiveSheet('test', 'sheet2');
+
+        expect(findFloatDom(canvasFloatDomService, 'sheet-scoped-card')).toBeUndefined();
+
+        (fixture.manager as unknown as {
+            _syncFloatDomVisibilityForActiveSheet: (unitId: string, activeSubUnitId: string) => void;
+        })._syncFloatDomVisibilityForActiveSheet('test', 'sheet1');
+
+        expect(findFloatDom(canvasFloatDomService, 'sheet-scoped-card')).toBeDefined();
+    });
 });
 
 function findFloatDom(canvasFloatDomService: CanvasFloatDomService, id: string): IFloatDom | undefined {
@@ -1319,4 +2073,25 @@ function findFloatDom(canvasFloatDomService: CanvasFloatDomService, id: string):
             return floatDom;
         }
     }
+}
+
+function createStage1FloatDomInfo() {
+    return {
+        runtimeMounted: false,
+        runtimeStage: 'stage1',
+        position$: {
+            getValue: () => ({
+                startX: 100,
+                endX: 420,
+                startY: 80,
+                endY: 260,
+            }),
+        },
+        rect: {
+            left: 1000,
+            top: 800,
+            width: 320,
+            height: 180,
+        },
+    };
 }

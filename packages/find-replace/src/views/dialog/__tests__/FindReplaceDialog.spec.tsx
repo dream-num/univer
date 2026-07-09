@@ -25,12 +25,12 @@ import type {
     IReplaceAllResult,
 } from '../../../services/find-replace.service';
 import { awaitTime, ICommandService, toDisposable } from '@univerjs/core';
-import { ILayoutService, RediContext } from '@univerjs/ui';
+import { ILayoutService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createTestBed, IMessageService } from '../../../__tests__/create-test-bed';
+import { createTestBed } from '../../../__tests__/create-test-bed';
 import {
     ReplaceAllMatchesCommand,
     ReplaceCurrentMatchCommand,

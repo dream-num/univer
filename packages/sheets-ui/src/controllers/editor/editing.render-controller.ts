@@ -233,10 +233,13 @@ export class EditingRenderController extends Disposable {
 
     private _initialCursorSync(d: DisposableCollection) {
         d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-            const currentDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
-            if (!currentDoc) return;
+            const editorId = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
+                ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                : this._editorBridgeService.getCurrentEditorId();
+            const docUnitId = editorId ?? this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+            if (!docUnitId) return;
 
-            const docSelectionRenderManager = this._renderManagerService.getRenderById(currentDoc?.getUnitId())?.with(DocSelectionRenderService);
+            const docSelectionRenderManager = this._renderManagerService.getRenderById(docUnitId)?.with(DocSelectionRenderService);
             if (!docSelectionRenderManager) return;
 
             docSelectionRenderManager.sync();
@@ -421,7 +424,10 @@ export class EditingRenderController extends Disposable {
             return;
         }
 
+        const { unitId, isInArrayFormulaRange = false } = editCellState;
+
         this._commandService.syncExecuteCommand(ScrollToRangeOperation.id, {
+            unitId,
             range: {
                 startRow: editCellState.row,
                 startColumn: editCellState.column,
@@ -431,7 +437,6 @@ export class EditingRenderController extends Disposable {
         });
 
         this._editorBridgeService.refreshEditCellPosition(false);
-        const { unitId, isInArrayFormulaRange = false } = editCellState;
         const editorObject = this._getEditorObject();
 
         if (editorObject == null) {

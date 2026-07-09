@@ -48,6 +48,7 @@ import { SheetDrawingPrintingController } from './controllers/sheet-drawing-prin
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/ui.controller';
+import { touchSheetsDrawingFloatingHostCapabilityWhenReady } from './embed/floating-host';
 import { DrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
@@ -100,9 +101,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [DrawingContextMenuController],
         ]);
 
-        touchDependencies(this._injector, [
-            [SheetCanvasFloatDomManagerService],
-        ]);
+        touchSheetsDrawingFloatingHostCapabilityWhenReady(this._injector);
         this._injector.get(ComponentsController);
     }
 

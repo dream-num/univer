@@ -172,7 +172,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     }
 
     private _getTableMap() {
-        const unitId = this._currentConfigService.getExecuteUnitId();
+        const unitId = this._formulaRuntimeService.currentUnitId;
         if (!unitId) {
             return;
         }

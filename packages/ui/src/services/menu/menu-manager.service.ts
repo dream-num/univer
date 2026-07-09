@@ -293,6 +293,23 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         this.menuChanged$.next();
     }
 
+    createScoped(injector: Injector): IMenuManagerService {
+        const root = this;
+        const createScopedBuilder = () => {
+            const service = new MenuManagerService(injector, root._configService);
+            service._menu = root._menu;
+            return service;
+        };
+
+        return {
+            menuChanged$: root.menuChanged$,
+            mergeMenu: (source: MenuSchemaType, target?: MenuSchemaType) => root.mergeMenu(source, target),
+            appendRootMenu: (source: MenuSchemaType) => root.appendRootMenu(source),
+            getMenuByPositionKey: (position: string) => createScopedBuilder().getMenuByPositionKey(position),
+            getFlatMenuByPositionKey: (position: string) => createScopedBuilder().getFlatMenuByPositionKey(position),
+        };
+    }
+
     private _buildMenuSchema(data: MenuSchemaType): IMenuSchema[] {
         const result: IMenuSchema[] = [];
 

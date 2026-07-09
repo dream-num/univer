@@ -148,17 +148,18 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         }
 
         const dependencies = this._renderDependencies.get(type)!;
-        dependencies.push(...deps);
+        const registeredDeps = deps.filter((dep) => !hasRenderDependency(dependencies, dep));
+        dependencies.push(...registeredDeps);
 
         for (const [_, render] of this._renderMap) {
             const renderType = render.type;
             if (renderType === type) {
-                this._tryAddRenderDependencies(render, deps);
+                this._tryAddRenderDependencies(render, registeredDeps);
             }
         }
 
         return toDisposable(() => {
-            deps.forEach((dep) => remove(dependencies, dep));
+            registeredDeps.forEach((dep) => remove(dependencies, dep));
         });
     }
 
@@ -173,6 +174,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         }
 
         const dependencies = this._renderDependencies.get(type)!;
+        if (hasRenderDependency(dependencies, depCtor)) {
+            return toDisposable(() => {});
+        }
+
         dependencies.push(depCtor);
 
         for (const [_, render] of this._renderMap) {
@@ -215,7 +220,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @returns renderUnit:IRender
      */
     createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender {
-        const renderer = this._createRender(unitId, this._injector.createInstance(Engine, unitId, undefined), true, createUnitOptions);
+        const parentInjector = createUnitOptions?.renderParentInjector ?? this._injector;
+        const renderer = this._createRender(unitId, parentInjector.createInstance(Engine, unitId, undefined), createUnitOptions?.embeddedRender !== true, createUnitOptions, parentInjector);
         this._renderCreated$.next(renderer);
         return renderer;
     }
@@ -250,7 +256,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param isMainScene
      * @returns renderUnit:IRender
      */
-    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions): IRender {
+    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions, parentInjector: Injector = this._injector): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
 
@@ -277,7 +283,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             const type = this._univerInstanceService.getUnitType(unitId);
             const ctorOfDeps = this._getRenderDepsByType(type);
 
-            renderUnit = this._injector.createInstance(RenderUnit, {
+            renderUnit = parentInjector.createInstance(RenderUnit, {
                 unit,
                 engine,
                 scene,
@@ -286,8 +292,17 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             });
             this._addRenderUnit(unitId, renderUnit);
 
-            // init deps
-            this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
+            try {
+                // init deps
+                this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
+            } catch (error) {
+                try {
+                    this._disposeItem(renderUnit);
+                } finally {
+                    this._renderMap.delete(unitId);
+                }
+                throw error;
+            }
         } else {
             // For slide pages
             renderUnit = {
@@ -370,6 +385,25 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
         this._renderDisposed$.next(item.unitId);
     }
+}
+
+function hasRenderDependency(dependencies: Dependency[], dep: Dependency): boolean {
+    const identifier = getRenderDependencyIdentifier(dep);
+    const key = getRenderDependencyIdentifierKey(identifier);
+    return dependencies.some((registered) => getRenderDependencyIdentifierKey(getRenderDependencyIdentifier(registered)) === key);
+}
+
+function getRenderDependencyIdentifier(dep: Dependency): DependencyIdentifier<unknown> {
+    return (Array.isArray(dep) ? dep[0] : dep) as DependencyIdentifier<unknown>;
+}
+
+function getRenderDependencyIdentifierKey(identifier: DependencyIdentifier<unknown>): DependencyIdentifier<unknown> | string {
+    const decoratorName = (identifier as unknown as { decoratorName?: unknown }).decoratorName;
+    if (typeof decoratorName === 'string' && decoratorName) {
+        return `identifier:${decoratorName}`;
+    }
+
+    return identifier;
 }
 
 export const IRenderManagerService = createIdentifier<IRenderManagerService>('engine-render.render-manager.service');

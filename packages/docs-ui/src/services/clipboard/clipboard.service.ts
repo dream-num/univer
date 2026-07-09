@@ -76,7 +76,12 @@ HtmlToUDMService.use(WordPastePlugin);
 
 export interface IClipboardPropertyItem { }
 
+export interface IDocClipboardCopyDocDataContext {
+    sourceDocuments: IDocumentData[];
+}
+
 export interface IDocClipboardHook {
+    onCopyDocData?(doc: Partial<IDocumentData>, context: IDocClipboardCopyDocDataContext): Partial<IDocumentData>;
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number): string;
     onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
@@ -394,6 +399,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         if (internalDocData) {
+            internalDocData = this._applyCopyDocDataHooks(internalDocData, documentList);
             internalJson = createInternalClipboardFragment(internalDocData);
             html = embedInternalClipboardFragment(html, internalJson);
         }
@@ -413,6 +419,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 this._clipboardHooks.splice(index, 1);
             }
         });
+    }
+
+    private _applyCopyDocDataHooks(doc: Partial<IDocumentData>, sourceDocuments: IDocumentData[]): Partial<IDocumentData> {
+        return this._clipboardHooks.reduce((currentDoc, hook) => {
+            return hook.onCopyDocData?.(currentDoc, { sourceDocuments }) ?? currentDoc;
+        }, doc);
     }
 
     private _getDocumentBodyInRanges(sliceType: SliceBodyType, ranges?: ITextRangeWithStyle[]) {

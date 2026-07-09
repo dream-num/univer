@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum } from '@univerjs/core';
+import type { DrawingTypeEnum, ITextRangeParam } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 
 export interface IInsertDrawingCommandParams {
     unitId: string;
     drawings: IDocDrawing[];
+    textRange?: ITextRangeParam;
 }
 
 export interface IDeleteDrawingCommandParam {

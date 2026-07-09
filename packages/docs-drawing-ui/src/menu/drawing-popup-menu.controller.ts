@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
@@ -28,6 +29,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
@@ -52,6 +54,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextService private readonly _contextService: IContextService,
+        @IDocDrawingAdapterService private readonly _drawingAdapterService: IDocDrawingAdapterService,
         @ICommandService private readonly _commandService: ICommandService
 
     ) {
@@ -240,13 +243,18 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     }
 
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
+        const drawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IDocDrawing | null;
+        const editCommandInfo = drawing
+            ? this._drawingAdapterService.getEditDrawingCommandInfo({ unitId, subUnitId, drawing })
+            : null;
+
         return [
             {
-                label: 'docs-drawing-ui.image-popup.edit',
+                label: editCommandInfo?.label ?? 'docs-drawing-ui.image-popup.edit',
                 index: 0,
-                commandId: EditDocDrawingOperation.id,
-                commandParams: { unitId, subUnitId, drawingId },
-                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
+                commandId: editCommandInfo?.commandId ?? EditDocDrawingOperation.id,
+                commandParams: editCommandInfo?.commandParams ?? { unitId, subUnitId, drawingId },
+                disable: editCommandInfo?.disable ?? drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
                 label: 'docs-drawing-ui.image-popup.delete',

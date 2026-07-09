@@ -16,10 +16,13 @@
 
 import type {
     DocumentDataModel,
+    IAccessor,
     ICommand,
     ICustomTable,
+    IDisposable,
     IDocumentBody,
     IDocumentData,
+    IDrawingParam,
     IMutationInfo,
     ITextRange,
     JSONXActions,
@@ -33,6 +36,7 @@ import {
     generateRandomId,
     getRichTextEditPath,
     ICommandService,
+    IUndoRedoService,
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
@@ -44,6 +48,8 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
+import type { IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import { IDocClipboardPasteAdapterService } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -94,8 +100,10 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     handler: async (accessor, params: IInnerPasteCommandParams) => {
         const { segmentId, textRanges, doc } = params;
         const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const pasteAdapterService = getPasteAdapterService(accessor);
         const selections = docSelectionManagerService.getTextRanges();
         const rectRanges = docSelectionManagerService.getRectRanges();
         const { body, tableSource, drawings } = doc;
@@ -126,6 +134,9 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
+        const resourceRedoMutations: IMutationInfo[] = [];
+        const resourceUndoMutations: IMutationInfo[] = [];
+        const resourceMutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }> = [];
 
         const hasTable = !!body.tables?.length;
         const hasCustomBlock = !!body.customBlocks?.length;
@@ -173,6 +184,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
             if (hasCustomBlock && drawings) {
                 const drawingLen = docDataModel.getSnapshot().drawingsOrder?.length ?? 0;
+                const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
 
                 for (const block of cloneBody.customBlocks!) {
                     const { blockId } = block;
@@ -181,15 +193,42 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
                     block.blockId = drawingId;
 
-                    const drawing = Tools.deepClone(drawings[blockId]);
+                    const sourceDrawing = drawings[blockId] as IDrawingParam;
+                    const drawing = Tools.deepClone(sourceDrawing) as IDrawingParam;
                     drawing.drawingId = drawingId;
 
-                    const action = jsonX.insertOp(['drawings', drawingId], drawing);
-                    const orderAction = jsonX.insertOp(['drawingsOrder', drawingLen], drawingId);
+                    customBlockMappings.push({
+                        sourceBlockId: blockId,
+                        targetBlockId: drawingId,
+                        sourceDrawing,
+                        targetDrawing: drawing,
+                    });
+                }
+
+                if (customBlockMappings.length > 0 && pasteAdapterService) {
+                    const mutationInfos = pasteAdapterService.getPasteMutationInfos({
+                        unitId,
+                        segmentId,
+                        doc,
+                        sourceBody: body,
+                        targetBody: cloneBody,
+                        customBlockMappings,
+                    });
+
+                    if (mutationInfos.redoMutations.length > 0 || mutationInfos.undoMutations.length > 0) {
+                        resourceRedoMutations.push(...mutationInfos.redoMutations);
+                        resourceUndoMutations.push(...mutationInfos.undoMutations);
+                        resourceMutationGroups.push(mutationInfos);
+                    }
+                }
+
+                customBlockMappings.forEach(({ targetBlockId, targetDrawing }) => {
+                    const action = jsonX.insertOp(['drawings', targetBlockId], targetDrawing);
+                    const orderAction = jsonX.insertOp(['drawingsOrder', drawingLen], targetBlockId);
 
                     rawActions.push(action!);
                     rawActions.push(orderAction!);
-                }
+                });
             }
 
             const customRange = getCustomRangeAtPosition(originBody.customRanges ?? [], endOffset, UNITS.includes(unitId));
@@ -235,14 +274,80 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return JSONX.compose(acc, cur as JSONXActions);
         }, null as JSONXActions);
 
+        if (!executeResourceMutationGroups(resourceMutationGroups, commandService)) {
+            return false;
+        }
+
+        const historyId = `doc-paste-resource:${unitId}:${Date.now()}`;
+        let batchingDisposable: IDisposable | null = null;
+        if (resourceRedoMutations.length > 0 || resourceUndoMutations.length > 0) {
+            batchingDisposable = undoRedoService.__tempBatchingUndoRedo(unitId);
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                redoMutations: resourceRedoMutations,
+                undoMutations: resourceUndoMutations,
+                id: historyId,
+            });
+        }
+
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        if (!result && batchingDisposable != null) {
+            batchingDisposable.dispose();
+            undoRedoService.rollback(historyId, unitId);
+            return false;
+        }
+
+        batchingDisposable?.dispose();
         return Boolean(result);
     },
 };
+
+function getPasteAdapterService(accessor: IAccessor) {
+    try {
+        return accessor.get(IDocClipboardPasteAdapterService);
+    } catch {
+        return null;
+    }
+}
+
+function executeResourceMutationGroups(
+    mutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }>,
+    commandService: ICommandService
+): boolean {
+    const executedUndoGroups: IMutationInfo[][] = [];
+
+    for (const mutationGroup of mutationGroups) {
+        const result = executeMutations(mutationGroup.redoMutations, commandService);
+        if (!result) {
+            executeMutationGroups([...executedUndoGroups].reverse(), commandService);
+            return false;
+        }
+
+        executedUndoGroups.push(mutationGroup.undoMutations);
+    }
+
+    return true;
+}
+
+function executeMutationGroups(mutationGroups: IMutationInfo[][], commandService: ICommandService): void {
+    mutationGroups.forEach((mutations) => {
+        executeMutations(mutations, commandService);
+    });
+}
+
+function executeMutations(mutations: IMutationInfo[], commandService: ICommandService): boolean {
+    for (const mutation of mutations) {
+        if (!commandService.syncExecuteCommand(mutation.id, mutation.params)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 // TODO: WORKAROUND to fix https://github.com/dream-num/univer-pro/issues/2560.
 function adjustSelectionByTable(selection: ITextRange, tables: ICustomTable[]): ITextRange {

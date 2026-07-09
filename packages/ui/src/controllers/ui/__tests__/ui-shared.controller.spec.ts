@@ -96,6 +96,7 @@ describe('SingleUnitUIController', () => {
         const instanceService = {
             focused$,
             getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'render-3' })),
+            getUnitCreateOptions: vi.fn(() => null),
         };
 
         const lifecycleService = {
@@ -147,6 +148,67 @@ describe('SingleUnitUIController', () => {
         expect(clearTimeoutSpy).toHaveBeenCalled();
     });
 
+    it('should not mount embedded renderers into the global workbench content', async () => {
+        vi.useFakeTimers();
+
+        const layoutService = {
+            registerRootContainerElement: vi.fn(() => ({ dispose: vi.fn() })),
+            registerContentElement: vi.fn(() => ({ dispose: vi.fn() })),
+        };
+
+        const focused$ = new Subject<string>();
+        const created$ = new Subject<any>();
+        const normalRender = createRenderer('normal-render');
+        const embeddedRender = createRenderer('embedded-render');
+        const rendererMap = new Map<string, any>([
+            ['normal-render', normalRender],
+            ['embedded-render', embeddedRender],
+        ]);
+
+        const renderManagerService = {
+            getRenderAll: vi.fn(() => rendererMap),
+            getRenderById: vi.fn((id: string) => rendererMap.get(id)),
+            created$,
+            disposed$: new Subject<string>(),
+        };
+
+        const instanceService = {
+            focused$,
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'embedded-render' })),
+            getUnitCreateOptions: vi.fn((unitId: string) => unitId === 'embedded-render' ? { embeddedRender: true } : null),
+        };
+
+        const lifecycleService = {
+            onStage: vi.fn().mockResolvedValue(undefined),
+            stage: LifecycleStages.Starting,
+        };
+
+        const controller = new TestSingleUnitUIController(
+            {} as any,
+            instanceService,
+            layoutService,
+            lifecycleService,
+            renderManagerService,
+            document.createElement('div'),
+            document.createElement('div')
+        );
+
+        controller.runBootstrap();
+
+        await controller.callbackPromise;
+        vi.advanceTimersByTime(300);
+
+        expect(normalRender.engine.mount).toHaveBeenCalledTimes(1);
+        expect(embeddedRender.engine.mount).not.toHaveBeenCalled();
+
+        focused$.next('embedded-render');
+        expect(normalRender.engine.unmount).not.toHaveBeenCalled();
+        expect(embeddedRender.engine.mount).not.toHaveBeenCalled();
+
+        created$.next({ unitId: 'embedded-render' });
+        expect(embeddedRender.engine.mount).not.toHaveBeenCalled();
+    });
+
     it('should ignore LifecycleUnreachableError during bootstrap callback', async () => {
         const layoutService = {
             registerRootContainerElement: vi.fn(() => ({ dispose: vi.fn() })),
@@ -158,6 +220,7 @@ describe('SingleUnitUIController', () => {
             {
                 focused$: new Subject<string>(),
                 getFocusedUnit: vi.fn(() => null),
+                getUnitCreateOptions: vi.fn(() => null),
             },
             layoutService,
             {

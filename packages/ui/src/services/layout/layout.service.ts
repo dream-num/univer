@@ -28,6 +28,7 @@ import {
     Workbook,
 } from '@univerjs/core';
 import { fromEvent } from 'rxjs';
+import { isEmbedBoundaryTarget } from '../../utils/embed-boundary';
 
 type FocusHandlerFn = (unitId: string) => void;
 
@@ -175,8 +176,22 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
 
-                if (this._rootContainerElement?.contains(target) && givingBackFocusElements.some((item) => target.dataset.uComp === item)) {
-                    queueMicrotask(() => this.focus());
+                if (
+                    this._rootContainerElement?.contains(target) &&
+                    givingBackFocusElements.some((item) => target.dataset.uComp === item) &&
+                    !isEmbedBoundaryTarget(target)
+                ) {
+                    queueMicrotask(() => {
+                        const targetUnitId = getFocusUnitIdFromElement(target);
+                        if (targetUnitId && this._univerInstanceService.getUnit(targetUnitId)) {
+                            this._univerInstanceService.focusUnit(targetUnitId);
+                        }
+
+                        this.focus();
+                        this._isFocused = true;
+                        this._contextService.setContextValue(FOCUSING_UNIVER, this._isFocused);
+                        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR, getFocusingUniverEditorStatus());
+                    });
                     return;
                 }
 
@@ -199,4 +214,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
 function getFocusingUniverEditorStatus(): boolean {
     return (document.activeElement as HTMLElement)?.dataset.uComp === 'editor';
+}
+
+function getFocusUnitIdFromElement(target: HTMLElement): string | undefined {
+    return target.dataset.uUnitId;
 }

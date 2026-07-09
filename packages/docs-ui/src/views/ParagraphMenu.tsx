@@ -97,8 +97,6 @@ import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service';
 
-export { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from './paragraph-menu/component-keys';
-
 export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 212, viewportPadding = 8): 'left' | 'right' {
     return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
 }

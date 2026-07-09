@@ -29,6 +29,7 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -36,6 +37,7 @@ import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerj
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -49,7 +51,9 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @Optional(IDocEmbedInteractionBoundaryService) _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -103,6 +107,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                         return;
                     }
 
+                    if (!isInternalEditorID(this._context.unitId) && this._isEmbedChildInteractionActive(this._context.unitId)) {
+                        return;
+                    }
+
                     this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params, {
                         unitId: this._context.unitId,
                         subUnitId: this._context.unitId,
@@ -131,12 +139,16 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
+            if (this._isEmbedInteractionEvent(evt, unitId)) {
+                return;
+            }
 
             // FIXME:@Jocs: editor status should not be coupled with the instance service.
             const docDataModel = this._instanceSrv.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
             if (docDataModel?.getUnitId() !== unitId) {
                 this._instanceSrv.setCurrentUnitForType(unitId);
             }
+            this._instanceSrv.focusUnit(unitId);
 
             const skeleton = this._docSkeletonManagerService.getSkeleton();
             const { offsetX, offsetY } = evt;
@@ -195,12 +207,18 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
+            if (this._isEmbedInteractionEvent(evt, unitId)) {
+                return;
+            }
 
             this._docSelectionRenderService.__handleDblClick(evt);
         }));
 
         this.disposeWithMe(document.onTripleClick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
+                return;
+            }
+            if (this._isEmbedInteractionEvent(evt, unitId)) {
                 return;
             }
 
@@ -236,6 +254,31 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         this._editorService.focus(unitId);
     }
 
+    private _isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent, unitId: string): boolean {
+        if (isInternalEditorID(unitId)) {
+            return false;
+        }
+
+        const target = (evt as Event).target;
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitRuntimeEvent(unitId, target, evt as Event)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(unitId)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId, target, evt as Event)) {
+            return true;
+        }
+
+        return isEmbedInteractionEvent(evt);
+    }
+
+    private _isEmbedChildInteractionActive(unitId: string): boolean {
+        return this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId) === true;
+    }
+
     private _commandExecutedListener() {
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
@@ -247,6 +290,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 const unitId = this._docSelectionManagerService.__getCurrentSelection()?.unitId;
 
                 if (documentId !== unitId) {
+                    return;
+                }
+
+                if (this._isEmbedChildInteractionActive(documentId)) {
                     return;
                 }
 
@@ -268,6 +315,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             // and can be set to the previous cursor position in the future.
             // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
             if (!isInternalEditor) {
+                if (this._isEmbedChildInteractionActive(unitId)) {
+                    return;
+                }
+
                 //TODO: @JOCS Only for docs. move to docs in the future.
                 this._docSelectionRenderService.focus();
                 const docDataModel = this._context.unit;
@@ -286,4 +337,48 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             }
         }));
     }
+}
+
+function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
+    const target = (evt as Event).target;
+    if (typeof Element !== 'undefined' && target instanceof Element && target.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
+        return true;
+    }
+
+    if (typeof document === 'undefined') {
+        return false;
+    }
+
+    const point = getEventClientPoint(evt, target);
+    const clientX = point?.clientX;
+    const clientY = point?.clientY;
+    if (typeof clientX !== 'number' || typeof clientY !== 'number' || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
+        return false;
+    }
+
+    if (typeof document.elementFromPoint !== 'function') {
+        return false;
+    }
+
+    return document.elementFromPoint(clientX, clientY)?.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
+}
+
+function getEventClientPoint(evt: IPointerEvent | IMouseEvent, target: EventTarget | null): { clientX: number; clientY: number } | undefined {
+    if (Number.isFinite(evt.clientX) && Number.isFinite(evt.clientY)) {
+        return { clientX: evt.clientX, clientY: evt.clientY };
+    }
+
+    if (typeof Element !== 'undefined' && target instanceof Element && Number.isFinite(evt.offsetX) && Number.isFinite(evt.offsetY)) {
+        const rect = target.getBoundingClientRect();
+        return {
+            clientX: rect.left + evt.offsetX,
+            clientY: rect.top + evt.offsetY,
+        };
+    }
+
+    if (Number.isFinite(evt.x) && Number.isFinite(evt.y)) {
+        return { clientX: evt.x, clientY: evt.y };
+    }
+
+    return undefined;
 }

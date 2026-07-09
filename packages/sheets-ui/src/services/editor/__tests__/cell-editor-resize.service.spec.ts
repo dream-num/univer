@@ -42,6 +42,7 @@ import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets'
 import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EditorBridgeService, IEditorBridgeService } from '../../editor-bridge.service';
+import { EmbedFloatingGeometryService } from '../../sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { CellEditorManagerService, ICellEditorManagerService } from '../cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../cell-editor-resize.service';
@@ -141,6 +142,14 @@ class TestUniverInstanceService {
     getCurrentUnitOfType(type: UniverInstanceType) {
         return type === UniverInstanceType.UNIVER_SHEET
             ? { getUnitId: () => 'unit-1' }
+            : null;
+    }
+}
+
+class TestUniverInstanceServiceWithDifferentCurrent extends TestUniverInstanceService {
+    override getCurrentUnitOfType(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SHEET
+            ? { getUnitId: () => 'host-or-other-sheet' }
             : null;
     }
 }
@@ -367,6 +376,84 @@ describe('SheetCellEditorResizeService', () => {
         const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
         expect(editorManager.getState()).toEqual(expect.objectContaining({
             endX: 250,
+            show: true,
+        }));
+    });
+
+    it('positions embedded sheet editors against the child content root', async () => {
+        vi.stubGlobal('window', new EventTarget());
+        vi.stubGlobal('document', { activeElement: { dataset: {} } });
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([ThemeService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([EmbedFloatingGeometryService]);
+        injector.add([SheetCellEditorResizeService]);
+        const geometryService = injector.get(EmbedFloatingGeometryService);
+        geometryService.register({
+            embedId: 'embed-1',
+            childUnitId: 'unit-1',
+            root: {} as HTMLElement,
+            contentRoot: {
+                getBoundingClientRect: () => ({ left: 30, top: 50 }),
+            } as HTMLElement,
+        });
+
+        injector.get(SheetCellEditorResizeService).fitTextSize();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        expect(editorManager.getState()).toEqual(expect.objectContaining({
+            startX: 120,
+            startY: 90,
+            endX: 250,
+            endY: 134,
+            show: true,
+        }));
+    });
+
+    it('uses the editing unit renderer even when the current sheet unit is different', async () => {
+        vi.stubGlobal('window', new EventTarget());
+        vi.stubGlobal('document', { activeElement: { dataset: {} } });
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceServiceWithDifferentCurrent as never }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([ThemeService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([SheetCellEditorResizeService]);
+
+        injector.get(SheetCellEditorResizeService).fitTextSize();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        expect(editorManager.getState()).toEqual(expect.objectContaining({
+            startX: 120,
+            startY: 90,
+            endX: 250,
+            endY: 134,
             show: true,
         }));
     });

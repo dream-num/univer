@@ -51,6 +51,7 @@ function createService() {
         setExecuteSubUnitId: vi.fn(),
         getDirtyData: vi.fn(() => ({})),
         getDirtyDefinedNameMap: vi.fn(() => ({})),
+        getExecuteUnitId: vi.fn(() => 'unit'),
     };
     const runtimeService = {
         setFormulaExecuteStage: vi.fn(),
@@ -121,6 +122,7 @@ function createService() {
         setExecuteSubUnitId = currentConfigService.setExecuteSubUnitId;
         getDirtyData = currentConfigService.getDirtyData;
         getDirtyDefinedNameMap = currentConfigService.getDirtyDefinedNameMap;
+        getExecuteUnitId = currentConfigService.getExecuteUnitId;
     }
 
     class TestRuntimeService {

@@ -19,5 +19,6 @@ import './f-univer';
 export { FDocument } from './f-document';
 export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
 export type { IFDocumentParagraphInfo } from './f-document-paragraph';
+export type { FDocEmbedUnitFacadeMapAugmentation } from './f-types';
 export type { IFDocumentTextRange } from './utils';
 export { stripBlockTokens } from './utils';

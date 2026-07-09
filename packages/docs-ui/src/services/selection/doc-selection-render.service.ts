@@ -33,11 +33,12 @@ import type {
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
+import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -140,11 +141,18 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     get isFocusing() {
-        return this._input === document.activeElement;
+        return this._input === this._getOwnerDocument().activeElement;
     }
 
     get canFocusing() {
-        return this.isFocusing || document.activeElement === document.body || document.activeElement === null;
+        const ownerDocument = this._getOwnerDocument();
+        const activeElement = ownerDocument.activeElement;
+        return !this._shouldPreserveExternalFocus() && (
+            this.isFocusing ||
+            activeElement === ownerDocument.body ||
+            activeElement === null ||
+            (activeElement instanceof HTMLElement && this._containsCurrentEmbedRuntimeElement(activeElement))
+        );
     }
 
     constructor(
@@ -152,7 +160,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ILogService private readonly _logService: ILogService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Optional(IDocEmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
         this._initDOM();
@@ -372,16 +382,19 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._container.style.top = `${top}px`;
         this._container.style.zIndex = '1000';
 
-        if (this.canFocusing || force) {
+        if ((force && !this._shouldPreserveExternalFocus()) || (!force && this.canFocusing)) {
             this.focus();
         }
     }
 
     hasFocus(): boolean {
-        return document.activeElement === this._input;
+        return this._getOwnerDocument().activeElement === this._input;
     }
 
     focus(): void {
+        if (!this._input.hasAttribute('tabindex')) {
+            this._input.tabIndex = -1;
+        }
         this._input.focus();
     }
 
@@ -764,6 +777,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
+    private _getOwnerDocument(): Document {
+        return this._container?.ownerDocument ?? document;
+    }
+
     private _getNodePosition(node: Nullable<INodeInfo>): Nullable<INodePosition> {
         if (node == null) {
             return;
@@ -982,6 +999,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const anchor = activeRangeInstance?.getAnchor();
 
         if (!anchor || (anchor && !anchor.visible) || this.activeViewPort == null) {
+            if (this._shouldPreserveExternalFocus()) {
+                return;
+            }
             this.focus();
             return;
         }
@@ -1178,10 +1198,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _initInputEvents() {
         this.disposeWithMe(
             fromEvent(this._input, 'keydown').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 if (this._isIMEInputApply) {
                     return;
                 }
 
+                this._stopEmbedOwnedEditorShortcutPropagation(e);
                 this._eventHandle(e, (config) => {
                     this._onKeydown$.next(config);
                 });
@@ -1190,6 +1214,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'input').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 // Prevent input when there is any rect ranges.
                 if ((e as InputEvent).inputType === 'historyUndo' || (e as InputEvent).inputType === 'historyRedo') {
                     return;
@@ -1212,6 +1239,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'compositionstart').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 // Prevent input when there is any rect ranges.
                 if (this._rectRangeList.length > 0) {
                     e.stopPropagation();
@@ -1228,6 +1258,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'compositionend').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 this._isIMEInputApply = false;
 
                 this._eventHandle(e, (config) => {
@@ -1238,6 +1271,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'compositionupdate').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 this._eventHandle(e, (config) => {
                     this._onInputBefore$.next(config);
                     this._onCompositionupdate$.next(config);
@@ -1247,6 +1283,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'paste').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 this._eventHandle(e, (config) => {
                     this._onPaste$.next(config);
                 });
@@ -1255,6 +1294,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'focus').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 this._eventHandle(e, (config) => {
                     this._onFocus$.next(config);
                 });
@@ -1271,6 +1313,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.disposeWithMe(
             fromEvent(this._input, 'blur').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
                 this._eventHandle(e, (config) => {
                     this._onBlur$.next(config);
                 });
@@ -1292,6 +1337,52 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             activeRange,
             rangeList,
         });
+    }
+
+    private _shouldSuppressHostHiddenEditorEvent(event: Event): boolean {
+        const unitId = this._context.unitId;
+        if (isInternalEditorID(unitId)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitRuntimeEvent(unitId, event.target, event)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(unitId)) {
+            return false;
+        }
+
+        if (event.target instanceof HTMLElement && this._containsCurrentEmbedRuntimeElement(event.target)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId, event.target, event)) {
+            event.stopPropagation();
+            if (event.cancelable) {
+                event.preventDefault();
+            }
+            if (event.type === 'focus' && event.target instanceof HTMLElement) {
+                event.target.blur();
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private _stopEmbedOwnedEditorShortcutPropagation(event: Event): void {
+        if (!(event instanceof KeyboardEvent) || !this._getCurrentEmbedOwner()) {
+            return;
+        }
+
+        const key = event.key.toLowerCase();
+        const isSelectAllShortcut = key === 'a' && (event.metaKey || event.ctrlKey);
+        if (!isSelectAllShortcut) {
+            return;
+        }
+
+        event.stopPropagation();
     }
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {
@@ -1336,6 +1427,93 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
 
         return nodeInfo;
+    }
+
+    private _shouldPreserveExternalFocus(): boolean {
+        const ownerDocument = this._getOwnerDocument();
+        const activeElement = ownerDocument.activeElement;
+        const currentEmbedOwner = this._getCurrentEmbedOwner();
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.isChildUnitRuntimeEvent(this._context.unitId, activeElement)) {
+            return false;
+        }
+
+        if (activeElement instanceof HTMLElement && this._containsOwnEditorElement(activeElement)) {
+            return false;
+        }
+
+        if (activeElement instanceof HTMLElement && this._containsCurrentEmbedRuntimeElement(activeElement)) {
+            return false;
+        }
+
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(this._context.unitId, activeElement)) {
+            return true;
+        }
+
+        if (currentEmbedOwner && this._embedInteractionBoundaryService?.contains(currentEmbedOwner, activeElement)) {
+            return true;
+        }
+
+        if (activeElement instanceof HTMLElement && this._containsCurrentLayoutElement(activeElement)) {
+            return false;
+        }
+
+        return this._embedInteractionBoundaryService?.hasRecentInteractionFor?.(currentEmbedOwner, ownerDocument) === true;
+    }
+
+    private _containsCurrentEmbedRuntimeElement(element: HTMLElement): boolean {
+        const currentEmbedOwner = this._getCurrentEmbedOwner();
+        if (!currentEmbedOwner) {
+            return false;
+        }
+
+        const activeEmbedOwner = this._getElementEmbedOwner(element);
+        return activeEmbedOwner === currentEmbedOwner && this._containsCurrentLayoutElement(element);
+    }
+
+    private _getCurrentEmbedOwner(): string | undefined {
+        const rootContainerElement = this._layoutService?.rootContainerElement;
+        return this._getElementEmbedOwner(this._input) ??
+            this._getElementEmbedOwner(this._container) ??
+            this._getElementEmbedOwner(rootContainerElement instanceof HTMLElement ? rootContainerElement : undefined);
+    }
+
+    private _getElementEmbedOwner(element: HTMLElement | null | undefined): string | undefined {
+        if (!element || typeof element.closest !== 'function') {
+            return undefined;
+        }
+
+        return element.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`)?.getAttribute(DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE) ?? undefined;
+    }
+
+    private _containsOwnEditorElement(element: HTMLElement): boolean {
+        return this._container === element ||
+            this._input === element ||
+            (typeof this._container?.contains === 'function' && this._container.contains(element)) ||
+            (typeof this._inputParent?.contains === 'function' && this._inputParent.contains(element));
+    }
+
+    private _containsCurrentLayoutElement(element: HTMLElement): boolean {
+        const layoutService = this._layoutService as (ILayoutService & {
+            checkElementInCurrentContainers?: (element: HTMLElement) => boolean;
+        }) | undefined;
+        if (!layoutService) {
+            return this._container === element || (
+                typeof this._container?.contains === 'function' && this._container.contains(element)
+            );
+        }
+        if (layoutService.checkElementInCurrentContainers?.(element)) {
+            return true;
+        }
+
+        const root = layoutService.rootContainerElement;
+        return root === element ||
+            root?.contains(element) === true ||
+            this._container === element ||
+            (typeof this._container?.contains === 'function' && this._container.contains(element));
     }
 
     private _detachEvent() {

@@ -255,11 +255,12 @@ export function FormulaBar(props: IProps) {
 
     const handlePointerDown = () => {
         try {
+            contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+
             // When clicking on the formula bar, the cell editor also needs to enter the edit state
             const visibleState = editorBridgeService.isVisible();
             if (visibleState.visible === false) {
                 if (editorActivationDisable) {
-                    contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
                     editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
                     return;
                 }
@@ -274,15 +275,13 @@ export function FormulaBar(props: IProps) {
                 );
                 // cancel by event
                 if (!result) {
+                    contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
                     shouldSkipFocus.current = true;
-                    return;
                 }
                 // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
-
-            // Open the normal editor first, and then we mark formula editor as activated.
-            contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
         } catch (e) {
+            contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
             shouldSkipFocus.current = true;
             throw e;
         }

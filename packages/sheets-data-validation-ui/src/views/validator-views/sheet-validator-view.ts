@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { DataValidatorDropdownType, IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { Inject, Injector } from '@univerjs/core';
-import { LIST_FORMULA_INPUT_NAME } from '../components/formula-input';
+import { LIST_FORMULA_INPUT_NAME } from '@univerjs/sheets-data-validation';
 
 /**
  * This is the base class for all sheet data validator views. It is used to extend {@link BaseDataValidator}.

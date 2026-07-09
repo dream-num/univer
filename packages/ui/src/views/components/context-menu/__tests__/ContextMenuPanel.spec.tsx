@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { IValueOption } from '../../../../services/menu/menu';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -25,7 +25,7 @@ import { ComponentManager, IconManager } from '../../../../common';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { RediContext } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import {
     CONTEXT_MENU_SUBMENU_CLOSE_DELAY,
     CONTEXT_MENU_SUBMENU_PORTAL_ATTR,
@@ -89,7 +89,7 @@ class TestState {
     }
 }
 
-function createContextMenuInjector() {
+function createContextMenuTestInjector() {
     const injector = new Injector();
     injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
@@ -113,17 +113,14 @@ function renderWithDependencies(
     menuMap: Record<string, IMenuSchema[]>,
     setupInjector?: (injector: Injector) => void
 ) {
-    const injector = createContextMenuInjector();
+    const injector = createContextMenuTestInjector();
     setupInjector?.(injector);
     const menuManagerService = injector.get(IMenuManagerService) as unknown as TestMenuManagerService;
 
     Object.entries(menuMap).forEach(([position, menus]) => menuManagerService.setMenus(position, menus));
 
-    return render(
-        <RediContext.Provider value={{ injector }}>
-            {element}
-        </RediContext.Provider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
+    return render(<ConnectedTestRoot />);
 }
 
 function createButtonItem(

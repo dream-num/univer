@@ -201,6 +201,24 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._initMoving();
     }
 
+    override dispose(): void {
+        if (this._disposed) {
+            return;
+        }
+
+        this._clearUpdatingListeners();
+        this._reset();
+        this._escapeShortcutDisposable?.dispose();
+        this._escapeShortcutDisposable = null;
+
+        this._controlFillConfig$.complete();
+        this._selectionMoveEnd$.complete();
+        this._selectionMoving$.complete();
+        this._selectionMoveStart$.complete();
+
+        super.dispose();
+    }
+
     /**
      * If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
      */

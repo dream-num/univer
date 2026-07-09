@@ -567,7 +567,13 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
-            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top, affectNonInlineDrawings);
+            updateInlineDrawingPosition(
+                line,
+                affectInlineDrawings,
+                ctx.dataModel.getUnitId?.() ?? '',
+                drawingAnchor?.top,
+                affectNonInlineDrawings
+            );
         }
 
         const paragraphStyle = paragraphConfig?.paragraphStyle;

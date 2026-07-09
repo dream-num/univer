@@ -19,7 +19,7 @@ import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeT
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../views/ParagraphMenu';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../views/paragraph-menu/component-keys';
 import {
     getPreferredParagraphBoundsInRange,
     getTableBlockMenuHoverRect,

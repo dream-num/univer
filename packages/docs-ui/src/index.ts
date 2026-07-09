@@ -140,13 +140,25 @@ export { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-rat
 export type { ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
 export { getCommandSkeleton } from './commands/util';
 export type { DocFitAlign, DocFitMode, DocFitTarget, IDocFitToWidthOptions, IUniverDocsUIConfig } from './config/config';
-export { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS } from './config/config';
+export { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export {
     DocParagraphPlaceholderRenderController,
 } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export { DocUIController } from './controllers/ui.controller';
+export {
+    createDefaultDocsTableLikeCustomBlockBleedViewport,
+    resolveDocsTableLikeCustomBlockBleedViewport,
+    resolveDocsTableLikeCustomBlockContentHeight,
+    resolveDocsTableLikeCustomBlockContentWidth,
+} from './embed-docs-custom-block-bleed';
+export type { IDocsCustomBlockBleedViewport, IDocsCustomBlockBleedViewportHint } from './embed-docs-custom-block-bleed';
+export { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
+export { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
+export type { IDocsTableLikeCustomBlockScrollOptions } from './embed-docs-custom-block-scroll';
+export { resolveDocsCustomBlockRenderViewport } from './embed-host-anchor';
+export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockRenderViewportParams } from './embed-host-anchor';
 export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
@@ -186,6 +198,8 @@ export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
+export { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from './services/doc-embed-integration.service';
+export type { IDocEmbedInteractionBoundaryService as IDocEmbedInteractionBoundaryServiceType, IDocEmbedRuntimeFocusCoordinator as IDocEmbedRuntimeFocusCoordinatorType } from './services/doc-embed-integration.service';
 export {
     DocEventManagerService,
     getListMarkerFallbackBound,
@@ -193,6 +207,7 @@ export {
 } from './services/doc-event-manager.service';
 export type { IBulletBound, IMutiPageParagraphBound } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+export { DocPageLayoutService } from './services/doc-page-layout.service';
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocPrintInterceptorService } from './services/doc-print-interceptor.service';
@@ -200,6 +215,7 @@ export type { IDocPrintComponentContext, IDocPrintContext } from './services/doc
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
+export { DocFloatMenuService } from './services/float-menu.service';
 export {
     isInSameTableCell,
     isValidRectRange,
@@ -233,3 +249,5 @@ export type {
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
 export type { IRichTextEditorProps } from './views/RichTextEditor';
+export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockSize } from '@univerjs/docs';
+export type { IDocsCustomBlockMutationParams, IEmbedDocsCustomBlockData } from '@univerjs/docs';

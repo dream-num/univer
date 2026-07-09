@@ -75,6 +75,7 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import {
+    BASE_FORMULA_INPUT_NAME,
     CheckboxValidator,
     DataValidationCacheService,
     DataValidationCustomFormulaService,
@@ -82,6 +83,7 @@ import {
     DataValidationFormulaService,
     DataValidationListCacheService,
     DateValidator,
+    LIST_FORMULA_INPUT_NAME,
     ListMultipleValidator,
     ListValidator,
     RemoveSheetDataValidationCommand,
@@ -110,7 +112,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDetail } from '../DataValidationDetail';
 import { DateShowTimeOption } from '../DateShowTimeOption';
-import { BASE_FORMULA_INPUT_NAME, FORMULA_INPUTS, LIST_FORMULA_INPUT_NAME } from '../formula-input';
+import { FORMULA_INPUTS } from '../formula-input';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

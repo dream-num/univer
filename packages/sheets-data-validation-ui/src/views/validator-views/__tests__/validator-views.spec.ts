@@ -15,18 +15,26 @@
  */
 
 import type { IFormulaResult } from '@univerjs/data-validation';
-import { DataValidationType, ICommandService, Injector, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
+import {
+    DataValidationType,
+    ICommandService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    ThemeService,
+} from '@univerjs/core';
 import { DataValidatorDropdownType } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DataValidationFormulaService, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { describe, expect, it } from 'vitest';
-import { DateShowTimeOption } from '../../components/DateShowTimeOption';
 import {
     BASE_FORMULA_INPUT_NAME,
     CHECKBOX_FORMULA_INPUT_NAME,
     CUSTOM_FORMULA_INPUT_NAME,
+    DataValidationFormulaService,
     LIST_FORMULA_INPUT_NAME,
-} from '../../components/formula-input';
+    SheetDataValidationModel,
+} from '@univerjs/sheets-data-validation';
+import { describe, expect, it } from 'vitest';
+import { DateShowTimeOption } from '../../components/DateShowTimeOption';
 import { ListRenderModeInput } from '../../components/ListRenderModeInput';
 
 class TestPath2D {

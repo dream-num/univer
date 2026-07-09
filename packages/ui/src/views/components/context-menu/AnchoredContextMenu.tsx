@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { ILayoutService } from '../../../services/layout/layout.service';
 import type { IValueOption } from '../../../services/menu/menu';
+import type { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { Popup } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
@@ -34,6 +36,8 @@ export interface IAnchoredContextMenuProps {
     menuType: string;
     anchorVertical?: 'top' | 'bottom';
     menuOffset?: number;
+    menuManagerService?: IMenuManagerService;
+    layoutService?: ILayoutService;
     onRequestClose: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
@@ -46,6 +50,8 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         menuType,
         anchorVertical = 'bottom',
         menuOffset = 0,
+        menuManagerService,
+        layoutService,
         onRequestClose,
         onOptionSelect,
     } = props;
@@ -161,6 +167,8 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
                 {menuType && (
                     <ContextMenuPanel
                         menuType={menuType}
+                        menuManagerService={menuManagerService}
+                        layoutService={layoutService}
                         menuSessionVersion={menuSessionVersionRef.current}
                         onOptionSelect={onOptionSelect}
                     />

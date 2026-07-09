@@ -392,6 +392,11 @@ export class UniverDocsUIPlugin extends Plugin {
             if (!doc) return;
 
             const id = doc.getUnitId();
+            const createOptions = currentService.getUnitCreateOptions(id);
+            if (createOptions?.makeCurrent === false) {
+                return;
+            }
+
             if (!editorService.isEditor(id)) {
                 currentService.focusUnit(doc.getUnitId());
             }

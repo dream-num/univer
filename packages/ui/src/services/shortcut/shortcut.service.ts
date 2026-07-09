@@ -16,13 +16,13 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { KeyCode } from './keycode';
 import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { fromGlobalEvent } from '../../common/lifecycle';
+import { isEmbedBoundaryTarget } from '../../utils/embed-boundary';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
-import { KeyCodeToChar, MetaKeys } from './keycode';
+import { KeyCode, KeyCodeToChar, MetaKeys } from './keycode';
 
 /**
  * A shortcut item that could be registered to the {@link IShortcutService}.
@@ -293,6 +293,10 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return undefined;
         }
 
+        if (this._shouldLetEmbedTextEditorHandleNativeShortcut(e, binding)) {
+            return undefined;
+        }
+
         const shortcuts = this._shortCutMapping.get(binding);
         if (shortcuts === undefined) {
             return undefined;
@@ -344,5 +348,22 @@ export class ShortcutService extends Disposable implements IShortcutService {
         }
 
         return binding;
+    }
+
+    private _shouldLetEmbedTextEditorHandleNativeShortcut(e: KeyboardEvent, binding: number): boolean {
+        if (binding !== (KeyCode.A | MetaKeys.CTRL_COMMAND)) {
+            return false;
+        }
+
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) {
+            return false;
+        }
+
+        const isNativeTextEditor = target.isContentEditable ||
+            target instanceof HTMLInputElement ||
+            target instanceof HTMLTextAreaElement;
+
+        return isNativeTextEditor && isEmbedBoundaryTarget(target);
     }
 }

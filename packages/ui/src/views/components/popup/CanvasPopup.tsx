@@ -116,7 +116,7 @@ export function CanvasPopup() {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
         const PopupComponent = Component && popup.connectorInjector
-            ? connectInjector(Component, popup.connectorInjector as never)
+            ? connectInjector(Component, popup.connectorInjector)
             : Component;
 
         return (
@@ -124,7 +124,7 @@ export function CanvasPopup() {
                 key={key}
                 popup={popup}
             >
-                {PopupComponent ? <PopupComponent popup={popup} /> : null}
+                {PopupComponent && <PopupComponent popup={popup} />}
             </SingleCanvasPopup>
         );
     });

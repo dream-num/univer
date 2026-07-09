@@ -15,7 +15,7 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import { isSheetLikeDocsCustomBlockChildType } from './embed-host-anchor';
+import { isSheetLikeDocsCustomBlockChildType } from '@univerjs/docs';
 
 export function collectDocsTableLikeEmbedChildUnitIds(
     drawings: Record<string, unknown> | undefined,

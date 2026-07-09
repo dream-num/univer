@@ -100,13 +100,12 @@ import {
     OrderListTypePicker,
 } from '../views/list-type-picker/index';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
-import { ParagraphSettingIndex } from '../views/paragraph-setting/index';
 import {
     DOC_PARAGRAPH_MENU_COMPONENT_KEY,
     DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
-    ParagraphMenu,
-    TableBlockMenu,
-} from '../views/ParagraphMenu';
+} from '../views/paragraph-menu/component-keys';
+import { ParagraphSettingIndex } from '../views/paragraph-setting/index';
+import { ParagraphMenu, TableBlockMenu } from '../views/ParagraphMenu';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
 import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 

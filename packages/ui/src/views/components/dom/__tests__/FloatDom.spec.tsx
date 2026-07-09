@@ -19,14 +19,14 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import type { IFloatDom, IFloatDomLayout } from '../../../services/dom/canvas-dom-layer.service';
+import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
-import { connectInjector } from '../../../utils/di';
-import { FloatDom, FloatDomSingle } from './FloatDom';
+import { CanvasFloatDomService } from '../../../../services/dom/canvas-dom-layer.service';
+import { connectInjector } from '../../../../utils/di';
+import { FloatDom, FloatDomSingle, resolveFloatDomCurrentUnitId, resolveFloatDomOverflow } from '../FloatDom';
 
 function TestFloatDomContent(_props: { hostFloatDomLayout$?: IFloatDom['position$'] }) {
     return <div>float content</div>;
@@ -72,6 +72,35 @@ function createFloatDom(): IFloatDom {
         unitId: 'doc-1',
     };
 }
+
+describe('resolveFloatDomOverflow', () => {
+    it('keeps regular float dom layers clipped', () => {
+        expect(resolveFloatDomOverflow({})).toEqual({
+            outerOverflow: 'hidden',
+            innerOverflow: 'hidden',
+        });
+    });
+
+    it('allows docs custom block bleed layers to escape the drawing wrapper', () => {
+        expect(resolveFloatDomOverflow({
+            customBlockRenderViewport: {
+                bleedLeft: 210,
+                bleedWidth: 1420,
+            },
+        })).toEqual({
+            outerOverflow: 'visible',
+            innerOverflow: 'visible',
+        });
+    });
+});
+
+describe('resolveFloatDomCurrentUnitId', () => {
+    it('resolves the focused unit id when the focused observable emits a unit object', () => {
+        expect(resolveFloatDomCurrentUnitId(undefined, {
+            getUnitId: () => 'doc-1',
+        })).toBe('doc-1');
+    });
+});
 
 describe('FloatDomSingle', () => {
     afterEach(() => {

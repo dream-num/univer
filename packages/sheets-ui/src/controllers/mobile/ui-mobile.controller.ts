@@ -91,7 +91,7 @@ import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.
 import { SheetPermissionOpenDialogOperation } from '../../commands/operations/sheet-permission-open-dialog.operation';
 import { SheetPermissionOpenPanelOperation } from '../../commands/operations/sheet-permission-open-panel.operation';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
-import { menuSchema } from '../../menu/mobile-menu';
+import { menuSchema } from '../../menu/schema';
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
 import { RenderSheetContent } from '../../views/sheet-container/SheetContainer';
 

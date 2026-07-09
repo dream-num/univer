@@ -23,8 +23,6 @@ import { resolveDocRenderBackground } from './doc-render-background';
 
 const DOC_MAIN_CANVAS_ID = 'univer-doc-main-canvas';
 
-export { resolveDocRenderBackground as resolveDocsCanvasBackground } from './doc-render-background';
-
 export function getDocsCanvasBackgroundColor(documentFlavor?: DocumentFlavor, canvasColorService?: ICanvasColorService, editorBackgroundColor?: string, isEditor?: boolean) {
     return resolveDocRenderBackground({
         documentFlavor,

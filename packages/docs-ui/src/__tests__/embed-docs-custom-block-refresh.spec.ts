@@ -16,7 +16,11 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
+import {
+    collectDocsTableLikeEmbedChildUnitIds,
+    createDocsCustomBlockSizeRefreshScheduler,
+    shouldRefreshDocsCustomBlockSizeForCommand,
+} from '../embed-docs-custom-block-refresh';
 
 describe('docs custom block refresh helpers', () => {
     it('collects only sheet-like custom block child unit ids', () => {

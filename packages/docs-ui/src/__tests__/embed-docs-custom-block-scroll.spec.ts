@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
+import { scrollDocsTableLikeCustomBlockLive } from '../embed-docs-custom-block-scroll';
 
 describe('scrollDocsTableLikeCustomBlockLive', () => {
     it('consumes horizontal wheel while the bleed viewport can scroll', () => {

@@ -16,38 +16,7 @@
 
 import type { UniverInstanceType } from '@univerjs/core';
 import { DocumentFlavor } from '@univerjs/core';
-import {
-    createDocsCustomBlockDrawing,
-    createDocsCustomBlockInsertMutation,
-    createDocsCustomBlockRemoveMutation,
-    createEmbedDocsCustomBlockData,
-    createInsertCustomBlockActions,
-    createRemoveCustomBlockActions,
-    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
-    isEmbedDocsCustomBlockData,
-    isSheetLikeDocsCustomBlockChildType,
-    resolveDocsCustomBlockSize,
-    shouldUseInlineTextSelectionForDocsCustomBlockDrawing,
-} from '@univerjs/docs';
-
-export type {
-    EmbedDocsCustomBlockInteractionMode,
-    IDocsCustomBlockMutationParams,
-    IEmbedDocsCustomBlockData,
-} from '@univerjs/docs';
-export {
-    createDocsCustomBlockDrawing,
-    createDocsCustomBlockInsertMutation,
-    createDocsCustomBlockRemoveMutation,
-    createEmbedDocsCustomBlockData,
-    createInsertCustomBlockActions,
-    createRemoveCustomBlockActions,
-    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
-    isEmbedDocsCustomBlockData,
-    isSheetLikeDocsCustomBlockChildType,
-    resolveDocsCustomBlockSize,
-    shouldUseInlineTextSelectionForDocsCustomBlockDrawing,
-};
+import { isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockSize } from '@univerjs/docs';
 
 const MODERN_DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
 

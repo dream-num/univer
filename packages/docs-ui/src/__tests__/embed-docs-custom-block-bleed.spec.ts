@@ -17,7 +17,11 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it, vi } from 'vitest';
-import { resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
+import {
+    resolveDocsTableLikeCustomBlockBleedViewport,
+    resolveDocsTableLikeCustomBlockContentHeight,
+    resolveDocsTableLikeCustomBlockContentWidth,
+} from '../embed-docs-custom-block-bleed';
 
 describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
     it('keeps the viewport inside the block when content fits the block width', () => {

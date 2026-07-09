@@ -15,8 +15,13 @@
  */
 
 import { DocumentFlavor, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import {
+    createDocsCustomBlockDrawing,
+    resolveDocsCustomBlockSize,
+    shouldUseInlineTextSelectionForDocsCustomBlockDrawing,
+} from '@univerjs/docs';
 import { describe, expect, it } from 'vitest';
-import { createDocsCustomBlockDrawing, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
+import { resolveDocsCustomBlockRenderViewport } from '../embed-host-anchor';
 
 describe('resolveDocsCustomBlockSize', () => {
     it('uses a taller default size for docs custom blocks', () => {

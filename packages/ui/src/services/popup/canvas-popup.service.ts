@@ -27,7 +27,7 @@ export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProp
     excludeRects$?: Observable<IBoundRectNoAngle[]>;
     excludeRects?: Nullable<IBoundRectNoAngle[]>;
     componentKey: string;
-    connectorInjector?: Pick<Injector, 'get' | 'has' | 'invoke'>;
+    connectorInjector?: Injector;
 
     unitId: string;
     subUnitId: string;

@@ -15,7 +15,7 @@
  */
 
 import { DataValidationType } from '@univerjs/core';
-import { BASE_FORMULA_INPUT_NAME } from '../components/formula-input';
+import { BASE_FORMULA_INPUT_NAME } from '@univerjs/sheets-data-validation';
 import { BaseSheetDataValidatorView } from './sheet-validator-view';
 
 export class DecimalValidatorView extends BaseSheetDataValidatorView {

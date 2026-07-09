@@ -20,8 +20,13 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, getCommandUnitId, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
-import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
+import {
+    collectDocsTableLikeEmbedChildUnitIds,
+    createDocsCustomBlockSizeRefreshScheduler,
+    getCommandUnitId,
+    shouldRefreshDocsCustomBlockSizeForCommand,
+} from '../embed-docs-custom-block-refresh';
+import { scrollDocsTableLikeCustomBlockLive } from '../embed-docs-custom-block-scroll';
 
 describe('docs custom block refresh and scroll helpers', () => {
     it('collects table-like child units and matches command params', () => {

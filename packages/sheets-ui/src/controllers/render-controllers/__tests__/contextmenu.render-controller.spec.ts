@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ISheetHostChromeOverrideService } from '../../services/sheet-host-chrome-override.service';
-import { shouldSuppressSheetContextMenuForEmbedOverride } from './contextmenu.render-controller';
+import { ISheetHostChromeOverrideService } from '../../../services/sheet-host-chrome-override.service';
+import { shouldSuppressSheetContextMenuForEmbedOverride } from '../contextmenu.render-controller';
 
 describe('SheetContextMenuRenderController embed chrome bridge', () => {
     it('suppresses host sheet context menus only for active sheet-tab overrides', () => {

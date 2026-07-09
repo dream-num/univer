@@ -30,6 +30,7 @@ import type {
     IPoint,
 } from '@univerjs/engine-render';
 import { DataStreamTreeTokenType } from '@univerjs/core';
+import { shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from '@univerjs/docs';
 import {
     compareDocumentSkeletonNestedPagePathOrder,
     DocumentSkeletonPageType,
@@ -40,7 +41,6 @@ import {
     GlyphType,
     Liquid,
 } from '@univerjs/engine-render';
-import { shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from '../../embed-host-anchor';
 
 export enum NodePositionStateType {
     NORMAL,

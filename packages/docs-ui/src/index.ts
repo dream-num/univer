@@ -157,8 +157,8 @@ export type { IDocsCustomBlockBleedViewport, IDocsCustomBlockBleedViewportHint }
 export { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
 export { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 export type { IDocsTableLikeCustomBlockScrollOptions } from './embed-docs-custom-block-scroll';
-export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize } from './embed-host-anchor';
-export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockMutationParams, IDocsCustomBlockRenderViewportParams, IEmbedDocsCustomBlockData } from './embed-host-anchor';
+export { resolveDocsCustomBlockRenderViewport } from './embed-host-anchor';
+export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockRenderViewportParams } from './embed-host-anchor';
 export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
@@ -249,3 +249,5 @@ export type {
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
 export type { IRichTextEditorProps } from './views/RichTextEditor';
+export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockSize } from '@univerjs/docs';
+export type { IDocsCustomBlockMutationParams, IEmbedDocsCustomBlockData } from '@univerjs/docs';

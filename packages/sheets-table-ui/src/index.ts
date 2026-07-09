@@ -17,4 +17,5 @@
 import './global.css';
 
 export type { IUniverSheetsTableUIConfig } from './config/config';
+export { menuSchema as SheetsTableUIMenuSchema } from './menu/schema';
 export { UniverSheetsTableUIPlugin } from './plugin';

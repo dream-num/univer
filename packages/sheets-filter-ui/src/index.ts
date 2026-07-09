@@ -19,6 +19,7 @@ import './global.css';
 export { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from './commands/operations/sheets-filter.operation';
 export type { IOpenFilterPanelOperationParams } from './commands/operations/sheets-filter.operation';
 export type { IUniverSheetsFilterUIConfig } from './config/config';
+export { menuSchema as SheetsFilterUIMenuSchema } from './menu/schema';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFilterUIPlugin } from './plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';

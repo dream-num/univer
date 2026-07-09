@@ -25,6 +25,7 @@ export type { IOpenHyperLinkEditPanelOperationParams } from './commands/operatio
 export type { IUniverSheetsHyperLinkUIConfig } from './config/config';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 export { InsertLinkShortcut } from './menu/menu';
+export { menuSchema as SheetsHyperLinkUIMenuSchema } from './menu/schema';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { SheetsHyperLinkPopupService } from './services/popup.service';
 export { SheetsHyperLinkResolverService } from './services/resolver.service';

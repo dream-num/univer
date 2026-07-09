@@ -37,7 +37,7 @@ export { isKnownSheetNonRotatableDrawingType, resolveSheetDrawingRotateEnabled }
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
-export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
+export { ISheetDrawingService, SheetDrawingAnchorType, SheetDrawingService } from './services/sheet-drawing.service';
 export type {
     IFloatDomData,
     ISheetDrawing,

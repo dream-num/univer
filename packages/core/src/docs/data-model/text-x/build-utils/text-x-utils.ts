@@ -23,9 +23,10 @@ import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
 import fastDiff from 'fast-diff';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
+import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
-import { getBodySlice, getTextRunSlice } from '../utils';
+import { getBodySlice, getBodySliceForTextXAction, getTextRunSlice } from '../utils';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
 
 export interface IDeleteCustomRangeParam {
@@ -161,6 +162,191 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
 
+interface IStructuralTextContainer {
+    startOffset: number;
+    endOffset: number;
+    paragraphs: number[];
+    sectionBreaks: number[];
+    require: 'paragraph-or-section' | 'paragraph-and-section';
+}
+
+function isOffsetDeleted(offset: number, selections: ITextRange[]) {
+    return selections.some((selection) => offset >= selection.startOffset && offset < selection.endOffset);
+}
+
+function isInsertInContainer(insertOffset: number, container: IStructuralTextContainer) {
+    return insertOffset >= container.startOffset && insertOffset <= container.endOffset;
+}
+
+function protectLastDeletedOffset(offsets: number[], selections: ITextRange[], protectedOffsets: Set<number>) {
+    if (offsets.length && offsets.every((offset) => isOffsetDeleted(offset, selections))) {
+        protectedOffsets.add(offsets[offsets.length - 1]);
+    }
+}
+
+function protectDeletedColumnBoundaryTokens(body: IDocumentBody, selections: ITextRange[], protectedOffsets: Set<number>) {
+    // Plain text selection edits may cross column edges, but structural column tokens must stay atomic.
+    for (let i = 0; i < body.dataStream.length; i++) {
+        const char = body.dataStream[i];
+        if (
+            (
+                char === DataStreamTreeTokenType.COLUMN_GROUP_START ||
+                char === DataStreamTreeTokenType.COLUMN_START ||
+                char === DataStreamTreeTokenType.COLUMN_END ||
+                char === DataStreamTreeTokenType.COLUMN_GROUP_END
+            ) &&
+            isOffsetDeleted(i, selections)
+        ) {
+            protectedOffsets.add(i);
+        }
+    }
+}
+
+function collectStructuralTextContainers(body: IDocumentBody): IStructuralTextContainer[] {
+    const containers: IStructuralTextContainer[] = [{
+        startOffset: 0,
+        endOffset: body.dataStream.length,
+        paragraphs: [],
+        sectionBreaks: [],
+        require: 'paragraph-and-section',
+    }];
+    const columnStack: IStructuralTextContainer[] = [];
+    const cellStack: IStructuralTextContainer[] = [];
+
+    const getActiveContainer = () => {
+        if (cellStack.length) {
+            return cellStack[cellStack.length - 1];
+        }
+
+        if (columnStack.length) {
+            return columnStack[columnStack.length - 1];
+        }
+
+        return containers[0];
+    };
+
+    for (let i = 0; i < body.dataStream.length; i++) {
+        const char = body.dataStream[i];
+
+        if (char === DataStreamTreeTokenType.COLUMN_START) {
+            columnStack.push({
+                startOffset: i + 1,
+                endOffset: i + 1,
+                paragraphs: [],
+                sectionBreaks: [],
+                require: 'paragraph-or-section',
+            });
+        } else if (char === DataStreamTreeTokenType.COLUMN_END) {
+            const column = columnStack.pop();
+            if (column) {
+                column.endOffset = i;
+                containers.push(column);
+            }
+        } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
+            cellStack.push({
+                startOffset: i + 1,
+                endOffset: i + 1,
+                paragraphs: [],
+                sectionBreaks: [],
+                require: 'paragraph-and-section',
+            });
+        } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
+            const cell = cellStack.pop();
+            if (cell) {
+                cell.endOffset = i;
+                containers.push(cell);
+            }
+        } else if (char === DataStreamTreeTokenType.PARAGRAPH) {
+            getActiveContainer().paragraphs.push(i);
+        } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
+            getActiveContainer().sectionBreaks.push(i);
+        }
+    }
+
+    return containers;
+}
+
+function normalizeSelectionsForStructuralSentinels(
+    selections: ITextRange[],
+    body: IDocumentBody,
+    insertBody: Nullable<IDocumentBody>
+) {
+    if (!selections.length) {
+        return selections;
+    }
+
+    const insertOffset = selections[0].startOffset;
+    const insertDataStream = insertBody?.dataStream ?? '';
+    const insertHasParagraph = insertDataStream.includes(DataStreamTreeTokenType.PARAGRAPH);
+    const insertHasSectionBreak = insertDataStream.includes(DataStreamTreeTokenType.SECTION_BREAK);
+    const protectedOffsets = new Set<number>();
+
+    // Plain text edits must not leave the document root, columns, or table cells without parser children.
+    collectStructuralTextContainers(body).forEach((container) => {
+        const insertAppliesToContainer = insertBody && isInsertInContainer(insertOffset, container);
+
+        if (container.require === 'paragraph-or-section') {
+            const offsets = [...container.paragraphs, ...container.sectionBreaks].sort((a, b) => a - b);
+            if (!insertAppliesToContainer || (!insertHasParagraph && !insertHasSectionBreak)) {
+                protectLastDeletedOffset(offsets, selections, protectedOffsets);
+            }
+            return;
+        }
+
+        if (!insertAppliesToContainer || !insertHasParagraph) {
+            protectLastDeletedOffset(container.paragraphs, selections, protectedOffsets);
+        }
+
+        if (!insertAppliesToContainer || !insertHasSectionBreak) {
+            protectLastDeletedOffset(container.sectionBreaks, selections, protectedOffsets);
+        }
+    });
+    protectDeletedColumnBoundaryTokens(body, selections, protectedOffsets);
+
+    if (!protectedOffsets.size) {
+        return selections;
+    }
+
+    const normalizedSelections: ITextRange[] = [];
+    selections.forEach((selection) => {
+        let startOffset = selection.startOffset;
+
+        for (let offset = selection.startOffset; offset < selection.endOffset; offset++) {
+            if (!protectedOffsets.has(offset)) {
+                continue;
+            }
+
+            if (startOffset < offset) {
+                normalizedSelections.push({
+                    ...selection,
+                    startOffset,
+                    endOffset: offset,
+                    collapsed: false,
+                });
+            }
+
+            startOffset = offset + 1;
+        }
+
+        if (startOffset < selection.endOffset) {
+            normalizedSelections.push({
+                ...selection,
+                startOffset,
+                endOffset: selection.endOffset,
+                collapsed: false,
+            });
+        }
+    });
+
+    return normalizedSelections.length
+        ? normalizedSelections
+        : [{
+            ...selections[0],
+            endOffset: selections[0].startOffset,
+            collapsed: true,
+        }];
+}
+
 export function deleteSelectionTextX(
     selections: ITextRange[],
     body: IDocumentBody,
@@ -169,6 +355,7 @@ export function deleteSelectionTextX(
     keepBullet: boolean = true
 ): Array<TextXAction> {
     selections.sort((a, b) => a.startOffset - b.startOffset);
+    selections = normalizeSelectionsForStructuralSentinels(selections, body, insertBody);
     const dos: Array<TextXAction> = [];
     const { paragraphs = [] } = body;
 
@@ -203,7 +390,7 @@ export function deleteSelectionTextX(
         });
     }
 
-    if (paragraphInRange && keepBullet) {
+    if (paragraphInRange?.bullet && keepBullet) {
         const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= (selections[selections.length - 1].endOffset - 1));
         if (nextParagraph) {
             if (nextParagraph.startIndex > cursor) {
@@ -227,7 +414,7 @@ export function deleteSelectionTextX(
                         },
                     ],
                 },
-                coverType: UpdateDocsAttributeType.REPLACE,
+                coverType: UpdateDocsAttributeType.COVER,
             });
         }
     }
@@ -283,6 +470,17 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) return false;
 
+    const normalizedSelections = normalizeSelectionsForStructuralSentinels([selection], body, insertBody);
+    const selectionAdjusted = normalizedSelections.length !== 1 ||
+        normalizedSelections[0].startOffset !== selection.startOffset ||
+        normalizedSelections[0].endOffset !== selection.endOffset;
+
+    if (selectionAdjusted) {
+        const textX = new TextX();
+        textX.push(...deleteSelectionTextX([selection], body, 0, insertBody));
+        return textX;
+    }
+
     const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
     const diffs = fastDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
     let cursor = 0;
@@ -293,7 +491,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
                 const action: TextXAction = {
                     t: TextXActionType.RETAIN,
                     body: {
-                        ...getBodySlice(insertBody, cursor, cursor + text.length, false),
+                        ...getBodySliceForTextXAction(insertBody, cursor, cursor + text.length, false),
                         dataStream: '',
                     },
                     len: text.length,
@@ -305,7 +503,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
             case 1: {
                 const action: TextXAction = {
                     t: TextXActionType.INSERT,
-                    body: getBodySlice(insertBody, cursor, cursor + text.length),
+                    body: getBodySliceForTextXAction(insertBody, cursor, cursor + text.length),
                     len: text.length,
                 };
                 cursor += text.length;
@@ -349,6 +547,17 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextRunsParams
     const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) return false;
 
+    const normalizedSelections = normalizeSelectionsForStructuralSentinels([selection], body, insertBody);
+    const selectionAdjusted = normalizedSelections.length !== 1 ||
+        normalizedSelections[0].startOffset !== selection.startOffset ||
+        normalizedSelections[0].endOffset !== selection.endOffset;
+
+    if (selectionAdjusted) {
+        const textX = new TextX();
+        textX.push(...deleteSelectionTextX([selection], body, 0, insertBody));
+        return textX;
+    }
+
     const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
     const diffs = fastDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
     let cursor = 0;
@@ -383,7 +592,7 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextRunsParams
             case 1: {
                 const action: TextXAction = {
                     t: TextXActionType.INSERT,
-                    body: getBodySlice(insertBody, cursor, cursor + text.length),
+                    body: getBodySliceForTextXAction(insertBody, cursor, cursor + text.length),
                     len: text.length,
                 };
                 cursor += text.length;

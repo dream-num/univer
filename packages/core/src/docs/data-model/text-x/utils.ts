@@ -27,6 +27,41 @@ export enum SliceBodyType {
     cut,
 }
 
+export enum SliceStructuralRangeMode {
+    // General copy/slice behavior: keep the intersecting portion for backward compatibility.
+    intersect,
+    // Mutation builders: only emit metadata for structural ranges fully carried by this action body.
+    contained,
+    // ActionIterator splits: keep metadata on the chunk that carries the structural range end.
+    ending,
+}
+
+function hasStructuralRangeInSlice(startIndex: number, endIndex: number, startOffset: number, endOffset: number, mode: SliceStructuralRangeMode) {
+    if (mode === SliceStructuralRangeMode.contained) {
+        return startIndex >= startOffset && endIndex <= endOffset;
+    }
+
+    if (mode === SliceStructuralRangeMode.ending) {
+        return startIndex < endOffset && endIndex > startOffset && endIndex <= endOffset;
+    }
+
+    return Math.max(startIndex, startOffset) < Math.min(endIndex, endOffset);
+}
+
+function getSlicedStructuralRange(startIndex: number, endIndex: number, startOffset: number, endOffset: number, mode: SliceStructuralRangeMode) {
+    if (mode === SliceStructuralRangeMode.intersect) {
+        return {
+            startIndex: Math.max(startIndex, startOffset) - startOffset,
+            endIndex: Math.min(endIndex, endOffset) - startOffset,
+        };
+    }
+
+    return {
+        startIndex: startIndex - startOffset,
+        endIndex: endIndex - startOffset,
+    };
+}
+
 export function getTextRunSlice(
     body: IDocumentBody,
     startOffset: number,
@@ -85,7 +120,8 @@ export function getTextRunSlice(
 export function getTableSlice(
     body: IDocumentBody,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
+    mode = SliceStructuralRangeMode.intersect
 ) {
     const { tables = [] } = body;
     const newTables = [];
@@ -93,11 +129,10 @@ export function getTableSlice(
         const clonedTable = Tools.deepClone(table);
         const { startIndex, endIndex } = clonedTable;
 
-        if (Math.max(startIndex, startOffset) < Math.min(endIndex, endOffset)) {
+        if (hasStructuralRangeInSlice(startIndex, endIndex, startOffset, endOffset, mode)) {
             newTables.push({
                 ...clonedTable,
-                startIndex: Math.max(startIndex, startOffset) - startOffset,
-                endIndex: Math.min(endIndex, endOffset) - startOffset,
+                ...getSlicedStructuralRange(startIndex, endIndex, startOffset, endOffset, mode),
             });
         }
     }
@@ -107,7 +142,8 @@ export function getTableSlice(
 export function getBlockRangeSlice(
     body: IDocumentBody,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
+    mode = SliceStructuralRangeMode.intersect
 ) {
     const { blockRanges = [] } = body;
     const newBlockRanges: IDocumentBlockRange[] = [];
@@ -116,11 +152,10 @@ export function getBlockRangeSlice(
         const clonedBlockRange = Tools.deepClone(blockRange);
         const { startIndex, endIndex } = clonedBlockRange;
 
-        if (startIndex >= startOffset && endIndex < endOffset) {
+        if (hasStructuralRangeInSlice(startIndex, endIndex, startOffset, endOffset, mode)) {
             newBlockRanges.push({
                 ...clonedBlockRange,
-                startIndex: startIndex - startOffset,
-                endIndex: endIndex - startOffset,
+                ...getSlicedStructuralRange(startIndex, endIndex, startOffset, endOffset, mode),
             });
         }
     }
@@ -131,7 +166,8 @@ export function getBlockRangeSlice(
 export function getColumnGroupSlice(
     body: IDocumentBody,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
+    mode = SliceStructuralRangeMode.intersect
 ) {
     const { columnGroups = [] } = body;
     const newColumnGroups: ICustomColumnGroup[] = [];
@@ -140,11 +176,10 @@ export function getColumnGroupSlice(
         const clonedColumnGroup = Tools.deepClone(columnGroup);
         const { startIndex, endIndex } = clonedColumnGroup;
 
-        if (startIndex >= startOffset && endIndex < endOffset) {
+        if (hasStructuralRangeInSlice(startIndex, endIndex, startOffset, endOffset, mode)) {
             newColumnGroups.push({
                 ...clonedColumnGroup,
-                startIndex: startIndex - startOffset,
-                endIndex: endIndex - startOffset,
+                ...getSlicedStructuralRange(startIndex, endIndex, startOffset, endOffset, mode),
             });
         }
     }
@@ -254,7 +289,8 @@ export function getBodySlice(
     startOffset: number,
     endOffset: number,
     returnEmptyArray = true,
-    type = SliceBodyType.cut
+    type = SliceBodyType.cut,
+    structuralRangeMode = SliceStructuralRangeMode.intersect
 ): IDocumentBody {
     const { dataStream } = body;
 
@@ -264,17 +300,17 @@ export function getBodySlice(
 
     docBody.textRuns = getTextRunSlice(body, startOffset, endOffset, returnEmptyArray);
 
-    const newTables = getTableSlice(body, startOffset, endOffset);
+    const newTables = getTableSlice(body, startOffset, endOffset, structuralRangeMode);
     if (newTables.length) {
         docBody.tables = newTables;
     }
 
-    const newBlockRanges = getBlockRangeSlice(body, startOffset, endOffset);
+    const newBlockRanges = getBlockRangeSlice(body, startOffset, endOffset, structuralRangeMode);
     if (newBlockRanges.length) {
         docBody.blockRanges = newBlockRanges;
     }
 
-    const newColumnGroups = getColumnGroupSlice(body, startOffset, endOffset);
+    const newColumnGroups = getColumnGroupSlice(body, startOffset, endOffset, structuralRangeMode);
     if (newColumnGroups.length) {
         docBody.columnGroups = newColumnGroups;
     }
@@ -299,6 +335,26 @@ export function getBodySlice(
     docBody.customBlocks = getCustomBlockSlice(body, startOffset, endOffset);
 
     return docBody;
+}
+
+export function getBodySliceForTextXAction(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number,
+    returnEmptyArray = true,
+    type = SliceBodyType.cut
+): IDocumentBody {
+    return getBodySlice(body, startOffset, endOffset, returnEmptyArray, type, SliceStructuralRangeMode.contained);
+}
+
+export function getBodySliceForSplitTextXAction(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number,
+    returnEmptyArray = true,
+    type = SliceBodyType.cut
+): IDocumentBody {
+    return getBodySlice(body, startOffset, endOffset, returnEmptyArray, type, SliceStructuralRangeMode.ending);
 }
 
 export function normalizeBody(body: IDocumentBody): IDocumentBody {

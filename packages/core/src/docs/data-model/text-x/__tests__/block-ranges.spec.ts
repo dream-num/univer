@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
 import { DataStreamTreeTokenType } from '../../types';
 import { deleteBlockRanges, insertBlockRanges } from '../apply-utils/common';
 import { getPlainText } from '../build-utils/parse';
-import { getBodySlice } from '../utils';
+import { getBodySlice, getBodySliceForTextXAction } from '../utils';
 
 describe('document block ranges', () => {
     it('moves following block ranges when text is inserted before them', () => {
@@ -61,6 +61,18 @@ describe('document block ranges', () => {
         expect(slice.blockRanges).toEqual([
             { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 3 },
         ]);
+    });
+
+    it('does not include partial block ranges in action bodies', () => {
+        const body: IDocumentBody = {
+            dataStream: `A\r${DataStreamTreeTokenType.BLOCK_START}B\r${DataStreamTreeTokenType.BLOCK_END}C\r\n`,
+            blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 2, endIndex: 5 }],
+        };
+
+        const slice = getBodySliceForTextXAction(body, 3, 5, false);
+
+        expect(slice.dataStream).toBe('B\r');
+        expect(slice.blockRanges).toBeUndefined();
     });
 
     it('removes fully deleted block ranges', () => {

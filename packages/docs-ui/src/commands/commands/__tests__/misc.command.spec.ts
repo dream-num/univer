@@ -996,7 +996,7 @@ describe('misc document commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('Body\r\n');
-        expect(getBody()?.paragraphs?.[0].startIndex).toBe(0);
+        expect(getBody()?.paragraphs?.[0].startIndex).toBe(4);
     });
 
     it('removes the character before the cursor when Backspace is pressed inside text', async () => {

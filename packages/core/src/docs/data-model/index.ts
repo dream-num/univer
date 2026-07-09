@@ -38,11 +38,15 @@ export { updateAttributeByDelete } from './text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './text-x/apply-utils/insert-apply';
 export * from './text-x/build-utils';
 export { getPlainText } from './text-x/build-utils/parse';
+export { validateDocBodyStructure, validateDocumentStructure } from './text-x/structure-validator';
+export type { DocStructureIssueCode, IDocStructureIssue } from './text-x/structure-validator';
 export { TextX } from './text-x/text-x';
 export type { TPriority } from './text-x/text-x';
 export {
     composeBody,
     getBodySlice,
+    getBodySliceForSplitTextXAction,
+    getBodySliceForTextXAction,
     getCustomBlockSlice,
     getCustomDecorationSlice,
     getCustomRangeSlice,

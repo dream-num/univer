@@ -31,6 +31,7 @@ import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import { cloneParagraphWithId } from '../../../paragraph-id';
+import { DataStreamTreeTokenType } from '../../types';
 import { getBodySlice } from '../utils';
 
 // Internal TextX undo marker: restored delete bodies keep their captured paragraph ids.
@@ -409,12 +410,15 @@ export function insertCustomBlocks(
 }
 
 export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
-    const { tables } = body;
-
-    if (tables == null) {
+    if (!body.tables && !insertBody.tables?.length) {
         return;
     }
 
+    if (!body.tables) {
+        body.tables = [];
+    }
+
+    const { tables } = body;
     for (let i = 0, len = tables.length; i < len; i++) {
         const table = tables[i];
         const { startIndex, endIndex } = table;
@@ -422,7 +426,7 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
         if (startIndex >= currentIndex) {
             table.startIndex += textLength;
             table.endIndex += textLength;
-        } else if (endIndex > currentIndex) {
+        } else if (endIndex > currentIndex || (endIndex === currentIndex && body.dataStream[currentIndex + textLength] === DataStreamTreeTokenType.PARAGRAPH)) {
             table.endIndex += textLength;
         }
     }
@@ -457,7 +461,7 @@ export function insertColumnGroups(body: IDocumentBody, insertBody: IDocumentBod
         if (startIndex >= currentIndex) {
             columnGroup.startIndex += textLength;
             columnGroup.endIndex += textLength;
-        } else if (endIndex >= currentIndex) {
+        } else if (endIndex > currentIndex || (endIndex === currentIndex && body.dataStream[currentIndex + textLength] === DataStreamTreeTokenType.COLUMN_GROUP_END)) {
             columnGroup.endIndex += textLength;
         }
     }

@@ -19,6 +19,7 @@ import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, Univ
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+    buildReplaceSnapshotActions,
     CoverContentCommand,
     ReplaceContentCommand,
     ReplaceSelectionCommand,
@@ -244,6 +245,26 @@ describe('replace or cover content of document', () => {
             })).resolves.toBe(true);
 
             expect(getDataStream()).toBe('=SUM(A2:B4)\r\n');
+        });
+
+        it('builds replacement snapshot body changes without whole body replace', () => {
+            const previousSnapshot = getDocumentData();
+            const nextSnapshot = {
+                ...previousSnapshot,
+                body: {
+                    dataStream: 'Snapshot\r\n',
+                    paragraphs: [{ paragraphId: 'para_replace_snapshot_shape', startIndex: 8 }],
+                    sectionBreaks: [{ startIndex: 9 }],
+                    textRuns: [],
+                },
+            };
+
+            const actions = buildReplaceSnapshotActions(previousSnapshot, nextSnapshot);
+            const serializedActions = JSON.stringify(actions);
+
+            expect(actions).not.toBeNull();
+            expect(serializedActions).toContain('"et":"text-x"');
+            expect(serializedActions).not.toContain('["body",{"r"');
         });
 
         it('replaces the active selection through the real rich text mutation flow', async () => {

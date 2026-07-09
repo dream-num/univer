@@ -55,7 +55,8 @@ export const InsertDocDrawingCommand: ICommand = {
         }
 
         const unitId = documentDataModel.getUnitId();
-        const contentInsertRange = getContentInsertRange(accessor, unitId);
+        const explicitTextRange = params.textRange == null ? null : normalizeTextRange(params.textRange);
+        const contentInsertRange = explicitTextRange ?? getContentInsertRange(accessor, unitId);
         const targetTextRange = contentInsertRange
             ? {
                 ...activeTextRange,
@@ -193,4 +194,15 @@ function getContentInsertRange(accessor: IAccessor, unitId: string): ITextRangeP
     } catch {
         return null;
     }
+}
+
+function normalizeTextRange(textRange: ITextRangeParam): ITextRangeParam {
+    const endOffset = textRange.endOffset ?? textRange.startOffset;
+
+    return {
+        ...textRange,
+        endOffset,
+        collapsed: textRange.collapsed ?? textRange.startOffset === endOffset,
+        segmentId: textRange.segmentId ?? '',
+    };
 }

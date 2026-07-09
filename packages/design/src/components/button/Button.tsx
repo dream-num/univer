@@ -74,6 +74,7 @@ export const buttonVariants = cva(
                 `,
             },
             size: {
+                icon: 'univer-size-8 !univer-p-0',
                 small: 'univer-h-6 univer-rounded-md univer-px-1.5 univer-text-xs',
                 middle: 'univer-h-8 univer-rounded-lg univer-px-2 univer-text-sm',
                 large: 'univer-h-10 univer-rounded-lg univer-px-3 univer-text-sm',

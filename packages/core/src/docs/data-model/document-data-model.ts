@@ -56,6 +56,12 @@ function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData
         }
     });
 
+    // Existing snapshots with a body must preserve the absence of document
+    // defaults. The renderer provides the legacy flavor fallback for them.
+    if (snapshot.body != null && snapshot.documentStyle?.defaultParagraphStyle === undefined) {
+        delete mergedSnapshot.documentStyle.defaultParagraphStyle;
+    }
+
     return mergedSnapshot;
 }
 

@@ -18,6 +18,7 @@ import type {
     IBullet,
     IDocDrawingBase,
     IDocumentBody,
+    IDocumentStyle,
     IDrawings,
     IParagraph,
     IParagraphStyle,
@@ -40,11 +41,9 @@ import type { IShapedText } from './shaping';
 import {
     DataStreamTreeTokenType,
     DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
-    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
-    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
     DocumentBlockRangeType,
     PositionedObjectLayoutType,
-    Tools,
+    resolveDocumentParagraphStyle,
 } from '@univerjs/core';
 import { BreakType, GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
@@ -289,38 +288,17 @@ function _hasNextAdjacentLayoutBlockRange(blockRanges: IDocumentBody['blockRange
     );
 }
 
-function _applyDefaultLayoutParagraphStyle(style: IParagraphStyle, hasBlockRange: boolean) {
-    if (style.lineSpacing == null) {
-        style.lineSpacing = DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
-    }
-
-    if (hasBlockRange) {
-        return;
-    }
-
-    if (style.spaceAbove == null) {
-        style.spaceAbove = { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE };
-    }
-
-    if (style.spaceBelow == null) {
-        style.spaceBelow = { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW };
-    }
-}
-
 function _applyBlockRangeLayoutParagraphStyle(
     body: Nullable<IDocumentBody>,
     paragraph: IParagraph,
     paragraphStyle: IParagraphStyle,
-    shouldApplyDocumentDefaults: boolean
+    documentStyle: Nullable<IDocumentStyle>,
+    useLegacyModernDefaults: boolean
 ): IParagraphStyle {
-    const style = Tools.deepClone(paragraphStyle);
     const blockRanges = body?.blockRanges;
 
     if (!blockRanges?.length) {
-        if (shouldApplyDocumentDefaults) {
-            _applyDefaultLayoutParagraphStyle(style, false);
-        }
-        return style;
+        return resolveDocumentParagraphStyle(documentStyle, paragraphStyle, { useLegacyModernDefaults });
     }
 
     const blockRange = blockRanges.find((range) =>
@@ -330,13 +308,19 @@ function _applyBlockRangeLayoutParagraphStyle(
     );
 
     if (!blockRange) {
-        if (shouldApplyDocumentDefaults) {
-            _applyDefaultLayoutParagraphStyle(style, false);
-        }
-        return style;
+        return resolveDocumentParagraphStyle(documentStyle, paragraphStyle, { useLegacyModernDefaults });
     }
 
-    _applyDefaultLayoutParagraphStyle(style, true);
+    const style = resolveDocumentParagraphStyle(documentStyle, paragraphStyle, {
+        excludeDocumentOuterSpacing: true,
+        useLegacyModernDefaults,
+    });
+
+    // Keep the existing block line-height fallback when neither the document
+    // nor the paragraph provides one.
+    if (style.lineSpacing == null) {
+        style.lineSpacing = DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
+    }
 
     const blockParagraphs = (body?.paragraphs ?? [])
         .filter((item) => item.startIndex > blockRange.startIndex && item.startIndex < blockRange.endIndex)
@@ -470,8 +454,9 @@ export function lineBreaking(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
     const { paragraphStyle = {}, bullet } = paragraph;
+    const documentStyle = viewModel.getSnapshot?.()?.documentStyle;
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ??
-        getDocumentCompatibilityPolicy(viewModel.getSnapshot?.()?.documentStyle.documentFlavor);
+        getDocumentCompatibilityPolicy(documentStyle?.documentFlavor);
     const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
     const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
 
@@ -496,6 +481,7 @@ export function lineBreaking(
             viewModel.getBody?.() ?? null,
             paragraph,
             paragraphStyle,
+            documentStyle,
             shouldApplyDocumentDefaults
         ),
         docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(

@@ -26,6 +26,11 @@ export type {
     ICreateHeaderFooterCommandParams,
     IHeaderFooterProps,
 } from './commands/commands/create-header-footer.command';
+export { SetDocumentDefaultParagraphStyleCommand } from './commands/commands/set-document-default-paragraph-style.command';
+export type {
+    IDocumentDefaultParagraphStylePatch,
+    ISetDocumentDefaultParagraphStyleCommandParams,
+} from './commands/commands/set-document-default-paragraph-style.command';
 export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';

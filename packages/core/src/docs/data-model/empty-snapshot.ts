@@ -87,7 +87,8 @@ export function getEmptySnapshot(
 
     // Set default values for modern document flavor
     if (documentFlavor === DocumentFlavor.MODERN) {
-        EMPTY_DOCUMENT_DATA.body!.paragraphs![0].paragraphStyle = {
+        EMPTY_DOCUMENT_DATA.body!.paragraphs![0].paragraphStyle = {};
+        EMPTY_DOCUMENT_DATA.documentStyle.defaultParagraphStyle = {
             spaceAbove: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE },
             lineSpacing: DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
             spaceBelow: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW },

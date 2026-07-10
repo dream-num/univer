@@ -494,6 +494,7 @@ export enum GridType {
 
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     textStyle?: ITextStyle; // default style for text
+    defaultParagraphStyle?: IDocumentDefaultParagraphStyle; // default style inherited by paragraphs
     background?: IDocumentBackground; // Page background image.
 }
 
@@ -804,6 +805,12 @@ export interface IParagraphStyle extends IParagraphProperties {
     // Not achieved, aligned with Excel's standards.
     textStyle?: ITextStyle; // paragraph textStyle
 }
+
+/**
+ * Paragraph properties that may be inherited from the document defaults.
+ * Paragraph identity and named/text styles have their own inheritance mechanisms.
+ */
+export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' | 'namedStyleType' | 'textStyle'>;
 
 export interface IParagraphProperties extends IIndentStart {
     headingId?: string; // headingId

@@ -594,7 +594,7 @@ export function ParagraphMenuIndentIncreaseMenuItemFactory(accessor: IAccessor):
     return {
         id: DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
         type: MenuItemType.BUTTON,
-        icon: 'MoreRightIcon',
+        icon: 'LineIndentIncreaseIcon',
         title: 'docs-ui.paragraphMenu.increase',
         tooltip: 'docs-ui.paragraphMenu.increaseIndent',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
@@ -605,7 +605,7 @@ export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor):
     return {
         id: DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
         type: MenuItemType.BUTTON,
-        icon: 'MoreLeftIcon',
+        icon: 'LineIndentDecreaseIcon',
         title: 'docs-ui.paragraphMenu.decrease',
         tooltip: 'docs-ui.paragraphMenu.decreaseIndent',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

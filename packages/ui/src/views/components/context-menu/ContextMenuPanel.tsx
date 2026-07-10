@@ -1440,20 +1440,25 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                             const optionSelectable = !isNonSelectableLabel(option.label);
                                             const optionHoverable = !isNonHoverableLabel(option.label);
                                             const optionClassName = clsx(
-                                                sizeVariant === 'paragraph-t'
-                                                    ? `
-                                                      univer-relative univer-box-border univer-flex univer-min-h-10
-                                                      univer-w-full univer-items-center univer-rounded-lg
-                                                      univer-border-none univer-bg-transparent univer-px-3
-                                                      univer-text-left univer-text-base
-                                                      dark:!univer-text-white
-                                                    `
+                                                optionSelectable
+                                                    ? sizeVariant === 'paragraph-t'
+                                                        ? `
+                                                          univer-relative univer-box-border univer-flex univer-min-h-10
+                                                          univer-w-full univer-items-center univer-rounded-lg
+                                                          univer-border-none univer-bg-transparent univer-px-3
+                                                          univer-text-left univer-text-base
+                                                          dark:!univer-text-white
+                                                        `
+                                                        : `
+                                                          univer-relative univer-box-border univer-flex univer-min-h-8
+                                                          univer-w-full univer-items-center univer-rounded-md
+                                                          univer-border-none univer-bg-transparent univer-px-2
+                                                          univer-text-left univer-text-sm
+                                                          dark:!univer-text-white
+                                                        `
                                                     : `
-                                                      univer-relative univer-box-border univer-flex univer-min-h-8
-                                                      univer-w-full univer-items-center univer-rounded-md
-                                                      univer-border-none univer-bg-transparent univer-px-2
-                                                      univer-text-left univer-text-sm
-                                                      dark:!univer-text-white
+                                                      univer-relative univer-box-border univer-block univer-w-full
+                                                      univer-border-none univer-bg-transparent univer-p-0
                                                     `,
                                                 option.disabled
                                                     ? 'univer-cursor-not-allowed univer-opacity-60'

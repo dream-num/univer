@@ -34,6 +34,7 @@ import {
     getParagraphMenuCommandParams,
     getParagraphMenuCommandTargetRange,
     getParagraphMenuHiddenItemIds,
+    getParagraphMenuPopupDirection,
     getParagraphMenuResolvedCommand,
     isEmptyParagraphMenuTarget,
     shouldExecuteParagraphMenuMove,
@@ -89,6 +90,20 @@ function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IPara
 }
 
 describe('ParagraphMenu command behavior', () => {
+    it('places the root menu on the right in rtl so submenus can open to the left', () => {
+        expect(getParagraphMenuPopupDirection(300, 212, 8, {
+            anchorRight: 340,
+            direction: 'rtl',
+            viewportWidth: 800,
+        })).toBe('right');
+
+        expect(getParagraphMenuPopupDirection(700, 212, 8, {
+            anchorRight: 740,
+            direction: 'rtl',
+            viewportWidth: 800,
+        })).toBe('left');
+    });
+
     it('applies a heading choice to the paragraph target as a named style change', () => {
         const targetRange: ITextRangeWithStyle = {
             startOffset: 10,

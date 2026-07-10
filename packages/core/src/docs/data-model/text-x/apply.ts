@@ -66,15 +66,12 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
     memoryCursor.reset();
 
     actions.forEach((action) => {
-        // Since updateApply modifies the action(used in undo/redo),
-        // so make a deep copy here.
-        const clonedAction = Tools.deepClone(action);
-
-        switch (clonedAction.t) {
+        switch (action.t) {
             case TextXActionType.RETAIN: {
-                const { coverType, body, len } = clonedAction;
+                const { coverType, body, len } = action;
                 if (body != null) {
-                    updateApply(doc, body, len, memoryCursor.cursor, coverType);
+                    // Attribute apply mutates its payload while normalizing ranges.
+                    updateApply(doc, Tools.deepClone(body), len, memoryCursor.cursor, coverType);
                 }
 
                 memoryCursor.moveCursor(len);
@@ -82,22 +79,28 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
             }
 
             case TextXActionType.INSERT: {
-                const { body, len } = clonedAction;
+                const { body, len } = action;
+                // Plain typing only reads dataStream. Structural inserts still clone their local metadata payload.
+                const insertBody = onlyHasDataStream(body) ? body : Tools.deepClone(body);
 
-                insertApply(doc, body!, len, memoryCursor.cursor);
+                insertApply(doc, insertBody, len, memoryCursor.cursor);
                 memoryCursor.moveCursor(len);
                 break;
             }
 
             case TextXActionType.DELETE: {
-                const { len } = clonedAction;
+                const { len } = action;
                 deleteApply(doc, len, memoryCursor.cursor);
                 break;
             }
             default:
-                throw new Error(`Unknown action type for action: ${clonedAction}.`);
+                throw new Error(`Unknown action type for action: ${action}.`);
         }
     });
 
     return doc;
+}
+
+function onlyHasDataStream(body: IDocumentBody): boolean {
+    return Object.keys(body).length === 1 && typeof body.dataStream === 'string';
 }

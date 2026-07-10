@@ -176,10 +176,12 @@ export function insertParagraphs(
     currentIndex: number,
     preserveMissingParagraphIds = false
 ) {
-    const { paragraphs } = body;
-    if (paragraphs == null) {
+    if (!body.paragraphs && !insertBody.paragraphs?.length) {
         return;
     }
+
+    body.paragraphs ??= [];
+    const { paragraphs } = body;
 
     const { paragraphs: insertParagraphs } = insertBody;
     normalizeInsertedParagraphIdsForDocument(paragraphs, insertParagraphs, currentIndex, {
@@ -344,11 +346,12 @@ export function insertSectionBreaks(
     textLength: number,
     currentIndex: number
 ) {
-    const { sectionBreaks } = body;
-
-    if (sectionBreaks == null) {
+    if (!body.sectionBreaks && !insertBody.sectionBreaks?.length) {
         return;
     }
+
+    body.sectionBreaks ??= [];
+    const { sectionBreaks } = body;
 
     for (let i = 0, len = sectionBreaks.length; i < len; i++) {
         const sectionBreak = sectionBreaks[i];

@@ -16,8 +16,8 @@
 
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { TextXAction } from '../action-types';
-import { describe, expect, it } from 'vitest';
-import { UpdateDocsAttributeType } from '../../../../shared';
+import { describe, expect, it, vi } from 'vitest';
+import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber, HorizontalAlign } from '../../../../types/enum';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
@@ -114,6 +114,49 @@ function getDefaultDocWithCustomRange() {
 }
 
 describe('apply method', () => {
+    it('does not deep-clone plain typing and delete actions', () => {
+        const deepClone = vi.spyOn(Tools, 'deepClone');
+        const doc: IDocumentBody = { dataStream: 'A\r\n' };
+
+        try {
+            TextX.apply(doc, [
+                { t: TextXActionType.RETAIN, len: 1 },
+                { t: TextXActionType.INSERT, len: 1, body: { dataStream: 'B' } },
+                { t: TextXActionType.DELETE, len: 1 },
+            ]);
+
+            expect(doc.dataStream).toBe('AB\n');
+            expect(deepClone).not.toHaveBeenCalled();
+        } finally {
+            deepClone.mockRestore();
+        }
+    });
+
+    it('keeps structural insert action payloads immutable', () => {
+        const doc: IDocumentBody = {
+            dataStream: 'A\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'source' }],
+        };
+        const actions: TextXAction[] = [{
+            t: TextXActionType.INSERT,
+            len: 1,
+            body: {
+                dataStream: '\r',
+                paragraphs: [{
+                    startIndex: 0,
+                    paragraphId: 'inserted',
+                    paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
+                }],
+            },
+        }];
+        const serializedActions = JSON.stringify(actions);
+
+        TextX.apply(doc, actions);
+
+        expect(JSON.stringify(actions)).toBe(serializedActions);
+        expect(doc.paragraphs?.[0]).not.toBe(actions[0].body?.paragraphs?.[0]);
+    });
+
     it('should get the same result when apply two actions by order OR composed first case 1', () => {
         const actionsA: TextXAction[] = [
             {

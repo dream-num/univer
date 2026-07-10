@@ -43,15 +43,25 @@ export class FEnum {
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name !== 'constructor') {
-                // @ts-ignore
-                this.prototype[name] = source.prototype[name];
+                const descriptor = Object.getOwnPropertyDescriptor(source.prototype, name);
+                if (descriptor) {
+                    Object.defineProperty(this.prototype, name, descriptor);
+                } else {
+                    // @ts-ignore
+                    this.prototype[name] = source.prototype[name];
+                }
             }
         });
 
         Object.getOwnPropertyNames(source).forEach((name) => {
             if (name !== 'prototype' && name !== 'name' && name !== 'length') {
-                // @ts-ignore
-                this[name] = source[name];
+                const descriptor = Object.getOwnPropertyDescriptor(source, name);
+                if (descriptor) {
+                    Object.defineProperty(this, name, descriptor);
+                } else {
+                    // @ts-ignore
+                    this[name] = source[name];
+                }
             }
         });
     }

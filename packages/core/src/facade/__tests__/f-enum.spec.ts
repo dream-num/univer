@@ -35,6 +35,7 @@ import {
     Dimension,
     Direction,
     HorizontalAlign,
+    ImageSourceType,
     InterpolationPointType,
     LifecycleStages,
     LocaleType,
@@ -120,5 +121,18 @@ describe('FEnum', () => {
 
         expect(extendedEnum.extraEnum()).toBe('extended:enum');
         expect((ExtendedEnum as typeof ExtendedEnum & { label: string }).label).toBe('enum-source');
+    });
+
+    it('should copy enum getter descriptors when a plugin extends an existing enum name', () => {
+        class EnumSource {
+            get ImageSourceType() {
+                return ImageSourceType;
+            }
+        }
+
+        class ExtendedEnum extends FEnum { }
+
+        expect(() => ExtendedEnum.extend(EnumSource)).not.toThrow();
+        expect(new ExtendedEnum().ImageSourceType).toBe(ImageSourceType);
     });
 });

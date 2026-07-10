@@ -347,7 +347,7 @@ function DropdownMenuSeparator({
 function DropdownMenuShortcut({
     className,
     ...props
-}: ComponentProps<'span'>) {
+}: Omit<ComponentProps<'span'>, 'ref'>) {
     return (
         <span
             className={clsx('univer-ml-auto univer-text-sm univer-tracking-widest univer-opacity-60', className)}

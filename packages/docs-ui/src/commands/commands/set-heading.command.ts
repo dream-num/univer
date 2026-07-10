@@ -55,7 +55,14 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         const selectionService = accessor.get(DocSelectionManagerService);
         const contentInsertRange = params.textRanges ? null : consumeContentInsertRange(accessor, unitId);
         if (contentInsertRange) {
-            return insertNamedStyleParagraph(accessor, doc, params.value, contentInsertRange.startOffset, contentInsertRange.endOffset);
+            return insertNamedStyleParagraph(
+                accessor,
+                doc,
+                params.value,
+                contentInsertRange.startOffset,
+                contentInsertRange.endOffset,
+                contentInsertRange.segmentId
+            );
         }
 
         const selections = params.textRanges ?? selectionService.getTextRanges({ unitId, subUnitId: unitId });
@@ -107,7 +114,8 @@ function insertNamedStyleParagraph(
     doc: DocumentDataModel,
     namedStyleType: NamedStyleType,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
+    segmentId = ''
 ): boolean {
     const textX = BuildTextUtils.selection.replace({
         doc,
@@ -115,6 +123,7 @@ function insertNamedStyleParagraph(
             startOffset,
             endOffset,
             collapsed: startOffset === endOffset,
+            segmentId,
         },
         body: {
             dataStream: '\r',
@@ -135,16 +144,26 @@ function insertNamedStyleParagraph(
 
     const jsonX = JSONX.getInstance();
     const commandService = accessor.get(ICommandService);
-    return Boolean(commandService.syncExecuteCommand<IRichTextEditingMutationParams>(RichTextEditingMutation.id, {
-        actions: jsonX.editOp(textX.serialize(), getRichTextEditPath(doc)),
+    const success = Boolean(commandService.syncExecuteCommand<IRichTextEditingMutationParams>(RichTextEditingMutation.id, {
+        actions: jsonX.editOp(textX.serialize(), getRichTextEditPath(doc, segmentId)),
         isEditing: false,
         textRanges: [{
             startOffset,
             endOffset: startOffset,
             collapsed: true,
         }],
+        segmentId,
         unitId: doc.getUnitId(),
     }));
+
+    if (success) {
+        accessor.get(DocSelectionManagerService).replaceTextRanges([{
+            startOffset,
+            endOffset: startOffset,
+        }], false);
+    }
+
+    return success;
 }
 
 export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {

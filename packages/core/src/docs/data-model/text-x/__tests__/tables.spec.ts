@@ -175,6 +175,31 @@ describe('TextX tables', () => {
         expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([7, 14]);
     });
 
+    it('removes table metadata when exactly the half-open table token range is deleted', () => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const body: IDocumentBody = {
+            dataStream: `${tableStream}After${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 7, paragraphId: 'cell' },
+                { startIndex: tableStream.length + 5, paragraphId: 'after' },
+            ],
+            sectionBreaks: [
+                { startIndex: 8 },
+                { startIndex: tableStream.length + 6 },
+            ],
+            tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
+        };
+        const actions: TextXAction[] = [{ t: TextXActionType.DELETE, len: tableStream.length }];
+
+        TextX.makeInvertible(actions, body);
+        TextX.apply(body, actions);
+
+        expect(body.dataStream).toBe(`After${T.PARAGRAPH}${T.SECTION_BREAK}`);
+        expect(body.tables).toEqual([]);
+        expect(actions[0].body?.tables).toEqual([{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }]);
+    });
+
     it('keeps a following column group outside the table when typing at the table end', () => {
         const T = DataStreamTreeTokenType;
         const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;

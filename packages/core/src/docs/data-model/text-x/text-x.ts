@@ -20,7 +20,7 @@ import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from '.
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { ActionIterator } from './action-iterator';
-import { TextXActionType } from './action-types';
+import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
 import { textXApply } from './apply';
 import { normalizeInsertedParagraphIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
 import { transformBody } from './transform-utils';
@@ -38,7 +38,9 @@ function normalizeInsertActionParagraphIds(
 ) {
     normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
         freshenSplitParagraph: false,
+        preserveExplicitParagraphIds: Boolean((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
         reservedParagraphIds,
+        dataStream: doc.dataStream,
     });
 }
 

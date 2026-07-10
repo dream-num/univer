@@ -17,7 +17,7 @@
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { getParagraphContentStartOffset, PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
 /**
@@ -92,7 +92,8 @@ export class FDocumentParagraph {
      * ```
      */
     getInfo(): IFDocumentParagraphInfo {
-        const { paragraphs = [] } = this._document.getBody(this._segmentId);
+        const body = this._document.getBody(this._segmentId);
+        const { paragraphs = [] } = body;
         const matches = paragraphs
             .map((paragraph, paragraphIndex) => ({ paragraph, paragraphIndex }))
             .filter(({ paragraph }) => paragraph.paragraphId === this._paragraphId);
@@ -106,7 +107,7 @@ export class FDocumentParagraph {
         }
 
         const { paragraph, paragraphIndex } = matches[0];
-        const startOffset = paragraphIndex > 0 ? paragraphs[paragraphIndex - 1].startIndex + 1 : 0;
+        const startOffset = getParagraphContentStartOffset(body, paragraph);
 
         return {
             paragraph,

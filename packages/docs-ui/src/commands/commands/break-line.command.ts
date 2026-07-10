@@ -72,6 +72,7 @@ export function generateParagraphs(
 
 interface IBreakLineCommandParams {
     horizontalLine?: IParagraphBorder;
+    insertionMode?: 'split-paragraph' | 'insert-gap';
     textRange?: ITextRangeParam;
 }
 
@@ -104,7 +105,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             return true;
         }
 
-        const { horizontalLine } = params ?? {};
+        const { horizontalLine, insertionMode = 'split-paragraph' } = params ?? {};
         const { segmentId } = activeTextRange;
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '')?.getBody();
@@ -118,13 +119,16 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const { startOffset, endOffset } = activeTextRange;
 
         const paragraphs = originBody.paragraphs ?? [];
-        const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
+        const insertsAtStructuralGap = insertionMode === 'insert-gap' || isTopLevelStructuralGap(originBody.dataStream, startOffset);
+        const prevParagraph = insertsAtStructuralGap
+            ? undefined
+            : paragraphs.find((p) => p.startIndex >= startOffset);
 
-        if (!prevParagraph) {
+        if (!prevParagraph && !insertsAtStructuralGap) {
             return false;
         }
-        const isAtParagraphEnd = startOffset === prevParagraph.startIndex;
-        const prevParagraphIndex = prevParagraph.startIndex;
+        const isAtParagraphEnd = startOffset === prevParagraph?.startIndex;
+        const prevParagraphIndex = prevParagraph?.startIndex;
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
         const curTextRun = getTextRunAtPosition(originBody, endOffset, defaultTextStyle, styleCache);
@@ -154,7 +158,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             return false;
         }
         const { collapsed } = activeTextRange;
-        const cursorMove = insertBody.dataStream.length;
+        const cursorMove = insertsAtStructuralGap ? 0 : insertBody.dataStream.length;
         const textRanges = [
             {
                 startOffset: startOffset + cursorMove,
@@ -171,6 +175,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
                 actions: [],
                 textRanges,
                 debounce: true,
+                trigger: BreakLineCommand.id,
             },
         };
 
@@ -195,8 +200,8 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             textX.push(...dos);
         }
 
-        if (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED || prevParagraph.paragraphStyle?.headingId) {
-            if (activeTextRange.endOffset < prevParagraphIndex) {
+        if (prevParagraph && (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED || prevParagraph.paragraphStyle?.headingId)) {
+            if (prevParagraphIndex != null && activeTextRange.endOffset < prevParagraphIndex) {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: prevParagraphIndex - activeTextRange.endOffset,
@@ -250,3 +255,15 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         return Boolean(result);
     },
 };
+
+function isTopLevelStructuralGap(dataStream: string, offset: number): boolean {
+    const previousToken = dataStream[offset - 1];
+    const nextToken = dataStream[offset];
+
+    return previousToken === DataStreamTreeTokenType.BLOCK_END ||
+        previousToken === DataStreamTreeTokenType.TABLE_END ||
+        previousToken === DataStreamTreeTokenType.COLUMN_GROUP_END ||
+        nextToken === DataStreamTreeTokenType.BLOCK_START ||
+        nextToken === DataStreamTreeTokenType.TABLE_START ||
+        nextToken === DataStreamTreeTokenType.COLUMN_GROUP_START;
+}

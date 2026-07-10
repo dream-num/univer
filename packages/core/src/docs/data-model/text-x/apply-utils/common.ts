@@ -32,6 +32,13 @@ import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../.
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import { cloneParagraphWithId } from '../../../paragraph-id';
 import { DataStreamTreeTokenType } from '../../types';
+import { PRESERVE_INSERTED_PARAGRAPH_IDS } from '../action-types';
+import {
+    shiftExclusiveRangeOnDelete,
+    shiftExclusiveRangeOnInsert,
+    shiftInclusiveRangeOnDelete,
+    shiftInclusiveRangeOnInsert,
+} from '../build-utils/range-interval';
 import { getBodySlice } from '../utils';
 
 // Internal TextX undo marker: restored delete bodies keep their captured paragraph ids.
@@ -174,7 +181,8 @@ export function insertParagraphs(
     insertBody: IDocumentBody,
     textLength: number,
     currentIndex: number,
-    preserveMissingParagraphIds = false
+    preserveMissingParagraphIds = false,
+    originalDataStream = body.dataStream
 ) {
     if (!body.paragraphs && !insertBody.paragraphs?.length) {
         return;
@@ -188,6 +196,8 @@ export function insertParagraphs(
         freshenSplitParagraph: true,
         preserveMissingParagraphIds,
         preserveExplicitSplitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS]),
+        preserveExplicitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
+        dataStream: originalDataStream,
     });
 
     const paragraphIndexList = [];
@@ -234,20 +244,23 @@ export function normalizeInsertedParagraphIdsForDocument(
     options: {
         freshenSplitParagraph: boolean;
         preserveExplicitSplitParagraphIds?: boolean;
+        preserveExplicitParagraphIds?: boolean;
         preserveMissingParagraphIds?: boolean;
         reservedParagraphIds?: Set<string>;
+        dataStream?: string;
     }
 ) {
     if (!paragraphs || !insertParagraphs?.length) {
         return;
     }
 
-    const splitParagraph = getParagraphSplitByInsert(paragraphs, currentIndex);
+    const splitParagraph = getParagraphSplitByInsert(paragraphs, currentIndex, options.dataStream);
     const firstSplitInsertIndex = splitParagraph ? getFirstInsertedParagraphIndex(insertParagraphs) : -1;
     const splitParagraphId = splitParagraph?.paragraphId;
     const firstInsertedParagraphId = firstSplitInsertIndex === -1 ? undefined : insertParagraphs[firstSplitInsertIndex].paragraphId;
-    const shouldPreserveExplicitSplitParagraphId = options.preserveExplicitSplitParagraphIds && firstInsertedParagraphId != null && firstInsertedParagraphId !== splitParagraphId;
+    const shouldPreserveExplicitSplitParagraphId = (options.preserveExplicitSplitParagraphIds || options.preserveExplicitParagraphIds) && firstInsertedParagraphId != null && firstInsertedParagraphId !== splitParagraphId;
     const existingParagraphIds = collectParagraphIds(paragraphs);
+    const preservedInsertedParagraphIds = new Set<string>();
 
     if (splitParagraphId) {
         existingParagraphIds.delete(splitParagraphId);
@@ -271,6 +284,15 @@ export function normalizeInsertedParagraphIdsForDocument(
     }
 
     for (let i = 0, len = insertParagraphs.length; i < len; i++) {
+        const explicitParagraphId = insertParagraphs[i].paragraphId;
+        if (options.preserveExplicitParagraphIds && explicitParagraphId && !preservedInsertedParagraphIds.has(explicitParagraphId)) {
+            // The corresponding old paragraph is deleted later in the same TextX
+            // operation. A temporary id collision is therefore intentional.
+            insertParagraphs[i] = { ...insertParagraphs[i] };
+            preservedInsertedParagraphIds.add(explicitParagraphId);
+            continue;
+        }
+
         if (i !== firstSplitInsertIndex || splitParagraphId == null || shouldPreserveExplicitSplitParagraphId) {
             insertParagraphs[i] = cloneInsertedParagraphWithId(insertParagraphs[i], existingParagraphIds, options.preserveMissingParagraphIds ?? false);
             continue;
@@ -315,12 +337,35 @@ function cloneInsertedParagraphWithId(
     return cloneParagraphWithId(insertParagraph, existingParagraphIds);
 }
 
-function getParagraphSplitByInsert(paragraphs: IParagraph[], currentIndex: number): IParagraph | undefined {
+const PARAGRAPH_CONTAINER_TOKENS = new Set<string>([
+    DataStreamTreeTokenType.SECTION_BREAK,
+    DataStreamTreeTokenType.TABLE_START,
+    DataStreamTreeTokenType.TABLE_ROW_START,
+    DataStreamTreeTokenType.TABLE_CELL_START,
+    DataStreamTreeTokenType.TABLE_CELL_END,
+    DataStreamTreeTokenType.TABLE_ROW_END,
+    DataStreamTreeTokenType.TABLE_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_START,
+    DataStreamTreeTokenType.COLUMN_START,
+    DataStreamTreeTokenType.COLUMN_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_END,
+    DataStreamTreeTokenType.BLOCK_START,
+    DataStreamTreeTokenType.BLOCK_END,
+]);
+
+function getParagraphSplitByInsert(paragraphs: IParagraph[], currentIndex: number, dataStream?: string): IParagraph | undefined {
     const sortedParagraphs = [...paragraphs].sort((left, right) => left.startIndex - right.startIndex);
 
     for (let i = 0; i < sortedParagraphs.length; i++) {
         const paragraph = sortedParagraphs[i];
-        const paragraphStart = i > 0 ? sortedParagraphs[i - 1].startIndex + 1 : 0;
+        let paragraphStart = i > 0 ? sortedParagraphs[i - 1].startIndex + 1 : 0;
+        while (paragraphStart < paragraph.startIndex) {
+            const token = dataStream?.[paragraphStart];
+            if (!token || !PARAGRAPH_CONTAINER_TOKENS.has(token)) {
+                break;
+            }
+            paragraphStart++;
+        }
 
         if (currentIndex > paragraphStart && currentIndex < paragraph.startIndex) {
             return paragraph;
@@ -424,14 +469,7 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
     const { tables } = body;
     for (let i = 0, len = tables.length; i < len; i++) {
         const table = tables[i];
-        const { startIndex, endIndex } = table;
-
-        if (startIndex >= currentIndex) {
-            table.startIndex += textLength;
-            table.endIndex += textLength;
-        } else if (endIndex > currentIndex) {
-            table.endIndex += textLength;
-        }
+        Object.assign(table, shiftExclusiveRangeOnInsert(table, currentIndex, textLength));
     }
 
     const insertTables = insertBody.tables;
@@ -459,14 +497,7 @@ export function insertColumnGroups(body: IDocumentBody, insertBody: IDocumentBod
     const { columnGroups } = body;
     for (let i = 0, len = columnGroups.length; i < len; i++) {
         const columnGroup = columnGroups[i];
-        const { startIndex, endIndex } = columnGroup;
-
-        if (startIndex >= currentIndex) {
-            columnGroup.startIndex += textLength;
-            columnGroup.endIndex += textLength;
-        } else if (endIndex > currentIndex || (endIndex === currentIndex && body.dataStream[currentIndex + textLength] === DataStreamTreeTokenType.COLUMN_GROUP_END)) {
-            columnGroup.endIndex += textLength;
-        }
+        Object.assign(columnGroup, shiftInclusiveRangeOnInsert(columnGroup, currentIndex, textLength));
     }
 
     const insertColumnGroups = insertBody.columnGroups;
@@ -494,14 +525,7 @@ export function insertBlockRanges(body: IDocumentBody, insertBody: IDocumentBody
     const { blockRanges } = body;
     for (let i = 0, len = blockRanges.length; i < len; i++) {
         const blockRange = blockRanges[i];
-        const { startIndex, endIndex } = blockRange;
-
-        if (startIndex >= currentIndex) {
-            blockRange.startIndex += textLength;
-            blockRange.endIndex += textLength;
-        } else if (endIndex >= currentIndex) {
-            blockRange.endIndex += textLength;
-        }
+        Object.assign(blockRange, shiftInclusiveRangeOnInsert(blockRange, currentIndex, textLength));
     }
 
     const insertBlockRanges = insertBody.blockRanges;
@@ -991,43 +1015,22 @@ export function deleteCustomBlocks(body: IDocumentBody, textLength: number, curr
 
 export function deleteTables(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { tables } = body;
-
-    const startIndex = currentIndex;
-
-    const endIndex = currentIndex + textLength - 1;
     const removeTables: ICustomTable[] = [];
 
     if (tables) {
         const newTables = [];
         for (let i = 0, len = tables.length; i < len; i++) {
             const table = tables[i];
-            const { startIndex: st, endIndex: ed } = table;
-
-            if (startIndex <= st && endIndex >= ed) {
+            const transformed = shiftExclusiveRangeOnDelete(table, currentIndex, textLength);
+            if (!transformed) {
                 removeTables.push({
                     ...table,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
+                    startIndex: table.startIndex - currentIndex,
+                    endIndex: table.endIndex - currentIndex,
                 });
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
-
-                if (segments.length === 0) {
-                    continue;
-                }
-
-                table.startIndex = segments[0];
-                table.endIndex = segments[1];
-
-                // FIXME: @JOCS, why startIndex will equal to endIndex here?
-                if (table.startIndex === table.endIndex) {
-                    continue;
-                }
-            } else if (endIndex < st) {
-                table.startIndex -= textLength;
-                table.endIndex -= textLength;
             }
+            Object.assign(table, transformed);
             newTables.push(table);
         }
         body.tables = newTables;
@@ -1038,42 +1041,22 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
 
 export function deleteColumnGroups(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { columnGroups } = body;
-
-    const startIndex = currentIndex;
-
-    const endIndex = currentIndex + textLength - 1;
     const removeColumnGroups: ICustomColumnGroup[] = [];
 
     if (columnGroups) {
         const newColumnGroups = [];
         for (let i = 0, len = columnGroups.length; i < len; i++) {
             const columnGroup = columnGroups[i];
-            const { startIndex: st, endIndex: ed } = columnGroup;
-
-            if (startIndex <= st && endIndex >= ed) {
+            const transformed = shiftInclusiveRangeOnDelete(columnGroup, currentIndex, textLength);
+            if (!transformed) {
                 removeColumnGroups.push({
                     ...columnGroup,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
+                    startIndex: columnGroup.startIndex - currentIndex,
+                    endIndex: columnGroup.endIndex - currentIndex,
                 });
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
-
-                if (segments.length === 0) {
-                    continue;
-                }
-
-                columnGroup.startIndex = segments[0];
-                columnGroup.endIndex = segments[1];
-
-                if (columnGroup.startIndex === columnGroup.endIndex) {
-                    continue;
-                }
-            } else if (endIndex < st) {
-                columnGroup.startIndex -= textLength;
-                columnGroup.endIndex -= textLength;
             }
+            Object.assign(columnGroup, transformed);
             newColumnGroups.push(columnGroup);
         }
         body.columnGroups = newColumnGroups;
@@ -1084,9 +1067,6 @@ export function deleteColumnGroups(body: IDocumentBody, textLength: number, curr
 
 export function deleteCustomRanges(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { customRanges } = body;
-
-    const startIndex = currentIndex;
-    const endIndex = currentIndex + textLength - 1;
     // TODO: @JOCS, removeCustomRanges is not used, should we remove it?
     const removeCustomRanges: ICustomRange[] = [];
 
@@ -1094,24 +1074,12 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         const newCustomRanges = [];
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
-            const { startIndex: st, endIndex: ed } = customRange;
-            // delete decoration
-            if (st >= startIndex && ed <= endIndex) {
+            const transformed = shiftInclusiveRangeOnDelete(customRange, currentIndex, textLength);
+            if (!transformed) {
                 removeCustomRanges.push(customRange);
                 continue;
-            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
-
-                if (segments.length === 0) {
-                    continue;
-                }
-
-                customRange.startIndex = segments[0];
-                customRange.endIndex = segments[1];
-            } else if (endIndex < st) {
-                customRange.startIndex -= textLength;
-                customRange.endIndex -= textLength;
             }
+            Object.assign(customRange, transformed);
             newCustomRanges.push(customRange);
         }
 
@@ -1123,33 +1091,18 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
 
 export function deleteBlockRanges(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { blockRanges } = body;
-
-    const startIndex = currentIndex;
-    const endIndex = currentIndex + textLength - 1;
     const removeBlockRanges: IDocumentBlockRange[] = [];
 
     if (blockRanges) {
         const newBlockRanges = [];
         for (let i = 0, len = blockRanges.length; i < len; i++) {
             const blockRange = blockRanges[i];
-            const { startIndex: st, endIndex: ed } = blockRange;
-            if (st >= startIndex && ed <= endIndex) {
+            const transformed = shiftInclusiveRangeOnDelete(blockRange, currentIndex, textLength);
+            if (!transformed) {
                 removeBlockRanges.push(blockRange);
                 continue;
-            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
-
-                if (segments.length === 0) {
-                    removeBlockRanges.push(blockRange);
-                    continue;
-                }
-
-                blockRange.startIndex = segments[0];
-                blockRange.endIndex = segments[1];
-            } else if (endIndex < st) {
-                blockRange.startIndex -= textLength;
-                blockRange.endIndex -= textLength;
             }
+            Object.assign(blockRange, transformed);
             newBlockRanges.push(blockRange);
         }
 

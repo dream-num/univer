@@ -47,7 +47,6 @@ import {
 } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { BreakLineCommand } from '../commands/commands/break-line.command';
 import {
     DocCopyCommand,
     DocCopyCurrentParagraphCommand,
@@ -1060,15 +1059,11 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 return;
             }
 
-            const insertRange = {
+            docContentInsertService.setInsertRange({
+                unitId: popup.unitId,
                 startOffset: latestTarget.moveRange.endOffset,
                 endOffset: latestTarget.moveRange.endOffset,
-                collapsed: true,
                 segmentId: activeParagraphBound?.segmentId,
-            };
-            replaceSelection(insertRange);
-            await commandService.executeCommand(BreakLineCommand.id, {
-                textRange: insertRange,
             });
             const wrappedCommandId = typeof commandParams?.commandId === 'string' ? commandParams.commandId : undefined;
             if (wrappedCommandId) {

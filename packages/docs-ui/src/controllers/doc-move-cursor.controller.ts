@@ -1066,10 +1066,9 @@ export class DocMoveCursorController extends Disposable {
         }
 
         if (this._isColumnGroupContentPage(page)) {
-            const exitTarget = this._getColumnGroupExitLineTarget(page, direction, offsetLeft);
-            if (exitTarget != null) {
-                return exitTarget;
-            }
+            // A column page is nested under a column-group column, not under the
+            // document skeleton. Stop here even when the host has no adjacent line.
+            return this._getColumnGroupExitLineTarget(page, direction, offsetLeft);
         }
 
         if (this._isTableCellContentPage(page)) {
@@ -1078,7 +1077,7 @@ export class DocMoveCursorController extends Disposable {
 
         const skeleton: Nullable<IDocumentSkeletonCached> = page.parent as IDocumentSkeletonCached;
 
-        if (skeleton == null) {
+        if (skeleton?.pages == null) {
             return;
         }
 

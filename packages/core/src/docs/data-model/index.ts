@@ -31,7 +31,7 @@ export {
 } from './rich-text-builder';
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './subdocument';
 export { ActionIterator } from './text-x/action-iterator';
-export { TextXActionType } from './text-x/action-types';
+export { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './text-x/action-types';
 export type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './text-x/action-types';
 export { normalizeTextRuns, RESTORE_INSERTED_PARAGRAPH_IDS } from './text-x/apply-utils/common';
 export { updateAttributeByDelete } from './text-x/apply-utils/delete-apply';

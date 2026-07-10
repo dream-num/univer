@@ -34,11 +34,12 @@ export function updateAttributeByInsert(
     textLength: number,
     currentIndex: number
 ) {
+    const originalDataStream = body.dataStream;
     body.dataStream = insertTextToContent(body.dataStream, currentIndex, insertBody.dataStream);
 
     insertTextRuns(body, insertBody, textLength, currentIndex);
 
-    insertParagraphs(body, insertBody, textLength, currentIndex);
+    insertParagraphs(body, insertBody, textLength, currentIndex, false, originalDataStream);
 
     insertSectionBreaks(body, insertBody, textLength, currentIndex);
 

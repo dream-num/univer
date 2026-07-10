@@ -253,7 +253,7 @@ describe('test cases in clipboard', () => {
     }
 
     function createCustomBlockDocumentData(): IDocumentData {
-        const dataStream = `${DataStreamTreeTokenType.BLOCK_START}\rBody\r\n`;
+        const dataStream = `${DataStreamTreeTokenType.CUSTOM_BLOCK}\rBody\r\n`;
 
         return {
             id: 'test-doc',
@@ -486,7 +486,7 @@ describe('test cases in clipboard', () => {
         });
 
         it('Should paste custom block drawings with new ids for internal clipboard content', async () => {
-            const blockDataStream = `${DataStreamTreeTokenType.BLOCK_START}\r`;
+            const blockDataStream = `${DataStreamTreeTokenType.CUSTOM_BLOCK}\r`;
             const commandParams: IInnerPasteCommandParams = {
                 segmentId: '',
                 doc: {
@@ -563,7 +563,7 @@ describe('test cases in clipboard', () => {
 
             const snapshot = getDocumentSnapshot();
 
-            expect(snapshot?.body?.dataStream.startsWith(DataStreamTreeTokenType.BLOCK_START)).toBe(false);
+            expect(snapshot?.body?.dataStream.startsWith(DataStreamTreeTokenType.CUSTOM_BLOCK)).toBe(false);
             expect(snapshot?.body?.customBlocks ?? []).toHaveLength(0);
             expect(snapshot?.drawings?.['drawing-1']).toBeUndefined();
             expect(snapshot?.drawingsOrder ?? []).toHaveLength(0);

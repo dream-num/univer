@@ -16,7 +16,7 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { PresetListType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
     createBulletDocument,
@@ -122,6 +122,40 @@ describe('FDocumentParagraph', () => {
                 },
             },
         ]);
+    });
+
+    it('keeps a paragraph after a block scoped outside the block end token', () => {
+        const T = DataStreamTreeTokenType;
+        createDocumentFacade(createDocumentData('doc-after-block', {
+            dataStream: `${T.BLOCK_START}Code${T.PARAGRAPH}${T.BLOCK_END}After${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 5, paragraphId: 'para_code' },
+                { startIndex: 12, paragraphId: 'para_after' },
+            ],
+            sectionBreaks: [{ startIndex: 13 }],
+            blockRanges: [{
+                blockId: 'code-1',
+                blockType: DocumentBlockRangeType.CODE,
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        }));
+
+        const paragraph = document.getParagraphs()[1];
+
+        expect(paragraph.getInfo()).toMatchObject({ startOffset: 7, endOffset: 12 });
+        expect(paragraph.getText()).toBe('After');
+        expect(document.insertParagraph(1, 'Between').getText()).toBe('Between');
+        expect(document.save().body).toMatchObject({
+            dataStream: `${T.BLOCK_START}Code${T.PARAGRAPH}${T.BLOCK_END}Between${T.PARAGRAPH}After${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            blockRanges: [{ startIndex: 0, endIndex: 6 }],
+        });
+        const paragraphAfterInsert = document.getParagraphs().find((item) => item.getText() === 'After');
+        expect(paragraphAfterInsert?.setText('Changed')).toBe(true);
+        expect(document.save().body).toMatchObject({
+            dataStream: `${T.BLOCK_START}Code${T.PARAGRAPH}${T.BLOCK_END}Between${T.PARAGRAPH}Changed${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            blockRanges: [{ startIndex: 0, endIndex: 6 }],
+        });
     });
 
     it('keeps paragraph edits scoped to their header segment', () => {

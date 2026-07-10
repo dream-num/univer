@@ -21,6 +21,7 @@ import { BreakLineCommand } from './break-line.command';
 import { getCurrentParagraph } from './util';
 
 interface IHorizontalCommandParams {
+    insertionMode?: 'split-paragraph' | 'insert-gap';
     insertRange?: ITextRangeParam;
 }
 
@@ -41,6 +42,7 @@ export const HorizontalLineCommand: ICommand<IHorizontalCommandParams> = {
                 width: 1,
                 dashStyle: DashStyleType.SOLID,
             },
+            insertionMode: params?.insertionMode,
             textRange: params?.insertRange,
         });
     },
@@ -60,6 +62,7 @@ export const InsertHorizontalLineBellowCommand: ICommand<IHorizontalCommandParam
         }
         if (contentInsertRange) {
             return commandService.syncExecuteCommand(HorizontalLineCommand.id, {
+                insertionMode: 'insert-gap',
                 insertRange: {
                     startOffset: contentInsertRange.startOffset,
                     endOffset: contentInsertRange.endOffset,

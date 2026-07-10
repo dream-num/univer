@@ -28,6 +28,7 @@ import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { getBodySlice, getBodySliceForTextXAction, getTextRunSlice } from '../utils';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
+import { getBlockRangeInterval } from './range-interval';
 
 export interface IDeleteCustomRangeParam {
     rangeId: string;
@@ -163,11 +164,19 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 // paragraph information needs to be preserved when performing the CUT operation
 
 interface IStructuralTextContainer {
+    atomicRange?: { endOffset: number; startOffset: number };
     startOffset: number;
     endOffset: number;
     paragraphs: number[];
     sectionBreaks: number[];
     require: 'paragraph-or-section' | 'paragraph-and-section';
+}
+
+function isAtomicContainerDeleted(container: IStructuralTextContainer, selections: ITextRange[]): boolean {
+    return Boolean(container.atomicRange && selections.some((selection) =>
+        selection.startOffset <= container.atomicRange!.startOffset &&
+        selection.endOffset >= container.atomicRange!.endOffset
+    ));
 }
 
 function isOffsetDeleted(offset: number, selections: ITextRange[]) {
@@ -200,6 +209,66 @@ function protectDeletedColumnBoundaryTokens(body: IDocumentBody, selections: ITe
             protectedOffsets.add(i);
         }
     }
+}
+
+function protectPartiallyDeletedBlockBoundaryTokens(body: IDocumentBody, selections: ITextRange[], protectedOffsets: Set<number>) {
+    for (const blockRange of body.blockRanges ?? []) {
+        const blockInterval = getBlockRangeInterval(blockRange);
+        const fullyDeleted = selections.some((selection) =>
+            selection.startOffset <= blockInterval.startOffset &&
+            selection.endOffset >= blockInterval.endOffset
+        );
+        if (fullyDeleted) {
+            continue;
+        }
+
+        if (isOffsetDeleted(blockRange.startIndex, selections)) {
+            protectedOffsets.add(blockRange.startIndex);
+        }
+        if (isOffsetDeleted(blockRange.endIndex, selections)) {
+            protectedOffsets.add(blockRange.endIndex);
+        }
+    }
+}
+
+function collectBlockTextContainers(body: IDocumentBody): IStructuralTextContainer[] {
+    const blockRanges = [...(body.blockRanges ?? [])].sort((left, right) => left.startIndex - right.startIndex);
+    const containers = blockRanges.map((blockRange) => {
+        const atomicRange = getBlockRangeInterval(blockRange);
+        return {
+            atomicRange,
+            startOffset: atomicRange.startOffset + 1,
+            endOffset: atomicRange.endOffset - 1,
+            paragraphs: [] as number[],
+            sectionBreaks: [] as number[],
+            require: 'paragraph-or-section' as const,
+        };
+    });
+
+    const assignPoint = (offset: number, key: 'paragraphs' | 'sectionBreaks') => {
+        let low = 0;
+        let high = blockRanges.length - 1;
+        let index = -1;
+        while (low <= high) {
+            const middle = Math.floor((low + high) / 2);
+            const blockRange = blockRanges[middle];
+            if (offset <= blockRange.startIndex) {
+                high = middle - 1;
+            } else if (offset >= blockRange.endIndex) {
+                low = middle + 1;
+            } else {
+                index = middle;
+                break;
+            }
+        }
+        if (index >= 0) {
+            containers[index][key].push(offset);
+        }
+    };
+    (body.paragraphs ?? []).forEach((paragraph) => assignPoint(paragraph.startIndex, 'paragraphs'));
+    (body.sectionBreaks ?? []).forEach((sectionBreak) => assignPoint(sectionBreak.startIndex, 'sectionBreaks'));
+
+    return containers;
 }
 
 function collectStructuralTextContainers(body: IDocumentBody): IStructuralTextContainer[] {
@@ -263,7 +332,40 @@ function collectStructuralTextContainers(body: IDocumentBody): IStructuralTextCo
         }
     }
 
+    containers.push(...collectBlockTextContainers(body));
+
     return containers;
+}
+
+function protectRequiredContainerChildren(
+    container: IStructuralTextContainer,
+    selections: ITextRange[],
+    insertBody: Nullable<IDocumentBody>,
+    insertOffset: number,
+    protectedOffsets: Set<number>
+): void {
+    if (isAtomicContainerDeleted(container, selections)) {
+        return;
+    }
+
+    const insertAppliesToContainer = insertBody && isInsertInContainer(insertOffset, container);
+    const insertDataStream = insertBody?.dataStream ?? '';
+    const insertHasParagraph = insertDataStream.includes(DataStreamTreeTokenType.PARAGRAPH);
+    const insertHasSectionBreak = insertDataStream.includes(DataStreamTreeTokenType.SECTION_BREAK);
+    if (container.require === 'paragraph-or-section') {
+        const offsets = [...container.paragraphs, ...container.sectionBreaks].sort((a, b) => a - b);
+        if (!insertAppliesToContainer || (!insertHasParagraph && !insertHasSectionBreak)) {
+            protectLastDeletedOffset(offsets, selections, protectedOffsets);
+        }
+        return;
+    }
+
+    if (!insertAppliesToContainer || !insertHasParagraph) {
+        protectLastDeletedOffset(container.paragraphs, selections, protectedOffsets);
+    }
+    if (!insertAppliesToContainer || !insertHasSectionBreak) {
+        protectLastDeletedOffset(container.sectionBreaks, selections, protectedOffsets);
+    }
 }
 
 function normalizeSelectionsForStructuralSentinels(
@@ -276,32 +378,14 @@ function normalizeSelectionsForStructuralSentinels(
     }
 
     const insertOffset = selections[0].startOffset;
-    const insertDataStream = insertBody?.dataStream ?? '';
-    const insertHasParagraph = insertDataStream.includes(DataStreamTreeTokenType.PARAGRAPH);
-    const insertHasSectionBreak = insertDataStream.includes(DataStreamTreeTokenType.SECTION_BREAK);
     const protectedOffsets = new Set<number>();
 
     // Plain text edits must not leave the document root, columns, or table cells without parser children.
     collectStructuralTextContainers(body).forEach((container) => {
-        const insertAppliesToContainer = insertBody && isInsertInContainer(insertOffset, container);
-
-        if (container.require === 'paragraph-or-section') {
-            const offsets = [...container.paragraphs, ...container.sectionBreaks].sort((a, b) => a - b);
-            if (!insertAppliesToContainer || (!insertHasParagraph && !insertHasSectionBreak)) {
-                protectLastDeletedOffset(offsets, selections, protectedOffsets);
-            }
-            return;
-        }
-
-        if (!insertAppliesToContainer || !insertHasParagraph) {
-            protectLastDeletedOffset(container.paragraphs, selections, protectedOffsets);
-        }
-
-        if (!insertAppliesToContainer || !insertHasSectionBreak) {
-            protectLastDeletedOffset(container.sectionBreaks, selections, protectedOffsets);
-        }
+        protectRequiredContainerChildren(container, selections, insertBody, insertOffset, protectedOffsets);
     });
     protectDeletedColumnBoundaryTokens(body, selections, protectedOffsets);
+    protectPartiallyDeletedBlockBoundaryTokens(body, selections, protectedOffsets);
 
     if (!protectedOffsets.size) {
         return selections;

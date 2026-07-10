@@ -280,6 +280,30 @@ describe('DocMoveCursorController movement helpers', () => {
         expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(beforeGlyph, -1);
     });
 
+    it('stops safely at a terminal column group when no following body line exists', () => {
+        const controller = createControllerHarness();
+        const columnGlyph = createGlyph('C', 12);
+        const blockLine = createBlockLine(11, 40);
+        const bodyColumn = createColumn([blockLine]);
+        const bodyPage = createPage([bodyColumn], DocumentSkeletonPageType.BODY);
+        const columnPage = createPage([createColumn([createLine([columnGlyph], 30, 0)])], DocumentSkeletonPageType.CELL);
+        const columnGroupColumn = { columnId: 'b', left: 100, top: 0, width: 80, height: 20, st: 30, ed: 35, page: columnPage };
+        const columnGroup = createColumnGroup([columnGroupColumn], bodyPage);
+        bodyPage.skeColumnGroups.set('cg-1', columnGroup as never);
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn(),
+        };
+
+        expect(controller._getTopOrBottomPosition(
+            skeleton,
+            columnGlyph,
+            { segmentPage: -1 },
+            true
+        )).toBeUndefined();
+        expect(skeleton.findPositionByGlyph).not.toHaveBeenCalled();
+    });
+
     it('enters the nearest docs table cell when moving vertically from a body line', () => {
         const controller = createControllerHarness();
         const bodyGlyph = createGlyph('A', 118);

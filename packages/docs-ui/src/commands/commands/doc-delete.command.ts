@@ -23,6 +23,7 @@ import {
     CommandType,
     DataStreamTreeTokenType,
     DeleteDirection,
+    getBlockRangeInterval,
     getRichTextEditPath,
     HorizontalAlign,
     ICommandService,
@@ -407,18 +408,10 @@ export function getCursorWhenDelete(textRanges: Readonly<Nullable<ITextRangeWith
     return cursor;
 }
 
-function getBlockRangeEndTokenOffset(body: IDocumentBody, blockRange: Pick<IDocumentBlockRange, 'endIndex'>): number {
-    return body.dataStream[blockRange.endIndex] === DataStreamTreeTokenType.BLOCK_END
-        ? blockRange.endIndex
-        : body.dataStream[blockRange.endIndex + 1] === DataStreamTreeTokenType.BLOCK_END
-            ? blockRange.endIndex + 1
-            : blockRange.endIndex;
-}
-
 export function isDeleteOffsetInsideBlockRange(body: IDocumentBody, offset: number): boolean {
     return body.blockRanges?.some((blockRange) => {
-        const endTokenOffset = getBlockRangeEndTokenOffset(body, blockRange);
-        return blockRange.startIndex < offset && offset < endTokenOffset;
+        const interval = getBlockRangeInterval(blockRange);
+        return interval.startOffset < offset && offset < interval.endOffset - 1;
     }) ?? false;
 }
 

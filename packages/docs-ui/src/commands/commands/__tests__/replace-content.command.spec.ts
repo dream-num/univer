@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -153,6 +153,8 @@ describe('replace or cover content of document', () => {
 
     describe('replace selected document content', () => {
         it('replaces the document snapshot including style and table metadata', async () => {
+            const T = DataStreamTreeTokenType;
+            const columnDataStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}Left${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}Right${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.PARAGRAPH}${T.SECTION_BREAK}`;
             const tableSource = {
                 table_1: {
                     tableId: 'table_1',
@@ -162,7 +164,7 @@ describe('replace or cover content of document', () => {
             };
             const columnGroups = [{
                 startIndex: 0,
-                endIndex: 9,
+                endIndex: 16,
                 columnGroupId: 'column_group_1',
                 columns: [
                     { columnId: 'column_1', widthRatio: 1 },
@@ -175,16 +177,14 @@ describe('replace or cover content of document', () => {
             const nextSnapshot = {
                 ...getDocumentData(),
                 body: {
-                    dataStream: 'Snapshot\r\n',
-                    textRuns: [{
-                        st: 0,
-                        ed: 8,
-                        ts: {
-                            fs: 16,
-                        },
-                    }],
-                    paragraphs: [{ paragraphId: 'para_replace_snapshot', startIndex: 8 }],
-                    sectionBreaks: [{ startIndex: 9 }],
+                    dataStream: columnDataStream,
+                    textRuns: [],
+                    paragraphs: [
+                        { paragraphId: 'para_replace_left', startIndex: 6 },
+                        { paragraphId: 'para_replace_right', startIndex: 14 },
+                        { paragraphId: 'para_replace_after', startIndex: 17 },
+                    ],
+                    sectionBreaks: [{ startIndex: 18 }],
                     customBlocks: [],
                     columnGroups,
                 },
@@ -215,8 +215,8 @@ describe('replace or cover content of document', () => {
                 unitId: 'test-doc',
                 snapshot: nextSnapshot,
                 textRanges: [{
-                    startOffset: 8,
-                    endOffset: 8,
+                    startOffset: 17,
+                    endOffset: 17,
                     collapsed: true,
                 }],
                 options: {
@@ -226,7 +226,7 @@ describe('replace or cover content of document', () => {
 
             const univerInstanceService = get(IUniverInstanceService);
             const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
-            expect(docsModel?.getBody()?.dataStream).toBe('Snapshot\r\n');
+            expect(docsModel?.getBody()?.dataStream).toBe(columnDataStream);
             expect(docsModel?.getDocumentStyle().pageSize).toEqual({ width: 500, height: 700 });
             expect(docsModel?.getSnapshot().tableSource).toEqual(tableSource);
             expect(docsModel?.getBody()?.columnGroups).toEqual(columnGroups);

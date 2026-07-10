@@ -486,7 +486,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
     },
 };
 
-function insertList(accessor: IAccessor, listType: PresetListType) {
+function insertList(accessor: IAccessor, listType: PresetListType, trigger: string) {
     const commandService = accessor.get(ICommandService);
     const docDataModel = accessor.get(IUniverInstanceService).getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!docDataModel) {
@@ -545,6 +545,7 @@ function insertList(accessor: IAccessor, listType: PresetListType) {
                 collapsed: true,
             }],
             isEditing: false,
+            trigger,
         },
     };
     const jsonX = JSONX.getInstance();
@@ -559,7 +560,7 @@ export const InsertBulletListBellowCommand: ICommand<IQuickListCommandParams> = 
     id: 'doc.command.insert-bullet-list-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
-        return insertList(accessor, PresetListType.BULLET_LIST);
+        return insertList(accessor, PresetListType.BULLET_LIST, InsertBulletListBellowCommand.id);
     },
 };
 
@@ -567,7 +568,7 @@ export const InsertOrderListBellowCommand: ICommand<IQuickListCommandParams> = {
     id: 'doc.command.insert-order-list-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
-        return insertList(accessor, PresetListType.ORDER_LIST);
+        return insertList(accessor, PresetListType.ORDER_LIST, InsertOrderListBellowCommand.id);
     },
 };
 
@@ -575,7 +576,7 @@ export const InsertCheckListBellowCommand: ICommand<IQuickListCommandParams> = {
     id: 'doc.command.insert-check-list-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
-        return insertList(accessor, PresetListType.CHECK_LIST);
+        return insertList(accessor, PresetListType.CHECK_LIST, InsertCheckListBellowCommand.id);
     },
 };
 

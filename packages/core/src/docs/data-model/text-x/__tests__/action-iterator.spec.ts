@@ -158,11 +158,12 @@ describe('Test action iterator', () => {
     it('preserves table metadata on the chunk containing the table end when an insert action is split', () => {
         const T = DataStreamTreeTokenType;
         const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}`;
+        const tableEnd = tableStream.length - 1;
         const iterator = new ActionIterator([{
             t: TextXActionType.INSERT,
             body: {
                 dataStream: tableStream,
-                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
+                tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
             },
             len: tableStream.length,
         }]);
@@ -171,24 +172,24 @@ describe('Test action iterator', () => {
         const restAction = iterator.next();
 
         expect(partialAction.body?.tables).toBeUndefined();
-        expect(restAction.body?.tables).toEqual([{ startIndex: -4, endIndex: tableStream.length - 4, tableId: 'table-1' }]);
+        expect(restAction.body?.tables).toEqual([{ startIndex: -4, endIndex: tableEnd - 4, tableId: 'table-1' }]);
 
         const body = { dataStream: '' };
         TextX.apply(body, [partialAction, restAction]);
         expect(body).toMatchObject({
             dataStream: tableStream,
-            tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
+            tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
         });
 
         const fullIterator = new ActionIterator([{
             t: TextXActionType.INSERT,
             body: {
                 dataStream: tableStream,
-                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
+                tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
             },
             len: tableStream.length,
         }]);
 
-        expect(fullIterator.next().body?.tables).toEqual([{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }]);
+        expect(fullIterator.next().body?.tables).toEqual([{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }]);
     });
 });

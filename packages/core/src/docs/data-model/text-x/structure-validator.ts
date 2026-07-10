@@ -22,6 +22,8 @@ export type DocStructureIssueCode =
     | 'missing-root-section-break'
     | 'paragraph-token-mismatch'
     | 'section-break-token-mismatch'
+    | 'table-start-token-mismatch'
+    | 'table-end-token-mismatch'
     | 'empty-column'
     | 'empty-table-cell'
     | 'unbalanced-column-group'
@@ -85,6 +87,33 @@ function validateSectionBreakMetadata(body: IDocumentBody, issues: IDocStructure
                 'section-break-token-mismatch',
                 'Section break metadata must point to a section break sentinel.',
                 sectionBreak.startIndex
+            ));
+        }
+    }
+}
+
+function validateTableMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
+    for (const table of body.tables ?? []) {
+        if (!Number.isInteger(table.startIndex) || body.dataStream[table.startIndex] !== DataStreamTreeTokenType.TABLE_START) {
+            issues.push(createIssue(
+                context,
+                'table-start-token-mismatch',
+                'Table startIndex must point to a table start sentinel.',
+                table.startIndex
+            ));
+        }
+
+        if (
+            !Number.isInteger(table.endIndex) ||
+            table.endIndex <= table.startIndex ||
+            table.endIndex > body.dataStream.length ||
+            body.dataStream[table.endIndex - 1] !== DataStreamTreeTokenType.TABLE_END
+        ) {
+            issues.push(createIssue(
+                context,
+                'table-end-token-mismatch',
+                'Table endIndex must be the exclusive boundary immediately after a table end sentinel.',
+                table.endIndex
             ));
         }
     }
@@ -185,6 +214,7 @@ export function validateDocBodyStructure(
     validateMinimumRootSentinels(body, issues, context);
     validateParagraphMetadata(body, issues, context);
     validateSectionBreakMetadata(body, issues, context);
+    validateTableMetadata(body, issues, context);
     validateStructuralContainers(body, issues, context);
 
     return issues;

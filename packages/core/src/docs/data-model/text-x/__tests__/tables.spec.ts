@@ -150,7 +150,7 @@ describe('TextX tables', () => {
         expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([9, 20]);
     });
 
-    it('shifts table end metadata when text is inserted before the paragraph after a table', () => {
+    it('keeps the half-open table end fixed when text is inserted after a table', () => {
         const T = DataStreamTreeTokenType;
         const body: IDocumentBody = {
             dataStream: `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
@@ -171,7 +171,78 @@ describe('TextX tables', () => {
         ]);
 
         expect(body.dataStream).toBe(`${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}啊手${T.PARAGRAPH}${T.SECTION_BREAK}`);
-        expect(body.tables).toEqual([{ startIndex: 0, endIndex: 14, tableId: 'table-1' }]);
+        expect(body.tables).toEqual([{ startIndex: 0, endIndex: 12, tableId: 'table-1' }]);
+        expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([7, 14]);
+    });
+
+    it('keeps a following column group outside the table when typing at the table end', () => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const columnGroupStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}Lane${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`;
+        const tableEnd = tableStream.length;
+        const columnGroupStart = tableEnd + 1;
+        const body: IDocumentBody = {
+            dataStream: `${tableStream}${T.PARAGRAPH}${columnGroupStream}`,
+            paragraphs: [
+                { startIndex: 7, paragraphId: 'cell' },
+                { startIndex: tableEnd, paragraphId: 'after-table' },
+                { startIndex: columnGroupStart + 6, paragraphId: 'column' },
+            ],
+            sectionBreaks: [
+                { startIndex: 8 },
+                { startIndex: columnGroupStart + columnGroupStream.length - 1 },
+            ],
+            tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
+            columnGroups: [{
+                startIndex: columnGroupStart,
+                endIndex: columnGroupStart + columnGroupStream.length - 2,
+                columnGroupId: 'column-group-1',
+            }],
+        };
+
+        TextX.apply(body, [
+            { t: TextXActionType.RETAIN, len: tableEnd },
+            { t: TextXActionType.INSERT, body: { dataStream: 'After' }, len: 5 },
+        ]);
+
+        expect(body.tables).toEqual([{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }]);
+        expect(body.columnGroups).toEqual([{
+            startIndex: columnGroupStart + 5,
+            endIndex: columnGroupStart + columnGroupStream.length + 3,
+            columnGroupId: 'column-group-1',
+        }]);
+        expect(body.dataStream.slice(tableEnd, tableEnd + 5)).toBe('After');
+        expect(body.dataStream[tableEnd + 5]).toBe(T.PARAGRAPH);
+    });
+
+    it('keeps the table end fixed across composed IME updates after a table', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 7, paragraphId: 'cell' },
+                { startIndex: 12, paragraphId: 'after' },
+            ],
+            sectionBreaks: [
+                { startIndex: 8 },
+                { startIndex: 13 },
+            ],
+            tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
+        };
+        const firstUpdate: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: 12 },
+            { t: TextXActionType.INSERT, body: { dataStream: 'A' }, len: 1 },
+        ];
+        const secondUpdate: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: 12 },
+            { t: TextXActionType.DELETE, len: 1 },
+            { t: TextXActionType.INSERT, body: { dataStream: 'AB' }, len: 2 },
+        ];
+
+        TextX.apply(body, TextX.compose(firstUpdate, secondUpdate));
+
+        expect(body.dataStream).toBe(`${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}AB${T.PARAGRAPH}${T.SECTION_BREAK}`);
+        expect(body.tables).toEqual([{ startIndex: 0, endIndex: 12, tableId: 'table-1' }]);
         expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([7, 14]);
     });
 

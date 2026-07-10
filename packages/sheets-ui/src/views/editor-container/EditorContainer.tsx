@@ -17,13 +17,34 @@
 import type { Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, Injector, IUniverInstanceService, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    DisposableCollection,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_FX_BAR_EDITOR,
+    ICommandService,
+    IContextService,
+    Injector,
+    IUniverInstanceService,
+    ThemeService,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
-import * as React from 'react';
+import {
+    ComponentManager,
+    DISABLE_AUTO_FOCUS_KEY,
+    MetaKeys,
+    useDependency,
+    useEvent,
+    useObservable,
+    useSidebarClick,
+} from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import {
+    SetCellEditVisibleArrowOperation,
+    SetCellEditVisibleOperation,
+} from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -39,8 +60,6 @@ import {
 } from '../../services/sheet-embed-integration.service';
 import { focusSheetCellEditorElement, registerSheetCellEditorRuntimePortal } from './focus-editor';
 import { useKeyEventConfig } from './hooks';
-
-interface ICellIEditorProps { }
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -180,7 +199,7 @@ function isEmbedRuntimeEditorOrPopup(target: EventTarget | null | undefined): bo
  * Cell editor container.
  * @returns the rendered cell editor container.
  */
-export const EditorContainer: React.FC<ICellIEditorProps> = () => {
+export function EditorContainer() {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
     });

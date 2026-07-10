@@ -14,19 +14,87 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDrawingSearch, IPosition, IRange, ITransformState, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IDisposable,
+    IDrawingSearch,
+    IPosition,
+    IRange,
+    ITransformState,
+    Nullable,
+    Serializable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetFrozenMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import type { IFloatDomData, IInsertDrawingCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type {
+    BaseObject,
+    IBoundRectNoAngle,
+    IRectProps,
+    IRender,
+    Scene,
+    SpreadsheetSkeleton,
+} from '@univerjs/engine-render';
+import type {
+    ISetFrozenMutationParams,
+    ISetSelectionsOperationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+} from '@univerjs/sheets';
+import type {
+    IFloatDomData,
+    IInsertDrawingCommandParams,
+    ISetDrawingCommandParams,
+    ISheetDrawing,
+    ISheetDrawingPosition,
+    ISheetFloatDom,
+} from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    DrawingTypeEnum,
+    fromEventSubject,
+    generateRandomId,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
+    Optional,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { disposeDrawingRenderObject, insertGroupObject } from '@univerjs/drawing-ui';
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, Image as RenderImage, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
-import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingApplyMutation, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    DRAWING_OBJECT_LAYER_INDEX,
+    IRenderManagerService,
+    ObjectType,
+    Rect,
+    Image as RenderImage,
+    SHEET_VIEWPORT_KEY,
+} from '@univerjs/engine-render';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    getSheetCommandTarget,
+    SetFrozenMutation,
+    SetSelectionsOperation,
+    SetWorksheetRowAutoHeightMutation,
+} from '@univerjs/sheets';
+import {
+    DrawingApplyType,
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    SetDrawingApplyMutation,
+    SetSheetDrawingCommand,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
+import {
+    ISheetSelectionRenderService,
+    SetScrollOperation,
+    SetZoomRatioOperation,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { CanvasFloatDomPreviewService, CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
 

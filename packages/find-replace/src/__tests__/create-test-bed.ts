@@ -16,7 +16,6 @@
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { IMessageService as IUiMessageService } from '@univerjs/ui';
 import {
     Disposable,
     IConfirmService,
@@ -61,7 +60,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     styles: {},
 };
 
-class TestMessageService implements IUiMessageService {
+class TestMessageService implements IMessageService {
     readonly messages: IMessageProps[] = [];
 
     show(options: IMessageProps): Disposable {

@@ -16,7 +16,7 @@
 
 import type { IPastePlugin } from './type';
 import { BooleanNumber, createParagraphId } from '@univerjs/core';
-import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
+import { extractNodeStyle } from '../parse-node-style';
 
 const LarkPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-lark',
@@ -28,7 +28,7 @@ const LarkPastePlugin: IPastePlugin = {
         {
             filter: ['s'],
             getStyle(node) {
-                const inlineStyle = getInlineStyle(node);
+                const inlineStyle = extractNodeStyle(node);
 
                 return {
                     st: {

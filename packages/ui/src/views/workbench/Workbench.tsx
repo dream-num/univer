@@ -19,7 +19,7 @@ import type { ComponentType } from 'react';
 import type { IUniverUIConfig } from '../../config/config';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render as createRoot } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -50,7 +50,7 @@ export function mountDesktopWorkbench(
 ): void {
     const ConnectedApp = connectInjector(DesktopWorkbench, injector) as ComponentType<IUniverWorkbenchProps>;
 
-    createRoot(
+    render(
         <ConnectedApp
             {...options}
             mountContainer={mountContainer}

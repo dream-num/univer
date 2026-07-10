@@ -15,10 +15,18 @@
  */
 
 import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
-import type { IEditorService } from '@univerjs/docs-ui';
 import type { IInsertFunctionOperationParams } from '../insert-function.operation';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
-import { IEditorService as IEditorServiceToken } from '@univerjs/docs-ui';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
+import { IEditorService } from '@univerjs/docs-ui';
 import {
     SetRangeValuesCommand,
     SetRangeValuesMutation,
@@ -57,10 +65,10 @@ describe('Test insert function operation', () => {
     }
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(undefined, [[IEditorServiceToken, { useClass: TestEditorService as never }]]);
+        const testBed = createCommandTestBed(undefined, [[IEditorService, { useClass: TestEditorService as never }]]);
         univer = testBed.univer;
         get = testBed.get;
-        editorService = get(IEditorServiceToken);
+        editorService = get(IEditorService);
 
         commandService = get(ICommandService);
         commandService.registerCommand(InsertFunctionOperation);

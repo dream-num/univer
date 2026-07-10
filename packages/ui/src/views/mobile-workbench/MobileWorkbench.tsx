@@ -18,7 +18,7 @@ import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ConfigProvider, render as createRoot } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
@@ -41,7 +41,7 @@ export function mountMobileWorkbench(
 ): void {
     const ConnectedApp = connectInjector(MobileWorkbench, injector) as ComponentType<IUniverAppProps>;
 
-    createRoot(
+    render(
         <ConnectedApp
             {...options}
             mountContainer={mountContainer}

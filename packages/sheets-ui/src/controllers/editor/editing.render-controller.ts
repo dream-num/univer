@@ -31,7 +31,11 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ISetRangeValuesCommandParams, ISetWorksheetActivateCommandParams, MutationsAffectRange } from '@univerjs/sheets';
+import type {
+    ISetRangeValuesCommandParams,
+    ISetWorksheetActivateCommandParams,
+    MutationsAffectRange,
+} from '@univerjs/sheets';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -64,7 +68,14 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
+import {
+    DocSelectionRenderService,
+    IEditorService,
+    MoveCursorOperation,
+    MoveSelectionOperation,
+    ReplaceSnapshotCommand,
+    VIEWPORT_KEY,
+} from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -88,7 +99,11 @@ import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
+import {
+    SetCellEditVisibleArrowOperation,
+    SetCellEditVisibleOperation,
+    SetCellEditVisibleWithF2Operation,
+} from '../../commands/operations/cell-edit.operation';
 import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-range.operation';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -454,7 +469,7 @@ export class EditingRenderController extends Disposable {
         }
 
         this._sheetCellEditorResizeService?.fitTextSize(() => {
-            const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+            const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
             viewMain?.scrollToViewportPos({
                 viewportScrollX: Number.POSITIVE_INFINITY,
                 viewportScrollY: Number.POSITIVE_INFINITY,
@@ -725,7 +740,7 @@ export class EditingRenderController extends Disposable {
         formulaBarEditor?.setSelectionRanges([], false);
         formulaBarEditor?.blur();
         const editorObject = this._getEditorObject();
-        editorObject?.scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+        editorObject?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
             viewportScrollX: 0,
             viewportScrollY: 0,
         });

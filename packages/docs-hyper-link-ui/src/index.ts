@@ -17,4 +17,5 @@
 import './global.css';
 
 export type { IUniverDocsHyperLinkUIConfig } from './config/config';
+export { menuSchema as DocsHyperLinkUIMenuSchema } from './menu/schema';
 export { UniverDocsHyperLinkUIPlugin } from './plugin';

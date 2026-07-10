@@ -16,7 +16,7 @@
 
 import type { ComponentProps, ReactNode } from 'react';
 import { ErrorIcon, InfoIcon, LoadingMultiIcon, SuccessIcon, WarningIcon } from '@univerjs/icons';
-import { Toaster as Sonner, toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { clsx } from '../../helper/clsx';
 
 export enum MessageType {
@@ -35,7 +35,7 @@ export interface IMessageProps {
     onClose?: () => void;
 }
 
-export type IMessagerProps = Omit<ComponentProps<typeof Sonner>, 'id' | 'position' | 'visibleToasts' | 'toastOptions'>;
+export type IMessagerProps = Omit<ComponentProps<typeof Toaster>, 'id' | 'position' | 'visibleToasts' | 'toastOptions'>;
 
 const MESSAGE_TOASTER_ID = 'univer-message-toaster';
 const DEFAULT_MESSAGE_DURATION = 3000;
@@ -90,7 +90,7 @@ const createMessageId = () => {
 };
 
 export const Messager = ({ className, ...props }: IMessagerProps) => (
-    <Sonner
+    <Toaster
         id={MESSAGE_TOASTER_ID}
         position="top-center"
         visibleToasts={4}

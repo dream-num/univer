@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Injector } from '@univerjs/core';
-import type { IRender, IRenderManagerService } from '@univerjs/engine-render';
+import type { IRender } from '@univerjs/engine-render';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
@@ -31,7 +31,7 @@ import {
     UserManagerService,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { IRenderManagerService as IRenderManagerServiceToken } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import threadCommentEnUS from '@univerjs/thread-comment-ui/locale/en-US';
@@ -178,7 +178,7 @@ function createPanelTestBed(decorationIds: string[]) {
     const get = injector.get.bind(injector) as Injector['get'];
 
     injector.add([DocSelectionManagerService]);
-    injector.add([IRenderManagerServiceToken, { useClass: TestRenderManagerService as never }]);
+    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
     injector.add([ThreadCommentModel]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);

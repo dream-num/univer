@@ -47,6 +47,18 @@ describe('Segmented', () => {
         expect(handleChange).toHaveBeenCalledWith('b');
     });
 
+    it('should render ReactNode labels', () => {
+        const { getByText } = render(
+            <Segmented
+                items={[
+                    { label: <span>Icon label</span>, value: 'icon' },
+                ]}
+            />
+        );
+
+        expect(getByText('Icon label')).toBeInTheDocument();
+    });
+
     it('should support controlled value', () => {
         const { getByText, rerender } = render(<Segmented items={items} value="a" />);
         expect(getByText('A')).toHaveClass('univer-text-gray-900', { exact: false });

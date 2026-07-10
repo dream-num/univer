@@ -414,6 +414,44 @@ describe('ContextMenuPanel', () => {
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
     });
 
+    it('does not add option padding around a non-selectable custom submenu component', () => {
+        renderWithDependencies(
+            <ContextMenuPanel menuType="insert-menu" sizeVariant="paragraph-t" />,
+            {
+                'insert-menu': [
+                    {
+                        key: 'insert-table',
+                        order: 0,
+                        item: {
+                            id: 'insert-table',
+                            type: MenuItemType.BUTTON_SELECTOR,
+                            title: 'docs-ui.insertTable',
+                            selections: [{
+                                label: {
+                                    name: 'test-picker',
+                                    hoverable: false,
+                                    selectable: false,
+                                },
+                            }],
+                        },
+                    },
+                ],
+            },
+            (injector) => {
+                injector.get(ComponentManager).register('test-picker', () => <div data-testid="test-picker" />);
+            }
+        );
+
+        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insertTable' });
+        fireEvent.mouseEnter(insertButton.parentElement as HTMLElement);
+
+        const picker = screen.getByTestId('test-picker');
+        const optionWrapper = picker.parentElement?.parentElement as HTMLElement;
+
+        expect(hasClassToken(optionWrapper, 'univer-p-0')).toBe(true);
+        expect(hasClassToken(optionWrapper, 'univer-px-3')).toBe(false);
+    });
+
     it('keeps the newly hovered submenu open when moving across sibling submenu items', () => {
         vi.useFakeTimers();
 

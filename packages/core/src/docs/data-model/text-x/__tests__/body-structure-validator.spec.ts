@@ -83,6 +83,28 @@ describe('validateDocBodyStructure', () => {
         expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('empty-table-cell');
     });
 
+    it('keeps table metadata anchored to the table end token when the following paragraph has text', () => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}A${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const body: IDocumentBody = {
+            dataStream: `${tableStream}After${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 4, paragraphId: 'cell' },
+                { startIndex: tableStream.length + 5, paragraphId: 'after-table' },
+            ],
+            sectionBreaks: [
+                { startIndex: 5 },
+                { startIndex: tableStream.length + 6 },
+            ],
+            tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
+        };
+
+        expect(validateDocBodyStructure(body)).toEqual([]);
+
+        body.tables![0].endIndex = tableStream.length + 5;
+        expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('table-end-token-mismatch');
+    });
+
     it('reports unbalanced structural tokens', () => {
         const T = DataStreamTreeTokenType;
         const body: IDocumentBody = {

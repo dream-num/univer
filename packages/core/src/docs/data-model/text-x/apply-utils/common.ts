@@ -429,7 +429,7 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
         if (startIndex >= currentIndex) {
             table.startIndex += textLength;
             table.endIndex += textLength;
-        } else if (endIndex > currentIndex || (endIndex === currentIndex && body.dataStream[currentIndex + textLength] === DataStreamTreeTokenType.PARAGRAPH)) {
+        } else if (endIndex > currentIndex) {
             table.endIndex += textLength;
         }
     }

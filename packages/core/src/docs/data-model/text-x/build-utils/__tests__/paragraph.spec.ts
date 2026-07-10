@@ -17,11 +17,16 @@
 import type { IDocumentBody, IParagraph } from '../../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
 import { HorizontalAlign } from '../../../../../types/enum';
+import { DocumentBlockRangeType } from '../../../../../types/interfaces';
 import { DocumentDataModel } from '../../../document-data-model';
 import { PresetListType } from '../../../preset-list-type';
+import { DataStreamTreeTokenType } from '../../../types';
 import { TextX } from '../../text-x';
 import {
     changeParagraphBulletNestLevel,
+    getParagraphContentStartOffset,
+    getParagraphContentStartOffsets,
+    getParagraphFollowingBlockOffset,
     hasParagraphInTable,
     setParagraphBullet,
     setParagraphStyle,
@@ -86,6 +91,57 @@ function createDocModel() {
 }
 
 describe('paragraph build utils', () => {
+    it('skips structural container sentinels when resolving paragraph content starts', () => {
+        const T = DataStreamTreeTokenType;
+        const cases = [
+            `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}`,
+            `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}A${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}`,
+            `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.SECTION_BREAK}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.PARAGRAPH}`,
+        ];
+
+        for (const dataStream of cases) {
+            const firstParagraphIndex = dataStream.indexOf(T.PARAGRAPH);
+            const paragraph = {
+                startIndex: dataStream.lastIndexOf(T.PARAGRAPH),
+                paragraphId: `para-structural-${dataStream.length}`,
+            };
+            const body: IDocumentBody = {
+                dataStream,
+                paragraphs: [
+                    { startIndex: firstParagraphIndex, paragraphId: 'para-before-structure' },
+                    paragraph,
+                ],
+            };
+
+            expect(getParagraphContentStartOffset(body, paragraph)).toBe(paragraph.startIndex);
+        }
+    });
+
+    it('resolves insert-below offsets after a containing document block', () => {
+        expect(getParagraphFollowingBlockOffset({
+            blockRanges: [{
+                blockId: 'code-1',
+                blockType: DocumentBlockRangeType.CODE,
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        }, { startIndex: 5 })).toBe(7);
+        expect(getParagraphFollowingBlockOffset({}, { startIndex: 5 })).toBe(6);
+    });
+
+    it('resolves all paragraph starts in one structural pass', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}B${T.PARAGRAPH}`,
+            paragraphs: [
+                { startIndex: 2, paragraphId: 'inside' },
+                { startIndex: 5, paragraphId: 'after' },
+            ],
+        };
+
+        expect([...getParagraphContentStartOffsets(body)]).toEqual([[2, 1], [5, 4]]);
+    });
+
     it('should switch bullets using adjacent paragraph context and remove an existing list when toggled again', () => {
         const doc = createDocModel();
         const body = doc.getBody()!;

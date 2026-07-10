@@ -19,8 +19,11 @@ import { DocumentBlockRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DataStreamTreeTokenType } from '../../types';
 import { deleteBlockRanges, insertBlockRanges } from '../apply-utils/common';
+import { BuildTextUtils } from '../build-utils';
 import { getPlainText } from '../build-utils/parse';
-import { getBodySlice, getBodySliceForTextXAction } from '../utils';
+import { validateDocBodyStructure } from '../structure-validator';
+import { TextX } from '../text-x';
+import { getBodySlice, getBodySliceForTextXAction, getParagraphsSlice, SliceBodyType } from '../utils';
 
 describe('document block ranges', () => {
     it('moves following block ranges when text is inserted before them', () => {
@@ -75,6 +78,23 @@ describe('document block ranges', () => {
         expect(slice.blockRanges).toBeUndefined();
     });
 
+    it('does not treat a block end sentinel as text in the following paragraph', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}B${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 2, paragraphId: 'inside-block' },
+                { startIndex: 5, paragraphId: 'after-block' },
+            ],
+        };
+
+        expect(getParagraphsSlice(body, 3, 4, SliceBodyType.copy)).toBeUndefined();
+        expect(getParagraphsSlice(body, 4, 5, SliceBodyType.copy)).toEqual([{
+            startIndex: 1,
+            paragraphId: 'after-block',
+        }]);
+    });
+
     it('removes fully deleted block ranges', () => {
         const body: IDocumentBody = {
             dataStream: `${DataStreamTreeTokenType.BLOCK_START}A\r${DataStreamTreeTokenType.BLOCK_END}\n`,
@@ -85,6 +105,65 @@ describe('document block ranges', () => {
 
         expect(removed).toEqual([{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 3 }]);
         expect(body.blockRanges).toEqual([]);
+    });
+
+    it('keeps block sentinels and a paragraph when a deletion crosses one boundary', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}B${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 2, paragraphId: 'inside-block' },
+                { startIndex: 5, paragraphId: 'after-block' },
+            ],
+            sectionBreaks: [{ startIndex: 6 }],
+            blockRanges: [{
+                blockId: 'code-1',
+                blockType: DocumentBlockRangeType.CODE,
+                startIndex: 0,
+                endIndex: 3,
+            }],
+        };
+
+        const actions = BuildTextUtils.selection.delete([
+            { startOffset: 1, endOffset: 5, collapsed: false },
+        ], body);
+        TextX.apply(body, actions);
+
+        expect(body.dataStream).toBe(`${T.BLOCK_START}${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.SECTION_BREAK}`);
+        expect(body.blockRanges).toEqual([{
+            blockId: 'code-1',
+            blockType: DocumentBlockRangeType.CODE,
+            startIndex: 0,
+            endIndex: 2,
+        }]);
+        expect(validateDocBodyStructure(body)).toEqual([]);
+    });
+
+    it('allows deleting a fully selected block atomically', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}B${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 2, paragraphId: 'inside-block' },
+                { startIndex: 5, paragraphId: 'after-block' },
+            ],
+            sectionBreaks: [{ startIndex: 6 }],
+            blockRanges: [{
+                blockId: 'code-1',
+                blockType: DocumentBlockRangeType.CODE,
+                startIndex: 0,
+                endIndex: 3,
+            }],
+        };
+
+        const actions = BuildTextUtils.selection.delete([
+            { startOffset: 0, endOffset: 4, collapsed: false },
+        ], body);
+        TextX.apply(body, actions);
+
+        expect(body.dataStream).toBe(`B${T.PARAGRAPH}${T.SECTION_BREAK}`);
+        expect(body.blockRanges).toEqual([]);
+        expect(validateDocBodyStructure(body)).toEqual([]);
     });
 
     it('removes block tokens from plain text', () => {

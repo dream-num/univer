@@ -18,6 +18,12 @@ import type { ITextRange } from '../../../../sheets/typedef';
 import type { CustomRangeType, ICustomRange, IDocumentBody } from '../../../../types/interfaces';
 import { Tools } from '../../../../shared';
 import { generateRandomId } from '../../../../shared/random-id';
+import {
+    containsInteriorInsertionOffset,
+    getCustomRangeInterval,
+    getInclusiveRangeInterval,
+    intersectsOperationalIntervals,
+} from './range-interval';
 
 /**
  * Check if two ranges intersect
@@ -40,11 +46,14 @@ export function getCustomRangesInterestsWithSelection(range: ITextRange, customR
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
         if (range.collapsed) {
-            if (customRange.startIndex < range.startOffset && range.startOffset <= customRange.endIndex) {
+            if (containsInteriorInsertionOffset(getCustomRangeInterval(customRange), range.startOffset)) {
                 result.push(customRange);
             }
         } else {
-            if (isIntersecting(range.startOffset, range.endOffset - 1, customRange.startIndex, customRange.endIndex)) {
+            if (intersectsOperationalIntervals(
+                { startOffset: range.startOffset, endOffset: range.endOffset },
+                getCustomRangeInterval(customRange)
+            )) {
                 result.push(customRange);
             }
         }
@@ -85,11 +94,15 @@ export function excludePointsFromRange(range: [number, number], points: number[]
 
 export function getIntersectingCustomRanges(startIndex: number, endIndex: number, customRanges: ICustomRange[], rangeType?: CustomRangeType) {
     const relativeCustomRanges = [];
+    const queryInterval = getInclusiveRangeInterval({ startIndex, endIndex });
 
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
         // intersect
-        if ((rangeType === undefined || customRange.rangeType === rangeType) && Math.max(customRange.startIndex, startIndex) <= Math.min(customRange.endIndex, endIndex)) {
+        if (
+            (rangeType === undefined || customRange.rangeType === rangeType) &&
+            intersectsOperationalIntervals(queryInterval, getCustomRangeInterval(customRange))
+        ) {
             relativeCustomRanges.push({ ...customRange });
         }
 

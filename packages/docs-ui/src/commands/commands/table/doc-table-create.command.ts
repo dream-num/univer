@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, ISectionBreak, ITextRun, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, createParagraphId, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { CommandType, containsInteriorInsertionOffset, createParagraphId, DataStreamTreeTokenType, getBlockRangeInterval, getParagraphContentStartOffset, getRichTextEditPath, getTableRangeInterval, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../../basics/paragraph';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
@@ -87,11 +87,11 @@ export function canInsertTableAtOffset(body: Pick<IDocumentBody, 'tables' | 'blo
 }
 
 function isOffsetInTableRange(ranges: Array<{ startIndex: number; endIndex: number }> | undefined, offset: number): boolean {
-    return Boolean(ranges?.some((range) => range.startIndex <= offset && offset < range.endIndex));
+    return Boolean(ranges?.some((range) => containsInteriorInsertionOffset(getTableRangeInterval(range), offset)));
 }
 
 function isOffsetInIndexRange(ranges: Array<{ startIndex: number; endIndex: number }> | undefined, offset: number): boolean {
-    return Boolean(ranges?.some((range) => range.startIndex <= offset && offset <= range.endIndex));
+    return Boolean(ranges?.some((range) => containsInteriorInsertionOffset(getBlockRangeInterval(range), offset)));
 }
 
 function isOffsetOnPointRange(ranges: Array<{ startIndex: number }> | undefined, offset: number): boolean {
@@ -148,7 +148,10 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         }
 
         const paragraphs = body.paragraphs ?? [];
-        const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
+        const prevParagraph = paragraphs.find((paragraph) => {
+            const paragraphStartOffset = getParagraphContentStartOffset(body, paragraph);
+            return paragraphStartOffset < startOffset && startOffset <= paragraph.startIndex;
+        });
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
         // const line = curGlyph?.parent?.parent;
         // const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);

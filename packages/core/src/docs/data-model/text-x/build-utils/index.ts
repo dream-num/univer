@@ -79,4 +79,26 @@ export class BuildTextUtils {
     };
 }
 
+export { getSingleDataStreamChange } from './data-stream-change';
+export type { IDataStreamChange } from './data-stream-change';
+export { getParagraphContentStartOffset, getParagraphContentStartOffsets, getParagraphFollowingBlockOffset } from './paragraph';
+export {
+    containsInteriorInsertionOffset,
+    containsStreamIndex,
+    getBlockRangeInterval,
+    getColumnGroupRangeInterval,
+    getCustomBlockInterval,
+    getCustomRangeInterval,
+    getExclusiveRangeInterval,
+    getInclusiveRangeInterval,
+    getTableCellTokenInterval,
+    getTableRangeInterval,
+    getTableRowTokenInterval,
+    intersectsOperationalIntervals,
+    shiftExclusiveRangeOnDelete,
+    shiftExclusiveRangeOnInsert,
+    shiftInclusiveRangeOnDelete,
+    shiftInclusiveRangeOnInsert,
+} from './range-interval';
+export type { IDocOperationalInterval } from './range-interval';
 export type { IAddCustomRangeTextXParam, IDeleteCustomRangeParam, IReplaceSelectionTextXParams } from './text-x-utils';

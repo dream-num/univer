@@ -683,6 +683,19 @@ describe('doc table create command helpers', () => {
         expect(canInsertTableAtOffset(fixture.documentData.body!, tableEndOffset)).toBe(true);
     });
 
+    it('allows insertion immediately before table and block start boundaries', () => {
+        const fixture = createTableFixture(1, 1);
+        const blockBody = {
+            blockRanges: [{ blockId: 'block-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 1, endIndex: 3 }],
+            customBlocks: [],
+            tables: [],
+        };
+
+        expect(canInsertTableAtOffset(fixture.documentData.body!, fixture.tableRange.startIndex)).toBe(true);
+        expect(canInsertTableAtOffset(blockBody, 1)).toBe(true);
+        expect(canInsertTableAtOffset(blockBody, 2)).toBe(false);
+    });
+
     it('does not create a table on a custom block', async () => {
         const testBed = createTableCreationBed({
             ...createParagraphDocument('A\b\r\n'),

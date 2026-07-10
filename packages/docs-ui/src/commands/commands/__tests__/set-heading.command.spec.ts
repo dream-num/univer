@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType, validateDocBodyStructure } from '@univerjs/core';
 import {
     DocContentInsertService,
     DocSelectionManagerService,
@@ -77,6 +77,66 @@ function getQuickHeadingDocumentData(): IDocumentData {
     };
 }
 
+type BoundaryNodeType = 'blockRange' | 'paragraph' | 'table';
+
+function getBoundaryDocumentData(leftType: BoundaryNodeType, rightType: BoundaryNodeType): { documentData: IDocumentData; insertOffset: number; rightParagraphId: string } {
+    const T = DataStreamTreeTokenType;
+    const body: NonNullable<IDocumentData['body']> = {
+        dataStream: '',
+        paragraphs: [],
+        sectionBreaks: [],
+        blockRanges: [],
+        tables: [],
+    };
+    let nextId = 0;
+
+    const append = (type: BoundaryNodeType, side: 'left' | 'right') => {
+        const startIndex = body.dataStream.length;
+        const paragraphId = `${side}-${type}-${nextId++}`;
+        const paragraphStyle = side === 'right'
+            ? { indentStart: { v: 60 }, textStyle: { ff: 'monospace' } }
+            : undefined;
+
+        if (type === 'paragraph') {
+            body.dataStream += `${side}${T.PARAGRAPH}`;
+            body.paragraphs!.push({ paragraphId, paragraphStyle, startIndex: body.dataStream.length - 1 });
+        } else if (type === 'blockRange') {
+            body.dataStream += `${T.BLOCK_START}${side}${T.PARAGRAPH}${T.BLOCK_END}`;
+            body.paragraphs!.push({ paragraphId, paragraphStyle, startIndex: body.dataStream.length - 2 });
+            body.blockRanges!.push({
+                blockId: `${side}-block`,
+                blockType: DocumentBlockRangeType.CALLOUT,
+                startIndex,
+                endIndex: body.dataStream.length - 1,
+            });
+        } else {
+            body.dataStream += `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${side}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+            body.paragraphs!.push({ paragraphId, paragraphStyle, startIndex: body.dataStream.length - 5 });
+            body.sectionBreaks!.push({ startIndex: body.dataStream.length - 4 });
+            body.tables!.push({ tableId: `${side}-table`, startIndex, endIndex: body.dataStream.length });
+        }
+
+        return paragraphId;
+    };
+
+    append(leftType, 'left');
+    const insertOffset = body.dataStream.length;
+    const rightParagraphId = append(rightType, 'right');
+    body.dataStream += `${T.PARAGRAPH}${T.SECTION_BREAK}`;
+    body.paragraphs!.push({ paragraphId: 'trailing', startIndex: body.dataStream.length - 2 });
+    body.sectionBreaks!.push({ startIndex: body.dataStream.length - 1 });
+
+    return {
+        documentData: {
+            id: 'test-doc',
+            body,
+            documentStyle: getHeadingDocumentData().documentStyle,
+        },
+        insertOffset,
+        rightParagraphId,
+    };
+}
+
 describe('set heading commands', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -85,6 +145,22 @@ describe('set heading commands', () => {
     function getBody() {
         const univerInstanceService = get(IUniverInstanceService);
         return univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)?.getBody();
+    }
+
+    function resetDocument(documentData: IDocumentData) {
+        univer.dispose();
+        const testBed = createCommandTestBed(documentData, [[DocContentInsertService]]);
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(SetParagraphNamedStyleCommand);
+        commandService.registerCommand(H1HeadingCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        get(DocSelectionManagerService).__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
     }
 
     beforeEach(() => {
@@ -184,6 +260,45 @@ describe('set heading commands', () => {
         expect(getBody()?.dataStream).toBe('Heading\r\r\n');
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.TITLE);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId?.length).toBe(6);
+    });
+
+    it.each([
+        ['paragraph', 'paragraph'],
+        ['paragraph', 'blockRange'],
+        ['paragraph', 'table'],
+        ['blockRange', 'paragraph'],
+        ['blockRange', 'blockRange'],
+        ['blockRange', 'table'],
+        ['table', 'paragraph'],
+        ['table', 'blockRange'],
+        ['table', 'table'],
+    ] as Array<[BoundaryNodeType, BoundaryNodeType]>)('inserts an isolated H1 at the %s -> %s gap', async (leftType, rightType) => {
+        const { documentData, insertOffset, rightParagraphId } = getBoundaryDocumentData(leftType, rightType);
+        const rightStyle = documentData.body!.paragraphs!.find((paragraph) => paragraph.paragraphId === rightParagraphId)!.paragraphStyle;
+        resetDocument(documentData);
+        const selectionManager = get(DocSelectionManagerService);
+        let latestSelectionOffset: number | undefined;
+        const selectionSubscription = selectionManager.refreshSelection$.subscribe((event) => {
+            latestSelectionOffset = event?.docRanges[0]?.startOffset;
+        });
+        get(DocContentInsertService).setInsertRange({
+            unitId: 'test-doc',
+            startOffset: insertOffset,
+            endOffset: insertOffset,
+        });
+
+        expect(await commandService.executeCommand(H1HeadingCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        const body = getBody()!;
+        const insertedParagraph = body.paragraphs?.find((paragraph) => paragraph.startIndex === insertOffset);
+        const rightParagraph = body.paragraphs?.find((paragraph) => paragraph.paragraphId === rightParagraphId);
+        expect(insertedParagraph?.paragraphStyle).toMatchObject({ namedStyleType: NamedStyleType.HEADING_1 });
+        expect(insertedParagraph?.paragraphStyle?.indentStart).toBeUndefined();
+        expect(rightParagraph?.paragraphStyle).toEqual(rightStyle);
+        expect(latestSelectionOffset).toBe(insertOffset);
+        expect(validateDocBodyStructure(body)).toEqual([]);
+        selectionSubscription.unsubscribe();
     });
 
     it('converts markdown-like quick headings through the real command chain', async () => {

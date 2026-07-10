@@ -19,8 +19,10 @@ import type { DocumentDataModel } from '../../data-model';
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { PRESERVE_INSERTED_PARAGRAPH_IDS } from './action-types';
 import { normalizeTextRuns } from './apply-utils/common';
 import { coverTextRuns } from './apply-utils/update-apply';
+import { getParagraphContentStartOffsets } from './build-utils/paragraph';
 
 export enum SliceBodyType {
     copy,
@@ -215,10 +217,10 @@ export function getParagraphsSlice(
     }
 
     const sortedParagraphs = [...paragraphs].sort((a, b) => a.startIndex - b.startIndex);
+    const paragraphStartOffsets = getParagraphContentStartOffsets(body);
 
-    for (let index = 0; index < sortedParagraphs.length; index++) {
-        const paragraph = sortedParagraphs[index];
-        const paragraphStart = index > 0 ? sortedParagraphs[index - 1].startIndex + 1 : 0;
+    for (const paragraph of sortedParagraphs) {
+        const paragraphStart = paragraphStartOffsets.get(paragraph.startIndex) ?? 0;
         const paragraphEnd = paragraph.startIndex;
         const paragraphMarkInRange = paragraphEnd >= startOffset && paragraphEnd < endOffset;
         const paragraphTextIntersectsRange = Math.max(paragraphStart, startOffset) < Math.min(paragraphEnd, endOffset);
@@ -297,6 +299,10 @@ export function getBodySlice(
     const docBody: IDocumentBody = {
         dataStream: dataStream.slice(startOffset, endOffset),
     };
+
+    if ((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]) {
+        (docBody as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS] = true;
+    }
 
     docBody.textRuns = getTextRunSlice(body, startOffset, endOffset, returnEmptyArray);
 
@@ -552,6 +558,13 @@ export function composeBody(
     const retBody: IDocumentBody = {
         dataStream: thisBody.dataStream,
     };
+
+    if (
+        (thisBody as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS] ||
+        (otherBody as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]
+    ) {
+        (retBody as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS] = true;
+    }
 
     const {
         textRuns: thisTextRuns,

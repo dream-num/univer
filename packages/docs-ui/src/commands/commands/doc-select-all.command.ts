@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, ICustomTable, IDocumentBody, IParagraph } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICustomTable, IDocumentBody } from '@univerjs/core';
 import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
-import { CommandType, DOC_RANGE_TYPE, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, DOC_RANGE_TYPE, getParagraphContentStartOffsets, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 
 interface ISelectAllCommandParams { }
@@ -147,7 +147,7 @@ function getScopedSelectAllRange(body: IDocumentBody, activeRange: ISuccinctDocR
         }];
     }
 
-    const paragraphRange = clampParagraphRangeByTables(getParagraphRangeAtOffset(body.paragraphs ?? [], startOffset), body.tables ?? [], startOffset);
+    const paragraphRange = clampParagraphRangeByTables(getParagraphRangeAtOffset(body, startOffset), body.tables ?? [], startOffset);
     return paragraphRange
         ? [{
             ...paragraphRange,
@@ -185,11 +185,11 @@ function getTableRectRange(table: ICustomTable): ISuccinctDocRangeParam {
     };
 }
 
-function getParagraphRangeAtOffset(paragraphs: IParagraph[], offset: number): Pick<ISuccinctDocRangeParam, 'endOffset' | 'startOffset'> | null {
-    const sortedParagraphs = [...paragraphs].sort((left, right) => left.startIndex - right.startIndex);
-    for (let index = 0; index < sortedParagraphs.length; index++) {
-        const paragraph = sortedParagraphs[index];
-        const startOffset = index === 0 ? 0 : sortedParagraphs[index - 1].startIndex + 1;
+function getParagraphRangeAtOffset(body: IDocumentBody, offset: number): Pick<ISuccinctDocRangeParam, 'endOffset' | 'startOffset'> | null {
+    const sortedParagraphs = [...(body.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
+    const paragraphStartOffsets = getParagraphContentStartOffsets(body);
+    for (const paragraph of sortedParagraphs) {
+        const startOffset = paragraphStartOffsets.get(paragraph.startIndex) ?? 0;
         if (startOffset <= offset && offset <= paragraph.startIndex) {
             return {
                 endOffset: paragraph.startIndex,

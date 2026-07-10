@@ -187,10 +187,10 @@ describe('buildMoveDocBlockActions', () => {
                 { paragraphId: 'para_docs_ui_fixture_32', startIndex: 1 },
                 { paragraphId: 'para_docs_ui_fixture_33', startIndex: 5 },
                 { paragraphId: 'para_docs_ui_fixture_34', startIndex: 9 },
-                { paragraphId: 'para_docs_ui_fixture_35', startIndex: 12 },
+                { paragraphId: 'para_docs_ui_fixture_35', startIndex: 13 },
             ],
-            sectionBreaks: [{ startIndex: 13 }],
-            columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 12 }],
+            sectionBreaks: [{ startIndex: 14 }],
+            columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 11 }],
         });
 
         const { nextDocumentData } = buildMoveDocBlockActions({
@@ -203,7 +203,7 @@ describe('buildMoveDocBlockActions', () => {
         expect(nextDocumentData.body?.columnGroups).toEqual([{
             columnGroupId: 'column-group-1',
             startIndex: 0,
-            endIndex: 10,
+            endIndex: 9,
         }]);
     });
 });
@@ -247,7 +247,7 @@ describe('MoveDocBlockCommand', () => {
                 { paragraphId: 'para_docs_ui_fixture_39', startIndex: 13 },
             ],
             sectionBreaks: [{ startIndex: 14 }],
-            columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 12 }],
+            columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 11 }],
         }));
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(MoveDocBlockCommand);
@@ -263,7 +263,7 @@ describe('MoveDocBlockCommand', () => {
         expect(testBed.doc.getSnapshot().body?.columnGroups).toEqual([{
             columnGroupId: 'column-group-1',
             startIndex: 0,
-            endIndex: 10,
+            endIndex: 9,
         }]);
     });
 

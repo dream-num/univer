@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BreakLineCommand } from '../break-line.command';
@@ -80,6 +80,34 @@ function getDocumentDataWithColumnGroup(): IDocumentData {
     };
 }
 
+function getDocumentDataWithAdjacentBlocks(): IDocumentData {
+    const T = DataStreamTreeTokenType;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.BLOCK_START}B${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { paragraphId: 'code-paragraph', startIndex: 2 },
+                { paragraphId: 'callout-paragraph', startIndex: 6, paragraphStyle: { indentStart: { v: 60 } } },
+                { paragraphId: 'trailing-paragraph', startIndex: 8 },
+            ],
+            sectionBreaks: [{ startIndex: 9 }],
+            blockRanges: [
+                { blockId: 'code-1', blockType: DocumentBlockRangeType.CODE, startIndex: 0, endIndex: 3 },
+                { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 4, endIndex: 7 },
+            ],
+        },
+        documentStyle: {
+            pageSize: { width: 594.3, height: 840.51 },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
 describe('break line command', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -98,6 +126,25 @@ describe('break line command', () => {
     function setupWithColumnGroup() {
         univer.dispose();
         const testBed = createCommandTestBed(getDocumentDataWithColumnGroup());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(BreakLineCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+
+        return selectionManager;
+    }
+
+    function setupWithAdjacentBlocks() {
+        univer.dispose();
+        const testBed = createCommandTestBed(getDocumentDataWithAdjacentBlocks());
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
@@ -165,5 +212,25 @@ describe('break line command', () => {
 
         expect(getBody()?.columnGroups).toEqual([{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 17 }]);
         expect(getBody()?.dataStream[17]).toBe(DataStreamTreeTokenType.COLUMN_GROUP_END);
+    });
+
+    it('inserts a paragraph between adjacent block ranges without corrupting either range', async () => {
+        const selectionManager = setupWithAdjacentBlocks();
+        selectionManager.__TEST_ONLY_add([{ startOffset: 4, endOffset: 4, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+
+        await commandService.executeCommand(BreakLineCommand.id, {
+            textRange: { startOffset: 4, endOffset: 4, collapsed: true, segmentId: '' },
+        });
+        await awaitTime(0);
+
+        const T = DataStreamTreeTokenType;
+        expect(getBody()?.dataStream).toBe(`${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.BLOCK_START}B${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.SECTION_BREAK}`);
+        expect(getBody()?.blockRanges).toEqual([
+            { blockId: 'code-1', blockType: DocumentBlockRangeType.CODE, startIndex: 0, endIndex: 3 },
+            { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 5, endIndex: 8 },
+        ]);
+        expect(getBody()?.paragraphs?.find((paragraph) => paragraph.startIndex === 4)?.paragraphStyle).toBeUndefined();
+        expect(getBody()?.paragraphs?.find((paragraph) => paragraph.paragraphId === 'callout-paragraph')?.paragraphStyle).toEqual({ indentStart: { v: 60 } });
+        expect(selectionManager.getActiveTextRange()?.startOffset).toBe(4);
     });
 });

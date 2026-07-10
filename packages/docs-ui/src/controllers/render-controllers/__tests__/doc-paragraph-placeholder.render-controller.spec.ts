@@ -252,7 +252,7 @@ describe('doc paragraph placeholder render controller', () => {
         });
     });
 
-    it('shows list item placeholder after the marker when a list item has no text', () => {
+    it('shows a readable list item placeholder after the marker when a list item has no text', () => {
         const page = createPage([createLine(0, { bullet: true, fontSize: 14 })]);
         const body = createBody('\r\n', [{
             startIndex: 0,
@@ -268,7 +268,7 @@ describe('doc paragraph placeholder render controller', () => {
 
         expect(placeholders[0]).toMatchObject({
             text: '项目',
-            fontSize: 14,
+            fontSize: 16,
             x: 77,
         });
     });

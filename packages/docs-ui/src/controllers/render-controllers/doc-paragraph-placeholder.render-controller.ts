@@ -44,7 +44,7 @@ import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 const PLACEHOLDER_COLOR = 'rgba(0, 0, 0, 0.35)';
 const DEFAULT_PLACEHOLDER_FONT_SIZE = 12;
-const MIN_NORMAL_TEXT_PLACEHOLDER_FONT_SIZE = 16;
+const MIN_BODY_TEXT_PLACEHOLDER_FONT_SIZE = 16;
 const DEFAULT_PLACEHOLDER_FONT_FAMILY = 'Arial';
 const LIST_PLACEHOLDER_GAP = 4;
 
@@ -299,11 +299,11 @@ function getPlaceholderFontSize(line: IDocumentSkeletonLine, paragraph: IParagra
     const textStyle = NAMED_STYLE_MAP[namedStyleType];
     const fontSize = getLineFontSize(line) ?? textStyle?.fs ?? DEFAULT_PLACEHOLDER_FONT_SIZE;
 
-    if (paragraph.bullet || namedStyleType !== NamedStyleType.NORMAL_TEXT) {
+    if (namedStyleType !== NamedStyleType.NORMAL_TEXT) {
         return fontSize;
     }
 
-    return Math.max(fontSize, MIN_NORMAL_TEXT_PLACEHOLDER_FONT_SIZE);
+    return Math.max(fontSize, MIN_BODY_TEXT_PLACEHOLDER_FONT_SIZE);
 }
 
 function getLineFontFamily(line: IDocumentSkeletonLine): Nullable<string> {

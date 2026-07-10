@@ -20,6 +20,8 @@ import { describe, expect, it, vi } from 'vitest';
 import {
     BACKGROUND_COLOR_SWATCH_ICONS,
     ParagraphMenuBackgroundColorSwatchMenuItemFactories,
+    ParagraphMenuIndentDecreaseMenuItemFactory,
+    ParagraphMenuIndentIncreaseMenuItemFactory,
 } from '../paragraph-menu';
 
 vi.mock('@univerjs/ui', async () => {
@@ -31,6 +33,17 @@ vi.mock('@univerjs/ui', async () => {
 });
 
 describe('paragraph menu theme colors', () => {
+    it('uses semantic line-indent icons for indent actions', () => {
+        const accessor = {
+            get: vi.fn(),
+        };
+        const increase = ParagraphMenuIndentIncreaseMenuItemFactory(accessor as never);
+        const decrease = ParagraphMenuIndentDecreaseMenuItemFactory(accessor as never);
+
+        expect(increase.icon).toBe('LineIndentIncreaseIcon');
+        expect(decrease.icon).toBe('LineIndentDecreaseIcon');
+    });
+
     it('uses direct theme highlight background tokens for background swatches', () => {
         const themeService = {
             getColorFromTheme: vi.fn((path: string) => ({

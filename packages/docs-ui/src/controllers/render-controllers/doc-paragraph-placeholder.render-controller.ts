@@ -44,6 +44,7 @@ import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 const PLACEHOLDER_COLOR = 'rgba(0, 0, 0, 0.35)';
 const DEFAULT_PLACEHOLDER_FONT_SIZE = 12;
+const MIN_BODY_TEXT_PLACEHOLDER_FONT_SIZE = 16;
 const DEFAULT_PLACEHOLDER_FONT_FAMILY = 'Arial';
 const LIST_PLACEHOLDER_GAP = 4;
 
@@ -249,8 +250,9 @@ function getLinePlaceholderLayout(
     const divide = line.divides[0];
     const glyphs = divide?.glyphGroup ?? [];
     const firstGlyph = glyphs[0];
-    const textStyle = NAMED_STYLE_MAP[paragraph.paragraphStyle?.namedStyleType ?? NamedStyleType.NORMAL_TEXT];
-    const fontSize = getLineFontSize(line) ?? textStyle?.fs ?? DEFAULT_PLACEHOLDER_FONT_SIZE;
+    const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? NamedStyleType.NORMAL_TEXT;
+    const textStyle = NAMED_STYLE_MAP[namedStyleType];
+    const fontSize = getPlaceholderFontSize(line, paragraph);
     const fontFamily = getLineFontFamily(line) ?? DEFAULT_PLACEHOLDER_FONT_FAMILY;
     const fontWeight = textStyle?.bl ? 'bold' : 'normal';
     const lineStartX = originLeft + (divide?.left ?? 0) + (divide?.paddingLeft ?? 0);
@@ -290,6 +292,18 @@ function getLineFontSize(line: IDocumentSkeletonLine): Nullable<number> {
     }
 
     return null;
+}
+
+function getPlaceholderFontSize(line: IDocumentSkeletonLine, paragraph: IParagraph): number {
+    const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? NamedStyleType.NORMAL_TEXT;
+    const textStyle = NAMED_STYLE_MAP[namedStyleType];
+    const fontSize = getLineFontSize(line) ?? textStyle?.fs ?? DEFAULT_PLACEHOLDER_FONT_SIZE;
+
+    if (namedStyleType !== NamedStyleType.NORMAL_TEXT) {
+        return fontSize;
+    }
+
+    return Math.max(fontSize, MIN_BODY_TEXT_PLACEHOLDER_FONT_SIZE);
 }
 
 function getLineFontFamily(line: IDocumentSkeletonLine): Nullable<string> {

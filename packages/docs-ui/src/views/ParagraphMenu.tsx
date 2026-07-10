@@ -27,6 +27,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    LocaleService,
     NamedStyleType,
     SliceBodyType,
     TextX,
@@ -98,8 +99,29 @@ import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service';
 
-export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 212, viewportPadding = 8): 'left' | 'right' {
-    return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
+export function getParagraphMenuPopupDirection(
+    anchorLeft: number,
+    menuWidth = 212,
+    viewportPadding = 8,
+    options: {
+        anchorRight?: number;
+        direction?: 'ltr' | 'rtl';
+        viewportWidth?: number;
+    } = {}
+): 'left' | 'right' {
+    const {
+        anchorRight = anchorLeft,
+        direction = 'ltr',
+        viewportWidth = Number.POSITIVE_INFINITY,
+    } = options;
+    const hasLeftSpace = anchorLeft - menuWidth >= viewportPadding;
+    const hasRightSpace = anchorRight + menuWidth + viewportPadding <= viewportWidth;
+
+    if (direction === 'rtl') {
+        return hasRightSpace || !hasLeftSpace ? 'right' : 'left';
+    }
+
+    return hasLeftSpace || !hasRightSpace ? 'left' : 'right';
 }
 
 export const PARAGRAPH_MENU_HOVER_OPEN_DELAY = 800;
@@ -823,7 +845,9 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const openMenuRef = useRef<() => void>(() => undefined);
     const hoverOpenSchedulerRef = useRef(createParagraphMenuHoverOpenScheduler(() => openMenuRef.current()));
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const direction = useObservable(localeService.direction$, 'ltr');
     const docClipboardService = useDependency(IDocClipboardService);
     const docContentInsertService = useDependency(DocContentInsertService);
     const docBlockMoveValidatorService = useDependency(DocBlockMoveValidatorService);
@@ -880,10 +904,16 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const updateAnchorRect = () => {
         const boundingRect = anchorRef.current?.getBoundingClientRect();
         const left = (boundingRect?.left ?? 0) - 4;
-        setMenuDirection(getParagraphMenuPopupDirection(left));
+        const right = boundingRect?.right ?? 0;
+        const viewportWidth = anchorRef.current?.ownerDocument.defaultView?.innerWidth ?? window.innerWidth;
+        setMenuDirection(getParagraphMenuPopupDirection(left, 212, 8, {
+            anchorRight: right,
+            direction,
+            viewportWidth,
+        }));
         const nextAnchorRect = {
             left,
-            right: boundingRect?.right ?? 0,
+            right,
             top: boundingRect?.top ?? 0,
             bottom: boundingRect?.bottom ?? 0,
         };

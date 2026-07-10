@@ -86,7 +86,7 @@ export { SelectList } from './components/select-list/SelectList';
 export type { ISelectListProps } from './components/select-list/SelectList';
 export { MultipleSelect } from './components/select/MultipleSelect';
 export type { IMultipleSelectProps } from './components/select/MultipleSelect';
-export { Select } from './components/select/Select';
+export { Select, selectClassName } from './components/select/Select';
 export type { ISelectProps } from './components/select/Select';
 export { Separator } from './components/separator/Separator';
 export { Switch } from './components/switch/Switch';

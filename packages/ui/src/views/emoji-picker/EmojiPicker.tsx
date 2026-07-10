@@ -150,22 +150,21 @@ export function EmojiPicker(props: { popup?: IPopup<IEmojiPickerPopupProps> }) {
             "
         >
             <div className="univer-flex univer-items-center univer-gap-1 univer-px-3 univer-pb-2 univer-pt-3">
-                <label
-                    className="
-                      univer-flex univer-h-8 univer-flex-1 univer-items-center univer-gap-1 univer-rounded-lg
-                      univer-border univer-border-solid univer-border-primary-500 univer-px-2 univer-text-gray-500
-                      dark:!univer-border-primary-600 dark:!univer-text-gray-400
-                    "
-                >
-                    <SearchIcon />
-                    <Input
-                        aria-label={localeService.t<LocaleKey>('ui.emojiPicker.search')}
-                        placeholder={localeService.t<LocaleKey>('ui.emojiPicker.search')}
-                        className="univer-min-w-0 univer-flex-1"
-                        value={query}
-                        onChange={setQuery}
-                    />
-                </label>
+                <Input
+                    aria-label={localeService.t<LocaleKey>('ui.emojiPicker.search')}
+                    placeholder={localeService.t<LocaleKey>('ui.emojiPicker.search')}
+                    className="univer-min-w-0 univer-flex-1"
+                    value={query}
+                    onChange={setQuery}
+                    slot={(
+                        <SearchIcon
+                            className="
+                              univer-size-4 univer-text-gray-500
+                              dark:!univer-text-gray-400
+                            "
+                        />
+                    )}
+                />
                 <button
                     type="button"
                     aria-label={localeService.t<LocaleKey>('ui.emojiPicker.random')}

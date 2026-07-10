@@ -306,7 +306,7 @@ export function Ribbon(props: IRibbonProps) {
                         role="toolbar"
                         aria-label={localeService.t(activatedTabTitle)}
                     >
-                        <ToolbarDropdownProvider>
+                        <ToolbarDropdownProvider key={activatedTab}>
                             {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                                 <Fragment key={groupItem.key}>
                                     <div

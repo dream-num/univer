@@ -206,7 +206,7 @@ describe('doc paragraph placeholder render controller', () => {
         expect(shouldRenderParagraphPlaceholder(createDocumentModel(DocumentFlavor.MODERN), DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, { placeholder: true })).toBe(false);
     });
 
-    it('shows normal text placeholder for an empty normal paragraph', () => {
+    it('uses a readable minimum font size for an empty normal paragraph', () => {
         const page = createPage([createLine(0, { fontSize: 13, fontFamily: 'Inter' })]);
         const body = createBody('\r\n', [{ startIndex: 0, paragraphId: 'para_placeholder_normal' }]);
 
@@ -215,11 +215,22 @@ describe('doc paragraph placeholder render controller', () => {
         expect(placeholders).toMatchObject([{
             text: '请输入文字或按"/"启用命令',
             fontFamily: 'Inter',
-            fontSize: 13,
+            fontSize: 16,
             fontWeight: 'normal',
             x: 61,
             y: 116,
         }]);
+    });
+
+    it('keeps a larger normal paragraph font size', () => {
+        const page = createPage([createLine(0, { fontSize: 18 })]);
+        const body = createBody('\r\n', [{ startIndex: 0, paragraphId: 'para_placeholder_large' }]);
+
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
+
+        expect(placeholders[0]).toMatchObject({
+            fontSize: 18,
+        });
     });
 
     it('shows heading placeholder with the heading font size', () => {

@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, IDocumentData, Injector } from '@univerjs/core';
-import type { FUniver } from '@univerjs/core/facade';
 import {
     DisposableCollection,
     DocumentBlockRangeType,
@@ -26,7 +25,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FUniver as FUniverCtor } from '@univerjs/core/facade';
+import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { UniverDocsPlugin } from '../../plugin';
@@ -208,6 +207,6 @@ export function createTestBed(documentConfig?: IDocumentData): ITestBed {
         univer,
         get: injector.get.bind(injector),
         doc,
-        univerAPI: FUniverCtor.newAPI(injector),
+        univerAPI: FUniver.newAPI(injector),
     };
 }

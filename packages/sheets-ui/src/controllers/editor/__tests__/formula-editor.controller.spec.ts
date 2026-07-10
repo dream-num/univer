@@ -21,7 +21,7 @@ import {
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FX_BAR_EDITOR,
 } from '@univerjs/core';
-import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { CoverContentCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -43,7 +43,7 @@ function createController() {
         scrollToViewportPos: vi.fn(),
         resetCanvasSizeAndUpdateScroll: vi.fn(),
     };
-    const scene = { transformByState: vi.fn(), getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN ? viewport : null) };
+    const scene = { transformByState: vi.fn(), getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN ? viewport : null) };
     const mainComponent = { resize: vi.fn() };
     const formulaDoc = {
         getBody: vi.fn(() => ({ dataStream: 'SUM(A1:A3)\r\n' })),

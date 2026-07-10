@@ -15,9 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type {
-    IRichTextEditingMutationParams,
-} from '@univerjs/docs';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -39,7 +37,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY, IEditorService } from '@univerjs/docs-ui';
+import { CoverContentCommand, IEditorService, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { combineLatest, filter, takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -255,7 +253,7 @@ export class FormulaEditorController extends RxDisposable {
         actualHeight += marginTop + marginBottom;
 
         const { width, height } = position;
-        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         scene.transformByState({

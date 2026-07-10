@@ -24,14 +24,17 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { MoveCursorOperation, MoveSelectionOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import {
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+} from '../../../commands/commands/set-selection.command';
 import { EditingRenderController } from '../editing.render-controller';
 
 function createController() {
@@ -157,7 +160,7 @@ function createController() {
     controller._renderManagerService = {
         getRenderById: vi.fn(() => ({
             scene: {
-                getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN
+                getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN
                     ? { scrollToViewportPos: vi.fn() }
                     : null),
                 resetCursor: vi.fn(),
@@ -170,7 +173,7 @@ function createController() {
             makeDirty: vi.fn(),
         },
         scene: {
-            getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN
+            getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN
                 ? { scrollToViewportPos: vi.fn() }
                 : null),
             resetCursor: vi.fn(),

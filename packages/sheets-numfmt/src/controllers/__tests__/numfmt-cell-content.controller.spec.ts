@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, Injector, IWorkbookData, Workbook, Worksheet } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook, Worksheet } from '@univerjs/core';
 import {
     cellToRange,
     CellValueType,
@@ -22,12 +22,12 @@ import {
     IConfigService,
     ILogService,
     Inject,
+    Injector,
     InterceptorEffectEnum,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
     Plugin,
-    Injector as RediInjector,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -102,7 +102,7 @@ function createControllerTestBed(workbookData?: IWorkbookData) {
 
         constructor(
             _config: undefined,
-            @Inject(RediInjector) override readonly _injector: Injector
+            @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
         }

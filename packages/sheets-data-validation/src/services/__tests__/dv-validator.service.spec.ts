@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IRange, IUniverInstanceService, LifecycleService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IDataValidationRule,
+    IRange,
+    IUniverInstanceService,
+    LifecycleService,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import type { DataValidationCacheService } from '../dv-cache.service';
-import { ObjectMatrix as CoreObjectMatrix, DataValidationStatus, LifecycleStages } from '@univerjs/core';
+import { DataValidationStatus, LifecycleStages, ObjectMatrix } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsDataValidationValidatorService } from '../dv-validator.service';
@@ -49,7 +57,7 @@ function createService() {
         getActiveSheet: () => worksheet,
         getSheetBySheetId: vi.fn((sheetId: string) => (sheetId === 'sheet-1' ? worksheet : null)),
     } as unknown as Workbook;
-    const cache = new CoreObjectMatrix<Nullable<DataValidationStatus>>();
+    const cache = new ObjectMatrix<Nullable<DataValidationStatus>>();
     const rule = createRule('rule-1', [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }]);
     const model = {
         getRuleByLocation: vi.fn(() => rule),

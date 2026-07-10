@@ -14,11 +14,30 @@
  * limitations under the License.
  */
 
-import type { Dependency, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { CellValueType, ICommandService, ILogService, Inject, IUniverInstanceService, LocaleType, LogLevel, Plugin, RANGE_TYPE, touchDependencies, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
+import {
+    CellValueType,
+    ICommandService,
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    RANGE_TYPE,
+    touchDependencies,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FormulaDataModel, FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
-import { INumfmtService, SetRangeValuesMutation, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    INumfmtService,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IStatusBarService, StatusBarService } from '../../services/status-bar.service';
 import { StatusBarController } from '../status-bar.controller';
@@ -62,7 +81,7 @@ function createTestBed() {
 
         constructor(
             _config: undefined,
-            @Inject(UniverInjector) override readonly _injector: Injector
+            @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
         }

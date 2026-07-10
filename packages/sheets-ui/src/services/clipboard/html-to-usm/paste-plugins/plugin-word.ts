@@ -17,7 +17,7 @@
 import type { IParagraph } from '@univerjs/core';
 import type { IPastePlugin } from './type';
 import { BooleanNumber, createParagraphId } from '@univerjs/core';
-import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
+import { extractNodeStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
 
 export const WordPastePlugin: IPastePlugin = {
@@ -30,7 +30,7 @@ export const WordPastePlugin: IPastePlugin = {
         {
             filter: ['b'],
             getStyle(node) {
-                const inlineStyle = getInlineStyle(node);
+                const inlineStyle = extractNodeStyle(node);
 
                 return { bl: BooleanNumber.TRUE, ...inlineStyle };
             },

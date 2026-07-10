@@ -37,7 +37,13 @@ export {
 } from './commands/operations/image-crop.operation';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
 export type { IUniverDrawingUIConfig } from './config/config';
-export { disposeDrawingRenderObject, getCurrentUnitInfo, getDrawingRenderObject, insertGroupObject } from './controllers/utils';
+export {
+    disposeDrawingRenderObject,
+    getCurrentUnitInfo,
+    getDrawingRenderObject,
+    insertGroupObject,
+} from './controllers/utils';
+export { menuSchema as DrawingUIMenuSchema } from './menu/schema';
 export { UniverDrawingUIPlugin } from './plugin';
 export { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from './services/drawing-image-clip.service';
 export type { ImageShapeClipDelegate } from './services/drawing-image-clip.service';

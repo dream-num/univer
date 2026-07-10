@@ -15,6 +15,7 @@
  */
 
 import type { ISheetDataValidationRule } from '@univerjs/core';
+import type { MouseEvent } from 'react';
 import { ColorKit, ICommandService, ThemeService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { clsx } from '@univerjs/design';
@@ -23,7 +24,6 @@ import { DeleteIcon } from '@univerjs/icons';
 import { RemoveSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import * as React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface IDataValidationDetailProps {
@@ -55,7 +55,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             stroke: color,
         };
     }, [theme]);
-    const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleDelete = (e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>) => {
         commandService.executeCommand(RemoveSheetDataValidationCommand.id, {
             ruleId: rule.uid,
             unitId,
@@ -121,22 +121,20 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             >
                 {rule.ranges.map((range) => serializeRange(range)).join(',')}
             </div>
-            {isHover
-                ? (
-                    <div
-                        className={`
-                          univer-absolute univer-right-2 univer-top-[19px] univer-flex univer-size-5 univer-items-center
-                          univer-justify-center univer-rounded
-                          hover:univer-bg-gray-200
-                          dark:!univer-text-gray-300
-                          dark:hover:!univer-bg-gray-700
-                        `}
-                        onClick={handleDelete}
-                    >
-                        <DeleteIcon />
-                    </div>
-                )
-                : null}
+            {isHover && (
+                <div
+                    className={`
+                      univer-absolute univer-right-2 univer-top-[19px] univer-flex univer-size-5 univer-items-center
+                      univer-justify-center univer-rounded
+                      hover:univer-bg-gray-200
+                      dark:!univer-text-gray-300
+                      dark:hover:!univer-bg-gray-700
+                    `}
+                    onClick={handleDelete}
+                >
+                    <DeleteIcon />
+                </div>
+            )}
         </div>
     );
 };

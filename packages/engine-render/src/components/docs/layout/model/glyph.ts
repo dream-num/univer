@@ -23,7 +23,7 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
-import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
+import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
@@ -101,7 +101,7 @@ export function createSkeletonLetterGlyph(
 }
 
 export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {
-    return _createSkeletonWordOrLetter(GlyphType.TAB, DT.TAB, config, glyphWidth);
+    return _createSkeletonWordOrLetter(GlyphType.TAB, DataStreamTreeTokenType.TAB, config, glyphWidth);
 }
 
 export function createHyphenDashGlyph(config: IFontCreateConfig) {
@@ -114,7 +114,7 @@ export function createHyphenDashGlyph(config: IFontCreateConfig) {
 // It is used to create inline custom blocks, such as inline images, to occupy placeholders in the layout.
 export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, drawingId = ''): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle } = config;
-    const content = DT.CUSTOM_BLOCK;
+    const content = DataStreamTreeTokenType.CUSTOM_BLOCK;
 
     return {
         content: '',
@@ -139,7 +139,7 @@ export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphW
         isJustifiable: false,
         adjustability: baseAdjustability(content, 0),
         glyphType: GlyphType.PLACEHOLDER,
-        streamType: content as DT,
+        streamType: content as DataStreamTreeTokenType,
         count: 1,
         drawingId,
     };
@@ -154,27 +154,27 @@ export function _createSkeletonWordOrLetter(
 ): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
     const skipWidthList: string[] = [
-        DT.SECTION_BREAK,
-        DT.TABLE_START,
-        DT.TABLE_END,
-        DT.TABLE_ROW_START,
-        DT.TABLE_ROW_END,
-        DT.TABLE_CELL_START,
-        DT.TABLE_CELL_END,
-        DT.COLUMN_GROUP_START,
-        DT.COLUMN_START,
-        DT.COLUMN_END,
-        DT.COLUMN_GROUP_END,
-        DT.BLOCK_START,
-        DT.BLOCK_END,
-        DT.CUSTOM_RANGE_START,
-        DT.CUSTOM_RANGE_END,
-        DT.COLUMN_BREAK,
-        DT.PAGE_BREAK,
-        DT.DOCS_END,
-        DT.CUSTOM_BLOCK,
+        DataStreamTreeTokenType.SECTION_BREAK,
+        DataStreamTreeTokenType.TABLE_START,
+        DataStreamTreeTokenType.TABLE_END,
+        DataStreamTreeTokenType.TABLE_ROW_START,
+        DataStreamTreeTokenType.TABLE_ROW_END,
+        DataStreamTreeTokenType.TABLE_CELL_START,
+        DataStreamTreeTokenType.TABLE_CELL_END,
+        DataStreamTreeTokenType.COLUMN_GROUP_START,
+        DataStreamTreeTokenType.COLUMN_START,
+        DataStreamTreeTokenType.COLUMN_END,
+        DataStreamTreeTokenType.COLUMN_GROUP_END,
+        DataStreamTreeTokenType.BLOCK_START,
+        DataStreamTreeTokenType.BLOCK_END,
+        DataStreamTreeTokenType.CUSTOM_RANGE_START,
+        DataStreamTreeTokenType.CUSTOM_RANGE_END,
+        DataStreamTreeTokenType.COLUMN_BREAK,
+        DataStreamTreeTokenType.PAGE_BREAK,
+        DataStreamTreeTokenType.DOCS_END,
+        DataStreamTreeTokenType.CUSTOM_BLOCK,
     ];
-    let streamType = DT.LETTER;
+    let streamType = DataStreamTreeTokenType.LETTER;
 
     if (skipWidthList.indexOf(content) > -1) {
         return {
@@ -200,13 +200,13 @@ export function _createSkeletonWordOrLetter(
             isJustifiable: false,
             adjustability: baseAdjustability(content, 0),
             glyphType: GlyphType.PLACEHOLDER,
-            streamType: content as DT,
+            streamType: content as DataStreamTreeTokenType,
             count: 1,
         };
     }
 
-    if (content === DT.PARAGRAPH) {
-        streamType = DT.PARAGRAPH;
+    if (content === DataStreamTreeTokenType.PARAGRAPH) {
+        streamType = DataStreamTreeTokenType.PARAGRAPH;
     }
 
     let bBox = null;
@@ -317,7 +317,7 @@ export function createSkeletonBulletGlyph(
         isJustifiable: isJustifiable(content),
         adjustability: baseAdjustability(content, width),
         glyphType: GlyphType.LIST,
-        streamType: DT.LETTER,
+        streamType: DataStreamTreeTokenType.LETTER,
         // Deliberately set to 0 so that there is no need to count when calculating the cursor.
         count: 0,
         raw: content,

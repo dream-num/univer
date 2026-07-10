@@ -18,7 +18,7 @@ import type { IPosition } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IDocumentSkeletonLine } from './i-document-skeleton-cached';
 import { BorderStyleTypes } from '@univerjs/core';
-import { BORDER_TYPE as BORDER_LTRB, ORIENTATION_TYPE } from './const';
+import { BORDER_TYPE, ORIENTATION_TYPE } from './const';
 import { createCanvasElement } from './tools';
 import { Vector2 } from './vector2';
 
@@ -60,28 +60,28 @@ export function getDevicePixelRatio(): number {
  * @param lineWidthBuffer Solving the problem of mitered corners in the drawing of borders thicker than 2 pixels, caused by the line segments being centered.
  * @param position border draw position
  */
-export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, lineWidthBuffer: number, position: IPosition) {
+export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, lineWidthBuffer: number, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
-    if (type === BORDER_LTRB.TOP) {
+    if (type === BORDER_TYPE.TOP) {
         drawStartX = startX - lineWidthBuffer;
         drawStartY = startY;
         drawEndX = endX + lineWidthBuffer;
         drawEndY = startY;
-    } else if (type === BORDER_LTRB.BOTTOM) {
+    } else if (type === BORDER_TYPE.BOTTOM) {
         drawStartX = startX - lineWidthBuffer;
         drawStartY = endY;
         drawEndX = endX - lineWidthBuffer;
         drawEndY = endY;
-    } else if (type === BORDER_LTRB.LEFT) {
+    } else if (type === BORDER_TYPE.LEFT) {
         drawStartX = startX;
         drawStartY = startY - lineWidthBuffer;
         drawEndX = startX;
         drawEndY = endY + lineWidthBuffer;
-    } else if (type === BORDER_LTRB.RIGHT) {
+    } else if (type === BORDER_TYPE.RIGHT) {
         drawStartX = endX;
         drawStartY = startY - lineWidthBuffer;
         drawEndX = endX;
@@ -96,44 +96,44 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_L
     ctx.closePathByEnv();
 }
 
-function drawDiagonalSingleLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
+function drawDiagonalSingleLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
     switch (type) {
-        case BORDER_LTRB.TL_BR:
+        case BORDER_TYPE.TL_BR:
             drawStartX = startX;
             drawStartY = startY;
             drawEndX = endX;
             drawEndY = endY;
             break;
-        case BORDER_LTRB.TL_BC:
+        case BORDER_TYPE.TL_BC:
             drawStartX = startX;
             drawStartY = startY;
             drawEndX = (startX + endX) / 2;
             drawEndY = endY;
             break;
-        case BORDER_LTRB.TL_MR:
+        case BORDER_TYPE.TL_MR:
             drawStartX = startX;
             drawStartY = startY;
             drawEndX = endX;
             drawEndY = (startY + endY) / 2;
             break;
-        case BORDER_LTRB.BL_TR:
+        case BORDER_TYPE.BL_TR:
             drawStartX = startX;
             drawStartY = endY;
             drawEndX = endX;
             drawEndY = startY;
             break;
-        case BORDER_LTRB.ML_TR:
+        case BORDER_TYPE.ML_TR:
             drawStartX = startX;
             drawStartY = (startY + endY) / 2;
             drawEndX = endX;
             drawEndY = startY;
             break;
-        case BORDER_LTRB.BC_TR:
+        case BORDER_TYPE.BC_TR:
             drawStartX = (startX + endX) / 2;
             drawStartY = endY;
             drawEndX = endX;
@@ -149,7 +149,7 @@ function drawDiagonalSingleLineByBorderType(ctx: UniverRenderingContext, type: B
     ctx.stroke();
 }
 
-function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
+function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, position: IPosition) {
     let drawFirstStartX = 0;
     let drawFirstStartY = 0;
     let drawFirstEndX = 0;
@@ -160,7 +160,7 @@ function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: B
     let drawSecondEndY = 0;
     const { startX, startY, endX, endY } = position;
     switch (type) {
-        case BORDER_LTRB.TL_BR:
+        case BORDER_TYPE.TL_BR:
             drawFirstStartX = startX;
             drawFirstStartY = startY + 1.5;
             drawFirstEndX = endX - 1.5;
@@ -170,7 +170,7 @@ function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: B
             drawSecondEndX = endX;
             drawSecondEndY = endY - 1.5;
             break;
-        case BORDER_LTRB.BL_TR:
+        case BORDER_TYPE.BL_TR:
             drawFirstStartX = startX;
             drawFirstStartY = endY - 1.5;
             drawFirstEndX = endX - 1.5;
@@ -196,40 +196,40 @@ function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: B
     ctx.stroke();
 }
 
-export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, style: BorderStyleTypes, type: BORDER_LTRB, position: IPosition) {
-    if (style === BorderStyleTypes.DOUBLE && (type === BORDER_LTRB.TL_BR || type === BORDER_LTRB.BL_TR)) {
+export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, style: BorderStyleTypes, type: BORDER_TYPE, position: IPosition) {
+    if (style === BorderStyleTypes.DOUBLE && (type === BORDER_TYPE.TL_BR || type === BORDER_TYPE.BL_TR)) {
         drawDiagonalDoubleLineByBorderType(ctx, type, position);
     } else {
         drawDiagonalSingleLineByBorderType(ctx, type, position);
     }
 }
 
-export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
+export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
     switch (type) {
-        case BORDER_LTRB.TOP:
+        case BORDER_TYPE.TOP:
             drawStartX = startX;
             drawStartY = startY;
             drawEndX = endX;
             drawEndY = startY;
             break;
-        case BORDER_LTRB.BOTTOM:
+        case BORDER_TYPE.BOTTOM:
             drawStartX = startX;
             drawStartY = endY;
             drawEndX = endX;
             drawEndY = endY;
             break;
-        case BORDER_LTRB.LEFT:
+        case BORDER_TYPE.LEFT:
             drawStartX = startX;
             drawStartY = startY;
             drawEndX = startX;
             drawEndY = endY;
             break;
-        case BORDER_LTRB.RIGHT:
+        case BORDER_TYPE.RIGHT:
             drawStartX = endX;
             drawStartY = startY;
             drawEndX = endX;

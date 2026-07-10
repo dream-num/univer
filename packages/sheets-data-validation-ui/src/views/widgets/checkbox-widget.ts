@@ -16,7 +16,12 @@
 
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
-import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    UniverRenderingContext,
+    UniverRenderingContext2D,
+} from '@univerjs/engine-render';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
 import {
@@ -29,7 +34,14 @@ import {
     UniverInstanceType,
     VerticalAlign,
 } from '@univerjs/core';
-import { CheckboxShape as Checkbox, CURSOR_TYPE, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Transform } from '@univerjs/engine-render';
+import {
+    CheckboxShape,
+    CURSOR_TYPE,
+    fixLineWidthByScale,
+    getCurrentTypeOfRenderer,
+    IRenderManagerService,
+    Transform,
+} from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import {
     CHECKBOX_FORMULA_1,
@@ -170,7 +182,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const checked = String(value) === String(formula1);
         const defaultColor = this._themeService.getColorFromTheme('primary.600');
 
-        Checkbox.drawWith(ctx as UniverRenderingContext, {
+        CheckboxShape.drawWith(ctx as UniverRenderingContext, {
             checked,
             width: size,
             height: size,

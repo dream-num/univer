@@ -40,7 +40,14 @@ import {
     VerticalAlign,
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { createEditorUndoRedoKeyboardConfig, DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
+import {
+    createEditorUndoRedoKeyboardConfig,
+    DocBackScrollRenderController,
+    DocSelectionRenderService,
+    IEditorService,
+    useKeyboardEvent,
+    useResize,
+} from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';

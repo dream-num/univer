@@ -25,6 +25,33 @@ import { TextX } from '../text-x';
 import { getBodySliceForTextXAction } from '../utils';
 
 describe('TextX column groups', () => {
+    it('creates missing paragraph and section-break collections from inserted column metadata', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}${T.COLUMN_END}${T.COLUMN_GROUP_END}`,
+            columnGroups: [{ startIndex: 0, endIndex: 3, columnGroupId: 'cg-1' }],
+        };
+
+        TextX.apply(body, [
+            { t: TextXActionType.RETAIN, len: 2 },
+            {
+                t: TextXActionType.INSERT,
+                len: 2,
+                body: {
+                    dataStream: `${T.PARAGRAPH}${T.SECTION_BREAK}`,
+                    paragraphs: [{ startIndex: 0, paragraphId: 'inserted' }],
+                    sectionBreaks: [{ startIndex: 1 }],
+                },
+            },
+        ]);
+
+        expect(body.paragraphs).toEqual([{
+            startIndex: 2,
+            paragraphId: expect.any(String),
+        }]);
+        expect(body.sectionBreaks).toEqual([{ startIndex: 3 }]);
+    });
+
     it('adds inserted column group metadata to documents without existing column groups', () => {
         const T = DataStreamTreeTokenType;
         const body: IDocumentBody = {

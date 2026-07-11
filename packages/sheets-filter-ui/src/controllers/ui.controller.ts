@@ -29,7 +29,7 @@ import {
     OpenFilterPanelOperation,
 } from '../commands/operations/sheets-filter.operation';
 import { menuSchema } from '../menu/schema';
-import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
+import { ISheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { FILTER_PANEL_POPUP_KEY } from '../views/components/SheetsFilterPanel';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { SheetsFilterUIMobileController } from './ui-mobile.controller';
@@ -40,7 +40,7 @@ import { SheetsFilterUIMobileController } from './ui-mobile.controller';
 export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
+        @ISheetsFilterPanelService private readonly _sheetsFilterPanelService: ISheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
         @Inject(LocaleService) private _localeService: LocaleService,

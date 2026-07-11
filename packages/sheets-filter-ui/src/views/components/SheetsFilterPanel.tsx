@@ -24,7 +24,7 @@ import { ComponentContainer, useComponentsOfPart, useDependency, useObservable }
 import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
-import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { ISheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
@@ -36,7 +36,7 @@ import { FilterSyncSwitch } from './SheetsFilterSyncSwitch';
  * @returns React element
  */
 export function FilterPanel() {
-    const sheetsFilterPanelService = useDependency(SheetsFilterPanelService);
+    const sheetsFilterPanelService = useDependency(ISheetsFilterPanelService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
 

@@ -28,7 +28,7 @@ import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOper
 import enUS from '../../locale/en-US';
 import ruRU from '../../locale/ru-RU';
 import zhCN from '../../locale/zh-CN';
-import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { ISheetsFilterPanelService, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { FilterPanel } from './SheetsFilterPanel';
 
 const meta: Meta<typeof FilterPanel> = {
@@ -69,7 +69,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
                 [IUIPartsService, { useClass: UIPartsService }],
                 [WorksheetProtectionPointModel],
                 [SheetInterceptorService],
-                [SheetsFilterPanelService],
+                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
                 [RefRangeService],
             ]);
 

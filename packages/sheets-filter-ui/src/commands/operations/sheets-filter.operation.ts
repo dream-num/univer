@@ -20,7 +20,7 @@ import { CommandType, ICommandService, IContextService, Quantity } from '@univer
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { ILayoutService } from '@univerjs/ui';
-import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { ISheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 
 export const FILTER_PANEL_OPENED_KEY = 'FILTER_PANEL_OPENED';
 
@@ -40,7 +40,7 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
     handler: (accessor, params: IOpenFilterPanelOperationParams) => {
         const contextService = accessor.get(IContextService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
-        const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
+        const sheetsFilterPanelService = accessor.get(ISheetsFilterPanelService);
         const commandService = accessor.get(ICommandService);
 
         // Close the cell edit if it is opened.
@@ -68,7 +68,7 @@ export const CloseFilterPanelOperation: IOperation = {
     type: CommandType.OPERATION,
     handler: (accessor) => {
         const contextService = accessor.get(IContextService);
-        const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
+        const sheetsFilterPanelService = accessor.get(ISheetsFilterPanelService);
         const layoutService = accessor.get(ILayoutService, Quantity.OPTIONAL);
 
         if (contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
@@ -90,7 +90,7 @@ export const ChangeFilterByOperation: IOperation<IChangeFilterByOperationParams>
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const { filterBy } = params!;
-        const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
+        const sheetsFilterPanelService = accessor.get(ISheetsFilterPanelService);
         return sheetsFilterPanelService.changeFilterBy(filterBy);
     },
 };

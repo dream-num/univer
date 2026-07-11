@@ -61,7 +61,7 @@ import {
     OpenFilterPanelOperation,
 } from '../../../commands/operations/sheets-filter.operation';
 import enUS from '../../../locale/en-US';
-import { SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
+import { ISheetsFilterPanelService, SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
 import { FilterPanel } from '../SheetsFilterPanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -151,7 +151,7 @@ function createFilterPanelViewTestBed(workbookData: IWorkbookData, filterConfig?
         override onStarting(): void {
             ([
                 [SheetInterceptorService],
-                [SheetsFilterPanelService],
+                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
                 [RefRangeService],
                 [SheetsSelectionsService],
                 [SheetRangeThemeModel],
@@ -194,7 +194,7 @@ function createFilterPanelViewTestBed(workbookData: IWorkbookData, filterConfig?
         commandService,
         contextService: injector.get(IContextService),
         filterService: injector.get(SheetsFilterService),
-        panelService: injector.get(SheetsFilterPanelService),
+        panelService: injector.get(ISheetsFilterPanelService),
         messageService: injector.get(IMessageService) as TestMessageService,
     };
 }

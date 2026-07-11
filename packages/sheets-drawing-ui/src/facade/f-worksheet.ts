@@ -463,7 +463,7 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
         const subUnitId = this._worksheet.getSheetId();
 
         return Array.from(floatDomService.getFloatDomsBySubUnitId(unitId, subUnitId).values())
-            .map((info) => {
+            .map((info): IFCanvasFloatDomResult | null => {
                 const { rect } = info;
                 const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
                     drawingId: info.id,

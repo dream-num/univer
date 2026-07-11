@@ -471,6 +471,8 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
                     subUnitId,
                 })! as ISheetFloatDom;
 
+                if (!drawingParm) return null;
+
                 const { left, top, width, height, flipX, flipY, angle, skewX, skewY } = rect.getState();
 
                 return {
@@ -490,7 +492,8 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
                     data: drawingParm.data,
                     id: info.id,
                 };
-            });
+            })
+            .filter((dom): dom is IFCanvasFloatDomResult => dom != null);
     }
 
     override updateFloatDom(id: string, config: Partial<Omit<IFCanvasFloatDomResult, 'id'>>): this {

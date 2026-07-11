@@ -18,6 +18,7 @@ import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Unive
 import type { IFormulaData } from '../../basics/common';
 import {
     BaseDataModel,
+    BaseFieldType,
     BooleanNumber,
     CellValueType,
     IUniverInstanceService,
@@ -120,16 +121,16 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
             primaryFieldId: 'name',
             fieldOrder: ['name', 'amount', 'qty', 'tags', 'link', 'attachment', 'total', 'deleted-formula'],
             fields: {
-                name: { id: 'name', name: 'Name', type: 'text', config: {} },
-                amount: { id: 'amount', name: 'Amount', type: 'number', config: {} },
-                qty: { id: 'qty', name: 'Qty', type: 'number', config: {} },
-                tags: { id: 'tags', name: 'Tags', type: 'text', config: {} },
-                link: { id: 'link', name: 'Link', type: 'link', config: {} },
-                attachment: { id: 'attachment', name: 'Files', type: 'attachment', config: {} },
+                name: { id: 'name', name: 'Name', type: BaseFieldType.Text, config: {} },
+                amount: { id: 'amount', name: 'Amount', type: BaseFieldType.Number, config: {} },
+                qty: { id: 'qty', name: 'Qty', type: BaseFieldType.Number, config: {} },
+                tags: { id: 'tags', name: 'Tags', type: BaseFieldType.Text, config: {} },
+                link: { id: 'link', name: 'Link', type: BaseFieldType.Link, config: {} },
+                attachment: { id: 'attachment', name: 'Files', type: BaseFieldType.Attachment, config: {} },
                 total: {
                     id: 'total',
                     name: 'Total',
-                    type: 'formula',
+                    type: BaseFieldType.Formula,
                     config: {
                         formula: '=SUM({Amount}, [Qty], tableOther[External])',
                     },
@@ -137,7 +138,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                 'deleted-formula': {
                     id: 'deleted-formula',
                     name: 'Deleted Formula',
-                    type: 'formula',
+                    type: BaseFieldType.Formula,
                     deleted: true,
                     config: { formula: '=1' },
                 },
@@ -178,7 +179,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
             primaryFieldId: 'external',
             fieldOrder: ['external'],
             fields: {
-                external: { id: 'external', name: 'External', type: 'number', config: {} },
+                external: { id: 'external', name: 'External', type: BaseFieldType.Number, config: {} },
             },
             records: {
                 'record-2': {
@@ -200,7 +201,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
             primaryFieldId: 'name',
             fieldOrder: ['name'],
             fields: {
-                name: { id: 'name', name: 'Name', type: 'formula', config: { formula: '=1' } },
+                name: { id: 'name', name: 'Name', type: BaseFieldType.Formula, config: { formula: '=1' } },
             },
             records: {
                 'record-3': {

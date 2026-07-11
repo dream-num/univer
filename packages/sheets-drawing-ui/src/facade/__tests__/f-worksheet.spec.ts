@@ -547,8 +547,14 @@ describe('sheets-drawing-ui facade', () => {
 
         const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
         const sheetDrawingService = injector.get(ISheetDrawingService);
-        worksheet.addFloatDomToPosition({ componentKey: 'OrderCard' }, 'order-card');
-        worksheet.addFloatDomToPosition({ componentKey: 'MissingCard' }, 'missing-card');
+        worksheet.addFloatDomToPosition({
+            componentKey: 'OrderCard',
+            initPosition: { startX: 20, startY: 30, endX: 140, endY: 90 },
+        }, 'order-card');
+        worksheet.addFloatDomToPosition({
+            componentKey: 'MissingCard',
+            initPosition: { startX: 40, startY: 50, endX: 160, endY: 110 },
+        }, 'missing-card');
         await Promise.resolve();
 
         const drawingData = sheetDrawingService.getDrawingData('test', 'sheet1');

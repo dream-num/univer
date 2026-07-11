@@ -15,8 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
-
 import type { LambdaNode } from '../ast-node/lambda-node';
 import { Disposable, Inject, sortRules } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
@@ -30,7 +28,7 @@ import {
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
-import { ErrorNode } from '../ast-node/base-ast-node';
+import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
 import { ErrorFunctionNode, FunctionNodeFactory } from '../ast-node/function-node';
 import { LambdaNodeFactory } from '../ast-node/lambda-node';
 import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
@@ -299,6 +297,9 @@ export class AstTreeBuilder extends Disposable {
             switch (astNode.nodeType) {
                 // case NodeType.ERROR:
                 //     return astNode;
+                case NodeType.BASE:
+                    calculateStack.push(astNode);
+                    break;
                 case NodeType.FUNCTION: {
                     const token = astNode.getToken().trim().toUpperCase();
                     if (FORCED_RECALCULATION_FUNCTION_NAME.has(token)) {
@@ -384,11 +385,39 @@ export class AstTreeBuilder extends Disposable {
         }
 
         if (astNode == null) {
+            const aggregatorNode = this._createGroupByAggregatorTokenNode(item);
+            if (aggregatorNode != null) {
+                return aggregatorNode;
+            }
+
             return new ErrorFunctionNode();
         }
 
         // console.log('astNode111', astNode, item);
         return astNode;
+    }
+
+    private _createGroupByAggregatorTokenNode(param: LexerNode | string): Nullable<BaseAstNode> {
+        const token = (typeof param === 'string' ? param : param.getToken()).trim().toUpperCase();
+        const prefix = '_XLETA.';
+        if (!token.startsWith(prefix)) {
+            return null;
+        }
+
+        const name = token.slice(prefix.length);
+        if (
+            name !== 'SUM' &&
+            name !== 'COUNT' &&
+            name !== 'COUNTA' &&
+            name !== 'PERCENTOF' &&
+            name !== 'MIN' &&
+            name !== 'MAX' &&
+            name !== 'ARRAYTOTEXT'
+        ) {
+            return null;
+        }
+
+        return new BaseAstNode(name);
     }
 
     private _initializeAstNode() {

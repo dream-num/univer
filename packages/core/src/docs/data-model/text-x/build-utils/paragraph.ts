@@ -15,14 +15,16 @@
  */
 
 import type { ITextRange } from '../../../../sheets/typedef';
-import type { ICustomTable, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
+import type { ICustomTable, IDocumentBody, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { generateRandomId } from '../../../../shared/random-id';
 import { PRESET_LIST_TYPE, PresetListType } from '../../preset-list-type';
+import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
+import { containsStreamIndex, getBlockRangeInterval, getTableRangeInterval } from './range-interval';
 import { getParagraphsInRanges } from './selection';
 
 export interface ISwitchParagraphBulletParams {
@@ -244,7 +246,84 @@ export interface IChangeParagraphBulletNestLevelParams {
 }
 
 export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
-    return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);
+    return tables.some((table) => {
+        const interval = getTableRangeInterval(table);
+        return paragraph.startIndex > interval.startOffset && containsStreamIndex(interval, paragraph.startIndex);
+    });
+}
+
+const PARAGRAPH_CONTAINER_TOKENS = new Set<string>([
+    DataStreamTreeTokenType.SECTION_BREAK,
+    DataStreamTreeTokenType.TABLE_START,
+    DataStreamTreeTokenType.TABLE_ROW_START,
+    DataStreamTreeTokenType.TABLE_CELL_START,
+    DataStreamTreeTokenType.TABLE_CELL_END,
+    DataStreamTreeTokenType.TABLE_ROW_END,
+    DataStreamTreeTokenType.TABLE_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_START,
+    DataStreamTreeTokenType.COLUMN_START,
+    DataStreamTreeTokenType.COLUMN_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_END,
+    DataStreamTreeTokenType.BLOCK_START,
+    DataStreamTreeTokenType.BLOCK_END,
+]);
+
+export function getParagraphContentStartOffset(
+    body: Pick<IDocumentBody, 'dataStream' | 'paragraphs'>,
+    paragraph: Pick<IParagraph, 'startIndex'>
+): number {
+    let previousParagraph: IParagraph | undefined;
+    for (const candidate of body.paragraphs ?? []) {
+        if (
+            candidate.startIndex < paragraph.startIndex &&
+            (!previousParagraph || candidate.startIndex > previousParagraph.startIndex)
+        ) {
+            previousParagraph = candidate;
+        }
+    }
+    let startOffset = previousParagraph ? previousParagraph.startIndex + 1 : 0;
+
+    while (
+        startOffset < paragraph.startIndex &&
+        PARAGRAPH_CONTAINER_TOKENS.has(body.dataStream[startOffset])
+    ) {
+        startOffset++;
+    }
+
+    return startOffset;
+}
+
+export function getParagraphContentStartOffsets(
+    body: Pick<IDocumentBody, 'dataStream' | 'paragraphs'>
+): Map<number, number> {
+    const startOffsets = new Map<number, number>();
+    const paragraphs = [...(body.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
+
+    for (let index = 0; index < paragraphs.length; index++) {
+        const paragraph = paragraphs[index];
+        let startOffset = index > 0 ? paragraphs[index - 1].startIndex + 1 : 0;
+        while (
+            startOffset < paragraph.startIndex &&
+            PARAGRAPH_CONTAINER_TOKENS.has(body.dataStream[startOffset])
+        ) {
+            startOffset++;
+        }
+        startOffsets.set(paragraph.startIndex, startOffset);
+    }
+
+    return startOffsets;
+}
+
+export function getParagraphFollowingBlockOffset(
+    body: Pick<IDocumentBody, 'blockRanges'>,
+    paragraph: Pick<IParagraph, 'startIndex'>
+): number {
+    const containingBlock = (body.blockRanges ?? []).find((blockRange) => {
+        const interval = getBlockRangeInterval(blockRange);
+        return paragraph.startIndex > interval.startOffset && paragraph.startIndex < interval.endOffset - 1;
+    });
+
+    return containingBlock ? getBlockRangeInterval(containingBlock).endOffset : paragraph.startIndex + 1;
 }
 
 export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNestLevelParams) => {

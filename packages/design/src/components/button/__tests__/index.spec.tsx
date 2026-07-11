@@ -65,6 +65,19 @@ describe('Button', () => {
 
         expect(a).toEqual(1);
     });
+
+    it('supports an icon size for square trigger buttons', () => {
+        const { container } = render(
+            <Button size="icon">
+                <svg />
+            </Button>
+        );
+
+        const button = container.querySelector('[data-u-comp="button"]');
+
+        expect(button?.className).toContain('univer-size-8');
+        expect(button?.className).toContain('!univer-p-0');
+    });
 });
 
 describe('ButtonGroup', () => {

@@ -25,13 +25,24 @@ export { MoveDocDrawingsCommand } from './commands/commands/move-drawings.comman
 export { RemoveDocDrawingCommand } from './commands/commands/remove-doc-drawing.command';
 export { SetDocDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
 export { UngroupDocDrawingCommand } from './commands/commands/ungroup-doc-drawing.command';
+export { UpdateDrawingDocTransformCommand } from './commands/commands/update-doc-drawing.command';
 export { ClearDocDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.operation';
 export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';
-export { type IUniverDocsDrawingUIConfig } from './config/config';
+export type { IUniverDocsDrawingUIConfig } from './config/config';
 export { DocFloatDomController } from './controllers/doc-float-dom.controller';
 export { DOCS_IMAGE_MENU_ID } from './menu/image.menu';
+export { menuSchema as DocsDrawingUIMenuSchema } from './menu/schema';
 export { DOCS_SHAPE_BELOW_MENU_ID, DOCS_SHAPE_MENU_ID } from './menu/shape.menu';
 export { UniverDocsDrawingUIPlugin } from './plugin';
+export { DocDrawingFloatingToolbarAdapterService } from './services/doc-drawing-floating-toolbar-adapter.service';
+export type {
+    IDocDrawingFloatingToolbarAdapter,
+    IDocDrawingFloatingToolbarButtonItem,
+    IDocDrawingFloatingToolbarItem,
+    IDocDrawingFloatingToolbarOption,
+    IDocDrawingFloatingToolbarParams,
+    IDocDrawingFloatingToolbarSelectItem,
+} from './services/doc-drawing-floating-toolbar-adapter.service';
 export { DocDrawingPosition } from './views/doc-image-panel/DocDrawingPosition';
 export { DocDrawingTextWrap } from './views/doc-image-panel/DocDrawingTextWrap';

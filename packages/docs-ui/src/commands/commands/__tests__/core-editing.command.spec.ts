@@ -367,7 +367,7 @@ describe('core editing commands', () => {
         expect(isDeleteOffsetInsideBlockRange(body, 3)).toBe(false);
     });
 
-    it('detects block ranges whose endIndex points before the block end token', () => {
+    it('does not reinterpret a malformed block range endIndex', () => {
         const dataStream = `${DataStreamTreeTokenType.BLOCK_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}\n`;
         const body = {
             dataStream,
@@ -380,7 +380,7 @@ describe('core editing commands', () => {
         };
 
         expect(isDeleteOffsetInsideBlockRange(body, 1)).toBe(true);
-        expect(isDeleteOffsetInsideBlockRange(body, 2)).toBe(true);
+        expect(isDeleteOffsetInsideBlockRange(body, 2)).toBe(false);
         expect(isDeleteOffsetInsideBlockRange(body, 3)).toBe(false);
     });
 

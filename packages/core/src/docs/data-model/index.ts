@@ -16,6 +16,48 @@
 
 export * from './document-data-model';
 export { getEmptySnapshot as getDocsEmptySnapshot } from './empty-snapshot';
+export { JSON1, JSONX } from './json-x/json-x';
+export type { JSONXActions, JSONXPath } from './json-x/json-x';
+export { resolveDocumentParagraphStyle } from './paragraph-style';
+export type { IResolveDocumentParagraphStyleOptions } from './paragraph-style';
 export * from './preset-list-type';
+export { replaceInDocumentBody } from './replacement';
+export {
+    ParagraphStyleBuilder,
+    ParagraphStyleValue,
+    RichTextBuilder,
+    RichTextValue,
+    TextDecorationBuilder,
+    TextStyleBuilder,
+    TextStyleValue,
+} from './rich-text-builder';
+export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './subdocument';
+export { ActionIterator } from './text-x/action-iterator';
+export { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './text-x/action-types';
+export type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './text-x/action-types';
+export { normalizeTextRuns, RESTORE_INSERTED_PARAGRAPH_IDS } from './text-x/apply-utils/common';
+export { updateAttributeByDelete } from './text-x/apply-utils/delete-apply';
+export { updateAttributeByInsert } from './text-x/apply-utils/insert-apply';
 export * from './text-x/build-utils';
+export { getPlainText } from './text-x/build-utils/parse';
+export { validateDocBodyStructure, validateDocumentStructure } from './text-x/structure-validator';
+export type { DocStructureIssueCode, IDocStructureIssue } from './text-x/structure-validator';
+export { TextX } from './text-x/text-x';
+export type { TPriority } from './text-x/text-x';
+export {
+    composeBody,
+    getBodySlice,
+    getBodySliceForSplitTextXAction,
+    getBodySliceForTextXAction,
+    getCustomBlockSlice,
+    getCustomDecorationSlice,
+    getCustomRangeSlice,
+    getParagraphsSlice,
+    getRichTextEditPath,
+    getSectionBreakSlice,
+    getTableSlice,
+    getTextRunSlice,
+    normalizeBody,
+    SliceBodyType,
+} from './text-x/utils';
 export * from './types';

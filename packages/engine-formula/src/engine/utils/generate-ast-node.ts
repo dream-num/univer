@@ -23,7 +23,7 @@ import type { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode } from '../ast-node/ast-root-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../dependency/dependency-tree';
-import { escapeRegExp } from '@univerjs/core';
+import { regexp } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -37,18 +37,32 @@ type IDirtyStringMap = Record<string, string>;
 const DIRTY_DEFINED_NAME_SET_CACHE = new WeakMap<IDirtyStringMap, Set<string>>();
 const DIRTY_SUPER_TABLE_PATTERN_CACHE = new WeakMap<IDirtyStringMap, RegExp | null>();
 
-export function generateAstNode(unitId: string, formulaString: string, lexer: Lexer, astTreeBuilder: AstTreeBuilder, currentConfigService: IFormulaCurrentConfigService): AstRootNode {
+export function generateAstNode(
+    unitId: string,
+    formulaString: string,
+    lexer: Lexer,
+    astTreeBuilder: AstTreeBuilder,
+    currentConfigService: IFormulaCurrentConfigService,
+    subUnitId?: string
+): AstRootNode {
+    if (subUnitId) {
+        currentConfigService.setExecuteUnitId(unitId);
+        currentConfigService.setExecuteSubUnitId(subUnitId);
+    }
+
+    const executeSubUnitId = subUnitId ?? currentConfigService.getExecuteSubUnitId() ?? '';
+    const cacheKey = `${unitId}:${executeSubUnitId}:${formulaString}`;
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
-    let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(`${unitId}${formulaString}`);
+    let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(cacheKey);
 
     const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService) || checkIsChangedBySuperTable(unitId, formulaString, currentConfigService);
 
-    if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService)) {
+    if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService, unitId)) {
         // astNode.setRefOffset(refOffsetX, refOffsetY);
         return astNode;
     }
 
-    const lexerNode = lexer.treeBuilder(formulaString);
+    const lexerNode = lexer.treeBuilder(formulaString, true, unitId);
 
     if (ERROR_TYPE_SET.has(lexerNode as ErrorType)) {
         return ErrorNode.create(lexerNode as ErrorType);
@@ -65,7 +79,7 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
 
     // astNode.setRefOffset(refOffsetX, refOffsetY);
     if (!noCache) {
-        FORMULA_AST_CACHE.set(`${unitId}${formulaString}`, astNode);
+        FORMULA_AST_CACHE.set(cacheKey, astNode);
     }
 
     return astNode;
@@ -115,12 +129,11 @@ function getNormalizedDirtyDefinedNameSet(unitDefinedNameMap: IDirtyStringMap): 
 function getDirtySuperTableReferencePattern(unitSuperTableMap: IDirtyStringMap): RegExp | null {
     let tableReferencePattern = DIRTY_SUPER_TABLE_PATTERN_CACHE.get(unitSuperTableMap);
     if (tableReferencePattern === undefined) {
-        const escapedTableNames = Object.keys(unitSuperTableMap)
-            .filter((tableName) => tableName.length > 0)
-            .map(escapeRegExp);
+        const tableNames = Object.keys(unitSuperTableMap)
+            .filter((tableName) => tableName.length > 0);
 
-        tableReferencePattern = escapedTableNames.length > 0
-            ? new RegExp(`(^|[^A-Za-z0-9_])(?:${escapedTableNames.join('|')})(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
+        tableReferencePattern = tableNames.length > 0
+            ? regexp.createRegExpFromSafeFragment(`(^|[^A-Za-z0-9_])${regexp.or(...tableNames)}(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
             : null;
         DIRTY_SUPER_TABLE_PATTERN_CACHE.set(unitSuperTableMap, tableReferencePattern);
     }
@@ -128,9 +141,9 @@ function getDirtySuperTableReferencePattern(unitSuperTableMap: IDirtyStringMap):
     return tableReferencePattern;
 }
 
-function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormulaCurrentConfigService) {
+function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormulaCurrentConfigService, unitId: string) {
     const definedNameMap = currentConfigService.getDirtyDefinedNameMap();
-    const executeUnitId = currentConfigService.getExecuteUnitId();
+    const executeUnitId = unitId;
     if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
         const names = Object.keys(definedNameMap[executeUnitId]!);
         for (let i = 0, len = names.length; i < len; i++) {
@@ -150,7 +163,7 @@ export function includeDefinedName(tree: IFormulaDependencyTree, node: Nullable<
      */
     // const node = tree.nodeData?.node;
     if (node != null) {
-        const dirtyDefinedName = isDirtyDefinedForNode(node, currentConfigService);
+        const dirtyDefinedName = isDirtyDefinedForNode(node, currentConfigService, tree.unitId);
         if (dirtyDefinedName) {
             return true;
         }

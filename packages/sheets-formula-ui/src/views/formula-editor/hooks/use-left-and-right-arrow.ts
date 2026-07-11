@@ -15,22 +15,65 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { CommandType, Direction, DisposableCollection, ICommandService } from '@univerjs/core';
-import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { CommandType, Direction, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, generateRandomId, ICommandService, IContextService } from '@univerjs/core';
+import { IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
 import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { FormulaSelectingType } from './use-formula-selection';
 
-// eslint-disable-next-line max-lines-per-function
-export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
+export function shouldMoveFormulaSelectionFromCurrentSelection(selectingType: FormulaSelectingType, refSelectionCount: number): boolean {
+    if (selectingType === FormulaSelectingType.NEED_ADD) {
+        return refSelectionCount === 0;
+    }
+
+    return selectingType === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE;
+}
+
+export interface IFormulaEditorInteractionOwnerOptions {
+    fxBarFocused?: boolean;
+    formulaBarEditorId?: string;
+    normalEditorId?: string;
+}
+
+export function isFormulaEditorInteractionOwner(
+    focusEditorId: string | null | undefined | void,
+    editorId: string,
+    options?: IFormulaEditorInteractionOwnerOptions
+): boolean {
+    if (focusEditorId === editorId) {
+        return true;
+    }
+
+    if (!options?.fxBarFocused) {
+        return false;
+    }
+
+    return editorId === (options.formulaBarEditorId ?? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) &&
+        focusEditorId === (options.normalEditorId ?? DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+}
+
+export const isFormulaEditorKeyboardOwner = isFormulaEditorInteractionOwner;
+
+export const useLeftAndRightArrow = (
+    isNeed: boolean,
+    shouldMoveSelection: FormulaSelectingType,
+    editor?: Editor,
+    onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void,
+    getRefSelectionCount?: () => number
+) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
+    const editorService = useDependency(IEditorService);
+    const contextService = useDependency(IContextService);
+    const operationNamespace = useMemo(() => generateRandomId(4), []);
     const shouldMoveSelectionRef = useRef(shouldMoveSelection);
     shouldMoveSelectionRef.current = shouldMoveSelection;
     const onMoveInEditorRef = useRef(onMoveInEditor);
     onMoveInEditorRef.current = onMoveInEditor;
+    const getRefSelectionCountRef = useRef(getRefSelectionCount);
+    getRefSelectionCountRef.current = getRefSelectionCount;
 
     // eslint-disable-next-line max-lines-per-function
     useEffect(() => {
@@ -38,8 +81,17 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
             return;
         }
         const editorId = editor.getEditorId();
-        const operationId = `sheet.formula-embedding-editor.${editorId}`;
+        const operationId = `sheet.formula-embedding-editor.${editorId}.${operationNamespace}`;
         const d = new DisposableCollection();
+        const shouldHandleShortcut = () => {
+            try {
+                const fxBarFocused = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+                return isFormulaEditorInteractionOwner(editorService.getFocusId(), editorId, { fxBarFocused }) &&
+                    (editor.docSelectionRenderService.isFocusing || fxBarFocused);
+            } catch {
+                return false;
+            }
+        };
         const handleMoveInEditor = (keycode: KeyCode, metaKey?: MetaKeys) => {
             if (onMoveInEditorRef.current) {
                 onMoveInEditorRef.current(keycode, metaKey);
@@ -78,12 +130,16 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
                 direction = Direction.RIGHT;
             }
             if (shouldMoveSelectionRef.current) {
+                const fromCurrentSelection = shouldMoveFormulaSelectionFromCurrentSelection(
+                    shouldMoveSelectionRef.current,
+                    getRefSelectionCountRef.current?.() ?? 0
+                );
                 if (metaKey === MetaKeys.CTRL_COMMAND) {
                     commandService.executeCommand(MoveSelectionCommand.id, {
                         direction,
                         jumpOver: JumpOver.moveGap,
                         extra: 'formula-editor',
-                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD || shouldMoveSelectionRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE,
+                        fromCurrentSelection,
                     });
                 } else if (metaKey === MetaKeys.SHIFT) {
                     commandService.executeCommand(ExpandSelectionCommand.id, {
@@ -100,7 +156,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
                     commandService.executeCommand(MoveSelectionCommand.id, {
                         direction,
                         extra: 'formula-editor',
-                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD || shouldMoveSelectionRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE,
+                        fromCurrentSelection,
                     });
                 }
             } else {
@@ -140,7 +196,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
             return {
                 id: operationId,
                 binding: metaKey ? keyCode | metaKey : keyCode,
-                preconditions: () => true,
+                preconditions: shouldHandleShortcut,
                 priority: 900,
                 staticParameters: {
                     eventType: DeviceInputEventType.Keyboard,
@@ -155,5 +211,5 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
         return () => {
             d.dispose();
         };
-    }, [commandService, editor, isNeed, shortcutService]);
+    }, [commandService, contextService, editor, editorService, isNeed, operationNamespace, shortcutService]);
 };

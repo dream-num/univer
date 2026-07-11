@@ -705,6 +705,7 @@ export interface ISelection {
     primary: Nullable<ISelectionCell>;
 }
 export interface ITextRangeStart {
+    /** Inclusive insertion offset at the start of the selection. */
     startOffset: number;
 }
 
@@ -715,6 +716,7 @@ export enum RANGE_DIRECTION {
 }
 
 export interface ITextRange extends ITextRangeStart {
+    /** Exclusive insertion offset at the end of a non-collapsed selection. */
     endOffset: number;
     collapsed: boolean;
     direction?: RANGE_DIRECTION;

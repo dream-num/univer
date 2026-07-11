@@ -18,7 +18,7 @@ import type { IFloatDom, IFloatDomLayout } from '../canvas-dom-layer.service';
 import { Injector } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { CanvasFloatDomService } from '../canvas-dom-layer.service';
+import { CanvasFloatDomPreviewService, CanvasFloatDomService } from '../canvas-dom-layer.service';
 
 function createService(): CanvasFloatDomService {
     const injector = new Injector();
@@ -77,5 +77,49 @@ describe('CanvasFloatDomService', () => {
         expect(service.domLayers).toEqual([]);
         expect(sizes).toEqual([0, 1, 2, 0]);
         sub.unsubscribe();
+    });
+
+    it('clears retained layer callbacks when disposed', () => {
+        const service = createService();
+        const sizes: number[] = [];
+        let completed = false;
+        service.domLayers$.subscribe({
+            next: (layers) => sizes.push(layers.length),
+            complete: () => {
+                completed = true;
+            },
+        });
+
+        service.addFloatDom(createFloatDom('dom-1'));
+        service.dispose();
+
+        expect(service.domLayers).toEqual([]);
+        expect(sizes).toEqual([0, 1, 0]);
+        expect(completed).toBe(true);
+    });
+
+    it('clears preview state when disposed', () => {
+        const service = new CanvasFloatDomPreviewService();
+        let previewCompleted = false;
+        let requestCompleted = false;
+        service.previewUpdated$.subscribe({
+            complete: () => {
+                previewCompleted = true;
+            },
+        });
+        service.previewRequested$.subscribe({
+            complete: () => {
+                requestCompleted = true;
+            },
+        });
+
+        service.requestPreview({ id: 'dom-1', width: 20, height: 10 });
+        service.setPreview({ id: 'dom-1', image: 'data:image/png;base64,', updatedAt: 1 });
+        service.dispose();
+
+        expect(service.getPreview('dom-1')).toBeUndefined();
+        expect(service.getPendingRequests()).toEqual([]);
+        expect(previewCompleted).toBe(true);
+        expect(requestCompleted).toBe(true);
     });
 });

@@ -66,7 +66,7 @@ const TABLE_NAME_REGEX = '((?![~!@#$%^&*()_+<>?:,./;’，。、‘：“《》�
 
 const TABLE_TITLE_REGEX = '\\[#.+\\]\\s*?,\\s*?';
 
-const TABLE_CONTENT_REGEX = '\\[((?<!#).)*\\]';
+const TABLE_CONTENT_REGEX = '\\[((?<!#)[\\s\\S])*\\]';
 
 const TABLE_MULTIPLE_COLUMN_REGEX = `${TABLE_CONTENT_REGEX}${RANGE_SYMBOL}${TABLE_CONTENT_REGEX}`;
 

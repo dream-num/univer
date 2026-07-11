@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBlockRange, IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBlockRange, IDocumentBody, IParagraph, ITextRun, JSONXActions } from '@univerjs/core';
 import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IPopup, IValueOption, RectPopupDirection } from '@univerjs/ui';
@@ -27,8 +27,10 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    LocaleService,
     NamedStyleType,
     SliceBodyType,
+    TextX,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -46,7 +48,6 @@ import {
 } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { BreakLineCommand } from '../commands/commands/break-line.command';
 import {
     DocCopyCommand,
     DocCopyCurrentParagraphCommand,
@@ -97,10 +98,29 @@ import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service';
 
-export { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from './paragraph-menu/component-keys';
+export function getParagraphMenuPopupDirection(
+    anchorLeft: number,
+    menuWidth = 212,
+    viewportPadding = 8,
+    options: {
+        anchorRight?: number;
+        direction?: 'ltr' | 'rtl';
+        viewportWidth?: number;
+    } = {}
+): 'left' | 'right' {
+    const {
+        anchorRight = anchorLeft,
+        direction = 'ltr',
+        viewportWidth = Number.POSITIVE_INFINITY,
+    } = options;
+    const hasLeftSpace = anchorLeft - menuWidth >= viewportPadding;
+    const hasRightSpace = anchorRight + menuWidth + viewportPadding <= viewportWidth;
 
-export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 212, viewportPadding = 8): 'left' | 'right' {
-    return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
+    if (direction === 'rtl') {
+        return hasRightSpace || !hasLeftSpace ? 'right' : 'left';
+    }
+
+    return hasLeftSpace || !hasRightSpace ? 'left' : 'right';
 }
 
 export const PARAGRAPH_MENU_HOVER_OPEN_DELAY = 800;
@@ -615,19 +635,132 @@ export function unwrapBlockRangeBody(documentBody: IDocumentBody, blockRange: ID
     };
 }
 
-function buildReplaceBodyActions(previousBody: IDocumentBody, nextBody: IDocumentBody) {
-    const jsonX = JSONX.getInstance();
-    return [
-        jsonX.replaceOp(['body', 'dataStream'], previousBody.dataStream, nextBody.dataStream),
-        jsonX.replaceOp(['body', 'paragraphs'], previousBody.paragraphs, nextBody.paragraphs),
-        jsonX.replaceOp(['body', 'sectionBreaks'], previousBody.sectionBreaks, nextBody.sectionBreaks),
-        jsonX.replaceOp(['body', 'textRuns'], previousBody.textRuns, nextBody.textRuns),
-        jsonX.replaceOp(['body', 'customRanges'], previousBody.customRanges, nextBody.customRanges),
-        jsonX.replaceOp(['body', 'customDecorations'], previousBody.customDecorations, nextBody.customDecorations),
-        jsonX.replaceOp(['body', 'customBlocks'], previousBody.customBlocks, nextBody.customBlocks),
-        jsonX.replaceOp(['body', 'tables'], previousBody.tables, nextBody.tables),
-        jsonX.replaceOp(['body', 'blockRanges'], previousBody.blockRanges, nextBody.blockRanges),
-    ].reduce((acc, action) => JSONX.compose(acc, action), null as ReturnType<typeof JSONX.compose>);
+const UNWRAP_BLOCK_BODY_PATCH_KEYS = [
+    'paragraphs',
+    'sectionBreaks',
+    'textRuns',
+    'customRanges',
+    'customDecorations',
+    'customBlocks',
+    'tables',
+    'columnGroups',
+    'blockRanges',
+] as const satisfies Array<keyof IDocumentBody>;
+
+export function buildUnwrapBlockRangeActions(previousBody: IDocumentBody, nextBody: IDocumentBody, blockRange: IDocumentBlockRange): JSONXActions | null {
+    const endTokenOffset = getEndTokenOffset(previousBody, blockRange);
+    const textX = new TextX();
+
+    textX.retain(blockRange.startIndex);
+    textX.delete(1);
+    textX.retain(Math.max(0, endTokenOffset - blockRange.startIndex - 1));
+    textX.delete(1);
+
+    const textAction = JSONX.getInstance().editOp(textX.serialize(), ['body']);
+    const intermediateBody = Tools.deepClone(previousBody);
+    TextX.apply(intermediateBody, textX.serialize());
+
+    const rawActions = [textAction];
+    collectUnwrapBlockBodyPatchActions(intermediateBody, nextBody, rawActions);
+
+    return rawActions.reduce((acc, action) => JSONX.compose(acc, action), null as JSONXActions);
+}
+
+function collectUnwrapBlockBodyPatchActions(previousBody: IDocumentBody, nextBody: IDocumentBody, actions: JSONXActions[]): void {
+    for (const key of UNWRAP_BLOCK_BODY_PATCH_KEYS) {
+        collectUnwrapPatchActions(
+            JSONX.getInstance(),
+            ['body', key],
+            previousBody[key],
+            nextBody[key],
+            actions
+        );
+    }
+}
+
+function collectUnwrapPatchActions(
+    jsonX: JSONX,
+    path: (string | number)[],
+    oldValue: unknown,
+    newValue: unknown,
+    actions: JSONXActions[]
+): void {
+    if (isEmptyArrayEquivalent(oldValue, newValue) || Tools.diffValue(oldValue, newValue)) {
+        return;
+    }
+
+    if (oldValue == null) {
+        actions.push(jsonX.insertOp(path, newValue));
+        return;
+    }
+
+    if (newValue == null) {
+        actions.push(jsonX.removeOp(path, oldValue));
+        return;
+    }
+
+    if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+        collectUnwrapArrayPatchActions(jsonX, path, oldValue, newValue, actions);
+        return;
+    }
+
+    if (isPlainObject(oldValue) && isPlainObject(newValue)) {
+        const keys = new Set([...Object.keys(oldValue), ...Object.keys(newValue)]);
+        keys.forEach((key) => collectUnwrapPatchActions(
+            jsonX,
+            [...path, key],
+            (oldValue as Record<string, unknown>)[key],
+            (newValue as Record<string, unknown>)[key],
+            actions
+        ));
+        return;
+    }
+
+    actions.push(jsonX.replaceOp(path, oldValue, newValue));
+}
+
+function collectUnwrapArrayPatchActions(
+    jsonX: JSONX,
+    path: (string | number)[],
+    oldItems: unknown[],
+    newItems: unknown[],
+    actions: JSONXActions[]
+): void {
+    if (oldItems.length === newItems.length) {
+        oldItems.forEach((item, index) => collectUnwrapPatchActions(jsonX, [...path, index], item, newItems[index], actions));
+        return;
+    }
+
+    let prefix = 0;
+    while (prefix < oldItems.length && prefix < newItems.length && Tools.diffValue(oldItems[prefix], newItems[prefix])) {
+        prefix++;
+    }
+
+    let oldSuffix = oldItems.length - 1;
+    let newSuffix = newItems.length - 1;
+    while (oldSuffix >= prefix && newSuffix >= prefix && Tools.diffValue(oldItems[oldSuffix], newItems[newSuffix])) {
+        oldSuffix--;
+        newSuffix--;
+    }
+
+    for (let index = oldSuffix; index >= prefix; index--) {
+        actions.push(jsonX.removeOp([...path, index], oldItems[index]));
+    }
+
+    for (let index = prefix; index <= newSuffix; index++) {
+        actions.push(jsonX.insertOp([...path, index], newItems[index]));
+    }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isEmptyArrayEquivalent(oldValue: unknown, newValue: unknown): boolean {
+    return (
+        (oldValue == null && Array.isArray(newValue) && newValue.length === 0) ||
+        (newValue == null && Array.isArray(oldValue) && oldValue.length === 0)
+    );
 }
 
 function getTargetSelectionRange(target: IDocBlockMenuTarget | null | undefined, paragraph?: IMutiPageParagraphBound | null): ITextRangeWithStyle | null {
@@ -711,7 +844,9 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const openMenuRef = useRef<() => void>(() => undefined);
     const hoverOpenSchedulerRef = useRef(createParagraphMenuHoverOpenScheduler(() => openMenuRef.current()));
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const direction = useObservable(localeService.direction$, 'ltr');
     const docClipboardService = useDependency(IDocClipboardService);
     const docContentInsertService = useDependency(DocContentInsertService);
     const docBlockMoveValidatorService = useDependency(DocBlockMoveValidatorService);
@@ -768,10 +903,16 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const updateAnchorRect = () => {
         const boundingRect = anchorRef.current?.getBoundingClientRect();
         const left = (boundingRect?.left ?? 0) - 4;
-        setMenuDirection(getParagraphMenuPopupDirection(left));
+        const right = boundingRect?.right ?? 0;
+        const viewportWidth = anchorRef.current?.ownerDocument.defaultView?.innerWidth ?? window.innerWidth;
+        setMenuDirection(getParagraphMenuPopupDirection(left, 212, 8, {
+            anchorRight: right,
+            direction,
+            viewportWidth,
+        }));
         const nextAnchorRect = {
             left,
-            right: boundingRect?.right ?? 0,
+            right,
             top: boundingRect?.top ?? 0,
             bottom: boundingRect?.bottom ?? 0,
         };
@@ -879,7 +1020,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
         const previousBody = doc.getBody()!;
         const { body, range } = unwrapBlockRangeBody(previousBody, latestTarget.blockRange);
-        const actions = buildReplaceBodyActions(previousBody, body);
+        const actions = buildUnwrapBlockRangeActions(previousBody, body, latestTarget.blockRange);
         const segmentId = activeParagraphBound?.segmentId ?? '';
 
         const success = await commandService.executeCommand(RichTextEditingMutation.id, {
@@ -948,15 +1089,11 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 return;
             }
 
-            const insertRange = {
+            docContentInsertService.setInsertRange({
+                unitId: popup.unitId,
                 startOffset: latestTarget.moveRange.endOffset,
                 endOffset: latestTarget.moveRange.endOffset,
-                collapsed: true,
                 segmentId: activeParagraphBound?.segmentId,
-            };
-            replaceSelection(insertRange);
-            await commandService.executeCommand(BreakLineCommand.id, {
-                textRange: insertRange,
             });
             const wrappedCommandId = typeof commandParams?.commandId === 'string' ? commandParams.commandId : undefined;
             if (wrappedCommandId) {

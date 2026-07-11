@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange, Nullable } from '@univerjs/core';
+import type { ICommand, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IScrollState } from '../../services/scroll-manager.service';
 
 import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
@@ -30,6 +30,8 @@ export interface ISetScrollRelativeCommandParams {
 }
 
 export interface IScrollCommandParams {
+    unitId?: string;
+    sheetId?: string;
     offsetX?: number;
     offsetY?: number;
     /**
@@ -114,11 +116,16 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerSrv = accessor.get(IRenderManagerService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = params.unitId
+            ? getScrollCommandTargetByParams(univerInstanceService, params)
+            : getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
         const { workbook, worksheet, unitId } = target;
-        const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
+        const renderUnit = renderManagerSrv.getRenderById(unitId);
+        if (!renderUnit) return false;
+
+        const scrollManagerService = renderUnit.with(SheetScrollManagerService);
         const currentScroll: Readonly<Nullable<IScrollState>> = scrollManagerService.getCurrentScrollState();
 
         if (!worksheet) {
@@ -150,10 +157,33 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
     },
 };
 
+function getScrollCommandTargetByParams(
+    univerInstanceService: IUniverInstanceService,
+    params: Pick<IScrollCommandParams, 'unitId' | 'sheetId'>
+) {
+    if (!params.unitId) {
+        return null;
+    }
+
+    const workbook = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
+    const worksheet = params.sheetId ? workbook?.getSheetBySheetId(params.sheetId) : workbook?.getActiveSheet();
+    if (!workbook || !worksheet) {
+        return null;
+    }
+
+    return {
+        workbook,
+        worksheet,
+        unitId: params.unitId,
+        subUnitId: worksheet.getSheetId(),
+    };
+}
+
 export interface IScrollToCellCommandParams {
     range: IRange;
     forceTop?: boolean;
     forceLeft?: boolean;
+    unitId?: string;
 }
 
 /**

@@ -15,7 +15,7 @@
  */
 
 import { DataValidationType } from '@univerjs/core';
-import { CHECKBOX_FORMULA_INPUT_NAME } from '../components/formula-input';
+import { CHECKBOX_FORMULA_INPUT_NAME } from '@univerjs/sheets-data-validation';
 import { CheckboxRender } from '../widgets/checkbox-widget';
 import { BaseSheetDataValidatorView } from './sheet-validator-view';
 

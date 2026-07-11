@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, IDisposable, INeedCheckDisposable, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
@@ -49,6 +49,8 @@ export class SheetCanvasPopManagerService extends Disposable {
     // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
     private _popupMenuOffsetMap = new Map<DrawingTypeEnum, { offsetX: number; offsetY: number }>();
+    private readonly _popupDisposables = new Set<IDisposable>();
+
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -122,6 +124,8 @@ export class SheetCanvasPopManagerService extends Disposable {
     }
 
     override dispose(): void {
+        Array.from(this._popupDisposables).forEach((disposable) => disposable.dispose());
+        this._popupDisposables.clear();
         super.dispose();
         this._popupMenuFeatureMap.clear();
         this._popupMenuOffsetMap.clear();
@@ -306,22 +310,27 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(disposable);
+        disposableCollection.add(toDisposable(() => {
+            this._globalPopupManagerService.removePopup(id);
+            position$.complete();
+        }));
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 
         return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                position$.complete();
-                disposable.dispose();
-            },
+            dispose: () => trackedDisposable.dispose(),
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
@@ -360,27 +369,32 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             hiddenRects$: rects$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(disposable);
+        disposableCollection.add(rectsObserverDisposable);
+        disposableCollection.add(toDisposable(() => {
+            this._globalPopupManagerService.removePopup(id);
+            position$.complete();
+            //@ts-ignore
+            workbook = null;
+            //@ts-ignore
+            worksheet = null;
+        }));
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 
         return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                position$.complete();
-                disposable.dispose();
-                rectsObserverDisposable.dispose();
-                //@ts-ignore
-                workbook = null;
-                //@ts-ignore
-                worksheet = null;
-            },
+            dispose: () => trackedDisposable.dispose(),
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
@@ -439,20 +453,25 @@ export class SheetCanvasPopManagerService extends Disposable {
             return;
         }
 
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            connectorInjector: popupInjector,
             anchorRect: bound,
             anchorRect$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(toDisposable(() => {
+            this._globalPopupManagerService.removePopup(id);
+            onDispose?.();
+        }));
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 
         return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                onDispose?.();
-            },
+            dispose: () => trackedDisposable.dispose(),
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
@@ -509,10 +528,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -528,9 +549,10 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange: IRange = { startRow: row, endRow: row, startColumn: col, endColumn: col };
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
             if (!after) {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
             } else {
                 updateRowCol(after.startRow, after.startColumn);
             }
@@ -538,7 +560,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         return {
             dispose() {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
                 //@ts-ignore
                 worksheet = null;
                 //@ts-ignore
@@ -595,10 +617,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -615,9 +639,10 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange = { ...range };
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
             if (!after) {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
             } else {
                 updateRange(after);
             }
@@ -625,9 +650,36 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         return {
             dispose() {
-                disposableCollection.dispose();
+                trackedDisposable.dispose();
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+        };
+    }
+
+    private _resolveEmbeddedPopupInjector(unitId: string, currentRender: IRender): Injector | undefined {
+        return this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true
+            ? currentRender.getInjector?.()
+            : undefined;
+    }
+
+    private _trackPopupDisposable(disposable: IDisposable): IDisposable {
+        let disposed = false;
+        const trackedDisposables = this._popupDisposables;
+        const trackedDisposable = {
+            dispose: () => {
+                if (disposed) {
+                    return;
+                }
+
+                disposed = true;
+                trackedDisposables.delete(trackedDisposable);
+                disposable.dispose();
+            },
+        };
+
+        trackedDisposables.add(trackedDisposable);
+        return {
+            dispose: () => trackedDisposable.dispose(),
         };
     }
 
@@ -654,7 +706,10 @@ export class SheetCanvasPopManagerService extends Disposable {
         const updatePosition = () => position$.next(this._calcCellPositionByCell(row, col, currentRender, skeleton, activeViewport));
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: () => updatePosition(),
+            error: () => {},
+        }));
         disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(() => updatePosition()));
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
@@ -769,7 +824,10 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: () => updatePosition(),
+            error: () => {},
+        }));
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {

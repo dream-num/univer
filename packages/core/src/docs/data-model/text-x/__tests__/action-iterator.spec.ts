@@ -16,8 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../../../types/enum/text-style';
+import { DataStreamTreeTokenType } from '../../types';
 import { ActionIterator } from '../action-iterator';
 import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
 
 describe('Test action iterator', () => {
     it('test action iterator basic use', () => {
@@ -151,5 +153,43 @@ describe('Test action iterator', () => {
             t: TextXActionType.DELETE,
             len: 5,
         }]);
+    });
+
+    it('preserves table metadata on the chunk containing the table end when an insert action is split', () => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}`;
+        const tableEnd = tableStream.length - 1;
+        const iterator = new ActionIterator([{
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: tableStream,
+                tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
+            },
+            len: tableStream.length,
+        }]);
+
+        const partialAction = iterator.next(4);
+        const restAction = iterator.next();
+
+        expect(partialAction.body?.tables).toBeUndefined();
+        expect(restAction.body?.tables).toEqual([{ startIndex: -4, endIndex: tableEnd - 4, tableId: 'table-1' }]);
+
+        const body = { dataStream: '' };
+        TextX.apply(body, [partialAction, restAction]);
+        expect(body).toMatchObject({
+            dataStream: tableStream,
+            tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
+        });
+
+        const fullIterator = new ActionIterator([{
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: tableStream,
+                tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
+            },
+            len: tableStream.length,
+        }]);
+
+        expect(fullIterator.next().body?.tables).toEqual([{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }]);
     });
 });

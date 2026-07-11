@@ -17,6 +17,7 @@
 import './global.css';
 
 export type { IUniverActionRecorderConfig } from './config/config';
+export { menuSchema as ActionRecorderMenuSchema } from './menu/action-recorder.menu';
 export { UniverActionRecorderPlugin } from './plugin';
 export { ActionRecorderService } from './services/action-recorder.service';
 export { ActionReplayService } from './services/replay.service';

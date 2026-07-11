@@ -22,15 +22,14 @@ import type { DocumentViewModel } from '../../../view-model/document-view-model'
 import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
 import type { ILayoutContext } from '../../tools';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
+import { cjk } from '../../../../../basics/cjk-regexp';
 import {
     hasArabic,
-    hasCJK,
-    hasCJKPunctuation,
-    hasCJKText,
     hasThai,
     hasTibetan,
     startWithEmoji,
 } from '../../../../../basics/tools';
+import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { Lang } from '../../hyphenation/lang';
 import { LineBreaker } from '../../line-breaker';
 import { BreakPointType } from '../../line-breaker/break';
@@ -64,8 +63,8 @@ function punctuationSpaceAdjustment(shapedGlyphs: IDocumentSkeletonGlyph[]) {
         const delta = width / 2;
 
         if (
-            hasCJKPunctuation(content) &&
-            hasCJKPunctuation(nextGlyph.content) &&
+            cjk.hasCJKPunctuation(content) &&
+            cjk.hasCJKPunctuation(nextGlyph.content) &&
             curGlyph.adjustability.shrinkability[1] + nextGlyph.adjustability.shrinkability[0] >= delta
         ) {
             const leftDelta = Math.min(curGlyph.adjustability.shrinkability[1], delta);
@@ -91,13 +90,13 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
         const { width } = curGlyph;
 
         // Case 1: CJ followed by a Latin character.
-        if (hasCJKText(curGlyph.content) && nextGlyph && LATIN_REG.test(nextGlyph.content)) {
+        if (cjk.hasCJKText(curGlyph.content) && nextGlyph && LATIN_REG.test(nextGlyph.content)) {
             curGlyph.width += width / 4;
             curGlyph.adjustability.shrinkability[1] += width / 8;
         }
 
         // Case 2: Latin followed by a CJ character.
-        if (hasCJKText(curGlyph.content) && prevGlyph && LATIN_REG.test(prevGlyph.content)) {
+        if (cjk.hasCJKText(curGlyph.content) && prevGlyph && LATIN_REG.test(prevGlyph.content)) {
             curGlyph.width += width / 4;
             curGlyph.xOffset += width / 4;
             curGlyph.adjustability.shrinkability[0] += width / 8;
@@ -243,8 +242,21 @@ export function shaping(
                             const top = 0;
                             const left = 0;
                             const boundingBox = getBoundingBox(angle, left, width, top, height);
+                            const viewport = getDocsCustomBlockRenderViewport(
+                                viewModel.getDataModel().getUnitId?.() ?? '',
+                                drawingOrigin.drawingId,
+                                {
+                                    fallbackHeight: boundingBox.height ?? 0,
+                                    fallbackWidth: boundingBox.width ?? 0,
+                                }
+                            );
 
-                            newGlyph = createSkeletonCustomBlockGlyph(config, boundingBox.width, boundingBox.height, drawingOrigin.drawingId);
+                            newGlyph = createSkeletonCustomBlockGlyph(
+                                config,
+                                viewport?.layoutWidth ?? viewport?.width ?? boundingBox.width,
+                                viewport?.height ?? boundingBox.height,
+                                drawingOrigin.drawingId
+                            );
                         } else if (drawingOrigin != null) {
                             newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
                         }
@@ -257,7 +269,7 @@ export function shaping(
                     shapedGlyphs.push(newGlyph);
                     i += char.length;
                     src = src.substring(char.length);
-                } else if (/\s/.test(char) || hasCJK(char)) {
+                } else if (/\s/.test(char) || cjk.hasCJK(char)) {
                     const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
                     let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
 

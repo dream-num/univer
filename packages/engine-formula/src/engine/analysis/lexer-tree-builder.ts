@@ -80,7 +80,8 @@ export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequen
 
 interface IInjectDefinedNameParam {
     unitId: Nullable<string>;
-    getValueByName(unitId: string, name: string): Nullable<IDefinedNamesServiceParam>;
+    sheetId?: Nullable<string>;
+    getValueByName(unitId: string, name: string, sheetId?: Nullable<string>): Nullable<IDefinedNamesServiceParam>;
     getDirtyDefinedNameMap(): IDirtyUnitDefinedNameMap;
     getSheetName: (unitId: string, sheetId: string) => string;
 }
@@ -767,7 +768,7 @@ export class LexerTreeBuilder extends Disposable {
         hasDefinedName: boolean;
         definedNames: string[];
     } {
-        const { unitId, getValueByName, getSheetName } = param;
+        const { unitId, sheetId, getValueByName, getSheetName } = param;
 
         if (unitId == null) {
             return {
@@ -796,7 +797,8 @@ export class LexerTreeBuilder extends Disposable {
                     token = this._getHasSheetNameDefinedName(tokenRaw, unitId, param);
                 }
 
-                const definedContent = getValueByName(unitId, token);
+                const definedNameToken = token.trim();
+                const definedContent = getValueByName(unitId, definedNameToken, sheetId);
                 if (definedContent) {
                     const refString = definedContent.formulaOrRefString;
                     // if (refString.substring(0, 1) === operatorToken.EQUALS) {
@@ -807,7 +809,7 @@ export class LexerTreeBuilder extends Disposable {
                     if (nestedDefinedNameParam == null || typeof nestedDefinedNameParam !== 'object') {
                         sequenceString += nestedDefinedNameParam || ErrorType.NAME;
                         hasDefinedName = true;
-                        definedNames.push(token);
+                        definedNames.push(definedNameToken);
                     } else if (typeof nestedDefinedNameParam === 'object') {
                         const { sequenceString: nestedSequenceString, definedNames: nestedDefinedNames } = nestedDefinedNameParam;
                         sequenceString += nestedSequenceString;
@@ -816,10 +818,10 @@ export class LexerTreeBuilder extends Disposable {
                         });
                         hasDefinedName = true;
                     }
-                } else if (this._checkDefinedNameDirty(token, param)) {
+                } else if (this._checkDefinedNameDirty(definedNameToken, param)) {
                     sequenceString += ErrorType.NAME;
                     hasDefinedName = true;
-                    definedNames.push(token);
+                    definedNames.push(definedNameToken);
                 } else {
                     sequenceString += token;
                 }
@@ -1500,8 +1502,9 @@ export class LexerTreeBuilder extends Disposable {
     // without a standalone lexer phase
     // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
-        // Editor will add '\r\n' at the end of the formula string
-        let formulaString = formulaStringRaw.replace(/\r\n$|\r|\n/g, ' ');
+        // Editor may add a line break at the end of the formula string.
+        // Keep internal line breaks because Excel table column names can contain them.
+        let formulaString = formulaStringRaw.replace(/(?:\r\n|\r|\n)$/g, ' ');
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }

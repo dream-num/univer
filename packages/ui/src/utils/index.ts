@@ -16,5 +16,6 @@
 
 export * from './cell';
 export * from './di';
+export * from './embed-boundary';
 export * from './html';
 export * from './util';

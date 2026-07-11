@@ -21,5 +21,6 @@ export {
     ToggleSheetCommentPanelOperation,
 } from './commands/operations/comment.operation';
 export type { IUniverSheetsThreadCommentUIConfig } from './config/config';
+export { menuSchema as SheetsThreadCommentUIMenuSchema } from './menu/schema';
 export { UniverSheetsThreadCommentUIPlugin } from './plugin';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';

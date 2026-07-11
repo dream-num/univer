@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
+import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
@@ -891,20 +891,15 @@ function isParagraphInTable(documentDataModel: DocumentDataModel, paragraphStart
 }
 
 function getParagraphMoveRange(documentDataModel: DocumentDataModel, paragraph: IMutiPageParagraphBound, cellRange?: { startOffset: number; endOffset: number } | null) {
-    const paragraphs = [...(documentDataModel.getBody()?.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
-    const index = paragraphs.findIndex((item) => item.startIndex === paragraph.startIndex);
-    const previousParagraph = index > 0
-        ? paragraphs.slice(0, index).reverse().find((item) => {
-            if (!cellRange) {
-                return true;
-            }
-
-            return item.startIndex > cellRange.startOffset && item.startIndex < cellRange.endOffset;
-        })
-        : null;
+    const body = documentDataModel.getBody();
+    const paragraphStartOffset = body
+        ? getParagraphContentStartOffset(body, paragraph)
+        : 0;
 
     return {
-        startOffset: previousParagraph ? previousParagraph.startIndex + 1 : (cellRange ? cellRange.startOffset + 1 : 0),
+        startOffset: cellRange
+            ? Math.max(paragraphStartOffset, cellRange.startOffset + 1)
+            : paragraphStartOffset,
         endOffset: paragraph.startIndex + 1,
     };
 }

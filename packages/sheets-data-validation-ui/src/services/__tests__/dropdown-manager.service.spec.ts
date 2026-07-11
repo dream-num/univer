@@ -36,7 +36,7 @@ import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univer
 import { serializeListOptions, SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import {
-    IEditorBridgeService as IEditorBridgeServiceIdentifier,
+    IEditorBridgeService,
     ISheetCellDropdownManagerService,
     SetCellEditVisibleOperation,
 } from '@univerjs/sheets-ui';
@@ -168,7 +168,7 @@ function createTestBed(): ITestBed {
                 [SheetDataValidationModel, { useClass: TestSheetDataValidationModel }],
                 [SheetsSelectionsService, { useClass: TestSheetsSelectionsService }],
                 [ISheetCellDropdownManagerService, { useClass: TestCellDropdownManagerService }],
-                [IEditorBridgeServiceIdentifier, { useClass: TestEditorBridgeService }],
+                [IEditorBridgeService, { useClass: TestEditorBridgeService }],
                 [DataValidationDropdownManagerService],
             ];
             dependencies.forEach((dependency) => this._injector.add(dependency));
@@ -271,7 +271,7 @@ describe('DataValidationDropdownManagerService', () => {
 
     it('keeps a multiple-list dropdown open after serializing selected values', async () => {
         testBed = createTestBed();
-        (testBed.get(IEditorBridgeServiceIdentifier) as unknown as TestEditorBridgeService).visible = false;
+        (testBed.get(IEditorBridgeService) as unknown as TestEditorBridgeService).visible = false;
         setRule(testBed, {
             uid: 'rule-multiple',
             type: 'list',

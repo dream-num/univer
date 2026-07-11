@@ -67,7 +67,9 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
         }
 
         const activeRange = docSelectionManagerService.getActiveTextRange();
-        const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '')?.getBody();
+        const rangeSegmentId = 'segmentId' in range ? (range as ITextRange & { segmentId?: string }).segmentId : undefined;
+        const targetSegmentId = segmentId ?? rangeSegmentId ?? activeRange?.segmentId ?? '';
+        const originBody = docDataModel.getSelfOrHeaderFooterModel(targetSegmentId)?.getBody();
 
         if (originBody == null) {
             return false;
@@ -186,16 +188,12 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        const cursor = 0;
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: start - cursor,
-        });
-
-        textX.push({
-            t: TextXActionType.DELETE,
-            len: end - start + 1,
-        });
+        textX.push(...BuildTextUtils.selection.delete([{
+            ...range,
+            startOffset: start,
+            endOffset: end + 1,
+            collapsed: false,
+        }], body));
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);

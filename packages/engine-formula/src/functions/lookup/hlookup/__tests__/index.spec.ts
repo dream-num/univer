@@ -81,6 +81,22 @@ describe('Test hlookup', () => {
             expect(resultObject.getValue().toString()).toBe(ErrorType.NA);
         });
 
+        it('Blank return cell should be returned as zero', async () => {
+            const tableArray = ArrayValueObject.createByArray([
+                [1],
+                [null],
+            ]);
+
+            const resultObject = testFunction.calculate(
+                NumberValueObject.create(1),
+                tableArray,
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+
+            expect(resultObject.getValue()).toBe(0);
+        });
+
         it('array', async () => {
             const resultObject = testFunction.calculate(
                 matchArrayValueObject.clone(),

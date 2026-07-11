@@ -21,6 +21,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -35,6 +36,7 @@ import {
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
+import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
@@ -63,7 +65,9 @@ export class DocUIController extends Disposable {
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
-        @IConfigService protected readonly _configService: IConfigService
+        @IConfigService protected readonly _configService: IConfigService,
+        @Optional(IDocEmbedInteractionBoundaryService) _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) protected readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -119,11 +123,23 @@ export class DocUIController extends Disposable {
     private _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, (unitId: string) => {
+                if (this._shouldPreserveEmbedFocus(unitId)) {
+                    return;
+                }
+
                 const renderManagerService = this._injector.get(IRenderManagerService);
                 const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService);
 
                 docSelectionRenderService.focus();
             })
         );
+    }
+
+    private _shouldPreserveEmbedFocus(unitId: string): boolean {
+        if (this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(unitId)) {
+            return true;
+        }
+
+        return false;
     }
 }

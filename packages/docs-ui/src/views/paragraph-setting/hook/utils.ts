@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentStyle, IParagraph, ISectionBreak } from '@univerjs/core';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 import {
     BuildTextUtils,
     DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
+    DocumentBlockRangeType,
     ICommandService,
     IUniverInstanceService,
+    resolveDocumentParagraphStyle,
     SpacingRule,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -41,6 +43,33 @@ import {
     convertStoredLineSpacingToDisplayValue,
     getLineSpacingMetrics,
 } from '../line-spacing';
+
+const PARAGRAPH_LAYOUT_BLOCK_TYPES = new Set([
+    DocumentBlockRangeType.CALLOUT,
+    DocumentBlockRangeType.CODE,
+    DocumentBlockRangeType.QUOTE,
+]);
+
+export function resolveParagraphsForSettingPanel(
+    paragraphs: IParagraph[],
+    body: IDocumentBody,
+    documentStyle: IDocumentStyle
+) {
+    return paragraphs.map((paragraph) => {
+        const hasLayoutBlockRange = body.blockRanges?.some((range) =>
+            PARAGRAPH_LAYOUT_BLOCK_TYPES.has(range.blockType) &&
+            paragraph.startIndex > range.startIndex &&
+            paragraph.startIndex < range.endIndex
+        ) ?? false;
+
+        return {
+            ...paragraph,
+            paragraphStyle: resolveDocumentParagraphStyle(documentStyle, paragraph.paragraphStyle, {
+                excludeDocumentOuterSpacing: hasLayoutBlockRange,
+            }),
+        };
+    });
+}
 
 const useDocRanges = () => {
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
@@ -74,11 +103,14 @@ export const useCurrentParagraph = () => {
     const segmentId = docRanges[0].segmentId;
 
     const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-    const paragraphs = segment?.getBody()?.paragraphs ?? [];
-    const dataStream = segment?.getBody()?.dataStream ?? '';
+    const body = segment?.getBody();
+    const paragraphs = body?.paragraphs ?? [];
+    const dataStream = body?.dataStream ?? '';
     const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs, dataStream) ?? [];
 
-    return currentParagraphs;
+    return body == null
+        ? currentParagraphs
+        : resolveParagraphsForSettingPanel(currentParagraphs, body, docDataModel.getDocumentStyle());
 };
 
 export const useCurrentSections = (currentParagraphs: IParagraph[]) => {

@@ -19,7 +19,10 @@ import { getEmptySnapshot } from '../empty-snapshot';
 
 describe('getEmptySnapshot', () => {
     it('uses the configured paragraph spacing defaults for new docs', () => {
-        expect(getEmptySnapshot().body?.paragraphs?.[0].paragraphStyle).toEqual({
+        const snapshot = getEmptySnapshot();
+
+        expect(snapshot.body?.paragraphs?.[0].paragraphStyle).toEqual({});
+        expect(snapshot.documentStyle.defaultParagraphStyle).toEqual({
             spaceAbove: { v: 0 },
             lineSpacing: 1.5,
             spaceBelow: { v: 12 },

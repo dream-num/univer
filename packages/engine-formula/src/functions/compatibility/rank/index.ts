@@ -29,6 +29,14 @@ interface IRefType {
     refNumbers: number[];
 }
 
+function isSameRankNumber(left: number, right: number): boolean {
+    if (left === right || Number.isInteger(left) || Number.isInteger(right)) {
+        return left === right;
+    }
+    const scale = Math.max(1, Math.abs(left), Math.abs(right));
+    return Math.abs(left - right) <= Number.EPSILON * scale * 2;
+}
+
 export class Rank extends BaseFunction {
     override minParams = 2;
 
@@ -86,9 +94,9 @@ export class Rank extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const refOrderNumbers = refNumbers.sort((a, b) => !orderValue ? b - a : a - b);
+            const refOrderNumbers = [...refNumbers].sort((a, b) => !orderValue ? b - a : a - b);
 
-            const result = refOrderNumbers.indexOf(numberValue);
+            const result = refOrderNumbers.findIndex((refNumber) => isSameRankNumber(refNumber, numberValue));
 
             if (result === -1) {
                 return ErrorValueObject.create(ErrorType.NA);
@@ -109,7 +117,7 @@ export class Rank extends BaseFunction {
         let refErrorObject = ErrorValueObject.create(ErrorType.NA);
         const refNumbers: number[] = [];
 
-        if (!ref.isReferenceObject()) {
+        if (!ref.isReferenceObject() && !ref.isArray()) {
             return {
                 refHasError: true,
                 refErrorObject,
@@ -117,7 +125,9 @@ export class Rank extends BaseFunction {
             };
         }
 
-        const _ref = (ref as BaseReferenceObject).toArrayValueObject();
+        const _ref = ref.isReferenceObject()
+            ? (ref as BaseReferenceObject).toArrayValueObject()
+            : ref as ArrayValueObject;
 
         _ref.iterator((refObject) => {
             const _refObject = refObject as BaseValueObject;

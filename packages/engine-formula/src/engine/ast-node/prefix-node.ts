@@ -20,7 +20,8 @@ import type { BaseFunction } from '../../functions/base-function';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
-import { prefixToken } from '../../basics/token';
+import { OPERATOR_TOKEN_COMPARE_SET, prefixToken } from '../../basics/token';
+import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
@@ -81,6 +82,10 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        if (this._preserveAtRangeForFormula2LookupArray()) {
+            return currentValue;
+        }
+
         const runtimeService = this._runtimeService;
 
         const currentRow = runtimeService.currentRow || 0;
@@ -110,6 +115,34 @@ export class PrefixNode extends BaseAstNode {
         }
 
         return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    private _preserveAtRangeForFormula2LookupArray(): boolean {
+        let node: BaseAstNode = this;
+        let parent = node.getParent();
+        let sawCompareOperator = false;
+
+        while (parent != null) {
+            if (parent.nodeType === NodeType.OPERATOR) {
+                sawCompareOperator ||= OPERATOR_TOKEN_COMPARE_SET.has(parent.getToken());
+            }
+
+            if (parent.nodeType === NodeType.FUNCTION) {
+                const functionName = parent.getToken().toUpperCase();
+                if (
+                    sawCompareOperator &&
+                    functionName === FUNCTION_NAMES_LOOKUP.XMATCH
+                ) {
+                    return parent.getChildren().indexOf(node) === 1;
+                }
+                return false;
+            }
+
+            node = parent;
+            parent = parent.getParent();
+        }
+
+        return false;
     }
 }
 

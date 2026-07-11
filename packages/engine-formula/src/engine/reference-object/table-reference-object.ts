@@ -328,7 +328,16 @@ export class TableReferenceObject extends BaseReferenceObject {
 
         // Defensive: Full-width space → half-width, then trim
         const keyNorm = key.replace(/\u3000/g, ' ').trim();
-        return titleMap.get(keyNorm) ?? -1;
+        const normalizedHit = titleMap.get(keyNorm);
+        if (normalizedHit !== undefined) return normalizedHit;
+
+        const lineBreakNorm = keyNorm.replace(/\r\n?/g, '\n');
+        for (const [title, index] of titleMap.entries()) {
+            if (title.replace(/\u3000/g, ' ').trim().replace(/\r\n?/g, '\n') === lineBreakNorm) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     /** Resolve #This Row's row number; takes first data row (tableStartRow+1) when no context available */

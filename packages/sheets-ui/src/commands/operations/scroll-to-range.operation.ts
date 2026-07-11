@@ -29,9 +29,17 @@ export const ScrollToRangeOperation: ICommand<IScrollToCellCommandParams> = {
         }
         const instanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const scrollController = renderManagerService
-            .getRenderById(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
-            .with(SheetsScrollRenderController);
+        const unitId = params.unitId ?? instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+        if (!unitId) {
+            return false;
+        }
+
+        const renderUnit = renderManagerService.getRenderById(unitId);
+        if (!renderUnit) {
+            return false;
+        }
+
+        const scrollController = renderUnit.with(SheetsScrollRenderController);
 
         return scrollController.scrollToRange(params.range, params.forceTop, params.forceLeft);
     },

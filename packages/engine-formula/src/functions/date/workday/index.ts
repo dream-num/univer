@@ -109,9 +109,16 @@ export class Workday extends BaseFunction {
                         return ErrorValueObject.create(ErrorType.VALUE);
                     }
 
+                    if (cell.isNull()) {
+                        continue;
+                    }
+
                     const holidaySerialNumber = getDateSerialNumberByObject(cell);
 
                     if (typeof holidaySerialNumber !== 'number') {
+                        if (cell.isString()) {
+                            continue;
+                        }
                         return holidaySerialNumber;
                     }
 

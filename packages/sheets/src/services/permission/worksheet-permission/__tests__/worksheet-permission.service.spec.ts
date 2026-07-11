@@ -45,8 +45,13 @@ class TestPermissionService {
     readonly addedPermissionIds: string[] = [];
     readonly deletedPermissionIds: string[] = [];
     readonly updatedPermissionPoints: Array<{ id: string; value: unknown }> = [];
+    readonly permissionPoints = new Map<string, { id: string; value?: unknown }>();
 
-    addPermissionPoint(point: { id: string }) {
+    addPermissionPoint(point: { id: string; value?: unknown }) {
+        if (this.permissionPoints.has(point.id)) {
+            return false;
+        }
+        this.permissionPoints.set(point.id, point);
         this.addedPermissionIds.push(point.id);
         return true;
     }
@@ -56,8 +61,16 @@ class TestPermissionService {
     }
 
     updatePermissionPoint(id: string, value: unknown) {
+        const point = this.permissionPoints.get(id);
+        if (point) {
+            point.value = value;
+        }
         this.updatedPermissionPoints.push({ id, value });
         return true;
+    }
+
+    getPermissionPoint(id: string) {
+        return this.permissionPoints.get(id);
     }
 }
 
@@ -222,5 +235,25 @@ describe('WorksheetPermissionService', () => {
         expect(worksheetRuleModel.getRule('book-1', 'sheet-1')).toBeUndefined();
         expect(worksheetPointModel.getRule('book-1', 'sheet-2')).toBeUndefined();
         expect(permissionService.deletedPermissionIds.some((id) => id.includes('book-1') && id.includes('sheet-1'))).toBe(true);
+    });
+
+    it('updates existing worksheet permission points when rule resources load', () => {
+        const ruleResource = resourceManagerService.resources[0];
+        const existingAddCount = permissionService.addedPermissionIds.length;
+
+        ruleResource.onLoad('book-1', {
+            'sheet-1': [{
+                permissionId: 'worksheet-perm-1',
+                unitType: UnitObject.Worksheet,
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                viewState: ViewStateEnum.OthersCanView,
+                editState: EditStateEnum.OnlyMe,
+            }],
+        });
+
+        expect(permissionService.addedPermissionIds.length).toBe(existingAddCount);
+        expect(permissionService.updatedPermissionPoints.length).toBeGreaterThan(0);
+        expect(permissionService.updatedPermissionPoints.every((item) => item.id.includes('book-1') && item.id.includes('sheet-1') && item.value === false)).toBe(true);
     });
 });

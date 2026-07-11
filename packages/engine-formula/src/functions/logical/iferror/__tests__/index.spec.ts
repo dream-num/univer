@@ -45,9 +45,10 @@ describe('Test iferror function', () => {
                 calculateValueList: transformToValueObject([
                     [1],
                     ['#N/A'],
+                    ['#DIV/0!'],
                     [1],
                 ]),
-                rowCount: 3,
+                rowCount: 4,
                 columnCount: 1,
                 unitId: '',
                 sheetId: '',
@@ -58,6 +59,7 @@ describe('Test iferror function', () => {
             const result = testFunction.calculate(value, valueIfError);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
+                ['error'],
                 ['error'],
                 [1],
             ]);

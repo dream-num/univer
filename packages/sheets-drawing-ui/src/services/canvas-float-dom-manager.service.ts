@@ -14,20 +14,88 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDrawingSearch, IPosition, IRange, ITransformState, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IDisposable,
+    IDrawingSearch,
+    IPosition,
+    IRange,
+    ITransformState,
+    Nullable,
+    Serializable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetFrozenMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import type { IFloatDomData, IInsertDrawingCommandParams, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type {
+    BaseObject,
+    IBoundRectNoAngle,
+    IRectProps,
+    IRender,
+    Scene,
+    SpreadsheetSkeleton,
+} from '@univerjs/engine-render';
+import type {
+    ISetFrozenMutationParams,
+    ISetSelectionsOperationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+} from '@univerjs/sheets';
+import type {
+    IFloatDomData,
+    IInsertDrawingCommandParams,
+    ISetDrawingCommandParams,
+    ISheetDrawing,
+    ISheetDrawingPosition,
+    ISheetFloatDom,
+} from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    DrawingTypeEnum,
+    fromEventSubject,
+    generateRandomId,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
+    Optional,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { disposeDrawingRenderObject, insertGroupObject } from '@univerjs/drawing-ui';
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
-import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { CanvasFloatDomService } from '@univerjs/ui';
+import {
+    DRAWING_OBJECT_LAYER_INDEX,
+    IRenderManagerService,
+    ObjectType,
+    Rect,
+    Image as RenderImage,
+    SHEET_VIEWPORT_KEY,
+} from '@univerjs/engine-render';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    getSheetCommandTarget,
+    SetFrozenMutation,
+    SetSelectionsOperation,
+    SetWorksheetRowAutoHeightMutation,
+} from '@univerjs/sheets';
+import {
+    DrawingApplyType,
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    SetDrawingApplyMutation,
+    SetSheetDrawingCommand,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
+import {
+    ISheetSelectionRenderService,
+    SetScrollOperation,
+    SetZoomRatioOperation,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
+import { CanvasFloatDomPreviewService, CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
 
 export interface ICanvasFloatDom {
@@ -74,7 +142,7 @@ export const SHEET_FLOAT_DOM_PREFIX = 'univer-sheet-float-dom-';
 export interface ICanvasFloatDomInfo {
     position$: BehaviorSubject<IFloatDomLayout>;
     dispose: IDisposable;
-    rect: Rect;
+    rect: BaseObject;
     unitId: string;
     subUnitId: string;
     boundsOfViewArea?: IBoundRectNoAngle;
@@ -82,6 +150,10 @@ export interface ICanvasFloatDomInfo {
     domAnchor?: IDOMAnchor;
     id: string;
     domId?: string; // Ensure unique id for dom element at runtime
+    floatDomConfig?: IFloatDom;
+    runtimeMounted?: boolean;
+    runtimeStage?: 'inactive' | 'stage1' | 'stage2';
+    previewObjectKey?: string;
 }
 
 /**
@@ -114,6 +186,30 @@ export interface ISheetFloatDomRenderObjectFactoryContext {
  */
 export type SheetFloatDomRenderObjectFactory = (context: ISheetFloatDomRenderObjectFactoryContext) => Rect;
 
+function createExternalRuntimeDisposable<TOwner extends object>(
+    owner: TOwner,
+    id: string,
+    disposeById: (owner: TOwner, id: string) => void
+): IDisposable & { id: string } {
+    const ownerRef = new WeakRef(owner);
+    let disposed = false;
+
+    return {
+        id,
+        dispose() {
+            if (disposed) {
+                return;
+            }
+
+            disposed = true;
+            const currentOwner = ownerRef.deref();
+            if (currentOwner) {
+                disposeById(currentOwner, id);
+            }
+        },
+    };
+}
+
 export interface IDOMAnchor {
     width: number;
     height: number;
@@ -121,6 +217,331 @@ export interface IDOMAnchor {
     verticalOffsetAlign?: 'top' | 'bottom';
     marginX?: number | string;
     marginY?: number | string;
+}
+
+const SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG = {
+    borderEnabled: true,
+    borderStroke: '#4086f4',
+    borderStrokeWidth: 1,
+    borderSpacing: 2,
+    anchorFill: '#ffffff',
+    anchorStroke: '#4086f4',
+    anchorStrokeWidth: 1.5,
+    anchorSize: 8,
+    anchorCornerRadius: 2,
+    anchorStyle: 'canva',
+    rotateEnabled: false,
+    resizeEnabled: true,
+    moveBoundaryEnabled: false,
+} as const;
+
+const FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY = -100;
+const FLOAT_DOM_STAGE2_CLICK_DISTANCE_THRESHOLD = 4;
+const FLOAT_DOM_PREVIEW_OBJECT_SUFFIX = '__preview';
+export const EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT = 'univer:embed-float-drag-handle:pointerdown';
+
+export interface IFloatDomHostClickIntent {
+    pointerId?: number;
+    startOffsetX: number;
+    startOffsetY: number;
+    startedAt: number;
+}
+
+export interface IEmbedFloatDragHandlePointerDownDetail {
+    embedId?: string;
+    hostUnitId?: string;
+    hostAnchorId?: string;
+    pointerId?: number;
+    clientX?: number;
+    clientY?: number;
+    button?: number;
+}
+
+export interface IFloatDomMoveDragState {
+    pointerId?: number;
+    startClientX: number;
+    startClientY: number;
+    startLeft: number;
+    startTop: number;
+}
+
+export function shouldStartFloatDomMoveFromHandle(
+    info: Pick<ICanvasFloatDomInfo, 'id' | 'unitId'>,
+    detail: IEmbedFloatDragHandlePointerDownDetail
+): boolean {
+    return detail.hostAnchorId === info.id &&
+        (detail.hostUnitId == null || detail.hostUnitId === info.unitId) &&
+        (detail.button == null || detail.button === 0) &&
+        typeof detail.clientX === 'number' &&
+        typeof detail.clientY === 'number';
+}
+
+export function createFloatDomMoveDragState(
+    info: Pick<ICanvasFloatDomInfo, 'rect'>,
+    detail: IEmbedFloatDragHandlePointerDownDetail
+): IFloatDomMoveDragState | undefined {
+    if (typeof detail.clientX !== 'number' || typeof detail.clientY !== 'number') {
+        return undefined;
+    }
+
+    return {
+        pointerId: detail.pointerId,
+        startClientX: detail.clientX,
+        startClientY: detail.clientY,
+        startLeft: Number(info.rect.left ?? 0),
+        startTop: Number(info.rect.top ?? 0),
+    };
+}
+
+export function resolveFloatDomMoveDragTransform(
+    state: IFloatDomMoveDragState,
+    event: Pick<PointerEvent, 'clientX' | 'clientY'>,
+    scene: Pick<Scene, 'getAncestorScale'>
+): Pick<ITransformState, 'left' | 'top'> {
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    return {
+        left: state.startLeft + (event.clientX - state.startClientX) / (scaleX || 1),
+        top: state.startTop + (event.clientY - state.startClientY) / (scaleY || 1),
+    };
+}
+
+export function applyFloatDomTransformerConfig(rect: BaseObject, floatDomParam: IFloatDomData): void {
+    const data = floatDomParam.data;
+    if (!data || typeof data !== 'object') {
+        return;
+    }
+
+    const embedData = data as {
+        version?: number;
+        embedId?: string;
+        resizeBehavior?: string;
+    };
+    if (embedData.version !== 1 || typeof embedData.embedId !== 'string') {
+        return;
+    }
+
+    rect.transformerConfig = {
+        ...SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG,
+        keepRatio: embedData.resizeBehavior === 'aspect-ratio',
+    };
+}
+
+function isStage2RuntimeEmbedFloatDom(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    if (!isEmbedFloatDomData(floatDomParam)) {
+        return false;
+    }
+
+    const embedData = floatDomParam.data as {
+        hostType?: UniverInstanceType;
+        childType?: UniverInstanceType;
+        runtimeMountMode?: string;
+    };
+
+    return embedData.hostType === UniverInstanceType.UNIVER_SHEET &&
+        embedData.childType === UniverInstanceType.UNIVER_SHEET &&
+        embedData.runtimeMountMode === 'stage2';
+}
+
+export function isEmbedFloatDomData(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    const data = floatDomParam.data;
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+
+    const embedData = data as {
+        version?: number;
+        embedId?: string;
+    };
+
+    return embedData.version === 1 &&
+        typeof embedData.embedId === 'string';
+}
+
+export function isSheetHostedEmbedFloatDom(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    if (!isEmbedFloatDomData(floatDomParam)) {
+        return false;
+    }
+
+    const embedData = floatDomParam.data as {
+        hostType?: UniverInstanceType;
+        childType?: UniverInstanceType;
+    };
+
+    return embedData.hostType === UniverInstanceType.UNIVER_SHEET &&
+        embedData.childType != null;
+}
+
+export function resolveSheetFloatDomRuntimePolicy(
+    floatDomParam: Pick<IFloatDomData, 'data'>,
+    stage: ICanvasFloatDomInfo['runtimeStage'] = 'inactive'
+): {
+    autoMountRuntime: boolean;
+    passThroughRuntimeEvents: boolean;
+    preserveOnFocusChange: boolean;
+    usePreviewObject: boolean;
+} {
+    const autoMountRuntime = !isStage2RuntimeEmbedFloatDom(floatDomParam);
+    const sheetHostedEmbed = isSheetHostedEmbedFloatDom(floatDomParam);
+
+    return {
+        autoMountRuntime,
+        passThroughRuntimeEvents: !(sheetHostedEmbed && stage === 'stage2'),
+        preserveOnFocusChange: isEmbedFloatDomData(floatDomParam),
+        usePreviewObject: isStage2RuntimeEmbedFloatDom(floatDomParam),
+    };
+}
+
+export function shouldAutoMountFloatDomRuntime(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam).autoMountRuntime;
+}
+
+export function shouldPreserveFloatDomOnFocusChange(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam).preserveOnFocusChange;
+}
+
+export function shouldUseFloatDomPreviewObject(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam).usePreviewObject;
+}
+
+export function shouldPassThroughFloatDomRuntimeEvents(
+    floatDomParam: Pick<IFloatDomData, 'data'>,
+    stage: ICanvasFloatDomInfo['runtimeStage'] = 'inactive'
+): boolean {
+    return resolveSheetFloatDomRuntimePolicy(floatDomParam, stage).passThroughRuntimeEvents;
+}
+
+export function shouldUpdateFloatDomLayerOnRuntimeStageChange(floatDomParam: Pick<IFloatDomData, 'data'>): boolean {
+    return isEmbedFloatDomData(floatDomParam) && !shouldAutoMountFloatDomRuntime(floatDomParam);
+}
+
+export function shouldForwardSheetHostedEmbedFloatDomEvent(
+    floatDomParam: Pick<IFloatDomData, 'data'>,
+    event: Pick<Event, 'target'>
+): boolean {
+    if (!isSheetHostedEmbedFloatDom(floatDomParam)) {
+        return true;
+    }
+
+    const target = event.target as { closest?: (selector: string) => HTMLElement | null } | null;
+    const runtime = target?.closest?.('[data-embed-float-dom="true"]');
+    return runtime?.dataset?.embedFloatStage !== 'stage2';
+}
+
+export function shouldPassThroughFloatDomActivationEvent(nextStage: ICanvasFloatDomInfo['runtimeStage'] | undefined): boolean {
+    return nextStage !== 'stage2';
+}
+
+export function syncFloatDomHostSelectionOnStageEnter(
+    stage: ICanvasFloatDomInfo['runtimeStage'] | undefined,
+    renderObject: {
+        transformer: { clearControlByIds: (ids: string[]) => void };
+        scene: {
+            attachTransformerTo?: (object: BaseObject) => void;
+            getTransformer?: () => Nullable<{ clearSelectedObjects?: () => void }>;
+        };
+    } | null | undefined,
+    rect: BaseObject & { oKey?: string }
+): void {
+    if (!renderObject) {
+        return;
+    }
+
+    if (stage === 'stage1') {
+        renderObject.scene.attachTransformerTo?.(rect);
+        return;
+    }
+
+    if (stage === 'stage2' && rect.oKey) {
+        renderObject.transformer.clearControlByIds([rect.oKey]);
+        renderObject.scene.getTransformer?.()?.clearSelectedObjects?.();
+    }
+}
+
+function isFloatDomInDomLayer(
+    canvasFloatDomService: Pick<CanvasFloatDomService, 'domLayers'>,
+    id: string
+): boolean {
+    return canvasFloatDomService.domLayers.some(([layerId]) => layerId === id);
+}
+
+export function isCanvasFloatDomDrawingType(drawingType: DrawingTypeEnum): boolean {
+    return drawingType === DrawingTypeEnum.DRAWING_DOM ||
+        drawingType === DrawingTypeEnum.DRAWING_BLOCK ||
+        drawingType === DrawingTypeEnum.DRAWING_CHART;
+}
+
+export function shouldActivateStage2FromHostPointer(
+    info: Pick<ICanvasFloatDomInfo, 'position$' | 'rect' | 'runtimeMounted' | 'runtimeStage'>,
+    event: { offsetX?: number; offsetY?: number }
+): boolean {
+    if (info.runtimeMounted || info.runtimeStage !== 'stage1') {
+        return false;
+    }
+
+    const { offsetX, offsetY } = event;
+    if (typeof offsetX !== 'number' || typeof offsetY !== 'number') {
+        return false;
+    }
+
+    const position = info.position$.getValue();
+    if (
+        offsetX >= Math.min(position.startX, position.endX) &&
+        offsetX <= Math.max(position.startX, position.endX) &&
+        offsetY >= Math.min(position.startY, position.endY) &&
+        offsetY <= Math.max(position.startY, position.endY)
+    ) {
+        return true;
+    }
+
+    const rect = info.rect;
+    if (typeof rect.isHit === 'function') {
+        try {
+            return rect.isHit({ x: offsetX, y: offsetY } as any);
+        } catch {
+            // Fall back to the axis-aligned bounds when the render object expects
+            // richer vector instances than a host-level event can provide.
+        }
+    }
+
+    return offsetX >= rect.left &&
+        offsetX <= rect.left + rect.width &&
+        offsetY >= rect.top &&
+        offsetY <= rect.top + rect.height;
+}
+
+export function createFloatDomHostClickIntent(
+    info: Pick<ICanvasFloatDomInfo, 'position$' | 'rect' | 'runtimeMounted' | 'runtimeStage'>,
+    event: { type?: string; pointerId?: number; offsetX?: number; offsetY?: number }
+): IFloatDomHostClickIntent | undefined {
+    if (event.type !== 'pointerdown' || !shouldActivateStage2FromHostPointer(info, event)) {
+        return undefined;
+    }
+
+    return {
+        pointerId: event.pointerId,
+        startOffsetX: event.offsetX!,
+        startOffsetY: event.offsetY!,
+        startedAt: Date.now(),
+    };
+}
+
+export function shouldActivateStage2FromHostClickIntent(
+    info: Pick<ICanvasFloatDomInfo, 'position$' | 'rect' | 'runtimeMounted' | 'runtimeStage'>,
+    intent: IFloatDomHostClickIntent | undefined,
+    event: { type?: string; pointerId?: number; offsetX?: number; offsetY?: number }
+): boolean {
+    if (!intent || event.type !== 'pointerup') {
+        return false;
+    }
+    if (intent.pointerId != null && event.pointerId != null && intent.pointerId !== event.pointerId) {
+        return false;
+    }
+    if (!shouldActivateStage2FromHostPointer(info, event)) {
+        return false;
+    }
+
+    const distance = Math.hypot(event.offsetX! - intent.startOffsetX, event.offsetY! - intent.startOffsetY);
+    return distance <= FLOAT_DOM_STAGE2_CLICK_DISTANCE_THRESHOLD;
 }
 
 export interface ILimitBound extends IBoundRectNoAngle {
@@ -322,13 +743,15 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         @IDrawingManagerService private _drawingManagerService: IDrawingManagerService,
         @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
+        @Optional(CanvasFloatDomPreviewService) private readonly _canvasFloatDomPreviewService?: CanvasFloatDomPreviewService
     ) {
         super();
         this._drawingAddListener();
         this._featureUpdateListener();
         this._deleteListener();
         this._bindScrollEvent();
+        this._bindEmbedFloatDragHandleEvent();
     }
 
     /**
@@ -381,6 +804,328 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return Array.from(this._domLayerInfoMap.values()).filter((info) => info.subUnitId === subUnitId && info.unitId === unitId);
     }
 
+    private static _disposeExternalFloatDom(manager: SheetCanvasFloatDomManagerService, id: string): void {
+        manager._removeDom(id, true);
+    }
+
+    private _createFloatDomDisposable(id: string): IDisposable & { id: string } {
+        return createExternalRuntimeDisposable(this, id, SheetCanvasFloatDomManagerService._disposeExternalFloatDom);
+    }
+
+    private _bindEmbedFloatDragHandleEvent(): void {
+        if (typeof document === 'undefined') {
+            return;
+        }
+
+        const listener = (event: Event) => this._handleEmbedFloatDragHandlePointerDown(event as CustomEvent<IEmbedFloatDragHandlePointerDownDetail>);
+        document.addEventListener(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, listener);
+        this.disposeWithMe(() => document.removeEventListener(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, listener));
+    }
+
+    private _handleEmbedFloatDragHandlePointerDown(event: CustomEvent<IEmbedFloatDragHandlePointerDownDetail>): void {
+        const detail = event.detail;
+        if (!detail?.hostAnchorId) {
+            return;
+        }
+
+        const info = this._domLayerInfoMap.get(detail.hostAnchorId);
+        if (!info || !shouldStartFloatDomMoveFromHandle(info, detail)) {
+            return;
+        }
+
+        const dragState = createFloatDomMoveDragState(info, detail);
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(info.unitId);
+        if (!dragState || !renderObject) {
+            return;
+        }
+
+        const { scene, transformer } = renderObject;
+        if (info.rect.oKey) {
+            transformer.clearControlByIds([info.rect.oKey]);
+            scene.getTransformer()?.clearSelectedObjects();
+        }
+
+        const handlePointerMove = (pointerEvent: PointerEvent) => {
+            if (dragState.pointerId != null && pointerEvent.pointerId !== dragState.pointerId) {
+                return;
+            }
+
+            pointerEvent.preventDefault();
+            const nextTransform = resolveFloatDomMoveDragTransform(dragState, pointerEvent, scene);
+            info.rect.transformByState(nextTransform as ITransformState);
+        };
+        const handlePointerUp = (pointerEvent: PointerEvent) => {
+            if (dragState.pointerId != null && pointerEvent.pointerId !== dragState.pointerId) {
+                return;
+            }
+
+            window.removeEventListener('pointermove', handlePointerMove, true);
+            window.removeEventListener('pointerup', handlePointerUp, true);
+            window.removeEventListener('pointercancel', handlePointerCancel, true);
+
+            pointerEvent.preventDefault();
+            if (info.rect.left !== dragState.startLeft || info.rect.top !== dragState.startTop) {
+                this._commitFloatDomMove(info);
+            }
+            if (info.runtimeStage === 'stage1') {
+                scene.attachTransformerTo?.(info.rect);
+            }
+        };
+        const handlePointerCancel = (pointerEvent: PointerEvent) => {
+            if (dragState.pointerId != null && pointerEvent.pointerId !== dragState.pointerId) {
+                return;
+            }
+
+            window.removeEventListener('pointermove', handlePointerMove, true);
+            window.removeEventListener('pointerup', handlePointerUp, true);
+            window.removeEventListener('pointercancel', handlePointerCancel, true);
+            info.rect.transformByState({
+                left: dragState.startLeft,
+                top: dragState.startTop,
+            } as ITransformState);
+            if (info.runtimeStage === 'stage1') {
+                scene.attachTransformerTo?.(info.rect);
+            }
+        };
+
+        window.addEventListener('pointermove', handlePointerMove, true);
+        window.addEventListener('pointerup', handlePointerUp, true);
+        window.addEventListener('pointercancel', handlePointerCancel, true);
+    }
+
+    private _commitFloatDomMove(info: ICanvasFloatDomInfo): void {
+        const skeletonParam = this._renderManagerService.getRenderById(info.unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(info.subUnitId);
+        const drawing = this._sheetDrawingService.getDrawingByParam({
+            unitId: info.unitId,
+            subUnitId: info.subUnitId,
+            drawingId: info.id,
+        }) as ISheetDrawing | undefined;
+        if (!skeletonParam || !drawing?.transform) {
+            return;
+        }
+
+        const transform = {
+            ...drawing.transform,
+            left: info.rect.left,
+            top: info.rect.top,
+            width: info.rect.width,
+            height: info.rect.height,
+            angle: info.rect.angle,
+            flipX: info.rect.flipX,
+            flipY: info.rect.flipY,
+            skewX: info.rect.skewX,
+            skewY: info.rect.skewY,
+        } as ITransformState;
+        const sheetTransform = transformToDrawingPosition(transform, skeletonParam.skeleton);
+        const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeletonParam.skeleton);
+        if (!sheetTransform || !axisAlignSheetTransform) {
+            return;
+        }
+
+        this._commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
+            unitId: info.unitId,
+            drawings: [{
+                ...drawing,
+                transform,
+                sheetTransform,
+                axisAlignSheetTransform,
+            }],
+        });
+    }
+
+    isFloatDomRuntimeMounted(id: string): boolean {
+        return this._domLayerInfoMap.get(id)?.runtimeMounted === true;
+    }
+
+    private _getFloatDomPreviewObjectKey(rectShapeKey: string): string {
+        return `${rectShapeKey}${FLOAT_DOM_PREVIEW_OBJECT_SUFFIX}`;
+    }
+
+    private _syncPreviewObjectTransform(previewObject: Nullable<BaseObject>, rect: BaseObject): void {
+        previewObject?.transformByState({
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            angle: rect.angle,
+            flipX: rect.flipX,
+            flipY: rect.flipY,
+            skewX: rect.skewX,
+            skewY: rect.skewY,
+        } as ITransformState);
+    }
+
+    private _requestFloatDomPreview(drawingId: string, rect: BaseObject, data: Serializable | undefined): void {
+        if (!this._canvasFloatDomPreviewService) {
+            return;
+        }
+
+        this._canvasFloatDomPreviewService.requestPreview({
+            id: drawingId,
+            width: rect.width,
+            height: rect.height,
+            data,
+        });
+    }
+
+    private _upsertFloatDomPreviewObject(
+        scene: Scene,
+        rect: BaseObject,
+        rectShapeKey: string,
+        drawingId: string,
+        data: Serializable | undefined
+    ): BaseObject | undefined {
+        const preview = this._canvasFloatDomPreviewService?.getPreview(drawingId);
+        if (!preview?.image) {
+            this._requestFloatDomPreview(drawingId, rect, data);
+            return undefined;
+        }
+
+        const previewObjectKey = this._getFloatDomPreviewObjectKey(rectShapeKey);
+        const existingPreviewObject = scene.getObject(previewObjectKey);
+        if (existingPreviewObject instanceof RenderImage) {
+            existingPreviewObject.changeSource(preview.image);
+            this._syncPreviewObjectTransform(existingPreviewObject, rect);
+            return existingPreviewObject;
+        }
+
+        const previewObject = new RenderImage(previewObjectKey, {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            angle: rect.angle,
+            flipX: rect.flipX,
+            flipY: rect.flipY,
+            skewX: rect.skewX,
+            skewY: rect.skewY,
+            url: preview.image,
+            evented: false,
+            rotateEnabled: false,
+            resizeEnabled: false,
+        });
+        scene.addObject(previewObject, DRAWING_OBJECT_LAYER_INDEX);
+        return previewObject;
+    }
+
+    mountFloatDomRuntime(id: string): boolean {
+        const info = this._domLayerInfoMap.get(id);
+        if (!info?.floatDomConfig) {
+            return false;
+        }
+
+        if (info.runtimeMounted) {
+            return true;
+        }
+
+        if (isFloatDomInDomLayer(this._canvasFloatDomService, id)) {
+            this._canvasFloatDomService.updateFloatDom(id, {
+                eventPassThrough: false,
+                props: {
+                    ...info.floatDomConfig.props,
+                    initialStage: 'stage2',
+                    onRuntimeStageExit: () => this.unmountFloatDomRuntime(id),
+                },
+            });
+        } else {
+            this._canvasFloatDomService.addFloatDom({
+                ...info.floatDomConfig,
+                eventPassThrough: false,
+                props: {
+                    ...info.floatDomConfig.props,
+                    initialStage: 'stage2',
+                    onRuntimeStageExit: () => this.unmountFloatDomRuntime(id),
+                },
+            });
+        }
+        info.runtimeMounted = true;
+        info.runtimeStage = 'stage2';
+        return true;
+    }
+
+    unmountFloatDomRuntime(id: string): void {
+        const info = this._domLayerInfoMap.get(id);
+        if (!info?.runtimeMounted) {
+            return;
+        }
+
+        if (info.floatDomConfig && !shouldAutoMountFloatDomRuntime(info.floatDomConfig)) {
+            this._canvasFloatDomService.updateFloatDom(id, {
+                eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'inactive'),
+                props: info.floatDomConfig.props,
+            });
+        } else {
+            this._canvasFloatDomService.removeFloatDom(id);
+        }
+        info.runtimeMounted = false;
+        info.runtimeStage = 'inactive';
+    }
+
+    private _syncFloatDomVisibilityForActiveSheet(unitId: string, activeSubUnitId: string): void {
+        Array.from(this._domLayerInfoMap.values())
+            .filter((info) => info.unitId === unitId && info.floatDomConfig)
+            .forEach((info) => {
+                const isActiveSheet = info.subUnitId === activeSubUnitId;
+                const isInDomLayer = isFloatDomInDomLayer(this._canvasFloatDomService, info.id);
+
+                if (!isActiveSheet) {
+                    if (isInDomLayer) {
+                        this._canvasFloatDomService.removeFloatDom(info.id);
+                    }
+                    info.runtimeMounted = false;
+                    info.runtimeStage = 'inactive';
+                    return;
+                }
+
+                if (isInDomLayer || !info.floatDomConfig) {
+                    return;
+                }
+
+                this._canvasFloatDomService.addFloatDom(info.floatDomConfig);
+                const shouldAutoMountRuntime = shouldAutoMountFloatDomRuntime(info.floatDomConfig);
+                info.runtimeMounted = shouldAutoMountRuntime;
+                info.runtimeStage = isEmbedFloatDomData(info.floatDomConfig)
+                    ? 'inactive'
+                    : shouldAutoMountRuntime ? 'stage2' : 'inactive';
+            });
+    }
+
+    promoteFloatDomRuntimeStage(id: string): ICanvasFloatDomInfo['runtimeStage'] | undefined {
+        const info = this._domLayerInfoMap.get(id);
+        if (!info?.floatDomConfig) {
+            return undefined;
+        }
+
+        const sheetHostedEmbed = isSheetHostedEmbedFloatDom(info.floatDomConfig);
+        if (info.runtimeMounted && !sheetHostedEmbed) {
+            info.runtimeStage = 'stage2';
+            return 'stage2';
+        }
+
+        if (info.runtimeStage !== 'stage1') {
+            info.runtimeStage = 'stage1';
+            if (shouldUpdateFloatDomLayerOnRuntimeStageChange(info.floatDomConfig)) {
+                this._canvasFloatDomService.updateFloatDom(id, {
+                    eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage1'),
+                });
+            }
+            return 'stage1';
+        }
+
+        if (info.runtimeMounted) {
+            info.runtimeStage = 'stage2';
+            if (shouldUpdateFloatDomLayerOnRuntimeStageChange(info.floatDomConfig)) {
+                this._canvasFloatDomService.updateFloatDom(id, {
+                    eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(info.floatDomConfig, 'stage2'),
+                });
+            }
+            return 'stage2';
+        }
+
+        this.mountFloatDomRuntime(id);
+        return 'stage2';
+    }
+
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {
         if (unitId == null) {
             return;
@@ -429,7 +1174,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     const { transform, drawingType, data, hidden, groupId } = floatDomParam;
 
-                    if (drawingType !== DrawingTypeEnum.DRAWING_DOM && drawingType !== DrawingTypeEnum.DRAWING_CHART) {
+                    if (!isCanvasFloatDomDrawingType(drawingType)) {
                         return;
                     }
 
@@ -461,9 +1206,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     if (rectShape != null) {
                         this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
+                        applyFloatDomTransformerConfig(rectShape, floatDomParam);
                         rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                         this._syncFloatDomRect(drawingId, rectShape);
-                        return;
+                        if (shouldUseFloatDomPreviewObject(floatDomParam)) {
+                            this._syncPreviewObjectTransform(scene.getObject(this._getFloatDomPreviewObjectKey(rectShapeKey)), rectShape);
+                            this._requestFloatDomPreview(drawingId, rectShape, data);
+                        }
+                        if (this._domLayerInfoMap.has(drawingId)) {
+                            return;
+                        }
                     }
 
                     const imageConfig: IRectProps = {
@@ -492,7 +1244,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         imageConfig.radius = 8;
                     }
 
-                    const rect = this._createRenderObject({
+                    const rect = rectShape ?? this._createRenderObject({
                         key: rectShapeKey,
                         config: imageConfig,
                         unitId,
@@ -501,26 +1253,93 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         drawingType,
                         data,
                     });
+                    applyFloatDomTransformerConfig(rect, floatDomParam);
 
                     if (isChart) {
-                        rect.setObjectType(ObjectType.CHART);
-                    } else if (drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                        rect.setObjectType(ObjectType.DRAWING_DOM);
+                        rect.objectType = ObjectType.CHART;
+                    } else if (drawingType === DrawingTypeEnum.DRAWING_DOM || drawingType === DrawingTypeEnum.DRAWING_BLOCK) {
+                        rect.objectType = ObjectType.DRAWING_DOM;
                     }
 
-                    scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
-                    if (floatDomParam.allowTransform !== false) {
+                    if (!rectShape) {
+                        scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
+                    }
+                    if (!rectShape && floatDomParam.allowTransform !== false) {
                         scene.attachTransformerTo(rect);
                     }
-                    if (isChart && groupId) {
+                    if (!rectShape && isChart && groupId) {
                         insertGroupObject({ drawingId: groupId, unitId, subUnitId }, rect, scene, this._drawingManagerService);
                     }
                     const disposableCollection = new DisposableCollection();
+                    const shouldUsePreviewObject = shouldUseFloatDomPreviewObject(floatDomParam);
+                    const previewObjectKey = shouldUsePreviewObject ? this._getFloatDomPreviewObjectKey(rectShapeKey) : undefined;
+                    if (shouldUsePreviewObject) {
+                        this._upsertFloatDomPreviewObject(scene, rect, rectShapeKey, drawingId, data);
+                        const previewSubscription = this._canvasFloatDomPreviewService?.previewUpdated$.subscribe((preview) => {
+                            if (preview.id !== drawingId) {
+                                return;
+                            }
+
+                            this._upsertFloatDomPreviewObject(scene, rect, rectShapeKey, drawingId, data);
+                        });
+                        previewSubscription && disposableCollection.add(previewSubscription);
+                    }
                     const initPosition = calcSheetFloatDomPosition(rect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                     const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
 
                     const domId = `${SHEET_FLOAT_DOM_PREFIX}${generateRandomId(6)}`;
-                    const info: ICanvasFloatDomInfo = {
+                    const shouldAutoMountRuntime = shouldAutoMountFloatDomRuntime(floatDomParam);
+                    const shouldSyncEmbedRuntimeStage = isEmbedFloatDomData(floatDomParam);
+                    let info: ICanvasFloatDomInfo | undefined;
+                    const handleRuntimeStageEnter = (stage: ICanvasFloatDomInfo['runtimeStage']) => {
+                        if (info) {
+                            info.runtimeStage = stage;
+                            info.runtimeMounted = shouldAutoMountRuntime || stage === 'stage2';
+                            if (shouldUpdateFloatDomLayerOnRuntimeStageChange(floatDomParam)) {
+                                this._canvasFloatDomService.updateFloatDom(drawingId, {
+                                    eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, stage),
+                                });
+                            }
+                        }
+                        const currentRenderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+                        syncFloatDomHostSelectionOnStageEnter(stage, currentRenderObject, rect);
+                    };
+                    const floatDomConfig: IFloatDom = {
+                        position$,
+                        id: drawingId,
+                        domId,
+                        componentKey: floatDomParam.componentKey,
+                        eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, 'inactive'),
+                        preserveOnFocusChange: shouldPreserveFloatDomOnFocusChange(floatDomParam),
+                        onPointerDown: (evt) => {
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            }
+                        },
+                        onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            }
+                        },
+                        onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                            }
+                        },
+                        onWheel: (evt: WheelEvent) => {
+                            if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
+                                canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                            }
+                        },
+                        data,
+                        props: shouldSyncEmbedRuntimeStage
+                            ? {
+                                onRuntimeStageEnter: handleRuntimeStageEnter,
+                            }
+                            : undefined,
+                        unitId,
+                    };
+                    info = {
                         dispose: disposableCollection,
                         rect,
                         position$,
@@ -528,38 +1347,106 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         subUnitId,
                         id: drawingId,
                         domId,
+                        floatDomConfig,
+                        runtimeMounted: shouldAutoMountRuntime,
+                        runtimeStage: shouldSyncEmbedRuntimeStage
+                            ? 'inactive'
+                            : shouldAutoMountRuntime ? 'stage2' : 'inactive',
+                        previewObjectKey,
                     };
 
-                    this._canvasFloatDomService.addFloatDom({
-                        position$,
-                        id: drawingId,
-                        domId,
-                        componentKey: floatDomParam.componentKey,
-                        onPointerDown: (evt) => {
-                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                        },
-                        onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                        },
-                        onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                        },
-                        onWheel: (evt: WheelEvent) => {
-                            canvas.dispatchEvent(new WheelEvent(evt.type, evt));
-                        },
-                        data,
-                        unitId,
-                    });
+                    this._canvasFloatDomService.addFloatDom(floatDomConfig);
+                    if (!shouldAutoMountRuntime) {
+                        let hostStage2ClickIntent: IFloatDomHostClickIntent | undefined;
+                        const cancelStage2ClickIntentOnMove = (evt: { pointerId?: number; offsetX?: number; offsetY?: number }) => {
+                            if (!hostStage2ClickIntent) {
+                                return;
+                            }
+                            if (hostStage2ClickIntent.pointerId != null && evt.pointerId != null && hostStage2ClickIntent.pointerId !== evt.pointerId) {
+                                return;
+                            }
+                            if (typeof evt.offsetX !== 'number' || typeof evt.offsetY !== 'number') {
+                                hostStage2ClickIntent = undefined;
+                                return;
+                            }
+
+                            const distance = Math.hypot(evt.offsetX - hostStage2ClickIntent.startOffsetX, evt.offsetY - hostStage2ClickIntent.startOffsetY);
+                            if (distance > FLOAT_DOM_STAGE2_CLICK_DISTANCE_THRESHOLD) {
+                                hostStage2ClickIntent = undefined;
+                            }
+                        };
+                        const runtimeActivationListener = rect.onPointerDown$.subscribeEvent({
+                            priority: FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY,
+                            next: ([evt, state]) => {
+                                if (info?.runtimeStage === 'stage1') {
+                                    hostStage2ClickIntent = createFloatDomHostClickIntent(info, evt);
+                                    return;
+                                }
+
+                                const nextStage = this.promoteFloatDomRuntimeStage(drawingId);
+                                if (nextStage === 'stage2') {
+                                    syncFloatDomHostSelectionOnStageEnter(nextStage, renderObject, rect);
+                                    state.skipNextObservers = true;
+                                }
+                                if (!shouldPassThroughFloatDomActivationEvent(nextStage)) {
+                                    state.stopPropagation();
+                                }
+                            },
+                        });
+                        const sceneActivationListener = scene.onPointerDown$.subscribeEvent({
+                            priority: FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY,
+                            next: ([evt]) => {
+                                if (!info) {
+                                    return;
+                                }
+
+                                hostStage2ClickIntent = createFloatDomHostClickIntent(info, evt);
+                            },
+                        });
+                        const sceneMoveListener = scene.onPointerMove$.subscribeEvent({
+                            priority: FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY,
+                            next: ([evt]) => {
+                                cancelStage2ClickIntentOnMove(evt);
+                            },
+                        });
+                        const sceneUpListener = scene.onPointerUp$.subscribeEvent({
+                            priority: FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY,
+                            next: ([evt, state]) => {
+                                const shouldActivate = info && shouldActivateStage2FromHostClickIntent(info, hostStage2ClickIntent, evt);
+                                hostStage2ClickIntent = undefined;
+                                if (!shouldActivate) {
+                                    return;
+                                }
+
+                                const nextStage = this.promoteFloatDomRuntimeStage(drawingId);
+                                if (nextStage === 'stage2') {
+                                    syncFloatDomHostSelectionOnStageEnter(nextStage, renderObject, rect);
+                                    state.stopPropagation();
+                                    state.skipNextObservers = true;
+                                }
+                            },
+                        });
+                        disposableCollection.add(runtimeActivationListener);
+                        disposableCollection.add(sceneActivationListener);
+                        disposableCollection.add(sceneMoveListener);
+                        disposableCollection.add(sceneUpListener);
+                    }
 
                     const listener = rect.onTransformChange$.subscribeEvent(() => {
                         const newPosition = calcSheetFloatDomPosition(rect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                         position$.next(
                             newPosition
                         );
+                        if (previewObjectKey) {
+                            this._syncPreviewObjectTransform(scene.getObject(previewObjectKey), rect);
+                        }
                     });
 
                     disposableCollection.add(() => {
                         this._canvasFloatDomService.removeFloatDom(drawingId);
+                        if (previewObjectKey) {
+                            scene.removeObject(previewObjectKey);
+                        }
                     });
                     listener && disposableCollection.add(listener);
                     this._domLayerInfoMap.set(drawingId, info);
@@ -609,6 +1496,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 }
             });
         };
+
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+                switchMap((workbook) => workbook ? workbook.activeSheet$ : of(null))
+            ).subscribe((worksheet) => {
+                if (!worksheet) {
+                    return;
+                }
+
+                const unitId = worksheet.getUnitId();
+                const subUnitId = worksheet.getSheetId();
+                this._syncFloatDomVisibilityForActiveSheet(unitId, subUnitId);
+                updateSheet(unitId, subUnitId);
+            })
+        );
 
         // #region scroll
         this.disposeWithMe(
@@ -785,7 +1687,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    if (sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_DOM && sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_CHART) {
+                    if (!isCanvasFloatDomDrawingType(sheetDrawing.drawingType)) {
                         return;
                     }
 
@@ -880,12 +1782,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         this._add$.next({ unitId, subUnitId, id });
 
-        return {
-            id,
-            dispose: () => {
-                this._removeDom(id, true);
-            },
-        };
+        return this._createFloatDomDisposable(id);
     }
 
     private _removeDom(id: string, removeDrawing = false) {
@@ -997,7 +1894,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
             const { transform, drawingType, data, groupId } = floatDomParam;
 
-            if (drawingType !== DrawingTypeEnum.DRAWING_DOM && drawingType !== DrawingTypeEnum.DRAWING_CHART) {
+            if (!isCanvasFloatDomDrawingType(drawingType)) {
                 return;
             }
 
@@ -1181,12 +2078,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
         }
 
-        return {
-            id,
-            dispose: () => {
-                this._removeDom(id, true);
-            },
-        };
+        return this._createFloatDomDisposable(id);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -1426,12 +2318,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
         }
 
-        return {
-            id,
-            dispose: () => {
-                this._removeDom(id, true);
-            },
-        };
+        return this._createFloatDomDisposable(id);
     }
 
     /**
@@ -1466,7 +2353,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: () => updatePosition(),
+            error: () => {},
+        }));
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {

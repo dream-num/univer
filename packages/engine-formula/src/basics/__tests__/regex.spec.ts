@@ -169,6 +169,13 @@ describe('Test ref regex', () => {
             expect(RE_SINGLE.test('Table1[[Order-ID]]')).toBe(true);
         });
 
+        it('matches line-break column name', () => {
+            RE_SINGLE.lastIndex = 0;
+            expect(RE_SINGLE.test('Table1[CASH\r\nOUT]')).toBe(true);
+            RE_SINGLE.lastIndex = 0;
+            expect(RE_SINGLE.test('Table1[[#Totals],[CASH\r\nOUT]]')).toBe(true);
+        });
+
         it('matches pure unicode column name', () => {
             RE_SINGLE.lastIndex = 0;
             expect(RE_SINGLE.test('Table1[[中文列名]]')).toBe(true);
@@ -260,6 +267,11 @@ describe('Test ref regex', () => {
         it('matches column range with spaced colon and tag', () => {
             RE_MULTI.lastIndex = 0;
             expect(RE_MULTI.test('Table1[[#Data], [ Column1 ] : [ Column10 ]]')).toBe(true);
+        });
+
+        it('matches line-break column names in range', () => {
+            RE_MULTI.lastIndex = 0;
+            expect(RE_MULTI.test('Table1[[CASH\r\nOUT]:[CASH\r\nIN]]')).toBe(true);
         });
 
         it('matches unicode/special char names in range', () => {

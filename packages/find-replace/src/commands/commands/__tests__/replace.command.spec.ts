@@ -18,13 +18,10 @@ import type { Injector, Univer } from '@univerjs/core';
 import type { TestMessageService } from '../../../__tests__/create-test-bed';
 import { ICommandService, IConfirmService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import { IMessageService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-    createTestBed,
-    IFindReplaceService,
-    IMessageService,
-} from '../../../__tests__/create-test-bed';
-import { FindReplaceService } from '../../../services/find-replace.service';
+import { createTestBed } from '../../../__tests__/create-test-bed';
+import { FindReplaceService, IFindReplaceService } from '../../../services/find-replace.service';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../replace.command';
 
 describe('replace.command', () => {

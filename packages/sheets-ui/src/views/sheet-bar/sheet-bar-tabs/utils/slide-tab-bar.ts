@@ -29,7 +29,7 @@ export interface ISlideTabBarConfig {
     onChangeName: (id: string, name: string) => void;
     onChangeTab: (event: MouseEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
-    onNameCheckAlert: (text: string) => boolean;
+    onNameCheckAlert: (text: string, id?: string) => boolean;
     onNameChangeCheck: () => boolean;
 }
 
@@ -123,7 +123,7 @@ export class SlideTabItem {
         startSheetTabNameEditor({
             slideTabItem: this._slideTabItem,
             canStart: () => this._slideTabBar.getConfig().onNameChangeCheck(),
-            checkName: (name) => this._slideTabBar.getConfig().onNameCheckAlert(name),
+            checkName: (name) => this._slideTabBar.getConfig().onNameCheckAlert(name, this.getId()),
             setEditMode: (editing) => {
                 this._editMode = editing;
             },
@@ -132,9 +132,13 @@ export class SlideTabItem {
                 this._slideTabBar.updateItems();
             },
             onCommit: (name, focusEvent) => {
-                this._slideTabBar.getConfig().onChangeName(this.getId(), name);
-                if (callback) {
-                    callback(focusEvent);
+                try {
+                    this._slideTabBar.getConfig().onChangeName(this.getId(), name);
+                    if (callback) {
+                        callback(focusEvent);
+                    }
+                } finally {
+                    this._slideTabBar.addListener();
                 }
             },
         });
@@ -145,7 +149,7 @@ export class SlideTabItem {
         if (!input) return false;
 
         const text = input.textContent ?? '';
-        const checkAlert = this._slideTabBar.getConfig().onNameCheckAlert(text);
+        const checkAlert = this._slideTabBar.getConfig().onNameCheckAlert(text, this.getId());
         return checkAlert;
     }
 
@@ -353,6 +357,8 @@ export class SlideTabBar {
 
     protected _scrollIncremental: number = 0;
 
+    protected _dragStartScrollX: number = 0;
+
     protected _compareDirection: number = 0;
 
     protected _autoScrollTime: number | null = null;
@@ -425,7 +431,6 @@ export class SlideTabBar {
             if (this._activeTabItemIndex !== slideItemIndex) {
                 this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
                 this._activeTabItem?.removeEventListener('pointerup', this._upAction);
-                this.removeListener();
                 this._config.onChangeTab(downEvent, slideItemId);
                 return;
             }
@@ -434,6 +439,7 @@ export class SlideTabBar {
             this._downActionX = downEvent.pageX;
             this._moveActionX = 0;
             this._scrollIncremental = 0;
+            this._dragStartScrollX = this._slideScrollbar.getScrollX();
             this._activeTabItem = this._slideTabItems[slideItemIndex];
             if (!this._activeTabItem) {
                 console.error('Not found active slide-tab-item in sheet bar');
@@ -486,10 +492,6 @@ export class SlideTabBar {
         };
 
         this._upAction = (upEvent: MouseEvent) => {
-            if (this._activeTabItem?.isEditMode()) {
-                return;
-            }
-
             // Clear timer
             if (this._longPressTimer) {
                 clearTimeout(this._longPressTimer);
@@ -497,6 +499,16 @@ export class SlideTabBar {
             }
 
             if (!this._activeTabItem) return;
+
+            if (this._activeTabItem.isEditMode()) {
+                const activeSlideItemElement = this._activeTabItem.getSlideTabItem();
+                const pointerId = (upEvent as PointerEvent).pointerId;
+                if (pointerId != null && activeSlideItemElement.hasPointerCapture(pointerId)) {
+                    activeSlideItemElement.releasePointerCapture(pointerId);
+                }
+                this._activeTabItem.removeEventListener('pointerup', this._upAction);
+                return;
+            }
 
             // When blurring after editing the table name, _activeTabItemIndex and _compareIndex may not be equal, causing slideEnd to be triggered
             const isFromScroll = this._autoScrollTime !== null;
@@ -515,7 +527,11 @@ export class SlideTabBar {
 
             this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
             this._activeTabItem?.removeEventListener('pointerup', this._upAction);
-            if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex && isFromScroll) {
+            if (
+                this._config.onSlideEnd &&
+                this._activeTabItemIndex !== this._compareIndex &&
+                isFromScroll
+            ) {
                 this.removeListener();
                 this._config.onSlideEnd(upEvent, this._compareIndex || 0);
             }
@@ -523,6 +539,7 @@ export class SlideTabBar {
             this._scrollIncremental = 0;
             this._downActionX = 0;
             this._moveActionX = 0;
+            this._dragStartScrollX = this._slideScrollbar.getScrollX();
             this._compareIndex = 0;
         };
 
@@ -571,9 +588,9 @@ export class SlideTabBar {
      * @param currentIndex
      */
     update(currentIndex: number) {
+        this.removeListener();
         this._config.currentIndex = currentIndex;
         this._initConfig();
-        this.removeListener();
         this.addListener();
         this.scrollToItem(currentIndex);
     }
@@ -784,6 +801,7 @@ export class SlideTabBar {
 
         this._downActionX = 0;
         this._moveActionX = 0;
+        this._dragStartScrollX = this._slideScrollbar.getScrollX();
         this._compareDirection = 0;
         this._compareIndex = 0;
         this._slideTabItems = [];
@@ -878,6 +896,7 @@ export class SlideTabBar {
             return;
         }
 
+        const dragSortOffsetX = this._moveActionX + this._slideScrollbar.getScrollX() - this._dragStartScrollX;
         const dragSortResult = calculateSheetTabDragSort(
             this._slideTabItems.map((item) => ({
                 id: item.getId(),
@@ -885,7 +904,7 @@ export class SlideTabBar {
                 width: item.getWidth(),
             })),
             this._activeTabItemIndex,
-            this._moveActionX
+            dragSortOffsetX
         );
 
         this._compareIndex = dragSortResult.targetIndex;
@@ -896,7 +915,7 @@ export class SlideTabBar {
             }
 
             if (item.equals(this._activeTabItem)) {
-                this._compareDirection = item.translateX(offset);
+                this._compareDirection = item.translateX(this._moveActionX);
                 return;
             }
 

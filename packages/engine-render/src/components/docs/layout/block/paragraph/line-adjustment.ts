@@ -24,9 +24,8 @@ import type {
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
+import { cjk } from '../../../../../basics/cjk-regexp';
 import {
-    hasCJK,
-    hasCJKText,
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
 } from '../../../../../basics/tools';
@@ -97,7 +96,7 @@ function getJustifiables(divide: IDocumentSkeletonDivide): number {
     const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
 
     // CJK character at line end should not be adjusted.
-    if (hasCJK(lastGlyph.content)) {
+    if (cjk.hasCJK(lastGlyph.content)) {
         return justifiables - 1;
     }
 
@@ -279,7 +278,7 @@ function restoreLastCJKGlyphWidth(line: IDocumentSkeletonLine) {
         if (
             lastGlyph &&
             divide.isFull &&
-            hasCJKText(lastGlyph.content) &&
+            cjk.hasCJKText(lastGlyph.content) &&
             lastGlyph.width - lastGlyph.xOffset > lastGlyph.bBox.width
         ) {
             const shrinkAmount = lastGlyph.width - lastGlyph.xOffset - lastGlyph.bBox.width;

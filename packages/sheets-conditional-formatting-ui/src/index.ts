@@ -28,5 +28,6 @@ export { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-
 export { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 export type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
+export { menuSchema as SheetsConditionalFormattingUIMenuSchema } from './menu/schema';
 export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValueType } from '../types/enum';
+import type { CellValueType, LocaleType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
 
 export type BaseId = string;
@@ -96,13 +96,15 @@ export type ViewSpecificConfig =
 export interface IBaseSnapshot {
     id: BaseId;
     name: string;
+    rev?: number;
+    appVersion?: string;
+    locale?: LocaleType;
     schemaVersion: number;
     tables: Record<TableId, ITableSnapshot>;
     tableOrder: TableId[];
     createdAt: number;
     updatedAt: number;
     createdBy?: string;
-    rev?: number;
 }
 
 export interface ITableSnapshot {

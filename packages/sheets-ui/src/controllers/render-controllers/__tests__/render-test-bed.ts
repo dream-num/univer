@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-import type { Dependency, IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext, Vector2 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import { ICommandService, IContextService, ILogService, Inject, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IContextService,
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    Tools,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -443,7 +457,7 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
 
         constructor(
             _config: undefined,
-            @Inject(UniverInjector) override readonly _injector: Injector
+            @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
         }

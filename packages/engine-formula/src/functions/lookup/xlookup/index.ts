@@ -53,8 +53,10 @@ export class Xlookup extends BaseFunction {
             _searchMode = NumberValueObject.create(1);
         }
 
-        if (lookupValue.isError()) {
-            return lookupValue;
+        const _lookupValue = this._legacyImplicitLookupValue(lookupValue);
+
+        if (_lookupValue.isError()) {
+            return _lookupValue;
         }
 
         const rowCountLookup = lookupArray.isArray() ? (lookupArray as ArrayValueObject).getRowCount() : 1;
@@ -91,7 +93,7 @@ export class Xlookup extends BaseFunction {
         }
 
         return this._getResult(
-            lookupValue,
+            _lookupValue,
             baseValueObjectToArrayValueObject(lookupArray),
             baseValueObjectToArrayValueObject(returnArray),
             _ifNotFound,
@@ -145,7 +147,7 @@ export class Xlookup extends BaseFunction {
                     return ifNotFound;
                 }
 
-                return result;
+                return this._blankResultAsZero(result);
             });
         }
 
@@ -164,7 +166,7 @@ export class Xlookup extends BaseFunction {
                 return ifNotFound!;
             }
 
-            return result;
+            return this._blankResultAsZero(result);
         }
 
         let axis = 0;
@@ -183,6 +185,50 @@ export class Xlookup extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    private _legacyImplicitLookupValue(lookupValue: BaseValueObject): BaseValueObject {
+        if (!lookupValue.isArray()) {
+            return lookupValue;
+        }
+
+        const array = lookupValue as ArrayValueObject;
+
+        if (
+            array.getUnitId() === '' ||
+            array.getSheetId() === '' ||
+            array.getCurrentRow() < 0 ||
+            array.getCurrentColumn() < 0
+        ) {
+            return lookupValue;
+        }
+
+        const startRow = array.getCurrentRow();
+        const startColumn = array.getCurrentColumn();
+        const rowCount = array.getRowCount();
+        const columnCount = array.getColumnCount();
+
+        let rowIndex = -1;
+        let columnIndex = -1;
+        if (rowCount === 1 && columnCount === 1) {
+            rowIndex = 0;
+            columnIndex = 0;
+        } else if (rowCount === 1) {
+            rowIndex = 0;
+            columnIndex = this.column - startColumn;
+        } else if (columnCount === 1) {
+            rowIndex = this.row - startRow;
+            columnIndex = 0;
+        } else {
+            rowIndex = this.row - startRow;
+            columnIndex = this.column - startColumn;
+        }
+
+        if (rowIndex < 0 || rowIndex >= rowCount || columnIndex < 0 || columnIndex >= columnCount) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return array.get(rowIndex, columnIndex) as BaseValueObject || ErrorValueObject.create(ErrorType.VALUE);
     }
 
     private _handleExpandObject(
@@ -251,6 +297,14 @@ export class Xlookup extends BaseFunction {
         }
 
         return this.equalSearch(value, searchArray, resultArray, searchModeValue !== -1);
+    }
+
+    private _blankResultAsZero(value: BaseValueObject) {
+        if (value.isNull()) {
+            return NumberValueObject.create(0);
+        }
+
+        return value;
     }
 
     /**

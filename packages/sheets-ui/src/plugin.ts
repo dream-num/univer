@@ -308,6 +308,14 @@ export class UniverSheetsUIPlugin extends Plugin {
         const univerInstanceService = this._univerInstanceService;
         this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
-            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId())));
+            .subscribe((workbook) => {
+                const unitId = workbook!.getUnitId();
+                const createOptions = univerInstanceService.getUnitCreateOptions(unitId);
+                if (createOptions?.makeCurrent === false) {
+                    return;
+                }
+
+                univerInstanceService.focusUnit(unitId);
+            }));
     }
 }

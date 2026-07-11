@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -23,7 +23,7 @@ type ItemValue = string | number;
 const SEGMENTED_PADDING = 4;
 
 interface ISegmentedItem<T extends ItemValue = ItemValue> {
-    label: string;
+    label: ReactNode;
     value: T;
 }
 

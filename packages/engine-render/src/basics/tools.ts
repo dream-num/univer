@@ -35,7 +35,6 @@ import {
     Rectangle,
     Tools,
 } from '@univerjs/core';
-import * as cjk from 'cjk-regex';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 
@@ -336,23 +335,6 @@ function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string):
         })
         .filter(Boolean)
         .join(', ');
-}
-
-// Whether it contains CJK characters, excluding symbols
-const CJK_LETTER_REG = cjk.letters().toRegExp();
-export function hasCJKText(text: string) {
-    return CJK_LETTER_REG.test(text);
-}
-
-// Whether it contains CJK characters that support vertical layout, including punctuation
-const CJK_ALL_REG = cjk.all().toRegExp();
-export function hasCJK(text: string) {
-    return CJK_ALL_REG.test(text);
-}
-
-const CJK_PUNCTUATION_REG = cjk.punctuations().toRegExp();
-export function hasCJKPunctuation(text: string) {
-    return CJK_PUNCTUATION_REG.test(text);
 }
 
 export function hasAllLatin(text: string) {

@@ -52,11 +52,17 @@ function createLifecycleService() {
     const disposed$ = new Subject<ReturnType<typeof createWorkbook>>();
     const rawFormula$ = new BehaviorSubject(false);
     const initialWorkbook = createWorkbook('book-1');
-    const created$ = new Subject<any>();
-    const createdRenderers: Array<{ unitId: string; options?: unknown }> = [];
+    const created$ = new Subject<unknown>();
+    const createdRenderers: Array<{
+        unitId: string;
+        options?: unknown;
+        canvasElement: { dataset: Record<string, string> };
+        canvas: { setId: ReturnType<typeof vi.fn>; getCanvasEle: ReturnType<typeof vi.fn> };
+        context: { setId: ReturnType<typeof vi.fn> };
+    }> = [];
     const removedRenderers: string[] = [];
-    const spreadsheet = Object.create(Spreadsheet.prototype) as Spreadsheet & { makeForceDirty: any };
-    spreadsheet.makeForceDirty = vi.fn();
+    const spreadsheet = Object.create(Spreadsheet.prototype) as Spreadsheet & { makeForceDirty: (state?: boolean) => void };
+    spreadsheet.makeForceDirty = vi.fn<(state?: boolean) => void>();
 
     class TestContextService {
         subscribeContextValue$() {
@@ -73,6 +79,10 @@ function createLifecycleService() {
             return type === UniverInstanceType.UNIVER_SHEET ? [initialWorkbook] : [];
         }
 
+        getUnitCreateOptions() {
+            return undefined;
+        }
+
         getTypeOfUnitDisposed$(type: UniverInstanceType) {
             return type === UniverInstanceType.UNIVER_SHEET ? disposed$.asObservable() : new Subject().asObservable();
         }
@@ -82,7 +92,20 @@ function createLifecycleService() {
         readonly created$ = created$.asObservable();
 
         createRender(unitId: string, options?: unknown) {
-            createdRenderers.push({ unitId, options });
+            const canvasElement = { dataset: {} as Record<string, string> };
+            const canvas = { setId: vi.fn(), getCanvasEle: vi.fn(() => canvasElement) };
+            const context = { setId: vi.fn() };
+            createdRenderers.push({ unitId, options, canvasElement, canvas, context });
+            return {
+                unitId,
+                engine: {
+                    getCanvas: () => ({
+                        setId: canvas.setId,
+                        getCanvasEle: canvas.getCanvasEle,
+                        getContext: () => context,
+                    }),
+                },
+            };
         }
 
         removeRender(unitId: string) {
@@ -130,29 +153,20 @@ describe('SheetsRenderService', () => {
     });
 
     it('creates and disposes sheet renderers as workbooks enter and leave the instance service', async () => {
-        const { added$, disposed$, created$, createdRenderers, removedRenderers } = createLifecycleService();
+        const { added$, disposed$, createdRenderers, removedRenderers } = createLifecycleService();
 
         await Promise.resolve();
         expect(createdRenderers.map(({ unitId }) => unitId)).toEqual(['book-1']);
 
         added$.next({ unit: createWorkbook('book-2'), options: { mountContainer: 'container' } });
-        expect(createdRenderers.at(-1)).toEqual({
+        expect(createdRenderers.at(-1)).toMatchObject({
             unitId: 'book-2',
             options: { mountContainer: 'container' },
         });
 
-        const canvas = { setId: vi.fn() };
-        const context = { setId: vi.fn() };
-        created$.next({
-            unitId: 'book-2',
-            engine: {
-                getCanvas: () => ({
-                    setId: canvas.setId,
-                    getContext: () => context,
-                }),
-            },
-        });
+        const { canvasElement, canvas, context } = createdRenderers.at(-1)!;
         expect(canvas.setId).toHaveBeenCalledWith('univer-sheet-main-canvas_book-2');
+        expect(canvasElement.dataset.uUnitId).toBe('book-2');
         expect(context.setId).toHaveBeenCalledWith('univer-sheet-main-canvas_book-2');
 
         disposed$.next(createWorkbook('book-1'));

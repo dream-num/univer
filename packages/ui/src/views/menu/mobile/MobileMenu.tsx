@@ -52,11 +52,13 @@ type MobileMenuView =
 
 interface IMobileMenuProps extends IBaseMenuProps {
     schemas?: IMenuSchema[];
+    menuManagerService?: IMenuManagerService;
 }
 
 export function MobileMenu(props: IMobileMenuProps) {
-    const { menuType, onOptionSelect, schemas: providedSchemas } = props;
-    const menuManagerService = useDependency(IMenuManagerService);
+    const { menuType, onOptionSelect, schemas: providedSchemas, menuManagerService: providedMenuManagerService } = props;
+    const rootMenuManagerService = useDependency(IMenuManagerService);
+    const menuManagerService = providedMenuManagerService ?? rootMenuManagerService;
     const [viewStack, setViewStack] = useState<MobileMenuView[]>([]);
 
     const menuSchemaVersion$ = useMemo(() => {
@@ -132,6 +134,7 @@ export function MobileMenu(props: IMobileMenuProps) {
                     <div className="univer-overflow-hidden univer-rounded-2xl univer-bg-white">
                         <MobileSchemaList
                             schemas={currentView?.kind === 'schema' ? currentView.schemas : menuSchemas}
+                            menuManagerService={menuManagerService}
                             menuType={menuType}
                             onExecute={onOptionSelect}
                             onOpenView={openView}
@@ -157,11 +160,12 @@ export function MobileMenu(props: IMobileMenuProps) {
 
 function MobileSchemaList(props: {
     schemas: IMenuSchema[];
+    menuManagerService: IMenuManagerService;
     menuType?: string;
     onExecute?: IBaseMenuProps['onOptionSelect'];
     onOpenView: (view: MobileMenuView) => void;
 }) {
-    const { schemas, menuType, onExecute, onOpenView } = props;
+    const { schemas, menuManagerService, menuType, onExecute, onOpenView } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(schemas);
 
@@ -183,6 +187,7 @@ function MobileSchemaList(props: {
                         <MobileSchemaRow
                             key={schema.key}
                             schema={schema}
+                            menuManagerService={menuManagerService}
                             menuType={menuType}
                             onExecute={onExecute}
                             onOpenView={onOpenView}
@@ -217,6 +222,7 @@ function MobileSchemaList(props: {
                             <MobileSchemaRow
                                 key={childSchema.key}
                                 schema={childSchema}
+                                menuManagerService={menuManagerService}
                                 menuType={menuType}
                                 onExecute={onExecute}
                                 onOpenView={onOpenView}
@@ -232,13 +238,14 @@ function MobileSchemaList(props: {
 
 function MobileSchemaRow(props: {
     schema: IMenuSchema;
+    menuManagerService: IMenuManagerService;
     menuType?: string;
     onExecute?: IBaseMenuProps['onOptionSelect'];
     onOpenView: (view: MobileMenuView) => void;
     bordered: boolean;
 }) {
-    const { schema, menuType, onExecute, onOpenView, bordered } = props;
-    const interaction = useMobileSchemaInteraction({ schema, menuType, onOpenView });
+    const { schema, menuManagerService, menuType, onExecute, onOpenView, bordered } = props;
+    const interaction = useMobileSchemaInteraction({ schema, menuManagerService, menuType, onOpenView });
 
     if (!interaction || interaction.hidden) {
         return null;
@@ -365,11 +372,11 @@ function MobileSelectionOptionRow(props: {
 
 function useMobileSchemaInteraction(props: {
     schema: IMenuSchema;
+    menuManagerService: IMenuManagerService;
     menuType?: string;
     onOpenView: (view: MobileMenuView) => void;
 }) {
-    const { schema, menuType, onOpenView } = props;
-    const menuManagerService = useDependency(IMenuManagerService);
+    const { schema, menuManagerService, menuType, onOpenView } = props;
     const localeService = useDependency(LocaleService);
     const menuItem = schema.item as IDisplayMenuItem<IMenuItem> | undefined;
     const selectorItem = menuItem as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>> | undefined;

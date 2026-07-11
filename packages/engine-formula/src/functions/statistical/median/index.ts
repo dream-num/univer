@@ -65,7 +65,12 @@ export class Median extends BaseFunction {
                     return variant;
                 }
 
-                if (variant.isNull() || variant.isBoolean()) {
+                if (variant.isNull()) {
+                    continue;
+                }
+
+                if (variant.isBoolean()) {
+                    values.push(variant.getValue() ? 1 : 0);
                     continue;
                 }
 

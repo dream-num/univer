@@ -260,6 +260,13 @@ describe('sheets-ui command behaviors', () => {
         const workbook = {
             getUnitId: () => 'unit-1',
             getActiveSheet: () => worksheet,
+            getSheetBySheetId: (sheetId: string) => sheetId === 'sheet-1' ? worksheet : undefined,
+        };
+        const embeddedWorksheet = { getSheetId: () => 'embedded-sheet', getConfig: () => ({ freeze: { xSplit: 0, ySplit: 0 } }) };
+        const embeddedWorkbook = {
+            getUnitId: () => 'embedded-unit',
+            getActiveSheet: () => embeddedWorksheet,
+            getSheetBySheetId: (sheetId: string) => sheetId === 'embedded-sheet' ? embeddedWorksheet : undefined,
         };
         const renderManager = {
             getRenderById: vi.fn(() => ({
@@ -275,6 +282,7 @@ describe('sheets-ui command behaviors', () => {
         };
         const univerInstanceService = {
             getCurrentUnitOfType: () => workbook,
+            getUnit: (unitId: string) => unitId === 'embedded-unit' ? embeddedWorkbook : undefined,
         };
 
         const accessor = createAccessor([
@@ -301,6 +309,14 @@ describe('sheets-ui command behaviors', () => {
             sheetViewStartColumn: 5,
             offsetX: 66,
             offsetY: 30,
+        }));
+
+        expect(ScrollCommand.handler(accessor, { unitId: 'embedded-unit', sheetId: 'embedded-sheet', offsetX: 7 } as any)).toBe(true);
+        expect(renderManager.getRenderById).toHaveBeenLastCalledWith('embedded-unit');
+        expect(syncExecuteCommand).toHaveBeenCalledWith(SetScrollOperation.id, expect.objectContaining({
+            unitId: 'embedded-unit',
+            sheetId: 'embedded-sheet',
+            offsetX: 7,
         }));
 
         const scrollToRange = vi.fn(() => true);

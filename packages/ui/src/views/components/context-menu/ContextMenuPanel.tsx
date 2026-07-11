@@ -43,6 +43,8 @@ type ContextMenuAutoFocusTarget = 'first-item' | 'container';
 
 interface IContextMenuPanelProps {
     menuType: string;
+    menuManagerService?: IMenuManagerService;
+    layoutService?: ILayoutService;
     menuSessionVersion?: number;
     className?: string;
     activeItemIds?: string[];
@@ -59,6 +61,7 @@ interface IContextMenuPanelProps {
 
 interface IContextMenuMenuProps {
     menuSchemas: IMenuSchema[];
+    menuManagerService: IMenuManagerService;
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     rootMenuElement: HTMLElement | null;
@@ -75,6 +78,7 @@ interface IContextMenuMenuProps {
 interface IContextMenuMenuItemProps {
     menuKey: string;
     menuItem: IDisplayMenuItem<IMenuItem>;
+    menuManagerService: IMenuManagerService;
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     rootMenuElement: HTMLElement | null;
@@ -643,6 +647,8 @@ function getContextMenuSubmenuPanelClassName(sizeVariant: ContextMenuSizeVariant
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
     const {
         menuType,
+        menuManagerService: providedMenuManagerService,
+        layoutService: providedLayoutService,
         menuSessionVersion = 0,
         className,
         activeItemIds,
@@ -656,8 +662,10 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         onMenuPointerLeave,
         onOptionSelect,
     } = props;
-    const menuManagerService = useDependency(IMenuManagerService);
-    const layoutService = useDependency(ILayoutService);
+    const rootMenuManagerService = useDependency(IMenuManagerService);
+    const rootLayoutService = useDependency(ILayoutService);
+    const menuManagerService = providedMenuManagerService ?? rootMenuManagerService;
+    const layoutService = providedLayoutService ?? rootLayoutService;
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
     const [maxMenuHeight, setMaxMenuHeight] = useState(() => {
         if (typeof window === 'undefined') {
@@ -807,6 +815,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         >
             <ContextMenuMenu
                 menuSchemas={menuItems}
+                menuManagerService={menuManagerService}
                 menuSessionVersion={menuSessionVersion}
                 submenuPortalContainer={submenuPortalContainer}
                 rootMenuElement={menuElement}
@@ -824,7 +833,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
@@ -923,6 +932,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             key={menuSchema.key}
                             menuKey={menuSchema.key}
                             menuItem={menuSchema.item as IDisplayMenuItem<IMenuItem>}
+                            menuManagerService={menuManagerService}
                             menuSessionVersion={menuSessionVersion}
                             submenuPortalContainer={submenuPortalContainer}
                             rootMenuElement={rootMenuElement}
@@ -964,6 +974,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         key={childSchema.key}
                                         menuKey={childSchema.key}
                                         menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
+                                        menuManagerService={menuManagerService}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
                                         rootMenuElement={rootMenuElement}
@@ -1000,6 +1011,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     key={childSchema.key}
                                     menuKey={childSchema.key}
                                     menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
+                                    menuManagerService={menuManagerService}
                                     menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
                                     rootMenuElement={rootMenuElement}
@@ -1045,6 +1057,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 <ContextMenuMenuItem
                     menuKey={`${menuSchema.key}-header-action`}
                     menuItem={menuSchema.headerActionItem as IDisplayMenuItem<IMenuItem>}
+                    menuManagerService={menuManagerService}
                     menuSessionVersion={menuSessionVersion}
                     submenuPortalContainer={submenuPortalContainer}
                     rootMenuElement={rootMenuElement}
@@ -1070,6 +1083,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const {
         menuKey,
         menuItem,
+        menuManagerService,
         menuSessionVersion,
         submenuPortalContainer,
         rootMenuElement,
@@ -1088,7 +1102,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
-    const menuManagerService = useDependency(IMenuManagerService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable<boolean>(menuItem.hidden$, false);
@@ -1427,20 +1440,25 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                             const optionSelectable = !isNonSelectableLabel(option.label);
                                             const optionHoverable = !isNonHoverableLabel(option.label);
                                             const optionClassName = clsx(
-                                                sizeVariant === 'paragraph-t'
-                                                    ? `
-                                                      univer-relative univer-box-border univer-flex univer-min-h-10
-                                                      univer-w-full univer-items-center univer-rounded-lg
-                                                      univer-border-none univer-bg-transparent univer-px-3
-                                                      univer-text-left univer-text-base
-                                                      dark:!univer-text-white
-                                                    `
+                                                optionSelectable
+                                                    ? sizeVariant === 'paragraph-t'
+                                                        ? `
+                                                          univer-relative univer-box-border univer-flex univer-min-h-10
+                                                          univer-w-full univer-items-center univer-rounded-lg
+                                                          univer-border-none univer-bg-transparent univer-px-3
+                                                          univer-text-left univer-text-base
+                                                          dark:!univer-text-white
+                                                        `
+                                                        : `
+                                                          univer-relative univer-box-border univer-flex univer-min-h-8
+                                                          univer-w-full univer-items-center univer-rounded-md
+                                                          univer-border-none univer-bg-transparent univer-px-2
+                                                          univer-text-left univer-text-sm
+                                                          dark:!univer-text-white
+                                                        `
                                                     : `
-                                                      univer-relative univer-box-border univer-flex univer-min-h-8
-                                                      univer-w-full univer-items-center univer-rounded-md
-                                                      univer-border-none univer-bg-transparent univer-px-2
-                                                      univer-text-left univer-text-sm
-                                                      dark:!univer-text-white
+                                                      univer-relative univer-box-border univer-block univer-w-full
+                                                      univer-border-none univer-bg-transparent univer-p-0
                                                     `,
                                                 option.disabled
                                                     ? 'univer-cursor-not-allowed univer-opacity-60'
@@ -1522,6 +1540,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 {hasSubItemSubmenu && (
                                     <ContextMenuMenu
                                         menuSchemas={subMenuItems}
+                                        menuManagerService={menuManagerService}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
                                         rootMenuElement={rootMenuElement}

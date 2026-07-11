@@ -39,7 +39,6 @@ import { getCoordByCell, getSheetObject } from '../utils/component-tools';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
 
-export type { IHeaderUnhideRangeVisibleCheck };
 export const HEADER_UNHIDE_RANGE_VISIBLE_CHECK = createInterceptorKey<boolean, IHeaderUnhideRangeVisibleCheck>('headerUnhideRangeVisibleCheck');
 
 /**

@@ -27,6 +27,7 @@ import {
 import pkg from '../package.json';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from './commands/commands/create-header-footer.command';
+import { SetDocumentDefaultParagraphStyleCommand } from './commands/commands/set-document-default-paragraph-style.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
@@ -72,6 +73,7 @@ export class UniverDocsPlugin extends Plugin {
                 DeleteTextCommand,
                 UpdateTextCommand,
                 CreateHeaderFooterCommand,
+                SetDocumentDefaultParagraphStyleCommand,
                 RichTextEditingMutation,
                 DocsRenameMutation,
                 SetTextSelectionsOperation,

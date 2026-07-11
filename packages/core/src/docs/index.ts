@@ -15,3 +15,10 @@
  */
 
 export * from './data-model';
+export {
+    cloneBodyWithFreshParagraphIds,
+    cloneParagraphWithId,
+    createParagraphId,
+    PARAGRAPH_ID_PREFIX,
+} from './paragraph-id';
+export type { IParagraphIdScope } from './paragraph-id';

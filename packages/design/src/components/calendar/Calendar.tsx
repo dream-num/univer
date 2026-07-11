@@ -65,7 +65,7 @@ interface ICalendarProps {
 export function Calendar(props: ICalendarProps) {
     const { className, max, min, showTime = false, value, onValueChange } = props;
 
-    const { locale } = useContext(ConfigContext);
+    const { direction = 'ltr', locale } = useContext(ConfigContext);
 
     const { ariaLabels, year, weekDays, months } = locale?.Calendar as {
         ariaLabels: {
@@ -193,6 +193,7 @@ export function Calendar(props: ICalendarProps) {
     return (
         <div
             data-u-comp="calendar"
+            dir={direction}
             className={clsx(`
               univer-mx-auto univer-max-w-xs univer-select-none univer-rounded univer-bg-white univer-text-gray-900
               dark:!univer-bg-gray-900 dark:!univer-text-white
@@ -209,7 +210,12 @@ export function Calendar(props: ICalendarProps) {
                     aria-label={ariaLabels.previousMonth}
                     onClick={prevMonth}
                 >
-                    <MoreRightIcon className="univer-rotate-180" />
+                    <MoreRightIcon
+                        className="
+                          univer-rotate-180
+                          rtl:!univer-rotate-0
+                        "
+                    />
                 </DayButton>
                 <span className="univer-flex univer-items-center univer-gap-0.5 univer-text-sm univer-font-medium">
                     <Dropdown
@@ -278,7 +284,7 @@ export function Calendar(props: ICalendarProps) {
                     aria-label={ariaLabels.nextMonth}
                     onClick={nextMonth}
                 >
-                    <MoreRightIcon />
+                    <MoreRightIcon className="rtl:univer-rotate-180" />
                 </DayButton>
             </nav>
 

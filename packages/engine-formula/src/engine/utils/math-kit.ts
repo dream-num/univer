@@ -20,38 +20,20 @@
  Reference https://en.wikipedia.org/wiki/Numeric_precision_in_Microsoft_Excel
  */
 
-import Decimal from 'decimal.js';
-
 export function plus(a: number, b: number): number {
-    const result = a + b;
-    if (Number.isSafeInteger(result)) {
-        return result;
-    }
-    return new Decimal(a).add(b).toNumber();
+    return a + b;
 }
 
 export function minus(a: number, b: number): number {
-    const result = a - b;
-    if (Number.isSafeInteger(result)) {
-        return result;
-    }
-    return new Decimal(a).sub(b).toNumber();
+    return a - b;
 }
 
 export function multiply(a: number, b: number): number {
-    const result = a * b;
-    if (Number.isSafeInteger(result)) {
-        return result;
-    }
-    return new Decimal(a).mul(b).toNumber();
+    return a * b;
 }
 
 export function divide(a: number, b: number): number {
-    const result = a / b;
-    if (Number.isSafeInteger(result)) {
-        return result;
-    }
-    return new Decimal(a).div(b).toNumber();
+    return a / b;
 }
 /**
  * Rounds a number to a specified number of decimal places.
@@ -130,7 +112,7 @@ export function sqrt(base: number): number {
  * @returns True if numbers are equal, false otherwise.
  */
 export function equals(a: number, b: number): boolean {
-    return a === b;
+    return a === b || stripErrorMargin(a) === stripErrorMargin(b);
 }
 
 /**
@@ -140,7 +122,7 @@ export function equals(a: number, b: number): boolean {
  * @returns True if a is greater than b, false otherwise.
  */
 export function greaterThan(a: number, b: number): boolean {
-    return a > b;
+    return !equals(a, b) && stripErrorMargin(a) > stripErrorMargin(b);
 }
 
 /**
@@ -150,7 +132,7 @@ export function greaterThan(a: number, b: number): boolean {
  * @returns True if a is greater than or equal to b, false otherwise.
  */
 export function greaterThanOrEquals(a: number, b: number): boolean {
-    return a >= b;
+    return equals(a, b) || stripErrorMargin(a) > stripErrorMargin(b);
 }
 
 /**
@@ -160,7 +142,7 @@ export function greaterThanOrEquals(a: number, b: number): boolean {
  * @returns True if a is less than b, false otherwise.
  */
 export function lessThan(a: number, b: number): boolean {
-    return a < b;
+    return !equals(a, b) && stripErrorMargin(a) < stripErrorMargin(b);
 }
 
 /**
@@ -170,7 +152,7 @@ export function lessThan(a: number, b: number): boolean {
  * @returns True if a is less than or equal to b, false otherwise.
  */
 export function lessThanOrEquals(a: number, b: number): boolean {
-    return a <= b;
+    return equals(a, b) || stripErrorMargin(a) < stripErrorMargin(b);
 }
 
 /**

@@ -351,7 +351,9 @@ export interface IHyperlink {
 export interface ITextRun {
     // ct?: string; // content
     // len: number;
+    /** Inclusive character index of the first styled character. */
     st: number;
+    /** Exclusive character boundary after the last styled character. */
     ed: number;
     sId?: string; // styleID
     ts?: ITextStyle; // textStyle
@@ -362,7 +364,9 @@ export interface ITextRun {
  * Block element, link like, disabled to self nested
  */
 export interface ICustomRange<T extends Record<string, any> = Record<string, any>> {
+    /** Inclusive index of the first character covered by this annotation. */
     startIndex: number;
+    /** Inclusive index of the last character covered by this annotation. */
     endIndex: number;
     rangeId: string;
     rangeType: CustomRangeType | number;
@@ -388,7 +392,9 @@ export enum DocumentBlockRangeType {
 }
 
 export interface IDocumentBlockRange {
+    /** Inclusive index that must point at a `BLOCK_START` sentinel. */
     startIndex: number;
+    /** Inclusive index that must point at the matching `BLOCK_END` sentinel. */
     endIndex: number;
     blockId: string;
     blockType: DocumentBlockRangeType;
@@ -411,6 +417,7 @@ export enum CustomRangeType {
  * Custom Block
  */
 export interface ICustomBlock {
+    /** Index that must point at exactly one `CUSTOM_BLOCK` sentinel. */
     startIndex: number;
     blockType?: BlockType;
     // A unique ID associated with a custom block.
@@ -423,7 +430,9 @@ export enum CustomDecorationType {
 }
 
 export interface ICustomDecoration {
+    /** Inclusive index of the first decorated character. */
     startIndex: number;
+    /** Inclusive index of the last decorated character. */
     endIndex: number;
     id: string;
     type: CustomDecorationType;
@@ -494,6 +503,7 @@ export enum GridType {
 
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     textStyle?: ITextStyle; // default style for text
+    defaultParagraphStyle?: IDocumentDefaultParagraphStyle; // default style inherited by paragraphs
     background?: IDocumentBackground; // Page background image.
 }
 
@@ -805,6 +815,12 @@ export interface IParagraphStyle extends IParagraphProperties {
     textStyle?: ITextStyle; // paragraph textStyle
 }
 
+/**
+ * Paragraph properties that may be inherited from the document defaults.
+ * Paragraph identity and named/text styles have their own inheritance mechanisms.
+ */
+export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' | 'namedStyleType' | 'textStyle'>;
+
 export interface IParagraphProperties extends IIndentStart {
     headingId?: string; // headingId
     namedStyleType?: NamedStyleType; // namedStyleType
@@ -959,14 +975,18 @@ export enum TableTextWrapType {
 }
 
 export interface ICustomTable {
+    /** Inclusive index that must point at a `TABLE_START` sentinel. */
     startIndex: number;
+    /** Exclusive boundary immediately after the matching `TABLE_END` sentinel. */
     endIndex: number;
     // A unique ID associated with a table.
     tableId: string;
 }
 
 export interface ICustomColumnGroup {
+    /** Inclusive index that must point at a `COLUMN_GROUP_START` sentinel. */
     startIndex: number;
+    /** Inclusive index that must point at the matching `COLUMN_GROUP_END` sentinel. */
     endIndex: number;
     // A unique ID associated with a column group.
     columnGroupId: string;
@@ -1049,6 +1069,10 @@ export interface ITableRowSize {
  * Properties of row of table
  */
 export interface ITableRow {
+    /**
+     * Rows do not persist stream offsets. Their ordinal position must match the
+     * corresponding `TABLE_ROW_START`/`TABLE_ROW_END` pair in `dataStream`.
+     */
     tableCells: ITableCell[]; // tableCells
     // If omitted, then the table row shall automatically resize its height to the height required by its contents
     // (the equivalent of an hRule value of auto)
@@ -1062,6 +1086,10 @@ export interface ITableRow {
  * Properties of table cell
  */
 export interface ITableCell {
+    /**
+     * Cells do not persist stream offsets. Their ordinal position must match the
+     * corresponding `TABLE_CELL_START`/`TABLE_CELL_END` pair in the row stream.
+     */
     margin?: ITableCellMargin; // margin
     rowSpan?: number; // rowSpan
     columnSpan?: number; // columnSpan

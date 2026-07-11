@@ -47,8 +47,11 @@ function createService() {
                 },
             },
         })),
+        setExecuteUnitId: vi.fn(),
+        setExecuteSubUnitId: vi.fn(),
         getDirtyData: vi.fn(() => ({})),
         getDirtyDefinedNameMap: vi.fn(() => ({})),
+        getExecuteUnitId: vi.fn(() => 'unit'),
     };
     const runtimeService = {
         setFormulaExecuteStage: vi.fn(),
@@ -115,8 +118,11 @@ function createService() {
         loadDirtyRangesAndExcludedCell = currentConfigService.loadDirtyRangesAndExcludedCell;
         getRuntimeState = currentConfigService.getRuntimeState;
         getUnitData = currentConfigService.getUnitData;
+        setExecuteUnitId = currentConfigService.setExecuteUnitId;
+        setExecuteSubUnitId = currentConfigService.setExecuteSubUnitId;
         getDirtyData = currentConfigService.getDirtyData;
         getDirtyDefinedNameMap = currentConfigService.getDirtyDefinedNameMap;
+        getExecuteUnitId = currentConfigService.getExecuteUnitId;
     }
 
     class TestRuntimeService {

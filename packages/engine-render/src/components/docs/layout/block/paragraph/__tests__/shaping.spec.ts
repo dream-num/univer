@@ -274,6 +274,33 @@ describe('shaping', () => {
         }
     });
 
+    it('keeps top-bottom custom block as an anchor glyph instead of occupying document flow', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 1, blockId: 'b1' }],
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'd1',
+                    layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 100, height: 120 },
+                    },
+                },
+            },
+        });
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const customBlockGlyph = allGlyphs.find((g) => g.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+        expect(customBlockGlyph).toBeDefined();
+        expect(customBlockGlyph!.width).toBe(0);
+        expect(customBlockGlyph!.bBox.ba + customBlockGlyph!.bBox.bd).toBe(0);
+    });
+
     it('shapes text with useOpenType when font library is ready', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello');
         const originalIsReady = fontLibrary.isReady;

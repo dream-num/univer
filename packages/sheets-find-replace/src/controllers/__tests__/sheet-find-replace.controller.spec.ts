@@ -506,6 +506,34 @@ describe('SheetFindModel search and replace', () => {
         model.dispose();
     });
 
+    it('treats find strings as literal text when replacing plain cells', async () => {
+        const activeSheet = createWorksheet('sheet-1', {
+            '0,0': { v: 'a.b aXb a.b' },
+        });
+        const workbook = createWorkbook(activeSheet);
+        const { model, commandService } = createModel(workbook);
+
+        model.start({ ...baseQuery, findString: 'a.b' });
+
+        await expect(model.replaceAll('hit')).resolves.toBe(true);
+        expect(commandService.executeCommand).toHaveBeenLastCalledWith(SheetReplaceCommand.id, {
+            unitId: 'unit-1',
+            replacements: [
+                {
+                    count: 1,
+                    subUnitId: 'sheet-1',
+                    value: {
+                        0: {
+                            0: { v: 'hit aXb hit' },
+                        },
+                    },
+                },
+            ],
+        });
+
+        model.dispose();
+    });
+
     it('returns empty replacement results when nothing is searchable', async () => {
         const activeSheet = createWorksheet('sheet-1', {});
         const workbook = createWorkbook(activeSheet);

@@ -16,6 +16,7 @@
 
 import type { IMouseEvent } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../../locale/types';
+import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { ConfigContext } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
@@ -24,7 +25,9 @@ import { createPortal } from 'react-dom';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { ContextMenuPosition } from '../../../services/menu/types';
+import { IUIRuntimeScopeService } from '../../../services/runtime-scope/ui-runtime-scope.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { MobileMenu } from '../../menu/mobile/MobileMenu';
 
@@ -33,11 +36,14 @@ const MOBILE_CONTEXT_MENU_HOST_ID = 'mobile-context-menu';
 export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
+    const [menuContext, setMenuContext] = useState<IContextMenuTriggerContext | undefined>();
     const visibleRef = useRef(visible);
     const contextMenuHostService = useDependency(IContextMenuHostService);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
+    const menuManagerService = useDependency(IMenuManagerService);
+    const runtimeScopeService = useDependency(IUIRuntimeScopeService);
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
     const { mountContainer } = useContext(ConfigContext);
@@ -66,9 +72,10 @@ export function MobileContextMenu() {
         };
     }, [contextMenuHostService, contextMenuService]);
 
-    function handleContextMenu(_event: IMouseEvent, nextMenuType: string) {
+    function handleContextMenu(_event: IMouseEvent, nextMenuType: string, context?: IContextMenuTriggerContext) {
         contextMenuHostService.activateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
         setMenuType(nextMenuType);
+        setMenuContext(context);
         setVisible(true);
     }
 
@@ -91,6 +98,36 @@ export function MobileContextMenu() {
     if (!mountContainer || !visible) {
         return null;
     }
+
+    const activeScope = runtimeScopeService.get(menuContext?.unitId);
+    const activeCommandService = activeScope?.has(ICommandService)
+        ? activeScope.get<ICommandService>(ICommandService)
+        : commandService;
+    const activeLayoutService = activeScope?.has(ILayoutService)
+        ? activeScope.get<ILayoutService>(ILayoutService)
+        : layoutService;
+    const activeMenuManagerService = activeScope?.has(IMenuManagerService)
+        ? activeScope.get<IMenuManagerService>(IMenuManagerService)
+        : menuManagerService;
+    const menu = (
+        <MobileMenu
+            menuType={menuType}
+            menuManagerService={activeMenuManagerService}
+            onOptionSelect={(params) => {
+                const commandId = params.commandId ?? params.id ?? params.label as string | undefined;
+                const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
+                const commandParams = typeof params.value === 'undefined' ? fallbackParams : { value: params.value };
+
+                if (!commandId) {
+                    return;
+                }
+
+                activeLayoutService.focus();
+                activeCommandService.executeCommand(commandId, commandParams);
+                handleClose();
+            }}
+        />
+    );
 
     return createPortal(
         <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
@@ -144,22 +181,7 @@ export function MobileContextMenu() {
                     </div>
                 </div>
                 {menuType && (
-                    <MobileMenu
-                        menuType={menuType}
-                        onOptionSelect={(params) => {
-                            const commandId = params.commandId ?? params.id ?? params.label as string | undefined;
-                            const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
-                            const commandParams = typeof params.value === 'undefined' ? fallbackParams : { value: params.value };
-
-                            if (!commandId) {
-                                return;
-                            }
-
-                            layoutService.focus();
-                            commandService.executeCommand(commandId, commandParams);
-                            handleClose();
-                        }}
-                    />
+                    menu
                 )}
             </section>
         </div>,

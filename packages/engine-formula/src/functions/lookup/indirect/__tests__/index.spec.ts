@@ -20,6 +20,7 @@ import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
@@ -32,6 +33,8 @@ import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
+import { Concatenate } from '../../../text/concatenate';
+import { FUNCTION_NAMES_TEXT } from '../../../text/function-names';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Indirect } from '../index';
 
@@ -86,6 +89,7 @@ describe('Test indirect', () => {
 
         functionService.registerExecutors(
             new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT),
+            new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
             new Multiply(FUNCTION_NAMES_META.MULTIPLY)
         );
     });
@@ -109,6 +113,26 @@ describe('Test indirect', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
+        });
+
+        it('should propagate errors produced while building the reference text', () => {
+            const lexerNode = lexer.treeBuilder('=Indirect("A"&#N/A)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as BaseValueObject).getValue()).toBe(ErrorType.NA);
+        });
+
+        it('missing sheet returns #REF', () => {
+            const lexerNode = lexer.treeBuilder('=Indirect("\'Missing Sheet\'!A1")');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[ErrorType.REF]]);
         });
 
         it('array', () => {

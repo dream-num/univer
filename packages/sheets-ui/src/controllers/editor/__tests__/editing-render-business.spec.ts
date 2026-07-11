@@ -22,13 +22,19 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FX_BAR_EDITOR,
     LocaleType,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { MoveCursorOperation, MoveSelectionOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import {
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+} from '../../../commands/commands/set-selection.command';
 import { EditingRenderController } from '../editing.render-controller';
 
 function createController() {
@@ -44,7 +50,29 @@ function createController() {
         getSheetBySheetId: vi.fn(() => worksheet),
         getStyles: vi.fn(() => styles),
     };
+    let normalSnapshot = {
+        body: { dataStream: 'new value\r\n', paragraphs: [{ startIndex: 9, paragraphId: 'normal-para' }] },
+        documentStyle: {},
+    };
+    let formulaSnapshot = {
+        body: { dataStream: 'new value\r\n', paragraphs: [{ startIndex: 9, paragraphId: 'formula-para' }] },
+        documentStyle: {},
+    };
     const docModel = {
+        getUnitId: vi.fn(() => DOCS_NORMAL_EDITOR_UNIT_ID_KEY),
+        getSnapshot: vi.fn(() => normalSnapshot),
+        reset: vi.fn((snapshot) => {
+            normalSnapshot = snapshot;
+        }),
+    };
+    const formulaDocModel = {
+        getUnitId: vi.fn(() => DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY),
+        getSnapshot: vi.fn(() => formulaSnapshot),
+        reset: vi.fn((snapshot) => {
+            formulaSnapshot = snapshot;
+        }),
+    };
+    const documentModel = {
         getSnapshot: vi.fn(() => ({
             body: { dataStream: 'new value\r\n' },
             documentStyle: {},
@@ -68,6 +96,9 @@ function createController() {
         getContextValue: vi.fn(() => false),
     };
     controller._cellEditorManagerService = { setState: vi.fn() };
+    controller._sheetCellEditorResizeService = {
+        fitTextSize: vi.fn((callback?: () => void) => callback?.()),
+    };
     controller._editorService = {
         isSheetEditor: vi.fn(() => true),
         getEditor: vi.fn((editorId: string) => editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? formulaBarEditor : null),
@@ -78,12 +109,20 @@ function createController() {
             sheetId: 'sheet-1',
             row: 2,
             column: 3,
-            documentLayoutObject: { documentModel: null },
+            documentLayoutObject: { documentModel },
         })),
-        getEditLocation: vi.fn(() => ({ unitId: 'unit-1', sheetId: 'sheet-1', row: 2, column: 3 })),
+        getEditLocation: vi.fn(() => ({
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            row: 2,
+            column: 3,
+            documentLayoutObject: { documentModel },
+        })),
         getCurrentEditorId: vi.fn(() => DOCS_NORMAL_EDITOR_UNIT_ID_KEY),
         isForceKeepVisible: vi.fn(() => false),
         disableForceKeepVisible: vi.fn(),
+        refreshEditCellPosition: vi.fn(),
+        changeEditorDirty: vi.fn(),
     };
     controller._sheetInterceptorService = {
         onWriteCell: vi.fn((_workbook, _worksheet, _row, _column, cellData) => cellData),
@@ -94,9 +133,22 @@ function createController() {
         executeCommand: vi.fn(),
     };
     controller._univerInstanceService = {
-        getUnit: vi.fn((unitId: string) => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? docModel : workbook),
+        getUnit: vi.fn((unitId: string) => {
+            if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                return docModel;
+            }
+            if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                return formulaDocModel;
+            }
+
+            return workbook;
+        }),
         getCurrentUnitOfType: vi.fn(() => workbook),
         setCurrentUnitForType: vi.fn(),
+    };
+    controller._textSelectionManagerService = {
+        replaceDocRanges: vi.fn(),
+        refreshSelection: vi.fn(),
     };
     const workbookSelections = {
         getCurrentLastSelection: vi.fn(() => ({ range: { startRow: 1, startColumn: 1, endRow: 4, endColumn: 4 } })),
@@ -108,23 +160,37 @@ function createController() {
     controller._renderManagerService = {
         getRenderById: vi.fn(() => ({
             scene: {
-                getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN
+                getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN
                     ? { scrollToViewportPos: vi.fn() }
                     : null),
+                resetCursor: vi.fn(),
             },
             with: vi.fn(() => ({ resetInitialWidth: vi.fn() })),
         })),
     };
     controller._getEditorObject = vi.fn(() => ({
+        document: {
+            makeDirty: vi.fn(),
+        },
         scene: {
-            getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN
+            getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN
                 ? { scrollToViewportPos: vi.fn() }
                 : null),
+            resetCursor: vi.fn(),
         },
     }));
-    controller._getEditorSkeleton = vi.fn(() => ({ resetInitialWidth: vi.fn() }));
+    controller._getEditorSkeleton = vi.fn(() => ({ calculate: vi.fn(), resetInitialWidth: vi.fn() }));
+    controller._getEditorViewModel = vi.fn(() => ({ reset: vi.fn() }));
 
-    return { controller, docModel, formulaBarEditor, workbook, worksheet };
+    return {
+        controller,
+        docModel,
+        formulaBarEditor,
+        getFormulaSnapshot: () => formulaSnapshot,
+        getNormalSnapshot: () => normalSnapshot,
+        workbook,
+        worksheet,
+    };
 }
 
 describe('EditingRenderController business methods', () => {
@@ -206,5 +272,63 @@ describe('EditingRenderController business methods', () => {
         expect(controller._undoRedoService.clearUndoRedo).toHaveBeenCalledWith(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         expect(formulaBarEditor.setSelectionRanges).toHaveBeenCalledWith([], false);
         expect(formulaBarEditor.blur).toHaveBeenCalled();
+    });
+
+    it('leaves initial keyboard input to the doc input pipeline when opening the cell editor', () => {
+        const { controller, getFormulaSnapshot, getNormalSnapshot } = createController();
+
+        controller._handleEditorVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: 187,
+            initialValue: '=',
+            unitId: 'unit-1',
+        });
+
+        expect(getNormalSnapshot().body.dataStream).toBe('\r\n');
+        expect(getFormulaSnapshot().body.dataStream).toBe('\r\n');
+        expect(controller._textSelectionManagerService.replaceDocRanges).toHaveBeenCalledWith(
+            [{ startOffset: 0, endOffset: 0 }],
+            {
+                unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            }
+        );
+        expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
+    });
+
+    it('syncs the active sheet editor selection instead of the host document selection on focus', () => {
+        const { controller, workbook } = createController();
+        const focus$ = new Subject<boolean>();
+        const hostSelectionSync = vi.fn();
+        const cellEditorSelectionSync = vi.fn();
+        const disposableCollection = { add: vi.fn() };
+
+        controller._cellEditorManagerService.focus$ = focus$;
+        controller._univerInstanceService.getCurrentUnitOfType.mockImplementation((type: UniverInstanceType) => {
+            if (type === UniverInstanceType.UNIVER_DOC) {
+                return { getUnitId: () => 'host-doc' };
+            }
+
+            return workbook;
+        });
+        controller._renderManagerService.getRenderById.mockImplementation((unitId: string) => ({
+            with: vi.fn(() => {
+                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    return { sync: cellEditorSelectionSync };
+                }
+                if (unitId === 'host-doc') {
+                    return { sync: hostSelectionSync };
+                }
+
+                return undefined;
+            }),
+        }));
+
+        controller._initialCursorSync(disposableCollection);
+        focus$.next(true);
+
+        expect(cellEditorSelectionSync).toHaveBeenCalledTimes(1);
+        expect(hostSelectionSync).not.toHaveBeenCalled();
     });
 });

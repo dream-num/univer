@@ -16,7 +16,6 @@
 
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-
 import { EDITOR_ACTIVATED, FOCUSING_SHEET } from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import {
@@ -26,7 +25,11 @@ import {
     OpenFindDialogOperation,
     OpenReplaceDialogOperation,
 } from '../commands/operations/find-replace.operation';
-import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS, FIND_REPLACE_REPLACE_REVEALED } from '../services/context-keys';
+import {
+    FIND_REPLACE_DIALOG_FOCUS,
+    FIND_REPLACE_INPUT_FOCUS,
+    FIND_REPLACE_REPLACE_REVEALED,
+} from '../services/context-keys';
 
 function whenFindReplaceDialogFocused(contextService: IContextService): boolean {
     return contextService.getContextValue(FIND_REPLACE_DIALOG_FOCUS);

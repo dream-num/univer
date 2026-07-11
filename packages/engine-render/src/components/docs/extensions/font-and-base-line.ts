@@ -20,7 +20,8 @@ import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
-import { GlyphType, hasCJK } from '../../../basics';
+import { GlyphType } from '../../../basics';
+import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape } from '../../../shape';
@@ -358,7 +359,7 @@ export class FontAndBaseLine extends docExtension {
 
         const isVertical = vertexAngle === VERTICAL_DEG && centerAngle === VERTICAL_DEG;
 
-        if (isVertical && !hasCJK(content)) {
+        if (isVertical && !cjk.hasCJK(content)) {
             ctx.save();
             ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
             ctx.rotate(Math.PI / 2);

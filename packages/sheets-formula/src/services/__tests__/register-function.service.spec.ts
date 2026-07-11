@@ -96,7 +96,7 @@ describe('RegisterFunctionService', () => {
         expect(functionService.hasExecutor('ADD2')).toBe(false);
     });
 
-    it('uses remote registration hooks for grouped and async functions when the remote service is present', () => {
+    it('does not serialize functions for remote registration when the remote service is present', () => {
         const registerFunctions = vi.fn().mockResolvedValue(undefined);
         const registerAsyncFunctions = vi.fn().mockResolvedValue(undefined);
         const unregisterFunctions = vi.fn().mockResolvedValue(undefined);
@@ -111,31 +111,36 @@ describe('RegisterFunctionService', () => {
         injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
 
         const registerFunctionService = injector.get(IRegisterFunctionService);
+        const functionService = injector.get(IFunctionService);
+
+        const groupedFunction = () => 1;
+        const asyncFunction = async () => 2;
+        const groupedToString = vi.fn(() => '() => 1');
+        const asyncToString = vi.fn(() => 'async () => 2');
+        groupedFunction.toString = groupedToString;
+        asyncFunction.toString = asyncToString;
 
         const groupedDisposable = registerFunctionService.registerFunctions({
             calculate: [
-                [() => 1, 'REMOTE_GROUPED', 'Remote grouped function'],
+                [groupedFunction, 'REMOTE_GROUPED', 'Remote grouped function'],
             ],
         });
         const asyncDisposable = registerFunctionService.registerAsyncFunction({
             name: 'REMOTE_ASYNC',
-            func: async () => 2,
+            func: asyncFunction,
             description: 'Remote async function',
         });
 
-        expect(registerFunctions).toHaveBeenCalledTimes(1);
-        expect(registerFunctions).toHaveBeenCalledWith([
-            [expect.stringContaining('() => 1'), 'REMOTE_GROUPED'],
-        ]);
-        expect(registerAsyncFunctions).toHaveBeenCalledTimes(1);
-        expect(registerAsyncFunctions).toHaveBeenCalledWith([
-            [expect.stringContaining('async'), 'REMOTE_ASYNC'],
-        ]);
+        expect(functionService.hasExecutor('REMOTE_GROUPED')).toBe(true);
+        expect(functionService.hasExecutor('REMOTE_ASYNC')).toBe(true);
+        expect(groupedToString).not.toHaveBeenCalled();
+        expect(asyncToString).not.toHaveBeenCalled();
+        expect(registerFunctions).not.toHaveBeenCalled();
+        expect(registerAsyncFunctions).not.toHaveBeenCalled();
 
         groupedDisposable.dispose();
         asyncDisposable.dispose();
 
-        expect(unregisterFunctions).toHaveBeenCalledWith(['REMOTE_GROUPED']);
-        expect(unregisterFunctions).toHaveBeenCalledWith(['REMOTE_ASYNC']);
+        expect(unregisterFunctions).not.toHaveBeenCalled();
     });
 });

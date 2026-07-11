@@ -30,6 +30,18 @@ import { deserializeRangeWithSheetWithCache } from '../../../engine/utils/refere
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
+const INDIRECT_ERROR_LITERALS = [
+    ErrorType.NULL,
+    ErrorType.DIV_BY_ZERO,
+    ErrorType.VALUE,
+    ErrorType.REF,
+    ErrorType.NAME,
+    ErrorType.NUM,
+    ErrorType.NA,
+    ErrorType.CYCLE,
+    ErrorType.CALC,
+] as const;
+
 export class Indirect extends BaseFunction {
     override minParams = 1;
 
@@ -78,6 +90,11 @@ export class Indirect extends BaseFunction {
 
         if (refTextValue.trim() === '') {
             return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        const embeddedError = this._matchErrorLiteral(refTextValue);
+        if (embeddedError != null) {
+            return ErrorValueObject.create(embeddedError);
         }
 
         const refTextV = this._convertToDefinedName(refTextValue);
@@ -154,5 +171,10 @@ export class Indirect extends BaseFunction {
         }
 
         return formulaOrRefString;
+    }
+
+    private _matchErrorLiteral(refText: string) {
+        const normalizedRefText = refText.toUpperCase();
+        return INDIRECT_ERROR_LITERALS.find((errorType) => normalizedRefText.includes(errorType));
     }
 }

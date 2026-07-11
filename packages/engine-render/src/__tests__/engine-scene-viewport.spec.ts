@@ -626,6 +626,38 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('expands transformer outline symmetrically when border spacing is configured', () => {
+        const { engine, scene } = createFixture();
+        const rect = scene.getObject('rect-main') as Rect;
+        rect.transformerConfig = {
+            borderSpacing: 6,
+            borderStrokeWidth: 1,
+            anchorStyle: 'canva',
+            anchorSize: 8,
+        };
+        const transformer = new Transformer(scene);
+
+        expect((transformer as any)._getOutlinePosition(100, 40, 6, 1)).toEqual({
+            left: -7,
+            top: -7,
+            width: 112,
+            height: 52,
+        });
+
+        transformer.setSelectedControl(rect);
+        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
+        const controlObjects = control.getObjects();
+        const outline = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerOutline__')) as Rect;
+        const leftMiddle = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerResizeLM__')) as Rect;
+
+        expect(outline.left).toBe(-7);
+        expect(leftMiddle.left + leftMiddle.width / 2).toBe(outline.left);
+
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('rotates around the scene center when the scene is scaled', () => {
         const sceneMock = {
             ancestorScaleX: 2,

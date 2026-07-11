@@ -90,6 +90,9 @@ describe('Test percentileInc function', () => {
             });
             const result2 = testFunction.calculate(array2, k);
             expect(getObjectValue(result2)).toBe(ErrorType.NUM);
+
+            const result3 = testFunction.calculate(BooleanValueObject.create(false), k);
+            expect(getObjectValue(result3)).toBe(0);
         });
 
         it('K value test', () => {

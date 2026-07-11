@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { Subject } from 'rxjs';
@@ -25,7 +25,7 @@ import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
-import { RediContext } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import { ToolbarItem } from '../ToolbarItem';
 
 class TestLocaleService {
@@ -77,11 +77,8 @@ function renderWithDependencies(element: ReactElement) {
         TestIcon: ({ className }: { className?: string }) => <span className={className} data-icon="test" />,
     });
 
-    return render(
-        <RediContext.Provider value={{ injector }}>
-            {element}
-        </RediContext.Provider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
+    return render(<ConnectedTestRoot />);
 }
 
 afterEach(cleanup);

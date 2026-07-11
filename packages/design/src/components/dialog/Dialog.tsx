@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader, Dialog as DialogProvider, DialogTitle } from './DialogPrimitive';
+import {
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    Dialog as DialogProvider,
+    DialogTitle,
+} from './DialogPrimitive';
 
 export interface IDialogProps {
     children: ReactNode;
@@ -178,7 +185,7 @@ function useDraggable(
         return { x: newX, y: newY };
     }, []);
 
-    const startDrag = useCallback((e: ReactMouseEvent<HTMLElement> | MouseEvent) => {
+    const startDrag = useCallback((e: MouseEvent<HTMLElement> | MouseEvent) => {
         if (!enabled) return;
 
         e.preventDefault();
@@ -191,7 +198,7 @@ function useDraggable(
         document.body.style.userSelect = 'none';
     }, [enabled, position]);
 
-    const onDrag = useCallback((e: MouseEvent) => {
+    const onDrag = useCallback((e: globalThis.MouseEvent) => {
         if (!isDragging) return;
 
         e.preventDefault();

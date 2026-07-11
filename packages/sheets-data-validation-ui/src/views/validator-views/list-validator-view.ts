@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { DataValidationType } from '@univerjs/core';
 import { DataValidatorDropdownType } from '@univerjs/data-validation';
-import { LIST_FORMULA_INPUT_NAME } from '../components/formula-input';
+import { LIST_FORMULA_INPUT_NAME } from '@univerjs/sheets-data-validation';
 import { ListRenderModeInput } from '../components/ListRenderModeInput';
 import { DropdownWidget } from '../widgets/dropdown-widget';
 import { BaseSheetDataValidatorView } from './sheet-validator-view';

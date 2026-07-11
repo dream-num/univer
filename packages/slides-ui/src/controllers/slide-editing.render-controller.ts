@@ -61,7 +61,15 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import {
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DOCS_VIEW_KEY,
+    DocSelectionRenderService,
+    IEditorService,
+    MoveCursorOperation,
+    MoveSelectionOperation,
+    VIEWPORT_KEY,
+} from '@univerjs/docs-ui';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -431,7 +439,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
 
-        const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = editorScene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
         const clientHeight =
             document.body.clientHeight -
@@ -601,7 +609,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
         const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
-        scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+        scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
             viewportScrollX: Number.POSITIVE_INFINITY,
         });
 

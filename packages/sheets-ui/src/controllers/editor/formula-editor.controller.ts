@@ -15,9 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type {
-    IRichTextEditingMutationParams,
-} from '@univerjs/docs';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -39,7 +37,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY, IEditorService } from '@univerjs/docs-ui';
+import { CoverContentCommand, IEditorService, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { combineLatest, filter, takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -78,13 +76,25 @@ export class FormulaEditorController extends RxDisposable {
         this._create(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
         this.disposeWithMe(this._editorService.focus$.subscribe(() => {
-            const focusUnitId = this._editorService.getFocusEditor()?.getEditorId();
-            if (focusUnitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
-            } else {
-                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
-            }
+            this._syncFxBarFocusContext();
         }));
+    }
+
+    private _syncFxBarFocusContext(): void {
+        const focusUnitId = this._editorService.getFocusEditor()?.getEditorId();
+        if (focusUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+            return;
+        }
+
+        if (
+            this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) &&
+            this._contextService.getContextValue(EDITOR_ACTIVATED)
+        ) {
+            return;
+        }
+
+        this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
     }
 
     private _handleContentChange() {
@@ -243,7 +253,7 @@ export class FormulaEditorController extends RxDisposable {
         actualHeight += marginTop + marginBottom;
 
         const { width, height } = position;
-        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         scene.transformByState({

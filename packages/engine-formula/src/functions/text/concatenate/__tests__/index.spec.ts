@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Concatenate } from '../index';
 
@@ -36,6 +36,13 @@ describe('Test concatenate function', () => {
             const text1 = StringValueObject.create('"Hello ""World"');
             const result = testFunction.calculate(text1);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['"Hello ""World"']]);
+        });
+
+        it('Formats floating point numbers as formula text', () => {
+            const text1 = NumberValueObject.create(2790.222849999999);
+            const text2 = StringValueObject.create(' (Eff)');
+            const result = testFunction.calculate(text1, text2);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([['2790.22285 (Eff)']]);
         });
 
         it('Text1 is single cell, text2 is array', () => {

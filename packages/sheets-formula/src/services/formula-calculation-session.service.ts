@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import type { IExecutionInProgressParams, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { Disposable } from '@univerjs/core';
-import { FormulaExecutedStateType as FormulaExecutedState, FormulaExecuteStageType } from '@univerjs/engine-formula';
+import { FormulaExecutedStateType, FormulaExecuteStageType } from '@univerjs/engine-formula';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IFormulaCalculationSessionState {
@@ -114,12 +114,12 @@ export class FormulaCalculationSessionService extends Disposable {
     }
 
     markCompleted(state: FormulaExecutedStateType): void {
-        const noResultToApply = state === FormulaExecutedState.NOT_EXECUTED || state === FormulaExecutedState.INITIAL;
+        const noResultToApply = state === FormulaExecutedStateType.NOT_EXECUTED || state === FormulaExecutedStateType.INITIAL;
         this._emit({
             ...this.state,
-            stopped: state === FormulaExecutedState.STOP_EXECUTION,
-            completed: state !== FormulaExecutedState.INITIAL,
-            resultApplied: this.state.resultApplied || noResultToApply || state === FormulaExecutedState.STOP_EXECUTION,
+            stopped: state === FormulaExecutedStateType.STOP_EXECUTION,
+            completed: state !== FormulaExecutedStateType.INITIAL,
+            resultApplied: this.state.resultApplied || noResultToApply || state === FormulaExecutedStateType.STOP_EXECUTION,
         });
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { IValueOption } from '../../../../services/menu/menu';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -25,7 +25,7 @@ import { ComponentManager, IconManager } from '../../../../common';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { RediContext } from '../../../../utils/di';
+import { connectInjector } from '../../../../utils/di';
 import {
     CONTEXT_MENU_SUBMENU_CLOSE_DELAY,
     CONTEXT_MENU_SUBMENU_PORTAL_ATTR,
@@ -89,7 +89,7 @@ class TestState {
     }
 }
 
-function createContextMenuInjector() {
+function createContextMenuTestInjector() {
     const injector = new Injector();
     injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
@@ -113,17 +113,14 @@ function renderWithDependencies(
     menuMap: Record<string, IMenuSchema[]>,
     setupInjector?: (injector: Injector) => void
 ) {
-    const injector = createContextMenuInjector();
+    const injector = createContextMenuTestInjector();
     setupInjector?.(injector);
     const menuManagerService = injector.get(IMenuManagerService) as unknown as TestMenuManagerService;
 
     Object.entries(menuMap).forEach(([position, menus]) => menuManagerService.setMenus(position, menus));
 
-    return render(
-        <RediContext.Provider value={{ injector }}>
-            {element}
-        </RediContext.Provider>
-    );
+    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
+    return render(<ConnectedTestRoot />);
 }
 
 function createButtonItem(
@@ -415,6 +412,44 @@ describe('ContextMenuPanel', () => {
             value: '#ff0000',
         }]);
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+    });
+
+    it('does not add option padding around a non-selectable custom submenu component', () => {
+        renderWithDependencies(
+            <ContextMenuPanel menuType="insert-menu" sizeVariant="paragraph-t" />,
+            {
+                'insert-menu': [
+                    {
+                        key: 'insert-table',
+                        order: 0,
+                        item: {
+                            id: 'insert-table',
+                            type: MenuItemType.BUTTON_SELECTOR,
+                            title: 'docs-ui.insertTable',
+                            selections: [{
+                                label: {
+                                    name: 'test-picker',
+                                    hoverable: false,
+                                    selectable: false,
+                                },
+                            }],
+                        },
+                    },
+                ],
+            },
+            (injector) => {
+                injector.get(ComponentManager).register('test-picker', () => <div data-testid="test-picker" />);
+            }
+        );
+
+        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insertTable' });
+        fireEvent.mouseEnter(insertButton.parentElement as HTMLElement);
+
+        const picker = screen.getByTestId('test-picker');
+        const optionWrapper = picker.parentElement?.parentElement as HTMLElement;
+
+        expect(hasClassToken(optionWrapper, 'univer-p-0')).toBe(true);
+        expect(hasClassToken(optionWrapper, 'univer-px-3')).toBe(false);
     });
 
     it('keeps the newly hovered submenu open when moving across sibling submenu items', () => {

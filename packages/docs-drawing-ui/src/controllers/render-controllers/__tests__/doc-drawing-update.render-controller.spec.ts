@@ -15,6 +15,7 @@
  */
 
 import { BooleanNumber, FOCUSING_COMMON_DRAWINGS } from '@univerjs/core';
+import { RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -37,7 +38,7 @@ function createController(options: {
     const refreshDrawings$ = new Subject<unknown>();
     const onFocus$ = new Subject<unknown>();
     const onBlur$ = new Subject<unknown>();
-    const commandHandlers: Array<(command: { id: string }) => void> = [];
+    const commandHandlers: Array<(command: { id: string; params?: Record<string, unknown> }) => void> = [];
     let editArea = options.editArea ?? DocumentEditArea.BODY;
     let isFocusing = options.isFocusing ?? true;
 
@@ -313,5 +314,37 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
         expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+    });
+
+    it('ignores rich text mutations from other document units', async () => {
+        const { commandHandlers, getShape, scene } = createController({
+            drawings: {
+                'body-drawing': {
+                    drawingId: 'body-drawing',
+                    isMultiTransform: BooleanNumber.FALSE,
+                },
+            },
+        });
+
+        scene.attachTransformerTo.mockClear();
+        getShape('body-drawing').setOpacity.mockClear();
+
+        commandHandlers.forEach((handler) => handler({
+            id: RichTextEditingMutation.id,
+            params: { unitId: 'other-doc' },
+        }));
+        await Promise.resolve();
+
+        expect(scene.attachTransformerTo).not.toHaveBeenCalled();
+        expect(getShape('body-drawing').setOpacity).not.toHaveBeenCalled();
+
+        commandHandlers.forEach((handler) => handler({
+            id: RichTextEditingMutation.id,
+            params: { unitId: 'doc-1' },
+        }));
+        await Promise.resolve();
+
+        expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('body-drawing'));
+        expect(getShape('body-drawing').setOpacity).toHaveBeenCalledWith(1);
     });
 });

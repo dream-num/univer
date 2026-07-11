@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseFunction } from '@univerjs/engine-formula';
 import { createIdentifier } from '@univerjs/core';
-import { AsyncCustomFunction, CustomFunction, IFunctionService } from '@univerjs/engine-formula';
+import { IFunctionService } from '@univerjs/engine-formula';
 
 export interface IRemoteRegisterFunctionService {
     registerFunctions(serializedFuncs: Array<[string, string]>): Promise<void>;
@@ -36,19 +35,11 @@ export class RemoteRegisterFunctionService implements IRemoteRegisterFunctionSer
     ) {}
 
     async registerFunctions(serializedFuncs: Array<[string, string]>): Promise<void> {
-        const functionList = serializedFuncs.map(([func, name]) => {
-            return createFunction(func, name);
-        });
-
-        this._functionService.registerExecutors(...functionList);
+        rejectRemoteCustomFunctionRegistration(serializedFuncs);
     }
 
     async registerAsyncFunctions(serializedFuncs: Array<[string, string]>): Promise<void> {
-        const functionList = serializedFuncs.map(([func, name]) => {
-            return createAsyncFunction(func, name);
-        });
-
-        this._functionService.registerExecutors(...functionList);
+        rejectRemoteCustomFunctionRegistration(serializedFuncs);
     }
 
     async unregisterFunctions(names: string[]): Promise<void> {
@@ -58,18 +49,10 @@ export class RemoteRegisterFunctionService implements IRemoteRegisterFunctionSer
     }
 }
 
-function createFunction(functionString: string, functionName: string) {
-    const instance = new CustomFunction(functionName);
-    // eslint-disable-next-line no-new-func
-    const functionCalculate = new Function(`return ${functionString}`)();
-    instance.calculateCustom = functionCalculate;
-    return instance as BaseFunction;
-}
+function rejectRemoteCustomFunctionRegistration(serializedFuncs: Array<[string, string]>): void {
+    if (serializedFuncs.length === 0) {
+        return;
+    }
 
-function createAsyncFunction(functionString: string, functionName: string) {
-    const instance = new AsyncCustomFunction(functionName);
-    // eslint-disable-next-line no-new-func
-    const functionCalculate = new Function(`return ${functionString}`)();
-    instance.calculateCustom = functionCalculate;
-    return instance as BaseFunction;
+    throw new Error('Remote custom function registration is disabled because function deserialization over RPC is unsafe.');
 }

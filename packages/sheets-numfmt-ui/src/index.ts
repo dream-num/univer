@@ -17,4 +17,5 @@
 import './global.css';
 
 export type { IUniverSheetsNumfmtUIConfig } from './config/config';
+export { menuSchema as SheetsNumfmtUIMenuSchema } from './menu/schema';
 export { UniverSheetsNumfmtUIPlugin } from './plugin';

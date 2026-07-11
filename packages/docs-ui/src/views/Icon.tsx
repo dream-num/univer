@@ -101,12 +101,14 @@ export function TextColorSwatchIcon({ className, style, onClick, color }: ColorS
                 strokeOpacity={0.16}
             />
             <text
-                x={7.5}
+                x={12}
                 y={16.5}
+                direction="ltr"
                 fontFamily="Arial, sans-serif"
                 fontSize={12}
                 fontWeight={700}
                 fill={color}
+                textAnchor="middle"
             >
                 A
             </text>

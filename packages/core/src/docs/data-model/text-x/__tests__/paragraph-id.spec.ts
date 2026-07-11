@@ -15,15 +15,49 @@
  */
 
 import type { IDocumentBody } from '../../../../types/interfaces';
-import type { TextXAction } from '../action-types';
+import type { TextXAction } from '../../index';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
-import { TextXActionType } from '../action-types';
+import { DataStreamTreeTokenType } from '../../types';
+import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
 const PARAGRAPH_ID_PATTERN = /^para_.+/;
 
 describe('TextX paragraph ids', () => {
+    it('does not treat a structural gap as part of the following paragraph', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.BLOCK_START}B${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 2, paragraphId: 'para_left' },
+                { startIndex: 6, paragraphId: 'para_right', paragraphStyle: { indentStart: { v: 60 } } },
+                { startIndex: 8, paragraphId: 'para_trailing' },
+            ],
+        };
+        const actions: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 4,
+        }, {
+            t: TextXActionType.INSERT,
+            len: 1,
+            body: {
+                dataStream: T.PARAGRAPH,
+                paragraphs: [{ startIndex: 0, paragraphId: 'para_inserted' }],
+            },
+        }];
+
+        TextX.makeInvertible(actions, body);
+        TextX.apply(body, actions);
+
+        expect(body.paragraphs?.find((paragraph) => paragraph.paragraphId === 'para_right')).toEqual({
+            startIndex: 7,
+            paragraphId: 'para_right',
+            paragraphStyle: { indentStart: { v: 60 } },
+        });
+        expect(body.paragraphs?.find((paragraph) => paragraph.startIndex === 4)?.paragraphId).not.toBe('para_right');
+    });
+
     it('preserves paragraph ids when inserting text before paragraphs', () => {
         const body: IDocumentBody = {
             dataStream: 'A\rB\r\n',
@@ -375,5 +409,78 @@ describe('TextX paragraph ids', () => {
                 customBlocks: undefined,
             },
         });
+    });
+
+    it('preserves explicit paragraph ids during an atomic structural replacement', () => {
+        const body: IDocumentBody = {
+            dataStream: 'A\rB\r\n',
+            paragraphs: [
+                { startIndex: 1, paragraphId: 'para_first' },
+                { startIndex: 3, paragraphId: 'para_second' },
+            ],
+        };
+        const replacementBody = {
+            dataStream: 'A\rB\r',
+            paragraphs: [
+                { startIndex: 1, paragraphId: 'para_first' },
+                { startIndex: 3, paragraphId: 'para_second' },
+            ],
+            [PRESERVE_INSERTED_PARAGRAPH_IDS]: true,
+        } as IDocumentBody;
+        const textX = new TextX();
+
+        textX.insert(4, replacementBody);
+        textX.delete(4);
+        const actions = textX.serialize();
+        TextX.makeInvertible(actions, body);
+        TextX.apply(body, actions);
+
+        expect(body.dataStream).toBe('A\rB\r\n');
+        expect(body.paragraphs).toEqual([
+            { startIndex: 1, paragraphId: 'para_first' },
+            { startIndex: 3, paragraphId: 'para_second' },
+        ]);
+        expect((actions[0].body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]).toBe(true);
+        expect((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]).toBeUndefined();
+    });
+
+    it('preserves the structural replacement marker when insert actions are split and composed', () => {
+        const body: IDocumentBody = {
+            dataStream: 'A\rB\r\n',
+            paragraphs: [
+                { startIndex: 1, paragraphId: 'para_first' },
+                { startIndex: 3, paragraphId: 'para_second' },
+            ],
+        };
+        const replacement = new TextX();
+        replacement.insert(4, {
+            dataStream: 'A\rB\r',
+            paragraphs: [
+                { startIndex: 1, paragraphId: 'para_first' },
+                { startIndex: 3, paragraphId: 'para_second' },
+            ],
+            [PRESERVE_INSERTED_PARAGRAPH_IDS]: true,
+        } as IDocumentBody);
+        replacement.delete(4);
+
+        const formatting = new TextX();
+        formatting.retain(2, {
+            dataStream: '',
+            paragraphs: [{ startIndex: 1, paragraphId: 'para_first', paragraphStyle: { spaceAbove: { v: 8 } } }],
+        });
+        formatting.retain(2);
+
+        const composed = TextX.compose(replacement.serialize(), formatting.serialize());
+        const insertedBodies = composed
+            .filter((action) => action.t === TextXActionType.INSERT)
+            .map((action) => action.body as IDocumentBody & Record<string, unknown>);
+
+        expect(insertedBodies.length).toBeGreaterThan(0);
+        expect(insertedBodies.every((insertedBody) => insertedBody[PRESERVE_INSERTED_PARAGRAPH_IDS] === true)).toBe(true);
+
+        TextX.makeInvertible(composed, body);
+        TextX.apply(body, composed);
+
+        expect(body.paragraphs?.map((paragraph) => paragraph.paragraphId)).toEqual(['para_first', 'para_second']);
     });
 });

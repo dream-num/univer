@@ -26,13 +26,6 @@ import { CheckboxFormulaInput } from './CheckboxFormulaInput';
 import { CustomFormulaInput } from './CustomFormulaInput';
 import { ListFormulaInput } from './ListFormulaInput';
 
-export {
-    BASE_FORMULA_INPUT_NAME,
-    CHECKBOX_FORMULA_INPUT_NAME,
-    CUSTOM_FORMULA_INPUT_NAME,
-    LIST_FORMULA_INPUT_NAME,
-};
-
 export const FORMULA_INPUTS: [string, FormulaInputType][] = [
     [
         CUSTOM_FORMULA_INPUT_NAME,

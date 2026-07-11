@@ -19,7 +19,7 @@ import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeT
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../views/ParagraphMenu';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../views/paragraph-menu/component-keys';
 import {
     getPreferredParagraphBoundsInRange,
     getTableBlockMenuHoverRect,
@@ -609,6 +609,29 @@ describe('DocParagraphMenuService', () => {
         expect(service.activeTarget?.moveRange).toEqual({
             startOffset: 3,
             endOffset: 5,
+        });
+    });
+
+    it('does not include a preceding block end token in a paragraph move range', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const T = DataStreamTreeTokenType;
+        const dataStream = `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}B${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const service = createService({
+            attachPopupToRect,
+            blockRanges: [{ blockId: 'code-1', blockType: DocumentBlockRangeType.CODE, startIndex: 0, endIndex: 3 }],
+            dataStream,
+            paragraphs: [{ startIndex: 2 }, { startIndex: 5 }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 4,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+
+        expect(service.activeTarget?.moveRange).toEqual({
+            startOffset: 4,
+            endOffset: 6,
         });
     });
 

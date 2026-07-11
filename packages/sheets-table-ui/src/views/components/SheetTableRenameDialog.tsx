@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDefinedNamesService } from '@univerjs/engine-formula';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Input } from '@univerjs/design';
-import { IDefinedNamesService as IDefinedNamesServiceIdentifier } from '@univerjs/engine-formula';
+import { IDefinedNamesService } from '@univerjs/engine-formula';
 import {
     getExistingNamesSet,
     SetSheetTableCommand,
@@ -40,7 +39,7 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
     const commandService = useDependency(ICommandService);
     const tableManager = useDependency<TableManager>(TableManager);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const definedNamesService = useDependency<IDefinedNamesService>(IDefinedNamesServiceIdentifier);
+    const definedNamesService = useDependency<IDefinedNamesService>(IDefinedNamesService);
     const table = tableManager.getTableById(unitId, tableId);
     const [value, setValue] = useState(table?.getDisplayName() ?? '');
     const [error, setError] = useState('');

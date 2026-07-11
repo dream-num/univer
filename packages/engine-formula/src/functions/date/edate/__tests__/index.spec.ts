@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { excelDateSerial } from '../../../../basics/date';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
@@ -29,6 +30,20 @@ describe('Test edate function', () => {
             const months = NumberValueObject.create(1);
             const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862]]);
+        });
+
+        it('Clamps month-end overflow to the target month last day', () => {
+            const startDate = NumberValueObject.create(excelDateSerial(new Date(Date.UTC(2025, 7, 31))));
+            const months = NumberValueObject.create(-2);
+            const result = testFunction.calculate(startDate, months);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[excelDateSerial(new Date(Date.UTC(2025, 5, 30)))]]);
+        });
+
+        it('Clamps to February for non-leap years', () => {
+            const startDate = NumberValueObject.create(excelDateSerial(new Date(Date.UTC(2025, 2, 31))));
+            const months = NumberValueObject.create(-1);
+            const result = testFunction.calculate(startDate, months);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[excelDateSerial(new Date(Date.UTC(2025, 1, 28)))]]);
         });
 
         it('Start date is array', () => {

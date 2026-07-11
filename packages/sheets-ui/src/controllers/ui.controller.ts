@@ -16,15 +16,15 @@
 
 import {
     Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IConfigService,
     Inject,
     Injector,
-    IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
 import {
     SetBoldCommand,
@@ -348,9 +348,8 @@ export class SheetUIController extends Disposable {
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now
                 const renderManagerService = this._injector.get(IRenderManagerService);
-                const instanceService = this._injector.get(IUniverInstanceService);
-                const currentEditorRender = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, instanceService, renderManagerService);
-                const docSelectionRenderService = currentEditorRender?.with(DocSelectionRenderService);
+                const cellEditorRender = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                const docSelectionRenderService = cellEditorRender?.with(DocSelectionRenderService);
 
                 docSelectionRenderService?.focus();
             })

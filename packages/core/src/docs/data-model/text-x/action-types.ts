@@ -17,6 +17,10 @@
 import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 
+// Internal TextX structural-replacement marker. Inserted paragraphs replace the
+// same logical paragraphs later in the operation, so their ids must stay stable.
+export const PRESERVE_INSERTED_PARAGRAPH_IDS = '__textXPreserveParagraphIds';
+
 export enum TextXActionType {
     RETAIN = 'r',
     INSERT = 'i',

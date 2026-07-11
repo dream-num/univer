@@ -206,8 +206,8 @@ function createService(renderManagerServiceClass: unknown = RenderManagerService
         id: EDITOR_ID,
         body: {
             dataStream: 'abc\r\n',
-            paragraphs: [{ startIndex: 0, paragraphId: createParagraphId(new Set()) }],
-            sectionBreaks: [],
+            paragraphs: [{ startIndex: 3, paragraphId: createParagraphId(new Set()) }],
+            sectionBreaks: [{ startIndex: 4 }],
             customRanges: [],
             tables: [],
             textRuns: [],

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -28,6 +29,7 @@ export class Average extends BaseFunction {
         let accumulatorCount: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
+            variant = this._legacyImplicitDerivedArray(variant);
 
             if (variant.isString() || variant.isBoolean()) {
                 variant = variant.convertToNumberObjectValue();
@@ -52,5 +54,43 @@ export class Average extends BaseFunction {
         }
 
         return accumulatorSum.divided(accumulatorCount);
+    }
+
+    private _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
+        if (!variant.isArray()) {
+            return variant;
+        }
+
+        const array = variant as ArrayValueObject;
+        if (array.usesInvertedIndexCache()) {
+            return variant;
+        }
+
+        const startRow = array.getCurrentRow();
+        const startColumn = array.getCurrentColumn();
+        if (startRow < 0 || startColumn < 0) {
+            return variant;
+        }
+
+        const rowCount = array.getRowCount();
+        const columnCount = array.getColumnCount();
+        let rowIndex = -1;
+        let columnIndex = -1;
+        if (rowCount === 1) {
+            rowIndex = 0;
+            columnIndex = this.column - startColumn;
+        } else if (columnCount === 1) {
+            rowIndex = this.row - startRow;
+            columnIndex = 0;
+        } else {
+            rowIndex = this.row - startRow;
+            columnIndex = this.column - startColumn;
+        }
+
+        if (rowIndex < 0 || rowIndex >= rowCount || columnIndex < 0 || columnIndex >= columnCount) {
+            return variant;
+        }
+
+        return array.get(rowIndex, columnIndex) as BaseValueObject || variant;
     }
 }

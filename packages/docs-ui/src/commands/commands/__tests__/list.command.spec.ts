@@ -22,8 +22,9 @@ import {
     PRESET_LIST_TYPE,
     PresetListType,
     UniverInstanceType,
+    validateDocBodyStructure,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InsertBulletBelowCommand } from '../insert-below/insert-bullet-below.command';
 import {
@@ -94,7 +95,7 @@ describe('list commands', () => {
     }
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(getDocumentData());
+        const testBed = createCommandTestBed(getDocumentData(), [[DocContentInsertService]]);
         univer = testBed.univer;
         get = testBed.get;
         selectionId = 0;
@@ -258,6 +259,24 @@ describe('list commands', () => {
             listType: PresetListType.CHECK_LIST,
             nestingLevel: 0,
         });
+    });
+
+    it('inserts a list at an explicit paragraph gap without inheriting or converting the right paragraph', async () => {
+        const bodyBefore = getBody()!;
+        bodyBefore.paragraphs![1].paragraphStyle = { indentStart: { v: 60 } };
+        get(DocContentInsertService).setInsertRange({
+            unitId: 'test-doc',
+            startOffset: 6,
+            endOffset: 6,
+        });
+
+        expect(await commandService.executeCommand(InsertBulletListBellowCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        const body = getBody()!;
+        expect(body.paragraphs?.find((paragraph) => paragraph.startIndex === 6)?.bullet?.listType).toBe(PresetListType.BULLET_LIST);
+        expect(body.paragraphs?.find((paragraph) => paragraph.paragraphId === 'para_docs_ui_fixture_21')?.paragraphStyle).toEqual({ indentStart: { v: 60 } });
+        expect(validateDocBodyStructure(body)).toEqual([]);
     });
 
     it('inserts a bullet below the focused list item and keeps the active list identity', async () => {

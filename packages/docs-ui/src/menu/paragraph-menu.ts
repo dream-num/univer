@@ -64,6 +64,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     disableMenuWhenNoDocRange,
     getParagraphStyleAtCursor,
+    shouldSuppressDocMenuStateRefresh,
     TextColorSelectorMenuItemFactory,
 } from './menu';
 
@@ -103,6 +104,10 @@ function getHeadingActivatedObservable(accessor: IAccessor, headingType: NamedSt
     return new Observable((subscriber) => {
         const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
         const calc = () => {
+            if (shouldSuppressDocMenuStateRefresh(accessor)) {
+                return;
+            }
+
             const paragraph = getParagraphStyleAtCursor(accessor);
             if (paragraph == null) {
                 subscriber.next(DEFAULT_TYPE === headingType);
@@ -589,7 +594,7 @@ export function ParagraphMenuIndentIncreaseMenuItemFactory(accessor: IAccessor):
     return {
         id: DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
         type: MenuItemType.BUTTON,
-        icon: 'MoreRightIcon',
+        icon: 'LineIndentIncreaseIcon',
         title: 'docs-ui.paragraphMenu.increase',
         tooltip: 'docs-ui.paragraphMenu.increaseIndent',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
@@ -600,7 +605,7 @@ export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor):
     return {
         id: DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
         type: MenuItemType.BUTTON,
-        icon: 'MoreLeftIcon',
+        icon: 'LineIndentDecreaseIcon',
         title: 'docs-ui.paragraphMenu.decrease',
         tooltip: 'docs-ui.paragraphMenu.decreaseIndent',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

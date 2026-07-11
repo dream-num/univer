@@ -46,6 +46,7 @@ import {
 import {
     CreateHeaderFooterCommand,
     DeleteTextCommand,
+    DocContentInsertService,
     DocSelectionManagerService,
     DocSkeletonManagerService,
     HeaderFooterType,
@@ -56,7 +57,7 @@ import {
 import { DocumentEditArea, GlyphType, IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
@@ -945,6 +946,24 @@ describe('misc document commands', () => {
         }));
     });
 
+    it('uses gap insertion mode for a paragraph-menu horizontal line', () => {
+        const syncExecuteCommand = vi.fn(() => true);
+        const accessor = {
+            get: (token: unknown) => {
+                if (token === ICommandService) return { syncExecuteCommand };
+                if (token === IUniverInstanceService) return { getCurrentUnitOfType: () => ({ getUnitId: () => 'test-doc' }) };
+                if (token === DocContentInsertService) return { consumeInsertRange: () => ({ unitId: 'test-doc', startOffset: 7, endOffset: 7 }) };
+                throw new Error('unexpected dependency');
+            },
+        };
+
+        expect(InsertHorizontalLineBellowCommand.handler(accessor as never)).toBe(true);
+        expect(syncExecuteCommand).toHaveBeenCalledWith(HorizontalLineCommand.id, {
+            insertionMode: 'insert-gap',
+            insertRange: { startOffset: 7, endOffset: 7 },
+        });
+    });
+
     it('removes a horizontal line from the paragraph before the cursor', async () => {
         ({ univer, get } = createCommandTestBed(createHorizontalLineDoc()));
         commandService = get(ICommandService);
@@ -996,7 +1015,7 @@ describe('misc document commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('Body\r\n');
-        expect(getBody()?.paragraphs?.[0].startIndex).toBe(0);
+        expect(getBody()?.paragraphs?.[0].startIndex).toBe(4);
     });
 
     it('removes the character before the cursor when Backspace is pressed inside text', async () => {

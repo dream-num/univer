@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     DocumentFlavor,
     generateRandomId,
+    getParagraphContentStartOffset,
     ICommandService,
     Inject,
     Injector,
@@ -469,7 +470,8 @@ export class FDocument extends FBaseInitialable {
             return 0;
         }
 
-        const { dataStream, paragraphs = [] } = this.getBody(segmentId);
+        const body = this.getBody(segmentId);
+        const { dataStream, paragraphs = [] } = body;
 
         if (paragraphs.length === 0) {
             return Math.max(0, dataStream.length - 1);
@@ -479,7 +481,7 @@ export class FDocument extends FBaseInitialable {
             return paragraphs[paragraphs.length - 1].startIndex + 1;
         }
 
-        return paragraphs[index - 1].startIndex + 1;
+        return getParagraphContentStartOffset(body, paragraphs[index]);
     }
 
     private _ensureHeaderFooter(kind: 'header' | 'footer', pageIndex: number): string {

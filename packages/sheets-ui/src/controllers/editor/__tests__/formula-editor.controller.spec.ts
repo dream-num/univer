@@ -21,7 +21,7 @@ import {
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FX_BAR_EDITOR,
 } from '@univerjs/core';
-import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { CoverContentCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -31,9 +31,11 @@ import { FormulaEditorController } from '../formula-editor.controller';
 function createController() {
     const fxBtnClick$ = new Subject<void>();
     const position = { width: 240, height: 40 };
+    let focusEditorId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
     const contextValues = new Map<string, unknown>([
         [FOCUSING_EDITOR_BUT_HIDDEN, true],
         [EDITOR_ACTIVATED, false],
+        [FOCUSING_FX_BAR_EDITOR, false],
     ]);
     const scrollBar = { dispose: vi.fn() };
     const viewport = {
@@ -41,7 +43,7 @@ function createController() {
         scrollToViewportPos: vi.fn(),
         resetCanvasSizeAndUpdateScroll: vi.fn(),
     };
-    const scene = { transformByState: vi.fn(), getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN ? viewport : null) };
+    const scene = { transformByState: vi.fn(), getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN ? viewport : null) };
     const mainComponent = { resize: vi.fn() };
     const formulaDoc = {
         getBody: vi.fn(() => ({ dataStream: 'SUM(A1:A3)\r\n' })),
@@ -78,13 +80,20 @@ function createController() {
         setContextValue: vi.fn((key: string, value: unknown) => contextValues.set(key, value)),
     };
     controller._textSelectionManagerService = { replaceDocRanges: vi.fn() };
+    controller._editorService = {
+        getFocusEditor: vi.fn(() => ({ getEditorId: () => focusEditorId })),
+    };
 
     return {
         controller,
+        contextValues,
         fxBtnClick$,
         formulaDoc,
         mainComponent,
         scene,
+        setFocusEditorId: (editorId: string) => {
+            focusEditorId = editorId;
+        },
         scrollBar,
         viewport,
     };
@@ -104,10 +113,12 @@ describe('FormulaEditorController business methods', () => {
 
     it('turns hidden formula-bar content into a formula when fx button is clicked', () => {
         const { controller, fxBtnClick$ } = createController();
-        const raf = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+        const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+        const raf = vi.fn((cb: FrameRequestCallback) => {
             cb(0);
             return 1;
         });
+        vi.stubGlobal('requestAnimationFrame', raf);
 
         controller._listenFxBtnClick();
         fxBtnClick$.next();
@@ -130,6 +141,29 @@ describe('FormulaEditorController business methods', () => {
         });
         expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_FX_BAR_EDITOR, true);
 
-        raf.mockRestore();
+        vi.stubGlobal('requestAnimationFrame', originalRequestAnimationFrame);
+    });
+
+    it('keeps formula bar focus while formula range picking is active', () => {
+        const { contextValues, controller, setFocusEditorId } = createController();
+        contextValues.set(FOCUSING_FX_BAR_EDITOR, true);
+        contextValues.set(EDITOR_ACTIVATED, true);
+        setFocusEditorId(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+
+        controller._syncFxBarFocusContext();
+
+        expect(contextValues.get(FOCUSING_FX_BAR_EDITOR)).toBe(true);
+        expect(controller._contextService.setContextValue).not.toHaveBeenCalledWith(FOCUSING_FX_BAR_EDITOR, false);
+    });
+
+    it('clears formula bar focus when focus leaves outside formula range picking', () => {
+        const { contextValues, controller, setFocusEditorId } = createController();
+        contextValues.set(FOCUSING_FX_BAR_EDITOR, true);
+        contextValues.set(EDITOR_ACTIVATED, false);
+        setFocusEditorId(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+
+        controller._syncFxBarFocusContext();
+
+        expect(contextValues.get(FOCUSING_FX_BAR_EDITOR)).toBe(false);
     });
 });

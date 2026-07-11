@@ -18,13 +18,14 @@ import type { Editor } from '../../../services/editor/editor';
 import { CommandType, Direction, DisposableCollection, ICommandService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { MoveCursorOperation, MoveSelectionOperation } from '../../../commands/operations/doc-cursor.operation';
 
 // eslint-disable-next-line max-lines-per-function
 export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
+    const operationId = `doc.rich-text-editor.arrow.${useId()}`;
     const selectingModeRef = useRef(selectingMode);
     selectingModeRef.current = selectingMode;
     const onMoveInEditorRef = useRef(onMoveInEditor);
@@ -34,8 +35,6 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
         if (!editor || !isNeed) {
             return;
         }
-        const editorId = editor.getEditorId();
-        const operationId = `doc.rich-text-editor.${editorId}`;
         const d = new DisposableCollection();
         const handleMoveInEditor = (keycode: KeyCode, metaKey?: MetaKeys) => {
             if (onMoveInEditorRef.current) {
@@ -87,7 +86,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
             return {
                 id: operationId,
                 binding: metaKey ? keyCode | metaKey : keyCode,
-                preconditions: () => true,
+                preconditions: () => editor.isFocus(),
                 priority: 900,
                 staticParameters: {
                     eventType: DeviceInputEventType.Keyboard,
@@ -102,5 +101,5 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
         return () => {
             d.dispose();
         };
-    }, [commandService, editor, isNeed, shortcutService]);
+    }, [commandService, editor, isNeed, operationId, shortcutService]);
 };

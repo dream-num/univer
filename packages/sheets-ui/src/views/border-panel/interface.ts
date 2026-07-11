@@ -16,6 +16,7 @@
 
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { ICustomComponentProps } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 import { BorderStyleTypes } from '@univerjs/core';
 import { COMPONENT_PREFIX } from '../const';
 
@@ -100,7 +101,7 @@ export const BORDER_LINE_CHILDREN = [
         icon: 'RightDoubleDiagonalDoubleIcon',
         value: 'mltr_bctr',
     },
-];
+] satisfies Array<{ label: LocaleKey; icon: string; value: string }>;
 
 export const BORDER_SIZE_CHILDREN = [
     {

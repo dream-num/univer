@@ -38,7 +38,6 @@ interface ISelectListProps {
     onChange: (val: string[]) => void;
     multiple?: boolean;
     options: { label: string; value: string; color?: string }[];
-    title?: string;
     onEdit?: () => void;
     style?: CSSProperties;
     location: ISheetLocation;
@@ -52,7 +51,6 @@ function SelectList(props: ISelectListProps) {
         onChange,
         multiple,
         options,
-        title,
         onEdit,
         style,
         location,
@@ -125,7 +123,11 @@ function SelectList(props: ISelectListProps) {
                     />
                 </div>
             )}
-            <div className="univer-px-3.5 univer-py-1 univer-pt-2 univer-text-xs">{title}</div>
+            <div className="univer-px-3.5 univer-py-1 univer-pt-2 univer-text-xs">
+                {localeService.t<LocaleKey>(multiple
+                    ? 'sheets-ui.data-validation.listMultiple.dropdown'
+                    : 'sheets-ui.data-validation.list.dropdown')}
+            </div>
             <div
                 key={lowerFilter}
                 className={clsx(`
@@ -236,14 +238,12 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
     const { worksheet } = location;
     if (!worksheet) return null;
 
-    const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState(defaultValue);
     const cellWidth = (anchorRect?.right ?? 0) - (anchorRect?.left ?? 0);
 
     return (
         <SelectList
             style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
-            title={multiple ? localeService.t<LocaleKey>('sheets-ui.data-validation.listMultiple.dropdown') : localeService.t<LocaleKey>('sheets-ui.data-validation.list.dropdown')}
             value={getListDropdownValue(localValue, multiple)}
             multiple={multiple}
             onChange={async (newValue) => {

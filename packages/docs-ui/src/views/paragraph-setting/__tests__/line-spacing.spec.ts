@@ -21,14 +21,12 @@ import {
     convertLineSpacingForRuleChange,
     convertStoredLineSpacingToDisplayValue,
     getLineSpacingInputConfig,
-    getLineSpacingRuleOptions,
+    LINE_SPACING_RULE_OPTIONS,
 } from '../line-spacing';
 
 describe('paragraph line spacing helpers', () => {
     it('exposes Word-style spacing rule options', () => {
-        expect(getLineSpacingRuleOptions({
-            t: (key: string) => key,
-        } as any)).toEqual([
+        expect(LINE_SPACING_RULE_OPTIONS).toEqual([
             { label: 'docs-ui.doc.paragraphSetting.multiSpace', value: `${SpacingRule.AUTO}` },
             { label: 'docs-ui.doc.paragraphSetting.atLeast', value: `${SpacingRule.AT_LEAST}` },
             { label: 'docs-ui.doc.paragraphSetting.exactly', value: `${SpacingRule.EXACT}` },

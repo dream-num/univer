@@ -35,7 +35,10 @@ import { ColorPicker } from '../../ColorPicker';
 import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.valueType.${text}`), value: text });
+const createOptionItem = (text: CFValueType): { label: LocaleKey; value: CFValueType } => ({
+    label: `sheets-conditional-formatting-ui.valueType.${text}`,
+    value: text,
+});
 
 const InputText = (props: { disabled?: boolean; id: string; className?: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
@@ -128,14 +131,14 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         }
         return rule.config?.nativeColor || defaultDataBarNativeColor;
     });
-    const commonOptions = [
-        createOptionItem(CFValueType.num, localeService),
-        createOptionItem(CFValueType.percent, localeService),
-        createOptionItem(CFValueType.percentile, localeService),
-        createOptionItem(CFValueType.formula, localeService),
+    const commonOptionDefinitions = [
+        createOptionItem(CFValueType.num),
+        createOptionItem(CFValueType.percent),
+        createOptionItem(CFValueType.percentile),
+        createOptionItem(CFValueType.formula),
     ];
-    const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
-    const maxOptions = [createOptionItem(CFValueType.max, localeService), ...commonOptions];
+    const minOptions = [createOptionItem(CFValueType.min), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const maxOptions = [createOptionItem(CFValueType.max), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
     const [minValueType, setMinValueType] = useState<CFValueType>(() => {
         const defaultV = minOptions[0].value as CFValueType;
         if (!rule) {
@@ -257,7 +260,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     };
 
     const isShowInput = (type: string) => {
-        return commonOptions.map((item) => item.value).includes(type as CFValueType);
+        return commonOptionDefinitions.map((item) => item.value).includes(type as CFValueType);
     };
 
     return (

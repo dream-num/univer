@@ -40,8 +40,8 @@ import { Preview } from '../../Preview';
 import { WrapperError } from '../../wrapper-error/WrapperError';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: string, localeService: LocaleService) => ({
-    label: localeService.t(`sheets-conditional-formatting-ui.operator.${text}`),
+const createOptionItem = (text: CFTextOperator | CFNumberOperator | CFTimePeriodOperator): { label: LocaleKey; value: string } => ({
+    label: `sheets-conditional-formatting-ui.operator.${text}`,
     value: text,
 });
 type IValue = number | string | [number, number];
@@ -190,48 +190,50 @@ function HighlightCellInput(props: {
     }
     return null;
 };
-const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues | CFSubRuleType.number | CFSubRuleType.text | CFSubRuleType.timePeriod | CFSubRuleType.formula, localeService: LocaleService) => {
+const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues | CFSubRuleType.number | CFSubRuleType.text | CFSubRuleType.timePeriod | CFSubRuleType.formula) => {
     switch (type) {
         case CFSubRuleType.text: {
             return [
-                createOptionItem(CFTextOperator.containsText, localeService),
-                createOptionItem(CFTextOperator.notContainsText, localeService),
-                createOptionItem(CFTextOperator.beginsWith, localeService),
-                createOptionItem(CFTextOperator.endsWith, localeService),
-                createOptionItem(CFTextOperator.equal, localeService),
-                createOptionItem(CFTextOperator.notEqual, localeService),
-                createOptionItem(CFTextOperator.containsBlanks, localeService),
-                createOptionItem(CFTextOperator.notContainsBlanks, localeService),
-                createOptionItem(CFTextOperator.containsErrors, localeService),
-                createOptionItem(CFTextOperator.notContainsErrors, localeService),
+                createOptionItem(CFTextOperator.containsText),
+                createOptionItem(CFTextOperator.notContainsText),
+                createOptionItem(CFTextOperator.beginsWith),
+                createOptionItem(CFTextOperator.endsWith),
+                createOptionItem(CFTextOperator.equal),
+                createOptionItem(CFTextOperator.notEqual),
+                createOptionItem(CFTextOperator.containsBlanks),
+                createOptionItem(CFTextOperator.notContainsBlanks),
+                createOptionItem(CFTextOperator.containsErrors),
+                createOptionItem(CFTextOperator.notContainsErrors),
             ];
         }
         case CFSubRuleType.number: {
             return [
-                createOptionItem(CFNumberOperator.between, localeService),
-                createOptionItem(CFNumberOperator.notBetween, localeService),
-                createOptionItem(CFNumberOperator.equal, localeService),
-                createOptionItem(CFNumberOperator.notEqual, localeService),
-                createOptionItem(CFNumberOperator.greaterThan, localeService),
-                createOptionItem(CFNumberOperator.greaterThanOrEqual, localeService),
-                createOptionItem(CFNumberOperator.lessThan, localeService),
-                createOptionItem(CFNumberOperator.lessThanOrEqual, localeService),
+                createOptionItem(CFNumberOperator.between),
+                createOptionItem(CFNumberOperator.notBetween),
+                createOptionItem(CFNumberOperator.equal),
+                createOptionItem(CFNumberOperator.notEqual),
+                createOptionItem(CFNumberOperator.greaterThan),
+                createOptionItem(CFNumberOperator.greaterThanOrEqual),
+                createOptionItem(CFNumberOperator.lessThan),
+                createOptionItem(CFNumberOperator.lessThanOrEqual),
             ];
         }
         case CFSubRuleType.timePeriod: {
             return [
-                createOptionItem(CFTimePeriodOperator.yesterday, localeService),
-                createOptionItem(CFTimePeriodOperator.today, localeService),
-                createOptionItem(CFTimePeriodOperator.tomorrow, localeService),
-                createOptionItem(CFTimePeriodOperator.last7Days, localeService),
-                createOptionItem(CFTimePeriodOperator.lastWeek, localeService),
-                createOptionItem(CFTimePeriodOperator.thisWeek, localeService),
-                createOptionItem(CFTimePeriodOperator.nextWeek, localeService),
-                createOptionItem(CFTimePeriodOperator.lastMonth, localeService),
-                createOptionItem(CFTimePeriodOperator.thisMonth, localeService),
-                createOptionItem(CFTimePeriodOperator.nextMonth, localeService),
+                createOptionItem(CFTimePeriodOperator.yesterday),
+                createOptionItem(CFTimePeriodOperator.today),
+                createOptionItem(CFTimePeriodOperator.tomorrow),
+                createOptionItem(CFTimePeriodOperator.last7Days),
+                createOptionItem(CFTimePeriodOperator.lastWeek),
+                createOptionItem(CFTimePeriodOperator.thisWeek),
+                createOptionItem(CFTimePeriodOperator.nextWeek),
+                createOptionItem(CFTimePeriodOperator.lastMonth),
+                createOptionItem(CFTimePeriodOperator.thisMonth),
+                createOptionItem(CFTimePeriodOperator.nextMonth),
             ];
         }
+        default:
+            return [];
     }
 };
 export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell>) => {
@@ -264,10 +266,10 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.uniqueValues'),
     }];
 
-    const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
+    const operatorOptions = useMemo(() => getOperatorOptions(subType).map((option) => ({ ...option, label: localeService.t(option.label) })), [localeService, subType]);
 
     const [operator, setOperator] = useState<IResult['operator'] | undefined>(() => {
-        const defaultV = operatorOptions ? operatorOptions[0].value as IResult['operator'] : undefined;
+        const defaultV = operatorOptions[0]?.value as IResult['operator'] | undefined;
         if (!rule) {
             return defaultV;
         }
@@ -287,6 +289,14 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const getResult = useMemo(() => (option: { subType?: string; operator?: string; value?: IValue; style?: IHighlightCell['style'] }) => {
         switch (option.subType || subType) {
+            case CFSubRuleType.duplicateValues:
+            case CFSubRuleType.uniqueValues: {
+                return {
+                    type: CFRuleType.highlightCell,
+                    subType: option.subType ?? subType,
+                    style: option.style ?? style,
+                };
+            }
             case CFSubRuleType.text: {
                 if ([CFTextOperator.beginsWith, CFTextOperator.endsWith, CFTextOperator.containsText, CFTextOperator.notContainsText, CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
                     return {
@@ -346,8 +356,8 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const onTypeChange = (v: string) => {
         const _subType = v as typeof subType;
-        const operatorList = getOperatorOptions(_subType, localeService);
-        const _operator = operatorList && operatorList[0].value as typeof operator;
+        const operatorList = getOperatorOptions(_subType).map((option) => ({ ...option, label: localeService.t(option.label) }));
+        const _operator = operatorList[0]?.value as typeof operator;
         setSubType(_subType);
         setOperator(_operator);
         _operator && setValue(createDefaultValue(_subType, _operator));

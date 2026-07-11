@@ -31,26 +31,31 @@ import { HelpHiddenTip } from './HelpHiddenTip';
 interface IParamsProps {
     className?: string;
     title?: string;
+    titleKey?: LocaleKey;
     value?: string;
 }
 
-const Params = ({ className, title, value }: IParamsProps) => (
-    <div className="univer-my-2">
-        <div
-            className={clsx(`
-              univer-mb-2 univer-text-sm univer-font-medium univer-text-gray-900
-              dark:!univer-text-white
-            `, className)}
-        >
-            {title}
+const Params = ({ className, title, titleKey, value }: IParamsProps) => {
+    const localeService = useDependency(LocaleService);
+
+    return (
+        <div className="univer-my-2">
+            <div
+                className={clsx(`
+                  univer-mb-2 univer-text-sm univer-font-medium univer-text-gray-900
+                  dark:!univer-text-white
+                `, className)}
+            >
+                {titleKey ? localeService.t(titleKey) : title}
+            </div>
+            <div
+                className="univer-whitespace-pre-wrap univer-break-words univer-text-xs univer-text-gray-500"
+            >
+                {value}
+            </div>
         </div>
-        <div
-            className="univer-whitespace-pre-wrap univer-break-words univer-text-xs univer-text-gray-500"
-        >
-            {value}
-        </div>
-    </div>
-);
+    );
+};
 
 interface IHelpProps {
     prefix?: string;
@@ -189,13 +194,13 @@ export function HelpFunction(props: IHelpFunctionProps) {
                         >
                             <div className="univer-mt-3">
                                 <Params
-                                    title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
+                                    titleKey="sheets-formula-ui.prompt.helpExample"
                                     value={`${functionInfo.functionName}(${functionInfo.functionParameter
                                         .map((item) => item.example)
                                         .join(',')})`}
                                 />
                                 <Params
-                                    title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpAbstract')}
+                                    titleKey="sheets-formula-ui.prompt.helpAbstract"
                                     value={functionInfo.description}
                                 />
                                 {functionInfo &&

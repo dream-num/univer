@@ -39,7 +39,7 @@ import {
     TableManager,
 } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
 import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 import { FilterByEnum } from '../../types';
@@ -47,9 +47,14 @@ import { SheetTableConditionPanel } from './SheetTableConditionPanel';
 import { SheetTableItemsFilterPanel } from './SheetTableItemsFilterPanel';
 import { getInitConditionInfo } from './util';
 
+const FILTER_BY_OPTIONS: Array<{ label: LocaleKey; value: FilterByEnum }> = [
+    { label: 'sheets-table-ui.filter.by-values', value: FilterByEnum.Items },
+    { label: 'sheets-table-ui.filter.by-conditions', value: FilterByEnum.Condition },
+];
+
 export function SheetTableFilterPanel() {
     const localeService = useDependency(LocaleService);
-    const filterByItems = useFilterByOptions(localeService);
+    const filterByItems = FILTER_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
     const tableUiService = useDependency(SheetsTableUiService);
     const tableManager = useDependency(TableManager);
     const commandService = useDependency(ICommandService);
@@ -326,12 +331,4 @@ export function SheetTableFilterPanel() {
             </div>
         </div>
     );
-}
-
-function useFilterByOptions(localeService: LocaleService) {
-    const locale = localeService.getCurrentLocale();
-    return useMemo(() => [
-        { label: localeService.t<LocaleKey>('sheets-table-ui.filter.by-values'), value: FilterByEnum.Items },
-        { label: localeService.t<LocaleKey>('sheets-table-ui.filter.by-conditions'), value: FilterByEnum.Condition },
-    ], [locale, localeService]);
 }

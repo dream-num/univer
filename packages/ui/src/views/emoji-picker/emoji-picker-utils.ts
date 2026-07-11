@@ -15,6 +15,7 @@
  */
 
 import type { LocaleService } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { emojis } from './emojis.generated';
 
 export interface IEmojiItem {
@@ -31,7 +32,7 @@ export type EmojiCategory = Exclude<keyof typeof emojis, 'frequent'>;
 
 export const EMOJI_RECENT_LIMIT = 11;
 
-const EMOJI_CATEGORY_LABEL_KEYS: Record<EmojiCategory, string> = {
+const EMOJI_CATEGORY_LABEL_KEYS: Record<EmojiCategory, LocaleKey> = {
     activity: 'ui.emojiPicker.activities',
     foods: 'ui.emojiPicker.food',
     nature: 'ui.emojiPicker.animals',

@@ -63,7 +63,13 @@ import {
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
-import { ByColorsModel, ByConditionsModel, ByValuesModel, SheetsFilterPanelService } from '../sheets-filter-panel.service';
+import {
+    ByColorsModel,
+    ByConditionsModel,
+    ByValuesModel,
+    ISheetsFilterPanelService,
+    SheetsFilterPanelService,
+} from '../sheets-filter-panel.service';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',
@@ -128,7 +134,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
                 [RefRangeService],
                 [SheetsSelectionsService],
                 [SheetInterceptorService],
-                [SheetsFilterPanelService],
+                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
                 [SheetRangeThemeModel],
                 [ZebraCrossingCacheController],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
@@ -162,7 +168,7 @@ describe('test "SheetsFilterPanelService"', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let sheetsFilterService: SheetsFilterService;
-    let sheetsFilterPanelService: SheetsFilterPanelService;
+    let sheetsFilterPanelService: ISheetsFilterPanelService;
 
     function prepare(workbookData: IWorkbookData) {
         const testBed = createSheetsFilterPanelServiceTestBed(workbookData);
@@ -172,7 +178,7 @@ describe('test "SheetsFilterPanelService"', () => {
 
         commandService = get(ICommandService);
         sheetsFilterService = get(SheetsFilterService);
-        sheetsFilterPanelService = get(SheetsFilterPanelService);
+        sheetsFilterPanelService = get(ISheetsFilterPanelService);
     }
 
     afterEach(() => {

@@ -677,14 +677,17 @@ describe('conditional formatting rule editors', () => {
         });
 
         expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(true);
-        expect(submitRule(interceptorManager)).toMatchObject({
+        const submittedRule = submitRule(interceptorManager);
+        expect(submittedRule).toMatchObject({
             type: CFRuleType.highlightCell,
             subType: CFSubRuleType.duplicateValues,
         });
+        expect(submittedRule).not.toHaveProperty('operator');
         expect(lastRule).toMatchObject({
             type: CFRuleType.highlightCell,
             subType: CFSubRuleType.duplicateValues,
         });
+        expect(lastRule).not.toHaveProperty('operator');
     });
 
     it('preserves an existing formula highlight rule and validates it through beforeSubmit', async () => {

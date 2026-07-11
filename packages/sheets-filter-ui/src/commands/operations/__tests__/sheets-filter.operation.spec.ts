@@ -44,7 +44,7 @@ import {
 } from '@univerjs/sheets';
 import { FilterBy, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
+import { ISheetsFilterPanelService, SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
 import {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,
@@ -103,7 +103,7 @@ function createFilterOperationTestBed() {
         override onStarting(): void {
             ([
                 [SheetInterceptorService],
-                [SheetsFilterPanelService],
+                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
                 [RefRangeService],
                 [SheetsSelectionsService],
                 [SheetRangeThemeModel],
@@ -138,7 +138,7 @@ describe('test sheets filter ui operations', () => {
     let get: Injector['get'];
     let contextService: IContextService;
     let commandService: ICommandService;
-    let sheetsFilterPanelService: SheetsFilterPanelService;
+    let sheetsFilterPanelService: ISheetsFilterPanelService;
 
     beforeEach(() => {
         const testBed = createFilterOperationTestBed();
@@ -147,7 +147,7 @@ describe('test sheets filter ui operations', () => {
 
         contextService = get(IContextService);
         commandService = get(ICommandService);
-        sheetsFilterPanelService = get(SheetsFilterPanelService);
+        sheetsFilterPanelService = get(ISheetsFilterPanelService);
     });
 
     afterEach(() => {

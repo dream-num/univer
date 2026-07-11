@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleService } from '@univerjs/core';
 import type { IDocumentSkeletonLine } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_STYLES, SpacingRule } from '@univerjs/core';
@@ -36,13 +35,11 @@ function clamp(value: number, min: number, max: number) {
     return Math.min(max, Math.max(min, value));
 }
 
-export function getLineSpacingRuleOptions(localeService: LocaleService) {
-    return [
-        { label: localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
-        { label: localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.atLeast'), value: `${SpacingRule.AT_LEAST}` },
-        { label: localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.exactly'), value: `${SpacingRule.EXACT}` },
-    ];
-}
+export const LINE_SPACING_RULE_OPTIONS: Array<{ label: LocaleKey; value: string }> = [
+    { label: 'docs-ui.doc.paragraphSetting.multiSpace', value: `${SpacingRule.AUTO}` },
+    { label: 'docs-ui.doc.paragraphSetting.atLeast', value: `${SpacingRule.AT_LEAST}` },
+    { label: 'docs-ui.doc.paragraphSetting.exactly', value: `${SpacingRule.EXACT}` },
+];
 
 export function getLineSpacingInputConfig(spacingRule: SpacingRule) {
     return spacingRule === SpacingRule.AUTO ? AUTO_LINE_SPACING_CONFIG : FIXED_LINE_SPACING_CONFIG;

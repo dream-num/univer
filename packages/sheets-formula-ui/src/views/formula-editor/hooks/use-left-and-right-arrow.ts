@@ -54,8 +54,6 @@ export function isFormulaEditorInteractionOwner(
         focusEditorId === (options.normalEditorId ?? DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 }
 
-export const isFormulaEditorKeyboardOwner = isFormulaEditorInteractionOwner;
-
 export const useLeftAndRightArrow = (
     isNeed: boolean,
     shouldMoveSelection: FormulaSelectingType,

@@ -20,7 +20,7 @@ import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
 import { ILayoutService, IMessageService, useDebounceFn, useDependency, useObservable } from '@univerjs/ui';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { fromEvent } from 'rxjs';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
@@ -32,6 +32,21 @@ interface ISubFormRef {
     focus(): void;
     selectHasFocus(): boolean;
 }
+
+const FIND_SCOPE_OPTIONS: Array<{ label: LocaleKey; value: FindScope }> = [
+    { label: 'find-replace.dialog.find-scope.current-sheet', value: FindScope.SUBUNIT },
+    { label: 'find-replace.dialog.find-scope.workbook', value: FindScope.UNIT },
+];
+
+const FIND_DIRECTION_OPTIONS: Array<{ label: LocaleKey; value: FindDirection }> = [
+    { label: 'find-replace.dialog.find-direction.row', value: FindDirection.ROW },
+    { label: 'find-replace.dialog.find-direction.column', value: FindDirection.COLUMN },
+];
+
+const FIND_BY_OPTIONS: Array<{ label: LocaleKey; value: FindBy }> = [
+    { label: 'find-replace.dialog.find-by.value', value: FindBy.VALUE },
+    { label: 'find-replace.dialog.find-by.formula', value: FindBy.FORMULA },
+];
 
 function useFindInputFocus(findReplaceService: IFindReplaceService, ref: ForwardedRef<unknown>) {
     const focus = useCallback(() => {
@@ -158,9 +173,9 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
         findReplaceService.changeFindBy(findBy as FindBy);
     }, [findReplaceService]);
 
-    const findScopeOptions = useFindScopeOptions(localeService);
-    const findDirectionOptions = useFindDirectionOptions(localeService);
-    const findByOptions = useFindByOptions(localeService);
+    const findScopeOptions = FIND_SCOPE_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const findDirectionOptions = FIND_DIRECTION_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const findByOptions = FIND_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
 
     useEffect(() => {
         const shouldDisplayNoMatchInfo = findCompleted && matchesCount === 0;
@@ -301,40 +316,4 @@ export function FindReplaceDialog() {
             {!state.replaceRevealed ? <FindDialog ref={focusRef} /> : <ReplaceDialog ref={focusRef} />}
         </div>
     );
-}
-
-function useFindScopeOptions(localeService: LocaleService): Array<{ label: string; value: string }> {
-    const locale = localeService.getCurrentLocale();
-    const options = useMemo(() => {
-        return [
-            { label: localeService.t<LocaleKey>('find-replace.dialog.find-scope.current-sheet'), value: FindScope.SUBUNIT },
-            { label: localeService.t<LocaleKey>('find-replace.dialog.find-scope.workbook'), value: FindScope.UNIT },
-        ];
-    }, [locale]);
-
-    return options;
-}
-
-function useFindDirectionOptions(localeService: LocaleService): Array<{ label: string; value: string }> {
-    const locale = localeService.getCurrentLocale();
-    const options = useMemo(() => {
-        return [
-            { label: localeService.t<LocaleKey>('find-replace.dialog.find-direction.row'), value: FindDirection.ROW },
-            { label: localeService.t<LocaleKey>('find-replace.dialog.find-direction.column'), value: FindDirection.COLUMN },
-        ];
-    }, [locale]);
-
-    return options;
-}
-
-function useFindByOptions(localeService: LocaleService): Array<{ label: string; value: string }> {
-    const locale = localeService.getCurrentLocale();
-    const options = useMemo(() => {
-        return [
-            { label: localeService.t<LocaleKey>('find-replace.dialog.find-by.value'), value: FindBy.VALUE },
-            { label: localeService.t<LocaleKey>('find-replace.dialog.find-by.formula'), value: FindBy.FORMULA },
-        ];
-    }, [locale]);
-
-    return options;
 }

@@ -56,17 +56,17 @@ export interface IFilterByColorItem {
 }
 
 export interface ISheetsFilterPanelService {
-    /**
-     * Set up the panel to change the filter condition on a specific column.
-     * @param filterModel the filter model we will be working on
-     * @param col
-     * @returns if the filter condition is set up successfully
-     */
-    setUpFilterConditionOfCol(filterModel: FilterModel, col: number): boolean;
+    readonly col: number;
+    readonly col$: Observable<number>;
+    readonly filterBy: FilterBy;
+    readonly filterBy$: Observable<FilterBy>;
+    readonly filterByModel: Nullable<IFilterByModel>;
+    readonly filterByModel$: Observable<Nullable<IFilterByModel>>;
+    readonly filterModel: Nullable<FilterModel>;
+    readonly hasCriteria$: Observable<boolean>;
 
-    /**
-     * Terminate the filter panel without applying changes.
-     */
+    setupCol(filterModel: FilterModel, col: number): void;
+    changeFilterBy(filterBy: FilterBy): boolean;
     terminate(): boolean;
 }
 export const ISheetsFilterPanelService = createIdentifier<ISheetsFilterPanelService>('sheets-filter-ui.sheets-filter-panel.service');
@@ -84,7 +84,7 @@ export interface IFilterByModel extends IDisposable {
  * This service controls the state of the filter panel. There should be only one instance of the filter panel
  * at one time.
  */
-export class SheetsFilterPanelService extends Disposable {
+export class SheetsFilterPanelService extends Disposable implements ISheetsFilterPanelService {
     private readonly _filterBy$ = new BehaviorSubject<FilterBy>(FilterBy.VALUES);
     readonly filterBy$ = this._filterBy$.asObservable();
     get filterBy(): FilterBy { return this._filterBy$.getValue(); }

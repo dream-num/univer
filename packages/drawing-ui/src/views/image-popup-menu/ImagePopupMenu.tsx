@@ -191,9 +191,11 @@ function ToolbarGroup(props: { children: ReactNode }) {
     );
 }
 
-function ToolbarButton(props: { title: string; active?: boolean; disabled?: boolean; children: ReactNode; onClick: () => void }) {
+function ToolbarButton(props: { titleKey: string; active?: boolean; disabled?: boolean; children: ReactNode; onClick: () => void }) {
+    const localeService = useDependency(LocaleService);
+
     return (
-        <Tooltip title={props.title} placement="bottom">
+        <Tooltip title={localeService.t(props.titleKey)} placement="bottom">
             <button
                 type="button"
                 disabled={props.disabled}
@@ -372,7 +374,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
             <Separator orientation="vertical" />
             <ToolbarGroup>
                 <ToolbarButton
-                    title={editItem ? localeService.t<LocaleKey>(editItem.label) : localeService.t<LocaleKey>('drawing-ui.image-popup.edit')}
+                    titleKey={editItem?.label ?? 'drawing-ui.image-popup.edit'}
                     disabled={!editItem || editItem.disable}
                     onClick={() => {
                         setHidden(true);
@@ -382,7 +384,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     <DocSettingIcon />
                 </ToolbarButton>
                 <ToolbarButton
-                    title={cropItem ? localeService.t<LocaleKey>(cropItem.label) : localeService.t<LocaleKey>('drawing-ui.image-popup.crop')}
+                    titleKey={cropItem?.label ?? 'drawing-ui.image-popup.crop'}
                     disabled={!cropItem || cropItem.disable}
                     onClick={() => executeMenuItem(cropItem)}
                 >
@@ -392,7 +394,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
             <Separator orientation="vertical" />
             <ToolbarGroup>
                 <ToolbarButton
-                    title={deleteItem ? localeService.t<LocaleKey>(deleteItem.label) : localeService.t<LocaleKey>('drawing-ui.image-popup.delete')}
+                    titleKey={deleteItem?.label ?? 'drawing-ui.image-popup.delete'}
                     disabled={!deleteItem || deleteItem.disable}
                     onClick={() => executeMenuItem(deleteItem)}
                 >

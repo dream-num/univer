@@ -29,8 +29,8 @@ import { ColorPicker } from '../../ColorPicker';
 import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: string, localeService: LocaleService) => ({
-    label: localeService.t(`sheets-conditional-formatting-ui.valueType.${text}`),
+const createOptionItem = (text: CFValueType | 'none'): { label: LocaleKey; value: CFValueType | 'none' } => ({
+    label: `sheets-conditional-formatting-ui.valueType.${text}`,
     value: text,
 });
 
@@ -101,10 +101,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
-    const commonOptions = [createOptionItem(CFValueType.num, localeService), createOptionItem(CFValueType.percent, localeService), createOptionItem(CFValueType.percentile, localeService), createOptionItem(CFValueType.formula, localeService)];
-    const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
-    const medianOptions = [createOptionItem('none', localeService), ...commonOptions];
-    const maxOptions = [createOptionItem(CFValueType.max, localeService), ...commonOptions];
+    const commonOptionDefinitions = [createOptionItem(CFValueType.num), createOptionItem(CFValueType.percent), createOptionItem(CFValueType.percentile), createOptionItem(CFValueType.formula)];
+    const minOptions = [createOptionItem(CFValueType.min), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const medianOptions = [createOptionItem('none'), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const maxOptions = [createOptionItem(CFValueType.max), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
 
     const [minType, setMinType] = useState(() => {
         const defaultV = CFValueType.min;

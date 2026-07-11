@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
+import { createIdentifier, DisposableCollection, toDisposable } from '@univerjs/core';
 
 export const FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
 export const FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE = 'data-embed-runtime-focus-role';
@@ -53,6 +53,120 @@ export interface IFormulaEmbedInteractionBoundaryService {
 }
 
 export const IFormulaEmbedInteractionBoundaryService = createIdentifier<IFormulaEmbedInteractionBoundaryService>('sheets-formula-ui.embed-interaction-boundary.service');
+
+interface IRegisterFormulaEditorRuntimePortalOptions {
+    embedId: string;
+    editorId: string;
+    ownerDocument?: Document;
+    interactionBoundaryService?: IFormulaEmbedInteractionBoundaryService;
+    focusCoordinator?: IFormulaEmbedRuntimeFocusCoordinator;
+}
+
+export function registerFormulaEditorRuntimePortal(options: IRegisterFormulaEditorRuntimePortalOptions): IDisposable {
+    const ownerDocument = options.ownerDocument ?? (typeof document === 'undefined' ? undefined : document);
+    if (!ownerDocument) {
+        return toDisposable(() => {});
+    }
+
+    const collection = new DisposableCollection();
+    const view = ownerDocument.defaultView;
+    const frameHandles: number[] = [];
+    let observer: MutationObserver | undefined;
+    let portalRegistration: IDisposable | undefined;
+    let registeredPortalRoot: HTMLElement | null = null;
+    let disposed = false;
+
+    const tryRegister = () => {
+        if (disposed) {
+            return;
+        }
+
+        const portalRoot = resolveFormulaEditorPortalRoot(options.editorId, ownerDocument);
+        if (portalRoot === registeredPortalRoot) {
+            return;
+        }
+
+        portalRegistration?.dispose();
+        portalRegistration = undefined;
+        registeredPortalRoot = null;
+        if (!portalRoot) {
+            return;
+        }
+
+        registeredPortalRoot = portalRoot;
+        portalRegistration = registerFormulaEditorPortalRoot(options, ownerDocument, portalRoot);
+    };
+
+    const scheduleRetry = (remaining: number) => {
+        if (remaining <= 0 || !view?.requestAnimationFrame) {
+            return;
+        }
+
+        const handle = view.requestAnimationFrame(() => {
+            const index = frameHandles.indexOf(handle);
+            if (index >= 0) {
+                frameHandles.splice(index, 1);
+            }
+            tryRegister();
+            if (!registeredPortalRoot) {
+                scheduleRetry(remaining - 1);
+            }
+        });
+        frameHandles.push(handle);
+    };
+
+    tryRegister();
+    if (!registeredPortalRoot) {
+        scheduleRetry(2);
+    }
+    if (view?.MutationObserver && ownerDocument.body) {
+        observer = new view.MutationObserver(() => tryRegister());
+        observer.observe(ownerDocument.body, { childList: true, subtree: true });
+    }
+
+    collection.add(toDisposable(() => {
+        disposed = true;
+        frameHandles.forEach((handle) => view?.cancelAnimationFrame?.(handle));
+        frameHandles.length = 0;
+        observer?.disconnect();
+        observer = undefined;
+        portalRegistration?.dispose();
+        portalRegistration = undefined;
+        registeredPortalRoot = null;
+    }));
+
+    return collection;
+}
+
+function resolveFormulaEditorPortalRoot(editorId: string, ownerDocument: Document): HTMLElement | null {
+    return (ownerDocument.getElementById(`univer-doc-selection-container-${editorId}`) as HTMLElement | null)
+        ?? (ownerDocument.getElementById(`__editor_${editorId}`) as HTMLElement | null);
+}
+
+function registerFormulaEditorPortalRoot(
+    options: IRegisterFormulaEditorRuntimePortalOptions,
+    ownerDocument: Document,
+    portalRoot: HTMLElement
+): IDisposable {
+    const collection = new DisposableCollection();
+    const editorElement = ownerDocument.getElementById(`__editor_${options.editorId}`) as HTMLElement | null;
+    const elements = editorElement && editorElement !== portalRoot ? [portalRoot, editorElement] : [portalRoot];
+
+    elements.forEach((element) => {
+        if (options.interactionBoundaryService) {
+            collection.add(options.interactionBoundaryService.registerOwnedElement(options.embedId, element));
+        }
+        if (options.focusCoordinator) {
+            collection.add(options.focusCoordinator.registerElement({
+                embedId: options.embedId,
+                role: 'child-editor',
+                element,
+            }));
+        }
+    });
+
+    return collection;
+}
 
 export function resolveFormulaEmbedRuntimeDomScope(root: HTMLElement | null | undefined): IFormulaEmbedRuntimeDomScope | undefined {
     const scopeElement = root?.closest<HTMLElement>(`[${FORMULA_EMBED_ID_ATTRIBUTE}]`);

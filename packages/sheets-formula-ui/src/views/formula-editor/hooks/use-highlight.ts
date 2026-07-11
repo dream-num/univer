@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, ITextRange, ITextRun, Workbook } from '@univerjs/core';
+import type { IDocumentBody, IRange, ITextRange, ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import type { INode } from './use-formula-token';
-import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -250,13 +250,11 @@ export function useDocHight(_leadingCharacter: string = '') {
             return [];
         }
         const str = body.dataStream.slice(0, body.dataStream.length - 2);
-        const cloneBody = { dataStream: '', ...data.body };
         if (!str.startsWith(_leadingCharacter)) return [];
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            cloneBody.textRuns = [];
             commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                 unitId: editorId,
-                body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
+                body: createFormulaHighlightBody(str, []),
             });
             return [];
         } else {
@@ -268,14 +266,14 @@ export function useDocHight(_leadingCharacter: string = '') {
                 });
             }
 
-            cloneBody.textRuns = [{ st: 0, ed: 1, ts: { fs: 11 } }, ...textRuns];
-            cloneBody.dataStream = getFormulaHighlightDataStream(_leadingCharacter, sequenceNodes, sourceText);
+            const highlightDataStream = getFormulaHighlightDataStream(_leadingCharacter, sequenceNodes, sourceText);
+            const highlightTextRuns = [{ st: 0, ed: 1, ts: { fs: 11 } }, ...textRuns];
             let selections;
             if (isNeedResetSelection) {
                 // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
                 selections = editor.getSelectionRanges();
                 // After 'buildTextRuns' , the content changes, most of it is deleted, and the cursor position needs to be corrected
-                const maxOffset = cloneBody.dataStream.length - 2 + leadingCharacterLength;
+                const maxOffset = highlightDataStream.length - 2 + leadingCharacterLength;
                 selections.forEach((selection) => {
                     selection.startOffset = Math.max(0, Math.min(selection.startOffset, maxOffset));
                     selection.endOffset = Math.max(0, Math.min(selection.endOffset, maxOffset));
@@ -283,13 +281,22 @@ export function useDocHight(_leadingCharacter: string = '') {
             }
             commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                 unitId: editorId,
-                body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
+                body: createFormulaHighlightBody(highlightDataStream.slice(0, -2), highlightTextRuns),
                 textRanges: newSelections ?? selections,
             });
             return refSelections;
         }
     });
     return highlightDoc;
+}
+
+/**
+ * ReplaceTextRunsCommand shifts the editor's existing structural metadata when text changes.
+ * Its replacement body must therefore contain only inline formula data; carrying paragraphs
+ * or section breaks copied from the old snapshot would leave their indexes stale.
+ */
+export function createFormulaHighlightBody(dataStream: string, textRuns: ITextRun[]): IDocumentBody {
+    return { dataStream, textRuns };
 }
 
 export function getFormulaHighlightDataStream(leadingCharacter: string, sequenceNodes: Array<ISequenceNode | string>, sourceText?: string): string {

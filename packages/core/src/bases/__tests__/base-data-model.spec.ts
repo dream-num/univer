@@ -17,6 +17,7 @@
 import type { IBaseSnapshot } from '../typedef';
 import { describe, expect, it } from 'vitest';
 import { BaseDataModel } from '../base-data-model';
+import { BaseFieldType } from '../typedef';
 
 describe('BaseDataModel', () => {
     it('keeps complete recordOrder without sorting all records', () => {
@@ -34,7 +35,7 @@ describe('BaseDataModel', () => {
                     id: 'table-1',
                     name: 'Table',
                     fields: {
-                        title: { id: 'title', name: 'Title', type: 'text', config: {} },
+                        title: { id: 'title', name: 'Title', type: BaseFieldType.Text, config: {} },
                     },
                     fieldOrder: ['title'],
                     primaryFieldId: 'title',

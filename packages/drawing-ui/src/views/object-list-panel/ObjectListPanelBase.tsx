@@ -847,8 +847,6 @@ function ObjectDetailsEditor(props: {
     );
 }
 
-export const DrawingObjectListPanel = ObjectListPanelBase;
-
 export type IDrawingObjectListItem = IObjectListPanelItem;
 export type IDrawingObjectListPanelLabels = IObjectListPanelLabels;
 export type IDrawingObjectListPanelProps = IObjectListPanelBaseProps;

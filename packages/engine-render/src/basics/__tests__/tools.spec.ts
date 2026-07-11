@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaselineOffset, BooleanNumber, GridType, NumberUnitType, Rectangle, Tools } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, DEFAULT_STYLES, GridType, NumberUnitType, Rectangle, Tools } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FontCache } from '../../components/docs/layout/shaping-engine/font-cache';
 import {
@@ -179,6 +179,20 @@ describe('tools extra', () => {
         } as any);
         expect(fontStack.fontFamily).toBe('"SF Mono", "Cascadia Code", Consolas, monospace');
         expect(fontStack.fontString).toContain('"SF Mono", "Cascadia Code", Consolas, monospace');
+
+        for (const fontSize of [8, 9.2, 10.4]) {
+            const fractional = getFontStyleString({ ff: 'Arial', fs: fontSize } as any);
+            expect(fractional.fontSize).toBe(fontSize);
+            expect(fractional.originFontSize).toBe(fontSize);
+            expect(fractional.fontCache).toContain(`${fontSize}pt Arial`);
+            expect(fractional.fontString).toContain(`${fontSize}pt Arial`);
+        }
+
+        for (const fontSize of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+            const invalid = getFontStyleString({ ff: 'Arial', fs: fontSize } as any);
+            expect(invalid.fontSize).toBe(DEFAULT_STYLES.fs);
+            expect(invalid.originFontSize).toBe(DEFAULT_STYLES.fs);
+        }
 
         const superscript = getFontStyleString({
             fs: 12,

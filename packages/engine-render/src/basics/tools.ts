@@ -281,8 +281,8 @@ export function getFontStyleString(
 
     // font-size/line-height
     let originFontSize = defaultFontSize;
-    if (textStyle.fs) {
-        originFontSize = Math.ceil(textStyle.fs);
+    if (typeof textStyle.fs === 'number' && Number.isFinite(textStyle.fs) && textStyle.fs > 0) {
+        originFontSize = textStyle.fs;
     }
     let fontSize = originFontSize;
 

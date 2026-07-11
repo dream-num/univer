@@ -47,11 +47,6 @@ export interface ISideMenuInstance {
     scrollTo: (id: string) => void;
 }
 
-const commonClass = 'univer-font-[500] univer-truncate univer-h-[24px] univer-mb-2 univer-leading-[24px] univer-cursor-pointer univer-pr-1 ';
-const titleClass = 'univer-text-base univer-font-semibold';
-const h1Class = 'univer-text-sm univer-font-semibold';
-const textClass = 'univer-text-sm';
-
 export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, ref) => {
     const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
     const isSideBar = mode === 'side-bar';
@@ -136,11 +131,14 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                             id={`univer-side-menu-${menu.id}`}
                             key={menu.id}
                             className={clsx(
-                                commonClass,
+                                `
+                                  univer-mb-2 univer-h-[24px] univer-cursor-pointer univer-truncate univer-pr-1
+                                  univer-font-[500] univer-leading-[24px]
+                                `,
                                 {
-                                    [titleClass]: menu.isTitle,
-                                    [h1Class]: menu.level === 1,
-                                    [textClass]: menu.level > 1,
+                                    'univer-text-base univer-font-semibold': menu.isTitle,
+                                    'univer-text-sm univer-font-semibold': menu.level === 1,
+                                    'univer-text-sm': menu.level > 1,
                                     'univer-text-gray-500 dark:!univer-text-gray-400': menu.id !== activeId,
                                     'univer-text-gray-800 dark:!univer-text-gray-200': menu.id === activeId,
                                 }

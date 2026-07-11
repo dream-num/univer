@@ -37,6 +37,7 @@ import { BooleanNumber } from '../../types/enum';
 import { CustomRangeType } from '../../types/interfaces';
 import { createParagraphId } from '../paragraph-id';
 import { DocumentDataModel } from './document-data-model';
+import { PresetListType } from './preset-list-type';
 import { BuildTextUtils } from './text-x/build-utils';
 import { TextX } from './text-x/text-x';
 import { getBodySlice } from './text-x/utils';
@@ -94,6 +95,201 @@ export function normalizeData(data: IDocumentData) {
     }
 
     return data;
+}
+
+/**
+ * Agent-friendly text style aliases accepted by `RichTextBuilder.span()`.
+ *
+ * The readable aliases can be combined in one object and apply only to the appended span. Native `ITextStyle` fields
+ * remain available for advanced document integrations.
+ *
+ * @example
+ * ```ts
+ * const text = univerAPI.newRichText()
+ *   .text('Status: ')
+ *   .span('Blocked', {
+ *     bold: true,
+ *     italic: true,
+ *     color: '#dc2626',
+ *     background: '#fee2e2',
+ *   });
+ * ```
+ */
+export interface IRichTextSpanStyle extends ITextStyle {
+    /**
+     * Agent-friendly alias for `bl`.
+     */
+    bold?: boolean;
+    /**
+     * Agent-friendly alias for `it`.
+     */
+    italic?: boolean;
+    /**
+     * Agent-friendly alias for `ff`.
+     */
+    fontFamily?: string;
+    /**
+     * Agent-friendly alias for `fs`.
+     */
+    fontSize?: number;
+    /**
+     * Agent-friendly alias for `cl`. A string is treated as an RGB color.
+     */
+    color?: string | IColorStyle | null;
+    /**
+     * Agent-friendly alias for `bg`. A string is treated as an RGB color.
+     */
+    background?: string | IColorStyle | null;
+}
+
+/**
+ * Agent-friendly paragraph options accepted by `RichTextBuilder.paragraph()`.
+ *
+ * Numeric lengths use document points. Pass an `INumberUnit` when another supported unit is required. `lineHeight`
+ * behaves as a multiplier with `SpacingRule.AUTO`, and as an absolute document size with `AT_LEAST` or `EXACT`.
+ *
+ * @example
+ * ```ts
+ * const text = univerAPI.newRichText()
+ *   .paragraph({
+ *     align: univerAPI.Enum.HorizontalAlign.LEFT,
+ *     lineHeight: 1.4,
+ *     lineHeightRule: univerAPI.Enum.SpacingRule.AUTO,
+ *     firstLineIndent: 12,
+ *     spaceAfter: 6,
+ *   })
+ *   .text('Agent-friendly paragraph');
+ * ```
+ */
+export interface IRichTextParagraphStyle {
+    /** Horizontal paragraph alignment. Use `univerAPI.Enum.HorizontalAlign`. */
+    align?: HorizontalAlign;
+    /** Line-height multiplier or absolute size, depending on `lineHeightRule`. */
+    lineHeight?: number;
+    /** Line-height interpretation. Defaults to `SpacingRule.AUTO`. */
+    lineHeightRule?: SpacingRule;
+    /** First-line indent. A number is interpreted as document points. */
+    firstLineIndent?: number | INumberUnit;
+    /** Hanging indent. A number is interpreted as document points. */
+    hangingIndent?: number | INumberUnit;
+    /** Leading-side indent. A number is interpreted as document points. */
+    indentStart?: number | INumberUnit;
+    /** Trailing-side indent. A number is interpreted as document points. */
+    indentEnd?: number | INumberUnit;
+    /** Space before the paragraph. A number is interpreted as document points. */
+    spaceBefore?: number | INumberUnit;
+    /** Space after the paragraph. A number is interpreted as document points. */
+    spaceAfter?: number | INumberUnit;
+    /** Text direction. Use `univerAPI.Enum.TextDirection`. */
+    direction?: TextDirection;
+    /** Whether lines may wrap at character boundaries. */
+    wordWrap?: boolean;
+    /** Keeps all paragraph lines together when pagination applies. */
+    keepLines?: boolean;
+    /** Keeps this paragraph with the following paragraph when pagination applies. */
+    keepNext?: boolean;
+}
+
+/**
+ * Agent-friendly options for one paragraph list item.
+ *
+ * @example
+ * ```ts
+ * const text = univerAPI.newRichText()
+ *   .listItem('Plan', {
+ *     type: univerAPI.Enum.PresetListType.ORDER_LIST,
+ *     listId: 'agent.release-steps',
+ *   })
+ *   .listItem('Build', {
+ *     type: univerAPI.Enum.PresetListType.ORDER_LIST,
+ *     listId: 'agent.release-steps',
+ *     level: 1,
+ *   });
+ * ```
+ */
+export interface IRichTextListItemOptions {
+    /** Preset ordered, unordered, or checklist style. Defaults to `PresetListType.BULLET_LIST`. */
+    type?: PresetListType;
+    /** Stable list identity. Consecutive compatible items reuse the previous id when omitted. */
+    listId?: string;
+    /** Zero-based nesting level. Defaults to `0`. */
+    level?: number;
+    /** Optional paragraph layout for this item. */
+    paragraphStyle?: ParagraphStyleBuilder | IRichTextParagraphStyle;
+}
+
+function normalizeColorStyle(color: string | IColorStyle | null | undefined): IColorStyle | null | undefined {
+    return typeof color === 'string' ? { rgb: color } : color;
+}
+
+function normalizeRichTextSpanStyle(style: IRichTextSpanStyle): ITextStyle {
+    const {
+        bold,
+        italic,
+        fontFamily,
+        fontSize,
+        color,
+        background,
+        ...rawStyle
+    } = style;
+    const normalized: ITextStyle = { ...rawStyle };
+
+    if (bold !== undefined) {
+        normalized.bl = bold ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    }
+    if (italic !== undefined) {
+        normalized.it = italic ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    }
+    if (fontFamily !== undefined) {
+        normalized.ff = fontFamily;
+    }
+    if (fontSize !== undefined) {
+        normalized.fs = fontSize;
+    }
+    if (color !== undefined) {
+        normalized.cl = normalizeColorStyle(color);
+    }
+    if (background !== undefined) {
+        normalized.bg = normalizeColorStyle(background);
+    }
+
+    return normalized;
+}
+
+function normalizeRichTextLength(value: number | INumberUnit | undefined): INumberUnit | undefined {
+    return typeof value === 'number' ? { v: value } : value;
+}
+
+function normalizeRichTextParagraphStyle(
+    style: ParagraphStyleBuilder | IRichTextParagraphStyle | undefined
+): IParagraphStyle | undefined {
+    if (!style) {
+        return undefined;
+    }
+    if (style instanceof ParagraphStyleBuilder) {
+        return style.build();
+    }
+
+    return {
+        horizontalAlign: style.align,
+        lineSpacing: style.lineHeight,
+        spacingRule: style.lineHeightRule,
+        indentFirstLine: normalizeRichTextLength(style.firstLineIndent),
+        hanging: normalizeRichTextLength(style.hangingIndent),
+        indentStart: normalizeRichTextLength(style.indentStart),
+        indentEnd: normalizeRichTextLength(style.indentEnd),
+        spaceAbove: normalizeRichTextLength(style.spaceBefore),
+        spaceBelow: normalizeRichTextLength(style.spaceAfter),
+        direction: style.direction,
+        wordWrap: style.wordWrap === undefined ? undefined : style.wordWrap ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+        keepLines: style.keepLines === undefined ? undefined : style.keepLines ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+        keepNext: style.keepNext === undefined ? undefined : style.keepNext ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+    };
+}
+
+function hasRichTextContent(data: IDocumentData): boolean {
+    const dataStream = data.body?.dataStream ?? '';
+    return dataStream.replace(/\r|\n/g, '').length > 0;
 }
 
 /**
@@ -1705,6 +1901,22 @@ export class RichTextValue {
  * Represents a rich text builder
  */
 export class RichTextBuilder extends RichTextValue {
+    /**
+     * Allows optional feature packages to add semantic builder methods.
+     * @internal
+     */
+    static extend(source: typeof RichTextBuilder): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name === 'constructor') {
+                return;
+            }
+            const descriptor = Object.getOwnPropertyDescriptor(source.prototype, name);
+            if (descriptor) {
+                Object.defineProperty(this.prototype, name, descriptor);
+            }
+        });
+    }
+
     public static newEmptyData(): IDocumentData {
         return normalizeData({
             id: 'd',
@@ -1737,6 +1949,223 @@ export class RichTextBuilder extends RichTextValue {
     constructor(data: IDocumentData) {
         super(data);
         this._doc = new DocumentDataModel(data);
+    }
+
+    /**
+     * Appends plain text to the rich text.
+     *
+     * This is an agent-friendly alias of `insertText(text)`. Use it when building rich text from left to right for
+     * shapes, comments, table cells, and document fragments.
+     *
+     * @param text Text to append.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText()
+     *   .text('Priority: ')
+     *   .bold('High')
+     *   .text(' ')
+     *   .code('P0');
+     * ```
+     */
+    text(text: string): RichTextBuilder {
+        return this.insertText(text);
+    }
+
+    /**
+     * Appends one text span with explicit style.
+     *
+     * Prefer this method when combining multiple styles, because the style object is local to the inserted text and does
+     * not leak into following calls.
+     *
+     * @param text Text to append.
+     * @param style Text style for this span. Agent-friendly aliases such as `bold`, `italic`, `fontFamily`, `fontSize`,
+     * `color`, and `background` are supported alongside native document text style fields.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText()
+     *   .text('Status: ')
+     *   .span('Important', { bold: true, italic: true, color: '#d92d20' });
+     * ```
+     */
+    span(text: string, style: IRichTextSpanStyle): RichTextBuilder {
+        if (!text) {
+            return this;
+        }
+
+        return this.insertRichText(RichTextValue.create({
+            id: 'd',
+            documentStyle: {},
+            body: {
+                dataStream: text,
+                textRuns: [{
+                    st: 0,
+                    ed: text.length,
+                    ts: normalizeRichTextSpanStyle(style),
+                }],
+            },
+        }));
+    }
+
+    /**
+     * Appends bold text.
+     *
+     * @param text Text to append.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText().text('This is ').bold('important');
+     * ```
+     */
+    bold(text: string): RichTextBuilder {
+        return this.span(text, { bold: true });
+    }
+
+    /**
+     * Appends italic text.
+     *
+     * @param text Text to append.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText().text('Use ').italic('judgment');
+     * ```
+     */
+    italic(text: string): RichTextBuilder {
+        return this.span(text, { italic: true });
+    }
+
+    /**
+     * Appends inline code-style text.
+     *
+     * This is intentionally an inline text style, not a block range. Use `paragraph().code('...')` when the code should
+     * occupy its own line.
+     *
+     * @param text Text to append as inline code.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText()
+     *   .text('Run ')
+     *   .code('pnpm test')
+     *   .text(' before submitting.');
+     * ```
+     */
+    code(text: string): RichTextBuilder {
+        return this.span(text, {
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            background: '#f3f4f6',
+        });
+    }
+
+    /**
+     * Appends one ordered, unordered, or checklist paragraph.
+     *
+     * Consecutive items with the same `type` automatically share a generated list id. Supply a semantic `listId` when
+     * an agent needs stable list identity across regeneration.
+     *
+     * @param text Plain item text.
+     * @param options List type, stable identity, nesting, and optional paragraph layout.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText()
+     *   .listItem('Analyze requirements', {
+     *     type: univerAPI.Enum.PresetListType.BULLET_LIST,
+     *     listId: 'agent.tasks',
+     *   })
+     *   .listItem('Implement API', {
+     *     type: univerAPI.Enum.PresetListType.BULLET_LIST,
+     *     listId: 'agent.tasks',
+     *     level: 1,
+     *   });
+     * ```
+     */
+    listItem(text: string, options: IRichTextListItemOptions = {}): RichTextBuilder {
+        const listType = options.type ?? PresetListType.BULLET_LIST;
+        const currentParagraph = this._data.body?.paragraphs?.at(-1);
+        const currentBullet = currentParagraph?.bullet;
+        const listId = options.listId?.trim() ||
+            (currentBullet?.listType === listType ? currentBullet.listId : generateRandomId());
+
+        if (hasRichTextContent(this._data)) {
+            this.paragraph(options.paragraphStyle);
+        } else if (options.paragraphStyle) {
+            this.paragraph(options.paragraphStyle);
+        }
+
+        const targetParagraph = this._data.body?.paragraphs?.at(-1);
+        if (targetParagraph) {
+            targetParagraph.bullet = {
+                listId,
+                listType,
+                nestingLevel: Math.max(0, Math.trunc(options.level ?? 0)),
+            };
+        }
+
+        return this.text(text);
+    }
+
+    /**
+     * Starts a new paragraph before the next appended content.
+     *
+     * Calling `paragraph()` on an empty builder is a no-op, so agents can naturally start chains with
+     * `newRichText().paragraph().text('Title')` without creating a leading blank paragraph.
+     *
+     * @param paragraphStyle Optional agent-friendly paragraph options or an advanced paragraph style builder.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText()
+     *   .paragraph({ lineHeight: 1.4, firstLineIndent: 16, spaceAfter: 8 })
+     *   .text('First paragraph')
+     *   .paragraph({ align: univerAPI.Enum.HorizontalAlign.CENTER })
+     *   .span('Second paragraph', { bold: true, italic: true });
+     * ```
+     */
+    paragraph(paragraphStyle?: ParagraphStyleBuilder | IRichTextParagraphStyle): RichTextBuilder {
+        const nextParagraphStyle = normalizeRichTextParagraphStyle(paragraphStyle);
+        if (!hasRichTextContent(this._data)) {
+            if (nextParagraphStyle) {
+                const firstParagraph = this._data.body?.paragraphs?.[0];
+                if (firstParagraph) {
+                    firstParagraph.paragraphStyle = nextParagraphStyle;
+                }
+            }
+            return this;
+        }
+
+        const currentParagraph = this._data.body?.paragraphs?.at(-1);
+        const currentParagraphStyle = Tools.deepClone(currentParagraph?.paragraphStyle);
+        const currentParagraphBullet = Tools.deepClone(currentParagraph?.bullet);
+        const startIndex = Math.max(0, (this._data.body?.dataStream.length ?? 2) - 2);
+        this.insertRichText(startIndex, RichTextValue.create({
+            id: 'd',
+            documentStyle: {},
+            body: {
+                dataStream: '\r',
+                paragraphs: [{
+                    startIndex: 0,
+                    paragraphId: createParagraphId(new Set()),
+                    paragraphStyle: currentParagraphStyle,
+                    bullet: currentParagraphBullet,
+                }],
+            },
+        }));
+        const nextParagraph = this._data.body?.paragraphs?.at(-1);
+        if (nextParagraphStyle) {
+            if (nextParagraph) {
+                nextParagraph.paragraphStyle = nextParagraphStyle;
+            }
+        } else if (nextParagraph) {
+            delete nextParagraph.paragraphStyle;
+        }
+        if (nextParagraph) {
+            delete nextParagraph.bullet;
+        }
+
+        return this;
     }
 
     /**

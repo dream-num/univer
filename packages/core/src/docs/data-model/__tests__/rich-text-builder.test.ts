@@ -17,7 +17,8 @@
 import type { IBullet } from '../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
 import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection } from '../../../types/enum';
-import { CustomRangeType } from '../../../types/interfaces';
+import { CustomRangeType, SpacingRule } from '../../../types/interfaces';
+import { PresetListType } from '../preset-list-type';
 import { ParagraphStyleBuilder, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder } from '../rich-text-builder';
 
 describe('TextStyleBuilder', () => {
@@ -353,6 +354,78 @@ describe('RichTextBuilder', () => {
             expect(data.textRuns![0].st).toBe(0);
             expect(data.textRuns![0].ed).toBe(5);
         });
+
+        it('should build agent-friendly styled spans', () => {
+            const builder = RichTextBuilder.create()
+                .text('Status: ')
+                .span('Important', { bold: true, italic: true, color: '#d92d20' })
+                .text(' ')
+                .bold('High')
+                .text(' ')
+                .italic('now');
+
+            const data = builder.getData().body!;
+
+            expect(data.dataStream).toBe('Status: Important High now\r\n');
+            expect(data.textRuns).toEqual([
+                {
+                    st: 8,
+                    ed: 17,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                        it: BooleanNumber.TRUE,
+                        cl: { rgb: '#d92d20' },
+                    },
+                },
+                {
+                    st: 18,
+                    ed: 22,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+                {
+                    st: 23,
+                    ed: 26,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                    },
+                },
+            ]);
+        });
+
+        it('should build inline code as a text style', () => {
+            const builder = RichTextBuilder.create()
+                .text('Run ')
+                .code('pnpm test')
+                .text(' before submitting.');
+
+            const data = builder.getData().body!;
+
+            expect(data.dataStream).toBe('Run pnpm test before submitting.\r\n');
+            expect(data.textRuns).toHaveLength(1);
+            const codeRun = data.textRuns![0]!;
+            expect(codeRun).toMatchObject({
+                st: 4,
+                ed: 13,
+                ts: {
+                    bg: { rgb: '#f3f4f6' },
+                },
+            });
+            expect(codeRun.ts!.ff).toContain('monospace');
+        });
+
+        it('should ignore empty styled spans', () => {
+            const builder = RichTextBuilder.create()
+                .text('Hello')
+                .span('', { bold: true, italic: true })
+                .text(' World');
+
+            const data = builder.getData().body!;
+
+            expect(data.dataStream).toBe('Hello World\r\n');
+            expect(data.textRuns).toHaveLength(0);
+        });
     });
 
     describe('rich text insertion', () => {
@@ -502,6 +575,88 @@ describe('RichTextBuilder', () => {
     });
 
     describe('paragraph management', () => {
+        it('should start a paragraph chain without a leading blank paragraph', () => {
+            const builder = RichTextBuilder.create()
+                .paragraph()
+                .text('Title')
+                .paragraph()
+                .span('Body', { bold: true, italic: true });
+
+            const data = builder.getData().body!;
+
+            expect(data.dataStream).toBe('Title\rBody\r\n');
+            expect(data.paragraphs).toHaveLength(2);
+            expect(data.textRuns).toEqual([
+                {
+                    st: 6,
+                    ed: 10,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                        it: BooleanNumber.TRUE,
+                    },
+                },
+            ]);
+        });
+
+        it('should apply agent-friendly options to the following paragraph', () => {
+            const builder = RichTextBuilder.create()
+                .paragraph({
+                    align: HorizontalAlign.LEFT,
+                    lineHeight: 1.4,
+                    firstLineIndent: 16,
+                    indentStart: 8,
+                    spaceAfter: 6,
+                })
+                .text('First')
+                .paragraph({
+                    align: HorizontalAlign.RIGHT,
+                    lineHeight: 24,
+                    lineHeightRule: SpacingRule.EXACT,
+                    hangingIndent: { v: 10 },
+                    spaceBefore: 4,
+                    keepNext: true,
+                })
+                .text('Second');
+
+            const data = builder.getData().body!;
+
+            expect(data.dataStream).toBe('First\rSecond\r\n');
+            expect(data.paragraphs?.[0]?.paragraphStyle).toMatchObject({
+                horizontalAlign: HorizontalAlign.LEFT,
+                lineSpacing: 1.4,
+                indentFirstLine: { v: 16 },
+                indentStart: { v: 8 },
+                spaceBelow: { v: 6 },
+            });
+            expect(data.paragraphs?.[1]?.paragraphStyle).toMatchObject({
+                horizontalAlign: HorizontalAlign.RIGHT,
+                lineSpacing: 24,
+                spacingRule: SpacingRule.EXACT,
+                hanging: { v: 10 },
+                spaceAbove: { v: 4 },
+                keepNext: BooleanNumber.TRUE,
+            });
+        });
+
+        it('should build stable nested list items and end the list on a normal paragraph', () => {
+            const builder = RichTextBuilder.create()
+                .listItem('Plan', { listId: 'agent.tasks' })
+                .listItem('Implement', { listId: 'agent.tasks', level: 1 })
+                .listItem('Verify', { type: PresetListType.ORDER_LIST, listId: 'agent.steps' })
+                .paragraph()
+                .text('Summary');
+
+            const data = builder.getData().body!;
+
+            expect(data.dataStream).toBe('Plan\rImplement\rVerify\rSummary\r\n');
+            expect(data.paragraphs?.map((paragraph) => paragraph.bullet)).toEqual([
+                { listId: 'agent.tasks', listType: PresetListType.BULLET_LIST, nestingLevel: 0 },
+                { listId: 'agent.tasks', listType: PresetListType.BULLET_LIST, nestingLevel: 1 },
+                { listId: 'agent.steps', listType: PresetListType.ORDER_LIST, nestingLevel: 0 },
+                undefined,
+            ]);
+        });
+
         it('should insert paragraph at the end', () => {
             const style = ParagraphStyleBuilder.create()
                 .setHorizontalAlign(HorizontalAlign.CENTER);

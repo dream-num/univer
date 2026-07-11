@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/explicit-function-return-type */
 
-import { AbsoluteRefType, AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, ImageSourceType, InterpolationPointType, LifecycleStages, LocaleType, MentionType, ProtectionType, RelativeDate, SheetTypes, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { AbsoluteRefType, AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, ImageSourceType, InterpolationPointType, LifecycleStages, LocaleType, MentionType, NumberUnitType, PresetListType, ProtectionType, RelativeDate, SheetTypes, SpacingRule, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 /**
  * @hideconstructor
@@ -205,6 +205,45 @@ export class FEnum {
      */
     get HorizontalAlign() {
         return HorizontalAlign;
+    }
+
+    /**
+     * Paragraph line-height interpretation modes
+     *
+     * @example
+     * ```ts
+     * console.log(univerAPI.Enum.SpacingRule.EXACT);
+     * ```
+     */
+    get SpacingRule() {
+        return SpacingRule;
+    }
+
+    /**
+     * Units accepted by document lengths such as paragraph indentation and spacing
+     *
+     * Agent-facing rich-text helpers accept plain numbers as document points, so this enum is only needed when an
+     * explicit alternative unit is required.
+     *
+     * @example
+     * ```ts
+     * console.log(univerAPI.Enum.NumberUnitType.POINT);
+     * ```
+     */
+    get NumberUnitType() {
+        return NumberUnitType;
+    }
+
+    /**
+     * Preset ordered, unordered, and checklist styles used by rich-text list items
+     *
+     * @example
+     * ```ts
+     * console.log(univerAPI.Enum.PresetListType.BULLET_LIST);
+     * ```
+     */
+    get PresetListType() {
+        return PresetListType;
     }
 
     /**

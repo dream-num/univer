@@ -15,7 +15,11 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+/**
+ * @vitest-environment jsdom
+ */
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     collectDocsTableLikeEmbedChildUnitIds,
     createDocsCustomBlockSizeRefreshScheduler,
@@ -23,6 +27,10 @@ import {
 } from '../embed-docs-custom-block-refresh';
 
 describe('docs custom block refresh helpers', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it('collects only sheet-like custom block child unit ids', () => {
         expect([...collectDocsTableLikeEmbedChildUnitIds({
             base: { data: { childType: UniverInstanceType.UNIVER_BASE, childUnitId: 'base-1' } },
@@ -79,13 +87,11 @@ describe('docs custom block refresh helpers', () => {
     it('coalesces repeated refresh requests into one frame', () => {
         const refresh = vi.fn();
         let frameCallback: (() => void) | undefined;
-        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh, {
-            cancelFrame: vi.fn(),
-            requestFrame: (callback) => {
-                frameCallback = callback;
-                return 1;
-            },
+        vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+            frameCallback = () => callback(0);
+            return 1;
         });
+        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh);
 
         scheduler.schedule();
         scheduler.schedule();
@@ -96,11 +102,9 @@ describe('docs custom block refresh helpers', () => {
 
     it('cancels a pending refresh when disposed', () => {
         const refresh = vi.fn();
-        const cancelFrame = vi.fn();
-        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh, {
-            cancelFrame,
-            requestFrame: () => 7,
-        });
+        vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(7);
+        const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
+        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh);
 
         scheduler.schedule();
         scheduler.dispose();

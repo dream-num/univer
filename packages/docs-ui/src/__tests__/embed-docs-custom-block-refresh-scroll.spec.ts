@@ -19,7 +19,7 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     collectDocsTableLikeEmbedChildUnitIds,
     createDocsCustomBlockSizeRefreshScheduler,
@@ -29,6 +29,10 @@ import {
 import { scrollDocsTableLikeCustomBlockLive } from '../embed-docs-custom-block-scroll';
 
 describe('docs custom block refresh and scroll helpers', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it('collects table-like child units and matches command params', () => {
         const childUnitIds = collectDocsTableLikeEmbedChildUnitIds({
             sheet: { data: { childUnitId: 'sheet-1', childType: UniverInstanceType.UNIVER_SHEET } },
@@ -62,26 +66,24 @@ describe('docs custom block refresh and scroll helpers', () => {
     it('coalesces refresh scheduling and cancels pending frames on dispose', () => {
         const refresh = vi.fn();
         let callback: (() => void) | undefined;
-        const frameApi = {
-            cancelFrame: vi.fn(),
-            requestFrame: vi.fn((next: () => void) => {
-                callback = next;
-                return 7;
-            }),
-        };
-        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh, frameApi);
+        const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((next) => {
+            callback = () => next(0);
+            return 7;
+        });
+        const cancelAnimationFrame = vi.spyOn(window, 'cancelAnimationFrame');
+        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh);
 
         scheduler.schedule();
         scheduler.schedule();
-        expect(frameApi.requestFrame).toHaveBeenCalledTimes(1);
+        expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
         callback?.();
         expect(refresh).toHaveBeenCalledTimes(1);
 
         scheduler.schedule();
         scheduler.dispose();
-        expect(frameApi.cancelFrame).toHaveBeenCalledWith(7);
+        expect(cancelAnimationFrame).toHaveBeenCalledWith(7);
         scheduler.dispose();
-        expect(frameApi.cancelFrame).toHaveBeenCalledTimes(1);
+        expect(cancelAnimationFrame).toHaveBeenCalledTimes(1);
     });
 
     it('scrolls live block content within horizontal and vertical limits', () => {

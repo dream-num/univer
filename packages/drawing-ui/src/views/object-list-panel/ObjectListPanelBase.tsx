@@ -178,13 +178,6 @@ const iconButtonClassName = `
   dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-100
 `;
 
-const expandButtonClassName = `
-  univer-flex univer-size-5 univer-shrink-0 univer-items-center univer-justify-center univer-rounded
-  univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-500 univer-outline-none univer-transition-transform
-  hover:univer-bg-gray-100 hover:univer-text-gray-900
-  dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-100
-`;
-
 const sectionOrder = new Map([
     [OBJECT_LIST_FLOATING_SECTION_ID, 0],
     [OBJECT_LIST_CANVAS_SECTION_ID, 1],
@@ -649,7 +642,14 @@ function ObjectListRow(props: {
                 ? (
                     <button
                         type="button"
-                        className={expandButtonClassName}
+                        className="
+                          univer-flex univer-size-5 univer-shrink-0 univer-items-center univer-justify-center
+                          univer-rounded univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-500
+                          univer-outline-none univer-transition-transform
+                          hover:univer-bg-gray-100 hover:univer-text-gray-900
+                          dark:!univer-text-gray-300
+                          dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-100
+                        "
                         title={item.expanded ? labels.collapse : labels.expand}
                         aria-label={item.expanded ? labels.collapse : labels.expand}
                         onClick={(event) => {

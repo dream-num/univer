@@ -100,11 +100,7 @@ export interface IDocsCustomBlockSizeRefreshScheduler {
 }
 
 export function createDocsCustomBlockSizeRefreshScheduler(
-    refresh: () => void,
-    frameApi: {
-        cancelFrame: (handle: number) => void;
-        requestFrame: (callback: () => void) => number;
-    } = getDefaultFrameApi()
+    refresh: () => void
 ): IDocsCustomBlockSizeRefreshScheduler {
     let pendingFrame: number | undefined;
 
@@ -114,7 +110,7 @@ export function createDocsCustomBlockSizeRefreshScheduler(
                 return;
             }
 
-            frameApi.cancelFrame(pendingFrame);
+            window.cancelAnimationFrame(pendingFrame);
             pendingFrame = undefined;
         },
         schedule: () => {
@@ -122,24 +118,10 @@ export function createDocsCustomBlockSizeRefreshScheduler(
                 return;
             }
 
-            pendingFrame = frameApi.requestFrame(() => {
+            pendingFrame = window.requestAnimationFrame(() => {
                 pendingFrame = undefined;
                 refresh();
             });
         },
-    };
-}
-
-function getDefaultFrameApi(): { cancelFrame: (handle: number) => void; requestFrame: (callback: () => void) => number } {
-    if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function') {
-        return {
-            cancelFrame: (handle) => cancelAnimationFrame(handle),
-            requestFrame: (callback) => requestAnimationFrame(callback),
-        };
-    }
-
-    return {
-        cancelFrame: (handle) => clearTimeout(handle),
-        requestFrame: (callback) => setTimeout(callback, 16) as unknown as number,
     };
 }

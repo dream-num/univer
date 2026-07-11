@@ -38,15 +38,6 @@ interface IMobileRibbonProps {
 
 const toolbarScrollOffset = 168;
 
-const nestedControlResetClassName = `
-[&_button]:!univer-m-0 [&_button]:!univer-appearance-none [&_button]:!univer-border-0
-[&_button]:!univer-bg-transparent [&_button]:!univer-p-0 [&_button]:!univer-leading-none
-[&_button]:!univer-outline-none
-[&_input]:!univer-m-0 [&_input]:!univer-appearance-none [&_input]:!univer-border-0
-[&_input]:!univer-bg-transparent [&_input]:!univer-p-0 [&_input]:!univer-leading-none
-[&_input]:!univer-outline-none
-`;
-
 export function MobileRibbon(props: IMobileRibbonProps) {
     const { headerMenuComponents, headerMenu = true } = props;
 
@@ -322,9 +313,16 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                                               [&_[data-u-command]]:!univer-h-8 [&_[data-u-command]]:!univer-min-h-8
                                               [&_[data-u-command]]:!univer-rounded-md
                                               [&_[data-u-command]]:!univer-px-1.5
-                                              [&_button]:!univer-h-8 [&_button]:!univer-min-w-8
-                                              [&_button]:!univer-rounded-md [&_button]:!univer-px-1.5
-                                            `, nestedControlResetClassName)}
+                                              [&_button]:!univer-m-0 [&_button]:!univer-h-8 [&_button]:!univer-min-w-8
+                                              [&_button]:!univer-appearance-none [&_button]:!univer-rounded-md
+                                              [&_button]:!univer-border-0 [&_button]:!univer-bg-transparent
+                                              [&_button]:!univer-p-0 [&_button]:!univer-px-1.5
+                                              [&_button]:!univer-leading-none [&_button]:!univer-outline-none
+                                              [&_input]:!univer-m-0 [&_input]:!univer-appearance-none
+                                              [&_input]:!univer-border-0 [&_input]:!univer-bg-transparent
+                                              [&_input]:!univer-p-0 [&_input]:!univer-leading-none
+                                              [&_input]:!univer-outline-none
+                                            `)}
                                         >
                                             <ToolbarItem {...child.item} />
                                         </div>

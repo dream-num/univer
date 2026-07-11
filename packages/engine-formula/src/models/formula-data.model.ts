@@ -191,9 +191,6 @@ export class FormulaDataModel extends Disposable {
             const tables = Object.values(snapshot.tables);
             for (let j = 0; j < tables.length; j++) {
                 const table = tables[j];
-                if (table.deleted) {
-                    continue;
-                }
                 const tableFormulaData: Record<number, Record<number, IFormulaDataItem>> = {};
                 const recordOrder = table.recordOrder;
                 if (!recordOrder) {
@@ -203,13 +200,13 @@ export class FormulaDataModel extends Disposable {
                 for (let row = 0; row < recordOrder.length; row++) {
                     const recordId = recordOrder[row];
                     const record = table.records[recordId];
-                    if (!record || record.deleted) {
+                    if (!record) {
                         continue;
                     }
                     for (let col = 0; col < table.fieldOrder.length; col++) {
                         const fieldId = table.fieldOrder[col];
                         const field = table.fields[fieldId];
-                        if (!field || field.deleted || field.type !== 'formula') {
+                        if (!field || field.type !== 'formula') {
                             continue;
                         }
                         const formula = String(field.config?.formula ?? '').trim();
@@ -398,11 +395,11 @@ export class FormulaDataModel extends Disposable {
             const baseData: ISheetData = {};
             const tableNameMap: { [tableName: string]: string } = {};
 
-            for (const table of Object.values(snapshot.tables).filter((item) => !item.deleted)) {
+            for (const table of Object.values(snapshot.tables)) {
                 baseData[table.id] = {
                     cellData: new ObjectMatrix(buildBaseRuntimeCellData(table)) as unknown as ObjectMatrix<ICellData>,
-                    rowCount: table.recordOrder?.filter((recordId) => !table.records[recordId]?.deleted).length ?? 0,
-                    columnCount: table.fieldOrder.filter((fieldId) => !table.fields[fieldId]?.deleted).length,
+                    rowCount: table.recordOrder?.length ?? 0,
+                    columnCount: table.fieldOrder.length,
                     rowData: {},
                     columnData: {},
                 };
@@ -936,7 +933,7 @@ function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot):
     let sameNameCount = 0;
     for (let i = 0; i < tables.length; i++) {
         const item = tables[i];
-        if (!item.deleted && item.name === table.name) {
+        if (item.name === table.name) {
             sameNameCount++;
             if (sameNameCount > 1) {
                 break;
@@ -951,7 +948,7 @@ function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<
     const fieldOrder: string[] = [];
     for (let i = 0; i < table.fieldOrder.length; i++) {
         const fieldId = table.fieldOrder[i];
-        if (table.fields[fieldId] && !table.fields[fieldId].deleted) {
+        if (table.fields[fieldId]) {
             fieldOrder.push(fieldId);
         }
     }
@@ -960,7 +957,7 @@ function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<
         recordOrder = [];
         for (let i = 0; i < table.recordOrder.length; i++) {
             const recordId = table.recordOrder[i];
-            if (table.records[recordId] && !table.records[recordId].deleted) {
+            if (table.records[recordId]) {
                 recordOrder.push(recordId);
             }
         }
@@ -969,9 +966,7 @@ function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<
         const records: typeof allRecords = [];
         for (let i = 0; i < allRecords.length; i++) {
             const record = allRecords[i];
-            if (!record.deleted) {
-                records.push(record);
-            }
+            records.push(record);
         }
         records.sort((a, b) => a.orderKey.localeCompare(b.orderKey));
         recordOrder = [];
@@ -984,7 +979,7 @@ function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<
     for (let row = 0; row < recordOrder.length; row++) {
         const recordId = recordOrder[row];
         const record = table.records[recordId];
-        if (!record || record.deleted) {
+        if (!record) {
             continue;
         }
         cellData[row] = { ...cellData[row] };
@@ -1058,10 +1053,10 @@ function resolveBaseFormulaTable(tableName: string | undefined, currentTable: IT
     }
 
     const byId = snapshot.tables[tableName];
-    if (byId && !byId.deleted) {
+    if (byId) {
         return byId;
     }
 
-    const matches = Object.values(snapshot.tables).filter((table) => !table.deleted && table.name === tableName);
+    const matches = Object.values(snapshot.tables).filter((table) => table.name === tableName);
     return matches.length === 1 ? matches[0] : undefined;
 }

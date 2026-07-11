@@ -130,7 +130,6 @@ export interface ITableSnapshot {
     views: Record<ViewId, IViewSnapshot>;
     viewOrder: ViewId[];
     primaryFieldId: FieldId;
-    deleted?: boolean;
 }
 
 export interface IRecordSnapshot {
@@ -141,7 +140,6 @@ export interface IRecordSnapshot {
     updatedAt: number;
     createdBy?: string;
     updatedBy?: string;
-    deleted?: boolean;
 }
 
 export interface IFieldSnapshot {
@@ -153,7 +151,6 @@ export interface IFieldSnapshot {
     defaultValue?: CellValue;
     system?: boolean;
     readonly?: boolean;
-    deleted?: boolean;
 }
 
 export interface IViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecificConfig> {
@@ -167,7 +164,6 @@ export interface IViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecific
     sort?: ISortConfig[];
     group?: IGroupConfig[];
     config: TConfig;
-    deleted?: boolean;
 }
 
 export type BaseSnapshot = IBaseSnapshot;

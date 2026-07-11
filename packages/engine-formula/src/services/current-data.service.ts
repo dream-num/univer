@@ -526,7 +526,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         const base = workbook ? null : this._univerInstanceService.getCurrentUnitOfType<BaseDataModel>(UniverInstanceType.UNIVER_BASE);
-        const table = base ? getFirstLiveBaseTable(base.getSnapshot().tables, base.getSnapshot().tableOrder) : null;
+        const table = base ? getFirstBaseTable(base.getSnapshot().tables, base.getSnapshot().tableOrder) : null;
 
         this._executeUnitId = workbook?.getUnitId() ?? base?.getUnitId();
         this._executeSubUnitId = worksheet?.getSheetId() ?? table?.id;
@@ -569,15 +569,15 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 }
 
-function getFirstLiveBaseTable(tables: Record<string, ITableSnapshot>, tableOrder: string[]): ITableSnapshot | null {
+function getFirstBaseTable(tables: Record<string, ITableSnapshot>, tableOrder: string[]): ITableSnapshot | null {
     for (const tableId of tableOrder) {
         const table = tables[tableId];
-        if (table && !table.deleted) {
+        if (table) {
             return table;
         }
     }
 
-    return Object.values(tables).find((table) => !table.deleted) ?? null;
+    return Object.values(tables)[0] ?? null;
 }
 
 export const IFormulaCurrentConfigService = createIdentifier<IFormulaCurrentConfigService>(

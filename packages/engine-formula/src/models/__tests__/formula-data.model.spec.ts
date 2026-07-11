@@ -111,7 +111,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
     id: 'base-test',
     name: 'Base',
     schemaVersion: 1,
-    tableOrder: ['table-main', 'tableOther', 'table-deleted'],
+    tableOrder: ['table-main', 'tableOther'],
     createdAt: 0,
     updatedAt: 0,
     tables: {
@@ -119,7 +119,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
             id: 'table-main',
             name: 'Sales',
             primaryFieldId: 'name',
-            fieldOrder: ['name', 'amount', 'qty', 'tags', 'link', 'attachment', 'total', 'deleted-formula'],
+            fieldOrder: ['name', 'amount', 'qty', 'tags', 'link', 'attachment', 'total'],
             fields: {
                 name: { id: 'name', name: 'Name', type: BaseFieldType.Text, config: {} },
                 amount: { id: 'amount', name: 'Amount', type: BaseFieldType.Number, config: {} },
@@ -134,13 +134,6 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                     config: {
                         formula: '=SUM({Amount}, [Qty], tableOther[External])',
                     },
-                },
-                'deleted-formula': {
-                    id: 'deleted-formula',
-                    name: 'Deleted Formula',
-                    type: BaseFieldType.Formula,
-                    deleted: true,
-                    config: { formula: '=1' },
                 },
             },
             records: {
@@ -158,18 +151,8 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                         attachment: ['file-1'],
                     },
                 },
-                'record-deleted': {
-                    id: 'record-deleted',
-                    orderKey: 'b',
-                    createdAt: 0,
-                    updatedAt: 0,
-                    deleted: true,
-                    values: {
-                        amount: 999,
-                    },
-                },
             },
-            recordOrder: ['record-1', 'record-deleted'],
+            recordOrder: ['record-1'],
             views: {},
             viewOrder: [],
         },
@@ -191,28 +174,6 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                 },
             },
             recordOrder: ['record-2'],
-            views: {},
-            viewOrder: [],
-        },
-        'table-deleted': {
-            id: 'table-deleted',
-            name: 'Deleted',
-            deleted: true,
-            primaryFieldId: 'name',
-            fieldOrder: ['name'],
-            fields: {
-                name: { id: 'name', name: 'Name', type: BaseFieldType.Formula, config: { formula: '=1' } },
-            },
-            records: {
-                'record-3': {
-                    id: 'record-3',
-                    orderKey: 'a',
-                    createdAt: 0,
-                    updatedAt: 0,
-                    values: {},
-                },
-            },
-            recordOrder: ['record-3'],
             views: {},
             viewOrder: [],
         },
@@ -932,13 +893,12 @@ describe('Test formula data model', () => {
                 });
             });
 
-            it('should build formula and runtime data for base tables with live records and fields only', () => {
+            it('should build formula and runtime data for base tables', () => {
                 const univerInstanceService = get(IUniverInstanceService);
                 univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
                 univer.createUnit(UniverInstanceType.UNIVER_BASE, TEST_BASE_DATA);
 
                 const formulaData = formulaDataModel.getFormulaData();
-                expect(formulaData['base-test']?.['table-deleted']).toBeUndefined();
                 expect(formulaData['base-test']?.['table-main']).toEqual({
                     0: {
                         6: {

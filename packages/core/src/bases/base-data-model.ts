@@ -62,17 +62,12 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
         return this._snapshot;
     }
 
-    /**
-     * Check if a non-deleted table name already exists, ignoring case.
-     * Returns true when the name is already used.
-     */
+    /** Check if a table name already exists, ignoring case. */
     checkTableName(name: string): boolean {
-        return Object.values(this._snapshot.tables).some((table) => !table.deleted && table.name.toLowerCase() === name.toLowerCase());
+        return Object.values(this._snapshot.tables).some((table) => table.name.toLowerCase() === name.toLowerCase());
     }
 
-    /**
-     * Generate a table name that does not conflict with existing non-deleted tables.
-     */
+    /** Generate a table name that does not conflict with existing tables. */
     uniqueTableName(name: string): string {
         let output = name;
         let count = 1;

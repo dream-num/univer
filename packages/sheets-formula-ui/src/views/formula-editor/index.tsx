@@ -35,7 +35,6 @@ import {
     Injector,
     IUniverInstanceService,
     noop,
-    toDisposable,
     UniverInstanceType,
     VerticalAlign,
 } from '@univerjs/core';
@@ -57,6 +56,7 @@ import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selec
 import {
     IFormulaEmbedInteractionBoundaryService,
     IFormulaEmbedRuntimeFocusCoordinator,
+    registerFormulaEditorRuntimePortal,
     resolveActiveFormulaEmbedRuntimeDomScope,
     resolveFormulaEmbedRuntimeDomScope,
 } from './formula-embed-integration.service';
@@ -145,118 +145,6 @@ export function syncCounterpartFormulaEditorSelection(
     }
 
     editorService.getEditor(syncEditorId)?.setSelectionRanges(selections, false);
-}
-
-export function registerFormulaEditorRuntimePortal(options: {
-    embedId: string;
-    editorId: string;
-    ownerDocument?: Document;
-    interactionBoundaryService?: IFormulaEmbedInteractionBoundaryService;
-    focusCoordinator?: IFormulaEmbedRuntimeFocusCoordinator;
-}): IDisposable {
-    const ownerDocument = options.ownerDocument ?? (typeof document === 'undefined' ? undefined : document);
-    if (!ownerDocument) {
-        return toDisposable(() => {});
-    }
-
-    const collection = new DisposableCollection();
-    const view = ownerDocument.defaultView;
-    const frameHandles: number[] = [];
-    let observer: MutationObserver | undefined;
-    let portalRegistration: IDisposable | undefined;
-    let registeredPortalRoot: HTMLElement | null = null;
-    let disposed = false;
-
-    const tryRegister = () => {
-        if (disposed) {
-            return;
-        }
-
-        const portalRoot = resolveFormulaEditorPortalRoot(options.editorId, ownerDocument);
-        if (portalRoot === registeredPortalRoot) {
-            return;
-        }
-
-        portalRegistration?.dispose();
-        portalRegistration = undefined;
-        registeredPortalRoot = null;
-        if (!portalRoot) {
-            return;
-        }
-
-        const rootRegistration = new DisposableCollection();
-        registeredPortalRoot = portalRoot;
-        if (options.interactionBoundaryService) {
-            rootRegistration.add(options.interactionBoundaryService.registerOwnedElement(options.embedId, portalRoot));
-            const editorElement = ownerDocument.getElementById(`__editor_${options.editorId}`) as HTMLElement | null;
-            if (editorElement && editorElement !== portalRoot) {
-                rootRegistration.add(options.interactionBoundaryService.registerOwnedElement(options.embedId, editorElement));
-            }
-        }
-
-        if (options.focusCoordinator) {
-            rootRegistration.add(options.focusCoordinator.registerElement({
-                embedId: options.embedId,
-                role: 'child-editor',
-                element: portalRoot,
-            }));
-
-            const editorElement = ownerDocument.getElementById(`__editor_${options.editorId}`) as HTMLElement | null;
-            if (editorElement && editorElement !== portalRoot) {
-                rootRegistration.add(options.focusCoordinator.registerElement({
-                    embedId: options.embedId,
-                    role: 'child-editor',
-                    element: editorElement,
-                }));
-            }
-        }
-        portalRegistration = rootRegistration;
-    };
-
-    const scheduleRetry = (remaining: number) => {
-        if (remaining <= 0 || !view?.requestAnimationFrame) {
-            return;
-        }
-
-        const handle = view.requestAnimationFrame(() => {
-            const index = frameHandles.indexOf(handle);
-            if (index >= 0) {
-                frameHandles.splice(index, 1);
-            }
-            tryRegister();
-            if (!registeredPortalRoot) {
-                scheduleRetry(remaining - 1);
-            }
-        });
-        frameHandles.push(handle);
-    };
-
-    tryRegister();
-    if (!registeredPortalRoot) {
-        scheduleRetry(2);
-    }
-    if (view?.MutationObserver && ownerDocument.body) {
-        observer = new view.MutationObserver(() => tryRegister());
-        observer.observe(ownerDocument.body, { childList: true, subtree: true });
-    }
-
-    collection.add(toDisposable(() => {
-        disposed = true;
-        frameHandles.forEach((handle) => view?.cancelAnimationFrame?.(handle));
-        frameHandles.length = 0;
-        observer?.disconnect();
-        observer = undefined;
-        portalRegistration?.dispose();
-        portalRegistration = undefined;
-        registeredPortalRoot = null;
-    }));
-
-    return collection;
-}
-
-function resolveFormulaEditorPortalRoot(editorId: string, ownerDocument: Document): HTMLElement | null {
-    return (ownerDocument.getElementById(`univer-doc-selection-container-${editorId}`) as HTMLElement | null)
-        ?? (ownerDocument.getElementById(`__editor_${editorId}`) as HTMLElement | null);
 }
 
 export { getSelectionAfterLaggingFormulaInput } from './hooks/use-formula-selection';

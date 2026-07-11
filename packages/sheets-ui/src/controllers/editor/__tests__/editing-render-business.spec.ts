@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -35,7 +36,39 @@ import {
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
 } from '../../../commands/commands/set-selection.command';
-import { EditingRenderController } from '../editing.render-controller';
+import { EditingRenderController, emptyBody } from '../editing.render-controller';
+
+describe('emptyBody', () => {
+    it('keeps an empty text-run collection initialized', () => {
+        const body: IDocumentBody = { dataStream: 'value\r\n', textRuns: [] };
+
+        emptyBody(body);
+
+        expect(body.textRuns).toEqual([]);
+    });
+
+    it('keeps one inherited style when resetting the editor', () => {
+        const body: IDocumentBody = {
+            dataStream: 'value\r\n',
+            textRuns: [{ st: 0, ed: 5, ts: { fs: 11 } }],
+        };
+
+        emptyBody(body);
+
+        expect(body.textRuns).toEqual([{ st: 0, ed: 1, ts: { fs: 11 } }]);
+    });
+
+    it('removes an inherited style when style removal is requested', () => {
+        const body: IDocumentBody = {
+            dataStream: 'value\r\n',
+            textRuns: [{ st: 0, ed: 5, ts: { fs: 11 } }],
+        };
+
+        emptyBody(body, true);
+
+        expect(body.textRuns).toBeUndefined();
+    });
+});
 
 function createController() {
     const worksheet = {

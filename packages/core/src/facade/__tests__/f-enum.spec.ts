@@ -39,9 +39,12 @@ import {
     LifecycleStages,
     LocaleType,
     MentionType,
+    NumberUnitType,
+    PresetListType,
     ProtectionType,
     RelativeDate,
     SheetTypes,
+    SpacingRule,
     TextDecoration,
     TextDirection,
     ThemeColorType,
@@ -72,6 +75,9 @@ describe('FEnum', () => {
         expect(facadeEnum.BaselineOffset).toBe(BaselineOffset);
         expect(facadeEnum.BooleanNumber).toBe(BooleanNumber);
         expect(facadeEnum.HorizontalAlign).toBe(HorizontalAlign);
+        expect(facadeEnum.SpacingRule).toBe(SpacingRule);
+        expect(facadeEnum.NumberUnitType).toBe(NumberUnitType);
+        expect(facadeEnum.PresetListType).toBe(PresetListType);
         expect(facadeEnum.TextDecoration).toBe(TextDecoration);
         expect(facadeEnum.TextDirection).toBe(TextDirection);
         expect(facadeEnum.VerticalAlign).toBe(VerticalAlign);

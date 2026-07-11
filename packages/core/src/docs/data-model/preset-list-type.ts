@@ -31,45 +31,58 @@ export enum QuickListType {
 }
 
 export enum PresetListType {
+    /** Standard filled-circle bullet list. */
     BULLET_LIST = 'BULLET_LIST',
+    /** Decorative diamond and arrow bullet list. */
     BULLET_LIST_1 = 'BULLET_LIST_1',
+    /** Checkmark-led bullet list for completed-item style content. */
     BULLET_LIST_2 = 'BULLET_LIST_2',
+    /** Square and diamond bullet list. */
     BULLET_LIST_3 = 'BULLET_LIST_3',
+    /** Star-like decorative bullet list. */
     BULLET_LIST_4 = 'BULLET_LIST_4',
+    /** Arrow-led bullet list. */
     BULLET_LIST_5 = 'BULLET_LIST_5',
 
     /**
-     * 1 a i
+     * Hierarchical ordered list using `1`, `a`, and `i` markers.
      */
     ORDER_LIST = 'ORDER_LIST',
     /**
-     * 1) a) i)
+     * Hierarchical ordered list using `1)`, `a)`, and `i)` markers.
      */
     ORDER_LIST_1 = 'ORDER_LIST_1',
     /**
-     * 1. 1.1. 1.1.1.
+     * Outline list using compound markers such as `1.`, `1.1.`, and `1.1.1.`.
      */
     ORDER_LIST_2 = 'ORDER_LIST_2',
     /**
-     * A a i
+     * Hierarchical ordered list using `A`, `a`, and `i` markers.
      */
     ORDER_LIST_3 = 'ORDER_LIST_3',
     /**
-     * A 1 i
+     * Hierarchical ordered list using `A`, `1`, and `i` markers.
      */
     ORDER_LIST_4 = 'ORDER_LIST_4',
     /**
-     * 01 a i
+     * Zero-padded ordered list using `01`, `a`, and `i` markers.
      */
     ORDER_LIST_5 = 'ORDER_LIST_5',
 
+    /** Quick ordered list using closing-parenthesis markers. */
     ORDER_LIST_QUICK_2 = 'ORDER_LIST_QUICK_2',
+    /** Quick ordered list using lowercase letter and period markers. */
     ORDER_LIST_QUICK_3 = 'ORDER_LIST_QUICK_3',
+    /** Quick ordered list using lowercase Roman numeral markers. */
     ORDER_LIST_QUICK_4 = 'ORDER_LIST_QUICK_4',
+    /** Quick ordered list using uppercase letter markers. */
     ORDER_LIST_QUICK_5 = 'ORDER_LIST_QUICK_5',
+    /** Quick ordered list using uppercase Roman numeral markers. */
     ORDER_LIST_QUICK_6 = 'ORDER_LIST_QUICK_6',
 
+    /** Unchecked task-list item. */
     CHECK_LIST = 'CHECK_LIST',
+    /** Checked task-list item. */
     CHECK_LIST_CHECKED = 'CHECK_LIST_CHECKED',
 }
 

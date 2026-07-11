@@ -587,33 +587,42 @@ export class FUniver extends Disposable {
 
     /**
      * Create a new rich text.
-     * @param {IDocumentData} data
      * @returns {RichTextBuilder} The new rich text instance
      * @example
      * ```ts
-     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
-     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     * const range = fWorksheet.getRange('A1');
-     * range.setRichTextValueForCell(richText);
+     * const richText = univerAPI.newRichText()
+     *   .align({ horizontal: univerAPI.Enum.HorizontalAlign.CENTER })
+     *   .text('Status: ')
+     *   .span('Ready', { bold: true, color: '#16a34a' });
      * ```
      */
-    newRichText(data?: IDocumentData): RichTextBuilder {
+    newRichText(): RichTextBuilder {
+        return RichTextBuilder.create();
+    }
+
+    /**
+     * Create a rich-text builder from raw Univer document data.
+     *
+     * This is an advanced integration escape hatch for importers and adapters. Application and agent code should use
+     * the fluent builder returned by `newRichText()`.
+     *
+     * @param data Raw Univer document data.
+     * @returns A rich-text builder initialized with the supplied document data.
+     * @advanced
+     */
+    newRichTextFromDocumentData(data: IDocumentData): RichTextBuilder {
         return RichTextBuilder.create(data);
     }
 
     /**
      * Create a new rich text value.
-     * @param {IDocumentData} data - The rich text data
+     *
+     * This is an advanced integration escape hatch for callers that already own Univer document data. Application and
+     * agent code should prefer the fluent value returned by `newRichText()`.
+     *
+     * @param {IDocumentData} data The raw Univer document data.
      * @returns {RichTextValue} The new rich text value instance
-     * @example
-     * ```ts
-     * const richTextValue = univerAPI.newRichTextValue({ body: { dataStream: 'Hello World\r\n' } });
-     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     * const range = fWorksheet.getRange('A1');
-     * range.setRichTextValueForCell(richTextValue);
-     * ```
+     * @advanced
      */
     newRichTextValue(data: IDocumentData): RichTextValue {
         return RichTextValue.create(data);
@@ -621,18 +630,13 @@ export class FUniver extends Disposable {
 
     /**
      * Create a new paragraph style.
-     * @param {IParagraphStyle} style - The paragraph style
+     *
+     * This is an advanced document-model API. Application and agent code should normally use
+     * `newRichText().paragraph({ ... })`.
+     *
+     * @param {IParagraphStyle} style The paragraph style
      * @returns {ParagraphStyleBuilder} The new paragraph style instance
-     * @example
-     * ```ts
-     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
-     * const paragraphStyle = univerAPI.newParagraphStyle({ textStyle: { ff: 'Arial', fs: 12, it: univerAPI.Enum.BooleanNumber.TRUE, bl: univerAPI.Enum.BooleanNumber.TRUE } });
-     * richText.insertParagraph(paragraphStyle);
-     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     * const range = fWorksheet.getRange('A1');
-     * range.setRichTextValueForCell(richText);
-     * ```
+     * @advanced
      */
     newParagraphStyle(style?: IParagraphStyle): ParagraphStyleBuilder {
         return ParagraphStyleBuilder.create(style);

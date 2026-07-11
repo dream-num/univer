@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '../../shared';
-import type { BaselineOffset, HorizontalAlign, TextDecoration, TextDirection } from '../../types/enum';
+import type { BaselineOffset, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../../types/enum';
 import type {
     IBorderData,
     IColorStyle,
@@ -188,6 +188,19 @@ export interface IRichTextParagraphStyle {
     keepLines?: boolean;
     /** Keeps this paragraph with the following paragraph when pagination applies. */
     keepNext?: boolean;
+}
+
+/**
+ * Portable text-container alignment accepted by `RichTextBuilder.align()`.
+ *
+ * Unlike `paragraph({ align })`, which styles one paragraph, this alignment is a document-level presentation hint that
+ * can be consumed consistently by shapes, table cells, and other rich-text hosts.
+ */
+export interface IRichTextAlignment {
+    /** Horizontal alignment for the rich-text block. */
+    horizontal?: HorizontalAlign;
+    /** Vertical alignment inside the host text container. */
+    vertical?: VerticalAlign;
 }
 
 /**
@@ -1970,6 +1983,46 @@ export class RichTextBuilder extends RichTextValue {
      */
     text(text: string): RichTextBuilder {
         return this.insertText(text);
+    }
+
+    /**
+     * Aligns the rich-text block inside its host container.
+     *
+     * This is the preferred facade-friendly API for alignment shared by shapes and table cells. It keeps callers away
+     * from `IDocumentData.documentStyle.renderConfig`. Use `paragraph({ align })` when individual paragraphs need
+     * different horizontal alignment.
+     *
+     * @param alignment Horizontal and/or vertical container alignment.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const text = univerAPI.newRichText()
+     *   .align({
+     *     horizontal: univerAPI.Enum.HorizontalAlign.CENTER,
+     *     vertical: univerAPI.Enum.VerticalAlign.MIDDLE,
+     *   })
+     *   .text('Centered text');
+     * ```
+     */
+    align(alignment: IRichTextAlignment): RichTextBuilder {
+        const documentStyle = this._data.documentStyle ??= {};
+        const renderConfig = documentStyle.renderConfig ??= {};
+
+        if (alignment.horizontal !== undefined) {
+            renderConfig.horizontalAlign = alignment.horizontal;
+            for (const paragraph of this._data.body?.paragraphs ?? []) {
+                paragraph.paragraphStyle = {
+                    ...paragraph.paragraphStyle,
+                    horizontalAlign: alignment.horizontal,
+                };
+            }
+        }
+
+        if (alignment.vertical !== undefined) {
+            renderConfig.verticalAlign = alignment.vertical;
+        }
+
+        return this;
     }
 
     /**

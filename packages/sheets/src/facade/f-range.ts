@@ -498,7 +498,8 @@ export class FRange extends FBaseInitialable {
      * console.log(fRange.getValue(true));
      *
      * // set the first cell value to 123
-     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } })
+     * const richText = univerAPI.newRichText()
+     *   .text('Hello World')
      *   .setStyle(0, 1, { bl: 1, cl: { rgb: '#c81e1e' } })
      *   .setStyle(6, 7, { bl: 1, cl: { rgb: '#c81e1e' } });
      * fRange.setRichTextValueForCell(richText);

@@ -16,7 +16,7 @@
 
 import type { IBullet } from '../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection } from '../../../types/enum';
+import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../../../types/enum';
 import { CustomRangeType, SpacingRule } from '../../../types/interfaces';
 import { PresetListType } from '../preset-list-type';
 import { ParagraphStyleBuilder, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder } from '../rich-text-builder';
@@ -575,6 +575,25 @@ describe('RichTextBuilder', () => {
     });
 
     describe('paragraph management', () => {
+        it('should apply portable horizontal and vertical block alignment', () => {
+            const builder = RichTextBuilder.create()
+                .align({
+                    horizontal: HorizontalAlign.CENTER,
+                    vertical: VerticalAlign.MIDDLE,
+                })
+                .text('First')
+                .paragraph()
+                .text('Second');
+
+            const data = builder.getData();
+
+            expect(data.documentStyle?.renderConfig).toMatchObject({
+                horizontalAlign: HorizontalAlign.CENTER,
+                verticalAlign: VerticalAlign.MIDDLE,
+            });
+            expect(data.body?.paragraphs?.[0]?.paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
+        });
+
         it('should start a paragraph chain without a leading blank paragraph', () => {
             const builder = RichTextBuilder.create()
                 .paragraph()

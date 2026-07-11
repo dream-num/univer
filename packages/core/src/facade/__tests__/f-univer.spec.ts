@@ -287,7 +287,7 @@ describe('FUniver integration', () => {
         expect(extendedAPI.fireEvent(extendedAPI.Event.CommandExecuted, { id: 'manual', type: CommandType.COMMAND, params: undefined })).toBeUndefined();
 
         const documentData = createDocData('facade-builder') as IDocumentData;
-        expect(extendedAPI.newRichText(documentData).getData().id).toBe('facade-builder');
+        expect(extendedAPI.newRichTextFromDocumentData(documentData).getData().id).toBe('facade-builder');
         expect(extendedAPI.newParagraphStyleValue({ horizontalAlign: HorizontalAlign.RIGHT }).horizontalAlign).toBe(HorizontalAlign.RIGHT);
         expect(extendedAPI.newTextStyleValue({ ff: 'Inter', fs: 14, bl: BooleanNumber.TRUE }).fontFamily).toBe('Inter');
         expect(extendedAPI.newTextStyleValue({ ff: 'Inter', fs: 14, bl: BooleanNumber.TRUE }).bold).toBe(true);

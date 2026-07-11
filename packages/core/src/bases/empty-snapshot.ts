@@ -18,6 +18,7 @@ import type { IBaseSnapshot, IFieldSnapshot, IRecordSnapshot, ITableSnapshot, IV
 import pkg from '../../package.json';
 import { generateRandomId } from '../shared';
 import { LocaleType } from '../types/enum';
+import { BaseFieldType, BaseViewType } from './typedef';
 
 export interface ICreateDefaultBaseTableSnapshotOptions {
     id: string;
@@ -31,13 +32,13 @@ export interface ICreateDefaultBaseTableSnapshotOptions {
 
 export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableSnapshotOptions): ITableSnapshot {
     const now = options.now ?? Date.now();
-    const primaryFieldId = options.primaryFieldId ?? `${options.id}-field-name`;
-    const gridViewId = options.gridViewId ?? `${options.id}-view-grid`;
+    const primaryFieldId = options.primaryFieldId ?? generateRandomId(6);
+    const gridViewId = options.gridViewId ?? generateRandomId(6);
     const recordCount = options.recordCount ?? 5;
     const primaryField: IFieldSnapshot = {
         id: primaryFieldId,
         name: options.primaryFieldName ?? 'Name',
-        type: 'text',
+        type: BaseFieldType.Text,
         config: { placeholder: 'bases.fieldConfig.textPlaceholder' },
     };
     const records: Record<string, IRecordSnapshot> = {};
@@ -65,7 +66,7 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
         id: gridViewId,
         tableId: options.id,
         name: 'Grid',
-        type: 'grid',
+        type: BaseViewType.Grid,
         fieldOrder: [primaryFieldId],
         fieldSettings: {},
         config: { frozenFieldCount: 1 },

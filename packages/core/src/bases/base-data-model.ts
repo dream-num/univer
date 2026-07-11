@@ -21,6 +21,7 @@ import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
 import { CellValueType } from '../types/enum';
 import { getEmptySnapshot } from './empty-snapshot';
+import { BaseFieldType } from './typedef';
 
 const BASE_LIST_VALUE_SEPARATOR = ', ';
 const BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR = '\u001F';
@@ -59,6 +60,27 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
 
     override getSnapshot(): IBaseSnapshot {
         return this._snapshot;
+    }
+
+    /**
+     * Check if a non-deleted table name already exists, ignoring case.
+     * Returns true when the name is already used.
+     */
+    checkTableName(name: string): boolean {
+        return Object.values(this._snapshot.tables).some((table) => !table.deleted && table.name.toLowerCase() === name.toLowerCase());
+    }
+
+    /**
+     * Generate a table name that does not conflict with existing non-deleted tables.
+     */
+    uniqueTableName(name: string): string {
+        let output = name;
+        let count = 1;
+        while (this.checkTableName(output)) {
+            output = `${name}${count}`;
+            count++;
+        }
+        return output;
     }
 
     setSnapshot(snapshot: IBaseSnapshot): void {
@@ -243,7 +265,7 @@ function hydrateRecordCellData(table: ITableSnapshot, records: Record<string, IR
         table.cellData![row] = { ...table.cellData![row] };
         Object.entries(record.values ?? {}).forEach(([fieldId, value]) => {
             const field = fields[fieldId];
-            if (field?.type === 'attachment') {
+            if (field?.type === BaseFieldType.Attachment) {
                 writeAttachmentResources(table, record.id, fieldId, value);
             }
             const col = table.colIndex![fieldId];
@@ -265,18 +287,18 @@ function hydrateRecordCellData(table: ITableSnapshot, records: Record<string, IR
 
 function toBaseCellData(value: CellValue | IBaseCellData, field?: IFieldSnapshot): IBaseCellData {
     if (isBaseCellData(value)) {
-        if (field?.type === 'attachment') {
+        if (field?.type === BaseFieldType.Attachment) {
             return { ...value, v: '', t: CellValueType.STRING };
         }
         return normalizeBaseCellData(value, field);
     }
-    if (field?.type === 'attachment') {
+    if (field?.type === BaseFieldType.Attachment) {
         return { v: '', t: CellValueType.STRING };
     }
     if (isListField(field)) {
         return { v: normalizeListValue(value).join(BASE_LIST_VALUE_SEPARATOR), t: CellValueType.STRING };
     }
-    if (field?.type === 'link' && value && typeof value === 'object' && !Array.isArray(value)) {
+    if (field?.type === BaseFieldType.Link && value && typeof value === 'object' && !Array.isArray(value)) {
         const link = value as { text?: unknown; url?: unknown };
         return { v: String(link.text ?? link.url ?? ''), t: CellValueType.STRING };
     }
@@ -344,7 +366,7 @@ function normalizeAttachmentValue(value: unknown): Record<string, unknown>[] {
 }
 
 function shouldRefreshCellDataFromRecord(cell: IBaseCellData, field: IFieldSnapshot | undefined, value: unknown): boolean {
-    if (field?.type === 'attachment') {
+    if (field?.type === BaseFieldType.Attachment) {
         return cell.v !== '';
     }
     if (isListField(field)) {
@@ -353,8 +375,8 @@ function shouldRefreshCellDataFromRecord(cell: IBaseCellData, field: IFieldSnaps
     return false;
 }
 
-function isListField(field?: IFieldSnapshot): field is IFieldSnapshot & { type: 'multiSelect' | 'person' | 'group' } {
-    return field?.type === 'multiSelect' || field?.type === 'person' || field?.type === 'group';
+function isListField(field?: IFieldSnapshot): boolean {
+    return field?.type === BaseFieldType.MultiSelect || field?.type === BaseFieldType.Person || field?.type === BaseFieldType.Group;
 }
 
 function normalizeListValue(value: unknown): string[] {

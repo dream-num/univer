@@ -1039,10 +1039,12 @@ export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyle
     return null;
 }
 
-function emptyBody(body: IDocumentBody, removeStyle = false) {
+export function emptyBody(body: IDocumentBody, removeStyle = false) {
     body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
-    if (body.textRuns != null) {
+    // Keep an empty collection initialized so the first formula highlight can be
+    // applied without a Core TextX special case.
+    if (body.textRuns?.length) {
         if (body.textRuns.length === 1 && !removeStyle) {
             body.textRuns[0].st = 0;
             body.textRuns[0].ed = 1;

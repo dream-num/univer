@@ -23,11 +23,11 @@ import {
     FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     FORMULA_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
     isEventTargetInSameFormulaEmbedInteractionBoundary,
+    registerFormulaEditorRuntimePortal,
 } from '../../formula-embed-integration.service';
-import { registerFormulaEditorRuntimePortal } from '../..';
 import { focusFormulaEditor, hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, shouldSkipFormulaEditorMouseUpFocus } from '../use-focus';
 import { FormulaSelectingType, resolveFormulaSelectingIntent, resolveFormulaSelectionCursorIndex, resolveFormulaSelectionDataStream, resolveFormulaSelectionWorkbook, shouldSkipReferenceEditingByPointer } from '../use-formula-selection';
-import { buildTextRuns, calcHighlightRanges, getFormulaHighlightDataStream } from '../use-highlight';
+import { buildTextRuns, calcHighlightRanges, createFormulaHighlightBody, getFormulaHighlightDataStream } from '../use-highlight';
 import { isFormulaEditorInteractionOwner, shouldMoveFormulaSelectionFromCurrentSelection } from '../use-left-and-right-arrow';
 import { createSelectionChangeDuplicateEndGuard, createSelectionChangeHandler, getInitialFormulaReferenceSelectionCount, getLastFormulaSelection, getSelectionsForFormulaRefUpdate, getSequenceNodeCharAtOffset, getSharedSelectionChangeDuplicateEndGuard, insertFormulaReferenceText, isFormulaReferenceAddingContext, isFormulaReferenceAddingTextContext, isSameFormulaSelection, prepareSelectionChangeContext, replaceFormulaControlSelection, shouldSkipFormulaReferenceUpdate } from '../use-sheet-selection-change';
 
@@ -568,6 +568,23 @@ describe('formula selection update helpers', () => {
 });
 
 describe('formula highlight helpers', () => {
+    it('does not copy stale paragraph metadata into a formula text replacement', () => {
+        const body = createFormulaHighlightBody('=F40', [
+            { st: 0, ed: 1, ts: { fs: 11 } },
+            { st: 1, ed: 4, ts: { fs: 11 } },
+        ]);
+
+        expect(body).toEqual({
+            dataStream: '=F40',
+            textRuns: [
+                { st: 0, ed: 1, ts: { fs: 11 } },
+                { st: 1, ed: 4, ts: { fs: 11 } },
+            ],
+        });
+        expect(body.paragraphs).toBeUndefined();
+        expect(body.sectionBreaks).toBeUndefined();
+    });
+
     it('preserves incomplete formula editor text while applying token highlights', () => {
         expect(getFormulaHighlightDataStream('=', [
             'SUM(',

@@ -78,9 +78,10 @@ export function generateAstNode(
     }
 
     // astNode.setRefOffset(refOffsetX, refOffsetY);
-    if (!noCache) {
-        FORMULA_AST_CACHE.set(cacheKey, astNode);
-    }
+    // Dirty metadata means the previous AST cannot be reused during this calculation.
+    // Cache the newly parsed node so later ordinary range recalculations do not fall
+    // back to the stale pre-registration AST after the dirty map is cleared.
+    FORMULA_AST_CACHE.set(cacheKey, astNode);
 
     return astNode;
 }

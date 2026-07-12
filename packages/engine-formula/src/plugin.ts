@@ -25,6 +25,7 @@ import { FormulaController } from './controllers/formula.controller';
 import { SetDependencyController } from './controllers/set-dependency.controller';
 import { SetFeatureCalculationController } from './controllers/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controllers/set-other-formula.controller';
+import { SuperTableActiveDirtyController } from './controllers/super-table-active-dirty.controller';
 // import { SetSuperTableController } from './controllers/set-super-table.controller';
 import { Lexer } from './engine/analysis/lexer';
 import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
@@ -51,6 +52,7 @@ import {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
+import { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
 import { FunctionService, IFunctionService } from './services/function.service';
 import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import {
@@ -92,6 +94,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
+            [SuperTableActiveDirtyController],
             // [SetSuperTableController],
         ]);
 
@@ -122,6 +125,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IFunctionService, { useClass: FunctionService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [FormulaCalculationTriggerService],
             [RegisterOtherFormulaService],
             [IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }],
             [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
@@ -131,6 +135,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [FormulaDataModel],
             //Controllers
             [FormulaController],
+            [SuperTableActiveDirtyController],
             // [SetSuperTableController],
             [ComputingStatusReporterController],
         ];

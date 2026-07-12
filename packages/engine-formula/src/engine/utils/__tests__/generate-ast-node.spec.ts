@@ -113,6 +113,33 @@ describe('generateAstNode defined name cache invalidation', () => {
         expect(harness.getParseCount()).toBe(2);
     });
 
+    it('reuses the refreshed defined name AST after the dirty map is cleared', () => {
+        const dirtyDefinedNameMap: Record<string, Record<string, string>> = {
+            'unit-1': {
+                'SUM(A1)': 'another formula text',
+            },
+        };
+        const harness = createHarness(dirtyDefinedNameMap);
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        delete dirtyDefinedNameMap['unit-1'];
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(1);
+    });
+
     it('reuses cache when dirty defined name key matches another unit', () => {
         const harness = createHarness({
             'unit-2': {
@@ -188,6 +215,33 @@ describe('generateAstNode defined name cache invalidation', () => {
         expect(harness.getParseCount()).toBe(2);
     });
 
+    it('reuses the refreshed super table AST after the dirty map is cleared', () => {
+        const dirtySuperTableMap: Record<string, Record<string, string>> = {
+            'unit-1': {
+                Table1: '1',
+            },
+        };
+        const harness = createHarness({}, dirtySuperTableMap);
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(Table1[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        delete dirtySuperTableMap['unit-1'];
+        generateAstNode(
+            'unit-1',
+            '=SUM(Table1[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(1);
+    });
+
     it('treats dirty super table names as literal text when building cache invalidation patterns', () => {
         const harness = createHarness({}, {
             'unit-1': {
@@ -212,6 +266,31 @@ describe('generateAstNode defined name cache invalidation', () => {
         generateAstNode(
             'unit-1',
             '=SUM(SalesXTable+[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(2);
+    });
+
+    it('invalidates table references whose names contain spaces', () => {
+        const harness = createHarness({}, {
+            'unit-1': {
+                'Regional Costs': '1',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(Regional Costs[[#This Row],[Freight]])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(Regional Costs[[#This Row],[Freight]])',
             harness.lexer as never,
             harness.astTreeBuilder as never,
             harness.currentConfigService as never

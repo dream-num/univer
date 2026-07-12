@@ -25,6 +25,10 @@ export interface ISetSuperTableMutationSearchParam {
     tableName: string;
 }
 
+export interface IRemoveSuperTableMutationParam extends ISetSuperTableMutationSearchParam {
+    reference?: Pick<ISuperTable, 'sheetId' | 'range'>;
+}
+
 export interface ISetSuperTableMutationParam extends ISetSuperTableMutationSearchParam {
     oldTableName?: string;
     reference: ISuperTable;
@@ -44,7 +48,7 @@ export const SetSuperTableMutation: IMutation<ISetSuperTableMutationParam> = {
     },
 };
 
-export const RemoveSuperTableMutation: IMutation<ISetSuperTableMutationSearchParam> = {
+export const RemoveSuperTableMutation: IMutation<IRemoveSuperTableMutationParam> = {
     id: 'formula.mutation.remove-super-table',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {

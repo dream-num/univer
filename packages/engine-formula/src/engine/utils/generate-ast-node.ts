@@ -55,9 +55,13 @@ export function generateAstNode(
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
     let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(cacheKey);
 
-    const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService) || checkIsChangedBySuperTable(unitId, formulaString, currentConfigService);
+    // Dirty registry metadata invalidates the cached AST for this calculation because
+    // defined names and SuperTable references are resolved while the AST is built.
+    const shouldRebuildAst =
+        checkIsChangedByDefinedName(unitId, formulaString, currentConfigService) ||
+        checkIsChangedBySuperTable(unitId, formulaString, currentConfigService);
 
-    if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService, unitId)) {
+    if (!shouldRebuildAst && astNode && !isDirtyDefinedForNode(astNode, currentConfigService, unitId)) {
         // astNode.setRefOffset(refOffsetX, refOffsetY);
         return astNode;
     }
@@ -78,9 +82,11 @@ export function generateAstNode(
     }
 
     // astNode.setRefOffset(refOffsetX, refOffsetY);
-    if (!noCache) {
-        FORMULA_AST_CACHE.set(cacheKey, astNode);
-    }
+    // Rebuilding and caching are separate concerns: dirty metadata prevents reading
+    // the old AST, while the newly parsed AST reflects the current registry and must
+    // replace it. Otherwise, after the dirty map is cleared, an ordinary range
+    // recalculation can fall back to the stale pre-registration AST.
+    FORMULA_AST_CACHE.set(cacheKey, astNode);
 
     return astNode;
 }

@@ -112,7 +112,7 @@ function getBoundaryDocumentData(leftType: BoundaryNodeType, rightType: Boundary
         } else {
             body.dataStream += `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${side}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
             body.paragraphs!.push({ paragraphId, paragraphStyle, startIndex: body.dataStream.length - 5 });
-            body.sectionBreaks!.push({ startIndex: body.dataStream.length - 4 });
+            body.sectionBreaks!.push({ sectionId: `section_${side}`, startIndex: body.dataStream.length - 4 });
             body.tables!.push({ tableId: `${side}-table`, startIndex, endIndex: body.dataStream.length });
         }
 
@@ -124,7 +124,7 @@ function getBoundaryDocumentData(leftType: BoundaryNodeType, rightType: Boundary
     const rightParagraphId = append(rightType, 'right');
     body.dataStream += `${T.PARAGRAPH}${T.SECTION_BREAK}`;
     body.paragraphs!.push({ paragraphId: 'trailing', startIndex: body.dataStream.length - 2 });
-    body.sectionBreaks!.push({ startIndex: body.dataStream.length - 1 });
+    body.sectionBreaks!.push({ sectionId: 'section_trailing', startIndex: body.dataStream.length - 1 });
 
     return {
         documentData: {

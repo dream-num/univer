@@ -20,10 +20,10 @@ import type { IDisposable, IDocumentData } from '@univerjs/core';
 import type { Mock } from 'vitest';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../doc-embed-integration.service';
 import { GlyphType, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../doc-embed-integration.service';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
 
@@ -1184,6 +1184,9 @@ describe('DocSelectionRenderService', () => {
     it('keeps segment state stable while the editor is reused by header, footer, and body selection flows', () => {
         const { renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const contexts: Array<{ segmentId: string; segmentPage: number }> = [];
+        const subscription = service.segmentContext$.subscribe((context) => contexts.push(context));
+        cleanup.push(() => subscription.unsubscribe());
 
         service.setSegment('header-1');
         service.setSegmentPage(3);
@@ -1197,6 +1200,13 @@ describe('DocSelectionRenderService', () => {
 
         expect(service.getSegment()).toBe('');
         expect(service.getSegmentPage()).toBe(-1);
+        expect(contexts).toEqual([
+            { segmentId: '', segmentPage: -1 },
+            { segmentId: 'header-1', segmentPage: -1 },
+            { segmentId: 'header-1', segmentPage: 3 },
+            { segmentId: '', segmentPage: 3 },
+            { segmentId: '', segmentPage: -1 },
+        ]);
     });
 
     it('selects the current word on double click and the paragraph on triple click', () => {

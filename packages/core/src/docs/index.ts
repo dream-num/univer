@@ -22,3 +22,19 @@ export {
     PARAGRAPH_ID_PREFIX,
 } from './paragraph-id';
 export type { IParagraphIdScope } from './paragraph-id';
+export {
+    cloneSectionBreakWithId,
+    createSectionId,
+    SECTION_ID_PREFIX,
+} from './section-break-id';
+export {
+    getSectionHeaderFooterReferenceKey,
+    resolveSectionHeaderFooterReference,
+    resolveSectionHeaderFooterReferences,
+} from './section-header-footer';
+export type {
+    IResolvedSectionHeaderFooterReference,
+    SectionHeaderFooterKind,
+    SectionHeaderFooterReferenceKey,
+    SectionHeaderFooterVariant,
+} from './section-header-footer';

@@ -103,7 +103,7 @@ describe('line-adjustment', () => {
                         horizontalAlign: HorizontalAlign.CENTER,
                     },
                 }],
-                sectionBreaks: [{ startIndex: 6 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_1022', startIndex: 6 }],
             },
         });
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
@@ -123,7 +123,7 @@ describe('line-adjustment', () => {
                         horizontalAlign: HorizontalAlign.RIGHT,
                     },
                 }],
-                sectionBreaks: [{ startIndex: 6 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_1023', startIndex: 6 }],
             },
         });
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
@@ -143,7 +143,7 @@ describe('line-adjustment', () => {
                         horizontalAlign: HorizontalAlign.JUSTIFIED,
                     },
                 }],
-                sectionBreaks: [{ startIndex: 17 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_1024', startIndex: 17 }],
             },
         });
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
@@ -164,7 +164,7 @@ describe('line-adjustment', () => {
                         horizontalAlign: HorizontalAlign.DISTRIBUTED,
                     },
                 }],
-                sectionBreaks: [{ startIndex: text.length + 1 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_1025', startIndex: text.length + 1 }],
             },
         });
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);

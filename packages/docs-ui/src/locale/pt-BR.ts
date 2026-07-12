@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'Excluir tabela',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'Cabeçalho',
             footer: 'Rodapé',
             panel: 'Configurações de cabeçalho e rodapé',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'Configurações de parágrafo',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Configurações de parágrafo',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Alinhamento',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Valor fixo (px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

@@ -43,7 +43,7 @@ import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render
 import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId } from '../../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../../services/selection/doc-selection-render.service';
@@ -110,8 +110,9 @@ class TestLayoutService {
 }
 
 class TestSelectionRenderService {
+    readonly segmentContext$ = new BehaviorSubject({ segmentId: 'default-header', segmentPage: 3 });
     private _segment = 'default-header';
-    private _segmentPage = 0;
+    private _segmentPage = 3;
     private _removeRangeCount = 0;
     private _blurCount = 0;
 
@@ -133,6 +134,7 @@ class TestSelectionRenderService {
 
     setSegment(segmentId: string): void {
         this._segment = segmentId;
+        this.segmentContext$.next({ segmentId, segmentPage: this._segmentPage });
     }
 
     getSegmentPage(): number {
@@ -141,6 +143,7 @@ class TestSelectionRenderService {
 
     setSegmentPage(page: number): void {
         this._segmentPage = page;
+        this.segmentContext$.next({ segmentId: this._segment, segmentPage: page });
     }
 
     removeAllRanges(): void {
@@ -171,6 +174,14 @@ class TestDocSkeletonManagerService {
 
     getViewModel(): TestDocumentViewModel {
         return this._viewModel;
+    }
+
+    getSkeleton() {
+        return {
+            getSkeletonData: () => ({
+                pages: [undefined, undefined, undefined, { sectionId: 'section_options', pageNumber: 1, pageNumberStart: 1 }],
+            }),
+        };
     }
 }
 
@@ -232,7 +243,7 @@ function createHeaderFooterOptionsTestBed() {
         body: {
             dataStream: '\r\n',
             paragraphs: [],
-            sectionBreaks: [],
+            sectionBreaks: [{ sectionId: 'section_options', startIndex: 1 }],
             customRanges: [],
             tables: [],
             textRuns: [],
@@ -325,6 +336,7 @@ describe('DocHeaderFooterOptions', () => {
         expect(params.headerFooterProps).toEqual({
             useFirstPageHeaderFooter: BooleanNumber.TRUE,
         });
+        expect(params.sectionId).toBe('section_options');
         expect(params.segmentId).toHaveLength(6);
         expect(rendered.selectionRenderService.segment).toBe(params.segmentId);
         expect(rendered.layoutService.focusCount).toBe(1);
@@ -358,6 +370,7 @@ describe('DocHeaderFooterOptions', () => {
         expect((rendered.records[0].params as ICoreHeaderFooterParams).headerFooterProps).toEqual({
             marginHeader: 25.5,
         });
+        expect((rendered.records[0].params as ICoreHeaderFooterParams).sectionId).toBe('section_options');
         expect((rendered.records[1].params as { unitId: string })).toEqual({
             unitId: UNIT_ID,
         });

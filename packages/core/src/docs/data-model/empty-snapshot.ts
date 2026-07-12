@@ -21,6 +21,7 @@ import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor, PaperType } from '../../types/interfaces';
 import { createParagraphId } from '../paragraph-id';
+import { createSectionId } from '../section-break-id';
 
 export function getEmptySnapshot(
     unitID = generateRandomId(6),
@@ -57,6 +58,7 @@ export function getEmptySnapshot(
             ],
             sectionBreaks: [
                 {
+                    sectionId: createSectionId(new Set()),
                     startIndex: 1,
                 },
             ],

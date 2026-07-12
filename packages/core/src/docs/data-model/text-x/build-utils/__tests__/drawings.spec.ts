@@ -27,7 +27,7 @@ describe('drawing build utils', () => {
             body: {
                 dataStream: '\r\n',
                 paragraphs: [{ startIndex: 0, paragraphId: 'para_top' }],
-                sectionBreaks: [{ startIndex: 1 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_59', startIndex: 1 }],
                 customBlocks: [],
             },
             drawings: {},
@@ -65,7 +65,7 @@ describe('drawing build utils', () => {
             { startIndex: 2, paragraphId: expect.stringMatching(/^para_/) },
         ]);
         expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 1, blockId: 'drawing-new' }]);
-        expect(doc.getBody()?.sectionBreaks).toEqual([{ startIndex: 3 }]);
+        expect(doc.getBody()?.sectionBreaks).toEqual([{ sectionId: expect.any(String), startIndex: 3 }]);
     });
 
     it('should resolve custom blocks and replace selected drawings in the document body', () => {

@@ -31,6 +31,7 @@ import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import { cloneParagraphWithId } from '../../../paragraph-id';
+import { cloneSectionBreakWithId } from '../../../section-break-id';
 import { DataStreamTreeTokenType } from '../../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS } from '../action-types';
 import {
@@ -397,6 +398,8 @@ export function insertSectionBreaks(
 
     body.sectionBreaks ??= [];
     const { sectionBreaks } = body;
+    const insertSectionBreaks = insertBody.sectionBreaks;
+    normalizeInsertedSectionIdsForDocument(sectionBreaks, insertSectionBreaks);
 
     for (let i = 0, len = sectionBreaks.length; i < len; i++) {
         const sectionBreak = sectionBreaks[i];
@@ -413,7 +416,6 @@ export function insertSectionBreaks(
         }
     }
 
-    const insertSectionBreaks = insertBody.sectionBreaks;
     if (insertSectionBreaks) {
         for (let i = 0, len = insertSectionBreaks.length; i < len; i++) {
             const sectionBreak = insertSectionBreaks[i];
@@ -422,6 +424,26 @@ export function insertSectionBreaks(
 
         sectionBreaks.push(...insertSectionBreaks);
         sectionBreaks.sort(sortRulesFactory('startIndex'));
+    }
+}
+
+export function normalizeInsertedSectionIdsForDocument(
+    sectionBreaks: ISectionBreak[] | undefined,
+    insertSectionBreaks: ISectionBreak[] | undefined,
+    reservedSectionIds: Set<string> = new Set()
+): void {
+    if (!insertSectionBreaks?.length) {
+        return;
+    }
+
+    const existingSectionIds = new Set(sectionBreaks?.map((sectionBreak) => sectionBreak.sectionId) ?? []);
+    for (const sectionId of reservedSectionIds) {
+        existingSectionIds.add(sectionId);
+    }
+
+    for (let i = 0; i < insertSectionBreaks.length; i++) {
+        insertSectionBreaks[i] = cloneSectionBreakWithId(insertSectionBreaks[i], existingSectionIds);
+        reservedSectionIds.add(insertSectionBreaks[i].sectionId);
     }
 }
 

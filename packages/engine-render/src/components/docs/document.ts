@@ -813,8 +813,10 @@ export class Documents extends DocComponent {
         y += marginTop + top + line.lineHeight + (line.borderBottom?.padding ?? 0);
 
         ctx.save();
-        ctx.setLineWidthByPrecision(1);
-        ctx.strokeStyle = line.borderBottom?.color.rgb ?? '#CDD0D8';
+        const border = line.borderBottom;
+        ctx.setLineWidthByPrecision(Math.max(0, border?.width ?? 1));
+        ctx.strokeStyle = border?.color.rgb ?? '#CDD0D8';
+        setDocsBorderDash(ctx, border?.dashStyle);
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,
@@ -1196,7 +1198,7 @@ export class Documents extends DocComponent {
 
         ctx.save();
         ctx.setLineWidthByPrecision(lineWidth);
-        setTableCellBorderDash(ctx, border.dashStyle);
+        setDocsBorderDash(ctx, border.dashStyle);
         ctx.strokeStyle = color;
         drawLineByBorderType(ctx, type, 0, position);
         ctx.restore();
@@ -1464,7 +1466,7 @@ export class Documents extends DocComponent {
     }
 }
 
-function setTableCellBorderDash(ctx: UniverRenderingContext, dashStyle?: DashStyleType) {
+function setDocsBorderDash(ctx: UniverRenderingContext, dashStyle?: DashStyleType) {
     if (dashStyle === DashStyleType.DOT) {
         ctx.setLineDash([2]);
         return;

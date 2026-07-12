@@ -28,7 +28,7 @@ function createViewModel(content: string) {
             dataStream,
             textRuns: [{ st: 0, ed: dataStream.length, ts: {} }],
             paragraphs: [{ startIndex: content.length, paragraphId: 'para_language_ruler_test' }],
-            sectionBreaks: [{ startIndex: content.length + 1 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_311', startIndex: content.length + 1 }],
         },
         documentStyle: {},
         drawings: {},

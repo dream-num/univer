@@ -227,7 +227,7 @@ describe('test cases in clipboard', () => {
                 ],
                 sectionBreaks: [
                     ...tableData.sectionBreaks,
-                    { startIndex: dataStream.length - 1 },
+                    { sectionId: 'section_fixture_203', startIndex: dataStream.length - 1 },
                 ],
                 tables: [{
                     startIndex: 0,
@@ -264,7 +264,7 @@ describe('test cases in clipboard', () => {
                     { paragraphId: 'para_docs_ui_clipboard_block', startIndex: 1 },
                     { paragraphId: 'para_docs_ui_clipboard_block_tail', startIndex: dataStream.length - 2 },
                 ],
-                sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_204', startIndex: dataStream.length - 1 }],
                 customBlocks: [{ blockId: 'drawing-1', startIndex: 0 }],
             },
             drawings: {

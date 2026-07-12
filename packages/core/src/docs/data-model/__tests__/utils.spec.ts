@@ -39,6 +39,10 @@ describe('document data-model utils', () => {
             ff: '"SF Mono", "Cascadia Code", Consolas, monospace',
             fs: 12,
         });
+        const fractionalStyle = getFontStyleString({
+            ff: 'Arial',
+            fs: 10.5,
+        });
 
         expect(defaultStyle).toEqual({
             fontCache: `${DEFAULT_STYLES.fs}pt  ${DEFAULT_STYLES.ff}`,
@@ -48,12 +52,14 @@ describe('document data-model utils', () => {
             fontFamily: DEFAULT_STYLES.ff,
         });
         expect(superscriptStyle.fontFamily).toBe('"Noto Sans"');
-        expect(superscriptStyle.originFontSize).toBe(13);
-        expect(superscriptStyle.fontSize).toBeCloseTo(7.8);
+        expect(superscriptStyle.originFontSize).toBe(12.2);
+        expect(superscriptStyle.fontSize).toBeCloseTo(7.32);
         expect(superscriptStyle.fontString).toContain(DEFAULT_FONTFACE_PLANE);
         expect(normalStyle.fontCache).toBe('normal normal 14pt "Ping Fang"');
         expect(fontStackStyle.fontFamily).toBe('"SF Mono", "Cascadia Code", Consolas, monospace');
         expect(fontStackStyle.fontString).toContain('"SF Mono", "Cascadia Code", Consolas, monospace');
+        expect(fractionalStyle.originFontSize).toBe(10.5);
+        expect(fractionalStyle.fontCache).toContain('10.5pt');
     });
 
     it('should expose baseline offsets and convert text rotation', () => {

@@ -119,6 +119,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
+    private readonly _segmentContext$ = new BehaviorSubject({ segmentId: '', segmentPage: -1 });
+    readonly segmentContext$ = this._segmentContext$.asObservable();
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
     private _onPointerEvent = false;
 
@@ -192,7 +194,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     setSegment(id: string) {
+        if (this._currentSegmentId === id) {
+            return;
+        }
         this._currentSegmentId = id;
+        this._segmentContext$.next({ segmentId: id, segmentPage: this._currentSegmentPage });
     }
 
     getSegment() {
@@ -200,7 +206,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     setSegmentPage(pageIndex: number) {
+        if (this._currentSegmentPage === pageIndex) {
+            return;
+        }
         this._currentSegmentPage = pageIndex;
+        this._segmentContext$.next({ segmentId: this._currentSegmentId, segmentPage: pageIndex });
     }
 
     getSegmentPage() {
@@ -1529,5 +1539,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onFocus$.complete();
         this._onBlur$.complete();
         this._onPointerDown$.complete();
+        this._segmentContext$.complete();
     }
 }

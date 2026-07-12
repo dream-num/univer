@@ -112,6 +112,7 @@ export interface IFooterIds {
 }
 
 export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, IDocsConfig {
+    sectionId: string;
     headerIds?: IHeaderIds;
     footerIds?: IFooterIds;
     useFirstPageHeaderFooter?: BooleanNumber;

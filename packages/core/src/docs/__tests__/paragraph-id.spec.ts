@@ -29,7 +29,7 @@ function createBody(): IDocumentBody {
             { startIndex: 5, paragraphId: 'para_alpha' },
             { startIndex: 10, paragraphId: 'para_existing' },
         ],
-        sectionBreaks: [{ startIndex: 11 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_1', startIndex: 11 }],
     };
 }
 

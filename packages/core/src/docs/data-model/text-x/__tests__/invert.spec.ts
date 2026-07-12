@@ -179,6 +179,8 @@ describe('test TextX static methods invert and makeInvertible', () => {
             },
             oldBody: {
                 dataStream: '',
+                paragraphs: undefined,
+                sectionBreaks: [],
                 textRuns: [{
                     st: 0,
                     ed: 3,
@@ -188,6 +190,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
                 }],
                 customRanges: [],
                 customDecorations: [],
+                customBlocks: undefined,
             },
             coverType: UpdateDocsAttributeType.COVER,
         }];

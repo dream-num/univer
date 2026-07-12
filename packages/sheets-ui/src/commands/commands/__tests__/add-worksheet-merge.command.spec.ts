@@ -406,6 +406,7 @@ describe('Test add worksheet merge commands', () => {
                                     ],
                                     sectionBreaks: [
                                         {
+                                            sectionId: 'section_fixture_1106',
                                             startIndex: 7,
                                         },
                                     ],

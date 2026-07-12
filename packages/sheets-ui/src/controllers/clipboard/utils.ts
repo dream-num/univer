@@ -28,6 +28,7 @@ import {
     CellValueType,
     cloneCellDataMatrix,
     createParagraphId,
+    createSectionId,
     CustomRangeType,
     generateRandomId,
     getNumfmtParseValueFilter,
@@ -558,6 +559,6 @@ export function generateBody(text: string): IDocumentBody {
     return {
         dataStream,
         paragraphs,
-        sectionBreaks: [{ startIndex: dataStream.indexOf('\n') }],
+        sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: dataStream.indexOf('\n') }],
     };
 }

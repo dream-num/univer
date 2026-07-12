@@ -111,7 +111,7 @@ function createTableFixture(rowCount = 3, colCount = 3): ITableFixture {
                     ...sectionBreak,
                     startIndex: sectionBreak.startIndex + tableStartIndex,
                 })),
-                { startIndex: dataStream.length - 1 },
+                { sectionId: 'section_fixture_219', startIndex: dataStream.length - 1 },
             ],
             tables: [{
                 startIndex: tableStartIndex,
@@ -635,7 +635,7 @@ describe('doc table create command helpers', () => {
             body: {
                 ...documentData.body!,
                 paragraphs: [{ paragraphId: 'para_block_range', startIndex: 8 }],
-                sectionBreaks: [{ startIndex: 11 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_220', startIndex: 11 }],
                 blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 9 }],
             },
         });
@@ -703,7 +703,7 @@ describe('doc table create command helpers', () => {
                 dataStream: 'A\b\r\n',
                 textRuns: [{ st: 0, ed: 2, ts: {} }],
                 paragraphs: [{ paragraphId: 'para_custom_block', startIndex: 2 }],
-                sectionBreaks: [{ startIndex: 3 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_221', startIndex: 3 }],
                 customBlocks: [{ startIndex: 1, blockId: 'custom-block-1' }],
             },
         });
@@ -756,7 +756,7 @@ function createParagraphDocument(dataStream: string): IDocumentData {
                 ts: {},
             }],
             paragraphs: [{ paragraphId: 'para_docs_ui_create_table', startIndex: dataStream.length - 2 }],
-            sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_222', startIndex: dataStream.length - 1 }],
             customBlocks: [],
         },
         documentStyle: {

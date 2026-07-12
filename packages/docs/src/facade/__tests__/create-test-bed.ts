@@ -72,7 +72,7 @@ export function createSimpleDocument(id = 'test'): IDocumentData {
             { startIndex: 10, paragraphId: 'para_beta' },
             { startIndex: 16, paragraphId: 'para_gamma' },
         ],
-        sectionBreaks: [{ startIndex: 17 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_110', startIndex: 17 }],
     });
 }
 
@@ -84,7 +84,7 @@ export function createDuplicateDocument(id = 'test'): IDocumentData {
             { startIndex: 9, paragraphId: 'para_same_2' },
             { startIndex: 14, paragraphId: 'para_tail' },
         ],
-        sectionBreaks: [{ startIndex: 15 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_111', startIndex: 15 }],
     });
 }
 
@@ -103,7 +103,7 @@ export function createTaskDocument(id = 'test'): IDocumentData {
             },
             { startIndex: 9, paragraphId: 'para_done' },
         ],
-        sectionBreaks: [{ startIndex: 10 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_112', startIndex: 10 }],
     });
 }
 
@@ -122,7 +122,7 @@ export function createBulletDocument(id = 'test'): IDocumentData {
             },
             { startIndex: 11, paragraphId: 'para_bullet_tail' },
         ],
-        sectionBreaks: [{ startIndex: 12 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_113', startIndex: 12 }],
     });
 }
 
@@ -136,7 +136,7 @@ export function createBlockRangeDocument(blockType = DocumentBlockRangeType.QUOT
             startIndex: 0,
             endIndex: 5,
         }],
-        sectionBreaks: [{ startIndex: 12 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_114', startIndex: 12 }],
     });
 }
 
@@ -145,7 +145,7 @@ export function createTableDocument(id = 'test'): IDocumentData {
         dataStream: 'TT\raa\r\n',
         paragraphs: [{ startIndex: 2, paragraphId: 'para_fixture_21' }, { startIndex: 5, paragraphId: 'para_after_table' }],
         tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 2 }],
-        sectionBreaks: [{ startIndex: 6 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_115', startIndex: 6 }],
     });
 }
 
@@ -154,7 +154,7 @@ export function createCustomBlockDocument(id = 'test'): IDocumentData {
         dataStream: '\b\raa\r\n',
         paragraphs: [{ startIndex: 1, paragraphId: 'para_fixture_22' }, { startIndex: 4, paragraphId: 'para_after_custom_block' }],
         customBlocks: [{ blockId: 'custom-1', blockType: 'custom' as never, startIndex: 0 }],
-        sectionBreaks: [{ startIndex: 5 }],
+        sectionBreaks: [{ sectionId: 'section_fixture_116', startIndex: 5 }],
     });
 }
 

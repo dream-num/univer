@@ -78,6 +78,7 @@ const locale = {
             header: 'Header',
             footer: 'Footer',
             panel: 'Header & Footer Settings',
+            linkToPrevious: 'Link to previous',
             firstPageCheckBox: 'Different first page',
             oddEvenCheckBox: 'Different odd and even pages',
             headerTopMargin: 'Header top margin(px)',
@@ -97,9 +98,11 @@ const locale = {
         doc: {
             menu: {
                 paragraphSetting: 'Paragraph Settings',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Paragraph Settings',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Alignment',
@@ -116,6 +119,20 @@ const locale = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Fixed Value(px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

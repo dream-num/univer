@@ -99,7 +99,7 @@ describe('linebreaking', () => {
                         nestingLevel: 0,
                     },
                 }],
-                sectionBreaks: [{ startIndex: 10 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_1020', startIndex: 10 }],
             },
             lists: {
                 'test-list': {
@@ -714,13 +714,10 @@ describe('linebreaking', () => {
                     wholeEntity: true,
                     properties: { docxBreakType: 'column' },
                 }],
-                sectionBreaks: [{
-                    startIndex: content.length + 1,
-                    columnProperties: [
-                        { width: 170, paddingEnd: 20 },
-                        { width: 170, paddingEnd: 0 },
-                    ],
-                }],
+                sectionBreaks: [{ sectionId: 'section_fixture_1021', startIndex: content.length + 1, columnProperties: [
+                    { width: 170, paddingEnd: 20 },
+                    { width: 170, paddingEnd: 0 },
+                ] }],
             },
         });
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);

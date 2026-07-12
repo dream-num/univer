@@ -14,61 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, createParagraphId, DataStreamTreeTokenType, generateRandomId, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { DocSelectionManagerService, generateParagraphs, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 
-export function generateParagraphs(
-    dataStream: string,
-    prevParagraph?: IParagraph,
-    borderBottom?: IParagraphBorder
-): IParagraph[] {
-    const paragraphs: IParagraph[] = [];
-    const existingParagraphIds = new Set<string>();
-
-    for (let i = 0, len = dataStream.length; i < len; i++) {
-        const char = dataStream[i];
-
-        if (char !== DataStreamTreeTokenType.PARAGRAPH) {
-            continue;
-        }
-
-        paragraphs.push({
-            startIndex: i,
-            paragraphId: createParagraphId(existingParagraphIds),
-        });
-    }
-
-    if (prevParagraph) {
-        for (const paragraph of paragraphs) {
-            if (prevParagraph.bullet) {
-                paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
-            }
-
-            if (prevParagraph.paragraphStyle) {
-                paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
-                delete paragraph.paragraphStyle.borderBottom;
-                if (prevParagraph.paragraphStyle.headingId) {
-                    paragraph.paragraphStyle.headingId = generateRandomId(6);
-                }
-            }
-        }
-    }
-
-    if (borderBottom) {
-        for (const paragraph of paragraphs) {
-            if (!paragraph.paragraphStyle) {
-                paragraph.paragraphStyle = {};
-            }
-            paragraph.paragraphStyle.borderBottom = borderBottom;
-        }
-    }
-
-    return paragraphs;
-}
+export { generateParagraphs };
 
 interface IBreakLineCommandParams {
     horizontalLine?: IParagraphBorder;

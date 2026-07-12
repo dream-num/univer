@@ -115,7 +115,7 @@ describe('document block ranges', () => {
                 { startIndex: 2, paragraphId: 'inside-block' },
                 { startIndex: 5, paragraphId: 'after-block' },
             ],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_5', startIndex: 6 }],
             blockRanges: [{
                 blockId: 'code-1',
                 blockType: DocumentBlockRangeType.CODE,
@@ -147,7 +147,7 @@ describe('document block ranges', () => {
                 { startIndex: 2, paragraphId: 'inside-block' },
                 { startIndex: 5, paragraphId: 'after-block' },
             ],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_6', startIndex: 6 }],
             blockRanges: [{
                 blockId: 'code-1',
                 blockType: DocumentBlockRangeType.CODE,

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { BooleanNumber, DocumentDataModel, ICommand, IDocumentBody, IHeaderAndFooterBase, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import {
     CommandType,
     createParagraphId,
+    createSectionId,
     DocumentFlavor,
     generateRandomId,
     ICommandService,
@@ -39,7 +40,9 @@ export enum HeaderFooterType {
 }
 
 export interface IHeaderFooterProps {
+    /** Distance from the page edge to the header, in points (pt). */
     marginHeader?: number;
+    /** Distance from the page edge to the footer, in points (pt). */
     marginFooter?: number;
     useFirstPageHeaderFooter?: BooleanNumber;
     evenAndOddHeaders?: BooleanNumber;
@@ -53,6 +56,8 @@ export interface ICreateHeaderFooterCommandParams {
     segmentId?: string;
     headerFooterProps?: IHeaderFooterProps;
     createMode?: HeaderFooterCreateMode;
+    /** Optional stable section id. Omit to configure the document-level default. */
+    sectionId?: string;
 }
 
 export function getEmptyHeaderFooterBody(): IDocumentBody {
@@ -79,6 +84,7 @@ export function getEmptyHeaderFooterBody(): IDocumentBody {
         ],
         sectionBreaks: [
             {
+                sectionId: createSectionId(new Set()),
                 startIndex: 1,
             },
         ],
@@ -88,9 +94,10 @@ export function getEmptyHeaderFooterBody(): IDocumentBody {
 export function createHeaderFooterAction(
     segmentId: string | undefined,
     createType: HeaderFooterType,
-    documentStyle: IHeaderFooterProps,
+    headerFooterConfig: IHeaderFooterProps,
     actions: JSONXActions,
-    createMode: HeaderFooterCreateMode = 'single'
+    createMode: HeaderFooterCreateMode = 'single',
+    configPath: Array<string | number> = ['documentStyle']
 ) {
     const jsonX = JSONX.getInstance();
     const ID_LEN = 6;
@@ -148,11 +155,11 @@ export function createHeaderFooterAction(
     }
 
     for (const [k, id] of linkedSegmentIds) {
-        if (documentStyle[k as keyof IHeaderFooterProps] != null) {
-            const replaceAction = jsonX.replaceOp(['documentStyle', k], documentStyle[k as keyof IHeaderFooterProps], id);
+        if (headerFooterConfig[k as keyof IHeaderFooterProps] != null) {
+            const replaceAction = jsonX.replaceOp([...configPath, k], headerFooterConfig[k as keyof IHeaderFooterProps], id);
             actions!.push(replaceAction!);
         } else {
-            const insertAction = jsonX.insertOp(['documentStyle', k], id);
+            const insertAction = jsonX.insertOp([...configPath, k], id);
             actions!.push(insertAction!);
         }
     }
@@ -166,14 +173,14 @@ export const CreateHeaderFooterCommand: ICommand<ICreateHeaderFooterCommandParam
     handler: (accessor, params: ICreateHeaderFooterCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { unitId, segmentId, createType, headerFooterProps, createMode = 'single' } = params;
+        const { unitId, segmentId, createType, headerFooterProps, createMode = 'single', sectionId } = params;
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return false;
         }
 
-        const { documentStyle } = docDataModel.getSnapshot();
+        const { documentStyle, body } = docDataModel.getSnapshot();
 
         // The modern document flavor does not support header/footer, so we return false if the document is modern.
         if (documentStyle.documentFlavor === DocumentFlavor.MODERN) {
@@ -182,22 +189,31 @@ export const CreateHeaderFooterCommand: ICommand<ICreateHeaderFooterCommandParam
 
         const rawActions: JSONXActions = [];
         const jsonX = JSONX.getInstance();
+        const sectionIndex = sectionId == null ? -1 : body?.sectionBreaks?.findIndex((section) => section.sectionId === sectionId) ?? -1;
+        const sectionBreak = sectionIndex < 0 ? undefined : body?.sectionBreaks?.[sectionIndex];
+        if (sectionId != null && !sectionBreak) {
+            return false;
+        }
+        const headerFooterConfig: IHeaderFooterProps & IHeaderAndFooterBase = sectionBreak ?? documentStyle;
+        const configPath: Array<string | number> = sectionId == null
+            ? ['documentStyle']
+            : ['body', 'sectionBreaks', sectionIndex];
 
         if (createType != null) {
-            createHeaderFooterAction(segmentId, createType, documentStyle, rawActions, createMode);
+            createHeaderFooterAction(segmentId, createType, headerFooterConfig, rawActions, createMode, configPath);
         }
 
         if (headerFooterProps != null) {
             Object.keys(headerFooterProps).forEach((key) => {
                 const value = headerFooterProps[key as keyof IHeaderFooterProps];
-                const oldValue = documentStyle[key as keyof IHeaderFooterProps];
+                const oldValue = headerFooterConfig[key as keyof IHeaderFooterProps];
                 if (value === oldValue) {
                     return;
                 }
 
                 const action = oldValue === undefined
-                    ? jsonX.insertOp(['documentStyle', key], value)
-                    : jsonX.replaceOp(['documentStyle', key], oldValue, value);
+                    ? jsonX.insertOp([...configPath, key], value)
+                    : jsonX.replaceOp([...configPath, key], oldValue, value);
 
                 rawActions.push(action!);
             });

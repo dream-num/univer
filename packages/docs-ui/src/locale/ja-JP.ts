@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: '表を削除',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'ヘッダー',
             footer: 'フッター',
             panel: 'ヘッダーとフッターの設定',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: '段落設定',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: '段落設定',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: '配置',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: '固定値(px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

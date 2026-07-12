@@ -30,6 +30,8 @@ export type DocStructureIssueCode =
     | 'duplicate-paragraph-metadata'
     | 'section-break-token-mismatch'
     | 'duplicate-section-break-metadata'
+    | 'missing-section-id'
+    | 'duplicate-section-id'
     | 'table-start-token-mismatch'
     | 'table-end-token-mismatch'
     | 'missing-table-metadata'
@@ -111,7 +113,14 @@ function validateParagraphMetadata(body: IDocumentBody, issues: IDocStructureIss
 
 function validateSectionBreakMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
     const metadataCounts = new Map<number, number>();
+    const sectionIds = new Map<string, number>();
     for (const sectionBreak of body.sectionBreaks ?? []) {
+        if (!sectionBreak.sectionId) {
+            issues.push(createIssue(context, 'missing-section-id', 'Section break metadata must have a stable section id.', sectionBreak.startIndex));
+        } else {
+            sectionIds.set(sectionBreak.sectionId, (sectionIds.get(sectionBreak.sectionId) ?? 0) + 1);
+        }
+
         if (body.dataStream[sectionBreak.startIndex] !== DataStreamTreeTokenType.SECTION_BREAK) {
             issues.push(createIssue(
                 context,
@@ -129,6 +138,12 @@ function validateSectionBreakMetadata(body: IDocumentBody, issues: IDocStructure
         duplicateCode: 'duplicate-section-break-metadata',
         duplicateMessage: 'Section break sentinel must have exactly one section break metadata entry.',
     }, issues);
+
+    for (const [sectionId, count] of sectionIds) {
+        if (count > 1) {
+            issues.push(createIssue(context, 'duplicate-section-id', `Section id "${sectionId}" must be unique within a document segment.`));
+        }
+    }
 }
 
 function validatePointMetadataDuplicates(

@@ -94,6 +94,7 @@ import {
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
+import { DocSectionSettingPanelOperation } from './commands/operations/doc-section-setting-panel.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -102,6 +103,7 @@ import { DocAutoFormatController } from './controllers/doc-auto-format.controlle
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
 import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
+import { DocSectionSettingController } from './controllers/doc-section-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
@@ -213,6 +215,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocAutoFormatController],
             [DocMoveCursorController],
             [DocParagraphSettingController],
+            [DocSectionSettingController],
             [DocTableController],
             [ComponentsController],
 
@@ -287,6 +290,7 @@ export class UniverDocsUIPlugin extends Plugin {
             SetDocZoomRatioCommand,
             DocSelectAllCommand,
             DocParagraphSettingPanelOperation,
+            DocSectionSettingPanelOperation,
             MoveCursorOperation,
             MoveSelectionOperation,
             ReplaceTextRunsCommand,
@@ -372,6 +376,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocTableController],
             [DocMoveCursorController],
             [DocParagraphSettingController],
+            [DocSectionSettingController],
             [IEditorService, { useClass: EditorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocClipboardPasteAdapterService],

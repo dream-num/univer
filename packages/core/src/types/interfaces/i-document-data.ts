@@ -474,8 +474,10 @@ export interface IDocStyleBase extends IMargin {
 
     documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
 
-    marginHeader?: number; // marginHeader
-    marginFooter?: number; // marginFooter
+    /** Distance from the page edge to the header, in points (pt). */
+    marginHeader?: number;
+    /** Distance from the page edge to the footer, in points (pt). */
+    marginFooter?: number;
 
     renderConfig?: IDocumentRenderConfig;
 }
@@ -559,6 +561,8 @@ export interface ISectionBreakBase {
  * Properties of section break
  */
 export interface ISectionBreak extends IDocStyleBase, ISectionBreakBase, IHeaderAndFooterBase {
+    /** Stable identity of the section-break metadata entry. */
+    sectionId: string;
     startIndex: number;
 }
 
@@ -595,7 +599,9 @@ export enum TextDirectionType {
  * Properties of section column
  */
 export interface ISectionColumnProperties {
+    /** Column width in points (pt). */
     width: number;
+    /** Trailing space after the column in points (pt). */
     paddingEnd: number;
 }
 

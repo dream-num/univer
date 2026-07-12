@@ -70,6 +70,7 @@ function getDocumentBody(): IDocumentBody {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_fixture_312',
                 startIndex: 37,
             },
         ],

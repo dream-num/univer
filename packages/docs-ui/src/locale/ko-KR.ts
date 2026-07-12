@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: '표 삭제',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: '머리글',
             footer: '바닥글',
             panel: '머리글 및 바닥글 설정',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: '문단 설정',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: '문단 설정',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: '정렬',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: '고정 값(px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

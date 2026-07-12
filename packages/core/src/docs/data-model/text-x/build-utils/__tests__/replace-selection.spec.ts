@@ -28,7 +28,7 @@ describe('replaceSelectionTextX', () => {
         const body: IDocumentBody = {
             dataStream: `A${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'para_minimum' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_60', startIndex: 2 }],
         };
         const doc = new DocumentDataModel({ body });
 
@@ -52,7 +52,7 @@ describe('replaceSelectionTextX', () => {
         const body: IDocumentBody = {
             dataStream: `A${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'para_minimum' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_61', startIndex: 2 }],
         };
         const doc = new DocumentDataModel({ body });
 
@@ -78,7 +78,7 @@ describe('replaceSelectionTextX', () => {
                 { startIndex: 1, paragraphId: 'first' },
                 { startIndex: 3, paragraphId: 'second' },
             ],
-            sectionBreaks: [{ startIndex: 4 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_62', startIndex: 4 }],
         };
 
         const actions = BuildTextUtils.selection.delete(
@@ -100,7 +100,7 @@ describe('replaceSelectionTextX', () => {
                 { startIndex: 5, paragraphId: 'first' },
                 { startIndex: 10, paragraphId: 'second' },
             ],
-            sectionBreaks: [{ startIndex: 11 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_63', startIndex: 11 }],
         };
 
         const actions = BuildTextUtils.selection.delete(
@@ -124,7 +124,7 @@ describe('replaceSelectionTextX', () => {
                 { startIndex: 5, paragraphId: 'first', bullet },
                 { startIndex: 10, paragraphId: 'second' },
             ],
-            sectionBreaks: [{ startIndex: 11 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_64', startIndex: 11 }],
         };
 
         const actions = BuildTextUtils.selection.delete(

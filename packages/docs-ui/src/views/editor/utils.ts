@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor } from '@univerjs/core';
+import { createParagraphId, createSectionId, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor } from '@univerjs/core';
 
 /**
  *
@@ -27,6 +27,7 @@ export function genSnapShotByValue(id = '', value = '') {
     const paragraphs = [];
     const sectionBreaks = [];
     const existingParagraphIds = new Set<string>();
+    const existingSectionIds = new Set<string>();
 
     for (let i = 0; i < dataStream.length; i++) {
         if (dataStream[i] === '\r') {
@@ -38,6 +39,7 @@ export function genSnapShotByValue(id = '', value = '') {
 
         if (dataStream[i] === '\n') {
             sectionBreaks.push({
+                sectionId: createSectionId(existingSectionIds),
                 startIndex: i,
             });
         }

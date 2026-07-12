@@ -207,6 +207,7 @@ function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
             }],
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_22', startIndex: dataStream.length - 2 }],
             sectionBreaks: [{
+                sectionId: 'section_fixture_base',
                 startIndex: dataStream.length - 1,
             }],
             customBlocks: [],
@@ -346,6 +347,7 @@ function createMultiParagraphDoc(): IDocumentData {
                 headingId: 'heading-1',
             } }, { paragraphId: 'para_docs_ui_fixture_24', startIndex: 10 }],
             sectionBreaks: [{
+                sectionId: 'section_fixture_multi',
                 startIndex: 11,
             }],
             customBlocks: [],
@@ -440,6 +442,7 @@ function createTableDoc(): IDocumentData {
                     startIndex: sectionBreak.startIndex + prefix.length,
                 })),
                 {
+                    sectionId: 'section_fixture_223',
                     startIndex: dataStream.length - 1,
                 },
             ],
@@ -485,6 +488,7 @@ function createTableCommandDoc(rowCount = 2, colCount = 2): IDocumentData {
             sectionBreaks: [
                 ...table.sectionBreaks,
                 {
+                    sectionId: 'section_fixture_224',
                     startIndex: dataStream.length - 1,
                 },
             ],
@@ -558,6 +562,7 @@ function createTableDocWithParagraphsBeforeTable(): IDocumentData {
                     startIndex: sectionBreak.startIndex + prefix.length,
                 })),
                 {
+                    sectionId: 'section_fixture_225',
                     startIndex: dataStream.length - 1,
                 },
             ],

@@ -78,6 +78,8 @@ export enum DocumentSkeletonPageType {
 };
 
 export interface IDocumentSkeletonPage {
+    /** Stable id of the document section that owns this body page. */
+    sectionId?: string;
     sections: IDocumentSkeletonSection[];
     headerId: string;
     footerId: string;

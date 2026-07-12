@@ -21,9 +21,10 @@ import {
     CommandType,
     ICommandService,
     IUniverInstanceService,
+    resolveSectionHeaderFooterReferences,
     UniverInstanceType,
 } from '@univerjs/core';
-import { CreateHeaderFooterCommand, DocSelectionManagerService, DocSkeletonManagerService, HeaderFooterType } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, DocSelectionManagerService, DocSkeletonManagerService, getTopLevelSectionBreaks, HeaderFooterType } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -33,6 +34,7 @@ export interface ICoreHeaderFooterParams {
     unitId: string;
     createType?: HeaderFooterType;
     segmentId?: string;
+    sectionId?: string;
     headerFooterProps?: IHeaderFooterProps;
 }
 
@@ -49,7 +51,7 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const { unitId, segmentId, createType, headerFooterProps } = params;
+        const { unitId, segmentId, createType, headerFooterProps, sectionId: requestedSectionId } = params;
         const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = docSkeletonManagerService?.getViewModel();
@@ -60,7 +62,18 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
 
         const editArea = docViewModel.getEditArea();
 
-        const { documentStyle } = docDataModel.getSnapshot();
+        const snapshot = docDataModel.getSnapshot();
+        const sectionId = requestedSectionId;
+        const sections = snapshot.body ? getTopLevelSectionBreaks(snapshot.body) : [];
+        const sectionIndex = sectionId == null ? -1 : sections.findIndex((section) => section.sectionId === sectionId);
+        const section = sectionIndex < 0 ? undefined : sections[sectionIndex];
+        const headerFooterConfig = sectionId == null
+            ? snapshot.documentStyle
+            : {
+                ...snapshot.documentStyle,
+                ...section,
+                ...resolveSectionHeaderFooterReferences(snapshot.documentStyle, sections, sectionIndex),
+            };
 
         let resolvedCreateType = createType;
 
@@ -69,9 +82,9 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
                 const value = headerFooterProps[key as keyof IHeaderFooterProps];
 
                 // need create first page header/footer if useFirstPageHeaderFooter is true and firstPageHeaderId is not set.
-                if (resolvedCreateType == null && key === 'useFirstPageHeaderFooter' && value === BooleanNumber.TRUE && !documentStyle.firstPageHeaderId) {
+                if (resolvedCreateType == null && key === 'useFirstPageHeaderFooter' && value === BooleanNumber.TRUE && !headerFooterConfig.firstPageHeaderId) {
                     resolvedCreateType = editArea === DocumentEditArea.HEADER ? HeaderFooterType.FIRST_PAGE_HEADER : HeaderFooterType.FIRST_PAGE_FOOTER;
-                } else if (resolvedCreateType == null && key === 'evenAndOddHeaders' && value === BooleanNumber.TRUE && !documentStyle.evenPageHeaderId) {
+                } else if (resolvedCreateType == null && key === 'evenAndOddHeaders' && value === BooleanNumber.TRUE && !headerFooterConfig.evenPageHeaderId) {
                     resolvedCreateType = editArea === DocumentEditArea.HEADER ? HeaderFooterType.EVEN_PAGE_HEADER : HeaderFooterType.EVEN_PAGE_FOOTER;
                 }
             });
@@ -82,7 +95,8 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
             segmentId,
             createType: resolvedCreateType,
             headerFooterProps,
-            createMode: 'pair',
+            createMode: sectionId == null ? 'pair' : 'single',
+            sectionId,
         });
 
         return result;

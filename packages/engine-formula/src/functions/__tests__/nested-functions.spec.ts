@@ -346,7 +346,7 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                                         { startIndex: 2, paragraphId: 'para_engine_formula_nested', paragraphStyle: { horizontalAlign: 0 } },
                                     ],
                                     sectionBreaks: [
-                                        { startIndex: 3 },
+                                        { sectionId: 'section_fixture_1062', startIndex: 3 },
                                     ],
                                     customRanges: [],
                                     customDecorations: [],

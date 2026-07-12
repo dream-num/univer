@@ -22,6 +22,7 @@ import {
     BaselineOffset,
     BooleanNumber,
     createParagraphId,
+    createSectionId,
     CustomRangeType,
     DataStreamTreeNodeType,
     DocumentBlockRangeType,
@@ -251,6 +252,7 @@ export function convertBodyToHtml(doc: IDocumentData): string {
         });
 
         sectionBreaks.push({
+            sectionId: createSectionId(new Set(sectionBreaks.map((sectionBreak) => sectionBreak.sectionId))),
             startIndex: dataStream.length - 1,
         });
 

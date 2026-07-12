@@ -34,7 +34,7 @@ import type {
 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorInputConfig } from '../selection/doc-selection-render.service';
-import { createParagraphId, Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
+import { createParagraphId, createSectionId, Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
@@ -349,7 +349,7 @@ export class Editor extends Disposable implements IEditor {
                         paragraphId: createParagraphId(new Set()),
                     }],
                     customRanges: [],
-                    sectionBreaks: [{ startIndex: text.length + 1 }],
+                    sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: text.length + 1 }],
                     tables: [],
                     textRuns: [],
                 },

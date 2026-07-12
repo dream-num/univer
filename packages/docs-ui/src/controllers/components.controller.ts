@@ -108,6 +108,8 @@ import {
 } from '../views/paragraph-menu/component-keys';
 import { ParagraphSettingIndex } from '../views/paragraph-setting/index';
 import { ParagraphMenu, TableBlockMenu } from '../views/ParagraphMenu';
+import { DOC_SECTION_SETTING_COMPONENT } from '../views/section-setting/component-name';
+import { SectionSettingIndex } from '../views/section-setting/index';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
 import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 
@@ -214,6 +216,7 @@ export class ComponentsController extends Disposable {
         }
 
         this.disposeWithMe(this._componentManager.register(paragraphSettingIndexKey, ParagraphSettingIndex));
+        this.disposeWithMe(this._componentManager.register(DOC_SECTION_SETTING_COMPONENT, SectionSettingIndex));
         ([
             [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
             [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],

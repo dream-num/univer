@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'Elimina tabella',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'Intestazione',
             footer: 'Piè di pagina',
             panel: 'Impostazioni Intestazione e Piè di Pagina',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'Impostazioni Paragrafo',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Impostazioni Paragrafo',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Allineamento',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Valore fisso (px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

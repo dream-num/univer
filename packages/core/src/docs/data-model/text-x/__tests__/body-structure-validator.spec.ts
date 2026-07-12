@@ -25,7 +25,7 @@ describe('validateDocBodyStructure', () => {
         const body: IDocumentBody = {
             dataStream: `A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'para-1' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_7', startIndex: 2 }],
         };
 
         expect(validateDocBodyStructure(body)).toEqual([]);
@@ -47,7 +47,7 @@ describe('validateDocBodyStructure', () => {
         const body: IDocumentBody = {
             dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 4, paragraphId: 'bad-para' }],
-            sectionBreaks: [{ startIndex: 5 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_8', startIndex: 5 }],
             columnGroups: [{ startIndex: 0, endIndex: 5, columnGroupId: 'cg-1' }],
         };
 
@@ -65,7 +65,10 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 1, paragraphId: 'first' },
                 { startIndex: 1, paragraphId: 'duplicate-first' },
             ],
-            sectionBreaks: [{ startIndex: 4 }, { startIndex: 4 }],
+            sectionBreaks: [
+                { sectionId: 'section_duplicate_a', startIndex: 4 },
+                { sectionId: 'section_duplicate_b', startIndex: 4 },
+            ],
         };
 
         expect(validateDocBodyStructure(body).map((issue) => issue.code)).toEqual([
@@ -79,7 +82,7 @@ describe('validateDocBodyStructure', () => {
         const body: IDocumentBody = {
             dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 5, paragraphId: 'root' }],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_11', startIndex: 6 }],
             columnGroups: [{ startIndex: 0, endIndex: 4, columnGroupId: 'cg-1' }],
         };
 
@@ -94,7 +97,7 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 4, paragraphId: 'cell' },
                 { startIndex: 8, paragraphId: 'after-table' },
             ],
-            sectionBreaks: [{ startIndex: 9 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_12', startIndex: 9 }],
             tables: [{ startIndex: 0, endIndex: 8, tableId: 'table-1' }],
         };
 
@@ -111,8 +114,8 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: tableStream.length + 5, paragraphId: 'after-table' },
             ],
             sectionBreaks: [
-                { startIndex: 5 },
-                { startIndex: tableStream.length + 6 },
+                { sectionId: 'section_fixture_13', startIndex: 5 },
+                { sectionId: 'section_fixture_14', startIndex: tableStream.length + 6 },
             ],
             tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
         };
@@ -131,7 +134,10 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 3, paragraphId: 'cell' },
                 { startIndex: 8, paragraphId: 'after-table' },
             ],
-            sectionBreaks: [{ startIndex: 4 }, { startIndex: 9 }],
+            sectionBreaks: [
+                { sectionId: 'section_cell', startIndex: 4 },
+                { sectionId: 'section_root', startIndex: 9 },
+            ],
         };
 
         expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('missing-table-metadata');
@@ -145,7 +151,7 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 2, paragraphId: 'outer' },
                 { startIndex: 5, paragraphId: 'inner' },
             ],
-            sectionBreaks: [{ startIndex: 7 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_17', startIndex: 7 }],
             blockRanges: [
                 { startIndex: 0, endIndex: 6, blockId: 'outer', blockType: DocumentBlockRangeType.CODE },
                 { startIndex: 3, endIndex: 6, blockId: 'inner', blockType: DocumentBlockRangeType.CALLOUT },
@@ -166,7 +172,7 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 2, paragraphId: 'first' },
                 { startIndex: 5, paragraphId: 'second' },
             ],
-            sectionBreaks: [{ startIndex: 7 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_18', startIndex: 7 }],
             blockRanges: [
                 { startIndex: 0, endIndex: 3, blockId: 'first', blockType: DocumentBlockRangeType.CODE },
                 { startIndex: 4, endIndex: 6, blockId: 'second', blockType: DocumentBlockRangeType.CALLOUT },
@@ -184,12 +190,12 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 1, paragraphId: 'inside' },
                 { startIndex: 3, paragraphId: 'after' },
             ],
-            sectionBreaks: [{ startIndex: 4 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_19', startIndex: 4 }],
         };
         const unbalanced: IDocumentBody = {
             dataStream: `${T.BLOCK_START}${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'inside' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_20', startIndex: 2 }],
         };
 
         expect(validateDocBodyStructure(missingMetadata).map((issue) => issue.code)).toContain('missing-block-range-metadata');
@@ -205,7 +211,7 @@ describe('validateDocBodyStructure', () => {
                 { startIndex: 2, paragraphId: 'left' },
                 { startIndex: 5, paragraphId: 'right' },
             ],
-            sectionBreaks: [{ startIndex: 8 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_21', startIndex: 8 }],
         };
 
         expect(validateDocBodyStructure(baseBody).map((issue) => issue.code)).toContain('missing-column-group-metadata');
@@ -250,7 +256,7 @@ describe('validateDocBodyStructure', () => {
         const valid: IDocumentBody = {
             dataStream: `${T.CUSTOM_BLOCK}${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'after-custom-block' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_22', startIndex: 2 }],
             customBlocks: [{ startIndex: 0, blockId: 'drawing-1' }],
         };
 
@@ -274,7 +280,7 @@ describe('validateDocBodyStructure', () => {
         const body: IDocumentBody = {
             dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 3, paragraphId: 'para-1' }],
-            sectionBreaks: [{ startIndex: 5 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_23', startIndex: 5 }],
         };
 
         expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('unbalanced-column-group');
@@ -286,7 +292,7 @@ describe('validateDocBodyStructure', () => {
             body: {
                 dataStream: `${T.PARAGRAPH}${T.SECTION_BREAK}`,
                 paragraphs: [{ startIndex: 0, paragraphId: 'body' }],
-                sectionBreaks: [{ startIndex: 1 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_24', startIndex: 1 }],
             },
             headers: {
                 'header-1': {

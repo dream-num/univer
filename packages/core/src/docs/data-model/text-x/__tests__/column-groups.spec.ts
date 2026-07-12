@@ -40,7 +40,7 @@ describe('TextX column groups', () => {
                 body: {
                     dataStream: `${T.PARAGRAPH}${T.SECTION_BREAK}`,
                     paragraphs: [{ startIndex: 0, paragraphId: 'inserted' }],
-                    sectionBreaks: [{ startIndex: 1 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_25', startIndex: 1 }],
                 },
             },
         ]);
@@ -49,7 +49,7 @@ describe('TextX column groups', () => {
             startIndex: 2,
             paragraphId: expect.any(String),
         }]);
-        expect(body.sectionBreaks).toEqual([{ startIndex: 3 }]);
+        expect(body.sectionBreaks).toEqual([{ sectionId: expect.any(String), startIndex: 3 }]);
     });
 
     it('adds inserted column group metadata to documents without existing column groups', () => {
@@ -57,7 +57,7 @@ describe('TextX column groups', () => {
         const body: IDocumentBody = {
             dataStream: `A${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'before' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_26', startIndex: 2 }],
         };
 
         TextX.apply(body, [
@@ -84,7 +84,7 @@ describe('TextX column groups', () => {
                 { startIndex: 2, paragraphId: 'left' },
                 { startIndex: 5, paragraphId: 'right' },
             ],
-            sectionBreaks: [{ startIndex: 8 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_27', startIndex: 8 }],
             columnGroups: [{ startIndex: 0, endIndex: 7, columnGroupId: 'cg-1' }],
         };
 
@@ -108,7 +108,7 @@ describe('TextX column groups', () => {
                 { startIndex: 7, paragraphId: 'right' },
                 { startIndex: 9, paragraphId: 'after' },
             ],
-            sectionBreaks: [{ startIndex: 10 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_28', startIndex: 10 }],
             columnGroups: [{ startIndex: 0, endIndex: 9, columnGroupId: 'cg-1' }],
         };
 
@@ -129,7 +129,7 @@ describe('TextX column groups', () => {
                 { startIndex: 3, paragraphId: 'left' },
                 { startIndex: 6, paragraphId: 'after' },
             ],
-            sectionBreaks: [{ startIndex: 7 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_29', startIndex: 7 }],
             columnGroups: [{ startIndex: 0, endIndex: 5, columnGroupId: 'cg-1' }],
         };
 
@@ -147,7 +147,7 @@ describe('TextX column groups', () => {
         const body: IDocumentBody = {
             dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 3, paragraphId: 'left' }],
-            sectionBreaks: [{ startIndex: 5 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_30', startIndex: 5 }],
             columnGroups: [{ startIndex: 0, endIndex: 4, columnGroupId: 'cg-1' }],
         };
         const actions: TextXAction[] = [
@@ -166,7 +166,7 @@ describe('TextX column groups', () => {
         const body: IDocumentBody = {
             dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 3, paragraphId: 'left' }],
-            sectionBreaks: [{ startIndex: 5 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_31', startIndex: 5 }],
             columnGroups: [{ startIndex: 0, endIndex: 4, columnGroupId: 'cg-1' }],
         };
 
@@ -181,7 +181,7 @@ describe('TextX column groups', () => {
         const body: IDocumentBody = {
             dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 3, paragraphId: 'left' }],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_32', startIndex: 6 }],
             columnGroups: [{ startIndex: 0, endIndex: 5, columnGroupId: 'cg-1' }],
         };
 
@@ -207,7 +207,7 @@ describe('TextX column groups', () => {
                 { startIndex: 3, paragraphId: 'first' },
                 { startIndex: 5, paragraphId: 'second' },
             ],
-            sectionBreaks: [{ startIndex: 8 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_33', startIndex: 8 }],
             columnGroups: [{ startIndex: 0, endIndex: 7, columnGroupId: 'cg-1' }],
         };
 
@@ -231,8 +231,8 @@ describe('TextX column groups', () => {
                 { startIndex: 11, paragraphId: 'right' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 14 },
+                { sectionId: 'section_fixture_34', startIndex: 8 },
+                { sectionId: 'section_fixture_35', startIndex: 14 },
             ],
             columnGroups: [{ startIndex: 0, endIndex: 13, columnGroupId: 'cg-1' }],
         };

@@ -27,6 +27,7 @@ describe('CreateHeaderFooterCommand', () => {
         const documentData = createDocumentData('test', {
             dataStream: 'Hello,\r\n',
             paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_19' }],
+            sectionBreaks: [{ sectionId: 'section_fixture_109', startIndex: 7 }],
         });
         documentData.documentStyle = {
             ...documentData.documentStyle,
@@ -66,5 +67,20 @@ describe('CreateHeaderFooterCommand', () => {
         expect(snapshot.documentStyle.defaultHeaderId).toBe('header-segment-1');
         expect(snapshot.documentStyle.defaultFooterId).toEqual(expect.any(String));
         expect(snapshot.footers?.[snapshot.documentStyle.defaultFooterId!].body?.dataStream).toBe('\r\n');
+    });
+
+    it('links a header to a specific section without changing the document default', () => {
+        const sectionId = testBed.doc.getSnapshot().body?.sectionBreaks?.[0].sectionId;
+        expect(commandService.syncExecuteCommand(CreateHeaderFooterCommand.id, {
+            unitId: 'test',
+            segmentId: 'section-header-1',
+            createType: HeaderFooterType.DEFAULT_HEADER,
+            sectionId,
+        })).toBe(true);
+
+        const snapshot = testBed.doc.getSnapshot();
+        expect(snapshot.body?.sectionBreaks?.[0].defaultHeaderId).toBe('section-header-1');
+        expect(snapshot.documentStyle.defaultHeaderId).toBeFalsy();
+        expect(snapshot.headers?.['section-header-1'].body?.dataStream).toBe('\r\n');
     });
 });

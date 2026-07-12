@@ -36,6 +36,7 @@ import { generateRandomId } from '../../shared/random-id';
 import { BooleanNumber } from '../../types/enum';
 import { CustomRangeType } from '../../types/interfaces';
 import { createParagraphId } from '../paragraph-id';
+import { createSectionId } from '../section-break-id';
 import { DocumentDataModel } from './document-data-model';
 import { PresetListType } from './preset-list-type';
 import { BuildTextUtils } from './text-x/build-utils';
@@ -71,6 +72,12 @@ export function normalizeBody(body: IDocumentBody) {
 
     if (!body.sectionBreaks) {
         body.sectionBreaks = [];
+        const existingSectionIds = new Set<string>();
+        for (let i = 0; i < body.dataStream.length; i++) {
+            if (body.dataStream[i] === '\n') {
+                body.sectionBreaks.push({ startIndex: i, sectionId: createSectionId(existingSectionIds) });
+            }
+        }
     }
 
     if (!body.tables) {

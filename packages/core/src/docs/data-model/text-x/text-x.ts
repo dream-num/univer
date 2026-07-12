@@ -22,7 +22,7 @@ import { Tools } from '../../../shared/tools';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
 import { textXApply } from './apply';
-import { normalizeInsertedParagraphIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
+import { normalizeInsertedParagraphIdsForDocument, normalizeInsertedSectionIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 
@@ -281,10 +281,12 @@ export class TextX {
 
         let index = 0;
         const reservedParagraphIds = new Set<string>();
+        const reservedSectionIds = new Set<string>();
 
         for (const action of actions) {
             if (action.t === TextXActionType.INSERT) {
                 normalizeInsertActionParagraphIds(action.body, doc, index, reservedParagraphIds);
+                normalizeInsertedSectionIdsForDocument(doc.sectionBreaks, action.body.sectionBreaks, reservedSectionIds);
             }
 
             if (action.t === TextXActionType.DELETE && (action.body == null || (action.body && action.body.dataStream.length !== action.len))) {

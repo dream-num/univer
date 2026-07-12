@@ -218,6 +218,7 @@ export function ParagraphSetting() {
                     </ParagraphSettingRow>
                 </div>
             </ParagraphSettingSection>
+
         </div>
     );
 }

@@ -124,6 +124,56 @@ describe('FDocumentParagraph', () => {
         ]);
     });
 
+    it('reads and updates a text range across existing style-run boundaries', () => {
+        const data = createSimpleDocument();
+        data.body!.textRuns = [
+            { st: 0, ed: 5, ts: { cl: { rgb: '#FF0000' }, bl: 1 } },
+            { st: 5, ed: 10, ts: { cl: { rgb: '#FF0000' }, it: 1 } },
+        ];
+        createDocumentFacade(data);
+
+        const range = document.getTextRange(2, 8);
+
+        expect(range.getText()).toBe('pha\rBe');
+        expect(range.getTextStyleRuns()).toEqual([
+            { startOffset: 2, endOffset: 5, textStyle: { cl: { rgb: '#FF0000' }, bl: 1 } },
+            { startOffset: 5, endOffset: 8, textStyle: { cl: { rgb: '#FF0000' }, it: 1 } },
+        ]);
+        expect(range.getCommonTextStyle()).toEqual({ cl: { rgb: '#FF0000' } });
+        expect(range.getExplicitTextStyleRuns()).toEqual(range.getTextStyleRuns());
+        expect(range.getCommonExplicitTextStyle()).toEqual(range.getCommonTextStyle());
+        expect(range.describe()).toMatchObject({
+            startOffset: 2,
+            endOffset: 8,
+            segmentId: '',
+            length: 6,
+            text: 'pha\rBe',
+            explicitTextStyleRuns: range.getTextStyleRuns(),
+            commonExplicitTextStyle: { cl: { rgb: '#FF0000' } },
+        });
+
+        expect(range.setTextStyle({ fs: 20 })).toBe(true);
+        expect(document.save().body?.textRuns).toEqual([
+            { st: 0, ed: 2, ts: { cl: { rgb: '#FF0000' }, bl: 1 } },
+            { st: 2, ed: 5, ts: { cl: { rgb: '#FF0000' }, bl: 1, fs: 20 } },
+            { st: 5, ed: 8, ts: { cl: { rgb: '#FF0000' }, it: 1, fs: 20 } },
+            { st: 8, ed: 10, ts: { cl: { rgb: '#FF0000' }, it: 1 } },
+        ]);
+        expect(document.getParagraphs()[0].getTextRange().getRange()).toEqual({
+            startOffset: 0,
+            endOffset: 5,
+            segmentId: '',
+        });
+    });
+
+    it('rejects invalid document text ranges', () => {
+        createDocumentFacade(createSimpleDocument());
+
+        expect(() => document.getTextRange(-1, 2)).toThrow(RangeError);
+        expect(() => document.getTextRange(4, 2)).toThrow(RangeError);
+        expect(() => document.getTextRange(0, 999)).toThrow(RangeError);
+    });
+
     it('keeps a paragraph after a block scoped outside the block end token', () => {
         const T = DataStreamTreeTokenType;
         createDocumentFacade(createDocumentData('doc-after-block', {
@@ -132,7 +182,7 @@ describe('FDocumentParagraph', () => {
                 { startIndex: 5, paragraphId: 'para_code' },
                 { startIndex: 12, paragraphId: 'para_after' },
             ],
-            sectionBreaks: [{ startIndex: 13 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_117', startIndex: 13 }],
             blockRanges: [{
                 blockId: 'code-1',
                 blockType: DocumentBlockRangeType.CODE,
@@ -164,7 +214,7 @@ describe('FDocumentParagraph', () => {
             ...createDocumentData('doc-with-header', {
                 dataStream: 'Body\r\n',
                 paragraphs: [{ startIndex: 4, paragraphId: 'para_body' }],
-                sectionBreaks: [{ startIndex: 5 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_118', startIndex: 5 }],
             }),
             headers: {
                 [headerId]: {
@@ -172,7 +222,7 @@ describe('FDocumentParagraph', () => {
                     body: {
                         dataStream: 'Head\r\n',
                         paragraphs: [{ startIndex: 4, paragraphId: 'para_header' }],
-                        sectionBreaks: [{ startIndex: 5 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_119', startIndex: 5 }],
                     },
                 },
             },

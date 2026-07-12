@@ -189,7 +189,7 @@ function mergeDirtyRanges(target: IUnitRange[], source: IUnitRange[]): void {
 function mergeDirtyUnitStringMap(left: IDirtyUnitStringMap, right?: IDirtyUnitStringMap): IDirtyUnitStringMap {
     const result: IDirtyUnitStringMap = { ...left };
     Object.entries(right ?? {}).forEach(([unitId, values]) => {
-        result[unitId] = { ...(result[unitId] ?? {}), ...(values ?? {}) };
+        result[unitId] = { ...result[unitId], ...values };
     });
     return result;
 }
@@ -197,9 +197,9 @@ function mergeDirtyUnitStringMap(left: IDirtyUnitStringMap, right?: IDirtyUnitSt
 function mergeDirtyUnitNestedMap(left: IDirtyUnitFeatureMap, right?: IDirtyUnitFeatureMap): IDirtyUnitFeatureMap {
     const result: IDirtyUnitFeatureMap = { ...left };
     Object.entries(right ?? {}).forEach(([unitId, sheets]) => {
-        const unitResult = { ...(result[unitId] ?? {}) };
+        const unitResult: NonNullable<IDirtyUnitFeatureMap[string]> = { ...result[unitId] };
         Object.entries(sheets ?? {}).forEach(([sheetId, values]) => {
-            unitResult[sheetId] = { ...(unitResult[sheetId] ?? {}), ...(values ?? {}) };
+            unitResult[sheetId] = { ...unitResult[sheetId], ...values };
         });
         result[unitId] = unitResult;
     });

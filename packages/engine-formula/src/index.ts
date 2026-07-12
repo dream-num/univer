@@ -124,6 +124,7 @@ export {
     SetSuperTableOptionMutation,
 } from './commands/mutations/set-super-table.mutation';
 export type {
+    IRemoveSuperTableMutationParam,
     ISetSuperTableMutationParam,
     ISetSuperTableMutationSearchParam,
 } from './commands/mutations/set-super-table.mutation';
@@ -135,6 +136,7 @@ export {
 } from './config/config';
 export type { IUniverEngineFormulaConfig } from './config/config';
 export { CalculateController } from './controllers/calculate.controller';
+export { SuperTableActiveDirtyController } from './controllers/super-table-active-dirty.controller';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
@@ -272,6 +274,7 @@ export {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 export type { IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
+export { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaResultStatus } from './services/formula-common';
 export { FunctionService } from './services/function.service';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from '@univerjs/engine-formula';
+import type { IRemoveSuperTableMutationParam, ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from '@univerjs/engine-formula';
 import type { Table } from '../models/table';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
@@ -52,10 +52,14 @@ export class SheetTableFormulaController extends Disposable {
         );
         this.disposeWithMe(
             this._tableManager.tableDelete$.subscribe((event) => {
-                const { unitId, tableName } = event;
-                this._commandService.executeCommand<ISetSuperTableMutationSearchParam>(RemoveSuperTableMutation.id, {
+                const { unitId, subUnitId, tableName, range } = event;
+                this._commandService.executeCommand<IRemoveSuperTableMutationParam>(RemoveSuperTableMutation.id, {
                     unitId,
                     tableName,
+                    reference: {
+                        sheetId: subUnitId,
+                        range,
+                    },
                 });
             })
         );

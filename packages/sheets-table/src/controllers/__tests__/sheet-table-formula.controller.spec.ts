@@ -76,10 +76,19 @@ describe('SheetTableFormulaController', () => {
         });
         expect(executeCommand).toHaveBeenCalledTimes(4);
 
-        tableDelete$.next({ unitId: 'u1', tableName: 'Orders' });
+        tableDelete$.next({
+            unitId: 'u1',
+            subUnitId: 's1',
+            tableName: 'Orders',
+            range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 },
+        });
         expect(executeCommand).toHaveBeenLastCalledWith(RemoveSuperTableMutation.id, {
             unitId: 'u1',
             tableName: 'Orders',
+            reference: {
+                sheetId: 's1',
+                range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 },
+            },
         });
 
         controller.dispose();

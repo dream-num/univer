@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam, ISetSuperTableMutationParam } from '@univerjs/engine-formula';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -37,8 +37,9 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetSuperTableMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
+    ClearSelectionFormatCommand,
     InsertColMutation,
     InsertRowMutation,
     InsertSheetMutation,
@@ -49,6 +50,7 @@ import {
     RemoveRowMutation,
     RemoveSheetMutation,
     ReorderRangeMutation,
+    SetBorderCommand,
     SetRangeValuesMutation,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
@@ -73,16 +75,15 @@ export class ActiveDirtyController extends Disposable {
     private _initialConversion() {
         this._activeDirtyManagerService.register(SetRangeValuesMutation.id, {
             commandId: SetRangeValuesMutation.id,
+            shouldTrigger: (command, options) => {
+                const params = command.params as ISetRangeValuesMutationParams;
+                return !options?.onlyLocal &&
+                    params.trigger !== SetStyleCommand.id &&
+                    params.trigger !== SetBorderCommand.id &&
+                    params.trigger !== ClearSelectionFormatCommand.id;
+            },
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetRangeValuesMutationParams;
-                /**
-                 * Changes in the cell value caused by the formula or style
-                 * will not trigger the formula to be marked as dirty for calculation.
-                 */
-                if (params.trigger === SetStyleCommand.id) {
-                    return {};
-                }
-
                 return {
                     dirtyRanges: this._getSetRangeValuesMutationDirtyRange(params),
                 };
@@ -98,8 +99,6 @@ export class ActiveDirtyController extends Disposable {
         this._initialSheet();
 
         this._initialDefinedName();
-
-        this._initialSuperTable();
     }
 
     private _initialMove() {
@@ -307,31 +306,6 @@ export class ActiveDirtyController extends Disposable {
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetDefinedNameMutationParam;
                 return { dirtyDefinedNameMap: this._getDefinedNameMutation(params) };
-            },
-        });
-    }
-
-    private _initialSuperTable() {
-        this._activeDirtyManagerService.register(SetSuperTableMutation.id, {
-            commandId: SetSuperTableMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as ISetSuperTableMutationParam;
-                const { unitId, reference } = params;
-                const { sheetId, range } = reference;
-
-                return {
-                    dirtyRanges: [{ unitId, sheetId, range }],
-                    dirtySuperTableMap: {
-                        [unitId]: {
-                            [params.tableName]: '1',
-                        },
-                    },
-                    clearDependencyTreeCache: {
-                        [unitId]: {
-                            [sheetId]: '1',
-                        },
-                    },
-                };
             },
         });
     }

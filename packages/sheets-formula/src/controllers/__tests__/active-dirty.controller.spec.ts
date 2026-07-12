@@ -25,7 +25,6 @@ import {
     IActiveDirtyManagerService,
     RemoveDefinedNameMutation,
     SetDefinedNameMutation,
-    SetSuperTableMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import {
@@ -81,6 +80,12 @@ function getDirtyData(testBed: ITestBed, command: ICommandInfo) {
     return conversion!.getDirtyData(command);
 }
 
+function shouldTrigger(testBed: ITestBed, command: ICommandInfo) {
+    const conversion = testBed.injector.get(IActiveDirtyManagerService).get(command.id);
+    expect(conversion).toBeDefined();
+    return conversion!.shouldTrigger?.(command);
+}
+
 describe('ActiveDirtyController', () => {
     let testBed: ITestBed;
 
@@ -110,7 +115,7 @@ describe('ActiveDirtyController', () => {
 
         testBed.injector.get(ActiveDirtyController);
 
-        expect(getDirtyData(testBed, {
+        expect(shouldTrigger(testBed, {
             id: SetRangeValuesMutation.id,
             params: {
                 unitId: 'test',
@@ -122,7 +127,7 @@ describe('ActiveDirtyController', () => {
                     },
                 },
             },
-        } as ICommandInfo)).toEqual({});
+        } as ICommandInfo)).toBe(false);
 
         expect(getDirtyData(testBed, {
             id: SetRangeValuesMutation.id,
@@ -404,55 +409,6 @@ describe('ActiveDirtyController', () => {
             dirtyDefinedNameMap: {
                 test: {
                     DIRTY_NAME: 'Sheet1!$A$1',
-                },
-            },
-        });
-    });
-
-    it('should dirty the table range and clear dependency cache when a super table changes', () => {
-        testBed = createControllerTestBed();
-        testBed.injector.get(ActiveDirtyController);
-
-        expect(getDirtyData(testBed, {
-            id: SetSuperTableMutation.id,
-            params: {
-                unitId: 'test',
-                tableName: 'Table1',
-                reference: {
-                    sheetId: 'sheet1',
-                    range: {
-                        startRow: 0,
-                        startColumn: 1,
-                        endRow: 5,
-                        endColumn: 2,
-                    },
-                    titleMap: new Map([
-                        ['Column1', 0],
-                        ['Column3', 1],
-                    ]),
-                },
-            },
-        } as ICommandInfo)).toEqual({
-            dirtyRanges: [
-                {
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                    range: {
-                        startRow: 0,
-                        startColumn: 1,
-                        endRow: 5,
-                        endColumn: 2,
-                    },
-                },
-            ],
-            dirtySuperTableMap: {
-                test: {
-                    Table1: '1',
-                },
-            },
-            clearDependencyTreeCache: {
-                test: {
-                    sheet1: '1',
                 },
             },
         });

@@ -26,6 +26,7 @@ import {
     ActiveDirtyManagerService,
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
+    FormulaCalculationTriggerService,
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -73,6 +74,7 @@ function createWorkbookData(): IWorkbookData {
 function createControllerTestBed() {
     const dependencies: Dependency[] = [
         [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+        [FormulaCalculationTriggerService],
         [RegisterOtherFormulaService],
         [FormulaCalculationSessionService],
         [FormulaCalculationSessionController],
@@ -206,6 +208,7 @@ describe('TriggerCalculationController', () => {
         });
         testBed.activeDirtyManagerService.register(SetRangeValuesMutation.id, {
             commandId: SetRangeValuesMutation.id,
+            shouldTrigger: (command) => (command.params as { trigger?: string })?.trigger !== SetStyleCommand.id,
             getDirtyData: () => ({
                 dirtyRanges: [{ unitId: 'test', sheetId: 'sheet1', range: { startRow: 9, startColumn: 9, endRow: 9, endColumn: 9 } }],
             }),

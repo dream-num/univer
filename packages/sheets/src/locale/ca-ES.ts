@@ -29,12 +29,12 @@ const locale: typeof enUS = {
             hideSheet: 'No hi ha fulls visibles després d\'ocultar aquest',
         },
         definedName: {
-            nameEmpty: '名称不能为空',
-            nameDuplicate: '名称已存在',
-            nameInvalid: '名称无效',
-            nameSheetConflict: '名称与工作表名称冲突',
-            formulaOrRefStringEmpty: '公式或引用字符串不能为空',
-            nameConflict: '名称与函数名称冲突',
+            nameEmpty: 'El nom no pot estar buit',
+            nameDuplicate: 'El nom ja existeix',
+            nameInvalid: 'El nom no és vàlid',
+            nameSheetConflict: 'El nom entra en conflicte amb el nom del full de càlcul',
+            formulaOrRefStringEmpty: 'La fórmula o la cadena de referència no pot estar buida',
+            nameConflict: 'El nom entra en conflicte amb el nom d\'una funció',
             defaultName: 'NomDefinit',
         },
         permission: {
@@ -54,10 +54,10 @@ const locale: typeof enUS = {
         },
 
         autoFill: {
-            copy: '复制单元格',
-            series: '填充序列',
-            formatOnly: '仅格式',
-            noFormat: '无格式',
+            copy: 'Copia les cel·les',
+            series: 'Omple la sèrie',
+            formatOnly: 'Només el format',
+            noFormat: 'Sense format',
         },
         merge: {
             confirm: {

@@ -407,7 +407,7 @@ const locale: typeof enUS = {
                 iCanNotEdit: 'No puedo editar',
                 iCanView: 'Puedo ver',
                 iCanNotView: 'No puedo ver',
-                emptyRangeError: 'El rango не puede estar vacío',
+                emptyRangeError: 'El rango no puede estar vacío',
                 rangeOverlapError: 'El rango no puede superponerse',
                 rangeOverlapOverPermissionError: 'El rango no puede superponerse con el rango que tiene el mismo permiso',
                 InsertHyperlink: 'Insertar hipervínculo',

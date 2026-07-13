@@ -396,7 +396,7 @@ const locale: typeof enUS = {
         abstract: 'Заменяет часть строки на другой текст с помощью регулярного выражения.',
         links: [
             {
-                title: '教学',
+                title: 'Инструкция',
                 url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=ru-Ru',
             },
         ],

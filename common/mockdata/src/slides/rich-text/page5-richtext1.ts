@@ -138,6 +138,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_slide_page5_richtext1_1',
                 startIndex: 517,
                 columnProperties: [
                     {

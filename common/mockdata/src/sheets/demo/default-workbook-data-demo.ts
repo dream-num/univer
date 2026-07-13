@@ -14192,6 +14192,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                 ],
                                 sectionBreaks: [
                                     {
+                                        sectionId: 'section_mockdata_default_workbook_demo_1',
                                         startIndex: 2,
                                     },
                                 ],
@@ -14299,6 +14300,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                 ],
                                 sectionBreaks: [
                                     {
+                                        sectionId: 'section_mockdata_default_workbook_demo_2',
                                         startIndex: 94,
                                     },
                                 ],
@@ -14441,6 +14443,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                 ],
                                 sectionBreaks: [
                                     {
+                                        sectionId: 'section_mockdata_default_workbook_demo_3',
                                         startIndex: 2,
                                     },
                                 ],
@@ -14495,6 +14498,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                 ],
                                 sectionBreaks: [
                                     {
+                                        sectionId: 'section_mockdata_default_workbook_demo_4',
                                         startIndex: 2,
                                     },
                                 ],

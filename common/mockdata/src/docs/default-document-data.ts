@@ -174,6 +174,7 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_default_document_1',
                 startIndex: 407,
                 columnProperties: [
                     {

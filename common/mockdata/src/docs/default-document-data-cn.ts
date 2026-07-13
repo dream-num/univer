@@ -658,6 +658,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_default_document_cn_1',
                 startIndex: 3066,
                 // columnProperties: [
                 //     {

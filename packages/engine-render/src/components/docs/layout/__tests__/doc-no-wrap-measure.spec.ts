@@ -16,7 +16,11 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { measureDocumentNoWrapTextWidth } from '../doc-no-wrap-measure';
+import {
+    measureDocumentNoWrapTextRangeWidth,
+    measureDocumentNoWrapTextWidth,
+    measureDocumentUnbreakableTextWidth,
+} from '../doc-no-wrap-measure';
 import { FontCache } from '../shaping-engine/font-cache';
 
 function createDocument(dataStream: string): IDocumentData {
@@ -70,6 +74,47 @@ describe('measureDocumentNoWrapTextWidth', () => {
         ];
 
         expect(measureDocumentNoWrapTextWidth(document)).toBe(40);
+
+        measureSpy.mockRestore();
+    });
+});
+
+describe('measureDocumentUnbreakableTextWidth', () => {
+    it('uses the docs line-break policy for words, spaces, and CJK text', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: Array.from(text).reduce((total, char) => total + (/[⺀-鿿豈-﫿]/u.test(char) ? 20 : 10), 0),
+        }) as never);
+
+        expect(measureDocumentUnbreakableTextWidth(createDocument('short longest 你好\r\n'))).toBe(70);
+
+        measureSpy.mockRestore();
+    });
+
+    it('preserves text-run styles while measuring a break segment', () => {
+        const measuredFonts = new Set<string>();
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string, font: string) => {
+            measuredFonts.add(font);
+            return { width: text.length * 10 } as never;
+        });
+        const document = createDocument('ABCD E\r\n');
+        document.body!.textRuns = [
+            { st: 0, ed: 2, ts: { fs: 10 } },
+            { st: 2, ed: 4, ts: { fs: 20 } },
+        ];
+
+        expect(measureDocumentUnbreakableTextWidth(document)).toBe(40);
+        expect(measuredFonts.size).toBeGreaterThan(1);
+
+        measureSpy.mockRestore();
+    });
+
+    it('measures a styled document range without creating a temporary document', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 10,
+        }) as never);
+        const document = createDocument('First Second\r\n');
+
+        expect(measureDocumentNoWrapTextRangeWidth(document, 6, 12)).toBe(60);
 
         measureSpy.mockRestore();
     });

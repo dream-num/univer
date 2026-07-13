@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, ITextStyle } from '@univerjs/core';
+import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
 import { getFontStyleString } from '../../../basics/tools';
+import { LineBreaker } from './line-breaker';
 import { FontCache } from './shaping-engine/font-cache';
-
-interface IDocumentNoWrapTextRunLike {
-    st?: number;
-    ed?: number;
-    ts?: ITextStyle;
-}
 
 function splitDocumentNoWrapMeasureLines(text: string): string[] {
     return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
@@ -83,15 +78,16 @@ function measureDocumentNoWrapCJKLatinSpacing(
 }
 
 function measureDocumentNoWrapLineByStyle(text: string, textStyle: ITextStyle | undefined): number {
+    const visibleText = text.slice(0, getDocumentNoWrapMeasureTrailingWhitespaceStart(text));
     const previous = { char: '', cjkWidth: 0 };
 
-    return measureDocumentNoWrapTextByStyle(text, textStyle) +
-        measureDocumentNoWrapCJKLatinSpacing(text, textStyle, previous);
+    return measureDocumentNoWrapTextByStyle(visibleText, textStyle) +
+        measureDocumentNoWrapCJKLatinSpacing(visibleText, textStyle, previous);
 }
 
 function measureDocumentNoWrapRunsWidth(
     dataStream: string,
-    textRuns: IDocumentNoWrapTextRunLike[],
+    textRuns: ITextRun[],
     fallbackTextStyle: ITextStyle | undefined
 ): number {
     let currentLineWidth = 0;
@@ -143,10 +139,10 @@ function measureDocumentNoWrapRunsWidth(
 
     let cursor = 0;
     [...textRuns]
-        .sort((a, b) => (a.st ?? 0) - (b.st ?? 0))
+        .sort((a, b) => a.st - b.st)
         .forEach((run) => {
-            const start = Math.max(0, run.st ?? 0);
-            const end = Math.max(start, run.ed ?? start);
+            const start = Math.max(0, run.st);
+            const end = Math.max(start, run.ed);
             if (start > cursor) {
                 appendRange(dataStream.slice(cursor, start), fallbackTextStyle);
             }
@@ -163,6 +159,35 @@ function measureDocumentNoWrapRunsWidth(
     return Math.max(maxLineWidth, currentLineWidth);
 }
 
+export function measureDocumentNoWrapTextRangeWidth(documentData: IDocumentData, start: number, end: number): number {
+    const body = documentData.body;
+    const dataStream = body?.dataStream ?? '';
+    const rangeStart = Math.max(0, Math.min(dataStream.length, start));
+    const rangeEnd = Math.max(rangeStart, Math.min(dataStream.length, end));
+    const rangeText = dataStream.slice(rangeStart, rangeEnd);
+    const textRuns = (body?.textRuns ?? [])
+        .map((run): ITextRun | null => {
+            const runStart = Math.max(rangeStart, run.st);
+            const runEnd = Math.min(rangeEnd, run.ed);
+            if (runEnd <= runStart) {
+                return null;
+            }
+
+            return {
+                ...run,
+                st: runStart - rangeStart,
+                ed: runEnd - rangeStart,
+            };
+        })
+        .filter((run): run is ITextRun => run !== null);
+
+    if (textRuns.length) {
+        return measureDocumentNoWrapRunsWidth(rangeText, textRuns, documentData.documentStyle?.textStyle);
+    }
+
+    return measureDocumentNoWrapLineByStyle(rangeText, documentData.documentStyle?.textStyle);
+}
+
 /**
  * Measures the widest no-wrap line using the same text-width policy that docs
  * layout relies on for lightweight shape/text-box autofit flows.
@@ -177,7 +202,7 @@ function measureDocumentNoWrapRunsWidth(
 export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | null | undefined): number {
     const body = documentData?.body;
     const dataStream = body?.dataStream ?? '';
-    const textRuns = body?.textRuns as IDocumentNoWrapTextRunLike[] | undefined;
+    const textRuns = body?.textRuns;
 
     if (textRuns?.length) {
         return measureDocumentNoWrapRunsWidth(
@@ -193,4 +218,29 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
         0,
         ...splitDocumentNoWrapMeasureLines(dataStream).map((line) => measureDocumentNoWrapLineByStyle(line, fallbackTextStyle))
     );
+}
+
+/**
+ * Measures the widest segment that docs line breaking keeps together. This is
+ * useful when a host may wrap normally but still needs enough width to avoid
+ * clipping an individual word, CJK glyph, or punctuation segment.
+ */
+export function measureDocumentUnbreakableTextWidth(documentData: IDocumentData | null | undefined): number {
+    const dataStream = documentData?.body?.dataStream ?? '';
+    if (!documentData || !dataStream) {
+        return 0;
+    }
+
+    const breaker = new LineBreaker(dataStream);
+    let start = 0;
+    let maxWidth = 0;
+    let breakPoint = breaker.nextBreakPoint();
+
+    while (breakPoint) {
+        maxWidth = Math.max(maxWidth, measureDocumentNoWrapTextRangeWidth(documentData, start, breakPoint.position));
+        start = breakPoint.position;
+        breakPoint = breaker.nextBreakPoint();
+    }
+
+    return maxWidth;
 }

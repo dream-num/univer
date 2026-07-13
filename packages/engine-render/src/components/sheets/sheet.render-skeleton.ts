@@ -1410,7 +1410,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const endY = Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop;
         let endRow = searchArray(rowHeightAccumulation, endY);
         // If the endY is exactly on the boundary, need to minus 1 to get the correct endRow.
-        if (endRow < lenOfRowData && rowHeightAccumulation[endRow - 1] === endY) {
+        const isEndYOnBoundary = endRow < lenOfRowData && rowHeightAccumulation[endRow - 1] === endY;
+        if (isEndYOnBoundary) {
             endRow -= 1;
         }
 
@@ -1419,17 +1420,19 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const endX = Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft;
         let endColumn = searchArray(columnWidthAccumulation, endX);
         // If the endX is exactly on the boundary, need to minus 1 to get the correct endColumn.
-        if (endColumn < lenOfColData && columnWidthAccumulation[endColumn - 1] === endX) {
+        const isEndXOnBoundary = endColumn < lenOfColData && columnWidthAccumulation[endColumn - 1] === endX;
+        if (isEndXOnBoundary) {
             endColumn -= 1;
         }
 
-        // If the get range is used for visible range, the endRow and endColumn need to minus 1.
+        // Printing excludes a row or column reached only by a small viewport overlap.
+        // An exact boundary was already adjusted above and must not be decremented twice.
         if (isPrinting) {
             return {
                 startRow,
-                endRow: endRow === lenOfRowData - 1 ? endRow : endRow - 1,
+                endRow: endRow === lenOfRowData - 1 || isEndYOnBoundary ? endRow : endRow - 1,
                 startColumn,
-                endColumn: endColumn === lenOfColData - 1 ? endColumn : endColumn - 1,
+                endColumn: endColumn === lenOfColData - 1 || isEndXOnBoundary ? endColumn : endColumn - 1,
             };
         }
 

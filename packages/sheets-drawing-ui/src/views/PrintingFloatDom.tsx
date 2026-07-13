@@ -32,51 +32,64 @@ export interface IPrintingFloatDomProps {
     worksheet: Worksheet;
 };
 
+export function createPrintingFloatDom(
+    info: IFloatDomData,
+    scene: Scene,
+    skeleton: SpreadsheetSkeleton,
+    worksheet: Worksheet
+) {
+    const { width, height, angle, left, top } = info.transform!;
+    // The print root starts at the sheet content origin and does not include row/column headers.
+    const offsetBound = transformBound2DOMBound(
+        {
+            left: left ?? 0,
+            right: (left ?? 0) + (width ?? 0),
+            top: top ?? 0,
+            bottom: (top ?? 0) + (height ?? 0),
+        },
+        scene,
+        skeleton,
+        worksheet,
+        undefined,
+        true
+    );
+    const { scaleX, scaleY } = scene.getAncestorScale();
+
+    const domPos: IFloatDomLayout = {
+        startX: offsetBound.left,
+        endX: offsetBound.right,
+        startY: offsetBound.top,
+        endY: offsetBound.bottom,
+        rotate: angle!,
+        width: width! * scaleX,
+        height: height! * scaleY,
+        absolute: offsetBound.absolute,
+    };
+
+    const floatDom: IFloatDom & { position: IFloatDomLayout } = {
+        position$: new BehaviorSubject<IFloatDomLayout>(domPos),
+        position: domPos,
+        id: info.drawingId,
+        componentKey: info.componentKey,
+        onPointerMove: () => { },
+        onPointerDown: () => { },
+        onPointerUp: () => { },
+        onWheel: () => { },
+        unitId: info.unitId,
+        data: info.data,
+        // Preserve props required by custom printable floating DOM components.
+        props: (info as IFloatDomData & { props?: Record<string, unknown> }).props,
+    };
+
+    return [info.drawingId, floatDom] as const;
+}
+
 export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
     const { floatDomInfos, scene, skeleton, worksheet } = props;
-    const floatDomParams = useMemo(() => floatDomInfos.map((info) => {
-        const { width, height, angle, left, top } = info.transform!;
-        const offsetBound = transformBound2DOMBound(
-            {
-                left: left ?? 0,
-                right: (left ?? 0) + (width ?? 0),
-                top: top ?? 0,
-                bottom: (top ?? 0) + (height ?? 0),
-            },
-            scene,
-            skeleton,
-            worksheet,
-            undefined,
-            true
-        );
-        const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const domPos: IFloatDomLayout = {
-            startX: offsetBound.left,
-            endX: offsetBound.right,
-            startY: offsetBound.top,
-            endY: offsetBound.bottom,
-            rotate: angle!,
-            width: width! * scaleX,
-            height: height! * scaleY,
-            absolute: offsetBound.absolute,
-        };
-
-        const floatDom: IFloatDom & { position: IFloatDomLayout } = {
-            position$: new BehaviorSubject<IFloatDomLayout>(domPos),
-            position: domPos,
-            id: info.drawingId,
-            componentKey: info.componentKey,
-            onPointerMove: () => { },
-            onPointerDown: () => { },
-            onPointerUp: () => { },
-            onWheel: () => { },
-            unitId: info.unitId,
-            data: info.data,
-        };
-
-        return [info.drawingId, floatDom] as const;
-    }), [floatDomInfos, scene, skeleton, worksheet]);
+    const floatDomParams = useMemo(
+        () => floatDomInfos.map((info) => createPrintingFloatDom(info, scene, skeleton, worksheet)),
+        [floatDomInfos, scene, skeleton, worksheet]
+    );
 
     return (
         <div style={{ position: 'absolute', top: 0, left: 0 }}>

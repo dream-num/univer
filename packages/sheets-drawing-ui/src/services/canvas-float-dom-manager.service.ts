@@ -98,6 +98,7 @@ import {
 } from '@univerjs/sheets-ui';
 import { CanvasFloatDomPreviewService, CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
+import { SHEET_CHART_RENDER_OBJECT_CONFIG } from './sheet-chart-render-object.config';
 
 export interface ICanvasFloatDom {
     /**
@@ -1259,7 +1260,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     };
 
                     const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
-                    imageConfig.rotateEnabled = false;
 
                     if (isChart) {
                         const backgroundColor = this._getChartDataBackground(data);
@@ -1270,9 +1270,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         if (data && (data as Record<string, string>).border) {
                             imageConfig.stroke = (data as Record<string, string>).border;
                         }
-                        imageConfig.paintFirst = 'stroke';
-                        imageConfig.strokeWidth = 1;
-                        imageConfig.radius = 8;
+                        Object.assign(imageConfig, SHEET_CHART_RENDER_OBJECT_CONFIG);
+                    } else {
+                        imageConfig.rotateEnabled = false;
                     }
 
                     const rect = rectShape ?? this._createRenderObject({

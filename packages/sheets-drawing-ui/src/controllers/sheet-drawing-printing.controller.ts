@@ -16,7 +16,7 @@
 
 import type { IRange } from '@univerjs/core';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
-import { Disposable, DrawingTypeEnum, Inject, Injector, PRINT_CHART_COMPONENT_KEY, Tools } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject, Injector, Tools } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -45,14 +45,24 @@ export class SheetDrawingPrintingController extends Disposable {
                 this._sheetPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_COMPONENT_COLLECT,
                 {
                     handler: (_param, pos, next) => {
-                        const { unitId, scene, subUnitId } = pos;
+                        const { unitId, scene, subUnitId, resourceCollector } = pos;
                         const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
                         const subUnitData = unitData?.[subUnitId];
                         if (subUnitData) {
                             subUnitData.order.forEach((id) => {
                                 const drawing = subUnitData.data[id];
-                                if (drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART && drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
-                                    this._drawingRenderService.renderDrawing(drawing, scene);
+                                if (drawing.hidden) {
+                                    return;
+                                }
+                                if (
+                                    drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART &&
+                                    drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM &&
+                                    drawing.drawingType !== DrawingTypeEnum.DRAWING_BLOCK
+                                ) {
+                                    const resource = this._drawingRenderService.renderDrawing(drawing, scene, { allowInactiveSheet: true });
+                                    if (resource) {
+                                        resourceCollector.add(Promise.resolve(resource));
+                                    }
                                 }
                             });
                         }
@@ -89,7 +99,7 @@ export class SheetDrawingPrintingController extends Disposable {
                         const data = subUnitData.order.map((key) => subUnitData.data[key]);
                         if (data.length) {
                             data.forEach((param) => {
-                                if (!param.groupId && param.transform && Tools.isDefine(param.transform.left) && Tools.isDefine(param.transform.top) && Tools.isDefine(param.transform.width) && Tools.isDefine(param.transform.height)) {
+                                if (!param.hidden && !param.groupId && param.transform && Tools.isDefine(param.transform.left) && Tools.isDefine(param.transform.top) && Tools.isDefine(param.transform.width) && Tools.isDefine(param.transform.height)) {
                                     const start = skeleton.skeleton.getCellIndexByOffset(param.transform.left, param.transform.top, scaleX, scaleY, { x: 0, y: 0 });
                                     const end = skeleton.skeleton.getCellIndexByOffset(param.transform.left + param.transform.width, param.transform.top + param.transform.height, scaleX, scaleY, { x: 0, y: 0 });
                                     if (start.column < newRange.startColumn) {
@@ -131,14 +141,10 @@ export class SheetDrawingPrintingController extends Disposable {
                         if (subUnitData) {
                             const floatDomInfos = subUnitData.order.map((id) => {
                                 const drawing = subUnitData.data[id] as IFloatDomData;
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
-                                    return {
-                                        ...drawing,
-                                        componentKey: this._componetManager.get(PRINT_CHART_COMPONENT_KEY) as any,
-                                    };
+                                if (drawing.hidden) {
+                                    return null;
                                 }
-
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM || drawing.drawingType === DrawingTypeEnum.DRAWING_BLOCK) {
                                     const printingComponentKey = this._sheetPrintInterceptorService.getPrintComponent(drawing.componentKey);
                                     return {
                                         ...drawing,
@@ -148,6 +154,13 @@ export class SheetDrawingPrintingController extends Disposable {
 
                                 return null;
                             }).filter(Boolean) as IFloatDomData[];
+                            // Each prepare cycle gets its own React container. Removing the old
+                            // container immediately and unmounting it later prevents its cleanup
+                            // from racing with a new render mounted into the persistent page root.
+                            const printingRoot = document.createElement('div');
+                            printingRoot.style.position = 'absolute';
+                            printingRoot.style.inset = '0';
+                            pos.root.appendChild(printingRoot);
                             const unmountPrintingFloatDom = mountPrintingFloatDom(
                                 {
                                     floatDomInfos,
@@ -155,16 +168,20 @@ export class SheetDrawingPrintingController extends Disposable {
                                     skeleton: pos.skeleton,
                                     worksheet: pos.worksheet,
                                 },
-                                pos.root,
+                                printingRoot,
                                 this._injector
                             );
 
                             disposableCollection?.add(() => {
-                                unmountPrintingFloatDom();
+                                printingRoot.remove();
+                                queueMicrotask(unmountPrintingFloatDom);
                             });
 
                             return next(disposableCollection);
                         }
+
+                        // Do not terminate the interceptor chain on sheets without drawings.
+                        return next(disposableCollection);
                     },
                 }
             )

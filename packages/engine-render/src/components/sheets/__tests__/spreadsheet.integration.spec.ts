@@ -306,6 +306,46 @@ describe('spreadsheet integration', () => {
         expect(skeleton.stylesCache.fontMatrix.getSizeOf()).toBe(0);
     });
 
+    it('keeps the last printing row and column when the viewport ends on their exact boundaries', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        const endRow = 3;
+        const endColumn = 3;
+        const cacheBound = createBound(
+            skeleton.rowHeaderWidthAndMarginLeft,
+            skeleton.columnHeaderHeightAndMarginTop,
+            skeleton.rowHeaderWidthAndMarginLeft + skeleton.columnWidthAccumulation[endColumn],
+            skeleton.columnHeaderHeightAndMarginTop + skeleton.rowHeightAccumulation[endRow]
+        );
+        const vpInfo = createViewportInfo(scene, cacheCanvas, { cacheBound });
+
+        expect(skeleton.getCacheRangeByViewport(vpInfo, true)).toEqual({
+            startRow: 0,
+            endRow,
+            startColumn: 0,
+            endColumn,
+        });
+    });
+
+    it('does not include the next printing row or column for a one-pixel viewport overlap', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        const endRow = 3;
+        const endColumn = 3;
+        const cacheBound = createBound(
+            skeleton.rowHeaderWidthAndMarginLeft,
+            skeleton.columnHeaderHeightAndMarginTop,
+            skeleton.rowHeaderWidthAndMarginLeft + skeleton.columnWidthAccumulation[endColumn] + 1,
+            skeleton.columnHeaderHeightAndMarginTop + skeleton.rowHeightAccumulation[endRow] + 1
+        );
+        const vpInfo = createViewportInfo(scene, cacheCanvas, { cacheBound });
+
+        expect(skeleton.getCacheRangeByViewport(vpInfo, true)).toEqual({
+            startRow: 0,
+            endRow,
+            startColumn: 0,
+            endColumn,
+        });
+    });
+
     it('builds border cache for row-wise merged cells on the selection left edge', () => {
         const workbookData = workbookDataFactory();
         workbookData.id = 'sheet-render-border-workbook';

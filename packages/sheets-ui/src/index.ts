@@ -234,7 +234,7 @@ export { IMarkSelectionService, MarkSelectionService } from './services/mark-sel
 export { SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 export type { ProtectedRangeShadowStrategy } from './services/permission/sheet-permission-render-manager.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
-export { SheetPrintInterceptorService } from './services/print-interceptor.service';
+export { SheetPrintingResourceCollector, SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { IRepeatLastActionService, RepeatLastActionPermission } from './services/repeat-last-action.service';
 export type { RepeatableCommandHandler } from './services/repeat-last-action.service';
 export { SheetScrollManagerService } from './services/scroll-manager.service';

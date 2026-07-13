@@ -7,6 +7,8 @@ import { CanvasFloatDomService } from '@univerjs/ui';
 import { CustomRangeLoading, FloatDomContentBoxProbe } from './component';
 
 const FLOAT_DOM_CONTENT_BOX_FIXTURE_ID = 'float-dom-content-box-probe';
+/* eslint-disable-next-line node/prefer-global/process */
+const IS_E2E: boolean = !!process.env.IS_E2E;
 
 interface IFloatDomContentBoxFixture {
     id: string;
@@ -20,8 +22,17 @@ interface IFloatDomContentBoxFixture {
     getLayout: () => IFloatDomLayout | undefined;
 }
 
+function exposeFloatDomContentBoxFixture(univer: Univer, fixture: IFloatDomContentBoxFixture): void {
+    window.floatDomContentBoxFixture = fixture;
+    univer.onDispose(() => {
+        if (window.floatDomContentBoxFixture === fixture) {
+            window.floatDomContentBoxFixture = undefined;
+        }
+    });
+}
+
 function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): void {
-    if (!new URLSearchParams(window.location.search).has('float-dom-content-box')) {
+    if (!IS_E2E || !new URLSearchParams(window.location.search).has('float-dom-content-box')) {
         return;
     }
 
@@ -58,7 +69,7 @@ function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): v
         }
         return { rect, scene };
     };
-    window.floatDomContentBoxFixture = {
+    const fixture: IFloatDomContentBoxFixture = {
         id: disposable.id,
         setContentBox: (contentBox) => canvasFloatDomService.updateFloatDom(disposable.id, { contentBox }),
         setBorder: (border) => worksheet.updateFloatDom(disposable.id, { data: { border } }),
@@ -94,6 +105,7 @@ function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): v
             return layout;
         },
     };
+    exposeFloatDomContentBoxFixture(univer, fixture);
 }
 
 export function insertFloatDom(univer: Univer, univerAPI: FUniver) {

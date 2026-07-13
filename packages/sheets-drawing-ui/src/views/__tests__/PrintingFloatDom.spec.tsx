@@ -23,7 +23,7 @@ import { ComponentManager } from '@univerjs/ui';
 import { act } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
-import { mountPrintingFloatDom } from '../PrintingFloatDom';
+import { createPrintingFloatDom, mountPrintingFloatDom } from '../PrintingFloatDom';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -74,8 +74,8 @@ class TestPrintingWorksheet {
     }
 }
 
-function PrintingContent(props: { data?: { label?: string } }) {
-    return <span data-testid="printed-content">{props.data?.label}</span>;
+function PrintingContent(props: { data?: { label?: string }; printingLabel?: string }) {
+    return <span data-testid="printed-content">{props.printingLabel ?? props.data?.label}</span>;
 }
 
 function createFloatDomInfo(drawingId = 'printed-float-dom', label = 'printing'): IFloatDomData {
@@ -182,5 +182,21 @@ describe('PrintingFloatDom', () => {
 
         expect(root.textContent).toContain('First printed label');
         expect(root.textContent).toContain('Second printed label');
+    });
+
+    it('forwards printing-only component props', () => {
+        const info = {
+            ...createFloatDomInfo(),
+            props: { printingLabel: 'Ready callback props' },
+        } as IFloatDomData;
+
+        const [, floatDom] = createPrintingFloatDom(
+            info,
+            new TestPrintingScene() as unknown as Scene,
+            new TestPrintingSkeleton() as unknown as SpreadsheetSkeleton,
+            new TestPrintingWorksheet() as unknown as Worksheet
+        );
+
+        expect(floatDom.props).toEqual({ printingLabel: 'Ready callback props' });
     });
 });

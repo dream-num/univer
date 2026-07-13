@@ -311,6 +311,15 @@ describe('DrawingRenderService', () => {
         expect(await inactiveSheetCase.service.renderImages(imageParam(), inactiveSheetCase.scene as unknown as Scene)).toBeUndefined();
         expect(inactiveSheetCase.scene.getObjectKeys).toEqual([]);
 
+        const inactivePrintingSheetCase = createHarness();
+        inactivePrintingSheetCase.univerInstanceService.unitType = UniverInstanceType.UNIVER_SHEET;
+        inactivePrintingSheetCase.univerInstanceService.activeSheetId = 'sheet-2';
+        expect(await inactivePrintingSheetCase.service.renderImages(
+            imageParam(),
+            inactivePrintingSheetCase.scene as unknown as Scene,
+            { allowInactiveSheet: true }
+        )).toHaveLength(1);
+
         const noTransformCase = createHarness();
         expect(await noTransformCase.service.renderImages(imageParam({ transform: null }), noTransformCase.scene as unknown as Scene)).toBeUndefined();
         expect(noTransformCase.scene.getObjectKeys).toEqual([]);

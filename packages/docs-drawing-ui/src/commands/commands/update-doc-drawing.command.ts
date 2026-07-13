@@ -652,8 +652,10 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
         // RichTextEditingMutation recalculates the document skeleton before the
         // synchronous command returns. Publish that fresh geometry so the drawing
         // manager, renderer, and transformer do not keep the pre-mutation size.
-        const skeleton = renderObject?.with(DocSkeletonManagerService).getSkeleton() ?? null;
-        accessor.get(DocRefreshDrawingsService).refreshDrawings(skeleton);
+        if (accessor.has(DocRefreshDrawingsService)) {
+            const skeleton = renderObject?.with(DocSkeletonManagerService).getSkeleton() ?? null;
+            accessor.get(DocRefreshDrawingsService).refreshDrawings(skeleton);
+        }
         transformer.refreshControls();
 
         return Boolean(result);

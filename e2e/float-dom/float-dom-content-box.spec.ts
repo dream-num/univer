@@ -513,4 +513,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     const transformerGeometryPath = testInfo.outputPath('float-dom-transformer-geometry.json');
     await writeFile(transformerGeometryPath, JSON.stringify(transformerRecords, null, 2));
     await testInfo.attach('float-dom-transformer-geometry', { path: transformerGeometryPath, contentType: 'application/json' });
+
+    await page.evaluate(() => window.univer.dispose());
+    await page.waitForFunction(() => window.floatDomContentBoxFixture === undefined);
 });

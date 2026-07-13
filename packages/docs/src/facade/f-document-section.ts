@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, Injector, IResolvedSectionHeaderFooterReference, ISectionBreak, ISectionColumnProperties, SectionHeaderFooterKind } from '@univerjs/core';
+import type { Injector, IResolvedSectionHeaderFooterReference, ISectionBreak, ISectionColumnProperties, SectionHeaderFooterKind, SectionHeaderFooterVariant } from '@univerjs/core';
+import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
@@ -39,22 +40,11 @@ export interface IFDocumentSectionDescription {
     columns: ISectionColumnProperties[];
     columnSeparatorType: ColumnSeparatorType;
     sectionType: SectionType;
-    headerFooter: Record<`${DocumentSectionHeaderFooterVariant}${Capitalize<SectionHeaderFooterKind>}`, {
+    headerFooter: Record<`${SectionHeaderFooterVariant}${Capitalize<SectionHeaderFooterKind>}`, {
         segmentId: string | null;
         linkedToPrevious: boolean;
     }>;
     config: ISectionBreak;
-}
-
-export type DocumentSectionHeaderFooterVariant = 'default' | 'first' | 'even';
-
-export interface IFDocumentSectionHeaderFooterOptions {
-    /** Distance from the page edge to the header, in points (pt). */
-    marginHeader?: number;
-    /** Distance from the page edge to the footer, in points (pt). */
-    marginFooter?: number;
-    useFirstPageHeaderFooter?: BooleanNumber;
-    evenAndOddHeaders?: BooleanNumber;
 }
 
 /** Error thrown when traditional section APIs are used to mutate a modern document. */
@@ -277,7 +267,7 @@ export class FDocumentSection {
      * }
      * ```
      */
-    ensureHeader(variant: DocumentSectionHeaderFooterVariant = 'default'): string {
+    ensureHeader(variant: SectionHeaderFooterVariant = 'default'): string {
         return this._ensureHeaderFooter('header', variant);
     }
 
@@ -294,7 +284,7 @@ export class FDocumentSection {
      * }
      * ```
      */
-    ensureFooter(variant: DocumentSectionHeaderFooterVariant = 'default'): string {
+    ensureFooter(variant: SectionHeaderFooterVariant = 'default'): string {
         return this._ensureHeaderFooter('footer', variant);
     }
 
@@ -306,7 +296,7 @@ export class FDocumentSection {
      * console.log(fDocument?.getSection(0)?.getHeaderId('default'));
      * ```
      */
-    getHeaderId(variant: DocumentSectionHeaderFooterVariant = 'default'): string | null {
+    getHeaderId(variant: SectionHeaderFooterVariant = 'default'): string | null {
         return this._getHeaderFooterReference('header', variant).segmentId ?? null;
     }
 
@@ -318,7 +308,7 @@ export class FDocumentSection {
      * console.log(fDocument?.getSection(0)?.getFooterId('first'));
      * ```
      */
-    getFooterId(variant: DocumentSectionHeaderFooterVariant = 'default'): string | null {
+    getFooterId(variant: SectionHeaderFooterVariant = 'default'): string | null {
         return this._getHeaderFooterReference('footer', variant).segmentId ?? null;
     }
 
@@ -330,7 +320,7 @@ export class FDocumentSection {
      * console.log(fDocument?.getSection(1)?.isHeaderLinkedToPrevious());
      * ```
      */
-    isHeaderLinkedToPrevious(variant: DocumentSectionHeaderFooterVariant = 'default'): boolean {
+    isHeaderLinkedToPrevious(variant: SectionHeaderFooterVariant = 'default'): boolean {
         return this._getHeaderFooterReference('header', variant).linkedToPrevious;
     }
 
@@ -342,7 +332,7 @@ export class FDocumentSection {
      * console.log(fDocument?.getSection(1)?.isFooterLinkedToPrevious('even'));
      * ```
      */
-    isFooterLinkedToPrevious(variant: DocumentSectionHeaderFooterVariant = 'default'): boolean {
+    isFooterLinkedToPrevious(variant: SectionHeaderFooterVariant = 'default'): boolean {
         return this._getHeaderFooterReference('footer', variant).linkedToPrevious;
     }
 
@@ -356,7 +346,7 @@ export class FDocumentSection {
      * }
      * ```
      */
-    setHeaderLinkedToPrevious(linkedToPrevious: boolean, variant: DocumentSectionHeaderFooterVariant = 'default'): boolean {
+    setHeaderLinkedToPrevious(linkedToPrevious: boolean, variant: SectionHeaderFooterVariant = 'default'): boolean {
         return this._setHeaderFooterLinkedToPrevious('header', variant, linkedToPrevious);
     }
 
@@ -370,7 +360,7 @@ export class FDocumentSection {
      * }
      * ```
      */
-    setFooterLinkedToPrevious(linkedToPrevious: boolean, variant: DocumentSectionHeaderFooterVariant = 'default'): boolean {
+    setFooterLinkedToPrevious(linkedToPrevious: boolean, variant: SectionHeaderFooterVariant = 'default'): boolean {
         return this._setHeaderFooterLinkedToPrevious('footer', variant, linkedToPrevious);
     }
 
@@ -389,7 +379,7 @@ export class FDocumentSection {
      * }
      * ```
      */
-    setHeaderFooterOptions(options: IFDocumentSectionHeaderFooterOptions): boolean {
+    setHeaderFooterOptions(options: IHeaderFooterProps): boolean {
         this._assertTraditionalDocument();
         return this._update(options);
     }
@@ -423,7 +413,7 @@ export class FDocumentSection {
         });
     }
 
-    private _ensureHeaderFooter(kind: 'header' | 'footer', variant: DocumentSectionHeaderFooterVariant): string {
+    private _ensureHeaderFooter(kind: SectionHeaderFooterKind, variant: SectionHeaderFooterVariant): string {
         this._assertTraditionalDocument();
         const { index } = this._resolve();
         const config = this.getConfig();
@@ -469,7 +459,7 @@ export class FDocumentSection {
 
     private _getHeaderFooterReference(
         kind: SectionHeaderFooterKind,
-        variant: DocumentSectionHeaderFooterVariant
+        variant: SectionHeaderFooterVariant
     ): IResolvedSectionHeaderFooterReference {
         const { index } = this._resolve();
         const snapshot = this._document.getDocumentDataModel().getSnapshot();
@@ -483,7 +473,7 @@ export class FDocumentSection {
 
     private _describeHeaderFooterReference(
         kind: SectionHeaderFooterKind,
-        variant: DocumentSectionHeaderFooterVariant
+        variant: SectionHeaderFooterVariant
     ): { segmentId: string | null; linkedToPrevious: boolean } {
         const reference = this._getHeaderFooterReference(kind, variant);
         return {
@@ -494,7 +484,7 @@ export class FDocumentSection {
 
     private _setHeaderFooterLinkedToPrevious(
         kind: SectionHeaderFooterKind,
-        variant: DocumentSectionHeaderFooterVariant,
+        variant: SectionHeaderFooterVariant,
         linkedToPrevious: boolean
     ): boolean {
         this._assertTraditionalDocument();

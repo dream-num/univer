@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraphBorder, ISectionBreak } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraphBorder, ISectionBreak, SectionHeaderFooterKind } from '@univerjs/core';
 import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { IFDocumentTextRange } from './utils';
 import {
@@ -691,7 +691,7 @@ export class FDocument extends FBaseInitialable {
         return getParagraphContentStartOffset(body, paragraphs[index]);
     }
 
-    private _ensureHeaderFooter(kind: 'header' | 'footer', pageIndex: number): string {
+    private _ensureHeaderFooter(kind: SectionHeaderFooterKind, pageIndex: number): string {
         if (this.isModern()) {
             throw new Error('The document is a modern document, header/footer is not supported.');
         }
@@ -715,7 +715,7 @@ export class FDocument extends FBaseInitialable {
         return segmentId;
     }
 
-    private _getHeaderFooterCreateInfo(kind: 'header' | 'footer', pageIndex: number): {
+    private _getHeaderFooterCreateInfo(kind: SectionHeaderFooterKind, pageIndex: number): {
         createType: HeaderFooterType;
         segmentId: string;
     } {

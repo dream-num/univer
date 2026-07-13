@@ -399,11 +399,11 @@ const locale: typeof enUS = {
         },
     },
     WORKDAY_INTL: {
-        description: '返回日期在指定的工作日天数之前或之后的序列号（使用参数指明周末有几天并指明是哪几天）',
-        abstract: '返回日期在指定的工作日天数之前或之后的序列号（使用参数指明周末有几天并指明是哪几天）',
+        description: 'Trả về số sê-ri của ngày trước hoặc sau một số ngày làm việc xác định, với tham số chỉ định ngày nào và bao nhiêu ngày là cuối tuần',
+        abstract: 'Trả về số sê-ri của ngày trước hoặc sau một số ngày làm việc xác định, với tham số chỉ định ngày nào và bao nhiêu ngày là cuối tuần',
         links: [
             {
-                title: '教学',
+                title: 'Hướng dẫn',
                 url: 'https://support.microsoft.com/vi-vn/office/workday-intl-%E5%87%BD%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
             },
         ],

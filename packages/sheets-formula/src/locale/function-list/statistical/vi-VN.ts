@@ -633,8 +633,8 @@ const locale: typeof enUS = {
         },
     },
     FREQUENCY: {
-        description: '以垂直数组的形式返回频率分布',
-        abstract: '以垂直数组的形式返回频率分布',
+        description: 'Trả về phân bố tần suất dưới dạng một mảng dọc',
+        abstract: 'Trả về phân bố tần suất dưới dạng một mảng dọc',
         links: [
             {
                 title: 'Hướng dẫn',

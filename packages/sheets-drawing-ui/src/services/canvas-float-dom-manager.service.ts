@@ -31,6 +31,7 @@ import type {
     IBoundRectNoAngle,
     IRectProps,
     IRender,
+    ITransformerConfig,
     Scene,
     SpreadsheetSkeleton,
 } from '@univerjs/engine-render';
@@ -235,6 +236,27 @@ const SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG = {
     moveBoundaryEnabled: false,
 } as const;
 
+/**
+ * Keep a chart selection outline outside the chart's own rounded frame.
+ * Charts retain resize handles but do not expose a rotation control.
+ */
+export const SHEET_CHART_TRANSFORMER_CONFIG = {
+    borderEnabled: true,
+    borderStroke: '#4086f4',
+    borderStrokeWidth: 1,
+    borderSpacing: 2,
+    anchorFill: '#ffffff',
+    anchorStroke: '#4086f4',
+    anchorStrokeWidth: 1.5,
+    anchorSize: 8,
+    anchorCornerRadius: 2,
+    anchorStyle: 'canva',
+    rotateEnabled: false,
+    resizeEnabled: true,
+    keepRatio: false,
+    moveBoundaryEnabled: false,
+} as const satisfies ITransformerConfig;
+
 const FLOAT_DOM_RUNTIME_ACTIVATION_EVENT_PRIORITY = -100;
 const FLOAT_DOM_STAGE2_CLICK_DISTANCE_THRESHOLD = 4;
 const FLOAT_DOM_PREVIEW_OBJECT_SUFFIX = '__preview';
@@ -323,6 +345,13 @@ export function applyFloatDomTransformerConfig(rect: BaseObject, floatDomParam: 
     rect.transformerConfig = {
         ...SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG,
         keepRatio: embedData.resizeBehavior === 'aspect-ratio',
+    };
+}
+
+export function applySheetChartTransformerConfig(rect: BaseObject): void {
+    rect.transformerConfig = {
+        ...rect.transformerConfig,
+        ...SHEET_CHART_TRANSFORMER_CONFIG,
     };
 }
 
@@ -1207,6 +1236,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     if (rectShape != null) {
                         this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
                         applyFloatDomTransformerConfig(rectShape, floatDomParam);
+                        if (drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                            applySheetChartTransformerConfig(rectShape);
+                        }
                         rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                         this._syncFloatDomRect(drawingId, rectShape);
                         if (shouldUseFloatDomPreviewObject(floatDomParam)) {
@@ -1240,7 +1272,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         }
                         imageConfig.paintFirst = 'stroke';
                         imageConfig.strokeWidth = 1;
-                        imageConfig.borderEnabled = false;
                         imageConfig.radius = 8;
                     }
 
@@ -1254,6 +1285,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         data,
                     });
                     applyFloatDomTransformerConfig(rect, floatDomParam);
+                    if (isChart) {
+                        applySheetChartTransformerConfig(rect);
+                    }
 
                     if (isChart) {
                         rect.objectType = ObjectType.CHART;
@@ -1922,6 +1956,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
             if (rectShape != null) {
                 this._removeTopLevelDuplicateIfGrouped(scene, rectShapeKey, rectShape);
+                if (drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                    applySheetChartTransformerConfig(rectShape);
+                }
                 rectShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 this._syncFloatDomRect(drawingId, rectShape);
                 return;
@@ -1948,7 +1985,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 }
                 domConfig.paintFirst = 'stroke';
                 domConfig.strokeWidth = 1;
-                domConfig.borderEnabled = false;
                 domConfig.radius = 8;
             }
 
@@ -1964,6 +2000,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
             if (isChart) {
                 domRect.setObjectType(ObjectType.CHART);
+                applySheetChartTransformerConfig(domRect);
             }
 
             scene.addObject(domRect, DRAWING_OBJECT_LAYER_INDEX);

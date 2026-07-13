@@ -31,5 +31,6 @@ export * from './scroll-xy';
 export * from './text-rotation';
 export * from './tools';
 export * from './transform';
+export type { ITransformerConfig } from './transformer-config';
 export * from './vector2';
 export * from './zoom';

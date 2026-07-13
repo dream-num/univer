@@ -26,21 +26,26 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
-import { AutofillDoubleIcon, CropIcon, DeleteIcon, DocSettingIcon, MoreDownIcon, TextWrapShapeIcon } from '@univerjs/icons';
+import { AutofillDoubleIcon, ChartIcon, CropIcon, DeleteIcon, DocSettingIcon, MoreDownIcon, TextWrapShapeIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
-    label: LocaleKey;
+    label: string;
     index: number;
     commandId: string;
     commandParams?: object;
     disable: boolean;
+    type?: 'button' | 'select';
+    value?: string;
+    options?: Array<{ label: unknown; value: string }>;
+    commandParamsFactory?: (value: string) => object;
+    icon?: string;
 }
 
 export interface IImagePopupMenuExtraProps {
     menuItems: IImagePopupMenuItem[];
-    variant?: 'doc-floating-toolbar';
+    variant?: 'doc-floating-toolbar' | 'doc-chart-floating-toolbar';
     unitId?: string;
     subUnitId?: string;
     drawingId?: string;
@@ -73,6 +78,10 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                 drawingId={popup.extraProps.drawingId}
             />
         );
+    }
+
+    if (popup.extraProps?.variant === 'doc-chart-floating-toolbar') {
+        return <DocChartFloatingToolbar menuItems={menuItems} />;
     }
 
     const commandService = useDependency(ICommandService);
@@ -109,7 +118,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                 align="start"
                 items={menuItems.map((item) => ({
                     type: 'item',
-                    children: localeService.t<LocaleKey>(item.label),
+                    children: localeService.t(item.label as LocaleKey),
                     disabled: item.disable,
                     onSelect: () => handleClick(item),
                 }))}
@@ -195,7 +204,7 @@ function ToolbarButton(props: { titleKey: string; active?: boolean; disabled?: b
     const localeService = useDependency(LocaleService);
 
     return (
-        <Tooltip title={localeService.t(props.titleKey)} placement="bottom">
+        <Tooltip title={localeService.t(props.titleKey as LocaleKey)} placement="bottom">
             <button
                 type="button"
                 disabled={props.disabled}
@@ -401,6 +410,81 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     <DeleteIcon />
                 </ToolbarButton>
             </ToolbarGroup>
+        </div>
+    );
+}
+
+function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'menuItems'>) {
+    const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
+    const chartTypeItem = props.menuItems.find((item) => item.type === 'select');
+    const editItem = props.menuItems.find((item) => item.icon === 'edit');
+    const deleteItem = props.menuItems.find((item) => item.icon === 'delete');
+    const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => ({
+        label: String(option.label),
+        value: option.value,
+        icon: <ChartIcon />,
+    }));
+
+    const executeMenuItem = (item: IImagePopupMenuItem | undefined) => {
+        if (!item || item.disable) {
+            return;
+        }
+        commandService.executeCommand(item.commandId, item.commandParams);
+    };
+
+    return (
+        <div
+            data-u-comp="doc-chart-floating-toolbar"
+            onMouseDown={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+            }}
+            className={clsx(`
+              univer-box-border univer-flex univer-items-center univer-rounded univer-bg-white univer-px-1 univer-py-1
+              univer-shadow-sm
+              dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+            `, borderClassName)}
+        >
+            {chartTypeItem && (
+                <>
+                    <ToolbarGroup>
+                        <ToolbarDropdownButton
+                            title={localeService.t(chartTypeItem.label as LocaleKey)}
+                            value={chartTypeItem.value ?? chartTypeOptions[0]?.value ?? ''}
+                            options={chartTypeOptions}
+                            onChange={(value) => {
+                                if (!chartTypeItem.disable) {
+                                    commandService.executeCommand(chartTypeItem.commandId, chartTypeItem.commandParamsFactory?.(value));
+                                }
+                            }}
+                        />
+                    </ToolbarGroup>
+                    {(editItem || deleteItem) && <Separator orientation="vertical" />}
+                </>
+            )}
+            {(editItem || deleteItem) && (
+                <ToolbarGroup>
+                    {editItem && (
+                        <ToolbarButton
+                            titleKey={editItem.label}
+                            disabled={editItem.disable}
+                            onClick={() => executeMenuItem(editItem)}
+                        >
+                            <DocSettingIcon />
+                        </ToolbarButton>
+                    )}
+                    {deleteItem && (
+                        <ToolbarButton
+                            titleKey={deleteItem.label}
+                            disabled={deleteItem.disable}
+                            onClick={() => executeMenuItem(deleteItem)}
+                        >
+                            <DeleteIcon />
+                        </ToolbarButton>
+                    )}
+                </ToolbarGroup>
+            )}
         </div>
     );
 }

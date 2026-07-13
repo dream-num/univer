@@ -646,6 +646,7 @@ describe('docs drawing commands integration', () => {
 
     it('moves a focused floating drawing by updating the persisted doc transform', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({} as never);
 
         testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
 
@@ -882,6 +883,9 @@ describe('docs drawing commands integration', () => {
 
     it('updates drawing doc transform through the command pipeline', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
+        const skeleton = {} as never;
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue(skeleton);
+        const refreshDrawings = vi.spyOn(testBed.get(DocRefreshDrawingsService), 'refreshDrawings');
 
         expect(await testBed.commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
             unitId: 'test-doc',
@@ -901,6 +905,7 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionV).toEqual({ posOffset: 18 });
         expect(testBed.refreshControls).toHaveBeenCalled();
+        expect(refreshDrawings).toHaveBeenCalledWith(skeleton);
 
         testBed.univer.dispose();
     });

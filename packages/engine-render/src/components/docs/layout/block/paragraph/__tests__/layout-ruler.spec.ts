@@ -135,6 +135,16 @@ describe('layout-ruler', () => {
         expect(result[0].sections.length).toBeGreaterThan(0);
     });
 
+    it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
+        const text = createGlyph('字', 10);
+        const punctuation = createGlyph('，', 10);
+        punctuation.adjustability.shrinkability = [0, 5];
+
+        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(false);
+        punctuation.adjustability.shrinkability = [0, 0];
+        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
+    });
+
     it('keeps direct paragraph indents before bullet list defaults', () => {
         const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Item');
         const shapedTextList = shaping(ctx, paragraphNode.content!, ctx.viewModel, paragraphNode, sectionBreakConfig);

@@ -58,4 +58,19 @@ describe('measureDocumentNoWrapTextWidth', () => {
 
         measureSpy.mockRestore();
     });
+
+    it('honors paragraph breaks that fall between text runs', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 10,
+        }) as never);
+        const document = createDocument('AA\rBBBB\r\n');
+        document.body!.textRuns = [
+            { st: 0, ed: 2, ts: { fs: 20 } },
+            { st: 3, ed: 7, ts: { fs: 20 } },
+        ];
+
+        expect(measureDocumentNoWrapTextWidth(document)).toBe(40);
+
+        measureSpy.mockRestore();
+    });
 });

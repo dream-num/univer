@@ -91,6 +91,17 @@ function isBeyondDivideWidth(width: number, divideWidth: number) {
     return width - divideWidth > tolerance;
 }
 
+function isGlyphGroupBeyondDivideWidth(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    offsetLeft: number,
+    divideWidth: number
+) {
+    const width = __getGlyphGroupWidth(glyphGroup);
+    const trailingShrinkability = glyphGroup[glyphGroup.length - 1]?.adjustability?.shrinkability?.[1] ?? 0;
+
+    return isBeyondDivideWidth(offsetLeft + width - trailingShrinkability, divideWidth);
+}
+
 export function layoutParagraph(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
@@ -245,14 +256,13 @@ function _divideOperator(
     const lastPage = getLastPage(pages);
     const divideInfo = getLastNotFullDivideInfo(lastPage); // Get the first divide in the latest line that is not full.
     if (divideInfo) {
-        const width = __getGlyphGroupWidth(glyphGroup);
         const { divide, isLast } = divideInfo;
         const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
         const lastWidth = lastGlyph?.width || 0;
         const lastLeft = lastGlyph?.left || 0;
         const preOffsetLeft = lastWidth + lastLeft;
         const { hyphenationZone } = sectionBreakConfig;
-        if (isBeyondDivideWidth(preOffsetLeft + width, divide.width)) {
+        if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width)) {
             if (
                 divide?.glyphGroup.length === 0 &&
                 glyphGroup.length > 0 &&
@@ -307,8 +317,7 @@ function _divideOperator(
                 while (glyphGroup.length) {
                     sliceGlyphGroup.push(glyphGroup.shift()!);
 
-                    const sliceGlyphGroupWidth = __getGlyphGroupWidth(sliceGlyphGroup);
-                    if (isBeyondDivideWidth(sliceGlyphGroupWidth, divide.width)) {
+                    if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width)) {
                         // To avoid infinity loop when width is less than one char's width.
                         if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
                             glyphGroup.unshift(sliceGlyphGroup.pop()!);
@@ -1375,6 +1384,7 @@ function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, floatObject: IF
 export const __testing = {
     reLayoutCheck: _reLayoutCheck,
     avoidFlowAffectingDrawingsForTable: __avoidFlowAffectingDrawingsForTable,
+    isGlyphGroupBeyondDivideWidth,
 };
 
 function _columnOperator(

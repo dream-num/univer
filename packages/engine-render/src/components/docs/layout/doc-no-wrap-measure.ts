@@ -91,7 +91,8 @@ function measureDocumentNoWrapLineByStyle(text: string, textStyle: ITextStyle | 
 
 function measureDocumentNoWrapRunsWidth(
     dataStream: string,
-    textRuns: IDocumentNoWrapTextRunLike[]
+    textRuns: IDocumentNoWrapTextRunLike[],
+    fallbackTextStyle: ITextStyle | undefined
 ): number {
     let currentLineWidth = 0;
     let maxLineWidth = 0;
@@ -128,19 +129,36 @@ function measureDocumentNoWrapRunsWidth(
         previous.cjkWidth = 0;
     };
 
-    textRuns.forEach((run) => {
-        const start = Math.max(0, run.st ?? 0);
-        const end = Math.max(start, run.ed ?? start);
-        const segments = splitDocumentNoWrapMeasureLines(dataStream.slice(start, end));
+    const appendRange = (text: string, textStyle: ITextStyle | undefined) => {
+        const segments = splitDocumentNoWrapMeasureLines(text);
 
         segments.forEach((segment, index) => {
             if (index > 0) {
                 finishLine();
             }
 
-            appendSegment(segment, run.ts);
+            appendSegment(segment, textStyle);
         });
-    });
+    };
+
+    let cursor = 0;
+    [...textRuns]
+        .sort((a, b) => (a.st ?? 0) - (b.st ?? 0))
+        .forEach((run) => {
+            const start = Math.max(0, run.st ?? 0);
+            const end = Math.max(start, run.ed ?? start);
+            if (start > cursor) {
+                appendRange(dataStream.slice(cursor, start), fallbackTextStyle);
+            }
+            const effectiveStart = Math.max(start, cursor);
+            if (end > effectiveStart) {
+                appendRange(dataStream.slice(effectiveStart, end), run.ts);
+            }
+            cursor = Math.max(cursor, end);
+        });
+    if (cursor < dataStream.length) {
+        appendRange(dataStream.slice(cursor), fallbackTextStyle);
+    }
 
     return Math.max(maxLineWidth, currentLineWidth);
 }
@@ -162,7 +180,11 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
     const textRuns = body?.textRuns as IDocumentNoWrapTextRunLike[] | undefined;
 
     if (textRuns?.length) {
-        return measureDocumentNoWrapRunsWidth(dataStream, textRuns);
+        return measureDocumentNoWrapRunsWidth(
+            dataStream,
+            textRuns,
+            documentData?.documentStyle?.textStyle
+        );
     }
 
     const fallbackTextStyle = documentData?.documentStyle?.textStyle;

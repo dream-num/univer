@@ -1,6 +1,6 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { FloatDomContentBoxMode, IFloatDomLayout } from '@univerjs/ui';
+import type { IFloatDomContentBoxConfig, IFloatDomLayout } from '@univerjs/ui';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasFloatDomService } from '@univerjs/ui';
@@ -10,7 +10,7 @@ const FLOAT_DOM_CONTENT_BOX_FIXTURE_ID = 'float-dom-content-box-probe';
 
 interface IFloatDomContentBoxFixture {
     id: string;
-    setMode: (mode: FloatDomContentBoxMode) => void;
+    setContentBox: (contentBox: IFloatDomContentBoxConfig) => void;
     setBorder: (border: boolean) => void;
     enableRotateHandle: () => void;
     getTransformerGeometry: () => {
@@ -60,7 +60,7 @@ function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): v
     };
     window.floatDomContentBoxFixture = {
         id: disposable.id,
-        setMode: (contentBoxMode) => canvasFloatDomService.updateFloatDom(disposable.id, { contentBoxMode }),
+        setContentBox: (contentBox) => canvasFloatDomService.updateFloatDom(disposable.id, { contentBox }),
         setBorder: (border) => worksheet.updateFloatDom(disposable.id, { data: { border } }),
         enableRotateHandle: () => {
             const { rect, scene } = getDrawingAndScene();

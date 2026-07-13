@@ -21,7 +21,7 @@ declare global {
         univerAPI: any;
         floatDomContentBoxFixture?: {
             id: string;
-            setMode: (mode: 'legacy-inset' | 'exact-bounds') => void;
+            setContentBox: (contentBox: { wrapperInset?: number; contentInset?: number }) => void;
             setBorder: (border: boolean) => void;
             enableRotateHandle: () => void;
             getTransformerGeometry: () => {

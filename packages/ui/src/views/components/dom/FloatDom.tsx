@@ -64,18 +64,20 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
         hostFloatDomLayout$: layer.position$,
     }), [layer.data, layer.position$, layer.props]);
     const floatDomOverflow = resolveFloatDomOverflow(layerProps);
+    const wrapperInset = layer.contentBox?.wrapperInset;
+    const contentInset = layer.contentBox?.contentInset;
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
             if (domRef.current && innerDomRef.current) {
-                applyFloatDomLayout(domRef.current, innerDomRef.current, resolveFloatDomLayout(position, layer.contentBoxMode));
+                applyFloatDomLayout(domRef.current, innerDomRef.current, resolveFloatDomLayout(position, { wrapperInset, contentInset }));
             }
         });
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [layer.contentBoxMode, layer.position$]);
+    }, [contentInset, layer.position$, wrapperInset]);
 
     const instance = univerInstanceService.getUnit(layer.unitId);
     const docDisabled = instance instanceof DocumentDataModel ? instance.getDisabled() : undefined;
@@ -98,7 +100,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
         return null;
     }
 
-    const layout = resolveFloatDomLayout(position, layer.contentBoxMode);
+    const layout = resolveFloatDomLayout(position, layer.contentBox);
 
     //domRef univer-float-dom-wrapper
     //innerDomRef univer-float-dom

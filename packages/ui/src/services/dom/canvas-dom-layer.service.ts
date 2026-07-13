@@ -30,7 +30,12 @@ export interface IFloatDomLayout extends IPosition {
     opacity?: number;
 }
 
-export type FloatDomContentBoxMode = 'legacy-inset' | 'exact-bounds';
+export interface IFloatDomContentBoxConfig {
+    /** Amount subtracted from the visible wrapper width and height. @default 2 */
+    wrapperInset?: number;
+    /** Amount subtracted from the content width and height. @default 4 */
+    contentInset?: number;
+}
 
 export interface IFloatDom {
     position$: Observable<IFloatDomLayout>;
@@ -50,11 +55,10 @@ export interface IFloatDom {
      */
     preserveOnFocusChange?: boolean;
     /**
-     * Controls whether the content slot preserves FloatDom's historical inset
-     * or follows the supplied placement and content bounds exactly.
-     * @default 'legacy-inset'
+     * Insets subtracted from FloatDom's wrapper and content dimensions.
+     * Omitted values preserve the historical wrapper/content insets of 2/4.
      */
-    contentBoxMode?: FloatDomContentBoxMode;
+    contentBox?: IFloatDomContentBoxConfig;
     onPointerMove: (evt: PointerEvent | MouseEvent) => void;
     onPointerDown: (evt: PointerEvent | MouseEvent) => void;
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;

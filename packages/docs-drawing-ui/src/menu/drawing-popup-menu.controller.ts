@@ -184,15 +184,17 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
                 const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
+                // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
+                const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
                 const popup = this._canvasPopManagerService.attachPopupToObject(
                     object,
                     {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                        direction: isImage ? 'top-center' : 'horizontal',
-                        offset: isImage ? [0, 8] : [2, 0],
+                        direction: isImage || isChart ? 'top-center' : 'horizontal',
+                        offset: isImage || isChart ? [0, 8] : [2, 0],
                         extraProps: {
                             menuItems: this._getDrawingPopupMenuItems(unitId, subUnitId, drawingId, drawingType),
-                            variant: isImage ? 'doc-floating-toolbar' : undefined,
+                            variant: isImage ? 'doc-floating-toolbar' : isChart ? 'doc-chart-floating-toolbar' : undefined,
                             unitId,
                             subUnitId,
                             drawingId,

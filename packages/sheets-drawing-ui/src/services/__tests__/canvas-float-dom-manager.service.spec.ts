@@ -40,6 +40,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
     applyFloatDomTransformerConfig,
+    applySheetChartTransformerConfig,
     calcSheetFloatDomPosition,
     createFloatDomHostClickIntent,
     createFloatDomMoveDragState,
@@ -636,6 +637,20 @@ describe('SheetCanvasFloatDomManagerService', () => {
             keepRatio: true,
             rotateEnabled: false,
             resizeEnabled: true,
+        }));
+    });
+
+    it('keeps the chart transformer outside the chart frame', () => {
+        const rect = {};
+
+        applySheetChartTransformerConfig(rect as any);
+
+        expect((rect as any).transformerConfig).toEqual(expect.objectContaining({
+            borderEnabled: true,
+            borderStroke: '#4086f4',
+            borderSpacing: 2,
+            anchorStyle: 'canva',
+            rotateEnabled: false,
         }));
     });
 

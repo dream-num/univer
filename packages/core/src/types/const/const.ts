@@ -257,6 +257,4 @@ export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphSt
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,
 };
 
-export const PRINT_CHART_COMPONENT_KEY = 'univer-sheets-chart-print-chart';
-
 export const DOC_DRAWING_PRINTING_COMPONENT_KEY = 'univer-docs-drawing-printing';

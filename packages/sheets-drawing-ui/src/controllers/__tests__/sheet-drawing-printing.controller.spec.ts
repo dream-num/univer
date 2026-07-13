@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, PRINT_CHART_COMPONENT_KEY } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { mountPrintingFloatDom } from '../../views/PrintingFloatDom';
 import { SheetDrawingPrintingController } from '../sheet-drawing-printing.controller';
@@ -23,7 +23,7 @@ vi.mock('../../views/PrintingFloatDom', () => ({
     mountPrintingFloatDom: vi.fn(() => vi.fn()),
 }));
 
-function createController() {
+function createController(options?: { hasDrawingData?: boolean }) {
     const interceptors = new Map<string, any>();
     const points = {
         PRINTING_COMPONENT_COLLECT: 'PRINTING_COMPONENT_COLLECT',
@@ -33,7 +33,7 @@ function createController() {
     const drawingData = {
         'unit-1': {
             'sheet-1': {
-                order: ['image-1', 'chart-1', 'dom-1', 'grouped-image'],
+                order: ['image-1', 'chart-1', 'dom-1', 'block-1', 'grouped-image', 'hidden-image', 'hidden-chart'],
                 data: {
                     'image-1': {
                         unitId: 'unit-1',
@@ -57,6 +57,14 @@ function createController() {
                         componentKey: 'custom-dom',
                         transform: { left: 80, top: 90, width: 40, height: 20 },
                     },
+                    'block-1': {
+                        unitId: 'unit-1',
+                        subUnitId: 'sheet-1',
+                        drawingId: 'block-1',
+                        drawingType: DrawingTypeEnum.DRAWING_BLOCK,
+                        componentKey: 'custom-block',
+                        transform: { left: 80, top: 80, width: 20, height: 20 },
+                    },
                     'grouped-image': {
                         unitId: 'unit-1',
                         subUnitId: 'sheet-1',
@@ -64,6 +72,22 @@ function createController() {
                         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                         groupId: 'group-1',
                         transform: { left: -100, top: -100, width: 20, height: 20 },
+                    },
+                    'hidden-image': {
+                        unitId: 'unit-1',
+                        subUnitId: 'sheet-1',
+                        drawingId: 'hidden-image',
+                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                        hidden: true,
+                        transform: { left: 1000, top: 1000, width: 500, height: 500 },
+                    },
+                    'hidden-chart': {
+                        unitId: 'unit-1',
+                        subUnitId: 'sheet-1',
+                        drawingId: 'hidden-chart',
+                        drawingType: DrawingTypeEnum.DRAWING_CHART,
+                        hidden: true,
+                        transform: { left: 1000, top: 1000, width: 500, height: 500 },
                     },
                 },
             },
@@ -93,14 +117,11 @@ function createController() {
                 }),
             },
         } as never,
-        { renderDrawing: vi.fn() } as never,
-        { getDrawingDataForUnit: vi.fn(() => drawingData['unit-1']) } as never,
+        { renderDrawing: vi.fn(() => Promise.resolve()) } as never,
+        { getDrawingDataForUnit: vi.fn(() => options?.hasDrawingData === false ? undefined : drawingData['unit-1']) } as never,
         { getRenderById: vi.fn(() => render) } as never,
         {
-            get: vi.fn((key: string) => {
-                if (key === PRINT_CHART_COMPONENT_KEY) return 'ChartPrintingComponent';
-                return `${key}-Component`;
-            }),
+            get: vi.fn((key: string) => `${key}-Component`),
         } as never,
         {} as never
     );
@@ -109,20 +130,23 @@ function createController() {
 }
 
 describe('SheetDrawingPrintingController', () => {
-    it('renders printable image drawings into the print scene while leaving chart/dom to float dom printing', () => {
+    it('renders printable images while excluding charts and floating DOM drawings', () => {
         const { controller, interceptors, points } = createController();
         const scene = {};
+        const resourceCollector = { add: vi.fn() };
         const next = vi.fn(() => 'next-result');
 
         const result = interceptors.get(points.PRINTING_COMPONENT_COLLECT).handler(null, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             scene,
+            resourceCollector,
         }, next);
 
         expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledTimes(2);
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'image-1' }), scene);
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'grouped-image' }), scene);
+        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'image-1' }), scene, { allowInactiveSheet: true });
+        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'grouped-image' }), scene, { allowInactiveSheet: true });
+        expect(resourceCollector.add).toHaveBeenCalledTimes(2);
         expect(result).toBe('next-result');
 
         controller.dispose();
@@ -148,13 +172,16 @@ describe('SheetDrawingPrintingController', () => {
         controller.dispose();
     });
 
-    it('mounts chart and dom float components for printing and registers cleanup', () => {
+    it('defers React root cleanup when replacing printed float components', async () => {
         const { controller, interceptors, points } = createController();
         const unmount = vi.fn();
         vi.mocked(mountPrintingFloatDom).mockReturnValueOnce(unmount);
-        const add = vi.fn((dispose: () => void) => dispose());
+        const disposers: Array<() => void> = [];
+        const add = vi.fn((dispose: () => void) => disposers.push(dispose));
         const disposableCollection = { add };
+        const resourceCollector = { add: vi.fn() };
         const next = vi.fn((value) => value);
+        const root = document.createElement('div');
 
         const result = interceptors.get(points.PRINTING_DOM_COLLECT).handler(disposableCollection, {
             unitId: 'unit-1',
@@ -162,25 +189,55 @@ describe('SheetDrawingPrintingController', () => {
             scene: 'scene',
             skeleton: 'skeleton',
             worksheet: 'worksheet',
-            root: 'root',
+            root,
+            resourceCollector,
         }, next);
 
         expect(mountPrintingFloatDom).toHaveBeenCalledWith(
             {
                 floatDomInfos: [
-                    expect.objectContaining({ drawingId: 'chart-1', componentKey: 'ChartPrintingComponent' }),
                     expect.objectContaining({ drawingId: 'dom-1', componentKey: 'custom-dom-print-Component' }),
+                    expect.objectContaining({ drawingId: 'block-1', componentKey: 'custom-block-print-Component' }),
                 ],
                 scene: 'scene',
                 skeleton: 'skeleton',
                 worksheet: 'worksheet',
             },
-            'root',
+            expect.any(HTMLElement),
             expect.any(Object)
         );
+        const printingRoot = vi.mocked(mountPrintingFloatDom).mock.calls[0][1];
+        expect(printingRoot).not.toBe(root);
+        expect(printingRoot.parentElement).toBe(root);
         expect(add).toHaveBeenCalled();
-        expect(unmount).toHaveBeenCalled();
+        expect(resourceCollector.add).not.toHaveBeenCalled();
+        expect(unmount).not.toHaveBeenCalled();
         expect(result).toBe(disposableCollection);
+
+        disposers.forEach((dispose) => dispose());
+        expect(unmount).not.toHaveBeenCalled();
+        expect(printingRoot.parentElement).toBeNull();
+
+        await Promise.resolve();
+        expect(unmount).toHaveBeenCalledOnce();
+
+        controller.dispose();
+    });
+
+    it('continues DOM collection when the sheet has no drawing data', () => {
+        const { controller, interceptors, points } = createController({ hasDrawingData: false });
+        const disposableCollection = { add: vi.fn() };
+        const next = vi.fn(() => 'next-result');
+        const mountCallCount = vi.mocked(mountPrintingFloatDom).mock.calls.length;
+
+        const result = interceptors.get(points.PRINTING_DOM_COLLECT).handler(disposableCollection, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+        }, next);
+
+        expect(next).toHaveBeenCalledWith(disposableCollection);
+        expect(result).toBe('next-result');
+        expect(mountPrintingFloatDom).toHaveBeenCalledTimes(mountCallCount);
 
         controller.dispose();
     });

@@ -84,7 +84,7 @@ export class DrawingRenderService {
     ) { }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    async renderImages(imageParam: IImageData, scene: Scene) {
+    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean }) {
         const {
             transform: singleTransform,
             drawingType,
@@ -114,7 +114,8 @@ export class DrawingRenderService {
             return;
         }
 
-        if (this._univerInstanceService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET && subUnitId !== this._getActiveSheetId()) {
+        // Isolated print scenes may target a worksheet that is not active in the editor.
+        if (!options?.allowInactiveSheet && this._univerInstanceService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET && subUnitId !== this._getActiveSheetId()) {
             return;
         }
 
@@ -284,7 +285,7 @@ export class DrawingRenderService {
         return rects;
     }
 
-    renderDrawing(param: IDrawingSearch, scene: Scene) {
+    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean }) {
         const drawingParam = this._drawingManagerService.getDrawingByParam(param);
         if (drawingParam == null) {
             return;
@@ -292,7 +293,7 @@ export class DrawingRenderService {
 
         switch (drawingParam.drawingType) {
             case DrawingTypeEnum.DRAWING_IMAGE:
-                return this.renderImages(drawingParam as IImageData, scene);
+                return this.renderImages(drawingParam as IImageData, scene, options);
             default:
         }
     }

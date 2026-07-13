@@ -388,7 +388,18 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
         const probe = document.querySelector('[data-float-dom-content-box-probe]')!;
         const contentRect = probe.parentElement!.getBoundingClientRect();
         const wrapperRect = probe.parentElement!.parentElement!.getBoundingClientRect();
-        return { logical, transformer, wrapperWidth: wrapperRect.width, wrapperHeight: wrapperRect.height, alignment: Math.max(
+        const layout = fixture.getLayout()!;
+        const placementProbe = document.createElement('div');
+        placementProbe.style.cssText = `position:absolute;pointer-events:none;left:${layout.startX}px;top:${layout.startY}px;width:${Math.max(layout.endX - layout.startX, 0)}px;height:${Math.max(layout.endY - layout.startY, 0)}px;transform:rotate(${layout.rotate}deg);transform-origin:center center;`;
+        probe.parentElement!.parentElement!.parentElement!.appendChild(placementProbe);
+        const placementRect = placementProbe.getBoundingClientRect();
+        placementProbe.remove();
+        return { logical, transformer, wrapperWidth: wrapperRect.width, wrapperHeight: wrapperRect.height, placementAlignment: Math.max(
+            Math.abs(placementRect.left - wrapperRect.left),
+            Math.abs(placementRect.top - wrapperRect.top),
+            Math.abs(placementRect.right - wrapperRect.right),
+            Math.abs(placementRect.bottom - wrapperRect.bottom)
+        ), alignment: Math.max(
             Math.abs(contentRect.left - wrapperRect.left),
             Math.abs(contentRect.top - wrapperRect.top),
             Math.abs(contentRect.right - wrapperRect.right),
@@ -399,6 +410,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     pointerResults.push({ target: 'left-top-drag', hit: resizeHit, action: 'resize', cursor: 'nw-resize' });
     expect(resizeHit).toBe(true);
     expect(resized.alignment).toBeLessThanOrEqual(0.5);
+    expect(resized.placementAlignment).toBeLessThanOrEqual(0.5);
     expect(resized.transformer.drawing).toMatchObject({
         left: resized.logical.left,
         top: resized.logical.top,
@@ -453,7 +465,18 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
         const probe = document.querySelector('[data-float-dom-content-box-probe]')!;
         const contentRect = probe.parentElement!.getBoundingClientRect();
         const wrapperRect = probe.parentElement!.parentElement!.getBoundingClientRect();
-        return { logical, transformer, wrapperWidth: wrapperRect.width, wrapperHeight: wrapperRect.height, alignment: Math.max(
+        const layout = fixture.getLayout()!;
+        const placementProbe = document.createElement('div');
+        placementProbe.style.cssText = `position:absolute;pointer-events:none;left:${layout.startX}px;top:${layout.startY}px;width:${Math.max(layout.endX - layout.startX, 0)}px;height:${Math.max(layout.endY - layout.startY, 0)}px;transform:rotate(${layout.rotate}deg);transform-origin:center center;`;
+        probe.parentElement!.parentElement!.parentElement!.appendChild(placementProbe);
+        const placementRect = placementProbe.getBoundingClientRect();
+        placementProbe.remove();
+        return { logical, transformer, wrapperWidth: wrapperRect.width, wrapperHeight: wrapperRect.height, placementAlignment: Math.max(
+            Math.abs(placementRect.left - wrapperRect.left),
+            Math.abs(placementRect.top - wrapperRect.top),
+            Math.abs(placementRect.right - wrapperRect.right),
+            Math.abs(placementRect.bottom - wrapperRect.bottom)
+        ), alignment: Math.max(
             Math.abs(contentRect.left - wrapperRect.left),
             Math.abs(contentRect.top - wrapperRect.top),
             Math.abs(contentRect.right - wrapperRect.right),
@@ -464,6 +487,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     pointerResults.push({ target: 'rotate-drag', hit: rotateDragHit, action: 'rotate', cursor: rotateCursor });
     expect(rotateDragHit).toBe(true);
     expect(rotated.alignment).toBeLessThanOrEqual(0.5);
+    expect(rotated.placementAlignment).toBeLessThanOrEqual(0.5);
     expect(rotated.transformer.drawing.angle).toBeCloseTo(rotated.logical.angle, 5);
     const rotatedTransformerGroup = rotated.transformer.controls.find(({ key }) => key.startsWith('__SpreadsheetTransformer___'))!;
     expect(rotatedTransformerGroup).toMatchObject({

@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'Удалить таблицу',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'Верхний колонтитул',
             footer: 'Нижний колонтитул',
             panel: 'Настройки верхнего и нижнего колонтитулов',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'Настройка абзаца',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Настройка абзаца',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Выравнивание',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Фиксированное значение (px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

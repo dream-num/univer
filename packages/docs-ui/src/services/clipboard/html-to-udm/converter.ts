@@ -19,6 +19,7 @@ import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugin
 import {
     ColorKit,
     createParagraphId,
+    createSectionId,
     CustomRangeType,
     DataStreamTreeTokenType,
     DocumentBlockRangeType,
@@ -105,6 +106,10 @@ export class HtmlToUDMService {
 
     private _createParagraphId(body: IDocumentBody): string {
         return createParagraphId(new Set(body.paragraphs?.map((paragraph) => paragraph.paragraphId)));
+    }
+
+    private _createSectionId(body: IDocumentBody): string {
+        return createSectionId(new Set(body.sectionBreaks?.map((sectionBreak) => sectionBreak.sectionId)));
     }
 
     convert(html: string, metaConfig: { unitId?: string } = {}): Partial<IDocumentData> {
@@ -478,6 +483,7 @@ export class HtmlToUDMService {
 
         body.sectionBreaks ??= [];
         body.sectionBreaks.push({
+            sectionId: this._createSectionId(body),
             startIndex: body.dataStream.length,
         });
 
@@ -600,6 +606,7 @@ export class HtmlToUDMService {
                 }
 
                 body.sectionBreaks?.push({
+                    sectionId: this._createSectionId(body),
                     startIndex: body.dataStream.length,
                 });
 

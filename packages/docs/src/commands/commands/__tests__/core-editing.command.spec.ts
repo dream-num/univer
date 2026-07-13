@@ -70,7 +70,7 @@ describe('core editing commands', () => {
             body: {
                 dataStream: 'Body\r\n',
                 paragraphs: [{ startIndex: 4, paragraphId: 'body' }],
-                sectionBreaks: [{ startIndex: 5 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_101', startIndex: 5 }],
             },
             headers: {
                 'header-1': {
@@ -78,7 +78,7 @@ describe('core editing commands', () => {
                     body: {
                         dataStream: 'Head\r\n',
                         paragraphs: [{ startIndex: 4, paragraphId: 'header' }],
-                        sectionBreaks: [{ startIndex: 5 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_102', startIndex: 5 }],
                     },
                 },
             },
@@ -108,7 +108,7 @@ describe('core editing commands', () => {
             body: {
                 dataStream: 'B\r\n',
                 paragraphs: [{ startIndex: 1, paragraphId: 'body' }],
-                sectionBreaks: [{ startIndex: 2 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_103', startIndex: 2 }],
             },
             headers: {
                 'header-1': {
@@ -116,7 +116,7 @@ describe('core editing commands', () => {
                     body: {
                         dataStream: 'LongHead\r\n',
                         paragraphs: [{ startIndex: 8, paragraphId: 'header' }],
-                        sectionBreaks: [{ startIndex: 9 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_104', startIndex: 9 }],
                     },
                 },
             },
@@ -147,7 +147,7 @@ describe('core editing commands', () => {
             body: {
                 dataStream: 'B\r\n',
                 paragraphs: [{ startIndex: 1, paragraphId: 'body' }],
-                sectionBreaks: [{ startIndex: 2 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_105', startIndex: 2 }],
             },
             footers: {
                 'footer-1': {
@@ -155,7 +155,7 @@ describe('core editing commands', () => {
                     body: {
                         dataStream: 'LongFooter\r\n',
                         paragraphs: [{ startIndex: 10, paragraphId: 'footer' }],
-                        sectionBreaks: [{ startIndex: 11 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_106', startIndex: 11 }],
                     },
                 },
             },
@@ -186,7 +186,7 @@ describe('core editing commands', () => {
             body: {
                 dataStream: 'Body\r\n',
                 paragraphs: [{ startIndex: 4, paragraphId: 'body' }],
-                sectionBreaks: [{ startIndex: 5 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_107', startIndex: 5 }],
             },
             headers: {
                 'header-1': {
@@ -194,7 +194,7 @@ describe('core editing commands', () => {
                     body: {
                         dataStream: 'Head\r\n',
                         paragraphs: [{ startIndex: 4, paragraphId: 'header' }],
-                        sectionBreaks: [{ startIndex: 5 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_108', startIndex: 5 }],
                     },
                 },
             },

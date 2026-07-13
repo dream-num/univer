@@ -190,6 +190,7 @@ export const docsDemoData: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_slides_demo',
                 startIndex: 407,
                 columnProperties: [
                     {

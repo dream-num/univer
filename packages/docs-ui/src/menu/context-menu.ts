@@ -19,7 +19,7 @@ import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
-import { DOC_RANGE_TYPE, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOC_RANGE_TYPE, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
@@ -37,6 +37,7 @@ import {
     DocTableInsertRowBellowCommand,
 } from '../commands/commands/table/doc-table-insert.command';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
+import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -176,6 +177,43 @@ export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
             return one || two;
         }),
+    };
+}
+
+function getSectionSettingUnavailableObservable(accessor: IAccessor): Observable<boolean> {
+    const selectionManager = accessor.get(DocSelectionManagerService);
+    const instanceService = accessor.get(IUniverInstanceService);
+
+    return new Observable((subscriber) => {
+        const emit = () => {
+            const documentDataModel = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            const activeRange = selectionManager.getActiveTextRange();
+            const body = documentDataModel?.getBody();
+            const unavailable = !documentDataModel ||
+                documentDataModel.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL ||
+                !activeRange ||
+                Boolean(activeRange.segmentId) ||
+                Boolean(body?.tables?.some((table) => activeRange.startOffset > table.startIndex && activeRange.startOffset < table.endIndex));
+            subscriber.next(unavailable);
+        };
+
+        emit();
+        const subscription = selectionManager.textSelection$.subscribe(emit);
+        return () => subscription.unsubscribe();
+    });
+}
+
+export function SectionSettingMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return {
+        id: DocSectionSettingPanelOperation.id,
+        type: MenuItemType.BUTTON,
+        icon: 'MenuIcon',
+        title: 'docs-ui.doc.menu.sectionSetting',
+        hidden$: combineLatest(
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+            getSectionSettingUnavailableObservable(accessor),
+            (hidden, unavailable) => hidden || unavailable
+        ),
     };
 }
 

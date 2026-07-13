@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import { BooleanNumber, ColumnLayoutType, ColumnResponsiveType, DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentBlockRangeType, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, VerticalAlignmentType } from '@univerjs/core';
+import { BooleanNumber, ColumnLayoutType, ColumnResponsiveType, DashStyleType, DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentBlockRangeType, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, VerticalAlignmentType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import { updateBlockIndex } from '../../tools';
@@ -138,10 +138,21 @@ describe('section', () => {
                     body: {
                         dataStream,
                         paragraphs: [
-                            { startIndex: 5, paragraphId: 'left' },
-                            { startIndex: 12, paragraphId: 'right' },
+                            {
+                                startIndex: 6,
+                                paragraphId: 'left',
+                                paragraphStyle: {
+                                    borderBottom: {
+                                        color: { rgb: '#336699' },
+                                        dashStyle: DashStyleType.SOLID,
+                                        padding: 4,
+                                        width: 2,
+                                    },
+                                },
+                            },
+                            { startIndex: 14, paragraphId: 'right' },
                         ],
-                        sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_1014', startIndex: dataStream.length - 1 }],
                         columnGroups: [{
                             startIndex: 0,
                             endIndex: dataStream.length - 1,
@@ -177,6 +188,11 @@ describe('section', () => {
             });
             expect(columnGroup.height).toBeGreaterThan(0);
             expect(columnGroup.columns[0].page.sections[0].columns[0].lines.length).toBeGreaterThan(0);
+            expect(columnGroup.columns[0].page.sections[0].columns[0].lines[0].borderBottom).toMatchObject({
+                color: { rgb: '#336699' },
+                padding: 4,
+                width: 2,
+            });
             expect(page.sections[0].columns[0].lines.at(-1)).toMatchObject({
                 paragraphIndex: columnGroup.ed,
                 lineHeight: columnGroup.height,
@@ -205,7 +221,7 @@ describe('section', () => {
                             { startIndex: 3, paragraphId: 'left' },
                             { startIndex: 7, paragraphId: 'right' },
                         ],
-                        sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_1015', startIndex: dataStream.length - 1 }],
                         columnGroups: [{
                             startIndex: 0,
                             endIndex: dataStream.length - 1,
@@ -260,7 +276,7 @@ describe('section', () => {
                             { startIndex: 5, paragraphId: 'right' },
                             { startIndex: 13, paragraphId: 'after' },
                         ],
-                        sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_1016', startIndex: dataStream.length - 1 }],
                         columnGroups: [{
                             startIndex: 0,
                             endIndex: 7,
@@ -330,8 +346,8 @@ describe('section', () => {
                             { startIndex: 14, paragraphId: 'right-column-para' },
                         ],
                         sectionBreaks: [
-                            { startIndex: 7 },
-                            { startIndex: dataStream.length - 1 },
+                            { sectionId: 'section_fixture_1017', startIndex: 7 },
+                            { sectionId: 'section_fixture_1018', startIndex: dataStream.length - 1 },
                         ],
                         tables: [{ startIndex: 2, endIndex: 11, tableId: 'table-in-column' }],
                         columnGroups: [{
@@ -406,7 +422,7 @@ describe('section', () => {
                             { startIndex: 88, paragraphId: 'column-block-3' },
                             { startIndex: 117, paragraphId: 'column-block-4' },
                         ],
-                        sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+                        sectionBreaks: [{ sectionId: 'section_fixture_1019', startIndex: dataStream.length - 1 }],
                         blockRanges: [{
                             blockId: 'callout-column-1',
                             blockType: DocumentBlockRangeType.CALLOUT,

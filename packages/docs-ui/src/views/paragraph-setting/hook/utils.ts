@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentStyle, IParagraph, ISectionBreak } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentStyle, IParagraph } from '@univerjs/core';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 import {
     BuildTextUtils,
@@ -35,7 +35,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
-import { findNearestSectionBreak } from '../../../commands/commands/list.command';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 import {
     convertDisplayLineSpacingToStoredValue,
@@ -111,37 +110,6 @@ export const useCurrentParagraph = () => {
     return body == null
         ? currentParagraphs
         : resolveParagraphsForSettingPanel(currentParagraphs, body, docDataModel.getDocumentStyle());
-};
-
-export const useCurrentSections = (currentParagraphs: IParagraph[]) => {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    const docRanges = useDocRanges();
-
-    if (!docDataModel || docRanges.length === 0) {
-        return [];
-    }
-
-    const segmentId = docRanges[0].segmentId;
-
-    const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.sectionBreaks ?? [];
-    const currentSectionBreaks = currentParagraphs
-        .map((item) => findNearestSectionBreak(item.startIndex, sectionBreaks))
-        .reduce((a, b, index, list) => {
-            const isEnd = list.length - 1 === index;
-            if (b) {
-                a.map[b.startIndex] = b;
-            }
-            if (isEnd) {
-                for (const key in a.map) {
-                    const v = a.map[key];
-                    a.result.push(v);
-                }
-            }
-            return a;
-        }, { map: {}, result: [] } as { map: Record<string, ISectionBreak>; result: ISectionBreak[] })
-        .result;
-    return currentSectionBreaks;
 };
 
 export const useFirstParagraphHorizontalAlign = (paragraph: IParagraph[], defaultValue: string) => {

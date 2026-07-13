@@ -95,7 +95,7 @@ describe('test case in html and udm convert', () => {
                 body: {
                     dataStream: 'Exported\r\n',
                     paragraphs: [{ paragraphId: 'para_docs_ui_fixture_73', startIndex: 'Exported'.length }],
-                    sectionBreaks: [{ startIndex: 'Exported\r\n'.length - 1 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_235', startIndex: 'Exported\r\n'.length - 1 }],
                 },
             }),
         });
@@ -106,7 +106,7 @@ describe('test case in html and udm convert', () => {
             body: {
                 dataStream: 'Original\r\n',
                 paragraphs: [{ paragraphId: 'para_docs_ui_fixture_74', startIndex: 'Original'.length }],
-                sectionBreaks: [{ startIndex: 'Original\r\n'.length - 1 }],
+                sectionBreaks: [{ sectionId: 'section_fixture_236', startIndex: 'Original\r\n'.length - 1 }],
             },
         }]);
 

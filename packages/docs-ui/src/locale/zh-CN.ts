@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: '删除表格',
         },
         headerFooter: {
+            linkToPrevious: '链接到上一节',
             header: '页眉',
             footer: '页脚',
             panel: '页眉页脚设置',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: '段落设置',
+                sectionSetting: '节设置',
             },
             slider: {
                 paragraphSetting: '段落设置',
+                sectionSetting: '节设置',
             },
             paragraphSetting: {
                 alignment: '对齐方式',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: '至少值(px)',
                 exactly: '固定值(px)',
                 fixedValue: '固定值(px)',
+            },
+            sectionSetting: {
+                selectedSections: '已选择 {0} 个节',
+                columnCount: '栏数',
+                columnGap: '栏间距',
+                columnSeparator: '分隔线',
+                none: '无',
+                betweenColumns: '栏间分隔线',
+                sectionStart: '节起始位置',
+                unspecified: '未指定',
+                continuous: '连续',
+                nextPage: '下一页',
+                evenPage: '偶数页',
+                oddPage: '奇数页',
             },
         },
         rightClick: {

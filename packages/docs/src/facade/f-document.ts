@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraphBorder, ISectionBreak, SectionHeaderFooterKind } from '@univerjs/core';
+import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { IFDocumentTextRange } from './utils';
 import {
     BooleanNumber,
+    createSectionId,
+    DashStyleType,
+    DataStreamTreeTokenType,
     DocumentFlavor,
     generateRandomId,
     getParagraphContentStartOffset,
@@ -30,8 +34,10 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { CreateHeaderFooterCommand, HeaderFooterType } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentSectionBreakCommand } from '@univerjs/docs';
 import { FDocumentParagraph } from './f-document-paragraph';
+import { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
+import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange } from './utils';
 
 export interface IFDocumentParagraphQuery {
@@ -246,6 +252,207 @@ export class FDocument extends FBaseInitialable {
             this._documentDataModel,
             this._injector
         );
+    }
+
+    /**
+     * Returns document-level header/footer switches and margins. Margin values are in points (pt).
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * console.log(fDocument?.getHeaderFooterOptions());
+     * ```
+     */
+    getHeaderFooterOptions(): IHeaderFooterProps {
+        const style = this._documentDataModel.getSnapshot().documentStyle;
+        return {
+            marginHeader: style.marginHeader,
+            marginFooter: style.marginFooter,
+            useFirstPageHeaderFooter: style.useFirstPageHeaderFooter,
+            evenAndOddHeaders: style.evenAndOddHeaders,
+        };
+    }
+
+    /**
+     * Updates document-level header/footer switches and margins in a traditional document.
+     * `marginHeader` and `marginFooter` are in points (pt).
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * if (fDocument && !fDocument.isModern()) {
+     *   fDocument.setHeaderFooterOptions({ marginHeader: 36, marginFooter: 36 });
+     * }
+     * ```
+     */
+    setHeaderFooterOptions(options: IHeaderFooterProps): boolean {
+        if (this.isModern()) {
+            throw new Error('The document is a modern document, header/footer is not supported.');
+        }
+        return this._commandService.syncExecuteCommand(CreateHeaderFooterCommand.id, {
+            unitId: this.getId(),
+            headerFooterProps: options,
+        });
+    }
+
+    /**
+     * Creates a facade for reading and styling a document text range.
+     * The end offset is exclusive, and offsets are scoped to the selected body segment.
+     * @param {number} startOffset The inclusive start offset.
+     * @param {number} endOffset The exclusive end offset.
+     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
+     * @returns {FDocumentTextRange} A fixed text-range facade.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveDocument()?.getTextRange(0, 5);
+     * console.log(range?.describe());
+     * range?.setTextStyle({ bl: 1 });
+     * ```
+     */
+    getTextRange(startOffset: number, endOffset: number, segmentId: string = ''): FDocumentTextRange {
+        return this._injector.createInstance(FDocumentTextRange, this, startOffset, endOffset, segmentId, this._injector);
+    }
+
+    /**
+     * Returns traditional document sections backed by persisted SectionBreak ids.
+     * Modern documents use ColumnGroup instead and return an empty array from this read API.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const sections = fDocument?.getSections() ?? [];
+     * console.log(sections.map((section) => section.describe()));
+     * ```
+     */
+    getSections(): FDocumentSection[] {
+        if (this._documentDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            return [];
+        }
+        return getTopLevelSectionBreaks(this.getBody()).map((sectionBreak) =>
+            this._injector.createInstance(FDocumentSection, this, sectionBreak.sectionId, this._injector));
+    }
+
+    /**
+     * Returns a traditional section by zero-based index, or `null` in modern documents.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const firstSection = fDocument?.getSection(0);
+     * console.log(firstSection?.describe());
+     * ```
+     */
+    getSection(index: number): FDocumentSection | null {
+        return this.getSections()[index] ?? null;
+    }
+
+    /**
+     * Returns the traditional section containing a data-stream offset, or `null` in modern documents.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument?.findParagraphByText('Launch');
+     * const offset = paragraph?.getInfo().startOffset;
+     * const section = offset == null ? null : fDocument?.getSectionAt(offset);
+     * console.log(section?.getId());
+     * ```
+     */
+    getSectionAt(offset: number): FDocumentSection | null {
+        return this.getSections().find((section) => {
+            const range = section.getRange();
+            return offset >= range.startOffset && offset <= range.endOffset;
+        }) ?? null;
+    }
+
+    /**
+     * Inserts a traditional document section break and returns its stable facade.
+     * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
+     * Numeric layout values in `config` are in points (pt).
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * if (fDocument && !fDocument.isModern()) {
+     *   const paragraph = fDocument.findParagraphByText('Appendix');
+     *   const offset = paragraph?.getInfo().startOffset;
+     *   const section = offset == null ? null : fDocument.insertSectionBreak(offset);
+     *   console.log(section?.getId());
+     * }
+     * ```
+     */
+    insertSectionBreak(offset: number, config: Partial<Omit<ISectionBreak, 'sectionId' | 'startIndex'>> = {}): FDocumentSection | null {
+        if (this._documentDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            throw new DocsSectionUnsupportedDocumentFlavorError();
+        }
+        const sectionId = createSectionId(new Set((this.getBody().sectionBreaks ?? []).map((section) => section.sectionId)));
+        const success = this._commandService.syncExecuteCommand(InsertDocumentSectionBreakCommand.id, {
+            unitId: this.getId(),
+            offset,
+            sectionId,
+            config,
+        });
+        return success ? this._injector.createInstance(FDocumentSection, this, sectionId, this._injector) : null;
+    }
+
+    /**
+     * Inserts a column-break token in a traditional document.
+     * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * if (fDocument && !fDocument.isModern()) {
+     *   const paragraph = fDocument.findParagraphByText('Continue in next column');
+     *   const offset = paragraph?.getInfo().startOffset;
+     *   if (offset != null) {
+     *     fDocument.insertColumnBreak(offset);
+     *   }
+     * }
+     * ```
+     */
+    insertColumnBreak(offset: number): boolean {
+        if (this._documentDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            throw new DocsSectionUnsupportedDocumentFlavorError();
+        }
+        return this.insertText(offset, DataStreamTreeTokenType.COLUMN_BREAK);
+    }
+
+    /**
+     * Inserts a horizontal rule using the existing paragraph `borderBottom` mechanism.
+     * The returned paragraph can be inspected or removed with normal paragraph APIs.
+     * Border width and padding are in points (pt).
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument?.findParagraphByText('Summary');
+     * const offset = paragraph?.getInfo().startOffset;
+     * const rule = offset == null ? null : fDocument?.insertHorizontalRule(offset);
+     * console.log(rule?.getId());
+     * ```
+     */
+    insertHorizontalRule(
+        offset: number,
+        border: IParagraphBorder = {
+            padding: 5,
+            color: { rgb: '#CDD0D8' },
+            width: 1,
+            dashStyle: DashStyleType.SOLID,
+        },
+        segmentId: string = ''
+    ): FDocumentParagraph | null {
+        const body = this.getBody(segmentId);
+        const paragraphs = generateParagraphs(
+            DataStreamTreeTokenType.PARAGRAPH,
+            undefined,
+            border,
+            body.paragraphs?.map((paragraph) => paragraph.paragraphId)
+        );
+        const paragraphId = paragraphs[0].paragraphId;
+        const success = replaceBodyRange(
+            { startOffset: offset, endOffset: offset, segmentId },
+            {
+                dataStream: DataStreamTreeTokenType.PARAGRAPH,
+                paragraphs,
+            },
+            this._documentDataModel,
+            this._injector
+        );
+
+        return success ? this.getParagraph(paragraphId, segmentId) : null;
     }
 
     /**
@@ -484,7 +691,7 @@ export class FDocument extends FBaseInitialable {
         return getParagraphContentStartOffset(body, paragraphs[index]);
     }
 
-    private _ensureHeaderFooter(kind: 'header' | 'footer', pageIndex: number): string {
+    private _ensureHeaderFooter(kind: SectionHeaderFooterKind, pageIndex: number): string {
         if (this.isModern()) {
             throw new Error('The document is a modern document, header/footer is not supported.');
         }
@@ -508,7 +715,7 @@ export class FDocument extends FBaseInitialable {
         return segmentId;
     }
 
-    private _getHeaderFooterCreateInfo(kind: 'header' | 'footer', pageIndex: number): {
+    private _getHeaderFooterCreateInfo(kind: SectionHeaderFooterKind, pageIndex: number): {
         createType: HeaderFooterType;
         segmentId: string;
     } {

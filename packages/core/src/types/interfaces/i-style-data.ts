@@ -213,11 +213,7 @@ export interface IStyleBase {
      * fontFamily
      */
     ff?: Nullable<string>;
-    /**
-     * fontSize
-     *
-     * pt
-     */
+    /** Font size in points (pt), where 1 pt is 1/72 inch. */
     fs?: number;
     /**
      * italic

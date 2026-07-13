@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentFlavor } from '@univerjs/core';
+import { DashStyleType, DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import {
@@ -726,6 +726,45 @@ describe('documents render', () => {
         (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
 
         expect(strokeStyles).toEqual(['#c7c9cc', '#c7c9cc', '#c7c9cc', '#c7c9cc']);
+
+        documents.dispose();
+    });
+
+    it('draws paragraph bottom borders with their configured width and dash style', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-paragraph-border', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const line = page.sections[0].columns[0].lines[1];
+        line.borderBottom = {
+            color: { rgb: '#ff0000' },
+            width: 2.5,
+            padding: 4,
+            dashStyle: DashStyleType.DASH,
+        };
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(_value: string) {},
+        } as any;
+
+        (documents as any)._drawBorderBottom(ctx, page, line);
+
+        expect(ctx.setLineWidthByPrecision).toHaveBeenCalledWith(2.5);
+        expect(ctx.setLineDash).toHaveBeenCalledWith([6]);
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
 
         documents.dispose();
     });

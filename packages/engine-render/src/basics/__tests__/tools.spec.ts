@@ -178,6 +178,10 @@ describe('tools extra', () => {
         expect(fontStack.fontFamily).toBe('"SF Mono", "Cascadia Code", Consolas, monospace');
         expect(fontStack.fontString).toContain('"SF Mono", "Cascadia Code", Consolas, monospace');
 
+        const fractional = getFontStyleString({ fs: 10.5, ff: 'Arial' } as any);
+        expect(fractional.originFontSize).toBe(10.5);
+        expect(fractional.fontString).toContain('10.5pt');
+
         const superscript = getFontStyleString({
             fs: 12,
             ff: 'Arial',

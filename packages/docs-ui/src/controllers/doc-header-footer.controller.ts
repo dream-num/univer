@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
 import type {
     Documents,
     DocumentViewModel,
+    IDocumentSkeletonPage,
     IMouseEvent,
     IPageRenderConfig,
     IPathProps,
@@ -45,6 +46,7 @@ import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
+import { getDocPageSectionContext } from '../utils/section-header-footer';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
@@ -53,11 +55,17 @@ const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
 interface IHeaderFooterCreate {
     createType: Nullable<HeaderFooterType>;
     headerFooterId: Nullable<string>;
+    sectionId?: string;
 }
 
-// TODO: @JOCS also need to check sectionBreak config in the future.
-function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: DocumentEditArea, segmentPage: number): IHeaderFooterCreate {
-    const { documentStyle } = viewModel.getDataModel().getSnapshot();
+function checkCreateHeaderFooterType(
+    viewModel: DocumentViewModel,
+    editArea: DocumentEditArea,
+    segmentPage: number,
+    page?: IDocumentSkeletonPage
+): IHeaderFooterCreate {
+    const snapshot = viewModel.getDataModel().getSnapshot();
+    const { sectionId, config } = getDocPageSectionContext(snapshot, page);
     const {
         defaultHeaderId,
         defaultFooterId,
@@ -67,67 +75,40 @@ function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: Doc
         firstPageFooterId,
         evenAndOddHeaders,
         useFirstPageHeaderFooter,
-    } = documentStyle;
+    } = config;
+    const isFirstPage = page ? page.pageNumber === page.pageNumberStart : segmentPage === 0;
+    const isEvenPage = page ? page.pageNumber % 2 === 0 : segmentPage % 2 === 1;
 
-    switch (editArea) {
-        case DocumentEditArea.BODY:
-            return {
-                createType: null,
-                headerFooterId: null,
-            };
-        case DocumentEditArea.HEADER: {
-            if (useFirstPageHeaderFooter === BooleanNumber.TRUE && !firstPageHeaderId) {
-                return {
-                    createType: HeaderFooterType.FIRST_PAGE_HEADER,
-                    headerFooterId: null,
-                };
-            }
-
-            if (evenAndOddHeaders === BooleanNumber.TRUE && segmentPage % 2 === 0 && !evenPageHeaderId) {
-                return {
-                    createType: HeaderFooterType.EVEN_PAGE_HEADER,
-                    headerFooterId: null,
-                };
-            }
-
-            return defaultHeaderId
-                ? {
-                    createType: null,
-                    headerFooterId: defaultHeaderId,
-                }
-                : {
-                    createType: HeaderFooterType.DEFAULT_HEADER,
-                    headerFooterId: null,
-                };
-        }
-        case DocumentEditArea.FOOTER: {
-            if (useFirstPageHeaderFooter === BooleanNumber.TRUE && !firstPageFooterId) {
-                return {
-                    createType: HeaderFooterType.FIRST_PAGE_FOOTER,
-                    headerFooterId: null,
-                };
-            }
-
-            if (evenAndOddHeaders === BooleanNumber.TRUE && segmentPage % 2 === 0 && !evenPageFooterId) {
-                return {
-                    createType: HeaderFooterType.EVEN_PAGE_FOOTER,
-                    headerFooterId: null,
-                };
-            }
-
-            return defaultFooterId
-                ? {
-                    createType: null,
-                    headerFooterId: defaultFooterId,
-                }
-                : {
-                    createType: HeaderFooterType.DEFAULT_FOOTER,
-                    headerFooterId: null,
-                };
-        }
-        default:
-            throw new Error(`Invalid editArea: ${editArea}`);
+    if (editArea === DocumentEditArea.BODY) {
+        return { createType: null, headerFooterId: null, sectionId };
     }
+
+    const isHeader = editArea === DocumentEditArea.HEADER;
+    if (!isHeader && editArea !== DocumentEditArea.FOOTER) {
+        throw new Error(`Invalid editArea: ${editArea}`);
+    }
+    const variants = isHeader
+        ? {
+            first: [firstPageHeaderId, HeaderFooterType.FIRST_PAGE_HEADER] as const,
+            even: [evenPageHeaderId, HeaderFooterType.EVEN_PAGE_HEADER] as const,
+            default: [defaultHeaderId, HeaderFooterType.DEFAULT_HEADER] as const,
+        }
+        : {
+            first: [firstPageFooterId, HeaderFooterType.FIRST_PAGE_FOOTER] as const,
+            even: [evenPageFooterId, HeaderFooterType.EVEN_PAGE_FOOTER] as const,
+            default: [defaultFooterId, HeaderFooterType.DEFAULT_FOOTER] as const,
+        };
+    const [headerFooterId, createType] = useFirstPageHeaderFooter === BooleanNumber.TRUE && isFirstPage
+        ? variants.first
+        : evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage
+            ? variants.even
+            : variants.default;
+
+    return {
+        createType: headerFooterId ? null : createType,
+        headerFooterId: headerFooterId ?? null,
+        sectionId,
+    };
 }
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
@@ -246,13 +227,17 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                 pageMarginTop
             );
 
-            if (preEditArea === editArea) {
+            if (
+                preEditArea === editArea &&
+                (editArea === DocumentEditArea.BODY || this._docSelectionRenderService.getSegmentPage() === pageNumber)
+            ) {
                 return;
             }
 
             viewModel.setEditArea(editArea);
 
-            const { createType, headerFooterId } = checkCreateHeaderFooterType(viewModel, editArea, pageNumber);
+            const page = skeleton.getSkeletonData()?.pages[pageNumber];
+            const { createType, headerFooterId, sectionId } = checkCreateHeaderFooterType(viewModel, editArea, pageNumber, page);
 
             if (editArea === DocumentEditArea.BODY) {
                 this._docSelectionRenderService.setSegment('');
@@ -269,6 +254,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                         unitId,
                         createType,
                         segmentId,
+                        sectionId,
                     });
                 } else if (headerFooterId != null) {
                     this._docSelectionRenderService.setSegment(headerFooterId);

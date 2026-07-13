@@ -27,6 +27,7 @@ import type {
 } from '@univerjs/core';
 import {
     createParagraphId,
+    createSectionId,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentDataModel,
     DocumentFlavor,
@@ -81,6 +82,7 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
                 },
             ],
             sectionBreaks: [{
+                sectionId: createSectionId(new Set()),
                 startIndex: contentLength + 1,
             }],
         },

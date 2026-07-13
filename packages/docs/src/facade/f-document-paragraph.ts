@@ -18,6 +18,7 @@ import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univ
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { getParagraphContentStartOffset, PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
 /**
@@ -133,6 +134,22 @@ export class FDocumentParagraph {
     }
 
     /**
+     * Returns an agent-friendly facade for reading and styling this paragraph's text.
+     * @returns {FDocumentTextRange} The paragraph text range, excluding the trailing paragraph break.
+     * @example
+     * ```ts
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument?.findParagraphByText('Launch');
+     * const range = paragraph?.getTextRange();
+     * console.log(range?.describe());
+     * ```
+     */
+    getTextRange(): FDocumentTextRange {
+        const { startOffset, endOffset } = this.getInfo();
+        return this._injector.createInstance(FDocumentTextRange, this._document, startOffset, endOffset, this._segmentId, this._injector);
+    }
+
+    /**
      * Get this paragraph's plain text.
      * @returns {string} The paragraph text without the trailing paragraph break.
      * @example
@@ -193,6 +210,7 @@ export class FDocumentParagraph {
 
     /**
      * Apply paragraph style to a paragraph handle or text range.
+     * `style.textStyle.fs` is a font size in points (pt), not CSS pixels.
      * @param {IParagraphStyle} style The Univer paragraph style patch.
      * @returns {boolean} `true` if the style was applied.
      * @example

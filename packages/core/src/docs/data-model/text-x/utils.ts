@@ -322,6 +322,12 @@ export function getBodySlice(
     }
 
     docBody.paragraphs = getParagraphsSlice(body, startOffset, endOffset, type);
+    const sectionBreaks = getSectionBreakSlice(body, startOffset, endOffset - 1);
+    if (sectionBreaks) {
+        docBody.sectionBreaks = sectionBreaks;
+    } else if (returnEmptyArray) {
+        docBody.sectionBreaks = [];
+    }
 
     if (type === SliceBodyType.cut) {
         const customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);

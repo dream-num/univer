@@ -24,7 +24,7 @@ import { ColumnResponsiveType, DataStreamTreeNodeType } from '@univerjs/core';
 import { DocumentSkeletonPageType, LineType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { applyTrailingBlockRangeSpaceBelow, createSkeletonPage } from '../model/page';
-import { getLastNotFullColumnInfo, updateBlockIndex } from '../tools';
+import { getLastNotFullColumnInfo, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
 import { dealWidthParagraph } from './paragraph/paragraph-layout';
 
 interface IColumnGroupLayoutColumn {
@@ -148,6 +148,7 @@ function createColumnContentPage(
         dealWidthParagraph(ctx, viewModel, paragraphNode, page, columnSectionBreakConfig);
     }
 
+    updateInlineDrawingCoordsAndBorder(ctx, [page]);
     updateBlockIndex(
         [page],
         columnNode.startIndex,

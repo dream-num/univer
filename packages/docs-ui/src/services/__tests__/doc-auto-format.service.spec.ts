@@ -48,7 +48,7 @@ function createService() {
         body: {
             dataStream: 'Hello world\r\n',
             paragraphs: [{ paragraphId: 'p1', startIndex: 11 }],
-            sectionBreaks: [{ startIndex: 13 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_228', startIndex: 13 }],
             customRanges: [{
                 startIndex: 6,
                 endIndex: 10,

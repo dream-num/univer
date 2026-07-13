@@ -87,6 +87,7 @@ describe('page model', () => {
         const headerVM = { getChildren: () => [{}] };
         const footerVM = { getChildren: () => [{}] };
         const sectionBreakConfig = {
+            sectionId: 'section-page-model',
             pageNumberStart: 1,
             pageSize: { width: 200, height: 300 },
             pageOrient: PageOrientType.PORTRAIT,
@@ -125,6 +126,7 @@ describe('page model', () => {
 
         const firstPage = createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, 1);
         expect(firstPage.headerId).toBe('h-first');
+        expect(firstPage.sectionId).toBe('section-page-model');
         expect(firstPage.footerId).toBe('f-first');
         expect(firstPage.pageWidth).toBe(200);
         expect(firstPage.pageHeight).toBe(300);

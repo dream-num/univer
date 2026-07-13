@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'Xóa bảng',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'Đầu trang',
             footer: 'Chân trang',
             panel: 'Cài đặt đầu trang và chân trang',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'Paragraph Setting',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Paragraph Setting',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Alignment',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Fixed Value(px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

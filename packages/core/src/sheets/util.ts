@@ -23,6 +23,7 @@ import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
 import { createParagraphId } from '../docs/paragraph-id';
+import { createSectionId } from '../docs/section-break-id';
 import { Rectangle } from '../shared';
 import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
 import { CustomRangeType, DocumentFlavor } from '../types/interfaces';
@@ -106,6 +107,7 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
                 },
             ],
             sectionBreaks: [{
+                sectionId: createSectionId(new Set()),
                 startIndex: contentLength + 1,
             }],
         },

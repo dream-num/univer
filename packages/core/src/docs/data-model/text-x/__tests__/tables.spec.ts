@@ -33,8 +33,8 @@ describe('TextX tables', () => {
                 { startIndex: 12, paragraphId: 'after-table' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 13 },
+                { sectionId: 'section_fixture_36', startIndex: 8 },
+                { sectionId: 'section_fixture_37', startIndex: 13 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -54,8 +54,8 @@ describe('TextX tables', () => {
                 { startIndex: 12, paragraphId: 'after-table' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 13 },
+                { sectionId: 'section_fixture_38', startIndex: 8 },
+                { sectionId: 'section_fixture_39', startIndex: 13 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -70,7 +70,7 @@ describe('TextX tables', () => {
         const body: IDocumentBody = {
             dataStream: `A${T.PARAGRAPH}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 1, paragraphId: 'before' }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_40', startIndex: 2 }],
         };
 
         TextX.apply(body, [
@@ -83,7 +83,7 @@ describe('TextX tables', () => {
                         { startIndex: 4, paragraphId: 'cell' },
                         { startIndex: 9, paragraphId: 'after-table' },
                     ],
-                    sectionBreaks: [{ startIndex: 5 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_41', startIndex: 5 }],
                     tables: [{ startIndex: 0, endIndex: 9, tableId: 'table-1' }],
                 },
                 len: 10,
@@ -101,7 +101,7 @@ describe('TextX tables', () => {
                 { startIndex: 1, paragraphId: 'before' },
                 { startIndex: 6, paragraphId: 'cell' },
             ],
-            sectionBreaks: [{ startIndex: 10 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_42', startIndex: 10 }],
             tables: [{ startIndex: 2, endIndex: 9, tableId: 'table-1' }],
         };
 
@@ -130,8 +130,8 @@ describe('TextX tables', () => {
                 { startIndex: 18, paragraphId: 'after' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 19 },
+                { sectionId: 'section_fixture_43', startIndex: 8 },
+                { sectionId: 'section_fixture_44', startIndex: 19 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -159,8 +159,8 @@ describe('TextX tables', () => {
                 { startIndex: 12, paragraphId: 'after' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 13 },
+                { sectionId: 'section_fixture_45', startIndex: 8 },
+                { sectionId: 'section_fixture_46', startIndex: 13 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -185,8 +185,8 @@ describe('TextX tables', () => {
                 { startIndex: tableStream.length + 5, paragraphId: 'after' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: tableStream.length + 6 },
+                { sectionId: 'section_fixture_47', startIndex: 8 },
+                { sectionId: 'section_fixture_48', startIndex: tableStream.length + 6 },
             ],
             tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
         };
@@ -214,8 +214,8 @@ describe('TextX tables', () => {
                 { startIndex: columnGroupStart + 6, paragraphId: 'column' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: columnGroupStart + columnGroupStream.length - 1 },
+                { sectionId: 'section_fixture_49', startIndex: 8 },
+                { sectionId: 'section_fixture_50', startIndex: columnGroupStart + columnGroupStream.length - 1 },
             ],
             tables: [{ startIndex: 0, endIndex: tableEnd, tableId: 'table-1' }],
             columnGroups: [{
@@ -249,8 +249,8 @@ describe('TextX tables', () => {
                 { startIndex: 12, paragraphId: 'after' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 13 },
+                { sectionId: 'section_fixture_51', startIndex: 8 },
+                { sectionId: 'section_fixture_52', startIndex: 13 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -280,8 +280,8 @@ describe('TextX tables', () => {
                 { startIndex: 18, paragraphId: 'after' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 19 },
+                { sectionId: 'section_fixture_53', startIndex: 8 },
+                { sectionId: 'section_fixture_54', startIndex: 19 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -312,8 +312,8 @@ describe('TextX tables', () => {
                 { startIndex: 18, paragraphId: 'after' },
             ],
             sectionBreaks: [
-                { startIndex: 8 },
-                { startIndex: 19 },
+                { sectionId: 'section_fixture_55', startIndex: 8 },
+                { sectionId: 'section_fixture_56', startIndex: 19 },
             ],
             tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
         };
@@ -329,7 +329,6 @@ describe('TextX tables', () => {
         ];
 
         TextX.apply(body, TextX.compose(firstUpdate, secondUpdate));
-
         expect(body.dataStream).toBe(`${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cel啊手l${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}After${T.PARAGRAPH}${T.SECTION_BREAK}`);
         expect(body.tables).toEqual([{ startIndex: 0, endIndex: 14, tableId: 'table-1' }]);
         expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([9, 20]);
@@ -341,8 +340,8 @@ describe('TextX tables', () => {
             dataStream: `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}A${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.SECTION_BREAK}`,
             paragraphs: [{ startIndex: 4, paragraphId: 'cell' }],
             sectionBreaks: [
-                { startIndex: 5 },
-                { startIndex: 9 },
+                { sectionId: 'section_fixture_57', startIndex: 5 },
+                { sectionId: 'section_fixture_58', startIndex: 9 },
             ],
             tables: [{ startIndex: 0, endIndex: 8, tableId: 'table-1' }],
         };

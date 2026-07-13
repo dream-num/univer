@@ -111,6 +111,7 @@ const richTextTestFloat: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_default_workbook_1',
                 startIndex: 61,
                 columnProperties: [
                     {
@@ -199,6 +200,7 @@ const richTextTest: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_default_workbook_2',
                 startIndex: 61,
                 columnProperties: [
                     {

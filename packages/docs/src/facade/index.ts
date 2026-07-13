@@ -15,10 +15,16 @@
  */
 
 import './f-univer';
+import './f-enum';
 
 export { FDocument } from './f-document';
 export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
 export type { IFDocumentParagraphInfo } from './f-document-paragraph';
+export { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
+export type { IFDocumentSectionColumnOptions, IFDocumentSectionDescription } from './f-document-section';
+export { FDocumentTextRange } from './f-document-text-range';
+export type { IFDocumentTextRangeDescription, IFDocumentTextStyleRun } from './f-document-text-range';
+export * from './f-enum';
 export type { FDocEmbedUnitFacadeMapAugmentation } from './f-types';
 export type { IFDocumentTextRange } from './utils';
 export { stripBlockTokens } from './utils';

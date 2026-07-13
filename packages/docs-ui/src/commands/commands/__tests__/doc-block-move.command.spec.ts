@@ -32,7 +32,7 @@ describe('buildMoveDocBlockActions', () => {
     it('moves a paragraph and remaps paragraph indexes', () => {
         const documentData = createDocument('A\rB\rC\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_9', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_10', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_11', startIndex: 5 }],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_205', startIndex: 6 }],
         });
 
         const { nextDocumentData, movedRange } = buildMoveDocBlockActions({
@@ -49,7 +49,7 @@ describe('buildMoveDocBlockActions', () => {
     it('moves a block range as one unit', () => {
         const documentData = createDocument('aa\rBB\rcc\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_12', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_13', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_14', startIndex: 8 }],
-            sectionBreaks: [{ startIndex: 9 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_206', startIndex: 9 }],
             blockRanges: [{ blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }],
         });
 
@@ -68,7 +68,7 @@ describe('buildMoveDocBlockActions', () => {
     it('moves a table range and remaps custom ranges and text runs', () => {
         const documentData = createDocument('aa\rTT\rcc\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_15', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_16', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_17', startIndex: 8 }],
-            sectionBreaks: [{ startIndex: 9 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_207', startIndex: 9 }],
             tables: [{ tableId: 'table-1', startIndex: 3, endIndex: 6 }],
             customRanges: [{ rangeId: 'comment-1', rangeType: CustomRangeType.COMMENT, startIndex: 6, endIndex: 7 }],
             textRuns: [{ st: 6, ed: 8, ts: {} }],
@@ -89,7 +89,7 @@ describe('buildMoveDocBlockActions', () => {
     it('moves a custom block paragraph and keeps the custom block attached', () => {
         const documentData = createDocument('\b\raa\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_18', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_19', startIndex: 4 }],
-            sectionBreaks: [{ startIndex: 5 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_208', startIndex: 5 }],
             customBlocks: [{ blockId: 'custom-1', blockType: BlockType.CUSTOM, startIndex: 0 }],
         });
 
@@ -120,7 +120,7 @@ describe('buildMoveDocBlockActions', () => {
 
         const documentData = createDocument('A\rB\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_20', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_21', startIndex: 3 }],
-            sectionBreaks: [{ startIndex: 4 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_209', startIndex: 4 }],
         });
 
         const { nextDocumentData, movedRange } = buildMoveDocBlockActions({
@@ -136,7 +136,7 @@ describe('buildMoveDocBlockActions', () => {
     it('remaps custom decorations that move with their paragraph', () => {
         const documentData = createDocument('aa\rDD\rcc\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_22', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_23', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_24', startIndex: 8 }],
-            sectionBreaks: [{ startIndex: 9 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_210', startIndex: 9 }],
             customDecorations: [{ id: 'decoration-1', startIndex: 3, endIndex: 5 } as never],
         });
 
@@ -154,7 +154,10 @@ describe('buildMoveDocBlockActions', () => {
     it('keeps every document metadata collection ordered after moving content upward', () => {
         const documentData = createDocument('aa\rMM\rzz\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_29', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_30', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_31', startIndex: 8 }],
-            sectionBreaks: [{ startIndex: 6 }, { startIndex: 9 }],
+            sectionBreaks: [
+                { sectionId: 'section_move_two', startIndex: 6 },
+                { sectionId: 'section_move_three', startIndex: 9 },
+            ],
             customBlocks: [{ blockId: 'custom-2', blockType: BlockType.CUSTOM, startIndex: 3 }, { blockId: 'custom-3', blockType: BlockType.CUSTOM, startIndex: 6 }],
             tables: [{ tableId: 'table-2', startIndex: 3, endIndex: 5 }, { tableId: 'table-3', startIndex: 6, endIndex: 8 }],
             blockRanges: [{ blockId: 'quote-2', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }, { blockId: 'quote-3', blockType: DocumentBlockRangeType.QUOTE, startIndex: 6, endIndex: 8 }],
@@ -189,7 +192,7 @@ describe('buildMoveDocBlockActions', () => {
                 { paragraphId: 'para_docs_ui_fixture_34', startIndex: 9 },
                 { paragraphId: 'para_docs_ui_fixture_35', startIndex: 13 },
             ],
-            sectionBreaks: [{ startIndex: 14 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_213', startIndex: 14 }],
             columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 11 }],
         });
 
@@ -219,7 +222,7 @@ describe('MoveDocBlockCommand', () => {
     it('moves a block through the real rich text mutation flow', async () => {
         testBed = createCommandTestBed(createDocument('A\rB\rC\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_25', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_26', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_27', startIndex: 5 }],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_214', startIndex: 6 }],
         }));
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(MoveDocBlockCommand);
@@ -246,7 +249,7 @@ describe('MoveDocBlockCommand', () => {
                 { paragraphId: 'para_docs_ui_fixture_38', startIndex: 9 },
                 { paragraphId: 'para_docs_ui_fixture_39', startIndex: 13 },
             ],
-            sectionBreaks: [{ startIndex: 14 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_215', startIndex: 14 }],
             columnGroups: [{ columnGroupId: 'column-group-1', startIndex: 2, endIndex: 11 }],
         }));
         const commandService = testBed.get(ICommandService);
@@ -270,7 +273,7 @@ describe('MoveDocBlockCommand', () => {
     it('applies registered block move transformers through the real rich text mutation flow', async () => {
         testBed = createCommandTestBed(createDocument('A\rB\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_40', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_41', startIndex: 3 }],
-            sectionBreaks: [{ startIndex: 4 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_216', startIndex: 4 }],
         }));
         const commandService = testBed.get(ICommandService);
         const moveValidatorService = testBed.get(DocBlockMoveValidatorService);
@@ -301,7 +304,7 @@ describe('MoveDocBlockCommand', () => {
     it('does not mutate when the target document is missing', async () => {
         testBed = createCommandTestBed(createDocument('A\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_28', startIndex: 1 }],
-            sectionBreaks: [{ startIndex: 2 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_217', startIndex: 2 }],
         }));
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(MoveDocBlockCommand);
@@ -320,7 +323,7 @@ describe('buildReplaceDocumentBodyActions', () => {
     it('uses TextX and local body patches instead of replacing whole body fields', () => {
         const previousDocumentData = createDocument('A\rB\rC\r\n', {
             paragraphs: [{ paragraphId: 'para_docs_ui_fixture_42', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_43', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_44', startIndex: 5 }],
-            sectionBreaks: [{ startIndex: 6 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_218', startIndex: 6 }],
         });
         const sourceRange = { startOffset: 0, endOffset: 2 };
         const targetOffset = 6;

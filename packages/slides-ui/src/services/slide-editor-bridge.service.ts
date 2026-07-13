@@ -20,6 +20,7 @@ import type { KeyCode } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import {
     createIdentifier,
+    createSectionId,
     Disposable,
     DocumentDataModel,
     EDITOR_ACTIVATED,
@@ -308,7 +309,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
                     } as IParagraphStyle,
                     startIndex: content.length + 1,
                 }] as IParagraph[],
-                sectionBreaks: [{ startIndex: content.length + 2 }],
+                sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: content.length + 2 }],
             } as IDocumentBody,
             documentStyle: {
                 marginBottom: 0,

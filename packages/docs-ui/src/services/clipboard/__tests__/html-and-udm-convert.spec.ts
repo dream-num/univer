@@ -403,7 +403,12 @@ describe('test case in html and udm convert', () => {
                         { paragraphId: 'para_docs_ui_fixture_56', startIndex: 21 },
                         { paragraphId: 'para_docs_ui_fixture_57', startIndex: 27 },
                     ],
-                    sectionBreaks: [{ startIndex: 10 }, { startIndex: 14 }, { startIndex: 22 }, { startIndex: 28 }],
+                    sectionBreaks: [
+                        { sectionId: 'section_html_1', startIndex: 10 },
+                        { sectionId: 'section_html_2', startIndex: 14 },
+                        { sectionId: 'section_html_3', startIndex: 22 },
+                        { sectionId: 'section_html_4', startIndex: 28 },
+                    ],
                 },
                 tableSource: {
                     'table-1': {
@@ -587,7 +592,7 @@ describe('test case in html and udm convert', () => {
                     dataStream: 'AB',
                     textRuns: [{ st: 0, ed: 1, ts: { bl: BooleanNumber.TRUE } }],
                     paragraphs: [{ paragraphId: 'para_docs_ui_fixture_65', startIndex: 1 }],
-                    sectionBreaks: [{ startIndex: 2 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_233', startIndex: 2 }],
                     blockRanges: [{ startIndex: 0, endIndex: 1, blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE }],
                     customRanges: [{ startIndex: 0, endIndex: 1, rangeId: 'range-1', rangeType: 0 }],
                     customDecorations: [{ startIndex: 0, endIndex: 1, id: 'decoration-1', type: CustomDecorationType.COMMENT }],
@@ -601,7 +606,7 @@ describe('test case in html and udm convert', () => {
                     dataStream: 'CD',
                     textRuns: [{ st: 0, ed: 2, ts: { it: BooleanNumber.TRUE } }],
                     paragraphs: [{ paragraphId: 'para_docs_ui_fixture_66', startIndex: 2 }],
-                    sectionBreaks: [{ startIndex: 2 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_234', startIndex: 2 }],
                     blockRanges: [{ startIndex: 0, endIndex: 2, blockId: 'code-1', blockType: DocumentBlockRangeType.CODE }],
                     customRanges: [{ startIndex: 0, endIndex: 1, rangeId: 'range-2', rangeType: 0 }],
                     customDecorations: [{ startIndex: 1, endIndex: 2, id: 'decoration-2', type: CustomDecorationType.COMMENT }],

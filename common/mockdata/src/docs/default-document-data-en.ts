@@ -355,11 +355,13 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_default_document_en_1',
                 startIndex: 1245,
                 // textDirection: textDirectionDocument,
                 // contentDirection: textDirection!,
             },
             {
+                sectionId: 'section_mockdata_default_document_en_2',
                 startIndex: 2629,
                 columnProperties: [
                     {

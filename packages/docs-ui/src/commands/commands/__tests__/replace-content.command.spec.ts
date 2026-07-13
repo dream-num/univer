@@ -184,7 +184,7 @@ describe('replace or cover content of document', () => {
                         { paragraphId: 'para_replace_right', startIndex: 14 },
                         { paragraphId: 'para_replace_after', startIndex: 17 },
                     ],
-                    sectionBreaks: [{ startIndex: 18 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_226', startIndex: 18 }],
                     customBlocks: [],
                     columnGroups,
                 },
@@ -254,7 +254,7 @@ describe('replace or cover content of document', () => {
                 body: {
                     dataStream: 'Snapshot\r\n',
                     paragraphs: [{ paragraphId: 'para_replace_snapshot_shape', startIndex: 8 }],
-                    sectionBreaks: [{ startIndex: 9 }],
+                    sectionBreaks: [{ sectionId: 'section_fixture_227', startIndex: 9 }],
                     textRuns: [],
                 },
             };

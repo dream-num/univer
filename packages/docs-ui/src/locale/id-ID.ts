@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'Hapus tabel',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'Header',
             footer: 'Footer',
             panel: 'Pengaturan Header & Footer',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'Pengaturan Paragraf',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Pengaturan Paragraf',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Perataan',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Nilai Tetap(px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

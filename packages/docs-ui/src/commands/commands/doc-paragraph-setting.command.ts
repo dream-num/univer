@@ -20,8 +20,7 @@ import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUni
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocParagraphSettingCommandParams {
-    paragraph: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule'>>;
-    sections?: Record<string, any>;
+    paragraph?: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule'>>;
 };
 export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandParams> = {
     id: 'doc-paragraph-setting.command',
@@ -44,8 +43,9 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
         const unitId = docDataModel.getUnitId();
 
         const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const allParagraphs = segment?.getBody()?.paragraphs ?? [];
-        const dataStream = segment?.getBody()?.dataStream ?? '';
+        const segmentBody = segment?.getBody();
+        const allParagraphs = segmentBody?.paragraphs ?? [];
+        const dataStream = segmentBody?.dataStream ?? '';
         const paragraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, allParagraphs, dataStream) ?? [];
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -57,6 +57,9 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             },
         };
 
+        if (!config.paragraph || Object.keys(config.paragraph).length === 0) {
+            return false;
+        }
         const memoryCursor = new MemoryCursor();
         memoryCursor.reset();
 
@@ -69,23 +72,19 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
                 t: TextXActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,
             });
-            // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
-            const paragraphStyle: IParagraphStyle = {
-                ...paragraph.paragraphStyle,
-                ...config.paragraph,
-            };
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: 1,
                 body: {
                     dataStream: '',
-                    paragraphs: [
-                        {
-                            ...paragraph,
-                            paragraphStyle,
-                            startIndex: 0,
+                    paragraphs: [{
+                        ...paragraph,
+                        paragraphStyle: {
+                            ...paragraph.paragraphStyle,
+                            ...config.paragraph,
                         },
-                    ],
+                        startIndex: 0,
+                    }],
                 },
                 coverType: UpdateDocsAttributeType.REPLACE,
             });

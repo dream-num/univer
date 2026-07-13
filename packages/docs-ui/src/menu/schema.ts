@@ -76,6 +76,7 @@ import {
 } from '../commands/commands/table/doc-table-insert.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
+import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import {
     CopyMenuFactory,
@@ -90,6 +91,7 @@ import {
     InsertRowBeforeMenuItemFactory,
     ParagraphSettingMenuFactory,
     PasteMenuFactory,
+    SectionSettingMenuFactory,
     TABLE_DELETE_MENU_ID,
     TABLE_INSERT_MENU_ID,
     TableDeleteMenuItemFactory,
@@ -327,6 +329,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: ParagraphSettingMenuFactory,
             },
+            [DocSectionSettingPanelOperation.id]: {
+                order: 1,
+                menuItemFactory: SectionSettingMenuFactory,
+            },
             [TABLE_INSERT_MENU_ID]: {
                 order: 1,
                 menuItemFactory: TableInsertMenuItemFactory,
@@ -418,6 +424,10 @@ export const menuSchema: MenuSchemaType = {
             [DocParagraphSettingPanelOperation.id]: {
                 order: 0,
                 menuItemFactory: ParagraphSettingMenuFactory,
+            },
+            [DocSectionSettingPanelOperation.id]: {
+                order: 1,
+                menuItemFactory: SectionSettingMenuFactory,
             },
             [INSERT_BELLOW_MENU_ID]: {
                 order: 1,
@@ -531,6 +541,10 @@ export const menuSchema: MenuSchemaType = {
                 [DocParagraphSettingPanelOperation.id]: {
                     order: 0,
                     menuItemFactory: ParagraphSettingMenuFactory,
+                },
+                [DocSectionSettingPanelOperation.id]: {
+                    order: 1,
+                    menuItemFactory: SectionSettingMenuFactory,
                 },
                 [BulletListCommand.id]: {
                     order: 1,

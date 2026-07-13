@@ -520,6 +520,28 @@ describe('docs layout tools extra', () => {
         expect(getPageFromPath(root as any, ['skeTables', 't1', 'rows', 0, 'cells', 0])).toBeNull();
     });
 
+    it('inherits header and footer references from the previous traditional section', () => {
+        const sections = [
+            { sectionId: 'section_1', defaultHeaderId: 'header-section-1' },
+            { sectionId: 'section_2' },
+        ];
+        const ctx = {
+            docsConfig: {},
+            viewModel: {
+                getChildren: () => [{ endIndex: 4 }, { endIndex: 9 }],
+                getSectionBreak: (endIndex: number) => endIndex === 4 ? sections[0] : sections[1],
+            },
+            dataModel: {
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    defaultHeaderId: 'header-global',
+                },
+            },
+        };
+
+        expect(prepareSectionBreakConfig(ctx as any, 1).headerIds?.defaultHeaderId).toBe('header-section-1');
+    });
+
     it('iterates document skeleton lines with nested table and column layout context', () => {
         const page = {
             marginLeft: 60,

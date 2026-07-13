@@ -68,7 +68,7 @@ export function getFontStyleString(
   // font-size/line-height
     let originFontSize = defaultFontSize;
     if (textStyle.fs) {
-        originFontSize = Math.ceil(textStyle.fs);
+        originFontSize = textStyle.fs;
     }
 
     const fontFamilyResult = normalizeFontFamily(textStyle.ff, defaultFont);

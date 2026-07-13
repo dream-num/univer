@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'Odstrániť tabuľku',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'Hlavička',
             footer: 'Päta',
             panel: 'Nastavenia hlavičky a päty',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'Nastavenia odseku',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'Nastavenia odseku',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'Zarovnanie',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'Pevná hodnota (px)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

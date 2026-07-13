@@ -16,27 +16,31 @@
 
 import type { DocumentDataModel, IDocumentStyle } from '@univerjs/core';
 import type { IHeaderFooterProps } from '@univerjs/docs';
+import type { IDocumentSkeletonPage } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../../locale/types';
 import {
     BooleanNumber,
     generateRandomId,
+    getSectionHeaderFooterReferenceKey,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
+    resolveSectionHeaderFooterReference,
     UniverInstanceType,
 } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, SetSectionHeaderFooterLinkCommand } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { ILayoutService, useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
+import { useState } from 'react';
 import {
     CloseHeaderFooterCommand,
     CoreHeaderFooterCommandId,
 } from '../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
+import { getDocPageSectionContext } from '../../../utils/section-header-footer';
 
-function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea, pageIndex: number): string {
+function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea, pageIndex: number, page?: IDocumentSkeletonPage): string {
     const {
         useFirstPageHeaderFooter,
         evenAndOddHeaders,
@@ -47,26 +51,28 @@ function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea,
         evenPageHeaderId,
         evenPageFooterId,
     } = documentStyle;
+    const isFirstPage = page ? page.pageNumber === page.pageNumberStart : pageIndex === 0;
+    const isEvenPage = page ? page.pageNumber % 2 === 0 : pageIndex % 2 === 1;
 
     if (editArea === DocumentEditArea.HEADER) {
         if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
-            if (pageIndex === 0) {
+            if (isFirstPage) {
                 return firstPageHeaderId!;
             } else {
-                return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageHeaderId! : defaultHeaderId!;
+                return evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage ? evenPageHeaderId! : defaultHeaderId!;
             }
         } else {
-            return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageHeaderId! : defaultHeaderId!;
+            return evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage ? evenPageHeaderId! : defaultHeaderId!;
         }
     } else {
         if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
-            if (pageIndex === 0) {
+            if (isFirstPage) {
                 return firstPageFooterId!;
             } else {
-                return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageFooterId! : defaultFooterId!;
+                return evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage ? evenPageFooterId! : defaultFooterId!;
             }
         } else {
-            return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageFooterId! : defaultFooterId!;
+            return evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage ? evenPageFooterId! : defaultFooterId!;
         }
     }
 }
@@ -76,6 +82,17 @@ export interface IDocHeaderFooterOptionsProps {
 }
 
 export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const docSelectionRenderService = renderManagerService.getRenderById(props.unitId)!.with(DocSelectionRenderService)!;
+    const segmentContext = useObservable(docSelectionRenderService.segmentContext$, {
+        segmentId: docSelectionRenderService.getSegment(),
+        segmentPage: docSelectionRenderService.getSegmentPage(),
+    });
+
+    return <DocHeaderFooterOptionsContent key={`${segmentContext?.segmentId ?? ''}:${segmentContext?.segmentPage ?? -1}`} {...props} />;
+};
+
+function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -86,8 +103,36 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     const { unitId } = props;
 
     const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService)!;
+    const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
-    const [options, setOptions] = useState<IHeaderFooterProps>({});
+    const getCurrentSectionContext = () => {
+        const snapshot = docDataModel?.getSnapshot();
+        const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const page = docSkeletonManagerService?.getSkeleton?.()?.getSkeletonData()?.pages[docSelectionRenderService.getSegmentPage()];
+        return snapshot == null ? undefined : { ...getDocPageSectionContext(snapshot, page), page };
+    };
+    const [options, setOptions] = useState<IHeaderFooterProps>(() => {
+        const config = getCurrentSectionContext()?.config;
+        return {
+            marginHeader: config?.marginHeader ?? 0,
+            marginFooter: config?.marginFooter ?? 0,
+            useFirstPageHeaderFooter: config?.useFirstPageHeaderFooter ?? BooleanNumber.FALSE,
+            evenAndOddHeaders: config?.evenAndOddHeaders ?? BooleanNumber.FALSE,
+        };
+    });
+    const sectionContext = getCurrentSectionContext();
+    const editArea = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
+    const headerFooterKind = editArea === DocumentEditArea.FOOTER ? 'footer' : 'header';
+    const variant = getHeaderFooterVariant(
+        sectionContext?.config ?? {},
+        docSelectionRenderService.getSegmentPage(),
+        sectionContext?.page
+    );
+    const referenceKey = getSectionHeaderFooterReferenceKey(headerFooterKind, variant);
+    const canLinkToPrevious = (sectionContext?.sectionIndex ?? -1) > 0;
+    const [linkedToPrevious, setLinkedToPrevious] = useState(
+        canLinkToPrevious && !sectionContext?.section?.[referenceKey]
+    );
 
     const handleCheckboxChange = (val: boolean, type: 'useFirstPageHeaderFooter' | 'evenAndOddHeaders') => {
         setOptions((prev) => ({
@@ -95,8 +140,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
         }));
 
-        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const documentStyle = docDataModel?.getSnapshot().documentStyle;
+        const sectionContext = getCurrentSectionContext();
+        const documentStyle = sectionContext?.config;
         const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
         const viewModel = docSkeletonManagerService?.getViewModel();
 
@@ -108,6 +153,10 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
 
         let needCreateHeaderFooter = false;
         const segmentPage = docSelectionRenderService.getSegmentPage();
+        const isFirstSectionPage = sectionContext?.page
+            ? sectionContext.page.pageNumber === sectionContext.page.pageNumberStart
+            : segmentPage === 0;
+        const isEvenPage = sectionContext?.page ? sectionContext.page.pageNumber % 2 === 0 : segmentPage % 2 === 1;
         let needChangeSegmentId = false;
         if (type === 'useFirstPageHeaderFooter' && val === true) {
             if (editArea === DocumentEditArea.HEADER && !documentStyle.firstPageHeaderId) {
@@ -116,7 +165,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 needCreateHeaderFooter = true;
             }
 
-            if (needCreateHeaderFooter && segmentPage === 0) {
+            if (needCreateHeaderFooter && isFirstSectionPage) {
                 needChangeSegmentId = true;
             }
         }
@@ -128,7 +177,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 needCreateHeaderFooter = true;
             }
 
-            if (needCreateHeaderFooter && segmentPage % 2 === 1) {
+            if (needCreateHeaderFooter && isEvenPage) {
                 needChangeSegmentId = true;
             }
         }
@@ -147,6 +196,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 headerFooterProps: {
                     [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
                 },
+                sectionId: sectionContext?.sectionId,
             });
         } else {
             const segmentPageIndex = docSelectionRenderService.getSegmentPage();
@@ -158,7 +208,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                     [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
                 },
                 editArea,
-                segmentPageIndex
+                segmentPageIndex,
+                sectionContext?.page
             );
 
             if (needFocusSegmentId && needFocusSegmentId !== prevSegmentId) {
@@ -170,6 +221,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 headerFooterProps: {
                     [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
                 },
+                sectionId: sectionContext?.sectionId,
             });
         }
 
@@ -187,6 +239,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             headerFooterProps: {
                 [type]: val,
             },
+            sectionId: getCurrentSectionContext()?.sectionId,
         });
 
         // To make sure input always has focus.
@@ -200,29 +253,47 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         });
     };
 
-    useEffect(() => {
-        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const documentStyle = docDataModel?.getSnapshot().documentStyle;
-
-        if (documentStyle) {
-            const {
-                marginHeader = 0,
-                marginFooter = 0,
-                useFirstPageHeaderFooter = BooleanNumber.FALSE,
-                evenAndOddHeaders = BooleanNumber.FALSE,
-            } = documentStyle;
-
-            setOptions({
-                marginHeader,
-                marginFooter,
-                useFirstPageHeaderFooter,
-                evenAndOddHeaders,
-            });
+    const handleLinkToPreviousChange = async (linked: boolean) => {
+        const context = getCurrentSectionContext();
+        if (!context?.sectionId || context.sectionIndex <= 0 || !docDataModel) {
+            return;
         }
-    }, [unitId]);
+        const currentEditArea = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
+        const kind = currentEditArea === DocumentEditArea.FOOTER ? 'footer' : 'header';
+        const currentVariant = getHeaderFooterVariant(context.config, docSelectionRenderService.getSegmentPage(), context.page);
+        const key = getSectionHeaderFooterReferenceKey(kind, currentVariant);
+        const segmentId = generateRandomId(6);
+        const previousSegmentId = resolveSectionHeaderFooterReference(
+            docDataModel.getDocumentStyle(),
+            context.sections,
+            context.sectionIndex - 1,
+            key
+        ).segmentId;
+        const success = await commandService.executeCommand(SetSectionHeaderFooterLinkCommand.id, {
+            unitId,
+            sectionId: context.sectionId,
+            kind,
+            variant: currentVariant,
+            linkedToPrevious: linked,
+            ...(linked ? {} : { segmentId }),
+        });
+        if (!success) {
+            return;
+        }
+        setLinkedToPrevious(linked);
+        docSelectionRenderService.setSegment(linked ? previousSegmentId ?? '' : segmentId);
+        layoutService.focus();
+    };
 
     return (
         <div className="univer-grid univer-gap-4">
+            {canLinkToPrevious && (
+                <div>
+                    <Checkbox checked={linkedToPrevious} onChange={(val) => { handleLinkToPreviousChange(val as boolean); }}>
+                        {localeService.t<LocaleKey>('docs-ui.headerFooter.linkToPrevious')}
+                    </Checkbox>
+                </div>
+            )}
             <div className="univer-grid univer-gap-2">
                 <div>
                     <Checkbox
@@ -272,4 +343,16 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             </div>
         </div>
     );
-};
+}
+
+function getHeaderFooterVariant(documentStyle: IDocumentStyle, pageIndex: number, page?: IDocumentSkeletonPage) {
+    const isFirstPage = page ? page.pageNumber === page.pageNumberStart : pageIndex === 0;
+    const isEvenPage = page ? page.pageNumber % 2 === 0 : pageIndex % 2 === 1;
+    if (documentStyle.useFirstPageHeaderFooter === BooleanNumber.TRUE && isFirstPage) {
+        return 'first' as const;
+    }
+    if (documentStyle.evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage) {
+        return 'even' as const;
+    }
+    return 'default' as const;
+}

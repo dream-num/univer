@@ -634,6 +634,7 @@ export function getDefaultDocData(): IDocumentData {
             ],
             sectionBreaks: [
                 {
+                    sectionId: 'section_common_debugger_default_doc_1',
                     startIndex: 3066,
                     // columnProperties: [
                     //     {

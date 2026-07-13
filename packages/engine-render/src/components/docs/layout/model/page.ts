@@ -47,6 +47,7 @@ export function createSkeletonPage(
     const page: IDocumentSkeletonPage = _getNullPage();
 
     const {
+        sectionId,
         pageNumberStart = 1,
         pageSize = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY },
         pageOrient = PageOrientType.PORTRAIT,
@@ -72,6 +73,7 @@ export function createSkeletonPage(
     const { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
 
     page.pageNumber = pageNumber;
+    page.sectionId = sectionId;
     page.pageNumberStart = pageNumberStart;
     page.renderConfig = renderConfig;
     page.marginLeft = marginLeft;
@@ -211,6 +213,7 @@ function _createSkeletonHeaderFooter(
     count = 0
 ): IDocumentSkeletonHeaderFooter {
     const {
+        sectionId,
         lists,
         footerTreeMap,
         headerTreeMap,
@@ -225,6 +228,7 @@ function _createSkeletonHeaderFooter(
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
     const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
     const headerFooterConfig: ISectionBreakConfig = {
+        sectionId,
         lists,
         footerTreeMap,
         headerTreeMap,
@@ -296,7 +300,7 @@ export function createNullCellPage(
     availableHeight: number = Number.POSITIVE_INFINITY,
     maxCellPageHeight: number = Number.POSITIVE_INFINITY
 ) {
-    const { lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
+    const { sectionId, lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
     const { skeletonResourceReference } = ctx;
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
@@ -322,6 +326,7 @@ export function createNullCellPage(
     const pageHeight = maxCellPageHeight;
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
+        sectionId,
         lists,
         footerTreeMap,
         headerTreeMap,

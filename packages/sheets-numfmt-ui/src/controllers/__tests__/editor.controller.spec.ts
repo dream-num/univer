@@ -340,6 +340,7 @@ describe('test editor', () => {
                 ],
                 sectionBreaks: [
                     {
+                        sectionId: 'section_fixture_1028',
                         startIndex: 10,
                     },
                 ],

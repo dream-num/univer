@@ -757,6 +757,7 @@ describe('doc skeleton', () => {
                 ],
                 sectionBreaks: [
                     {
+                        sectionId: 'section_fixture_301',
                         startIndex: 2,
                         sectionType: SectionType.CONTINUOUS,
                     },
@@ -825,6 +826,7 @@ describe('doc skeleton', () => {
                 paragraphs,
                 sectionBreaks: [
                     {
+                        sectionId: 'section_fixture_302',
                         startIndex: dataStream.length - 1,
                         pageSize: {
                             width: 793.7333333333332,
@@ -871,15 +873,19 @@ describe('doc skeleton', () => {
                         ],
                         sectionBreaks: [
                             {
+                                sectionId: 'section_fixture_303',
                                 startIndex: 5,
                             },
                             {
+                                sectionId: 'section_fixture_304',
                                 startIndex: 9,
                             },
                             {
+                                sectionId: 'section_fixture_305',
                                 startIndex: 13,
                             },
                             {
+                                sectionId: 'section_fixture_306',
                                 startIndex: 20,
                             },
                         ],
@@ -974,15 +980,19 @@ describe('doc skeleton', () => {
                         ],
                         sectionBreaks: [
                             {
+                                sectionId: 'section_fixture_307',
                                 startIndex: 60,
                             },
                             {
+                                sectionId: 'section_fixture_308',
                                 startIndex: 91,
                             },
                             {
+                                sectionId: 'section_fixture_309',
                                 startIndex: 120,
                             },
                             {
+                                sectionId: 'section_fixture_310',
                                 startIndex: 127,
                             },
                         ],

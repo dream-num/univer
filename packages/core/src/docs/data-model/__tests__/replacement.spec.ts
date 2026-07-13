@@ -82,6 +82,7 @@ function getTestDocumentBody() {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_fixture_replacement',
                 startIndex: 12,
             },
         ],
@@ -146,6 +147,7 @@ describe('test case in replaceInDocumentBody utils', () => {
             ],
             sectionBreaks: [
                 {
+                    sectionId: 'section_fixture_replacement',
                     startIndex: 16,
                 },
             ],
@@ -207,6 +209,7 @@ describe('test case in replaceInDocumentBody utils', () => {
             ],
             sectionBreaks: [
                 {
+                    sectionId: 'section_fixture_replacement',
                     startIndex: 8,
                 },
             ],

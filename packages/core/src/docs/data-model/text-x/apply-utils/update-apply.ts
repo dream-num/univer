@@ -347,7 +347,19 @@ function updateSectionBreaks(
             newUpdateSectionBreaks.push(...splitUpdateSectionBreaks);
             splitUpdateSectionBreaks = [];
         }
-        updateBody.sectionBreaks = newUpdateSectionBreaks;
+        updateBody.sectionBreaks = newUpdateSectionBreaks.map((updateSectionBreak) => {
+            const removed = removeSectionBreaks.find((sectionBreak) => sectionBreak.startIndex === updateSectionBreak.startIndex);
+            return removed
+                ? { ...updateSectionBreak, sectionId: removed.sectionId }
+                : updateSectionBreak;
+        });
+    } else {
+        updateBody.sectionBreaks = updateDataSectionBreaks.map((updateSectionBreak) => {
+            const removed = removeSectionBreaks.find((sectionBreak) => sectionBreak.startIndex === updateSectionBreak.startIndex);
+            return removed
+                ? { ...updateSectionBreak, sectionId: removed.sectionId }
+                : updateSectionBreak;
+        });
     }
     insertSectionBreaks(body, updateBody, textLength, currentIndex);
 

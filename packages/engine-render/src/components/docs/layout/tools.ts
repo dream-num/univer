@@ -67,6 +67,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
+    resolveSectionHeaderFooterReferences,
     SectionType,
     SpacingRule,
     VerticalAlign,
@@ -1607,6 +1608,7 @@ export interface ILayoutContext {
 }
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
+    sectionId: 'section_render_default',
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
     sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
@@ -1656,6 +1658,11 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     let { documentStyle } = dataModel;
     const { documentFlavor } = documentStyle;
     let sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
+    const sectionBreaks = viewModel.getChildren().map((node) => viewModel.getSectionBreak(node.endIndex) || DEFAULT_SECTION_BREAK);
+    sectionBreak = {
+        ...sectionBreak,
+        ...resolveSectionHeaderFooterReferences(documentStyle, sectionBreaks, nodeIndex),
+    };
 
     // If the configuration is in modern mode, use the style configuration of modern mode to overwrite the original configuration.
     // In modern mode, there are no pages, no sections, no columns. There are no headers and footers, and margins are all defaults.
@@ -1704,6 +1711,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         },
     } = documentStyle;
     const {
+        sectionId,
         charSpace = 0, // charSpace
         linePitch = 15.6, // linePitch pt
         gridType = GridType.LINES, // gridType
@@ -1750,6 +1758,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     }
 
     const sectionBreakConfig: ISectionBreakConfig = {
+        sectionId,
         charSpace,
         linePitch,
         gridType,

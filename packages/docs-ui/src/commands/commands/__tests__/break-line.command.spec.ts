@@ -64,7 +64,7 @@ function getDocumentDataWithColumnGroup(): IDocumentData {
                 { paragraphId: 'right', startIndex: 14 },
                 { paragraphId: 'after', startIndex: 17 },
             ],
-            sectionBreaks: [{ startIndex: 18 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_201', startIndex: 18 }],
             columnGroups: [{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 16 }],
         },
         documentStyle: {
@@ -92,7 +92,7 @@ function getDocumentDataWithAdjacentBlocks(): IDocumentData {
                 { paragraphId: 'callout-paragraph', startIndex: 6, paragraphStyle: { indentStart: { v: 60 } } },
                 { paragraphId: 'trailing-paragraph', startIndex: 8 },
             ],
-            sectionBreaks: [{ startIndex: 9 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_202', startIndex: 9 }],
             blockRanges: [
                 { blockId: 'code-1', blockType: DocumentBlockRangeType.CODE, startIndex: 0, endIndex: 3 },
                 { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 4, endIndex: 7 },

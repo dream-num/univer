@@ -77,6 +77,7 @@ const locale: typeof enUS = {
             deleteTable: 'حذف الجدول',
         },
         headerFooter: {
+            linkToPrevious: 'Link to previous',
             header: 'رأس',
             footer: 'تذييل',
             panel: 'إعدادات الرأس والتذييل',
@@ -99,9 +100,11 @@ const locale: typeof enUS = {
         doc: {
             menu: {
                 paragraphSetting: 'إعدادات الفقرة',
+                sectionSetting: 'Section Settings',
             },
             slider: {
                 paragraphSetting: 'إعدادات الفقرة',
+                sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
                 alignment: 'محاذاة',
@@ -118,6 +121,20 @@ const locale: typeof enUS = {
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
                 fixedValue: 'قيمة ثابتة (بكسل)',
+            },
+            sectionSetting: {
+                selectedSections: '{0} sections selected',
+                columnCount: 'Column count',
+                columnGap: 'Column gap',
+                columnSeparator: 'Separator',
+                none: 'None',
+                betweenColumns: 'Between columns',
+                sectionStart: 'Section start',
+                unspecified: 'Unspecified',
+                continuous: 'Continuous',
+                nextPage: 'Next page',
+                evenPage: 'Even page',
+                oddPage: 'Odd page',
             },
         },
         rightClick: {

@@ -35,7 +35,7 @@ function createDocument() {
         body: {
             dataStream: 'Hello\r\n',
             paragraphs: [{ paragraphId: 'p1', startIndex: 5 }],
-            sectionBreaks: [{ startIndex: 7 }],
+            sectionBreaks: [{ sectionId: 'section_fixture_126', startIndex: 7 }],
             customRanges: [],
             customDecorations: [],
             customBlocks: [],

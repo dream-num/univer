@@ -17,6 +17,7 @@
 import type { UniverType } from './constants/univer';
 import type { IDocumentMeta } from './doc';
 import type { IDrawingMeta } from './drawing';
+import type { IPdfMeta } from './pdf';
 import type { IWorkbookMeta } from './workbook';
 
 export interface IUnit {
@@ -26,4 +27,5 @@ export interface IUnit {
     workbook?: IWorkbookMeta | undefined;
     document?: IDocumentMeta | undefined;
     drawing?: IDrawingMeta | undefined;
+    pdf?: IPdfMeta | undefined;
 }

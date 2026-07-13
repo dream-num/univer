@@ -71,7 +71,7 @@ const locale: typeof enUS = {
                 lessThanOrEqual: 'est le ou avant {FORMULA1}',
                 equal: 'est {FORMULA1}',
                 notEqual: 'n\'est pas {FORMULA1}',
-                notBetween: 'n\'est pas entre {FORMULA1}',
+                notBetween: 'n\'est pas entre {FORMULA1} et {FORMULA2}',
                 legal: 'est une date légale',
             },
             errorMsg: {
@@ -82,7 +82,7 @@ const locale: typeof enUS = {
                 lessThanOrEqual: 'La valeur doit être une date légale et le ou avant {FORMULA1}',
                 equal: 'La valeur doit être une date légale et {FORMULA1}',
                 notEqual: 'La valeur doit être une date légale et non {FORMULA1}',
-                notBetween: 'La valeur doit être une date légale et non entre {FORMULA1}',
+                notBetween: 'La valeur doit être une date légale et non entre {FORMULA1} et {FORMULA2}',
                 legal: 'La valeur doit être une date légale',
             },
             title: 'Date',

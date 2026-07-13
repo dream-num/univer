@@ -163,9 +163,9 @@ describe('FloatDomSingle', () => {
         expect(inner.style.bottom).toBe('0px');
     });
 
-    it('preserves the legacy DOM hierarchy, classes, styles, overflow, and event forwarding by default', async () => {
+    it.each([undefined, 'legacy-inset'] as const)('preserves the legacy DOM hierarchy, classes, styles, overflow, and event forwarding for mode %s', async (contentBoxMode) => {
         const onPointerDown = vi.fn();
-        const layer = { ...createFloatDom(), onPointerDown };
+        const layer = { ...createFloatDom(), onPointerDown, contentBoxMode };
 
         renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
 

@@ -31,13 +31,24 @@ interface IFloatDomContentBoxEvidence {
     legacySnapshotMatched: boolean;
 }
 
-const POSITION_BY_CLIPPING: Record<ClippingCase, { left: number; top: number }> = {
-    visible: { left: 100, top: 80 },
-    'left-top': { left: -240, top: -160 },
-    'right-bottom': { left: 700, top: 380 },
-    offscreen: { left: 1800, top: 1400 },
-    're-entry': { left: 100, top: 80 },
-};
+interface ITransformerGeometry {
+    drawing: { left: number; top: number; width: number; height: number; angle: number };
+    controls: Array<{ key: string; left: number; top: number; width: number; height: number; angle: number }>;
+}
+
+function positionForClipping(clipping: ClippingCase, zoom: number): { left: number; top: number } {
+    switch (clipping) {
+        case 'left-top':
+            return { left: -240, top: -160 };
+        case 'right-bottom':
+            return { left: 1400 / zoom, top: 1000 / zoom };
+        case 'offscreen':
+            return { left: 1800 / zoom, top: 1400 / zoom };
+        case 'visible':
+        case 're-entry':
+            return { left: 100, top: 80 };
+    }
+}
 
 function maxEdgeDelta(a: IRectRecord, b: IRectRecord): IFloatDomContentBoxEvidence['edgeDelta'] {
     const edgeDelta = {
@@ -59,7 +70,7 @@ async function configureCase(
     clipping: ClippingCase,
     border: boolean
 ): Promise<void> {
-    const position = POSITION_BY_CLIPPING[clipping];
+    const position = positionForClipping(clipping, zoom);
     await page.evaluate(({ mode, zoom, rotation, position, border }) => {
         const fixture = window.floatDomContentBoxFixture!;
         const worksheet = window.univerAPI.getActiveWorkbook().getActiveSheet();
@@ -159,10 +170,10 @@ async function measureCase(
             probeRect,
             edgeDelta,
             legacySnapshotMatched: mode !== 'legacy-inset' || (
-                wrapper.style.width === `${Math.max(layout.endX - layout.startX - 2, 0)}px` &&
-                wrapper.style.height === `${Math.max(layout.endY - layout.startY - 2, 0)}px` &&
-                inner.style.width === `${layout.width - 4}px` &&
-                inner.style.height === `${layout.height - 4}px`
+                Math.abs(Number.parseFloat(wrapper.style.width) - Math.max(layout.endX - layout.startX - 2, 0)) < 0.001 &&
+                Math.abs(Number.parseFloat(wrapper.style.height) - Math.max(layout.endY - layout.startY - 2, 0)) < 0.001 &&
+                Math.abs(Number.parseFloat(inner.style.width) - (layout.width - 4)) < 0.001 &&
+                Math.abs(Number.parseFloat(inner.style.height) - (layout.height - 4)) < 0.001
             ),
         };
         console.debug(`[DEBUG-float-dom-content-box] ${JSON.stringify(record)}`);
@@ -210,10 +221,27 @@ test('FloatDom exact content box browser matrix', async ({ page }, testInfo: Tes
                                 expect(maxEdgeDelta(record.wrapperRect, record.contentRect).max, caseId).toBeLessThanOrEqual(0.5);
                             }
                         }
+                        if (clipping === 'left-top') {
+                            expect(record.contentRect.left < record.wrapperRect.left || record.contentRect.top < record.wrapperRect.top, caseId).toBe(true);
+                        } else if (clipping === 'right-bottom') {
+                            expect(record.wrapperRect.left < 1600 && record.wrapperRect.right > 1600, caseId).toBe(true);
+                            expect(record.wrapperRect.top < 1200 && record.wrapperRect.bottom > 1200, caseId).toBe(true);
+                        } else if (clipping === 'offscreen') {
+                            expect(record.wrapperRect.left > 1600, caseId).toBe(true);
+                            expect(record.wrapperRect.top > 1200, caseId).toBe(true);
+                        }
                     }
                 }
             }
         }
+    }
+
+    for (const reEntry of records.filter(({ clipping }) => clipping === 're-entry')) {
+        const visible = records.find((record) => record.clipping === 'visible' &&
+            record.mode === reEntry.mode && record.zoom === reEntry.zoom &&
+            record.rotation === reEntry.rotation && record.border === reEntry.border)!;
+        expect(maxEdgeDelta(reEntry.wrapperRect, visible.wrapperRect).max, `${reEntry.caseId} cumulative offset`).toBeLessThanOrEqual(0.5);
+        expect(maxEdgeDelta(reEntry.contentRect, visible.contentRect).max, `${reEntry.caseId} content cumulative offset`).toBeLessThanOrEqual(0.5);
     }
 
     const evidencePath = testInfo.outputPath('float-dom-content-box-evidence.json');
@@ -233,6 +261,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     await page.waitForFunction(() => Boolean(window.floatDomContentBoxFixture && document.querySelector('[data-float-dom-content-box-probe]')));
 
     const canvas = page.locator('canvas[id^="univer-sheet-main-canvas_"]');
+    const transformerRecords: Array<{ zoom: number; rotation: number; legacy: ITransformerGeometry; exact: ITransformerGeometry }> = [];
     const canvasPixelHash = () => page.locator('canvas[id^="univer-sheet-main-canvas_"]').evaluate((element: HTMLCanvasElement) => {
         const pixels = element.getContext('2d')!.getImageData(0, 0, element.width, element.height).data;
         let hash = 2166136261;
@@ -246,13 +275,22 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
         for (const rotation of [0, 30]) {
             await configureCase(page, 'legacy-inset', zoom, rotation, 'visible', false);
             await selectFloatDom(page);
+            await page.evaluate(() => window.floatDomContentBoxFixture!.enableRotateHandle());
+            await page.waitForTimeout(20);
+            const legacyGeometry = await page.evaluate(() => window.floatDomContentBoxFixture!.getTransformerGeometry());
             const legacyHash = await canvasPixelHash();
             const legacyCanvas = await canvas.screenshot();
             await page.evaluate(() => window.floatDomContentBoxFixture!.setMode('exact-bounds'));
             await page.waitForTimeout(50);
             const exactHash = await canvasPixelHash();
+            const exactGeometry = await page.evaluate(() => window.floatDomContentBoxFixture!.getTransformerGeometry());
             const exactCanvas = await canvas.screenshot();
             expect(exactHash, `transformer canvas z${zoom} r${rotation}`).toEqual(legacyHash);
+            expect(exactGeometry, `transformer geometry z${zoom} r${rotation}`).toEqual(legacyGeometry);
+            expect(legacyGeometry.controls.filter(({ key }) => key.includes('Resize')).length).toBe(8);
+            expect(legacyGeometry.controls.some(({ key }) => key.includes('Outline'))).toBe(true);
+            expect(legacyGeometry.controls.some(({ key }) => key.includes('Rotate__'))).toBe(true);
+            transformerRecords.push({ zoom, rotation, legacy: legacyGeometry, exact: exactGeometry });
 
             if (zoom === 1 && rotation === 0) {
                 const legacyPath = testInfo.outputPath('transformer-legacy.png');
@@ -326,6 +364,37 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
 
     await configureCase(page, 'exact-bounds', 1, 0, 'visible', false);
     await selectFloatDom(page);
+    const resizeStart = await page.locator('[data-float-dom-content-box-probe]').evaluate((probe) => {
+        const rect = probe.parentElement!.parentElement!.getBoundingClientRect();
+        return { x: rect.left + 2, y: rect.top + 2 };
+    });
+    await page.mouse.move(resizeStart.x, resizeStart.y);
+    await page.mouse.down();
+    // Keep the gesture inside the FloatDom so every move/up crosses the real
+    // pointer-forwarding boundary while the top-left handle shrinks the drawing.
+    await page.mouse.move(resizeStart.x + 20, resizeStart.y + 20, { steps: 4 });
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    const resized = await page.evaluate(() => {
+        const fixture = window.floatDomContentBoxFixture!;
+        const logical = window.univerAPI.getActiveWorkbook().getActiveSheet().getFloatDomById(fixture.id).position;
+        const probe = document.querySelector('[data-float-dom-content-box-probe]')!;
+        const contentRect = probe.parentElement!.getBoundingClientRect();
+        const wrapperRect = probe.parentElement!.parentElement!.getBoundingClientRect();
+        return { logical, alignment: Math.max(
+            Math.abs(contentRect.left - wrapperRect.left),
+            Math.abs(contentRect.top - wrapperRect.top),
+            Math.abs(contentRect.right - wrapperRect.right),
+            Math.abs(contentRect.bottom - wrapperRect.bottom)
+        ) };
+    });
+    const resizeHit = Math.abs(resized.logical.width - 480) > 0.5 && Math.abs(resized.logical.height - 320) > 0.5;
+    pointerResults.push({ target: 'left-top-drag', hit: resizeHit, action: 'resize', cursor: 'nw-resize' });
+    expect(resizeHit).toBe(true);
+    expect(resized.alignment).toBeLessThanOrEqual(0.5);
+
+    await configureCase(page, 'exact-bounds', 1, 0, 'visible', false);
+    await selectFloatDom(page);
     await page.evaluate(() => window.floatDomContentBoxFixture!.enableRotateHandle());
     await page.waitForTimeout(20);
     const rotateStart = await page.locator('[data-float-dom-content-box-probe]').evaluate((probe) => {
@@ -333,17 +402,47 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
         return { x: rect.left + rect.width / 2, y: rect.top - 57 };
     });
     let rotateCursor = 'default';
-    for (let offsetY = -8; offsetY <= 8 && rotateCursor !== 'move'; offsetY += 2) {
-        for (let offsetX = -8; offsetX <= 8 && rotateCursor !== 'move'; offsetX += 2) {
+    let rotateHitPoint: { x: number; y: number } | undefined;
+    for (let offsetY = -8; offsetY <= 8 && !rotateHitPoint; offsetY += 2) {
+        for (let offsetX = -8; offsetX <= 8 && !rotateHitPoint; offsetX += 2) {
             await page.mouse.move(rotateStart.x + offsetX, rotateStart.y + offsetY);
             rotateCursor = await canvas.evaluate((element) => getComputedStyle(element).cursor);
+            if (rotateCursor === 'move') {
+                rotateHitPoint = { x: rotateStart.x + offsetX, y: rotateStart.y + offsetY };
+            }
         }
     }
-    const rotateHit = rotateCursor === 'move';
+    const rotateHit = Boolean(rotateHitPoint);
     pointerResults.push({ target: 'rotate', hit: rotateHit, action: 'rotate', cursor: rotateCursor });
     expect(rotateHit).toBe(true);
+    if (!rotateHitPoint) throw new Error('Rotate handle was not found');
+    await page.mouse.move(rotateHitPoint.x, rotateHitPoint.y);
+    await page.mouse.down();
+    await page.mouse.move(rotateHitPoint.x + 80, rotateHitPoint.y + 40, { steps: 6 });
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    const rotated = await page.evaluate(() => {
+        const fixture = window.floatDomContentBoxFixture!;
+        const logical = window.univerAPI.getActiveWorkbook().getActiveSheet().getFloatDomById(fixture.id).position;
+        const probe = document.querySelector('[data-float-dom-content-box-probe]')!;
+        const contentRect = probe.parentElement!.getBoundingClientRect();
+        const wrapperRect = probe.parentElement!.parentElement!.getBoundingClientRect();
+        return { logical, alignment: Math.max(
+            Math.abs(contentRect.left - wrapperRect.left),
+            Math.abs(contentRect.top - wrapperRect.top),
+            Math.abs(contentRect.right - wrapperRect.right),
+            Math.abs(contentRect.bottom - wrapperRect.bottom)
+        ) };
+    });
+    const rotateDragHit = Math.abs(rotated.logical.angle) > 0.5;
+    pointerResults.push({ target: 'rotate-drag', hit: rotateDragHit, action: 'rotate', cursor: rotateCursor });
+    expect(rotateDragHit).toBe(true);
+    expect(rotated.alignment).toBeLessThanOrEqual(0.5);
     console.debug(`[DEBUG-float-dom-content-box] ${JSON.stringify({ caseId: 'transformer-pointer-interactions', pointerResults })}`);
     const pointerResultsPath = testInfo.outputPath('float-dom-pointer-results.json');
     await writeFile(pointerResultsPath, JSON.stringify(pointerResults, null, 2));
     await testInfo.attach('float-dom-pointer-results', { path: pointerResultsPath, contentType: 'application/json' });
+    const transformerGeometryPath = testInfo.outputPath('float-dom-transformer-geometry.json');
+    await writeFile(transformerGeometryPath, JSON.stringify(transformerRecords, null, 2));
+    await testInfo.attach('float-dom-transformer-geometry', { path: transformerGeometryPath, contentType: 'application/json' });
 });

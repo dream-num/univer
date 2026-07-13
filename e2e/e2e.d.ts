@@ -24,6 +24,10 @@ declare global {
             setMode: (mode: 'legacy-inset' | 'exact-bounds') => void;
             setBorder: (border: boolean) => void;
             enableRotateHandle: () => void;
+            getTransformerGeometry: () => {
+                drawing: { left: number; top: number; width: number; height: number; angle: number };
+                controls: Array<{ key: string; left: number; top: number; width: number; height: number; angle: number }>;
+            };
             getLayout: () => {
                 startX: number;
                 startY: number;

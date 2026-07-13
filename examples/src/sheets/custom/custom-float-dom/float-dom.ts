@@ -13,6 +13,10 @@ interface IFloatDomContentBoxFixture {
     setMode: (mode: FloatDomContentBoxMode) => void;
     setBorder: (border: boolean) => void;
     enableRotateHandle: () => void;
+    getTransformerGeometry: () => {
+        drawing: { left: number; top: number; width: number; height: number; angle: number };
+        controls: Array<{ key: string; left: number; top: number; width: number; height: number; angle: number }>;
+    };
     getLayout: () => IFloatDomLayout | undefined;
 }
 
@@ -41,23 +45,45 @@ function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): v
 
     const canvasFloatDomService = univer.__getInjector().get(CanvasFloatDomService);
     const renderManagerService = univer.__getInjector().get(IRenderManagerService);
+    const getDrawingAndScene = () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const scene = renderManagerService.getRenderById(workbook.getId())?.scene;
+        const rect = scene?.getObject(getDrawingShapeKeyByDrawingSearch({
+            unitId: workbook.getId(),
+            subUnitId: worksheet.getSheetId(),
+            drawingId: disposable.id,
+        }));
+        if (!rect || !scene) {
+            throw new Error('Failed to locate FloatDom transformer fixture');
+        }
+        return { rect, scene };
+    };
     window.floatDomContentBoxFixture = {
         id: disposable.id,
         setMode: (contentBoxMode) => canvasFloatDomService.updateFloatDom(disposable.id, { contentBoxMode }),
         setBorder: (border) => worksheet.updateFloatDom(disposable.id, { data: { border } }),
         enableRotateHandle: () => {
-            const workbook = univerAPI.getActiveWorkbook()!;
-            const scene = renderManagerService.getRenderById(workbook.getId())?.scene;
-            const rect = scene?.getObject(getDrawingShapeKeyByDrawingSearch({
-                unitId: workbook.getId(),
-                subUnitId: worksheet.getSheetId(),
-                drawingId: disposable.id,
-            }));
-            if (!rect || !scene) {
-                throw new Error('Failed to locate FloatDom transformer fixture');
-            }
+            const { rect, scene } = getDrawingAndScene();
             rect.transformerConfig = { ...rect.transformerConfig, rotateEnabled: true };
             scene.getTransformerByCreate()?.refreshControls();
+        },
+        getTransformerGeometry: () => {
+            const { rect, scene } = getDrawingAndScene();
+            const toGeometry = (object: typeof rect) => ({
+                key: object.oKey,
+                left: object.left,
+                top: object.top,
+                width: object.width,
+                height: object.height,
+                angle: object.angle,
+            });
+            return {
+                drawing: toGeometry(rect),
+                controls: scene.getAllObjects()
+                    .filter((object) => object.oKey.includes('__SpreadsheetTransformer'))
+                    .map((object) => toGeometry(object))
+                    .sort((a, b) => a.key.localeCompare(b.key)),
+            };
         },
         getLayout: () => {
             const layer = canvasFloatDomService.domLayers.find(([id]) => id === disposable.id)?.[1];

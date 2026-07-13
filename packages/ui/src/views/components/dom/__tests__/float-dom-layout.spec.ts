@@ -32,10 +32,12 @@ const PLACEMENT_480_BY_320: IFloatDomLayout = {
 describe('resolveFloatDomLayout', () => {
     it('keeps the legacy inset by default and exposes exact placement bounds on request', () => {
         const defaultLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320);
+        const explicitLegacyLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320, 'legacy-inset');
         const exactLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320, 'exact-bounds');
 
         expect(defaultLayout.wrapper).toMatchObject({ width: 478, height: 318 });
         expect(defaultLayout.inner).toMatchObject({ width: 476, height: 316 });
+        expect(explicitLegacyLayout).toEqual(defaultLayout);
         expect(exactLayout.wrapper).toMatchObject({ width: 480, height: 320 });
         expect(exactLayout.inner).toMatchObject({ width: 480, height: 320 });
     });

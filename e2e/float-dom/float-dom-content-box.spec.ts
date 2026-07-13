@@ -74,7 +74,9 @@ async function configureCase(
     await page.evaluate(({ mode, zoom, rotation, position, border }) => {
         const fixture = window.floatDomContentBoxFixture!;
         const worksheet = window.univerAPI.getActiveWorkbook().getActiveSheet();
-        fixture.setMode(mode);
+        fixture.setContentBox(mode === 'exact-bounds'
+            ? { wrapperInset: 0, contentInset: 0 }
+            : {});
         fixture.setBorder(border);
         worksheet.zoom(zoom);
         worksheet.updateFloatDom(fixture.id, {
@@ -285,7 +287,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
             const legacyGeometry = await page.evaluate(() => window.floatDomContentBoxFixture!.getTransformerGeometry());
             const legacyHash = await canvasPixelHash();
             const legacyCanvas = await canvas.screenshot();
-            await page.evaluate(() => window.floatDomContentBoxFixture!.setMode('exact-bounds'));
+            await page.evaluate(() => window.floatDomContentBoxFixture!.setContentBox({ wrapperInset: 0, contentInset: 0 }));
             await page.waitForTimeout(50);
             const exactHash = await canvasPixelHash();
             const exactGeometry = await page.evaluate(() => window.floatDomContentBoxFixture!.getTransformerGeometry());

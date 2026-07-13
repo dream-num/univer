@@ -131,7 +131,7 @@ describe('FloatDomSingle', () => {
         expect(receivedLayout$).toBe(layer.position$);
     });
 
-    it('renders the wrapper and content root at the full placement bounds in exact mode', async () => {
+    it('renders the wrapper and content root at the full placement bounds with zero insets', async () => {
         const position$ = new BehaviorSubject<IFloatDomLayout>({
             startX: 10,
             startY: 20,
@@ -145,7 +145,7 @@ describe('FloatDomSingle', () => {
         });
         const layer = {
             ...createFloatDom(),
-            contentBoxMode: 'exact-bounds' as const,
+            contentBox: { wrapperInset: 0, contentInset: 0 },
             position$,
         };
 
@@ -163,9 +163,9 @@ describe('FloatDomSingle', () => {
         expect(inner.style.bottom).toBe('0px');
     });
 
-    it.each([undefined, 'legacy-inset'] as const)('preserves the legacy DOM hierarchy, classes, styles, overflow, and event forwarding for mode %s', async (contentBoxMode) => {
+    it.each([undefined, {}] as const)('preserves the legacy DOM hierarchy, classes, styles, overflow, and event forwarding for config %o', async (contentBox) => {
         const onPointerDown = vi.fn();
-        const layer = { ...createFloatDom(), onPointerDown, contentBoxMode };
+        const layer = { ...createFloatDom(), onPointerDown, contentBox };
 
         renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
 
@@ -182,7 +182,7 @@ describe('FloatDomSingle', () => {
 
     it('updates clipped placement, full content size, and anchors through position$', async () => {
         const position$ = createFloatDom().position$ as BehaviorSubject<IFloatDomLayout>;
-        const layer = { ...createFloatDom(), contentBoxMode: 'exact-bounds' as const, position$ };
+        const layer = { ...createFloatDom(), contentBox: { wrapperInset: 0, contentInset: 0 }, position$ };
 
         renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
         const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
@@ -250,7 +250,7 @@ describe('FloatDom', () => {
         expect(document.getElementById('float-1')).not.toBeNull();
     });
 
-    it('updates content box mode at runtime through CanvasFloatDomService', async () => {
+    it('updates content box insets at runtime through CanvasFloatDomService', async () => {
         const rendered = renderWithDependencies(<FloatDom unitId="doc-1" />);
         const service = rendered.injector.get(CanvasFloatDomService);
 
@@ -260,7 +260,12 @@ describe('FloatDom', () => {
         expect(wrapper.style.width).toBe('98px');
         expect(inner.style.width).toBe('96px');
 
-        act(() => service.updateFloatDom('float-1', { contentBoxMode: 'exact-bounds' }));
+        act(() => service.updateFloatDom('float-1', { contentBox: { wrapperInset: 6, contentInset: 10 } }));
+
+        await waitFor(() => expect(wrapper.style.width).toBe('94px'));
+        expect(inner.style.width).toBe('90px');
+
+        act(() => service.updateFloatDom('float-1', { contentBox: { wrapperInset: 0, contentInset: 0 } }));
 
         await waitFor(() => expect(wrapper.style.width).toBe('100px'));
         expect(inner.style.width).toBe('100px');

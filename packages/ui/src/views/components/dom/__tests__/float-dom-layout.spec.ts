@@ -30,16 +30,27 @@ const PLACEMENT_480_BY_320: IFloatDomLayout = {
 };
 
 describe('resolveFloatDomLayout', () => {
-    it('keeps the legacy inset by default and exposes exact placement bounds on request', () => {
+    it('keeps the historical insets by default and exposes exact placement bounds with zero insets', () => {
         const defaultLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320);
-        const explicitLegacyLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320, 'legacy-inset');
-        const exactLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320, 'exact-bounds');
+        const emptyConfigLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320, {});
+        const exactLayout = resolveFloatDomLayout(PLACEMENT_480_BY_320, { wrapperInset: 0, contentInset: 0 });
 
         expect(defaultLayout.wrapper).toMatchObject({ width: 478, height: 318 });
         expect(defaultLayout.inner).toMatchObject({ width: 476, height: 316 });
-        expect(explicitLegacyLayout).toEqual(defaultLayout);
+        expect(emptyConfigLayout).toEqual(defaultLayout);
         expect(exactLayout.wrapper).toMatchObject({ width: 480, height: 320 });
         expect(exactLayout.inner).toMatchObject({ width: 480, height: 320 });
+    });
+
+    it('applies wrapper and content insets independently', () => {
+        expect(resolveFloatDomLayout(PLACEMENT_480_BY_320, { wrapperInset: 6 })).toMatchObject({
+            wrapper: { width: 474, height: 314 },
+            inner: { width: 476, height: 316 },
+        });
+        expect(resolveFloatDomLayout(PLACEMENT_480_BY_320, { contentInset: 10 })).toMatchObject({
+            wrapper: { width: 478, height: 318 },
+            inner: { width: 470, height: 310 },
+        });
     });
 
     it.each([
@@ -48,7 +59,7 @@ describe('resolveFloatDomLayout', () => {
         [{ left: false, top: true }, { left: 'auto', top: 0, right: 0, bottom: 'auto' }],
         [{ left: false, top: false }, { left: 'auto', top: 'auto', right: 0, bottom: 0 }],
     ] as const)('preserves the inner anchor for absolute=%o', (absolute, expected) => {
-        const layout = resolveFloatDomLayout({ ...PLACEMENT_480_BY_320, absolute }, 'exact-bounds');
+        const layout = resolveFloatDomLayout({ ...PLACEMENT_480_BY_320, absolute }, { wrapperInset: 0, contentInset: 0 });
 
         expect(layout.inner).toMatchObject(expected);
     });
@@ -63,13 +74,13 @@ describe('resolveFloatDomLayout', () => {
             width: 480,
             height: 320,
             absolute: { left: false, top: false },
-        }, 'exact-bounds');
+        }, { wrapperInset: 0, contentInset: 0 });
 
         expect(layout.wrapper).toMatchObject({ top: 0, left: 0, width: 300, height: 200 });
         expect(layout.inner).toMatchObject({ width: 480, height: 320, right: 0, bottom: 0 });
     });
 
-    it('keeps legacy small-content behavior while exact mode retains zero and small dimensions', () => {
+    it('keeps default small-content behavior while zero insets retain zero and small dimensions', () => {
         const smallPlacement = {
             ...PLACEMENT_480_BY_320,
             endX: 21,
@@ -82,16 +93,16 @@ describe('resolveFloatDomLayout', () => {
             wrapper: { width: 0, height: 0 },
             inner: { width: -3, height: -4 },
         });
-        expect(resolveFloatDomLayout(smallPlacement, 'exact-bounds')).toMatchObject({
+        expect(resolveFloatDomLayout(smallPlacement, { wrapperInset: 0, contentInset: 0 })).toMatchObject({
             wrapper: { width: 1, height: 1 },
             inner: { width: 1, height: 0 },
         });
     });
 
-    it('preserves rotation and opacity in either content mode', () => {
+    it('preserves rotation and opacity with configured insets', () => {
         const position = { ...PLACEMENT_480_BY_320, rotate: 30, opacity: 0.4 };
 
         expect(resolveFloatDomLayout(position).wrapper).toMatchObject({ transform: 'rotate(30deg)', opacity: 0.4 });
-        expect(resolveFloatDomLayout(position, 'exact-bounds').wrapper).toMatchObject({ transform: 'rotate(30deg)', opacity: 0.4 });
+        expect(resolveFloatDomLayout(position, { wrapperInset: 0, contentInset: 0 }).wrapper).toMatchObject({ transform: 'rotate(30deg)', opacity: 0.4 });
     });
 });

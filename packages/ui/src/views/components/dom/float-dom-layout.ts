@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FloatDomContentBoxMode, IFloatDomLayout } from '../../../services/dom/canvas-dom-layer.service';
+import type { IFloatDomContentBoxConfig, IFloatDomLayout } from '../../../services/dom/canvas-dom-layer.service';
 
 export interface IFloatDomLayoutStyle {
     wrapper: {
@@ -40,24 +40,25 @@ const LEGACY_CONTENT_INSET = 4;
 
 export function resolveFloatDomLayout(
     position: IFloatDomLayout,
-    contentBoxMode: FloatDomContentBoxMode = 'legacy-inset'
+    contentBox?: IFloatDomContentBoxConfig
 ): IFloatDomLayoutStyle {
-    const isExactBounds = contentBoxMode === 'exact-bounds';
+    const wrapperInset = contentBox?.wrapperInset ?? LEGACY_WRAPPER_INSET;
+    const contentInset = contentBox?.contentInset ?? LEGACY_CONTENT_INSET;
 
     return {
         wrapper: {
             top: position.startY,
             left: position.startX,
-            width: Math.max(position.endX - position.startX - (isExactBounds ? 0 : LEGACY_WRAPPER_INSET), 0),
-            height: Math.max(position.endY - position.startY - (isExactBounds ? 0 : LEGACY_WRAPPER_INSET), 0),
+            width: Math.max(position.endX - position.startX - wrapperInset, 0),
+            height: Math.max(position.endY - position.startY - wrapperInset, 0),
             transform: `rotate(${position.rotate}deg)`,
             opacity: position.opacity ?? 1,
         },
         inner: {
-            // Keep the historical negative-size behavior in legacy mode. Some
-            // older layers can still emit content smaller than the inset.
-            width: position.width - (isExactBounds ? 0 : LEGACY_CONTENT_INSET),
-            height: position.height - (isExactBounds ? 0 : LEGACY_CONTENT_INSET),
+            // Preserve the historical negative-size behavior. Consumers own
+            // the external behavior produced by their configured inset.
+            width: position.width - contentInset,
+            height: position.height - contentInset,
             left: position.absolute.left ? 0 : 'auto',
             top: position.absolute.top ? 0 : 'auto',
             right: position.absolute.left ? 'auto' : 0,

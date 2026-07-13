@@ -219,6 +219,11 @@ test('FloatDom exact content box browser matrix', async ({ page }, testInfo: Tes
                             expect(record.edgeDelta.max, caseId).toBeLessThanOrEqual(0.5);
                             if (clipping === 'visible' || clipping === 're-entry') {
                                 expect(maxEdgeDelta(record.wrapperRect, record.contentRect).max, caseId).toBeLessThanOrEqual(0.5);
+                                const radians = rotation * Math.PI / 180;
+                                const expectedRenderedWidth = (480 * Math.abs(Math.cos(radians)) + 320 * Math.abs(Math.sin(radians))) * zoom;
+                                const expectedRenderedHeight = (480 * Math.abs(Math.sin(radians)) + 320 * Math.abs(Math.cos(radians))) * zoom;
+                                expect(record.wrapperRect.width, `${caseId} rendered width`).toBeCloseTo(expectedRenderedWidth, 2);
+                                expect(record.wrapperRect.height, `${caseId} rendered height`).toBeCloseTo(expectedRenderedHeight, 2);
                             }
                         }
                         if (clipping === 'left-top') {
@@ -375,13 +380,15 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     await page.mouse.move(resizeStart.x + 20, resizeStart.y + 20, { steps: 4 });
     await page.mouse.up();
     await page.waitForTimeout(100);
+    await selectFloatDom(page);
     const resized = await page.evaluate(() => {
         const fixture = window.floatDomContentBoxFixture!;
         const logical = window.univerAPI.getActiveWorkbook().getActiveSheet().getFloatDomById(fixture.id).position;
+        const transformer = fixture.getTransformerGeometry();
         const probe = document.querySelector('[data-float-dom-content-box-probe]')!;
         const contentRect = probe.parentElement!.getBoundingClientRect();
         const wrapperRect = probe.parentElement!.parentElement!.getBoundingClientRect();
-        return { logical, alignment: Math.max(
+        return { logical, transformer, wrapperWidth: wrapperRect.width, wrapperHeight: wrapperRect.height, alignment: Math.max(
             Math.abs(contentRect.left - wrapperRect.left),
             Math.abs(contentRect.top - wrapperRect.top),
             Math.abs(contentRect.right - wrapperRect.right),
@@ -392,6 +399,23 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     pointerResults.push({ target: 'left-top-drag', hit: resizeHit, action: 'resize', cursor: 'nw-resize' });
     expect(resizeHit).toBe(true);
     expect(resized.alignment).toBeLessThanOrEqual(0.5);
+    expect(resized.transformer.drawing).toMatchObject({
+        left: resized.logical.left,
+        top: resized.logical.top,
+        width: resized.logical.width,
+        height: resized.logical.height,
+        angle: resized.logical.angle,
+    });
+    const resizedTransformerGroup = resized.transformer.controls.find(({ key }) => key.startsWith('__SpreadsheetTransformer___'))!;
+    expect(resizedTransformerGroup).toMatchObject({
+        left: resized.logical.left,
+        top: resized.logical.top,
+        width: resized.logical.width,
+        height: resized.logical.height,
+        angle: resized.logical.angle,
+    });
+    expect(resized.wrapperWidth).toBeCloseTo(resized.logical.width, 2);
+    expect(resized.wrapperHeight).toBeCloseTo(resized.logical.height, 2);
 
     await configureCase(page, 'exact-bounds', 1, 0, 'visible', false);
     await selectFloatDom(page);
@@ -421,13 +445,15 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     await page.mouse.move(rotateHitPoint.x + 80, rotateHitPoint.y + 40, { steps: 6 });
     await page.mouse.up();
     await page.waitForTimeout(100);
+    await selectFloatDom(page);
     const rotated = await page.evaluate(() => {
         const fixture = window.floatDomContentBoxFixture!;
         const logical = window.univerAPI.getActiveWorkbook().getActiveSheet().getFloatDomById(fixture.id).position;
+        const transformer = fixture.getTransformerGeometry();
         const probe = document.querySelector('[data-float-dom-content-box-probe]')!;
         const contentRect = probe.parentElement!.getBoundingClientRect();
         const wrapperRect = probe.parentElement!.parentElement!.getBoundingClientRect();
-        return { logical, alignment: Math.max(
+        return { logical, transformer, wrapperWidth: wrapperRect.width, wrapperHeight: wrapperRect.height, alignment: Math.max(
             Math.abs(contentRect.left - wrapperRect.left),
             Math.abs(contentRect.top - wrapperRect.top),
             Math.abs(contentRect.right - wrapperRect.right),
@@ -438,6 +464,22 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     pointerResults.push({ target: 'rotate-drag', hit: rotateDragHit, action: 'rotate', cursor: rotateCursor });
     expect(rotateDragHit).toBe(true);
     expect(rotated.alignment).toBeLessThanOrEqual(0.5);
+    expect(rotated.transformer.drawing.angle).toBeCloseTo(rotated.logical.angle, 5);
+    const rotatedTransformerGroup = rotated.transformer.controls.find(({ key }) => key.startsWith('__SpreadsheetTransformer___'))!;
+    expect(rotatedTransformerGroup).toMatchObject({
+        left: rotated.transformer.drawing.left,
+        top: rotated.transformer.drawing.top,
+        width: rotated.transformer.drawing.width,
+        height: rotated.transformer.drawing.height,
+        angle: rotated.transformer.drawing.angle,
+    });
+    const rotatedRadians = rotated.transformer.drawing.angle * Math.PI / 180;
+    const expectedRotatedWidth = rotated.transformer.drawing.width * Math.abs(Math.cos(rotatedRadians)) +
+        rotated.transformer.drawing.height * Math.abs(Math.sin(rotatedRadians));
+    const expectedRotatedHeight = rotated.transformer.drawing.width * Math.abs(Math.sin(rotatedRadians)) +
+        rotated.transformer.drawing.height * Math.abs(Math.cos(rotatedRadians));
+    expect(rotated.wrapperWidth).toBeCloseTo(expectedRotatedWidth, 2);
+    expect(rotated.wrapperHeight).toBeCloseTo(expectedRotatedHeight, 2);
     console.debug(`[DEBUG-float-dom-content-box] ${JSON.stringify({ caseId: 'transformer-pointer-interactions', pointerResults })}`);
     const pointerResultsPath = testInfo.outputPath('float-dom-pointer-results.json');
     await writeFile(pointerResultsPath, JSON.stringify(pointerResults, null, 2));

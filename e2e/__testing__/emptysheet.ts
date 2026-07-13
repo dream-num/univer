@@ -34175,6 +34175,7 @@ export const sheetData = {
                                 ],
                                 sectionBreaks: [
                                     {
+                                        sectionId: 'section_e2e_empty_sheet_1',
                                         startIndex: 517,
                                         columnProperties: [
                                             {

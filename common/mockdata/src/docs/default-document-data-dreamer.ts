@@ -252,6 +252,7 @@ export const DEFAULT_DOCUMENT_DATA_DREAMER: IDocumentData = {
         ],
         sectionBreaks: [
             {
+                sectionId: 'section_mockdata_default_document_dreamer_1',
                 startIndex: 3319,
                 columnProperties: [
                     {

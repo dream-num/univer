@@ -423,6 +423,7 @@ function createTextBody(text: string): IDocumentBody {
         ],
         sectionBreaks: [
             {
+                sectionId: `section_${text}`,
                 startIndex: dataStream.length - 1,
             },
         ],

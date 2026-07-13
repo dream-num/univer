@@ -34205,6 +34205,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE = {
                                 ],
                                 sectionBreaks: [
                                     {
+                                        sectionId: 'section_mockdata_default_workbook_style_1',
                                         startIndex: 517,
                                         columnProperties: [
                                             {

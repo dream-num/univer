@@ -18,32 +18,45 @@ import type { CSSProperties } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
-import { distinctUntilChanged, first } from 'rxjs';
+import { first } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
+import { resolveFloatDomLayout } from './float-dom-layout';
+
+function setStyleProperty(style: CSSStyleDeclaration, property: string, value: string): void {
+    if (style.getPropertyValue(property) !== value) {
+        style.setProperty(property, value);
+    }
+}
+
+function applyFloatDomLayout(
+    wrapper: HTMLDivElement,
+    inner: HTMLDivElement,
+    layout: ReturnType<typeof resolveFloatDomLayout>
+): void {
+    const { wrapper: wrapperStyle, inner: innerStyle } = layout;
+    setStyleProperty(wrapper.style, 'top', `${wrapperStyle.top}px`);
+    setStyleProperty(wrapper.style, 'left', `${wrapperStyle.left}px`);
+    setStyleProperty(wrapper.style, 'width', `${wrapperStyle.width}px`);
+    setStyleProperty(wrapper.style, 'height', `${wrapperStyle.height}px`);
+    setStyleProperty(wrapper.style, 'transform', wrapperStyle.transform);
+    setStyleProperty(wrapper.style, 'opacity', `${wrapperStyle.opacity}`);
+
+    setStyleProperty(inner.style, 'width', `${innerStyle.width}px`);
+    setStyleProperty(inner.style, 'height', `${innerStyle.height}px`);
+    setStyleProperty(inner.style, 'left', innerStyle.left === 'auto' ? 'auto' : `${innerStyle.left}px`);
+    setStyleProperty(inner.style, 'top', innerStyle.top === 'auto' ? 'auto' : `${innerStyle.top}px`);
+    setStyleProperty(inner.style, 'right', innerStyle.right === 'auto' ? 'auto' : `${innerStyle.right}px`);
+    setStyleProperty(inner.style, 'bottom', innerStyle.bottom === 'auto' ? 'auto' : `${innerStyle.bottom}px`);
+}
 
 export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
-
-    const size$ = useMemo(() => layer.position$.pipe(
-        distinctUntilChanged(
-            (prev, curr) => prev.absolute.left === curr.absolute.left &&
-                prev.absolute.top === curr.absolute.top &&
-                prev.endX - prev.startX === curr.endX - curr.startX &&
-                prev.endY - prev.startY === curr.endY - curr.startY
-        )
-    ), [layer.position$]);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
-    const transformRef = useRef<string>(`transform: rotate(${position?.rotate}deg) translate(${position?.startX}px, ${position?.startY}px)`);
-    const topRef = useRef<number>(position?.startY ?? 0);
-    const leftRef = useRef<number>(position?.startX ?? 0);
-    const innerStyle = useRef<CSSProperties>({
-
-    });
     const Component = typeof layer.componentKey === 'string' ? useDependency(ComponentManager).get(layer.componentKey) : layer.componentKey;
     const layerProps: any = useMemo(() => ({
         data: layer.data,
@@ -54,48 +67,15 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
-            transformRef.current = `rotate(${position.rotate}deg)`;
-            topRef.current = position.startY;
-            leftRef.current = position.startX;
-            if (domRef.current) {
-                domRef.current.style.transform = transformRef.current;
-                domRef.current.style.top = `${topRef.current}px`;
-                domRef.current.style.left = `${leftRef.current}px`;
-                domRef.current.style.opacity = `${position.opacity ?? 1}`;
+            if (domRef.current && innerDomRef.current) {
+                applyFloatDomLayout(domRef.current, innerDomRef.current, resolveFloatDomLayout(position, layer.contentBoxMode));
             }
         });
 
-        const sizeSubscription = size$.subscribe((size) => {
-            if (domRef.current) {
-                domRef.current.style.width = `${Math.max(size.endX - size.startX - 2, 0)}px`;
-                domRef.current.style.height = `${Math.max(size.endY - size.startY - 2, 0)}px`;
-            }
-
-            if (innerDomRef.current) {
-                const style = {
-                    width: `${size.width - 4}px`,
-                    height: `${size.height - 4}px`,
-                    left: `${size.absolute.left ? 0 : 'auto'}`,
-                    top: `${size.absolute.top ? 0 : 'auto'}`,
-                    right: `${size.absolute.left ? 'auto' : 0}`,
-                    bottom: `${size.absolute.top ? 'auto' : 0}`,
-                };
-
-                innerDomRef.current.style.width = style.width;
-                innerDomRef.current.style.height = style.height;
-                innerDomRef.current.style.left = style.left;
-                innerDomRef.current.style.top = style.top;
-                innerDomRef.current.style.right = style.right;
-                innerDomRef.current.style.bottom = style.bottom;
-
-                innerStyle.current = style;
-            }
-        });
         return () => {
             subscription.unsubscribe();
-            sizeSubscription.unsubscribe();
         };
-    }, [layer.position$, size$]);
+    }, [layer.contentBoxMode, layer.position$]);
 
     const instance = univerInstanceService.getUnit(layer.unitId);
     const docDisabled = instance instanceof DocumentDataModel ? instance.getDisabled() : undefined;
@@ -118,6 +98,8 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
         return null;
     }
 
+    const layout = resolveFloatDomLayout(position, layer.contentBoxMode);
+
     //domRef univer-float-dom-wrapper
     //innerDomRef univer-float-dom
     return (
@@ -126,11 +108,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
             className="univer-z-10"
             style={{
                 position: 'absolute',
-                top: topRef.current,
-                left: leftRef.current,
-                width: Math.max(position.endX - position.startX - 2, 0),
-                height: Math.max(position.endY - position.startY - 2, 0),
-                transform: transformRef.current,
+                ...layout.wrapper,
                 overflow: floatDomOverflow.outerOverflow,
                 transformOrigin: 'center center',
             }}
@@ -159,7 +137,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 id={id}
                 ref={innerDomRef}
                 className="univer-absolute univer-overflow-hidden"
-                style={{ ...innerStyle.current, overflow: floatDomOverflow.innerOverflow }}
+                style={{ ...layout.inner, overflow: floatDomOverflow.innerOverflow }}
             >
                 {component}
             </div>

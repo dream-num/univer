@@ -1,6 +1,74 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { CustomRangeLoading } from './component';
+import type { FloatDomContentBoxMode, IFloatDomLayout } from '@univerjs/ui';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasFloatDomService } from '@univerjs/ui';
+import { CustomRangeLoading, FloatDomContentBoxProbe } from './component';
+
+const FLOAT_DOM_CONTENT_BOX_FIXTURE_ID = 'float-dom-content-box-probe';
+
+interface IFloatDomContentBoxFixture {
+    id: string;
+    setMode: (mode: FloatDomContentBoxMode) => void;
+    setBorder: (border: boolean) => void;
+    enableRotateHandle: () => void;
+    getLayout: () => IFloatDomLayout | undefined;
+}
+
+function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): void {
+    if (!new URLSearchParams(window.location.search).has('float-dom-content-box')) {
+        return;
+    }
+
+    univerAPI.registerComponent('FloatDomContentBoxProbe', FloatDomContentBoxProbe);
+    const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+    const disposable = worksheet.addFloatDomToPosition({
+        componentKey: 'FloatDomContentBoxProbe',
+        initPosition: {
+            startX: 120,
+            startY: 100,
+            endX: 600,
+            endY: 420,
+        },
+        data: { border: false },
+        allowTransform: true,
+        eventPassThrough: true,
+    }, FLOAT_DOM_CONTENT_BOX_FIXTURE_ID);
+    if (!disposable) {
+        throw new Error('Failed to create FloatDom content-box e2e fixture');
+    }
+
+    const canvasFloatDomService = univer.__getInjector().get(CanvasFloatDomService);
+    const renderManagerService = univer.__getInjector().get(IRenderManagerService);
+    window.floatDomContentBoxFixture = {
+        id: disposable.id,
+        setMode: (contentBoxMode) => canvasFloatDomService.updateFloatDom(disposable.id, { contentBoxMode }),
+        setBorder: (border) => worksheet.updateFloatDom(disposable.id, { data: { border } }),
+        enableRotateHandle: () => {
+            const workbook = univerAPI.getActiveWorkbook()!;
+            const scene = renderManagerService.getRenderById(workbook.getId())?.scene;
+            const rect = scene?.getObject(getDrawingShapeKeyByDrawingSearch({
+                unitId: workbook.getId(),
+                subUnitId: worksheet.getSheetId(),
+                drawingId: disposable.id,
+            }));
+            if (!rect || !scene) {
+                throw new Error('Failed to locate FloatDom transformer fixture');
+            }
+            rect.transformerConfig = { ...rect.transformerConfig, rotateEnabled: true };
+            scene.getTransformerByCreate()?.refreshControls();
+        },
+        getLayout: () => {
+            const layer = canvasFloatDomService.domLayers.find(([id]) => id === disposable.id)?.[1];
+            let layout: IFloatDomLayout | undefined;
+            layer?.position$.subscribe((value) => {
+                layout = value;
+            }).unsubscribe();
+            return layout;
+        },
+    };
+}
 
 export function insertFloatDom(univer: Univer, univerAPI: FUniver) {
     univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
@@ -12,6 +80,7 @@ export function insertFloatDom(univer: Univer, univerAPI: FUniver) {
             const fRange = fWorksheet.getRange('A1:C3');
             const disposable = fWorksheet.addFloatDomToRange(fRange, { componentKey: 'CustomRangeLoading' }, {}, 'myRangeLoading');
             console.warn('Float DOM', disposable);
+            installFloatDomContentBoxFixture(univer, univerAPI);
             // remove float dom
             // if (disposable) {
             //     disposable.dispose();
@@ -20,4 +89,11 @@ export function insertFloatDom(univer: Univer, univerAPI: FUniver) {
             // }
         }
     });
+}
+
+declare global {
+    // eslint-disable-next-line ts/naming-convention
+    interface Window {
+        floatDomContentBoxFixture?: IFloatDomContentBoxFixture;
+    }
 }

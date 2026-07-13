@@ -30,6 +30,8 @@ export interface IFloatDomLayout extends IPosition {
     opacity?: number;
 }
 
+export type FloatDomContentBoxMode = 'legacy-inset' | 'exact-bounds';
+
 export interface IFloatDom {
     position$: Observable<IFloatDomLayout>;
     id: string;
@@ -47,6 +49,12 @@ export interface IFloatDom {
      * their DOM portal is not filtered out when the child handles focus.
      */
     preserveOnFocusChange?: boolean;
+    /**
+     * Controls whether the content slot preserves FloatDom's historical inset
+     * or follows the supplied placement and content bounds exactly.
+     * @default 'legacy-inset'
+     */
+    contentBoxMode?: FloatDomContentBoxMode;
     onPointerMove: (evt: PointerEvent | MouseEvent) => void;
     onPointerDown: (evt: PointerEvent | MouseEvent) => void;
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;

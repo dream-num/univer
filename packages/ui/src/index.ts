@@ -66,7 +66,7 @@ export type { IContextMenuHandler } from './services/contextmenu/contextmenu.ser
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
 export { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
-export type { ICanvasFloatDomPreview, ICanvasFloatDomPreviewRequest, IFloatDom, IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export type { FloatDomContentBoxMode, ICanvasFloatDomPreview, ICanvasFloatDomPreviewRequest, IFloatDom, IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { FontService, IFontService } from './services/font.service';
 export type { IFontConfig } from './services/font.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';

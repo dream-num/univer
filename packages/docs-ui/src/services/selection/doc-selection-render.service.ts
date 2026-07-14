@@ -372,16 +372,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._updateInputPosition();
     }
 
-    /**
-     * @deprecated
-     */
     activate(x: number, y: number, force = false) {
         // Keep the hidden editor inside the Portal subtree when possible to avoid focus-trap loops,
         // then compensate coordinates if a transformed ancestor changes the fixed containing block.
         this._ensureHostContainer();
         let left = x;
         let top = y;
-        const fixedContainer = this._container.parentElement;
+        const fixedContainer = this._container.offsetParent;
         if (fixedContainer) {
             const rect = fixedContainer.getBoundingClientRect();
             left -= rect.left;

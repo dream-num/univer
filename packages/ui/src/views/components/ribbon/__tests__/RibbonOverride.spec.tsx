@@ -78,6 +78,8 @@ describe('Ribbon override chrome', () => {
 
         const placeholder = getByText('Bases');
         expect(placeholder?.parentElement?.className).toContain('univer-justify-center');
+        expect(placeholder?.parentElement?.className).toContain('univer-bg-gray-50');
+        expect(placeholder.className).toContain('univer-font-semibold');
         expect(container.querySelectorAll('[data-embed-ribbon-override="true"]')).toHaveLength(1);
         expect(observeCount).toBe(0);
     });

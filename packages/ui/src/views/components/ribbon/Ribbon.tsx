@@ -238,15 +238,19 @@ export function Ribbon(props: IRibbonProps) {
             >
                 {!toolbarOnly && ribbonOverride?.placeholderTitle && ribbon.length === 0 && (
                     <div
-                        className={clsx('univer-flex univer-h-9 univer-items-end univer-px-3', {
+                        className={clsx(`
+                          univer-flex univer-h-9 univer-items-end univer-rounded-md univer-bg-gray-50 univer-px-3
+                          dark:!univer-bg-gray-900
+                        `, {
                             'univer-justify-center': hideToolbar,
                         })}
                     >
                         <span
                             className="
                               univer-relative univer-inline-flex univer-h-8 univer-items-center univer-justify-center
-                              univer-rounded-t univer-bg-primary-50 univer-px-3 univer-text-sm univer-font-medium
-                              univer-text-primary-600
+                              univer-rounded-t univer-bg-primary-50 univer-px-3 univer-text-sm univer-font-semibold
+                              univer-text-primary-600 univer-shadow-sm
+                              dark:!univer-bg-primary-900 dark:!univer-text-primary-300
                             "
                         >
                             {ribbonOverride.placeholderTitle}

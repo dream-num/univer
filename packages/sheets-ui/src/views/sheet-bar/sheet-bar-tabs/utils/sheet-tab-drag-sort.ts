@@ -88,3 +88,7 @@ export function reorderItems<T>(items: T[], fromIndex: number, toIndex: number):
     nextItems.splice(toIndex, 0, movedItem);
     return nextItems;
 }
+
+export function getSheetTabTargetOrder(sheetOrder: readonly string[], visibleSheetIds: string[], targetIndex: number): number {
+    return sheetOrder.indexOf(visibleSheetIds[targetIndex]);
+}

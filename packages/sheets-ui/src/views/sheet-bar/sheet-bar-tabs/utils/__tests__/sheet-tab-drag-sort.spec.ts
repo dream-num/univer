@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { calculateSheetTabDragSort, reorderItems } from '../sheet-tab-drag-sort';
+import { calculateSheetTabDragSort, getSheetTabTargetOrder, reorderItems } from '../sheet-tab-drag-sort';
 
 const layout = [
     { id: 'sheet-0', left: 0, width: 40 },
@@ -74,5 +74,20 @@ describe('sheet-tab-drag-sort', () => {
         expect(reorderItems(['a', 'b', 'c', 'd'], 1, 3)).toEqual(['a', 'c', 'd', 'b']);
         expect(reorderItems(['a', 'b', 'c', 'd'], 2, 0)).toEqual(['c', 'a', 'b', 'd']);
         expect(reorderItems(['a', 'b', 'c', 'd'], 2, 2)).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('moves sheet 2 after sheet 6 when sheet 5 is hidden', () => {
+        const sheetOrder = ['sheet-1', 'sheet-2', 'sheet-3', 'sheet-4', 'sheet-5', 'sheet-6'];
+        const visibleSheetIds = ['sheet-1', 'sheet-2', 'sheet-3', 'sheet-4', 'sheet-6'];
+        const targetOrder = getSheetTabTargetOrder(sheetOrder, visibleSheetIds, 4);
+
+        expect(reorderItems(sheetOrder, 1, targetOrder)).toEqual([
+            'sheet-1',
+            'sheet-3',
+            'sheet-4',
+            'sheet-5',
+            'sheet-6',
+            'sheet-2',
+        ]);
     });
 });

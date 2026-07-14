@@ -54,6 +54,7 @@ import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-ma
 import { useActiveWorkbook } from '../../hook';
 import { SheetBarItem } from './SheetBarItem';
 import { SheetBarTabsContextMenu } from './SheetBarTabsContextMenu';
+import { getSheetTabTargetOrder } from './utils/sheet-tab-drag-sort';
 import { SlideTabBar } from './utils/slide-tab-bar';
 
 const SCROLL_SHADOW_NONE = '';
@@ -507,7 +508,12 @@ export function SheetBarTabs() {
                 });
             },
             onSlideEnd: async (event: Event, order: number) => {
-                await commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
+                const targetOrder = getSheetTabTargetOrder(
+                    workbook.getSheetOrders(),
+                    workbook.getUnhiddenWorksheets(),
+                    order
+                );
+                await commandService.executeCommand(SetWorksheetOrderCommand.id, { order: targetOrder });
             },
             onChangeTab: (_event: MouseEvent, subUnitId: string) => {
                 // Do not use SetWorksheetActivateCommand, otherwise activation timing may be incorrect.

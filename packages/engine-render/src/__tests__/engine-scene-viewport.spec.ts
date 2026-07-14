@@ -568,7 +568,7 @@ describe('engine scene viewport extra', () => {
         transformer.dispose();
     });
 
-    it('expands transformer border spacing symmetrically around object bounds', () => {
+    it('positions transformer controls symmetrically around object bounds', () => {
         const transformer = new Transformer({
             getEngine: () => ({ activeScene: null }),
         } as any, {
@@ -578,22 +578,59 @@ describe('engine scene viewport extra', () => {
             borderStrokeWidth: 1,
         });
 
-        expect((transformer as any)._getOutlinePosition(100, 50, 2, 1)).toEqual({
-            left: -3,
-            top: -3,
-            width: 104,
-            height: 54,
+        const outline = new Rect('outline', {
+            ...(transformer as any)._getOutlinePosition(100, 50, 2, 1),
+            strokeWidth: 1,
         });
-        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerResizeLM__', 50, 100, {
+        expect(outline.getState()).toEqual(expect.objectContaining({
+            left: -3.5,
+            top: -3.5,
+            width: 106,
+            height: 56,
+        }));
+        const outlineMatrix = outline.transform.getMatrix();
+        expect([
+            outlineMatrix[4],
+            outlineMatrix[5],
+            outlineMatrix[4] + outline.width,
+            outlineMatrix[5] + outline.height,
+        ]).toEqual([-3, -3, 103, 53]);
+
+        const applyObject = {
+            getState: () => ({ width: 100, height: 50 }),
             transformerConfig: {
                 anchorSize: 8,
+                anchorStyle: 'canva',
                 borderSpacing: 2,
                 borderStrokeWidth: 1,
             },
-        })).toEqual({
-            left: -7,
-            top: 21,
+        };
+        const anchorTypes = [
+            '__SpreadsheetTransformerResizeLT__',
+            '__SpreadsheetTransformerResizeCT__',
+            '__SpreadsheetTransformerResizeRT__',
+            '__SpreadsheetTransformerResizeLM__',
+            '__SpreadsheetTransformerResizeRM__',
+            '__SpreadsheetTransformerResizeLB__',
+            '__SpreadsheetTransformerResizeCB__',
+            '__SpreadsheetTransformerResizeRB__',
+        ];
+        const anchorCenters = anchorTypes.map((type) => {
+            const anchor = (transformer as any)._createResizeAnchor(type, applyObject, 1) as Rect;
+            const matrix = anchor.transform.getMatrix();
+            return [matrix[4] + anchor.width / 2, matrix[5] + anchor.height / 2];
         });
+
+        expect(anchorCenters).toEqual([
+            [-3, -3],
+            [50, -3],
+            [103, -3],
+            [-3, 25],
+            [103, 25],
+            [-3, 53],
+            [50, 53],
+            [103, 53],
+        ]);
 
         transformer.dispose();
     });
@@ -638,10 +675,10 @@ describe('engine scene viewport extra', () => {
         const transformer = new Transformer(scene);
 
         expect((transformer as any)._getOutlinePosition(100, 40, 6, 1)).toEqual({
-            left: -7,
-            top: -7,
-            width: 112,
-            height: 52,
+            left: -7.5,
+            top: -7.5,
+            width: 114,
+            height: 54,
         });
 
         transformer.setSelectedControl(rect);
@@ -650,8 +687,10 @@ describe('engine scene viewport extra', () => {
         const outline = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerOutline__')) as Rect;
         const leftMiddle = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerResizeLM__')) as Rect;
 
-        expect(outline.left).toBe(-7);
-        expect(leftMiddle.left + leftMiddle.width / 2).toBe(outline.left);
+        const outlineMatrix = outline.transform.getMatrix();
+        const leftMiddleMatrix = leftMiddle.transform.getMatrix();
+        expect(outlineMatrix[4]).toBe(-7);
+        expect(leftMiddleMatrix[4] + leftMiddle.width / 2).toBe(outlineMatrix[4]);
 
         transformer.dispose();
         scene.dispose();

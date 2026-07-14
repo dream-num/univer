@@ -17,10 +17,9 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    // Traducció al català pendent per a cada funció
     ACCRINT: {
-        description: '',
-        abstract: '',
+        description: 'Retorna l\'interès acumulat d\'un valor que paga interessos periòdics',
+        abstract: 'Retorna l\'interès acumulat d\'un valor que paga interessos periòdics',
         links: [
             {
                 title: 'Instrucció',
@@ -28,14 +27,14 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            issue: { name: 'emissió', detail: '' },
-            firstInterest: { name: 'primer_interès', detail: '' },
-            settlement: { name: 'liquidació', detail: '' },
-            rate: { name: 'taxa', detail: '' },
-            par: { name: 'valor_nominal', detail: '' },
-            frequency: { name: 'freqüència', detail: '' },
-            basis: { name: 'base', detail: '' },
-            calcMethod: { name: 'mètode_càlcul', detail: '' },
+            issue: { name: 'emissió', detail: 'La data d\'emissió del valor.' },
+            firstInterest: { name: 'primer_interès', detail: 'La data del primer pagament d\'interessos del valor.' },
+            settlement: { name: 'liquidació', detail: 'La data de venciment del valor.' },
+            rate: { name: 'taxa', detail: 'El tipus de cupó anual del valor.' },
+            par: { name: 'valor_nominal', detail: 'El valor nominal del valor.' },
+            frequency: { name: 'freqüència', detail: 'El nombre de pagaments de cupó per any.' },
+            basis: { name: 'base', detail: 'El tipus de base de recompte de dies que cal utilitzar.' },
+            calcMethod: { name: 'mètode_càlcul', detail: 'Un valor lògic: TRUE o omès indica que els interessos s\'acumulen des de la data d\'emissió; FALSE indica que s\'acumulen des de la darrera data de pagament del cupó.' },
         },
     },
     // ... (la resta de funcions seguiran el mateix patró)

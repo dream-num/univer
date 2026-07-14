@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
+import type { IRectProps } from '@univerjs/engine-render';
 
-const locale: typeof enUS = {
-    'sheets-crosshair-highlight': {
-        button: {
-            tooltip: '十字線を強調表示',
-        },
-    },
-};
+type SheetChartRenderObjectConfig = Pick<
+    IRectProps,
+    'borderEnabled' | 'paintFirst' | 'radius' | 'rotateEnabled' | 'strokeWidth'
+>;
 
-export default locale;
+/** Shared Chart frame config for editor and isolated print Scene objects. */
+export const SHEET_CHART_RENDER_OBJECT_CONFIG = Object.freeze({
+    borderEnabled: false,
+    paintFirst: 'stroke',
+    radius: 8,
+    rotateEnabled: false,
+    strokeWidth: 1,
+} satisfies SheetChartRenderObjectConfig);

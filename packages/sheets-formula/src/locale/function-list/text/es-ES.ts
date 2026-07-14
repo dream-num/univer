@@ -134,7 +134,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            text: { name: 'texto', detail: 'El texto o una referencia a una celda que contiene el texto que desea cambiar. Si el texto no contiene ninguna letra inglesa de ancho medio o katakana, el texto не se cambia.' },
+            text: { name: 'texto', detail: 'El texto o una referencia a una celda que contiene el texto que desea cambiar. Si el texto no contiene ninguna letra inglesa de ancho medio o katakana, el texto no se cambia.' },
         },
     },
     DOLLAR: {

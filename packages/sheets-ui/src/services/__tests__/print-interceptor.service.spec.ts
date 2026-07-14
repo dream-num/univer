@@ -16,7 +16,7 @@
 
 import { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { SheetPrintInterceptorService } from '../print-interceptor.service';
+import { SheetPrintingResourceCollector, SheetPrintInterceptorService } from '../print-interceptor.service';
 
 describe('SheetPrintInterceptorService', () => {
     let service: SheetPrintInterceptorService;
@@ -38,5 +38,27 @@ describe('SheetPrintInterceptorService', () => {
         expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_RANGE)({ startRow: 1, endRow: 2, startColumn: 3, endColumn: 4 }, { unitId: 'u-1', subUnitId: 's-1' })).toEqual({ startRow: 1, endRow: 2, startColumn: 3, endColumn: 4 });
         expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_COMPONENT_COLLECT)(undefined, {} as never)).toBeUndefined();
         expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_DOM_COLLECT)(domCollection as never, {} as never)).toBe(domCollection);
+    });
+});
+
+describe('SheetPrintingResourceCollector', () => {
+    it('waits for registered printing resources', async () => {
+        const collector = new SheetPrintingResourceCollector();
+        let resolveResource!: () => void;
+        const resource = new Promise<void>((resolve) => {
+            resolveResource = resolve;
+        });
+        collector.add(resource);
+        let ready = false;
+        const waiting = collector.wait().then(() => {
+            ready = true;
+        });
+
+        await Promise.resolve();
+        expect(ready).toBe(false);
+
+        resolveResource();
+        await waiting;
+        expect(ready).toBe(true);
     });
 });

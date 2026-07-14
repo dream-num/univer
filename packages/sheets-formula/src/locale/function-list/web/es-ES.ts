@@ -18,44 +18,43 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: 'Devuelve una cadena codificada en URL',
-        abstract: 'Devuelve una cadena codificada en URL',
+        description: 'La función URLCODIF devuelve una cadena con codificación URL que reemplaza ciertos caracteres no alfanuméricos por el símbolo de porcentaje (%) y un número hexadecimal.',
+        abstract: 'La función URLCODIF devuelve una cadena con codificación URL que reemplaza ciertos caracteres no alfanuméricos por el símbolo de porcentaje (%) y un número hexadecimal.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/en-us/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/es-es/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
-            text: { name: 'texto', detail: 'Una cadena que se va a codificar en URL' },
+            text: { name: 'texto', detail: 'Una cadena a la que se va a codificar la dirección URL' },
         },
     },
     FILTERXML: {
-        description: 'Devuelve datos específicos del contenido XML utilizando la XPath especificada',
-        abstract: 'Devuelve datos específicos del contenido XML utilizando la XPath especificada',
+        description: 'La función XMLFILTRO devuelve datos específicos del contenido XML mediante la ruta x especificada.',
+        abstract: 'La función XMLFILTRO devuelve datos específicos del contenido XML mediante la ruta x especificada.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/es-es/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primero' },
-            number2: { name: 'número2', detail: 'segundo' },
+            xml: { name: 'xml', detail: 'Una cadena en formato XML válido.' },
+            xpath: { name: 'xpath', detail: 'Una cadena con formato XPath estándar.' },
         },
     },
     WEBSERVICE: {
-        description: 'Devuelve datos de un servicio web',
-        abstract: 'Devuelve datos de un servicio web',
+        description: 'La función SERVICIOWEB devuelve datos de un servicio web en Internet o en la Intranet.',
+        abstract: 'La función SERVICIOWEB devuelve datos de un servicio web en Internet o en la Intranet.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/es-es/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primero' },
-            number2: { name: 'número2', detail: 'segundo' },
+            url: { name: 'url', detail: 'La dirección URL del servicio web.' },
         },
     },
 };

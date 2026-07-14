@@ -62,16 +62,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'sheets-formula.functionList.INFO.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.INFO.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.INFO.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'sheets-formula.functionList.INFO.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.INFO.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'sheets-formula.functionList.INFO.functionParameter.typeText.name',
+                detail: 'sheets-formula.functionList.INFO.functionParameter.typeText.detail',
+                example: '"system"',
                 require: 1,
                 repeat: 0,
             },
@@ -307,16 +300,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'sheets-formula.functionList.ISOMITTED.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ISOMITTED.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.ISOMITTED.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'sheets-formula.functionList.ISOMITTED.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.ISOMITTED.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'sheets-formula.functionList.ISOMITTED.functionParameter.argument.name',
+                detail: 'sheets-formula.functionList.ISOMITTED.functionParameter.argument.detail',
+                example: 'value',
                 require: 1,
                 repeat: 0,
             },
@@ -400,7 +386,7 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
                 name: 'sheets-formula.functionList.SHEET.functionParameter.value.name',
                 detail: 'sheets-formula.functionList.SHEET.functionParameter.value.detail',
                 example: 'A1',
-                require: 1,
+                require: 0,
                 repeat: 0,
             },
         ],

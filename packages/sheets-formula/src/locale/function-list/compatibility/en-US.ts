@@ -16,95 +16,95 @@
 
 const locale = {
     BETADIST: {
-        description: 'Returns the beta cumulative distribution function',
-        abstract: 'Returns the beta cumulative distribution function',
+        description: 'Returns the cumulative beta probability density function. The beta distribution is commonly used to study variation in the percentage of something across samples, such as the fraction of the day people spend watching television.',
+        abstract: 'Returns the cumulative beta probability density function. The beta distribution is commonly used to study variation in the percentage of something across samples, such as the fraction of the day people spend watching television.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/betadist-function-49f1b9a9-a5da-470f-8077-5f1730b5fd47',
+                url: 'https://support.microsoft.com/en-us/excel/functions/betadist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value between A and B at which to evaluate the function.' },
-            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
-            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
-            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
-            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
+            x: { name: 'x', detail: 'Required. The value between A and B at which to evaluate the function.' },
+            alpha: { name: 'alpha', detail: 'Required. A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'Required. A parameter of the distribution.' },
+            A: { name: 'A', detail: 'Optional. A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'Optional. An upper bound to the interval of x.' },
         },
     },
     BETAINV: {
-        description: 'Returns the inverse of the cumulative distribution function for a specified beta distribution',
-        abstract: 'Returns the inverse of the cumulative distribution function for a specified beta distribution',
+        description: 'Returns the inverse of the cumulative beta probability density function for a specified beta distribution. That is, if probability = BETADIST(x,...), then BETAINV(probability,...) = x. The beta distribution can be used in project planning to model probable completion times given an expected completion time and variability.',
+        abstract: 'Returns the inverse of the cumulative beta probability density function for a specified beta distribution. That is, if probability = BETADIST(x,...), then BETAINV(probability,...) = x. The beta distribution can be used in project planning to model probable completion times given an expected completion time and variability.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/betainv-function-8b914ade-b902-43c1-ac9c-c05c54f10d6c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/betainv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability associated with the beta distribution.' },
-            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
-            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
-            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
-            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
+            probability: { name: 'probability', detail: 'Required. A probability associated with the beta distribution.' },
+            alpha: { name: 'alpha', detail: 'Required. A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'Required. A parameter the distribution.' },
+            A: { name: 'A', detail: 'Optional. A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'Optional. An upper bound to the interval of x.' },
         },
     },
     BINOMDIST: {
-        description: 'Returns the individual term binomial distribution probability',
-        abstract: 'Returns the individual term binomial distribution probability',
+        description: 'Returns the individual term binomial distribution probability. Use BINOMDIST in problems with a fixed number of tests or trials, when the outcomes of any trial are only success or failure, when trials are independent, and when the probability of success is constant throughout the experiment. For example, BINOMDIST can calculate the probability that two of the next three babies born are male.',
+        abstract: 'Returns the individual term binomial distribution probability. Use BINOMDIST in problems with a fixed number of tests or trials, when the outcomes of any trial are only success or failure, when trials are independent, and when the probability of success is constant throughout the experiment. For example, BINOMDIST can calculate the probability that two of the next three babies born are male.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/binomdist-function-506a663e-c4ca-428d-b9a8-05583d68789c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/binomdist-function',
             },
         ],
         functionParameter: {
-            numberS: { name: 'number_s', detail: 'The number of successes in trials.' },
-            trials: { name: 'trials', detail: 'The number of independent trials.' },
-            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, BINOMDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            numberS: { name: 'number_s', detail: 'Required. The number of successes in trials.' },
+            trials: { name: 'trials', detail: 'Required. The number of independent trials.' },
+            probabilityS: { name: 'probability_s', detail: 'Required. The probability of success on each trial.' },
+            cumulative: { name: 'cumulative', detail: 'Required. A logical value that determines the form of the function. If cumulative is TRUE, then BINOMDIST returns the cumulative distribution function, which is the probability that there are at most number_s successes; if FALSE, it returns the probability mass function, which is the probability that there are number_s successes.' },
         },
     },
     CHIDIST: {
-        description: 'Returns the right-tailed probability of the chi-squared distribution.',
-        abstract: 'Returns the right-tailed probability of the chi-squared distribution.',
+        description: 'Returns the right-tailed probability of the chi-squared distribution. The χ2 distribution is associated with a χ2 test. Use the χ2 test to compare observed and expected values. For example, a genetic experiment might hypothesize that the next generation of plants will exhibit a certain set of colors. By comparing the observed results with the expected ones, you can decide whether your original hypothesis is valid.',
+        abstract: 'Returns the right-tailed probability of the chi-squared distribution. The χ2 distribution is associated with a χ2 test. Use the χ2 test to compare observed and expected values. For example, a genetic experiment might hypothesize that the next generation of plants will exhibit a certain set of colors. By comparing the observed results with the expected ones, you can decide whether your original hypothesis is valid.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/chidist-function-c90d0fbc-5b56-4f5f-ab57-34af1bf6897e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/chidist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
-            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
+            x: { name: 'x', detail: 'Required. The value at which you want to evaluate the distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'Required. The number of degrees of freedom.' },
         },
     },
     CHIINV: {
-        description: 'Returns the inverse of the right-tailed probability of the chi-squared distribution.',
-        abstract: 'Returns the inverse of the right-tailed probability of the chi-squared distribution.',
+        description: 'Returns the inverse of the right-tailed probability of the chi-squared distribution. If probability = CHIDIST(x,...), then CHIINV(probability,...) = x. Use this function to compare observed results with expected ones in order to decide whether your original hypothesis is valid.',
+        abstract: 'Returns the inverse of the right-tailed probability of the chi-squared distribution. If probability = CHIDIST(x,...), then CHIINV(probability,...) = x. Use this function to compare observed results with expected ones in order to decide whether your original hypothesis is valid.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/chiinv-function-cfbea3f6-6e4f-40c9-a87f-20472e0512af',
+                url: 'https://support.microsoft.com/en-us/excel/functions/chiinv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability associated with the chi-squared distribution.' },
-            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
+            probability: { name: 'probability', detail: 'Required. A probability associated with the chi-squared distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'Required. The number of degrees of freedom.' },
         },
     },
     CHITEST: {
-        description: 'Returns the test for independence',
-        abstract: 'Returns the test for independence',
+        description: 'Returns the test for independence. CHITEST returns the value from the chi-squared (χ2) distribution for the statistic and the appropriate degrees of freedom. You can use χ2 tests to determine whether hypothesized results are verified by an experiment.',
+        abstract: 'Returns the test for independence. CHITEST returns the value from the chi-squared (χ2) distribution for the statistic and the appropriate degrees of freedom. You can use χ2 tests to determine whether hypothesized results are verified by an experiment.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/chitest-function-981ff871-b694-4134-848e-38ec704577ac',
+                url: 'https://support.microsoft.com/en-us/excel/functions/chitest-function',
             },
         ],
         functionParameter: {
-            actualRange: { name: 'actual_range', detail: 'The range of data that contains observations to test against expected values.' },
-            expectedRange: { name: 'expected_range', detail: 'The range of data that contains the ratio of the product of row totals and column totals to the grand total.' },
+            actualRange: { name: 'actual_range', detail: 'Required. The range of data that contains observations to test against expected values.' },
+            expectedRange: { name: 'expected_range', detail: 'Required. The range of data that contains the ratio of the product of row totals and column totals to the grand total.' },
         },
     },
     CONFIDENCE: {
@@ -113,472 +113,469 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/confidence-function-75ccc007-f77c-4343-bc14-673642091ad6',
+                url: 'https://support.microsoft.com/en-us/excel/functions/confidence-function',
             },
         ],
         functionParameter: {
-            alpha: { name: 'alpha', detail: 'The significance level used to compute the confidence level. The confidence level equals 100*(1 - alpha)%, or in other words, an alpha of 0.05 indicates a 95 percent confidence level.' },
-            standardDev: { name: 'standard_dev', detail: 'The population standard deviation for the data range and is assumed to be known.' },
-            size: { name: 'size', detail: 'The sample size.' },
+            alpha: { name: 'alpha', detail: 'Required. The significance level used to compute the confidence level. The confidence level equals 100*(1 - alpha)%, or in other words, an alpha of 0.05 indicates a 95 percent confidence level.' },
+            standardDev: { name: 'standard_dev', detail: 'Required. The population standard deviation for the data range and is assumed to be known.' },
+            size: { name: 'size', detail: 'Required. The sample size.' },
         },
     },
     COVAR: {
-        description: 'Returns population covariance, the average of the products of deviations for each data point pair in two data sets.',
-        abstract: 'Returns population covariance',
+        description: 'Returns covariance, the average of the products of deviations for each data point pair in two data sets.',
+        abstract: 'Returns covariance, the average of the products of deviations for each data point pair in two data sets.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/covar-function-50479552-2c03-4daf-bd71-a5ab88b2db03',
+                url: 'https://support.microsoft.com/en-us/excel/functions/covar-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'array1', detail: 'A first range of cell values.' },
-            array2: { name: 'array2', detail: 'A second range of cell values.' },
+            array1: { name: 'array1', detail: 'Required. The first cell range of integers.' },
+            array2: { name: 'array2', detail: 'Required. The second cell range of integers.' },
         },
     },
     CRITBINOM: {
-        description: 'Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value',
-        abstract: 'Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value',
+        description: 'Returns the smallest value for which the cumulative binomial distribution is greater than or equal to a criterion value. Use this function for quality assurance applications. For example, use CRITBINOM to determine the greatest number of defective parts that are allowed to come off an assembly line run without rejecting the entire lot.',
+        abstract: 'Returns the smallest value for which the cumulative binomial distribution is greater than or equal to a criterion value. Use this function for quality assurance applications. For example, use CRITBINOM to determine the greatest number of defective parts that are allowed to come off an assembly line run without rejecting the entire lot.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/critbinom-function-eb6b871d-796b-4d21-b69b-e4350d5f407b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/critbinom-function',
             },
         ],
         functionParameter: {
-            trials: { name: 'trials', detail: 'The number of Bernoulli trials.' },
-            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
-            alpha: { name: 'alpha', detail: 'The criterion value.' },
+            trials: { name: 'trials', detail: 'Required. The number of Bernoulli trials.' },
+            probabilityS: { name: 'probability_s', detail: 'Required. The probability of a success on each trial.' },
+            alpha: { name: 'alpha', detail: 'Required. The criterion value.' },
         },
     },
     EXPONDIST: {
-        description: 'Returns the exponential distribution',
-        abstract: 'Returns the exponential distribution',
+        description: 'Returns the exponential distribution. Use EXPONDIST to model the time between events, such as how long an automated bank teller takes to deliver cash. For example, you can use EXPONDIST to determine the probability that the process takes at most 1 minute.',
+        abstract: 'Returns the exponential distribution. Use EXPONDIST to model the time between events, such as how long an automated bank teller takes to deliver cash. For example, you can use EXPONDIST to determine the probability that the process takes at most 1 minute.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/expondist-function-68ab45fd-cd6d-4887-9770-9357eb8ee06a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/expondist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
-            lambda: { name: 'lambda', detail: 'The parameter value.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, EXPONDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            x: { name: 'x', detail: 'Required. The value of the function.' },
+            lambda: { name: 'lambda', detail: 'Required. The parameter value.' },
+            cumulative: { name: 'cumulative', detail: 'Required. A logical value that indicates which form of the exponential function to provide. If cumulative is TRUE, EXPONDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     FDIST: {
-        description: 'Returns the (right-tailed) F probability distribution',
-        abstract: 'Returns the (right-tailed) F probability distribution',
+        description: 'Returns the (right-tailed) F probability distribution (degree of diversity) for two data sets. You can use this function to determine whether two data sets have different degrees of diversity. For example, you can examine the test scores of men and women entering high school and determine if the variability in the females is different from that found in the males.',
+        abstract: 'Returns the (right-tailed) F probability distribution (degree of diversity) for two data sets. You can use this function to determine whether two data sets have different degrees of diversity. For example, you can examine the test scores of men and women entering high school and determine if the variability in the females is different from that found in the males.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/fdist-function-ecf76fba-b3f1-4e7d-a57e-6a5b7460b786',
+                url: 'https://support.microsoft.com/en-us/excel/functions/fdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value at which to evaluate the function.' },
-            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
-            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
+            x: { name: 'x', detail: 'Required. The value at which to evaluate the function.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'Required. The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'Required. The denominator degrees of freedom.' },
         },
     },
     FINV: {
-        description: 'Returns the inverse of the (right-tailed) F probability distribution',
-        abstract: 'Returns the inverse of the (right-tailed) F probability distribution',
+        description: 'Returns the inverse of the (right-tailed) F probability distribution. If p = FDIST(x,...), then FINV(p,...) = x.',
+        abstract: 'Returns the inverse of the (right-tailed) F probability distribution. If p = FDIST(x,...), then FINV(p,...) = x.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/finv-function-4d46c97c-c368-4852-bc15-41e8e31140b1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/finv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability associated with the F cumulative distribution.' },
-            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
-            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
+            probability: { name: 'probability', detail: 'Required. A probability associated with the F cumulative distribution.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'Required. The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'Required. The denominator degrees of freedom.' },
         },
     },
     FTEST: {
-        description: 'Returns the result of an F-test',
-        abstract: 'Returns the result of an F-test',
+        description: 'Returns the result of an F-test. An F-test returns the two-tailed probability that the variances in array1 and array2 are not significantly different. Use this function to determine whether two samples have different variances. For example, given test scores from public and private schools, you can test whether these schools have different levels of test score diversity.',
+        abstract: 'Returns the result of an F-test. An F-test returns the two-tailed probability that the variances in array1 and array2 are not significantly different. Use this function to determine whether two samples have different variances. For example, given test scores from public and private schools, you can test whether these schools have different levels of test score diversity.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ftest-function-4c9e1202-53fe-428c-a737-976f6fc3f9fd',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ftest-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'array1', detail: 'The first array or range of data.' },
-            array2: { name: 'array2', detail: 'The second array or range of data.' },
+            array1: { name: 'array1', detail: 'Required. The first array or range of data.' },
+            array2: { name: 'array2', detail: 'Required. The second array or range of data.' },
         },
     },
     GAMMADIST: {
-        description: 'Returns the gamma distribution',
-        abstract: 'Returns the gamma distribution',
+        description: 'Returns the gamma distribution. You can use this function to study variables that may have a skewed distribution. The gamma distribution is commonly used in queuing analysis.',
+        abstract: 'Returns the gamma distribution. You can use this function to study variables that may have a skewed distribution. The gamma distribution is commonly used in queuing analysis.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/gammadist-function-7327c94d-0f05-4511-83df-1dd7ed23e19e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/gammadist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value for which you want the distribution.' },
-            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
-            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, GAMMADIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            x: { name: 'x', detail: 'Required. The value at which you want to evaluate the distribution.' },
+            alpha: { name: 'alpha', detail: 'Required. A parameter to the distribution.' },
+            beta: { name: 'beta', detail: 'Required. A parameter to the distribution. If beta = 1, GAMMADIST returns the standard gamma distribution.' },
+            cumulative: { name: 'cumulative', detail: 'Required. A logical value that determines the form of the function. If cumulative is TRUE, GAMMADIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     GAMMAINV: {
-        description: 'Returns the inverse of the gamma cumulative distribution',
-        abstract: 'Returns the inverse of the gamma cumulative distribution',
+        description: 'Returns the inverse of the gamma cumulative distribution. If p = GAMMADIST(x,...), then GAMMAINV(p,...) = x. You can use this function to study a variable whose distribution may be skewed.',
+        abstract: 'Returns the inverse of the gamma cumulative distribution. If p = GAMMADIST(x,...), then GAMMAINV(p,...) = x. You can use this function to study a variable whose distribution may be skewed.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/gammainv-function-06393558-37ab-47d0-aa63-432f99e7916d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/gammainv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability associated with the gamma distribution.' },
-            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
-            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            probability: { name: 'probability', detail: 'Required. The probability associated with the gamma distribution.' },
+            alpha: { name: 'alpha', detail: 'Required. A parameter to the distribution.' },
+            beta: { name: 'beta', detail: 'Required. A parameter to the distribution. If beta = 1, GAMMAINV returns the standard gamma distribution.' },
         },
     },
     HYPGEOMDIST: {
-        description: 'Returns the hypergeometric distribution',
-        abstract: 'Returns the hypergeometric distribution',
+        description: 'Returns the hypergeometric distribution. HYPGEOMDIST returns the probability of a given number of sample successes, given the sample size, population successes, and population size. Use HYPGEOMDIST for problems with a finite population, where each observation is either a success or a failure, and where each subset of a given size is chosen with equal likelihood.',
+        abstract: 'Returns the hypergeometric distribution. HYPGEOMDIST returns the probability of a given number of sample successes, given the sample size, population successes, and population size. Use HYPGEOMDIST for problems with a finite population, where each observation is either a success or a failure, and where each subset of a given size is chosen with equal likelihood.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hypgeomdist-function-23e37961-2871-4195-9629-d0b2c108a12e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/hypgeomdist-function',
             },
         ],
         functionParameter: {
-            sampleS: { name: 'sample_s', detail: 'The number of successes in the sample.' },
-            numberSample: { name: 'number_sample', detail: 'The size of the sample.' },
-            populationS: { name: 'population_s', detail: 'The number of successes in the population.' },
-            numberPop: { name: 'number_pop', detail: 'The population size.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, HYPGEOMDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            sampleS: { name: 'sample_s', detail: 'Required. The number of successes in the sample.' },
+            numberSample: { name: 'number_sample', detail: 'Required. The size of the sample.' },
+            populationS: { name: 'population_s', detail: 'Required. The number of successes in the population.' },
+            numberPop: { name: 'number_pop', detail: 'Required. The population size.' },
         },
     },
     LOGINV: {
-        description: 'Returns the inverse of the lognormal cumulative distribution function',
-        abstract: 'Returns the inverse of the lognormal cumulative distribution function',
+        description: 'Returns the inverse of the lognormal cumulative distribution function of x, where ln(x) is normally distributed with parameters mean and standard_dev. If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x.',
+        abstract: 'Returns the inverse of the lognormal cumulative distribution function of x, where ln(x) is normally distributed with parameters mean and standard_dev. If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/loginv-function-0bd7631a-2725-482b-afb4-de23df77acfe',
+                url: 'https://support.microsoft.com/en-us/excel/functions/loginv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability corresponding to the lognormal distribution.' },
-            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
-            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
+            probability: { name: 'probability', detail: 'Required. A probability associated with the lognormal distribution.' },
+            mean: { name: 'mean', detail: 'Required. The mean of ln(x).' },
+            standardDev: { name: 'standard_dev', detail: 'Required. The standard deviation of ln(x).' },
         },
     },
     LOGNORMDIST: {
-        description: 'Returns the cumulative lognormal distribution',
-        abstract: 'Returns the cumulative lognormal distribution',
+        description: 'Returns the cumulative lognormal distribution of x, where ln(x) is normally distributed with parameters mean and standard_dev. Use this function to analyze data that has been logarithmically transformed.',
+        abstract: 'Returns the cumulative lognormal distribution of x, where ln(x) is normally distributed with parameters mean and standard_dev. Use this function to analyze data that has been logarithmically transformed.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/lognormdist-function-f8d194cb-9ee3-4034-8c75-1bdb3884100b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/lognormdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value for which you want the distribution.' },
-            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
-            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, LOGNORM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            x: { name: 'x', detail: 'Required. The value at which to evaluate the function.' },
+            mean: { name: 'mean', detail: 'Required. The mean of ln(x).' },
+            standardDev: { name: 'standard_dev', detail: 'Required. The standard deviation of ln(x).' },
         },
     },
     MODE: {
-        description: 'Returns the most common value in a data set',
-        abstract: 'Returns the most common value in a data set',
+        description: 'Let\'s say you want to find out the most common number of bird species sighted in a sample of bird counts at a critical wetland over a 30-year time period, or you want to find out the most frequently occurring number of phone calls at a telephone support center during off-peak hours. To calculate the mode of a group of numbers, use the MODE function.',
+        abstract: 'Let\'s say you want to find out the most common number of bird species sighted in a sample of bird counts at a critical wetland over a 30-year time period, or you want to find out the most frequently occurring number of phone calls at a telephone support center during off-peak hours. To calculate the mode of a group of numbers, use the MODE function.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/mode-function-e45192ce-9122-4980-82ed-4bdc34973120',
+                url: 'https://support.microsoft.com/en-us/excel/functions/mode-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want calculate the mode.' },
-            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want calculate the mode, up to a maximum of 255.' },
+            number1: { name: 'number1', detail: 'Required. The first number argument for which you want to calculate the mode.' },
+            number2: { name: 'number2', detail: 'Optional. Number arguments 2 to 255 for which you want to calculate the mode. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     NEGBINOMDIST: {
-        description: 'Returns the negative binomial distribution',
-        abstract: 'Returns the negative binomial distribution',
+        description: 'Returns the negative binomial distribution. NEGBINOMDIST returns the probability that there will be number_f failures before the number_s-th success, when the constant probability of a success is probability_s. This function is similar to the binomial distribution, except that the number of successes is fixed, and the number of trials is variable. Like the binomial, trials are assumed to be independent.',
+        abstract: 'Returns the negative binomial distribution. NEGBINOMDIST returns the probability that there will be number_f failures before the number_s-th success, when the constant probability of a success is probability_s. This function is similar to the binomial distribution, except that the number of successes is fixed, and the number of trials is variable. Like the binomial, trials are assumed to be independent.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/negbinomdist-function-f59b0a37-bae2-408d-b115-a315609ba714',
+                url: 'https://support.microsoft.com/en-us/excel/functions/negbinomdist-function',
             },
         ],
         functionParameter: {
-            numberF: { name: 'number_f', detail: 'The number of failures.' },
-            numberS: { name: 'number_s', detail: 'The threshold number of successes.' },
-            probabilityS: { name: 'probability_s', detail: 'The probability of a success.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, NEGBINOMDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            numberF: { name: 'number_f', detail: 'Required. The number of failures.' },
+            numberS: { name: 'number_s', detail: 'Required. The threshold number of successes.' },
+            probabilityS: { name: 'probability_s', detail: 'Required. The probability of a success.' },
         },
     },
     NORMDIST: {
-        description: 'Returns the normal cumulative distribution',
-        abstract: 'Returns the normal cumulative distribution',
+        description: 'The NORMDIST function returns the normal distribution for the specified mean and standard deviation. This function has a wide range of applications in statistics, including hypothesis testing.',
+        abstract: 'The NORMDIST function returns the normal distribution for the specified mean and standard deviation. This function has a wide range of applications in statistics, including hypothesis testing.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/normdist-function-126db625-c53e-4591-9a22-c9ff422d6d58',
+                url: 'https://support.microsoft.com/en-us/excel/functions/normdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value for which you want the distribution.' },
-            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
-            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, NORMDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            x: { name: 'x', detail: 'Required. The value for which you want the distribution' },
+            mean: { name: 'mean', detail: 'Required. The arithmetic mean of the distribution' },
+            standardDev: { name: 'standard_dev', detail: 'Required. The standard deviation of the distribution' },
+            cumulative: { name: 'cumulative', detail: 'Required. A logical value that determines the form of the function. If cumulative is TRUE, NORMDIST returns the cumulative distribution function; if cumulative is FALSE, it returns the probability mass function.' },
         },
     },
     NORMINV: {
-        description: 'Returns the inverse of the normal cumulative distribution',
-        abstract: 'Returns the inverse of the normal cumulative distribution',
+        description: 'Returns the inverse of the normal cumulative distribution for the specified mean and standard deviation.',
+        abstract: 'Returns the inverse of the normal cumulative distribution for the specified mean and standard deviation.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/norminv-function-87981ab8-2de0-4cb0-b1aa-e21d4cb879b8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/norminv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability corresponding to the normal distribution.' },
-            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
-            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
+            probability: { name: 'probability', detail: 'Required. A probability corresponding to the normal distribution.' },
+            mean: { name: 'mean', detail: 'Required. The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'Required. The standard deviation of the distribution.' },
         },
     },
     NORMSDIST: {
-        description: 'Returns the standard normal cumulative distribution',
-        abstract: 'Returns the standard normal cumulative distribution',
+        description: 'Returns the standard normal cumulative distribution function. The distribution has a mean of 0 (zero) and a standard deviation of one. Use this function in place of a table of standard normal curve areas.',
+        abstract: 'Returns the standard normal cumulative distribution function. The distribution has a mean of 0 (zero) and a standard deviation of one. Use this function in place of a table of standard normal curve areas.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/normsdist-function-463369ea-0345-445d-802a-4ff0d6ce7cac',
+                url: 'https://support.microsoft.com/en-us/excel/functions/normsdist-function',
             },
         ],
         functionParameter: {
-            z: { name: 'z', detail: 'The value for which you want the distribution.' },
+            z: { name: 'z', detail: 'Required. The value for which you want the distribution.' },
         },
     },
     NORMSINV: {
-        description: 'Returns the inverse of the standard normal cumulative distribution',
-        abstract: 'Returns the inverse of the standard normal cumulative distribution',
+        description: 'Returns the inverse of the standard normal cumulative distribution. The distribution has a mean of zero and a standard deviation of one.',
+        abstract: 'Returns the inverse of the standard normal cumulative distribution. The distribution has a mean of zero and a standard deviation of one.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/normsinv-function-8d1bce66-8e4d-4f3b-967c-30eed61f019d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/normsinv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'A probability corresponding to the normal distribution.' },
+            probability: { name: 'probability', detail: 'Required. A probability corresponding to the normal distribution.' },
         },
     },
     PERCENTILE: {
-        description: 'Returns the k-th percentile of values in a data set (Includes 0 and 1)',
-        abstract: 'Returns the k-th percentile of values in a data set (Includes 0 and 1)',
+        description: 'Returns the k-th percentile of values in a range. You can use this function to establish a threshold of acceptance. For example, you can decide to examine candidates who score above the 90th percentile.',
+        abstract: 'Returns the k-th percentile of values in a range. You can use this function to establish a threshold of acceptance. For example, you can decide to examine candidates who score above the 90th percentile.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/percentile-function-91b43a53-543c-4708-93de-d626debdddca',
+                url: 'https://support.microsoft.com/en-us/excel/functions/percentile-function',
             },
         ],
         functionParameter: {
-            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
-            k: { name: 'k', detail: 'The percentile value in the range 0 and 1 (Includes 0 and 1).' },
+            array: { name: 'array', detail: 'Required. The array or range of data that defines relative standing.' },
+            k: { name: 'k', detail: 'Required. The percentile value in the range 0..1, inclusive.' },
         },
     },
     PERCENTRANK: {
-        description: 'Returns the percentage rank of a value in a data set (Includes 0 and 1)',
-        abstract: 'Returns the percentage rank of a value in a data set (Includes 0 and 1)',
+        description: 'The PERCENTRANK function returns the rank of a value in a dataset as a percentage of the dataset -- essentially, the relative standing of a value within the whole dataset. For example, you could use PERCENTRANK to determine the standing of an individual\'s test score among the field of all scores for the same test.',
+        abstract: 'The PERCENTRANK function returns the rank of a value in a dataset as a percentage of the dataset -- essentially, the relative standing of a value within the whole dataset. For example, you could use PERCENTRANK to determine the standing of an individual\'s test score among the field of all scores for the same test.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/percentrank-function-f1b5836c-9619-4847-9fc9-080ec9024442',
+                url: 'https://support.microsoft.com/en-us/excel/functions/percentrank-function',
             },
         ],
         functionParameter: {
-            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
-            x: { name: 'x', detail: 'The value for which you want to know the rank.' },
-            significance: { name: 'significance', detail: 'A value that identifies the number of significant digits for the returned percentage value. If omitted, PERCENTRANK.INC uses three digits (0.xxx).' },
+            array: { name: 'array', detail: 'Required. The range of data (or pre-defined array) of numeric values within which percent rank is determined.' },
+            x: { name: 'x', detail: 'Required. The value for which you want to know the rank within the array.' },
+            significance: { name: 'significance', detail: 'Optional. A value that identifies the number of significant digits for the returned percentage value. If omitted, PERCENTRANK uses three digits (0.xxx).' },
         },
     },
     POISSON: {
-        description: 'Returns the Poisson distribution',
-        abstract: 'Returns the Poisson distribution',
+        description: 'Returns the Poisson distribution. A common application of the Poisson distribution is predicting the number of events over a specific time, such as the number of cars arriving at a toll plaza in 1 minute.',
+        abstract: 'Returns the Poisson distribution. A common application of the Poisson distribution is predicting the number of events over a specific time, such as the number of cars arriving at a toll plaza in 1 minute.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/poisson-function-d81f7294-9d7c-4f75-bc23-80aa8624173a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/poisson-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value for which you want the distribution.' },
-            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, POISSON returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            x: { name: 'x', detail: 'Required. The number of events.' },
+            mean: { name: 'mean', detail: 'Required. The expected numeric value.' },
+            cumulative: { name: 'cumulative', detail: 'Required. A logical value that determines the form of the probability distribution returned. If cumulative is TRUE, POISSON returns the cumulative Poisson probability that the number of random events occurring will be between zero and x inclusive; if FALSE, it returns the Poisson probability mass function that the number of events occurring will be exactly x.' },
         },
     },
     QUARTILE: {
-        description: 'Returns the quartile of a data set (Includes 0 and 1)',
-        abstract: 'Returns the quartile of a data set (Includes 0 and 1)',
+        description: 'Returns the quartile of a data set. Quartiles often are used in sales and survey data to divide populations into groups. For example, you can use QUARTILE to find the top 25 percent of incomes in a population.',
+        abstract: 'Returns the quartile of a data set. Quartiles often are used in sales and survey data to divide populations into groups. For example, you can use QUARTILE to find the top 25 percent of incomes in a population.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/quartile-function-93cf8f62-60cd-4fdb-8a92-8451041e1a2a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/quartile-function',
             },
         ],
         functionParameter: {
-            array: { name: 'array', detail: 'The array or range of data for which you want quartile values.' },
-            quart: { name: 'quart', detail: 'The quartile value to return.' },
+            array: { name: 'array', detail: 'Required. The array or cell range of numeric values for which you want the quartile value.' },
+            quart: { name: 'quart', detail: 'Required. Indicates which value to return.' },
         },
     },
     RANK: {
-        description: 'Returns the rank of a number in a list of numbers',
-        abstract: 'Returns the rank of a number in a list of numbers',
+        description: 'Returns the rank of a number in a list of numbers. The rank of a number is its size relative to other values in a list. (If you were to sort the list, the rank of the number would be its position.)',
+        abstract: 'Returns the rank of a number in a list of numbers. The rank of a number is its size relative to other values in a list. (If you were to sort the list, the rank of the number would be its position.)',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rank-function-6a2fc49d-1831-4a03-9d8c-c279cf99f723',
+                url: 'https://support.microsoft.com/en-us/excel/functions/rank-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The number whose rank you want to find.' },
-            ref: { name: 'ref', detail: 'A reference to a list of numbers. Nonnumeric values in ref are ignored.' },
-            order: { name: 'order', detail: 'A number specifying how to rank number. If order is 0 (zero) or omitted, Microsoft Excel ranks number as if ref were a list sorted in descending order. If order is any nonzero value, Microsoft Excel ranks number as if ref were a list sorted in ascending order.' },
+            number: { name: 'number', detail: 'Required. The number whose rank you want to find.' },
+            ref: { name: 'ref', detail: 'Required. A reference to a list of numbers. Nonnumeric values in ref are ignored.' },
+            order: { name: 'order', detail: 'Optional. A number specifying how to rank number. If order is 0 (zero) or omitted, Microsoft Excel ranks number as if ref were a list sorted in descending order. If order is any nonzero value, Microsoft Excel ranks number as if ref were a list sorted in ascending order.' },
         },
     },
     STDEV: {
         description: 'Estimates standard deviation based on a sample. The standard deviation is a measure of how widely values are dispersed from the average value (the mean).',
-        abstract: 'Estimates standard deviation based on a sample',
+        abstract: 'Estimates standard deviation based on a sample. The standard deviation is a measure of how widely values are dispersed from the average value (the mean).',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/stdev-function-51fecaaa-231e-4bbb-9230-33650a72c9b0',
+                url: 'https://support.microsoft.com/en-us/excel/functions/stdev-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'The first number argument corresponding to a sample of a population.' },
-            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
+            number1: { name: 'number1', detail: 'Required. The first number argument corresponding to a sample of a population.' },
+            number2: { name: 'number2', detail: 'Optional. Number arguments 2 to 255 corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     STDEVP: {
-        description: 'Calculates standard deviation based on the entire population given as arguments.',
-        abstract: 'Calculates standard deviation based on the entire population',
+        description: 'Calculates standard deviation based on the entire population given as arguments. The standard deviation is a measure of how widely values are dispersed from the average value (the mean).',
+        abstract: 'Calculates standard deviation based on the entire population given as arguments. The standard deviation is a measure of how widely values are dispersed from the average value (the mean).',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/stdevp-function-1f7c1c88-1bec-4422-8242-e9f7dc8bb195',
+                url: 'https://support.microsoft.com/en-us/excel/functions/stdevp-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'The first number argument corresponding to a population.' },
-            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
+            number1: { name: 'number1', detail: 'Required. The first number argument corresponding to a population.' },
+            number2: { name: 'number2', detail: 'Optional. Number arguments 2 to 255 corresponding to a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     TDIST: {
-        description: 'Returns the probability for the Student t-distribution',
-        abstract: 'Returns the probability for the Student t-distribution',
+        description: 'Returns the Percentage Points (probability) for the Student t-distribution where a numeric value (x) is a calculated value of t for which the Percentage Points are to be computed. The t-distribution is used in the hypothesis testing of small sample data sets. Use this function in place of a table of critical values for the t-distribution.',
+        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution where a numeric value (x) is a calculated value of t for which the Percentage Points are to be computed. The t-distribution is used in the hypothesis testing of small sample data sets. Use this function in place of a table of critical values for the t-distribution.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/tdist-function-630a7695-4021-4853-9468-4a1f9dcdd192',
+                url: 'https://support.microsoft.com/en-us/excel/functions/tdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution.' },
-            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
-            tails: { name: 'tails', detail: 'Specifies the number of distribution tails to return. If Tails = 1, TDIST returns the one-tailed distribution. If Tails = 2, TDIST returns the two-tailed distribution.' },
+            x: { name: 'x', detail: 'Required. The numeric value at which to evaluate the distribution.' },
+            degFreedom: { name: 'degFreedom', detail: 'Required. An integer indicating the number of degrees of freedom.' },
+            tails: { name: 'tails', detail: 'Required. Specifies the number of distribution tails to return. If Tails = 1, TDIST returns the one-tailed distribution. If Tails = 2, TDIST returns the two-tailed distribution.' },
         },
     },
     TINV: {
-        description: 'Returns the inverse of the probability for the Student t-distribution (two-tailed)',
-        abstract: 'Returns the inverse of the probability for the Student t-distribution (two-tailed)',
+        description: 'Returns the two-tailed inverse of the Student\'s t-distribution.',
+        abstract: 'Returns the two-tailed inverse of the Student\'s t-distribution.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/tinv-function-a7c85b9d-90f5-41fe-9ca5-1cd2f3e1ed7c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/tinv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'probability', detail: 'The probability associated with the Student\'s t-distribution.' },
-            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
+            probability: { name: 'probability', detail: 'Required. The probability associated with the two-tailed Student\'s t-distribution.' },
+            degFreedom: { name: 'degFreedom', detail: 'Required. The number of degrees of freedom with which to characterize the distribution.' },
         },
     },
     TTEST: {
-        description: 'Returns the probability associated with a Student\'s t-test',
-        abstract: 'Returns the probability associated with a Student\'s t-test',
+        description: 'Returns the probability associated with a Student\'s t-Test. Use TTEST to determine whether two samples are likely to have come from the same two underlying populations that have the same mean.',
+        abstract: 'Returns the probability associated with a Student\'s t-Test. Use TTEST to determine whether two samples are likely to have come from the same two underlying populations that have the same mean.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ttest-function-1696ffc1-4811-40fd-9d13-a0eaad83c7ae',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ttest-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'array1', detail: 'The first array or range of data.' },
-            array2: { name: 'array2', detail: 'The second array or range of data.' },
-            tails: { name: 'tails', detail: 'Specifies the number of distribution tails. If tails = 1, TTEST uses the one-tailed distribution. If tails = 2, TTEST uses the two-tailed distribution.' },
-            type: { name: 'type', detail: 'The kind of t-Test to perform.' },
+            array1: { name: 'array1', detail: 'Required. The first data set.' },
+            array2: { name: 'array2', detail: 'Required. The second data set.' },
+            tails: { name: 'tails', detail: 'Required. Specifies the number of distribution tails. If tails = 1, TTEST uses the one-tailed distribution. If tails = 2, TTEST uses the two-tailed distribution.' },
+            type: { name: 'type', detail: 'Required. The kind of t-Test to perform.' },
         },
     },
     VAR: {
         description: 'Estimates variance based on a sample.',
-        abstract: 'Estimates variance based on a sample',
+        abstract: 'Estimates variance based on a sample.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/var-function-1f2b7ab2-954d-4e17-ba2c-9e58b15a7da2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/var-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'The first number argument corresponding to a sample of a population.' },
-            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a sample of a population.' },
+            number1: { name: 'number1', detail: 'Required. The first number argument corresponding to a sample of a population.' },
+            number2: { name: 'number2', detail: 'Optional. Number arguments 2 to 255 corresponding to a sample of a population.' },
         },
     },
     VARP: {
         description: 'Calculates variance based on the entire population.',
-        abstract: 'Calculates variance based on the entire population',
+        abstract: 'Calculates variance based on the entire population.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/varp-function-26a541c4-ecee-464d-a731-bd4c575b1a6b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/varp-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'The first number argument corresponding to a population.' },
-            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a population.' },
+            number1: { name: 'number1', detail: 'Required. The first number argument corresponding to a population.' },
+            number2: { name: 'number2', detail: 'Optional. Number arguments 2 to 255 corresponding to a population.' },
         },
     },
     WEIBULL: {
-        description: 'Returns the Weibull distribution',
-        abstract: 'Returns the Weibull distribution',
+        description: 'Returns the Weibull distribution. Use this distribution in reliability analysis, such as calculating a device\'s mean time to failure.',
+        abstract: 'Returns the Weibull distribution. Use this distribution in reliability analysis, such as calculating a device\'s mean time to failure.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/weibull-function-b83dc2c6-260b-4754-bef2-633196f6fdcc',
+                url: 'https://support.microsoft.com/en-us/excel/functions/weibull-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The value for which you want the distribution.' },
-            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
-            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, WEIBULL returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            x: { name: 'x', detail: 'Required. The value at which to evaluate the function.' },
+            alpha: { name: 'alpha', detail: 'Required. A parameter to the distribution.' },
+            beta: { name: 'beta', detail: 'Required. A parameter to the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'Required. Determines the form of the function.' },
         },
     },
     ZTEST: {
-        description: 'Returns the one-tailed probability-value of a z-test',
-        abstract: 'Returns the one-tailed probability-value of a z-test',
+        description: 'Returns the one-tailed probability-value of a z-test. For a given hypothesized population mean, μ0, ZTEST returns the probability that the sample mean would be greater than the average of observations in the data set (array) — that is, the observed sample mean.',
+        abstract: 'Returns the one-tailed probability-value of a z-test. For a given hypothesized population mean, μ0, ZTEST returns the probability that the sample mean would be greater than the average of observations in the data set (array) — that is, the observed sample mean.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ztest-function-8f33be8a-6bd6-4ecc-8e3a-d9a4420c4a6a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ztest-function',
             },
         ],
         functionParameter: {
-            array: { name: 'array', detail: 'The array or range of data against which to test x.' },
-            x: { name: 'x', detail: 'The value to test.' },
-            sigma: { name: 'sigma', detail: 'The population (known) standard deviation. If omitted, the sample standard deviation is used.' },
+            array: { name: 'array', detail: 'Required. The array or range of data against which to test x.' },
+            x: { name: 'x', detail: 'Required. The value to test.' },
+            sigma: { name: 'sigma', detail: 'Optional. The population (known) standard deviation. If omitted, the sample standard deviation is used.' },
         },
     },
 };

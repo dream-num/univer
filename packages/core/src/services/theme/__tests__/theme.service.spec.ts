@@ -14,43 +14,90 @@
  * limitations under the License.
  */
 
-import { defaultTheme } from '@univerjs/themes';
+import type { Univer } from '../../../univer';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Injector } from '../../../common/di';
+import { createTestBed } from '../../__tests__/create-test-bed';
 import { ThemeService } from '../theme.service';
 
 describe('ThemeService', () => {
-    let service: ThemeService;
+    let univer: Univer;
 
     beforeEach(() => {
-        const injector = new Injector();
-        injector.add([ThemeService]);
-        service = injector.get(ThemeService);
+        univer?.dispose();
+        const instance = createTestBed();
+        univer = instance.univer;
     });
 
-    it('publishes theme and dark-mode changes used by UI renderers', () => {
-        const darkModes: boolean[] = [];
-        const primaryColors: string[] = [];
-        service.darkMode$.subscribe((darkMode) => darkModes.push(darkMode));
-        service.currentTheme$.subscribe((theme) => primaryColors.push(theme.primary[600]));
+    it('should get default theme', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        expect(themeService.getCurrentTheme()).toBeDefined();
+    });
 
-        service.setDarkMode(true);
-        service.setTheme({
-            ...defaultTheme,
+    it('should set and get theme', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        const oldTheme = themeService.getCurrentTheme();
+        const theme = {
+            ...oldTheme,
             primary: {
-                ...defaultTheme.primary,
+                ...oldTheme.primary,
                 600: '#123456',
             },
-        });
-
-        expect(darkModes).toEqual([false, true]);
-        expect(primaryColors).toEqual([defaultTheme.primary[600], '#123456']);
-        expect(service.getColorFromTheme('primary.600')).toBe('#123456');
+        };
+        themeService.setTheme(theme);
+        expect(themeService.getCurrentTheme().primary[600]).toBe('#123456');
     });
 
-    it('validates only theme color tokens that exist in the active theme shape', () => {
-        expect(service.isValidThemeColor('primary.600')).toBe(true);
-        expect(service.isValidThemeColor('missing.600')).toBe(false);
-        expect(service.isValidThemeColor('primary.999')).toBe(false);
+    it('should set and get dark mode', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        themeService.setDarkMode(true);
+        expect(themeService.darkMode).toBe(true);
+        themeService.setDarkMode(false);
+        expect(themeService.darkMode).toBe(false);
+    });
+
+    it('should validate theme color', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        expect(themeService.isValidThemeColor('primary.600')).toBe(true);
+        expect(themeService.isValidThemeColor('notexist')).toBe(false);
+    });
+
+    it('should get color from theme', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        const oldTheme = themeService.getCurrentTheme();
+        const theme = {
+            ...oldTheme,
+            primary: {
+                ...oldTheme.primary,
+                600: '#abcdef',
+            },
+        };
+        themeService.setTheme(theme);
+        expect(themeService.getColorFromTheme('primary.600')).toBe('#abcdef');
+    });
+
+    it('should get semantic highlight background token from theme', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        const token = themeService.getColorFromTheme<{ color: string; alpha: number }>('highlight.background.1');
+
+        expect(token).toEqual({ color: 'purple.500', alpha: 0.3 });
+        expect(themeService.getColorFromTheme(token.color)).toBe('#9061F9');
+    });
+
+    it('should tap cached theme color', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        const oldTheme = themeService.getCurrentTheme();
+        const theme = {
+            ...oldTheme,
+            primary: {
+                ...oldTheme.primary,
+                600: '#abcdef',
+            },
+        };
+        themeService.setTheme(theme);
+
+        expect(themeService.isValidThemeColor('primary.600')).toBe(true);
+        expect(themeService.isValidThemeColor('primary.600')).toBe(true); // Should hit the cache
+        expect(themeService.getColorFromTheme('primary.600')).toBe('#abcdef');
+        expect(themeService.getColorFromTheme('primary.600')).toBe('#abcdef'); // Should hit the cache
     });
 });

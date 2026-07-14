@@ -18,12 +18,12 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: 'Возвращает строку, закодированную в формате URL',
-        abstract: 'Возвращает строку, закодированную в формате URL',
+        description: 'Функция ENCODEURL возвращает строку в кодировке URL-адреса, заменяя некоторые небукенно-цифровые символы символами процента (%) и шестнадцатеричным числом.',
+        abstract: 'Функция ENCODEURL возвращает строку в кодировке URL-адреса, заменяя некоторые небукенно-цифровые символы символами процента (%) и шестнадцатеричным числом.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
@@ -31,31 +31,30 @@ const locale: typeof enUS = {
         },
     },
     FILTERXML: {
-        description: 'Возвращает конкретные данные из XML-содержимого, используя указанный XPath',
-        abstract: 'Возвращает конкретные данные из XML-содержимого, используя указанный XPath',
+        description: 'Функция FILTERXML возвращает определенные данные из XML-содержимого с помощью указанного xpath.',
+        abstract: 'Функция FILTERXML возвращает определенные данные из XML-содержимого с помощью указанного xpath.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            xml: { name: 'xml', detail: 'Строка в допустимом формате XML.' },
+            xpath: { name: 'xpath', detail: 'Строка в стандартном формате XPath.' },
         },
     },
     WEBSERVICE: {
-        description: 'Возвращает данные с веб-сервиса',
-        abstract: 'Возвращает данные с веб-сервиса',
+        description: 'Функция WEBSERVICE возвращает данные из веб-службы в Интернете или интрасети.',
+        abstract: 'Функция WEBSERVICE возвращает данные из веб-службы в Интернете или интрасети.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            url: { name: 'url', detail: 'URL-адрес веб-службы.' },
         },
     },
 };

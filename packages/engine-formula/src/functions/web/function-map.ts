@@ -17,8 +17,10 @@
 import { Encodeurl } from './encodeurl';
 import { Filterxml } from './filterxml';
 import { FUNCTION_NAMES_WEB } from './function-names';
+// import { Webservice } from './webservice';
 
 export const functionWeb = [
     [Encodeurl, FUNCTION_NAMES_WEB.ENCODEURL],
     [Filterxml, FUNCTION_NAMES_WEB.FILTERXML],
+    // [Webservice, FUNCTION_NAMES_WEB.WEBSERVICE],
 ];

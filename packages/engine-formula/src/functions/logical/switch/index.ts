@@ -25,6 +25,7 @@ import { BaseFunction } from '../../base-function';
 export class Switch extends BaseFunction {
     override minParams = 3;
 
+    // TODO(formula-contract): Enforce the documented 255-argument maximum instead of inheriting the unlimited default.
     override calculate(expression: BaseValueObject, ...args: BaseValueObject[]) {
         if (expression.isError()) {
             return expression;

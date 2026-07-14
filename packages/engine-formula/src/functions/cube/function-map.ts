@@ -14,4 +14,21 @@
  * limitations under the License.
  */
 
-export const functionCube = [];
+// import { Cubekpimember } from './cubekpimember';
+// import { Cubemember } from './cubemember';
+// import { Cubememberproperty } from './cubememberproperty';
+// import { Cuberankedmember } from './cuberankedmember';
+// import { Cubeset } from './cubeset';
+// import { Cubesetcount } from './cubesetcount';
+// import { Cubevalue } from './cubevalue';
+// import { FUNCTION_NAMES_CUBE } from './function-names';
+
+export const functionCube = [
+    // [Cubekpimember, FUNCTION_NAMES_CUBE.CUBEKPIMEMBER],
+    // [Cubemember, FUNCTION_NAMES_CUBE.CUBEMEMBER],
+    // [Cubememberproperty, FUNCTION_NAMES_CUBE.CUBEMEMBERPROPERTY],
+    // [Cuberankedmember, FUNCTION_NAMES_CUBE.CUBERANKEDMEMBER],
+    // [Cubeset, FUNCTION_NAMES_CUBE.CUBESET],
+    // [Cubesetcount, FUNCTION_NAMES_CUBE.CUBESETCOUNT],
+    // [Cubevalue, FUNCTION_NAMES_CUBE.CUBEVALUE],
+];

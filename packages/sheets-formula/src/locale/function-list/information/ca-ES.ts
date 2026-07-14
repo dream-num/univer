@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/cell-function-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -50,12 +50,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/info-function-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            typeText: { name: 'Tipus de text', detail: 'Text que especifica el tipus d’informació que s’ha de retornar.' },
         },
     },
     ISBETWEEN: {
@@ -81,7 +80,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -120,7 +119,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -133,7 +132,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -146,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/iseven-function-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
@@ -159,7 +158,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/isformula-function-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
@@ -172,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -185,7 +184,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -198,7 +197,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -211,7 +210,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/isodd-function-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -237,12 +236,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/isomitted-function-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            argument: { name: 'Argument', detail: 'Valor que es comprova per determinar si s’ha omès, com ara un paràmetre LAMBDA.' },
         },
     },
     ISREF: {
@@ -251,7 +249,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -264,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -281,7 +279,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            value: { name: 'valor', detail: 'El valor que s\'ha de verificar com a URL.' },
+            value: { name: 'valor', detail: 'ISURL("www.google.com")' },
         },
     },
     N: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/n-function-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/na-function-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -315,7 +313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/sheet-function-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -328,7 +326,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/sheets-function-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -340,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/type-function-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/type-function',
             },
         ],
         functionParameter: {

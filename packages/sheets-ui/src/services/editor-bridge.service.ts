@@ -34,8 +34,19 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
-import { convertTextRotation, convertTransformToOffsetX, convertTransformToOffsetY, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { attachPrimaryWithCoord, BEFORE_CELL_EDIT, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    convertTextRotation,
+    convertTransformToOffsetX,
+    convertTransformToOffsetY,
+    DeviceInputEventType,
+    IRenderManagerService,
+} from '@univerjs/engine-render';
+import {
+    attachPrimaryWithCoord,
+    BEFORE_CELL_EDIT,
+    SheetInterceptorService,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 

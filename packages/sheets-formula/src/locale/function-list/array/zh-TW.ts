@@ -18,12 +18,12 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
-        description: '限制特定大小的陣列結果',
-        abstract: '限制特定大小的陣列結果',
+        description: '限制特定大小的陣列結果。',
+        abstract: '限制特定大小的陣列結果。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3267036?hl=zh-Hant&sjid=8484774178571403392-AP',
+                url: 'https://support.google.com/docs/answer/3267036?hl=zh-Hant',
             },
         ],
         functionParameter: {
@@ -33,17 +33,17 @@ const locale: typeof enUS = {
         },
     },
     FLATTEN: {
-        description: '將一或多個範圍中的所有值合併至單一欄',
-        abstract: '將一或多個範圍中的所有值合併至單一欄',
+        description: '將一或多個範圍中的所有值合併至單一欄。',
+        abstract: '將一或多個範圍中的所有值合併至單一欄。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hant&sjid=17375453483079636084-AP',
+                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hant',
             },
         ],
         functionParameter: {
             range1: { name: '範圍1', detail: '第一個要合併的範圍。' },
-            range2: { name: '範圍2', detail: '其他要合併的範圍。' },
+            range2: { name: '範圍2', detail: '[選用] 可重複 其他要合併的範圍。' },
         },
     },
 };

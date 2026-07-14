@@ -21,7 +21,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/address-function-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/en-us/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -53,7 +53,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/areas-function-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/en-us/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -66,7 +66,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/en-us/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -81,7 +81,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/choosecols-function-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/en-us/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -96,7 +96,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/chooserows-function-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/en-us/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -111,7 +111,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/column-function-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -124,7 +124,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/columns-function-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/en-us/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -137,7 +137,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/drop-function-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/en-us/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -152,7 +152,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/expand-function-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/en-us/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -163,12 +163,12 @@ const locale = {
         },
     },
     FILTER: {
-        description: 'Filters a range of data based on criteria you define',
-        abstract: 'Filters a range of data based on criteria you define',
+        description: 'The FILTER function allows you to filter a range of data based on criteria you define.',
+        abstract: 'The FILTER function allows you to filter a range of data based on criteria you define.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/filter-function-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/en-us/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -183,7 +183,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/formulatext-function-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -196,40 +196,30 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/getpivotdata-function-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataField: { name: 'dataField', detail: 'The name of the PivotTable field that contains the data that you want to retrieve. This needs to be in quotes. Example: =GETPIVOTDATA("Sales", A3). Here, "Sales" is the Values field that we want to retrieve. Since no other field is specified, GETPIVOTDATA returns the total sales amount.' },
+            pivotTable: { name: 'pivotTable', detail: 'A reference to any cell, range of cells, or named range of cells in a PivotTable. This information is used to determine which PivotTable contains the data that you want to retrieve. Example: =GETPIVOTDATA("Sales", A3). Here, A3 is a reference inside the PivotTable and tells the formula which PivotTable to use.' },
+            field1: { name: 'field1', detail: '1 to 126 pairs of field names and item names that describe the data that you want to retrieve. The pairs can be in any order. Field names and names for items other than dates and numbers need to be enclosed in quotation marks. Example: =GETPIVOTDATA("Sales", A3, "Month", "Mar"). Here, "Month" is the field and "Mar" is the item. To specify multiple items for a field, enclose them in curly braces (for example: {"Mar", "Apr"}). For OLAP PivotTables , items can contain the source name of the dimension and also the source name of the item. A field and item pair for an OLAP PivotTable might look like this: "[Product]","[Product].[All Products].[Foods].[Baked Goods]"' },
+            item1: { name: 'item1', detail: '1 to 126 pairs of field names and item names that describe the data that you want to retrieve. The pairs can be in any order. Field names and names for items other than dates and numbers need to be enclosed in quotation marks. Example: =GETPIVOTDATA("Sales", A3, "Month", "Mar"). Here, "Month" is the field and "Mar" is the item. To specify multiple items for a field, enclose them in curly braces (for example: {"Mar", "Apr"}). For OLAP PivotTables , items can contain the source name of the dimension and also the source name of the item. A field and item pair for an OLAP PivotTable might look like this: "[Product]","[Product].[All Products].[Foods].[Baked Goods]"' },
         },
     },
     HLOOKUP: {
-        description: 'Looks in the top row of an array and returns the value of the indicated cell',
-        abstract: 'Looks in the top row of an array and returns the value of the indicated cell',
+        description: 'Searches for a value in the top row of a table or an array of values, and then returns a value in the same column from a row you specify in the table or array. Use HLOOKUP when your comparison values are located in a row across the top of a table of data, and you want to look down a specified number of rows. Use VLOOKUP when your comparison values are located in a column to the left of the data you want to find.',
+        abstract: 'Searches for a value in the top row of a table or an array of values, and then returns a value in the same column from a row you specify in the table or array. Use HLOOKUP when your comparison values are located in a row across the top of a table of data, and you want to look down a specified number of rows. Use VLOOKUP when your comparison values are located in a column to the left of the data you want to find.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hlookup-function-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: 'lookup_value',
-                detail: 'The value to be found in the first row of the table. Lookup_value can be a value, a reference, or a text string.',
-            },
-            tableArray: {
-                name: 'table_array',
-                detail: 'A table of information in which data is looked up. Use a reference to a range or a range name.',
-            },
-            rowIndexNum: {
-                name: 'row_index_num',
-                detail: 'The row number in table_array from which the matching value will be returned. A row_index_num of 1 returns the first row value in table_array, a row_index_num of 2 returns the second row value in table_array, and so on.',
-            },
-            rangeLookup: {
-                name: 'range_lookup',
-                detail: 'A logical value that specifies whether you want HLOOKUP to find an exact match or an approximate match.',
-            },
+            lookupValue: { name: 'lookup_value', detail: 'Required. The value to be found in the first row of the table. Lookup_value can be a value, a reference, or a text string.' },
+            tableArray: { name: 'table_array', detail: 'Required. A table of information in which data is looked up. Use a reference to a range or a range name. The values in the first row of table_array can be text, numbers, or logical values. If range_lookup is TRUE, the values in the first row of table_array must be placed in ascending order: ...-2, -1, 0, 1, 2,... , A-Z, FALSE, TRUE; otherwise, HLOOKUP may not give the correct value. If range_lookup is FALSE, table_array does not need to be sorted. Uppercase and lowercase text are equivalent. Sort the values in ascending order, left to right. For more information, see Sort data in a range or table .' },
+            rowIndexNum: { name: 'row_index_num', detail: 'Required. The row number in table_array from which the matching value will be returned. A row_index_num of 1 returns the first row value in table_array, a row_index_num of 2 returns the second row value in table_array, and so on. If row_index_num is less than 1, HLOOKUP returns the #VALUE! error value; if row_index_num is greater than the number of rows on table_array, HLOOKUP returns the #REF! error value.' },
+            rangeLookup: { name: 'range_lookup', detail: 'Optional. A logical value that specifies whether you want HLOOKUP to find an exact match or an approximate match. If TRUE or omitted, an approximate match is returned. In other words, if an exact match is not found, the next largest value that is less than lookup_value is returned. If FALSE, HLOOKUP will find an exact match. If one is not found, the error value #N/A is returned.' },
         },
     },
     HSTACK: {
@@ -238,7 +228,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hstack-function-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
@@ -252,21 +242,21 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=en',
+                url: 'https://support.google.com/docs/answer/3093313?hl=en',
             },
         ],
         functionParameter: {
-            url: { name: 'url', detail: 'The full URL of the link location enclosed in quotation marks, or a reference to a cell containing such a URL.' },
-            linkLabel: { name: 'link_label', detail: 'The text to display in the cell as the link, enclosed in quotation marks, or a reference to a cell containing such a label.' },
+            url: { name: 'url', detail: 'The full URL of the link location enclosed in quotation marks, or a reference to a cell containing such a URL. Only certain link types are allowed. http:// , https:// , mailto: , aim: , ftp:// , gopher:// , telnet:// , and news:// are permitted; others are explicitly forbidden. If another protocol is specified, link_label will be displayed in the cell, but will not be hyperlinked. If no protocol is specified, http:// is assumed, and is prepended to url .' },
+            linkLabel: { name: 'link_label', detail: '[ OPTIONAL - url by default ] - The text to display in the cell as the link, enclosed in quotation marks, or a reference to a cell containing such a label. If link_label is a reference to an empty cell, url will be displayed as a link if valid, or as plain text otherwise. If link_label is the empty string literal (""), the cell will appear empty, but the link is still accessible by clicking or moving to the cell.' },
         },
     },
     IMAGE: {
-        description: 'Returns an image from a given source',
-        abstract: 'Returns an image from a given source',
+        description: 'Current Channel',
+        abstract: 'Current Channel',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/en-us/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -278,12 +268,12 @@ const locale = {
         },
     },
     INDEX: {
-        description: 'Returns the reference of the cell at the intersection of a particular row and column. If the reference is made up of non-adjacent selections, you can pick the selection to look in.',
-        abstract: 'Uses an index to choose a value from a reference or array',
+        description: 'The INDEX function returns a value or the reference to a value from within a table or range.',
+        abstract: 'The INDEX function returns a value or the reference to a value from within a table or range.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/index-function-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/en-us/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -299,7 +289,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/en-us/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -313,7 +303,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/en-us/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -337,7 +327,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/match-function-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -352,7 +342,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/offset-function-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/en-us/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -369,7 +359,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/row-function-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -382,7 +372,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rows-function-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/en-us/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -395,12 +385,14 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rtd-function-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/en-us/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            progId: { name: 'progId', detail: 'Required. The name of the ProgID of a registered COM automation add-in that has been installed on the local computer. Enclose the name in quotation marks.' },
+            server: { name: 'server', detail: 'Required. Name of the server where the add-in should be run. If there is no server, and the program is run locally, leave the argument blank. Otherwise, enter quotation marks ("") around the server name. When using RTD within Visual Basic for Applications (VBA), double quotation marks or the VBA NullString property are required for the server, even if the server is running locally.' },
+            topic1: { name: 'topic1', detail: 'Topic1 is required, subsequent topics are optional. 1 to 253 parameters that together represent a unique piece of real-time data.' },
+            topic2: { name: 'topic2', detail: 'Topic1 is required, subsequent topics are optional. 1 to 253 parameters that together represent a unique piece of real-time data.' },
         },
     },
     SORT: {
@@ -409,7 +401,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/sort-function-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -425,7 +417,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/sortby-function-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -442,7 +434,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/take-function-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/en-us/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -457,7 +449,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/tocol-function-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/en-us/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -472,7 +464,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/torow-function-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/en-us/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -487,7 +479,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/transpose-function-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/en-us/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -500,7 +492,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/unique-function-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -515,7 +507,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/vlookup-function-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -543,7 +535,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/vstack-function-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -557,7 +549,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/wrapcols-function-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -572,7 +564,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/wraprows-function-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/en-us/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -587,7 +579,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/xlookup-function-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/en-us/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -617,7 +609,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/xmatch-function-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/en-us/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

@@ -18,44 +18,43 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: 'Returns a URL-encoded string',
-        abstract: 'Returns a URL-encoded string',
+        description: 'ENCODEURL 함수는 URL로 인코딩된 문자열을 반환하여 영숫자가 아닌 특정 문자를 백분율 기호(%) 및 16진수 숫자로 바꿉니다.',
+        abstract: 'ENCODEURL 함수는 URL로 인코딩된 문자열을 반환하여 영숫자가 아닌 특정 문자를 백분율 기호(%) 및 16진수 숫자로 바꿉니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'A string to be URL encoded' },
+            text: { name: 'text', detail: 'URL로 인코딩할 문자열' },
         },
     },
     FILTERXML: {
-        description: 'Returns specific data from the XML content by using the specified XPath',
-        abstract: 'Returns specific data from the XML content by using the specified XPath',
+        description: 'FILTERXML 함수는 지정된 xpath를 사용하여 XML 콘텐츠에서 특정 데이터를 반환합니다.',
+        abstract: 'FILTERXML 함수는 지정된 xpath를 사용하여 XML 콘텐츠에서 특정 데이터를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xml: { name: 'xml', detail: '유효한 XML 형식의 문자열입니다.' },
+            xpath: { name: 'xpath', detail: '표준 XPath 형식의 문자열입니다.' },
         },
     },
     WEBSERVICE: {
-        description: 'Returns data from a web service',
-        abstract: 'Returns data from a web service',
+        description: 'WEBSERVICE 함수는 인터넷 또는 인트라넷의 웹 서비스에서 데이터를 반환합니다.',
+        abstract: 'WEBSERVICE 함수는 인터넷 또는 인트라넷의 웹 서비스에서 데이터를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: '웹 서비스의 URL입니다.' },
         },
     },
 };

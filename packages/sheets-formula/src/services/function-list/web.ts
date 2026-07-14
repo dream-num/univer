@@ -41,16 +41,16 @@ export const FUNCTION_LIST_WEB: IFunctionInfo[] = [
         abstract: 'sheets-formula.functionList.FILTERXML.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.FILTERXML.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.FILTERXML.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'sheets-formula.functionList.FILTERXML.functionParameter.xml.name',
+                detail: 'sheets-formula.functionList.FILTERXML.functionParameter.xml.detail',
+                example: '"<root><item>value</item></root>"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.FILTERXML.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.FILTERXML.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'sheets-formula.functionList.FILTERXML.functionParameter.xpath.name',
+                detail: 'sheets-formula.functionList.FILTERXML.functionParameter.xpath.detail',
+                example: '"//item"',
                 require: 1,
                 repeat: 0,
             },
@@ -63,16 +63,9 @@ export const FUNCTION_LIST_WEB: IFunctionInfo[] = [
         abstract: 'sheets-formula.functionList.WEBSERVICE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.WEBSERVICE.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.WEBSERVICE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'sheets-formula.functionList.WEBSERVICE.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.WEBSERVICE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'sheets-formula.functionList.WEBSERVICE.functionParameter.url.name',
+                detail: 'sheets-formula.functionList.WEBSERVICE.functionParameter.url.detail',
+                example: '"https://example.com/api"',
                 require: 1,
                 repeat: 0,
             },

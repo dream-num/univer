@@ -463,13 +463,15 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
         const subUnitId = this._worksheet.getSheetId();
 
         return Array.from(floatDomService.getFloatDomsBySubUnitId(unitId, subUnitId).values())
-            .map((info) => {
+            .map((info): IFCanvasFloatDomResult | null => {
                 const { rect } = info;
                 const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
                     drawingId: info.id,
                     unitId,
                     subUnitId,
                 })! as ISheetFloatDom;
+
+                if (!drawingParm) return null;
 
                 const { left, top, width, height, flipX, flipY, angle, skewX, skewY } = rect.getState();
 
@@ -490,7 +492,8 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
                     data: drawingParm.data,
                     id: info.id,
                 };
-            });
+            })
+            .filter((dom): dom is IFCanvasFloatDomResult => dom != null);
     }
 
     override updateFloatDom(id: string, config: Partial<Omit<IFCanvasFloatDomResult, 'id'>>): this {

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/asc-%E5%87%BD%E6%95%B0-0b6abf1c-c663-4004-a964-ebc00b723266',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/asc-function',
             },
         ],
         functionParameter: {
@@ -36,7 +36,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/arraytotext-%E5%87%BD%E6%95%B0-9cdcad46-2fa5-4c6b-ac92-14e7bc862b8b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/arraytotext-function',
             },
         ],
         functionParameter: {
@@ -50,7 +50,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/bahttext-%E5%87%BD%E6%95%B0-5ba4d0b4-abd3-4325-8d22-7a92d59aab9c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/bahttext-function',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/char-%E5%87%BD%E6%95%B0-bbd249c8-b36e-4a91-8017-1c133f9b837a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/char-function',
             },
         ],
         functionParameter: {
@@ -76,7 +76,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/clean-%E5%87%BD%E6%95%B0-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/clean-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/code-%E5%87%BD%E6%95%B0-c32b692b-2ed0-4a04-bdd9-75640144b928',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/code-function',
             },
         ],
         functionParameter: {
@@ -102,7 +102,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/concat-%E5%87%BD%E6%95%B0-9b1a9a3f-94ff-41af-9736-694cbd6b4ca2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/concat-function',
             },
         ],
         functionParameter: {
@@ -116,7 +116,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/concatenate-%E5%87%BD%E6%95%B0-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/concatenate-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dbcs-%E5%87%BD%E6%95%B0-a4025e73-63d2-4958-9423-21a24794c9e5',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dbcs-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dollar-%E5%87%BD%E6%95%B0-a6cd05d9-9740-4ad3-a469-8109d18ff611',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dollar-function',
             },
         ],
         functionParameter: {
@@ -157,7 +157,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/exact-%E5%87%BD%E6%95%B0-f24a4864-e914-4e50-8bdb-7e82048c5c44',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/exact-function',
             },
         ],
         functionParameter: {
@@ -171,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/find-findb-%E5%87%BD%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -186,7 +186,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/find-findb-%E5%87%BD%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -201,7 +201,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/fixed-%E5%87%BD%E6%95%B0-621c3e2a-50ea-4b85-aab2-b11a7ff73369',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/fixed-function',
             },
         ],
         functionParameter: {
@@ -216,7 +216,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/left-leftb-%E5%87%BD%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -230,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/left-leftb-%E5%87%BD%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -244,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/len-lenb-%E5%87%BD%E6%95%B0-e7dc30ca-f8b2-4a7c-8f5b-6e82a0d017ef',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/len-lenb-%E5%87%BD%E6%95%B0-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -270,7 +270,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/lower-%E5%87%BD%E6%95%B0-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/lower-function',
             },
         ],
         functionParameter: {
@@ -283,7 +283,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -298,7 +298,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -327,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/numbervalue-%E5%87%BD%E6%95%B0-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/numbervalue-function',
             },
         ],
         functionParameter: {
@@ -342,12 +342,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/phonetic-%E5%87%BD%E6%95%B0-d510701f-2a90-4610-9a82-87c874aad6c6',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/phonetic-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'Tham khảo', detail: 'Yêu cầu. Chuỗi văn bản hoặc tham chiếu tới một ô đơn lẻ hoặc một phạm vi ô có chứa chuỗi văn bản furigana.' },
         },
     },
     PROPER: {
@@ -356,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/proper-%E5%87%BD%E6%95%B0-f79f1eeb-bd40-43d3-8273-10362ab89da1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/proper-function',
             },
         ],
         functionParameter: {
@@ -369,11 +368,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=vi',
+                url: 'https://support.google.com/docs/answer/3098244?hl=vi',
             },
         ],
         functionParameter: {
-            text: { name: 'văn bản', detail: 'Văn bản nhập vào.' },
+            text: { name: 'văn bản', detail: 'Lưu ý: Ví dụ trên sẽ trả về 2 cột dữ liệu, “trích xuất” ở cột đầu tiên và “giá trị” ở cột thứ hai.' },
             regularExpression: { name: 'biểu thức chính quy', detail: 'Phần đầu tiên văn_bản khớp với biểu thức này sẽ được trả về.' },
         },
     },
@@ -383,7 +382,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=vi',
+                url: 'https://support.google.com/docs/answer/3098292?hl=vi',
             },
         ],
         functionParameter: {
@@ -397,7 +396,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=vi',
+                url: 'https://support.google.com/docs/answer/3098245?hl=vi',
             },
         ],
         functionParameter: {
@@ -412,7 +411,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -428,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -444,7 +443,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rept-%E5%87%BD%E6%95%B0-e109c0d0-487e-4f88-91eb-8a41d0d6a179',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rept-function',
             },
         ],
         functionParameter: {
@@ -458,7 +457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/right-rightb-%E5%87%BD%E6%95%B0-8b679d3f-2c2d-46b7-9071-45c8836a1dbd',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -472,7 +471,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/right-rightb-%E5%87%BD%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -486,7 +485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/search-searchb-%E5%87%BD%E6%95%B0-dfb12d6f-c60d-4a40-b090-7d2617b49e11',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -501,7 +500,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/search-searchb-%E5%87%BD%E6%95%B0-dfb12d6f-c60d-4a40-b090-7d2617b49e11',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -516,7 +515,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/substitute-%E5%87%BD%E6%95%B0-6434944f-6f07-4437-8818-68a6a1a08747',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/substitute-function',
             },
         ],
         functionParameter: {
@@ -532,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-%E5%87%BD%E6%95%B0-fb83aeec-45e7-4924-af95-53e073541228',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-function',
             },
         ],
         functionParameter: {
@@ -545,7 +544,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/text-%E5%87%BD%E6%95%B0-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/text-function',
             },
         ],
         functionParameter: {
@@ -559,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/textafter-%E5%87%BD%E6%95%B0-c8db2546-5b51-416a-9690-c7e6722e90b4',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/textafter-function',
             },
         ],
         functionParameter: {
@@ -577,7 +576,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/textbefore-%E5%87%BD%E6%95%B0-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/textbefore-function',
             },
         ],
         functionParameter: {
@@ -595,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/textjoin-%E5%87%BD%E6%95%B0-357b449a-ec91-49d0-80c3-0e8fc845691c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/textjoin-function',
             },
         ],
         functionParameter: {
@@ -611,7 +610,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/textsplit-%E5%87%BD%E6%95%B0-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/textsplit-function',
             },
         ],
         functionParameter: {
@@ -629,7 +628,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/trim-%E5%87%BD%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479f9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/trim-function',
             },
         ],
         functionParameter: {
@@ -642,7 +641,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/unichar-%E5%87%BD%E6%95%B0-e7ffb741-824c-4e7c-bec7-59ac8ae8e43f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/unichar-function',
             },
         ],
         functionParameter: {
@@ -655,7 +654,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/unicode-%E5%87%BD%E6%95%B0-4f8d3512-f0e5-4222-8586-f467c93b3d9a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/unicode-function',
             },
         ],
         functionParameter: {
@@ -668,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/upper-%E5%87%BD%E6%95%B0-c11f29b3-d1a3-4537-8df6-04d0049963d6',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/upper-function',
             },
         ],
         functionParameter: {
@@ -681,7 +680,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/value-%E5%87%BD%E6%95%B0-d49bc6c1-c29b-44db-927b-11e7c34dd6ea',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/value-function',
             },
         ],
         functionParameter: {
@@ -694,7 +693,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/valuetotext-%E5%87%BD%E6%95%B0-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/valuetotext-function',
             },
         ],
         functionParameter: {
@@ -703,45 +702,51 @@ const locale: typeof enUS = {
         },
     },
     CALL: {
-        description: 'Calls a procedure in a dynamic link library or code resource',
-        abstract: 'Calls a procedure in a dynamic link library or code resource',
+        description: 'Gọi một thủ tục trong một thư viện liên kết động hoặc nguồn mã. Có hai mẫu cú pháp của hàm này. Chỉ dùng cú pháp 1 với tài nguyên mã đã đăng ký trước đây dùng đối số từ hàm REGISTER. Dùng cú pháp 2a hoặc 2b để đăng ký và gọi tài nguyên mã đồng thời.',
+        abstract: 'Gọi một thủ tục trong một thư viện liên kết động hoặc nguồn mã. Có hai mẫu cú pháp của hàm này. Chỉ dùng cú pháp 1 với tài nguyên mã đã đăng ký trước đây dùng đối số từ hàm REGISTER. Dùng cú pháp 2a hoặc 2b để đăng ký và gọi tài nguyên mã đồng thời.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/call-function-32d58445-e646-4ffd-8d5e-b45077a5e995',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/call-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'Module_text', detail: 'Yêu cầu. Văn bản được trích dẫn xác định tên thư viện nối kết động (DLL) chứa thủ tục trong Microsoft Excel cho Windows.' },
+            procedure: { name: 'Thủ tục', detail: 'Yêu cầu. Văn bản chỉ rõ tên hàm trong DLL trong Microsoft Excel cho Windows. Bạn cũng có thể dùng giá trị số thứ tự của hàm từ báo cáo EXPORTS trong tệp định nghĩa mô-đun (.DEF). Giá trị số thứ tự không được ở dạng văn bản.' },
+            typeText: { name: 'Type_text', detail: 'Yêu cầu. Văn bản xác định kiểu dữ liệu của giá trị trả về và kiểu dữ liệu của tất cả các đối số cho DLL hoặc tài nguyên mã. Chữ đầu tiên trong kiểu văn bản xác định giá trị trả về. Mã bạn dùng cho kiểu văn bản được mô tả chi tiết trong Dùng hàm CALL và REGISTER . Đối với các DLL hay tài nguyên mã (XLL) riêng lẻ, bạn có thể bỏ qua đối số này.' },
+            argument1: { name: 'Đối số 1,...', detail: 'Tùy chọn. Các đối số sẽ được chuyển đến thủ tục.' },
         },
     },
     EUROCONVERT: {
-        description: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
-        abstract: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        description: 'Quy đổi một số sang euro, quy đổi một số từ euro sang đồng tiền của nước thành viên liên minh châu Âu hoặc quy đổi một số từ đồng tiền của nước thành viên liên minh châu Âu sang nước khác bằng cách dùng euro làm đồng tiền trung gian (phép đạc tam giác). Các đồng tiền có thể quy đổi là đồng tiền của các nước thành viên Liên minh châu Âu (EU) đã đưa vào sử dụng đồng euro. Hàm này dùng các tỉ giá quy đổi ấn định do EU đặt ra.',
+        abstract: 'Quy đổi một số sang euro, quy đổi một số từ euro sang đồng tiền của nước thành viên liên minh châu Âu hoặc quy đổi một số từ đồng tiền của nước thành viên liên minh châu Âu sang nước khác bằng cách dùng euro làm đồng tiền trung gian (phép đạc tam giác). Các đồng tiền có thể quy đổi là đồng tiền của các nước thành viên Liên minh châu Âu (EU) đã đưa vào sử dụng đồng euro. Hàm này dùng các tỉ giá quy đổi ấn định do EU đặt ra.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/euroconvert-function-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/euroconvert-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'Number', detail: 'Bắt buộc. Giá trị tiền tệ mà bạn muốn quy đổi hoặc tham chiếu đến ô chứa giá trị.' },
+            source: { name: 'Nguồn', detail: 'Yêu cầu. Chuỗi ba chữ cái hoặc tham chiếu đến ô chứa chuỗi đó, tương ứng với mã ISO cho đồng tiền nguồn. Các mã tiền tệ sau đây sẵn dùng trong hàm EUROCONVERT:' },
+            target: { name: 'Mục tiêu', detail: 'Yêu cầu. Chuỗi ba chữ cái hoặc tham chiếu ô, tương ứng với mã ISO của đồng tiền mà bạn muốn quy đổi đối số number sang đồng tiền đó. Hãy xem bảng Source ở trước để biết mã ISO.' },
+            fullPrecision: { name: 'Full_precision', detail: 'Yêu cầu. Giá trị lô-gic (TRUE hoặc FALSE) hoặc biểu thức trả về giá trị TRUE hoặc FALSE, xác định cách hiển thị kết quả.' },
+            triangulationPrecision: { name: 'Triangulation_precision', detail: 'Yêu cầu. Số nguyên bằng hoặc lớn hơn 3 xác định số chữ số có nghĩa được dùng cho giá trị euro trung gian khi quy đổi giữa hai đồng tiền của nước thành viên liên minh châu Âu. Nếu bạn bỏ qua đối số này, Excel không làm tròn giá trị euro trung gian. Nếu bạn đưa đối số này vào khi quy đổi từ đồng tiền của nước thành viên châu Âu sang đồng euro, Excel sẽ tính toán giá trị euro trung gian có thể được quy đổi sang đồng tiền của nước thành viên liên minh châu Âu sau đó.' },
         },
     },
     REGISTER_ID: {
-        description: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
-        abstract: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        description: 'Trả về ID đăng ký của thư viện nối kết động chỉ định (DLL) hoặc nguồn mã đã được đăng ký trước đó. Nếu DLL hoặc nguồn mã chưa được đăng ký, thì hàm này đăng ký DLL hoặc nguồn mã rồi trả về ID đăng ký.',
+        abstract: 'Trả về ID đăng ký của thư viện nối kết động chỉ định (DLL) hoặc nguồn mã đã được đăng ký trước đó. Nếu DLL hoặc nguồn mã chưa được đăng ký, thì hàm này đăng ký DLL hoặc nguồn mã rồi trả về ID đăng ký.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/register-id-function-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/register-id-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'Module_text', detail: 'Yêu cầu. Văn bản chỉ rõ tên của DLL có chứa hàm trong Microsoft Excel cho Windows.' },
+            procedure: { name: 'Thủ tục', detail: 'Yêu cầu. Văn bản chỉ rõ tên hàm trong DLL trong Microsoft Excel cho Windows. Bạn cũng có thể dùng giá trị thứ tự của hàm từ câu lệnh EXPORT trong tệp định nghĩa mô-đun (.DEF). Giá trị thứ tự hoặc số ID nguồn không được có dạng văn bản.' },
+            typeText: { name: 'Type_text', detail: 'Tùy chọn. Văn bản chỉ định kiểu dữ liệu của giá trị trả về và kiểu dữ liệu của tất cả các đối số cho DLL. Chữ thứ nhất của đối số nhập_văn bản chỉ rõ giá trị trả về. Nếu hàm hoặc nguồn mã đã được đăng ký, thì bạn có thể bỏ qua đối số này.' },
         },
     },
 };

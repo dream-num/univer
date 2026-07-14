@@ -19,5 +19,24 @@ declare global {
         univer: any;
         // eslint-disable-next-line ts/no-explicit-any
         univerAPI: any;
+        floatDomContentBoxFixture?: {
+            id: string;
+            setContentBox: (contentBox: { wrapperInset?: number; contentInset?: number }) => void;
+            setBorder: (border: boolean) => void;
+            enableRotateHandle: () => void;
+            getTransformerGeometry: () => {
+                drawing: { left: number; top: number; width: number; height: number; angle: number };
+                controls: Array<{ key: string; left: number; top: number; width: number; height: number; angle: number }>;
+            };
+            getLayout: () => {
+                startX: number;
+                startY: number;
+                endX: number;
+                endY: number;
+                width: number;
+                height: number;
+                rotate: number;
+            } | undefined;
+        };
     }
 }

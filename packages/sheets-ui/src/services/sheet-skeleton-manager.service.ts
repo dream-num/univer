@@ -21,7 +21,10 @@ import { Disposable, Inject } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
-import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
+import {
+    SetColumnHeaderHeightCommand,
+    SetRowHeaderWidthCommand,
+} from '../commands/commands/headersize-changed.command';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
 export interface ISheetSkeletonManagerSearch {

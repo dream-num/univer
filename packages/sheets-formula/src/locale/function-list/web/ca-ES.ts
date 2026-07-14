@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/en-us/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
@@ -36,12 +36,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            xml: { name: 'xml', detail: 'Una cadena en format XML vàlid.' },
+            xpath: { name: 'xpath', detail: 'Una cadena en format XPath estàndard.' },
         },
     },
     WEBSERVICE: {
@@ -50,12 +50,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            url: { name: 'url', detail: 'L’URL del servei web.' },
         },
     },
 };

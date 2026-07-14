@@ -1314,11 +1314,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _getOutlinePosition(width: number, height: number, borderSpacing: number, borderStrokeWidth: number) {
+        const offset = borderSpacing + borderStrokeWidth;
+        const strokeOffset = borderStrokeWidth / 2;
+
         return {
-            left: -borderSpacing - borderStrokeWidth,
-            top: -borderSpacing - borderStrokeWidth,
-            width: width + borderSpacing * 2,
-            height: height + borderSpacing * 2,
+            left: -offset - strokeOffset,
+            top: -offset - strokeOffset,
+            width: width + offset * 2,
+            height: height + offset * 2,
         };
     }
 
@@ -1467,7 +1470,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_RT:
-                left += width + borderSpacing - borderStrokeWidth;
+                left += width + borderSpacing + borderStrokeWidth;
                 top += -borderSpacing - borderStrokeWidth;
 
                 break;
@@ -1477,23 +1480,23 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_RM:
-                left += width + borderSpacing - borderStrokeWidth;
+                left += width + borderSpacing + borderStrokeWidth;
                 top += height / 2;
 
                 break;
             case TransformerManagerType.RESIZE_LB:
                 left += -borderSpacing - borderStrokeWidth;
-                top += height + borderSpacing - borderStrokeWidth;
+                top += height + borderSpacing + borderStrokeWidth;
 
                 break;
             case TransformerManagerType.RESIZE_CB:
                 left += width / 2;
-                top += height + borderSpacing - borderStrokeWidth;
+                top += height + borderSpacing + borderStrokeWidth;
 
                 break;
             case TransformerManagerType.RESIZE_RB:
-                left += width + borderSpacing - borderStrokeWidth;
-                top += height + borderSpacing - borderStrokeWidth;
+                left += width + borderSpacing + borderStrokeWidth;
+                top += height + borderSpacing + borderStrokeWidth;
 
                 break;
         }
@@ -1565,8 +1568,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
             width: anchorProps.width,
             height: anchorProps.height,
             radius: anchorProps.radius,
-            left: left + (anchorSize - anchorProps.width) / 2,
-            top: top + (anchorSize - anchorProps.height) / 2,
+            left: left + (anchorSize - anchorProps.width) / 2 - anchorStrokeWidth / 2,
+            top: top + (anchorSize - anchorProps.height) / 2 - anchorStrokeWidth / 2,
             shadowColor: anchorShadowColor,
             shadowBlur: anchorShadowBlur,
             shadowOffsetX: anchorShadowOffsetX,

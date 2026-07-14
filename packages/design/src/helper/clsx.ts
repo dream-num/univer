@@ -17,7 +17,9 @@
 /* eslint-disable no-restricted-imports */
 import type { ClassValue } from 'clsx';
 import { clsx as cn } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+const twMerge = extendTailwindMerge({ prefix: 'univer-' });
 
 export function clsx(...inputs: ClassValue[]) {
     return twMerge(cn(inputs));

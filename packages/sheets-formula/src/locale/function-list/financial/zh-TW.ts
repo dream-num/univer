@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/accrint-%E5%87%BD%E6%95%B0-fe45d089-6722-4fb3-9379-e1f911d8dc74',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/accrint-function',
             },
         ],
         functionParameter: {
@@ -43,7 +43,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/accrintm-%E5%87%BD%E6%95%B0-f62f01f9-5754-4cc4-805b-0e70199328a7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/accrintm-function',
             },
         ],
         functionParameter: {
@@ -60,12 +60,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/amordegrc-%E5%87%BD%E6%95%B0-a14d0ca1-64a4-42eb-9b3d-b0dededf9e51',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/amordegrc-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '資產的成本。' },
+            datePurchased: { name: '購買日期', detail: '資產的購買日期。' },
+            firstPeriod: { name: '首個週期', detail: '第一個週期結束的日期。' },
+            salvage: { name: '殘值', detail: '資產耐用年限終了時的殘餘價值。' },
+            period: { name: '週期', detail: '週期。' },
+            rate: { name: '折舊率', detail: '折舊率。' },
+            basis: { name: '基礎', detail: '要使用的年計數基礎。' },
         },
     },
     AMORLINC: {
@@ -74,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/amorlinc-%E5%87%BD%E6%95%B0-7d417b45-f7f5-4dba-a0a5-3451a81079a8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/amorlinc-function',
             },
         ],
         functionParameter: {
@@ -93,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/coupdaybs-%E5%87%BD%E6%95%B0-eb9a8dfb-2fb2-4c61-8e5d-690b320cf872',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/coupdaybs-function',
             },
         ],
         functionParameter: {
@@ -109,7 +114,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/coupdays-%E5%87%BD%E6%95%B0-cc64380b-315b-4e7b-950c-b30b0a76f671',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/coupdays-function',
             },
         ],
         functionParameter: {
@@ -125,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/coupdaysnc-%E5%87%BD%E6%95%B0-5ab3f0b2-029f-4a8b-bb65-47d525eea547',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/coupdaysnc-function',
             },
         ],
         functionParameter: {
@@ -141,7 +146,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/coupncd-%E5%87%BD%E6%95%B0-fd962fef-506b-4d9d-8590-16df5393691f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/coupncd-function',
             },
         ],
         functionParameter: {
@@ -157,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/coupnum-%E5%87%BD%E6%95%B0-a90af57b-de53-4969-9c99-dd6139db2522',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/coupnum-function',
             },
         ],
         functionParameter: {
@@ -173,7 +178,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/couppcd-%E5%87%BD%E6%95%B0-2eb50473-6ee9-4052-a206-77a9a385d5b3',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/couppcd-function',
             },
         ],
         functionParameter: {
@@ -189,7 +194,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/cumipmt-%E5%87%BD%E6%95%B0-61067bb0-9016-427d-b95b-1a752af0e606',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/cumipmt-function',
             },
         ],
         functionParameter: {
@@ -207,7 +212,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/cumprinc-%E5%87%BD%E6%95%B0-94a4516d-bd65-41a1-bc16-053a6af4c04d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/cumprinc-function',
             },
         ],
         functionParameter: {
@@ -225,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/db-%E5%87%BD%E6%95%B0-354e7d28-5f93-4ff1-8a52-eb4ee549d9d7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/db-function',
             },
         ],
         functionParameter: {
@@ -242,7 +247,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/ddb-%E5%87%BD%E6%95%B0-519a7a37-8772-4c96-85c0-ed2c209717a5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/ddb-function',
             },
         ],
         functionParameter: {
@@ -259,7 +264,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/disc-%E5%87%BD%E6%95%B0-71fce9f3-3f05-4acf-a5a3-eac6ef4daa53',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/disc-function',
             },
         ],
         functionParameter: {
@@ -276,7 +281,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dollarde-%E5%87%BD%E6%95%B0-db85aab0-1677-428a-9dfd-a38476693427',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dollarde-function',
             },
         ],
         functionParameter: {
@@ -290,7 +295,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dollarfr-%E5%87%BD%E6%95%B0-0835d163-3023-4a33-9824-3042c5d4f495',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dollarfr-function',
             },
         ],
         functionParameter: {
@@ -304,7 +309,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/duration-%E5%87%BD%E6%95%B0-b254ea57-eadc-4602-a86a-c8e369334038',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/duration-function',
             },
         ],
         functionParameter: {
@@ -322,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/effect-%E5%87%BD%E6%95%B0-910d4e4c-79e2-4009-95e6-507e04f11bc4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/effect-function',
             },
         ],
         functionParameter: {
@@ -336,7 +341,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/fv-%E5%87%BD%E6%95%B0-2eef9f44-a084-4c61-bdd8-4fe4bb1b71b3',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/fv-function',
             },
         ],
         functionParameter: {
@@ -348,34 +353,34 @@ const locale: typeof enUS = {
         },
     },
     FVSCHEDULE: {
-        description: '傳回應用一系列複利率計算的初始本金的未來值',
-        abstract: '傳回應用一系列複利率計算的初始本金的未來值',
+        description: '傳回初始資金在套用一系列複利率之後的未來值。 使用 FVSCHEDULE 以變動或可調整的利率來計算投資的未來值。',
+        abstract: '傳回初始資金在套用一系列複利率之後的未來值。 使用 FVSCHEDULE 以變動或可調整的利率來計算投資的未來值。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/fvschedule-%E5%87%BD%E6%95%B0-bec29522-bd87-4082-bab9-a241f3fb251d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/fvschedule-function',
             },
         ],
         functionParameter: {
-            principal: { name: '初始資金', detail: '現值。' },
-            schedule: { name: '利率陣列', detail: '要套用的利率陣列。' },
+            principal: { name: '初始資金', detail: '必須。 這是現值。' },
+            schedule: { name: '利率陣列', detail: '必須。 這是要套用的利率陣列。' },
         },
     },
     INTRATE: {
-        description: '返回完全投資型債券的利率',
-        abstract: '返回完全投資型債券的利率',
+        description: '傳回完整投資證券的利率。',
+        abstract: '傳回完整投資證券的利率。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/intrate-%E5%87%BD%E6%95%B0-5cb34dde-a221-4cb6-b​​3eb-0b9e55e1316f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/intrate-function',
             },
         ],
         functionParameter: {
-            settlement: { name: '結算日期', detail: '證券的結算日期。' },
-            maturity: { name: '到期日期', detail: '證券的到期日期。' },
-            investment: { name: '投資額', detail: '證券的投資額。' },
-            redemption: { name: '贖回價', detail: '證券到期時的贖回價值。' },
-            basis: { name: '基礎', detail: '要使用的日計數基礎類型。' },
+            settlement: { name: '結算日期', detail: '必須。 這是證券的結算日期。 證券結算日期是證券交割給買方後的次日。' },
+            maturity: { name: '到期日期', detail: '必須。 這是證券的到期日期。 到期日期為證券到期的日期。' },
+            investment: { name: '投資額', detail: '必須。 這是證券的投資額。' },
+            redemption: { name: '贖回價', detail: '必須。 這是到期時收回的金額。' },
+            basis: { name: '基礎', detail: '可選的。 這是要使用的日計數基礎類型。' },
         },
     },
     IPMT: {
@@ -384,7 +389,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/ipmt-%E5%87%BD%E6%95%B0-5cce0ad6-8402-4a41-8d29-61a0b054cb6f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/ipmt-function',
             },
         ],
         functionParameter: {
@@ -402,7 +407,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/irr-%E5%87%BD%E6%95%B0-64925eaa-9988-495b-b290-3ad0c163c1bc',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/irr-function',
             },
         ],
         functionParameter: {
@@ -416,7 +421,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/ispmt-%E5%87%BD%E6%95%B0-fa58adb6-9d39-4ce0-8f43-75399cea56cc',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/ispmt-function',
             },
         ],
         functionParameter: {
@@ -432,7 +437,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/mduration-%E5%87%BD%E6%95%B0-b3786a69-4f20-469a-94ad-33e5b90a763c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/mduration-function',
             },
         ],
         functionParameter: {
@@ -450,7 +455,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/mirr-%E5%87%BD%E6%95%B0-b020f038-7492-4fb4-93c1-35c345b53524',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/mirr-function',
             },
         ],
         functionParameter: {
@@ -465,7 +470,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/nominal-%E5%87%BD%E6%95%B0-7f1ae29b-6b92-435e-b950-ad8b190ddd2b',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/nominal-function',
             },
         ],
         functionParameter: {
@@ -479,7 +484,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/nper-%E5%87%BD%E6%95%B0-240535b5-6653-4d2d-bfcf-b6a38151d815',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/nper-function',
             },
         ],
         functionParameter: {
@@ -496,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/npv-%E5%87%BD%E6%95%B0-8672cb67-2576-4d07-b67b-ac28acf2a568',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/npv-function',
             },
         ],
         functionParameter: {
@@ -511,7 +516,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oddfprice-%E5%87%BD%E6%95%B0-d7d664a8-34df-4233-8d2b​​-922bcf6a69e1',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oddfprice-function',
             },
         ],
         functionParameter: {
@@ -532,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oddfyield-%E5%87%BD%E6%95%B0-66bc8b7b-6501-4c93-9ce3-2fd16220fe37',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oddfyield-function',
             },
         ],
         functionParameter: {
@@ -553,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oddlprice-%E5%87%BD%E6%95%B0-fb657749-d200-4902-afaf-ed5445027fc4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oddlprice-function',
             },
         ],
         functionParameter: {
@@ -573,7 +578,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oddlyield-%E5%87%BD%E6%95%B0-c873d088-cf40-435f-8d41-c8232fee9238',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oddlyield-function',
             },
         ],
         functionParameter: {
@@ -593,7 +598,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/pduration-%E5%87%BD%E6%95%B0-44f33460-5be5-4c90-b857-22308892adaf',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/pduration-function',
             },
         ],
         functionParameter: {
@@ -608,7 +613,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/pmt-%E5%87%BD%E6%95%B0-0214da64-9a63-4996-bc20-214433fa6441',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/pmt-function',
             },
         ],
         functionParameter: {
@@ -625,7 +630,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/ppmt-%E5%87%BD%E6%95%B0-c370d9e3-7749-4ca4-beea-b06c6ac95e1b',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/ppmt-function',
             },
         ],
         functionParameter: {
@@ -643,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/price-%E5%87%BD%E6%95%B0-3ea9deac-8dfa-436f-a7c8-17ea02c21b0a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/price-function',
             },
         ],
         functionParameter: {
@@ -662,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/pricedisc-%E5%87%BD%E6%95%B0-d06ad7c1-380e-4be7-9fd9-75e3079acfd3',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/pricedisc-function',
             },
         ],
         functionParameter: {
@@ -679,7 +684,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/pricemat-%E5%87%BD%E6%95%B0-52c3b4da-bc7e-476a-989f-a95f675cae77',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/pricemat-function',
             },
         ],
         functionParameter: {
@@ -697,7 +702,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/pv-%E5%87%BD%E6%95%B0-23879d31-0e02-4321-be01-da16e8168cbd',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/pv-function',
             },
         ],
         functionParameter: {
@@ -714,7 +719,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/rate-%E5%87%BD%E6%95%B0-9f665657-4a7e-4bb7-a030-83fc59e748ce',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/rate-function',
             },
         ],
         functionParameter: {
@@ -732,7 +737,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/received-%E5%87%BD%E6%95%B0-7a3f8b93-6611-4f81-8576-828312c9b5e5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/received-function',
             },
         ],
         functionParameter: {
@@ -749,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/rri-%E5%87%BD%E6%95%B0-6f5822d8-7ef1-4233-944c-79e8172930f4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/rri-function',
             },
         ],
         functionParameter: {
@@ -764,7 +769,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/sln-%E5%87%BD%E6%95%B0-cdb666e5-c1c6-40a7-806a-e695edc2f1c8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/sln-function',
             },
         ],
         functionParameter: {
@@ -779,7 +784,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/syd-%E5%87%BD%E6%95%B0-069f8106-b60b-4ca2-98e0-2a0f206bdb27',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/syd-function',
             },
         ],
         functionParameter: {
@@ -795,7 +800,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/tbilleq-%E5%87%BD%E6%95%B0-2ab72d90-9b4d-4efe-9fc2-0f81f2c19c8c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/tbilleq-function',
             },
         ],
         functionParameter: {
@@ -810,7 +815,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/tbillprice-%E5%87%BD%E6%95%B0-eacca992-c29d-425a-9eb8-0513fe6035a2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/tbillprice-function',
             },
         ],
         functionParameter: {
@@ -825,7 +830,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/tbillyield-%E5%87%BD%E6%95%B0-6d381232-f4b0-4cd5-8e97-45b9c03468ba',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/tbillyield-function',
             },
         ],
         functionParameter: {
@@ -840,7 +845,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/vdb-%E5%87%BD%E6%95%B0-dde4e207-f3fa-488d-91d2-66d55e861d73',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/vdb-function',
             },
         ],
         functionParameter: {
@@ -859,7 +864,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/xirr-%E5%87%BD%E6%95%B0-de1242ec-6477-445b-b11b-a303ad9adc9d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/xirr-function',
             },
         ],
         functionParameter: {
@@ -874,7 +879,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/xnpv-%E5%87%BD%E6%95%B0-1b42bbf6-370f-4532-a0eb-d67c16b664b7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/xnpv-function',
             },
         ],
         functionParameter: {
@@ -888,7 +893,7 @@ const locale: typeof enUS = {
         abstract: '返回定期支付利息的債券的收益',
         links: [{
             title: '教導',
-            url: 'https://support.microsoft.com/zh-tw/office/yield-%E5%87%BD%E6%95%B0-f5f5ca43-c4bd-434f-8bd2-ed3c9727a4fe',
+            url: 'https://support.microsoft.com/zh-tw/excel/functions/yield-function',
         }],
         functionParameter: {
             settlement: { name: '結算日期', detail: '證券的結算日期。' },
@@ -906,7 +911,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/yielddisc-%E5%87%BD%E6%95%B0-a9dbdbae-7dae-46de-b995-615faffaaed7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/yielddisc-function',
             },
         ],
         functionParameter: {
@@ -923,7 +928,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/yieldmat-%E5%87%BD%E6%95%B0-ba7d1809-0d33-4bcb-96c7-6c56ec62ef6f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/yieldmat-function',
             },
         ],
         functionParameter: {

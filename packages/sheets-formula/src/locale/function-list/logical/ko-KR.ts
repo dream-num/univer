@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/and-함수-5f19b2e8-e1df-4408-897a-ce285a19e9d9',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/and-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/bycol-함수-58463999-7de5-49ce-8f38-b7f7a2192bfb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bycol-function',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/byrow-함수-2e04c677-78c8-4e6b-8c10-a4602f2602bb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/byrow-function',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/false-함수-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/false-function',
             },
         ],
         functionParameter: {
@@ -77,7 +77,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/if-함수-69aed7c9-4e8a-4755-a9bc-aa8bbff73be2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/if-function',
             },
         ],
         functionParameter: {
@@ -92,7 +92,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/iferror-함수-c526fd07-caeb-47b8-8bb6-63f3e417f611',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/iferror-function',
             },
         ],
         functionParameter: {
@@ -106,7 +106,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/ifna-함수-6626c961-a569-42fc-a49d-79b4951fd461',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/ifna-function',
             },
         ],
         functionParameter: {
@@ -120,7 +120,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/ifs-함수-36329a26-37b2-467c-972b-4a39bd951d45',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/ifs-function',
             },
         ],
         functionParameter: {
@@ -136,7 +136,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/lambda-함수-bd212d27-1cd1-4321-a34a-ccbf254b8b67',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/lambda-function',
             },
         ],
         functionParameter: {
@@ -145,20 +145,20 @@ const locale: typeof enUS = {
         },
     },
     LET: {
-        description: '계산 결과에 이름을 할당합니다',
-        abstract: '계산 결과에 이름을 할당합니다',
+        description: '함수는 LET 계산 결과에 이름을 할당합니다. 이를 통해 수식 안에 중간 계산, 값을 저장하거나 이름을 정의할 수 있습니다. 이러한 이름은 함수 범위 내에서만 적용됩니다 LET . 프로그래밍 LET 의 변수와 마찬가지로 은 Excel의 네이티브 수식 구문을 통해 수행됩니다.',
+        abstract: '함수는 LET 계산 결과에 이름을 할당합니다. 이를 통해 수식 안에 중간 계산, 값을 저장하거나 이름을 정의할 수 있습니다. 이러한 이름은 함수 범위 내에서만 적용됩니다 LET . 프로그래밍 LET 의 변수와 마찬가지로 은 Excel의 네이티브 수식 구문을 통해 수행됩니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/let-함수-34842dd8-b92b-4d3f-b325-b8b8f9908999',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/let-function',
             },
         ],
         functionParameter: {
             name1: { name: 'name1', detail: '첫 번째 이름입니다. 유효한 Excel 이름으로 시작해야 합니다.' },
             nameValue1: { name: 'name_value1', detail: '이름 1에 할당된 값입니다.' },
-            calculationOrName2: { name: 'calculation_or_name2', detail: 'One of the following:\n1.A calculation that uses all names within the LET function. This must be the last argument in the LET function.\n2.A second name to assign to a second name_value. If a name is specified, name_value2 and calculation_or_name3 become required.' },
-            nameValue2: { name: 'name_value2', detail: 'The value that is assigned to calculation_or_name2.' },
-            calculationOrName3: { name: 'calculation_or_name3', detail: 'One of the following:\n1.A calculation that uses all names within the LET function. The last argument in the LET function must be a calculation.\n2.A third name to assign to a third name_value. If a name is specified, name_value3 and calculation_or_name4 become required.' },
+            calculationOrName2: { name: 'calculation_or_name2', detail: '다음 중 하나입니다. LET 함수의 모든 이름을 사용하는 계산이며 LET 함수의 마지막 인수여야 합니다. 또는 두 번째 name_value에 할당할 두 번째 이름이며, 이름을 지정하면 name_value2와 calculation_or_name3가 필요합니다.' },
+            nameValue2: { name: 'name_value2', detail: 'calculation_or_name2에 할당된 값입니다.' },
+            calculationOrName3: { name: 'calculation_or_name3', detail: '다음 중 하나입니다. LET 함수의 모든 이름을 사용하는 계산이며 LET 함수의 마지막 인수는 계산이어야 합니다. 또는 세 번째 name_value에 할당할 세 번째 이름이며, 이름을 지정하면 name_value3와 calculation_or_name4가 필요합니다.' },
         },
     },
     MAKEARRAY: {
@@ -167,12 +167,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/makearray-함수-b80da5ad-b338-4149-a523-5b221da09097',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/makearray-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'rows', detail: 'The number of rows in the array. Must be greater than zero.' },
-            number2: { name: 'cols', detail: 'The number of columns in the array. Must be greater than zero.' },
+            number1: { name: 'rows', detail: '배열의 행 수입니다. 0보다 커야 합니다.' },
+            number2: { name: 'cols', detail: '배열의 열 수입니다. 0보다 커야 합니다.' },
             value3: {
                 name: 'lambda',
                 detail: ' A LAMBDA that is called to create the array. The LAMBDA takes two parameters: row (The row index of the array), col (The column index of the array).',
@@ -185,12 +185,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/map-함수-48006093-f97c-47c1-bfcc-749263bb1f01',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/map-function',
             },
         ],
         functionParameter: {
             array1: { name: 'array1', detail: '매핑할 배열입니다.' },
-            array2: { name: 'array2', detail: 'An array2 to be mapped.' },
+            array2: { name: 'array2', detail: '매핑할 두 번째 배열입니다.' },
             lambda: { name: 'lambda', detail: '각 배열에서 하나의 값을 받아들이고 하나의 결과를 반환하는 LAMBDA입니다.' },
         },
     },
@@ -200,7 +200,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/not-함수-9cfc6011-a054-40c7-a140-cd4ba2d87d77',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/not-function',
             },
         ],
         functionParameter: {
@@ -213,7 +213,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/or-함수-7d17ad14-8700-4281-b308-00b131e22af0',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/or-function',
             },
         ],
         functionParameter: {
@@ -227,7 +227,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/reduce-함수-42e39910-b345-45f3-84b8-0642b568b7cb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/reduce-function',
             },
         ],
         functionParameter: {
@@ -242,7 +242,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/scan-함수-d58dfd11-9969-4439-8730-1f22e81cc0f5',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/scan-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/switch-함수-47ab33c0-28ce-4530-8a45-d532ec4aa25e',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/switch-function',
             },
         ],
         functionParameter: {
@@ -274,7 +274,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/true-함수-7652c6e3-8987-48d0-97cd-ef223246b3fb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/true-function',
             },
         ],
         functionParameter: {
@@ -286,7 +286,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/xor-함수-1548d4c2-5e47-4f77-9a92-0533bba14f37',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/xor-function',
             },
         ],
         functionParameter: {

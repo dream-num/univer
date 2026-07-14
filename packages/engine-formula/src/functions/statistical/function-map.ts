@@ -50,6 +50,10 @@ import { FTest } from './f-test';
 import { Fisher } from './fisher';
 import { Fisherinv } from './fisherinv';
 import { Forecast } from './forecast';
+// import { ForecastEts } from './forecast-ets';
+// import { ForecastEtsConfint } from './forecast-ets-confint';
+// import { ForecastEtsSeasonality } from './forecast-ets-seasonality';
+// import { ForecastEtsStat } from './forecast-ets-stat';
 import { Frequency } from './frequency';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Gamma } from './gamma';
@@ -160,6 +164,10 @@ export const functionStatistical = [
     [Fisher, FUNCTION_NAMES_STATISTICAL.FISHER],
     [Fisherinv, FUNCTION_NAMES_STATISTICAL.FISHERINV],
     [Forecast, FUNCTION_NAMES_STATISTICAL.FORECAST],
+    // [ForecastEts, FUNCTION_NAMES_STATISTICAL.FORECAST_ETS],
+    // [ForecastEtsConfint, FUNCTION_NAMES_STATISTICAL.FORECAST_ETS_CONFINT],
+    // [ForecastEtsSeasonality, FUNCTION_NAMES_STATISTICAL.FORECAST_ETS_SEASONALITY],
+    // [ForecastEtsStat, FUNCTION_NAMES_STATISTICAL.FORECAST_ETS_STAT],
     [Forecast, FUNCTION_NAMES_STATISTICAL.FORECAST_LINEAR],
     [Frequency, FUNCTION_NAMES_STATISTICAL.FREQUENCY],
     [Gamma, FUNCTION_NAMES_STATISTICAL.GAMMA],

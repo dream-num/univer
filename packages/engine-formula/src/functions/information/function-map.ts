@@ -17,6 +17,7 @@
 import { Cell } from './cell';
 import { ErrorType } from './error-type';
 import { FUNCTION_NAMES_INFORMATION } from './function-names';
+// import { Info } from './info';
 import { Isbetween } from './isbetween';
 import { Isblank } from './isblank';
 import { Isdate } from './isdate';
@@ -30,6 +31,7 @@ import { Isna } from './isna';
 import { Isnontext } from './isnontext';
 import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
+// import { Isomitted } from './isomitted';
 import { Isref } from './isref';
 import { Istext } from './istext';
 import { Isurl } from './isurl';
@@ -42,6 +44,7 @@ import { Type } from './type';
 export const functionInformation = [
     [Cell, FUNCTION_NAMES_INFORMATION.CELL],
     [ErrorType, FUNCTION_NAMES_INFORMATION.ERROR_TYPE],
+    // [Info, FUNCTION_NAMES_INFORMATION.INFO],
     [Isbetween, FUNCTION_NAMES_INFORMATION.ISBETWEEN],
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
     [Isdate, FUNCTION_NAMES_INFORMATION.ISDATE],
@@ -55,6 +58,7 @@ export const functionInformation = [
     [Isnontext, FUNCTION_NAMES_INFORMATION.ISNONTEXT],
     [Isnumber, FUNCTION_NAMES_INFORMATION.ISNUMBER],
     [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
+    // [Isomitted, FUNCTION_NAMES_INFORMATION.ISOMITTED],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
     [Isurl, FUNCTION_NAMES_INFORMATION.ISURL],

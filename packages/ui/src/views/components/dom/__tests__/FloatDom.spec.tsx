@@ -20,10 +20,10 @@
 
 import type { ComponentType, ReactElement } from 'react';
 import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CanvasFloatDomService } from '../../../../services/dom/canvas-dom-layer.service';
 import { connectInjector } from '../../../../utils/di';
 import { FloatDom, FloatDomSingle, resolveFloatDomCurrentUnitId, resolveFloatDomOverflow } from '../FloatDom';
@@ -130,6 +130,86 @@ describe('FloatDomSingle', () => {
         await waitFor(() => expect(screen.getByText('float content')).not.toBeNull());
         expect(receivedLayout$).toBe(layer.position$);
     });
+
+    it('renders the wrapper and content root at the full placement bounds with zero insets', async () => {
+        const position$ = new BehaviorSubject<IFloatDomLayout>({
+            startX: 10,
+            startY: 20,
+            endX: 490,
+            endY: 340,
+            rotate: 30,
+            width: 480,
+            height: 320,
+            absolute: { left: false, top: false },
+            opacity: 0.5,
+        });
+        const layer = {
+            ...createFloatDom(),
+            contentBox: { wrapperInset: 0, contentInset: 0 },
+            position$,
+        };
+
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+        expect(wrapper.style.cssText).toContain('width: 480px');
+        expect(wrapper.style.cssText).toContain('height: 320px');
+        expect(wrapper.style.cssText).toContain('transform: rotate(30deg)');
+        expect(wrapper.style.cssText).toContain('opacity: 0.5');
+        expect(inner.style.cssText).toContain('width: 480px');
+        expect(inner.style.cssText).toContain('height: 320px');
+        expect(inner.style.right).toBe('0px');
+        expect(inner.style.bottom).toBe('0px');
+    });
+
+    it.each([undefined, {}] as const)('preserves the legacy DOM hierarchy, classes, styles, overflow, and event forwarding for config %o', async (contentBox) => {
+        const onPointerDown = vi.fn();
+        const layer = { ...createFloatDom(), onPointerDown, contentBox };
+
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+        expect(wrapper.className).toBe('univer-absolute univer-z-10 univer-origin-center');
+        expect(inner.className).toBe('univer-absolute univer-overflow-hidden');
+        expect(wrapper.style.cssText).toBe('top: 20px; left: 10px; width: 98px; height: 98px; transform: rotate(0deg); opacity: 1; overflow: hidden;');
+        expect(inner.style.cssText).toBe('width: 96px; height: 96px; left: 0px; top: 0px; right: auto; bottom: auto; overflow: hidden;');
+
+        fireEvent.pointerDown(inner);
+        expect(onPointerDown).toHaveBeenCalledOnce();
+    });
+
+    it('updates clipped placement, full content size, and anchors through position$', async () => {
+        const position$ = createFloatDom().position$ as BehaviorSubject<IFloatDomLayout>;
+        const layer = { ...createFloatDom(), contentBox: { wrapperInset: 0, contentInset: 0 }, position$ };
+
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+
+        act(() => position$.next({
+            startX: 0,
+            startY: 5,
+            endX: 300,
+            endY: 205,
+            rotate: 30,
+            width: 480,
+            height: 320,
+            absolute: { left: false, top: false },
+            opacity: 0.6,
+        }));
+
+        expect(wrapper.style.cssText).toContain('width: 300px');
+        expect(wrapper.style.cssText).toContain('height: 200px');
+        expect(wrapper.style.cssText).toContain('top: 5px');
+        expect(inner.style.cssText).toContain('width: 480px');
+        expect(inner.style.cssText).toContain('height: 320px');
+        expect(inner.style.left).toBe('auto');
+        expect(inner.style.top).toBe('auto');
+        expect(inner.style.right).toBe('0px');
+        expect(inner.style.bottom).toBe('0px');
+    });
 });
 
 describe('FloatDom', () => {
@@ -145,5 +225,26 @@ describe('FloatDom', () => {
 
         await waitFor(() => expect(screen.getByText('float content')).not.toBeNull());
         expect(document.getElementById('float-1')).not.toBeNull();
+    });
+
+    it('updates content box insets at runtime through CanvasFloatDomService', async () => {
+        const rendered = renderWithDependencies(<FloatDom unitId="doc-1" />);
+        const service = rendered.injector.get(CanvasFloatDomService);
+
+        act(() => service.addFloatDom(createFloatDom()));
+        const inner = await waitFor(() => document.getElementById('float-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+        expect(wrapper.style.width).toBe('98px');
+        expect(inner.style.width).toBe('96px');
+
+        act(() => service.updateFloatDom('float-1', { contentBox: { wrapperInset: 6, contentInset: 10 } }));
+
+        await waitFor(() => expect(wrapper.style.width).toBe('94px'));
+        expect(inner.style.width).toBe('90px');
+
+        act(() => service.updateFloatDom('float-1', { contentBox: { wrapperInset: 0, contentInset: 0 } }));
+
+        await waitFor(() => expect(wrapper.style.width).toBe('100px'));
+        expect(inner.style.width).toBe('100px');
     });
 });

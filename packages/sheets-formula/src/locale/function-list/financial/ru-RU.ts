@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%B0%D0%BA%D0%BE%D0%BF%D0%B4%D0%BE%D1%85%D0%BE%D0%B4-fe45d089-6722-4fb3-9379-e1f911d8dc74',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/accrint-function',
             },
         ],
         functionParameter: {
@@ -43,7 +43,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BD%D0%B0%D0%BA%D0%BE%D0%BF%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%BE%D0%B3%D0%B0%D1%88-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%B0%D0%BA%D0%BE%D0%BF%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%BE%D0%B3%D0%B0%D1%88-f62f01f9-5754-4cc4-805b-0e70199328a7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/accrintm-function',
             },
         ],
         functionParameter: {
@@ -60,12 +60,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B0%D0%BC%D0%BE%D1%80%D1%83%D0%BC-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B0%D0%BC%D0%BE%D1%80%D1%83%D0%BC-a14d0ca1-64a4-42eb-9b3d-b0dededf9e51',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/amordegrc-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'стоимость', detail: 'Стоимость актива.' },
+            datePurchased: { name: 'дата приобретения', detail: 'Дата приобретения актива.' },
+            firstPeriod: { name: 'первый период ', detail: 'Дата окончания первого периода.' },
+            salvage: { name: 'остаточная стоимость', detail: 'Остаточная стоимость актива в конце периода амортизации.' },
+            period: { name: 'период', detail: 'Период.' },
+            rate: { name: 'cтавка', detail: 'Ставка амортизации.' },
+            basis: { name: 'базис', detail: 'Используемый способ вычисления дат.' },
         },
     },
     AMORLINC: {
@@ -74,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B0%D0%BC%D0%BE%D1%80%D1%83%D0%B2-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B0%D0%BC%D0%BE%D1%80%D1%83%D0%B2-7d417b45-f7f5-4dba-a0a5-3451a81079a8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/amorlinc-function',
             },
         ],
         functionParameter: {
@@ -93,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BD%D0%B5%D0%B9%D0%BA%D1%83%D0%BF%D0%BE%D0%BD%D0%B4%D0%BE-eb9a8dfb-2fb2-4c61-8e5d-690b320cf872',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/coupdaybs-function',
             },
         ],
         functionParameter: {
@@ -109,7 +114,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%BD%D0%B5%D0%B9%D0%BA%D1%83%D0%BF%D0%BE%D0%BD-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BD%D0%B5%D0%B9%D0%BA%D1%83%D0%BF%D0%BE%D0%BD-cc64380b-315b-4e7b-950c-b30b0a76f671',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/coupdays-function',
             },
         ],
         functionParameter: {
@@ -125,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BD%D0%B5%D0%B9%D0%BA%D1%83%D0%BF%D0%BE%D0%BD%D0%BF%D0%BE%D1%81%D0%BB%D0%B5-5ab3f0b2-029f-4a8b-bb65-47d525eea547',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/coupdaysnc-function',
             },
         ],
         functionParameter: {
@@ -141,7 +146,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%82%D0%B0%D0%BA%D1%83%D0%BF%D0%BE%D0%BD%D0%BF%D0%BE%D1%81%D0%BB%D0%B5-fd962fef-506b-4d9d-8590-16df5393691f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/coupncd-function',
             },
         ],
         functionParameter: {
@@ -157,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B8%D1%81%D0%BB%D0%BA%D1%83%D0%BF%D0%BE%D0%BD-a90af57b-de53-4969-9c99-dd6139db2522',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/coupnum-function',
             },
         ],
         functionParameter: {
@@ -173,7 +178,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%82%D0%B0%D0%BA%D1%83%D0%BF%D0%BE%D0%BD%D0%B4%D0%BE-2eb50473-6ee9-4052-a206-77a9a385d5b3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/couppcd-function',
             },
         ],
         functionParameter: {
@@ -189,7 +194,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BE%D0%B1%D1%89%D0%BF%D0%BB%D0%B0%D1%82-61067bb0-9016-427d-b95b-1a752af0e606',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/cumipmt-function',
             },
         ],
         functionParameter: {
@@ -207,7 +212,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BE%D0%B1%D1%89%D0%B4%D0%BE%D1%85%D0%BE%D0%B4-94a4516d-bd65-41a1-bc16-053a6af4c04d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/cumprinc-function',
             },
         ],
         functionParameter: {
@@ -225,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84%D1%83%D0%BE-354e7d28-5f93-4ff1-8a52-eb4ee549d9d7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/db-function',
             },
         ],
         functionParameter: {
@@ -242,7 +247,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B4%D0%BE%D0%B1-519a7a37-8772-4c96-85c0-ed2c209717a5',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/ddb-function',
             },
         ],
         functionParameter: {
@@ -259,7 +264,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%BA%D0%B8%D0%B4%D0%BA%D0%B0-71fce9f3-3f05-4acf-a5a3-eac6ef4daa53',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/disc-function',
             },
         ],
         functionParameter: {
@@ -276,7 +281,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%80%D1%83%D0%B1%D0%BB%D1%8C-%D0%B4%D0%B5%D1%81-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D1%83%D0%B1%D0%BB%D1%8C-%D0%B4%D0%B5%D1%81-db85aab0-1677-428a-9dfd-a38476693427',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/dollarde-function',
             },
         ],
         functionParameter: {
@@ -290,7 +295,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D1%83%D0%B1%D0%BB%D1%8C-%D0%B4%D1%80%D0%BE%D0%B1%D1%8C-0835d163-3023-4a33-9824-3042c5d4f495',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/dollarfr-function',
             },
         ],
         functionParameter: {
@@ -304,7 +309,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BB%D0%B8%D1%82-b254ea57-eadc-4602-a86a-c8e369334038',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/duration-function',
             },
         ],
         functionParameter: {
@@ -322,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%8D%D1%84%D1%84%D0%B5%D0%BA%D1%82-910d4e4c-79e2-4009-95e6-507e04f11bc4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/effect-function',
             },
         ],
         functionParameter: {
@@ -331,51 +336,51 @@ const locale: typeof enUS = {
         },
     },
     FV: {
-        description: 'Возвращает будущую стоимость инвестиции на основе постоянной процентной ставки',
-        abstract: 'Возвращает будущую стоимость инвестиции на основе постоянной процентной ставки',
+        description: 'БС — одна из финансовых функций , возвращающая будущую стоимость инвестиции на основе постоянной процентной ставки. В функции БС можно использовать как периодические постоянные платежи, так и единый общий платеж.',
+        abstract: 'БС — одна из финансовых функций , возвращающая будущую стоимость инвестиции на основе постоянной процентной ставки. В функции БС можно использовать как периодические постоянные платежи, так и единый общий платеж.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D1%81-2eef9f44-a084-4c61-bdd8-4fe4bb1b71b3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/fv-function',
             },
         ],
         functionParameter: {
-            rate: { name: 'cтавка', detail: 'Процентная ставка за период.' },
-            nper: { name: 'кпер', detail: 'Общее количество периодов платежей по аннуитету.' },
-            pmt: { name: 'плт', detail: 'Выплата, производимая в каждый период; это значение не может меняться в течение всего периода выплат.' },
-            pv: { name: 'пс', detail: 'Приведенная к текущему моменту стоимость, т. е. общая сумма, которая на текущий момент равноценна ряду будущих платежей.' },
-            type: { name: 'тип', detail: 'Число 0 или 1, обозначающее срок выплаты.' },
+            rate: { name: 'cтавка', detail: 'Обязательно. Процентная ставка за период.' },
+            nper: { name: 'кпер', detail: 'Обязательно. Общее количество периодов платежей по аннуитету.' },
+            pmt: { name: 'плт', detail: 'Обязательно. Выплата, производимая в каждый период; это значение не может меняться в течение всего периода выплат. Обычно аргумент "плт" состоит из основного платежа и платежа по процентам, но не включает других налогов и сборов. Если он опущен, аргумент "пс" является обязательным.' },
+            pv: { name: 'пс', detail: 'Дополнительные. Приведенная к текущему моменту стоимость, т. е. общая сумма, которая на текущий момент равноценна ряду будущих платежей. Если аргумент "пс" опущен, предполагается значение 0. В этом случае аргумент "плт" является обязательным.' },
+            type: { name: 'тип', detail: 'Дополнительные. Число 0 или 1, обозначающее срок выплаты. Если аргумент "тип" опущен, предполагается значение 0.' },
         },
     },
     FVSCHEDULE: {
-        description: 'Возвращает будущую стоимость первоначальной основной суммы после применения ряда (плана) ставок сложных процентов',
-        abstract: 'Возвращает будущую стоимость первоначальной основной суммы после применения ряда (плана) ставок сложных процентов',
+        description: 'Возвращает будущую стоимость первоначальной основной суммы после применения ряда (плана) ставок сложных процентов. Функция БЗРАСПИС используется для вычисления будущей стоимости инвестиции с переменной процентной ставкой.',
+        abstract: 'Возвращает будущую стоимость первоначальной основной суммы после применения ряда (плана) ставок сложных процентов. Функция БЗРАСПИС используется для вычисления будущей стоимости инвестиции с переменной процентной ставкой.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B7%D1%80%D0%B0%D1%81%D0%BF%D0%B8%D1%81-bec29522-bd87-4082-bab9-a241f3fb251d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/fvschedule-function',
             },
         ],
         functionParameter: {
-            principal: { name: 'первичное', detail: 'Стоимость инвестиции на текущий момент.' },
-            schedule: { name: 'план', detail: 'Массив применяемых процентных ставок.' },
+            principal: { name: 'первичное', detail: 'Обязательно. Стоимость инвестиции на текущий момент.' },
+            schedule: { name: 'план', detail: 'Обязательно. Массив применяемых процентных ставок.' },
         },
     },
     INTRATE: {
-        description: 'Возвращает процентную ставку для полностью инвестированных ценных бумаг',
-        abstract: 'Возвращает процентную ставку для полностью инвестированных ценных бумаг',
+        description: 'Возвращает процентную ставку для полностью инвестированных ценных бумаг.',
+        abstract: 'Возвращает процентную ставку для полностью инвестированных ценных бумаг.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B8%D0%BD%D0%BE%D1%80%D0%BC%D0%B0-5cb34dde-a221-4cb6-b3eb-0b9e55e1316f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/intrate-function',
             },
         ],
         functionParameter: {
-            settlement: { name: 'дата согл', detail: 'Дата расчета за ценные бумаги.' },
-            maturity: { name: 'дата вступления в силу', detail: 'Срок погашения ценных бумаг.' },
-            investment: { name: 'инвестиция', detail: 'Объем инвестиции в ценные бумаги.' },
-            redemption: { name: 'погашение', detail: 'Сумма, которая должна быть получена на момент погашения ценных бумаг.' },
-            basis: { name: 'базис', detail: 'Используемый способ вычисления дня.' },
+            settlement: { name: 'дата согл', detail: 'Обязательно. Дата расчета за ценные бумаги (дата продажи ценных бумаг покупателю, более поздняя, чем дата выпуска).' },
+            maturity: { name: 'дата вступления в силу', detail: 'Обязательно. Срок погашения ценных бумаг. Эта дата определяет момент, когда истекает срок действия ценных бумаг.' },
+            investment: { name: 'инвестиция', detail: 'Обязательно. Объем инвестиции в ценные бумаги.' },
+            redemption: { name: 'погашение', detail: 'Обязательно. Сумма, которая должна быть получена на момент погашения ценных бумаг.' },
+            basis: { name: 'базис', detail: 'Дополнительные. Используемый способ вычисления дня.' },
         },
     },
     IPMT: {
@@ -384,7 +389,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BF%D0%BB%D1%82-5cce0ad6-8402-4a41-8d29-61a0b054cb6f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/ipmt-function',
             },
         ],
         functionParameter: {
@@ -397,17 +402,17 @@ const locale: typeof enUS = {
         },
     },
     IRR: {
-        description: 'Возвращает внутреннюю ставку доходности для ряда потоков денежных средств, представленных их численными значениями',
-        abstract: 'Возвращает внутреннюю ставку доходности для ряда потоков денежных средств, представленных их численными значениями',
+        description: 'Возвращает внутреннюю ставку доходности для ряда потоков денежных средств, представленных их численными значениями. В отличие от аннуитета, денежные суммы в пределах этих потоков могут колебаться. Однако обязательным условием является регулярность поступлений (например, ежемесячно или ежегодно). Внутренняя ставка доходности — это процентная ставка, принимаемая для инвестиции, состоящей из платежей (отрицательные величины) и доходов (положительные величины), которые имеют место в следующие друг за другом и одинаковые по продолжительности периоды.',
+        abstract: 'Возвращает внутреннюю ставку доходности для ряда потоков денежных средств, представленных их численными значениями. В отличие от аннуитета, денежные суммы в пределах этих потоков могут колебаться. Однако обязательным условием является регулярность поступлений (например, ежемесячно или ежегодно). Внутренняя ставка доходности — это процентная ставка, принимаемая для инвестиции, состоящей из платежей (отрицательные величины) и доходов (положительные величины), которые имеют место в следующие друг за другом и одинаковые по продолжительности периоды.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%81%D0%B4-64925eaa-9988-495b-b290-3ad0c163c1bc',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/irr-function',
             },
         ],
         functionParameter: {
             values: { name: 'значения', detail: 'Массив или ссылка на ячейки, содержащие числа, для которых требуется подсчитать внутреннюю ставку доходности.' },
-            guess: { name: 'догадка', detail: 'A number that you guess is close to the result of IRR.' },
+            guess: { name: 'предположение', detail: 'Число, которое, по вашему предположению, близко к результату IRR.' },
         },
     },
     ISPMT: {
@@ -416,7 +421,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%86%D0%BF%D0%BB%D0%B0%D1%82-fa58adb6-9d39-4ce0-8f43-75399cea56cc',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/ispmt-function',
             },
         ],
         functionParameter: {
@@ -432,7 +437,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B4%D0%BB%D0%B8%D1%82-b3786a69-4f20-469a-94ad-33e5b90a763c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/mduration-function',
             },
         ],
         functionParameter: {
@@ -450,7 +455,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B2%D1%81%D0%B4-b020f038-7492-4fb4-93c1-35c345b53524',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/mirr-function',
             },
         ],
         functionParameter: {
@@ -465,7 +470,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D0%BC%D0%B8%D0%BD%D0%B0%D0%BB-7f1ae29b-6b92-435e-b950-ad8b190ddd2b',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/nominal-function',
             },
         ],
         functionParameter: {
@@ -479,7 +484,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%BF%D0%B5%D1%80-240535b5-6653-4d2d-bfcf-b6a38151d815',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/nper-function',
             },
         ],
         functionParameter: {
@@ -496,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%87%D0%BF%D1%81-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%BF%D1%81-8672cb67-2576-4d07-b67b-ac28acf2a568',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/npv-function',
             },
         ],
         functionParameter: {
@@ -511,7 +516,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%86%D0%B5%D0%BD%D0%B0%D0%BF%D0%B5%D1%80%D0%B2%D0%BD%D0%B5%D1%80%D0%B5%D0%B3-d7d664a8-34df-4233-8d2b-922bcf6a69e1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oddfprice-function',
             },
         ],
         functionParameter: {
@@ -532,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%B5%D1%80%D0%B2%D0%BD%D0%B5%D1%80%D0%B5%D0%B3-66bc8b7b-6501-4c93-9ce3-2fd16220fe37',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oddfyield-function',
             },
         ],
         functionParameter: {
@@ -553,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%86%D0%B5%D0%BD%D0%B0%D0%BF%D0%BE%D1%81%D0%BB%D0%BD%D0%B5%D1%80%D0%B5%D0%B3-fb657749-d200-4902-afaf-ed5445027fc4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oddlprice-function',
             },
         ],
         functionParameter: {
@@ -573,7 +578,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%BE%D1%81%D0%BB%D0%BD%D0%B5%D1%80%D0%B5%D0%B3-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%BE%D1%81%D0%BB%D0%BD%D0%B5%D1%80%D0%B5%D0%B3-c873d088-cf40-435f-8d41-c8232fee9238',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oddlyield-function',
             },
         ],
         functionParameter: {
@@ -593,7 +598,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D0%B4%D0%BB%D0%B8%D1%82-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%B4%D0%BB%D0%B8%D1%82-44f33460-5be5-4c90-b857-22308892adaf',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/pduration-function',
             },
         ],
         functionParameter: {
@@ -608,7 +613,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BB%D1%82-0214da64-9a63-4996-bc20-214433fa6441',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/pmt-function',
             },
         ],
         functionParameter: {
@@ -625,7 +630,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BE%D1%81%D0%BF%D0%BB%D1%82-c370d9e3-7749-4ca4-beea-b06c6ac95e1b',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/ppmt-function',
             },
         ],
         functionParameter: {
@@ -643,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%86%D0%B5%D0%BD%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%86%D0%B5%D0%BD%D0%B0-3ea9deac-8dfa-436f-a7c8-17ea02c21b0a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/price-function',
             },
         ],
         functionParameter: {
@@ -662,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%86%D0%B5%D0%BD%D0%B0%D1%81%D0%BA%D0%B8%D0%B4%D0%BA%D0%B0-d06ad7c1-380e-4be7-9fd9-75e3079acfd3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/pricedisc-function',
             },
         ],
         functionParameter: {
@@ -679,7 +684,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%86%D0%B5%D0%BD%D0%B0%D0%BF%D0%BE%D0%B3%D0%B0%D1%88-52c3b4da-bc7e-476a-989f-a95f675cae77',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/pricemat-function',
             },
         ],
         functionParameter: {
@@ -697,7 +702,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%81-23879d31-0e02-4321-be01-da16e8168cbd',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/pv-function',
             },
         ],
         functionParameter: {
@@ -714,7 +719,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B0-9f665657-4a7e-4bb7-a030-83fc59e748ce',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rate-function',
             },
         ],
         functionParameter: {
@@ -732,7 +737,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%BE-7a3f8b93-6611-4f81-8576-828312c9b5e5',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/received-function',
             },
         ],
         functionParameter: {
@@ -749,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%8D%D0%BA%D0%B2-%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%8D%D0%BA%D0%B2-%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B0-6f5822d8-7ef1-4233-944c-79e8172930f4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rri-function',
             },
         ],
         functionParameter: {
@@ -764,7 +769,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B0%D0%BF%D0%BB-cdb666e5-c1c6-40a7-806a-e695edc2f1c8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/sln-function',
             },
         ],
         functionParameter: {
@@ -779,7 +784,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B0%D1%81%D1%87-069f8106-b60b-4ca2-98e0-2a0f206bdb27',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/syd-function',
             },
         ],
         functionParameter: {
@@ -795,7 +800,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D0%B0%D0%B2%D0%BD%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-2ab72d90-9b4d-4efe-9fc2-0f81f2c19c8c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/tbilleq-function',
             },
         ],
         functionParameter: {
@@ -810,7 +815,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%86%D0%B5%D0%BD%D0%B0%D0%BA%D1%87%D0%B5%D0%BA-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%86%D0%B5%D0%BD%D0%B0%D0%BA%D1%87%D0%B5%D0%BA-eacca992-c29d-425a-9eb8-0513fe6035a2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/tbillprice-function',
             },
         ],
         functionParameter: {
@@ -825,7 +830,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BA%D1%87%D0%B5%D0%BA-6d381232-f4b0-4cd5-8e97-45b9c03468ba',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/tbillyield-function',
             },
         ],
         functionParameter: {
@@ -840,7 +845,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%83%D0%BE-dde4e207-f3fa-488d-91d2-66d55e861d73',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/vdb-function',
             },
         ],
         functionParameter: {
@@ -859,7 +864,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B8%D1%81%D1%82%D0%B2%D0%BD%D0%B4%D0%BE%D1%85-de1242ec-6477-445b-b11b-a303ad9adc9d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/xirr-function',
             },
         ],
         functionParameter: {
@@ -874,7 +879,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B8%D1%81%D1%82%D0%BD%D0%B7-1b42bbf6-370f-4532-a0eb-d67c16b664b7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/xnpv-function',
             },
         ],
         functionParameter: {
@@ -889,7 +894,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D1%85%D0%BE%D0%B4-f5f5ca43-c4bd-434f-8bd2-ed3c9727a4fe',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/yield-function',
             },
         ],
         functionParameter: {
@@ -908,7 +913,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D1%81%D0%BA%D0%B8%D0%B4%D0%BA%D0%B0-a9dbdbae-7dae-46de-b995-615faffaaed7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/yielddisc-function',
             },
         ],
         functionParameter: {
@@ -925,7 +930,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%BE%D0%B3%D0%B0%D1%88-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D1%85%D0%BE%D0%B4%D0%BF%D0%BE%D0%B3%D0%B0%D1%88-ba7d1809-0d33-4bcb-96c7-6c56ec62ef6f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/yieldmat-function',
             },
         ],
         functionParameter: {

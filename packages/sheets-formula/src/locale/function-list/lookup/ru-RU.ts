@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B0%D0%B4%D1%80%D0%B5%D1%81-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B0%D0%B4%D1%80%D0%B5%D1%81-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -55,7 +55,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D0%B8-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -68,7 +68,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%8B%D0%B1%D0%BE%D1%80-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -83,7 +83,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D1%81%D1%82%D0%BE%D0%BB%D0%B1%D1%86-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -98,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-chooserows-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -113,7 +113,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D0%BE%D0%BB%D0%B1%D0%B5%D1%86-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%BE%D0%BB%D0%B1%D0%B5%D1%86-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -126,7 +126,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%87%D0%B8%D1%81%D0%BB%D1%81%D1%82%D0%BE%D0%BB%D0%B1-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B8%D1%81%D0%BB%D1%81%D1%82%D0%BE%D0%BB%D0%B1-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -139,7 +139,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-drop-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -154,7 +154,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-expand-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -170,7 +170,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -185,7 +185,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84-%D1%82%D0%B5%D0%BA%D1%81%D1%82-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84-%D1%82%D0%B5%D0%BA%D1%81%D1%82-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -198,54 +198,44 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5-%D1%81%D0%B2%D0%BE%D0%B4%D0%BD%D0%BE%D0%B9-%D1%82%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D1%8B-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'число1', detail: 'первое' },
-            number2: { name: 'число2', detail: 'второе' },
+            dataField: { name: 'Поле данных', detail: 'Имя поля данных, содержащего извлекаемые данные.' },
+            pivotTable: { name: 'Сводная таблица', detail: 'Ссылка на ячейку, диапазон или именованный диапазон сводной таблицы.' },
+            field1: { name: 'Поле 1', detail: 'Необязательно. Имя первого поля, описывающего данные.' },
+            item1: { name: 'Элемент 1', detail: 'Необязательно. Имя первого элемента в поле.' },
         },
     },
     HLOOKUP: {
-        description: 'Выполняет поиск значения в первой строке таблицы или массив значений и возвращает значение, находящееся в том же столбце в заданной строке таблицы или массива',
-        abstract: 'Выполняет поиск значения в первой строке таблицы или массив значений и возвращает значение, находящееся в том же столбце в заданной строке таблицы или массива.',
+        description: 'Ищет значение в первой строке таблицы или массива и возвращает значение, находящееся в том же столбце в заданной строке таблицы или массива. Функция ГПР используется, когда сравниваемые значения расположены в первой строке таблицы данных, а возвращаемые — на несколько строк ниже. Если сравниваемые значения находятся в столбце слева от искомых данных, используйте функцию ВПР.',
+        abstract: 'Ищет значение в первой строке таблицы или массива и возвращает значение, находящееся в том же столбце в заданной строке таблицы или массива. Функция ГПР используется, когда сравниваемые значения расположены в первой строке таблицы данных, а возвращаемые — на несколько строк ниже. Если сравниваемые значения находятся в столбце слева от искомых данных, используйте функцию ВПР.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B3%D0%BF%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%BF%D1%80-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: 'искомое значение',
-                detail: 'Значение, которое требуется найти в первой строке таблицы. "искомое значение" может быть значением, ссылкой или текстовой строкой.',
-            },
-            tableArray: {
-                name: 'таблица',
-                detail: 'Таблица, в которой производится поиск данных. Можно использовать ссылку на диапазон или имя диапазона.',
-            },
-            rowIndexNum: {
-                name: 'номер строки',
-                detail: 'Номер строки в аргументе "таблица", из которой будет возвращено соответствующее значение.',
-            },
-            rangeLookup: {
-                name: 'интервальный просмотр',
-                detail: 'Логическое значение, которое определяет, какое соответствие должна искать функция ГПР — точное или приблизительное.',
-            },
+            lookupValue: { name: 'искомое значение', detail: 'Обязательно. Значение, которое требуется найти в первой строке таблицы. "Искомое_значение" может быть значением, ссылкой или текстовой строкой.' },
+            tableArray: { name: 'таблица', detail: 'Обязательно. Таблица, в которой производится поиск данных. Можно использовать ссылку на диапазон или имя диапазона. Значения в первой строке аргумента "таблица" могут быть текстом, числами или логическими значениями. Если аргумент "интервальный_просмотр" имеет значение ИСТИНА, то значения в первой строке аргумента "таблица" должны быть расположены в возрастающем порядке: ...-2, -1, 0, 1, 2, ..., A-Z, ЛОЖЬ, ИСТИНА; в противном случае функция ГПР может выдать неправильный результат. Если аргумент "интервальный_просмотр" имеет значение ЛОЖЬ, таблица может быть не отсортирована. В текстовых строках регистр букв не учитывается. Значения сортируются слева направо по возрастанию. Дополнительные сведения см. в разделе Сортировка данных в диапазоне или таблице .' },
+            rowIndexNum: { name: 'номер строки', detail: 'Обязательно. Номер строки в аргументе "таблица", из которой будет возвращено соответствующее значение. Если значение аргумента "номер_строки" равно 1, возвращается значение из первой строки аргумента "таблица", если оно равно 2 — из второй строки и т. д. Если значение аргумента "номер_строки" меньше 1, функция ГПР возвращает значение ошибки #ЗНАЧ!; если оно больше, чем количество строк в аргументе "таблица", возвращается значение ошибки #ССЫЛ!.' },
+            rangeLookup: { name: 'интервальный просмотр', detail: 'Дополнительные. Логическое значение, которое определяет, какое соответствие должна искать функция ГПР — точное или приблизительное. Если этот аргумент имеет значение ИСТИНА или опущен, возвращается приблизительное соответствие; при отсутствии точного соответствия возвращается наибольшее из значений, меньших, чем "искомое_значение". Если этот аргумент имеет значение ЛОЖЬ, функция ГПР ищет точное соответствие. Если найти его не удается, возвращается значение ошибки #Н/Д.' },
         },
     },
     HSTACK: {
-        description: 'Добавляет массивы последовательно по горизонтали, чтобы вернуть больший массив',
-        abstract: 'Добавляет массивы последовательно по горизонтали, чтобы вернуть больший массив',
+        description: 'Добавляет массивы последовательно по горизонтали, чтобы вернуть больший массив.',
+        abstract: 'Добавляет массивы последовательно по горизонтали, чтобы вернуть больший массив.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D1%81%D1%82%D0%BE%D0%BB%D0%B1%D0%B8%D0%BA-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'массив', detail: 'Массивы, которые нужно добавить.' },
-            array2: { name: 'массив', detail: 'Массивы, которые нужно добавить.' },
+            array1: { name: 'массив', detail: 'Максимальное число строк из каждого аргумента массива.' },
+            array2: { name: 'массив', detail: 'Объединенное число всех столбцов из каждого аргумента массива.' },
         },
     },
     HYPERLINK: {
@@ -254,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=ru',
+                url: 'https://support.google.com/docs/answer/3093313?hl=ru',
             },
         ],
         functionParameter: {
@@ -263,12 +253,12 @@ const locale: typeof enUS = {
         },
     },
     IMAGE: {
-        description: 'Вставляет изображения в ячейки из источника вместе с замещающим текстом',
-        abstract: 'Вставляет изображения в ячейки из источника вместе с замещающим текстом',
+        description: 'Функция ИЗОБРАЖЕНИЕ вставляет изображения в ячейки из источника вместе с замещающим текстом. Затем вы можете перемещать и изменять ячейки, выполнять сортировку и фильтрацию, а также работать с изображениями в таблице Excel. Используйте эту функцию для визуального улучшения списков данных, например перечней, игр, сотрудников и математических концепций.',
+        abstract: 'Функция ИЗОБРАЖЕНИЕ вставляет изображения в ячейки из источника вместе с замещающим текстом. Затем вы можете перемещать и изменять ячейки, выполнять сортировку и фильтрацию, а также работать с изображениями в таблице Excel. Используйте эту функцию для визуального улучшения списков данных, например перечней, игр, сотрудников и математических концепций.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -285,7 +275,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B8%D0%BD%D0%B4%D0%B5%D0%BA%D1%81-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B8%D0%BD%D0%B4%D0%B5%D0%BA%D1%81-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -301,7 +291,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B2%D1%81%D1%81%D1%8B%D0%BB-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -315,7 +305,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -339,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D0%B8%D1%81%D0%BA%D0%BF%D0%BE%D0%B7-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -354,7 +344,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D0%BC%D0%B5%D1%89-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%BC%D0%B5%D1%89-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -371,7 +361,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -384,7 +374,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%87%D1%81%D1%82%D1%80%D0%BE%D0%BA-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D1%81%D1%82%D1%80%D0%BE%D0%BA-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -397,12 +387,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D1%80%D0%B2-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D1%80%D0%B2-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'число1', detail: 'первое' },
-            number2: { name: 'число2', detail: 'второе' },
+            progId: { name: 'Идентификатор программы', detail: 'Идентификатор установленной локально надстройки автоматизации COM.' },
+            server: { name: 'Сервер', detail: 'Имя сервера надстройки; для локального сервера используйте пустую строку.' },
+            topic1: { name: 'Тема 1', detail: 'Первая строка, задающая получаемые данные реального времени.' },
+            topic2: { name: 'Тема 2', detail: 'Необязательно. Дополнительные строки, задающие данные реального времени.' },
         },
     },
     SORT: {
@@ -411,7 +403,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%BE%D1%80%D1%82-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -427,7 +419,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D0%BE%D1%80%D1%82%D0%BF%D0%BE-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%BE%D1%80%D1%82%D0%BF%D0%BE-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -444,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-take-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -459,7 +451,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-tocol-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -474,7 +466,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%81%D1%82%D1%80%D0%BE%D0%BA%D1%83-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -489,7 +481,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%82%D1%80%D0%B0%D0%BD%D1%81%D0%BF-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -502,7 +494,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%83%D0%BD%D0%B8%D0%BA-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -517,7 +509,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D0%BF%D1%80-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -545,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%81%D1%82%D0%BE%D0%BB%D0%B1%D0%B8%D0%BA-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -559,7 +551,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-wrapcols-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -574,7 +566,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-wraprows-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -589,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80x-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -619,7 +611,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D0%B8%D1%81%D0%BA%D0%BF%D0%BE%D0%B7x-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

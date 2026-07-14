@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/asc-%E5%87%BD%E6%95%B0-0b6abf1c-c663-4004-a964-ebc00b723266',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/asc-function',
             },
         ],
         functionParameter: {
@@ -36,7 +36,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/arraytotext-%E5%87%BD%E6%95%B0-9cdcad46-2fa5-4c6b-ac92-14e7bc862b8b',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/arraytotext-function',
             },
         ],
         functionParameter: {
@@ -50,7 +50,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bahttext-%E5%87%BD%E6%95%B0-5ba4d0b4-abd3-4325-8d22-7a92d59aab9c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bahttext-function',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/char-%E5%87%BD%E6%95%B0-bbd249c8-b36e-4a91-8017-1c133f9b837a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/char-function',
             },
         ],
         functionParameter: {
@@ -76,7 +76,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/clean-%E5%87%BD%E6%95%B0-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/clean-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/code-%E5%87%BD%E6%95%B0-c32b692b-2ed0-4a04-bdd9-75640144b928',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/code-function',
             },
         ],
         functionParameter: {
@@ -102,7 +102,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/concat-%E5%87%BD%E6%95%B0-9b1a9a3f-94ff-41af-9736-694cbd6b4ca2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/concat-function',
             },
         ],
         functionParameter: {
@@ -116,7 +116,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/concatenate-%E5%87%BD%E6%95%B0-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/concatenate-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dbcs-%E5%87%BD%E6%95%B0-a4025e73-63d2-4958-9423-21a24794c9e5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dbcs-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dollar-%E5%87%BD%E6%95%B0-a6cd05d9-9740-4ad3-a469-8109d18ff611',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dollar-function',
             },
         ],
         functionParameter: {
@@ -157,7 +157,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/exact-%E5%87%BD%E6%95%B0-d3087698-fc15-4a15-9631-12575cf29926',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/exact-function',
             },
         ],
         functionParameter: {
@@ -171,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/find-findb-%E5%87%BD%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -186,7 +186,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/find-findb-%E5%87%BD%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -201,7 +201,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/fixed-%E5%87%BD%E6%95%B0-ffd5723c-324c-45e9-8b96-e41be2a8274a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/fixed-function',
             },
         ],
         functionParameter: {
@@ -216,7 +216,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/left-leftb-%E5%87%BD%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -230,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/left-leftb-%E5%87%BD%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -244,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/len-lenb-%E5%87%BD%E6%95%B0-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/len-lenb-%E5%87%BD%E6%95%B0-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -270,7 +270,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/lower-%E5%87%BD%E6%95%B0-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/lower-function',
             },
         ],
         functionParameter: {
@@ -283,7 +283,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -298,7 +298,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -327,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/numbervalue-%E5%87%BD%E6%95%B0-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/numbervalue-function',
             },
         ],
         functionParameter: {
@@ -342,12 +342,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/phonetic-%E5%87%BD%E6%95%B0-9a329dac-0c0f-42f8-9a55-639086988554',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/phonetic-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '參照', detail: '包含要擷取之注音文字的文字、範圍或參照。' },
         },
     },
     PROPER: {
@@ -356,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/proper-%E5%87%BD%E6%95%B0-52a5a283-e8b2-49be-8506-b2887b889f94',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/proper-function',
             },
         ],
         functionParameter: {
@@ -364,17 +363,17 @@ const locale: typeof enUS = {
         },
     },
     REGEXEXTRACT: {
-        description: '根據規則運算式擷取第一個符合規則的字串。',
-        abstract: '根據規則運算式擷取第一個符合規則的字串。',
+        description: '根據規則運算式擷取第一個符合規則的子字串。',
+        abstract: '根據規則運算式擷取第一個符合規則的子字串。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=zh-Hant',
+                url: 'https://support.google.com/docs/answer/3098244?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '輸入文字' },
-            regularExpression: { name: '規則運算式', detail: '指定規則運算式，系統就會傳回 text 中第一個符合此運算式的字串。' },
+            text: { name: '文字', detail: '輸入文字。' },
+            regularExpression: { name: '規則運算式', detail: '指定規則運算式，系統就會傳回 text 中第一個符合此運算式的子字串。' },
         },
     },
     REGEXMATCH: {
@@ -383,7 +382,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=zh-Hant',
+                url: 'https://support.google.com/docs/answer/3098292?hl=zh-Hant',
             },
         ],
         functionParameter: {
@@ -397,7 +396,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=zh-Hant',
+                url: 'https://support.google.com/docs/answer/3098245?hl=zh-Hant',
             },
         ],
         functionParameter: {
@@ -412,7 +411,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -428,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -444,7 +443,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/rept-%E5%87%BD%E6%95%B0-04c4d778-e712-43b4-9c15-d656582bb061',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/rept-function',
             },
         ],
         functionParameter: {
@@ -458,7 +457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/right-rightb-%E5%87%BD%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -472,7 +471,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/right-rightb-%E5%87%BD%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -486,7 +485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/search-searchb-%E5%87%BD%E6%95%B0-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -501,7 +500,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/search-searchb-%E5%87%BD%E6%95%B0-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -516,7 +515,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/substitute-%E5%87%BD%E6%95%B0-6434944e-a904-4336-a9b0-1e58df3bc332',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/substitute-function',
             },
         ],
         functionParameter: {
@@ -532,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/t-%E5%87%BD%E6%95%B0-fb83aeec-45e7-4924-af95-53e073541228',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/t-function',
             },
         ],
         functionParameter: {
@@ -545,7 +544,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/text-%E5%87%BD%E6%95%B0-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/text-function',
             },
         ],
         functionParameter: {
@@ -559,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/textafter-%E5%87%BD%E6%95%B0-c8db2546-5b51-416a-9690-c7e6722e90b4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/textafter-function',
             },
         ],
         functionParameter: {
@@ -577,7 +576,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/textbefore-%E5%87%BD%E6%95%B0-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/textbefore-function',
             },
         ],
         functionParameter: {
@@ -595,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/textjoin-%E5%87%BD%E6%95%B0-357b449a-ec91-49d0-80c3-0e8fc845691c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/textjoin-function',
             },
         ],
         functionParameter: {
@@ -611,7 +610,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/textsplit-%E5%87%BD%E6%95%B0-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/textsplit-function',
             },
         ],
         functionParameter: {
@@ -629,7 +628,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/trim-%E5%87%BD%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479f9',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/trim-function',
             },
         ],
         functionParameter: {
@@ -642,7 +641,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/unichar-%E5%87%BD%E6%95%B0-ffeb64f5-f131-44c6-b332-5cd72f0659b8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/unichar-function',
             },
         ],
         functionParameter: {
@@ -655,7 +654,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/unicode-%E5%87%BD%E6%95%B0-adb74aaa-a2a5-4dde-aff6-966e4e81f16f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/unicode-function',
             },
         ],
         functionParameter: {
@@ -668,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/upper-%E5%87%BD%E6%95%B0-c11f29b3-d1a3-4537-8df6-04d0049963d6',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/upper-function',
             },
         ],
         functionParameter: {
@@ -681,7 +680,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/value-%E5%87%BD%E6%95%B0-257d0108-07dc-437d-ae1c-bc2d3953d8c2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/value-function',
             },
         ],
         functionParameter: {
@@ -694,7 +693,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/valuetotext-%E5%87%BD%E6%95%B0-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/valuetotext-function',
             },
         ],
         functionParameter: {
@@ -708,12 +707,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/call-%E5%87%BD%E6%95%B0-32d58445-e646-4ffd-8d5e-b45077a5e995',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/call-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: '模組文字', detail: '包含程序的動態連結程式庫 (DLL) 名稱。' },
+            procedure: { name: '程序', detail: 'DLL 中的程序名稱或序號。' },
+            typeText: { name: '類型文字', detail: '指定引數與傳回值資料類型的文字。' },
+            argument1: { name: '引數 1', detail: '選用。傳遞給程序的第一個引數。' },
         },
     },
     EUROCONVERT: {
@@ -724,12 +725,15 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/euroconvert-%E5%87%BD%E6%95%B0-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/euroconvert-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數字', detail: '要換算的貨幣值。' },
+            source: { name: '來源貨幣', detail: '來源貨幣代碼。' },
+            target: { name: '目標貨幣', detail: '目標貨幣代碼。' },
+            fullPrecision: { name: '完整精確度', detail: '控制是否依貨幣特定規則四捨五入的邏輯值。' },
+            triangulationPrecision: { name: '三角換算精確度', detail: '選用。透過歐元進行中間換算時使用的有效位數。' },
         },
     },
     REGISTER_ID: {
@@ -738,12 +742,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/register-id-%E5%87%BD%E6%95%B0-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/register-id-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: '模組文字', detail: '包含程序的 DLL 或程式碼資源名稱。' },
+            procedure: { name: '程序', detail: '程序名稱或序號。' },
+            typeText: { name: '類型文字', detail: '選用。指定引數與傳回值資料類型的文字。' },
         },
     },
 };

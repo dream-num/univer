@@ -23,12 +23,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cubekpimember-%E9%96%A2%E6%95%B0-744608bf-2c62-42cd-b67a-a56109f4b03b',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cubekpimember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: '接続', detail: '必須。 キューブへの接続名を表す文字列です。' },
+            kpiName: { name: 'Kpi_name', detail: '必須。 キューブ内の KPI の名前を表す文字列です。' },
+            kpiProperty: { name: 'Kpi_property', detail: '必須。 返される KPI コンポーネントです。次のいずれかを指定できます。' },
+            caption: { name: 'キャプション', detail: 'オプション。 KPI 名および KPI のプロパティの代わりにセルに表示される代替テキストです。' },
         },
     },
     CUBEMEMBER: {
@@ -37,26 +39,28 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cubemember-%E9%96%A2%E6%95%B0-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cubemember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: '接続', detail: '必須。 キューブへの接続名を表す文字列です。' },
+            memberExpression: { name: 'Member_expression', detail: '必須。 キューブの一意のメンバーを表す多次元式 (MDX) の文字列です。 セル範囲または配列定数として指定された組をメンバー式に指定できます。' },
+            caption: { name: 'キャプション', detail: 'オプション。 定義されている場合、キューブのキャプションの代わりにセルに表示される文字列です。 組が返される場合、組の最後のメンバーのキャプションが使用されます。' },
         },
     },
     CUBEMEMBERPROPERTY: {
-        description: 'キューブ内のメンバー プロパティの値を返します。 メンバー名がキューブ内に存在することを確認し、このメンバーの特定のプロパティを取得するために使用します。',
-        abstract: 'キューブ内のメンバー プロパティの値を返します。 メンバー名がキューブ内に存在することを確認し、このメンバーの特定のプロパティを取得するために使用します。',
+        description: 'Excel の Cube 関数の 1 つである CUBEMEMBERPROPERTY 関数 は、キューブからメンバー プロパティの値を返します。 メンバー名がキューブ内に存在することを確認し、このメンバーの特定のプロパティを取得するために使用します。',
+        abstract: 'Excel の Cube 関数の 1 つである CUBEMEMBERPROPERTY 関数 は、キューブからメンバー プロパティの値を返します。 メンバー名がキューブ内に存在することを確認し、このメンバーの特定のプロパティを取得するために使用します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cubememberproperty-%E9%96%A2%E6%95%B0-001e57d6-b35a-49e5-abcd-05ff599e8951',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cubememberproperty-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: '接続', detail: '必須。 キューブへの接続名を表す文字列です。' },
+            memberExpression: { name: 'Member_expression', detail: '必須。 キューブのメンバーを表す多次元式 (MDX) の文字列です。' },
+            property: { name: 'プロパティ', detail: '必須。 返されるプロパティ名を表す文字列またはプロパティ名を含むセルへの参照を指定します。' },
         },
     },
     CUBERANKEDMEMBER: {
@@ -65,12 +69,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cuberankedmember-%E9%96%A2%E6%95%B0-07efecde-e669-4075-b4bf-6b40df2dc4b3',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cuberankedmember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: '接続', detail: '必須。 キューブへの接続名を表す文字列です。' },
+            setExpression: { name: 'Set_expression', detail: '必須。 "{[アイテム 1].子供}" などのセット式を表す文字列です。 CUBESET 関数、または CUBESET 関数を格納するセルへの参照も指定できます。' },
+            rank: { name: 'ランク', detail: '必須。 返される 1 番上の値を指定する整数値です。 ランクの値が 1 の場合、1 番上の値が返されます。ランクの値が 2 の場合、上から 2 番目の値が返されます。 上位 5 番目までの値を返す場合は、CUBERANKEDMEMBER 関数を 5 回使い、それぞれに 1 から 5 の異なるランクを指定します。' },
+            caption: { name: 'キャプション', detail: 'オプション。 定義されている場合、キューブのキャプションの代わりにセルに表示される文字列です。' },
         },
     },
     CUBESET: {
@@ -79,12 +85,15 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cubeset-%E9%96%A2%E6%95%B0-5b2146bd-62d6-4d04-9d8f-670e993ee1d9',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cubeset-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: '接続', detail: '必須。 キューブへの接続名を表す文字列です。' },
+            setExpression: { name: 'Set_expression', detail: '必須。 メンバーまたは組のセットを表すセット式の文字列です。 セット内の 1 つ以上のメンバー、組、またはセットを含む Excel 範囲へのセル参照を指定することもできます。' },
+            caption: { name: 'キャプション', detail: 'オプション。 定義されている場合、キューブのキャプションの代わりにセルに表示される文字列です。' },
+            sortOrder: { name: 'Sort_order', detail: 'オプション。 実行する並べ替えの種類です (存在する場合)。次のいずれかを指定できます。' },
+            sortBy: { name: 'Sort_by', detail: 'オプション。 並べ替えの基準となる値を表す文字列です。 たとえば、最も販売額の多い都市を見つけるには、セット式を都市のセットに設定し、並べ替えキーを販売メジャーに設定します。 最も人口の多い都市を見つけるには、セット式を都市のセットに設定し、並べ替えキーを人口メジャーに設定します。 並べ替え順序に並べ替えキーが必要で、並べ替えキーが省略されている場合は、エラー値 #VALUE! が返されます。' },
         },
     },
     CUBESETCOUNT: {
@@ -93,12 +102,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cubesetcount-%E9%96%A2%E6%95%B0-c4c2a438-c1ff-4061-80fe-982f2d705286',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cubesetcount-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            set: { name: '設定', detail: '必須。 CUBESET 関数で定義されたセットを表す Microsoft Office Excel の式を表す文字列です。 CUBESET 関数、または CUBESET 関数を格納するセルへの参照も指定できます。' },
         },
     },
     CUBEVALUE: {
@@ -107,12 +115,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/cubevalue-%E9%96%A2%E6%95%B0-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/cubevalue-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: '接続', detail: '必須。 キューブへの接続名を表す文字列です。' },
+            memberExpression: { name: 'Member_expression', detail: 'オプション。 キューブ内のメンバーまたは組を表す多次元式 (MDX) の文字列です。 または、メンバー式は CUBESET 関数で定義したセットでもかまいません。 メンバー式をスライサーとして使用して、合計値が返されるキューブの部分を定義します。 メンバー式でメジャーが指定されない場合は、そのキューブの既定のメジャーが使用されます。' },
         },
     },
 };

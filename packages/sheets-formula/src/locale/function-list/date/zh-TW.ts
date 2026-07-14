@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/date-%E5%87%BD%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -38,13 +38,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/datedif-%E5%87%BD%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日期', detail: '代表指定期間的第一個或開始日期的日期。' },
-            endDate: { name: '結束日期', detail: '代表期間最後一個或結束日期的日期。' },
-            method: { name: '資訊類型', detail: '要傳回的資訊類型' },
+            startDate: { name: '開始日期', detail: '代表某一時期的第一個或起始日期的日期。 日期可以以引號內的文字字串輸入，例如「2001/1/30」 () ，序號 (例如36921（代表2001年1月30日），如果你使用1900日期系統) ，也可以作為其他公式或函式的結果，例如DATEVALUE (「2001/1/30」) ) (。' },
+            endDate: { name: '結束日期', detail: '代表該時期的最後或結束日期的日期。' },
+            unit: { name: 'Unit', detail: '您希望回傳的資訊類型，其中： 單位****回傳 「 Y 」「該期間的完整年數。」 M 「該期間內的完整月份數。」 D 「該期間的天數。」 MD：「 start_date和end_date天的差別。 日期中的月和年都會被忽略。 重要： 我們不建議使用「多元醫學博士」這個論點，因為已知有其限制。 請參考下方已知問題章節。」 YM 「start_date月和end_date月的差異。 日期的日期和年份被忽略」「 YD 」start_date日與end_date日的差異。 日期中的年會被忽略。' },
         },
     },
     DATEVALUE: {
@@ -53,7 +53,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/datevalue-%E5%87%BD%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -66,7 +66,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/day-%E5%87%BD%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/days-%E5%87%BD%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/days-function',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/days360-%E5%87%BD%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/edate-%E5%87%BD%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -122,7 +122,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/eomonth-%E5%87%BD%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -131,17 +131,17 @@ const locale: typeof enUS = {
         },
     },
     EPOCHTODATE: {
-        description: '將 Unix Epoch 紀元時間戳記 (以秒、毫秒或微秒為單位) 轉換為世界標準時間 (UTC) 的日期時間格式',
-        abstract: '將 Unix Epoch 紀元時間戳記 (以秒、毫秒或微秒為單位) 轉換為世界標準時間 (UTC) 的日期時間格式',
+        description: '將 Unix Epoch 紀元時間戳記 (以秒、毫秒或微秒為單位) 轉換為世界標準時間 (UTC) 的日期時間格式。',
+        abstract: '將 Unix Epoch 紀元時間戳記 (以秒、毫秒或微秒為單位) 轉換為世界標準時間 (UTC) 的日期時間格式。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hant&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            timestamp: { name: '時間戳記', detail: '以秒、毫秒或微秒為單位的 Unix Epoch 紀元時間戳記。' },
-            unit: { name: '時間單位', detail: '時間戳記的表示單位。預設值是 1: \n1 表示以秒為單位。\n2 表示以毫秒為單位。\n3 表示以微秒為單位。' },
+            timestamp: { name: '時間戳記', detail: 'EPOCHTODATE(1655908429662,2)' },
+            unit: { name: '時間單位', detail: 'EPOCHTODATE(1655906710)' },
         },
     },
     HOUR: {
@@ -150,7 +150,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hour-%E5%87%BD%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -163,7 +163,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/isoweeknum-%E5%87%BD%E6%95%B0-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
@@ -171,53 +171,53 @@ const locale: typeof enUS = {
         },
     },
     MINUTE: {
-        description: '將序號轉換為分鐘',
-        abstract: '將序號轉換為分鐘',
+        description: '傳回時間值的分鐘數。 分鐘必須以整數指定，範圍從 0 到 59。',
+        abstract: '傳回時間值的分鐘數。 分鐘必須以整數指定，範圍從 0 到 59。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/minute-%E5%87%BD%E6%95%B0-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: '日期序號', detail: '要找的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
+            serialNumber: { name: '日期序號', detail: '必須。 這是包含要尋找之分鐘的時間。 時間可以在引號之內以文字字串輸入 (例如，"6:45 PM")，或以小數輸入 (例如 0.78125，表示 6:45 PM)，也能夠以其他公式或函數的結果輸入 (例如，TIMEVALUE("6:45 PM"))。' },
         },
     },
     MONTH: {
-        description: '傳回日期（以序列數表示）中的月份。 月份是介於 1（一月）到 12（十二月）之間的整數。 ',
-        abstract: '將序號轉換為月',
+        description: '傳回以序號代表的日期月份。 月份數必須以整數指定，範圍從 1 (1 月) 到 12 (12 月)。',
+        abstract: '傳回以序號代表的日期月份。 月份數必須以整數指定，範圍從 1 (1 月) 到 12 (12 月)。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/month-%E5%87%BD%E6%95%B0-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/month-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: '日期序號', detail: '要找的月份的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
+            serialNumber: { name: '日期序號', detail: '必須。 這是您要嘗試尋找的月份日期。 日期應該使用 DATE 函數來輸入，或是從其他公式或函數導出。 例如，使用 DATE(2008,5,23) 表示 2008 年 5 月 23 日。 如果 以文字格式輸入日期 ，則可能發生問題。' },
         },
     },
     NETWORKDAYS: {
-        description: '傳回兩個日期間的完整工作日的天數',
-        abstract: '返回兩個日期間的完整工作日的天數',
+        description: '傳回 start_date 與 end_date 間的全部工作日數。 工作天不包括週末與任何假日。 使用 NETWORKDAYS，根據某段期間內的工作天數來計算員工累積的酬勞。',
+        abstract: '傳回 start_date 與 end_date 間的全部工作日數。 工作天不包括週末與任何假日。 使用 NETWORKDAYS，根據某段期間內的工作天數來計算員工累積的酬勞。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/networkdays-%E5%87%BD%E6%95%B0-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日期', detail: '代表開始日期的日期。' },
-            endDate: { name: '結束日期', detail: '代表結束日期的日期。' },
-            holidays: { name: '假日', detail: '要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
+            startDate: { name: '開始日期', detail: '必須。 這是代表開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '必須。 這是代表結束日期的日期。' },
+            holidays: { name: '假日', detail: '可選的。 這是要從工作行事曆中排除之一個或多個日期的選擇性範圍，例如州假日和聯邦假日以及彈性假日。 此清單可以是包含日期的儲存格範圍，或是代表日期之序列值的陣列常數。' },
         },
     },
     NETWORKDAYS_INTL: {
-        description: '傳回兩個日期之間的完整工作日的天數（使用參數指明週末有幾天並指明是哪幾天）',
-        abstract: '傳回兩個日期之間的完整工作日的天數（使用參數指明週末有幾天並指明是哪幾天）',
+        description: '使用參數指出哪幾天和多少天是週末，以傳回兩個日期之間的所有工作日數。 週末和指定為假日的任何日子都不視為工作日。',
+        abstract: '使用參數指出哪幾天和多少天是週末，以傳回兩個日期之間的所有工作日數。 週末和指定為假日的任何日子都不視為工作日。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/networkdays-intl-%E5%87%BD%E6%95%B0-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -228,28 +228,28 @@ const locale: typeof enUS = {
         },
     },
     NOW: {
-        description: '傳回目前日期和時間的序號。 ',
-        abstract: '傳回目前日期和時間的序號',
+        description: '傳回目前日期和時間的序列值。 如果在輸入函數之前，儲存格格式為 [通用格式] ，則 Excel 會將儲存格格式變更為符合地區選項的日期與時間格式。 您可以使用功能區上 [常用] 索引標籤 [數值] 群組中的命令來變更儲存格的日期和時間格式。',
+        abstract: '傳回目前日期和時間的序列值。 如果在輸入函數之前，儲存格格式為 [通用格式] ，則 Excel 會將儲存格格式變更為符合地區選項的日期與時間格式。 您可以使用功能區上 [常用] 索引標籤 [數值] 群組中的命令來變更儲存格的日期和時間格式。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/now-%E5%87%BD%E6%95%B0-3337fd29-145a-4347-b2e6-2​​0c904739c46',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/now-function',
             },
         ],
         functionParameter: {
         },
     },
     SECOND: {
-        description: '將序號轉換為秒',
-        abstract: '將序號轉換為秒',
+        description: '傳回時間值的秒數。 秒是介於 0 (零) 到 59 之間的整數。',
+        abstract: '傳回時間值的秒數。 秒是介於 0 (零) 到 59 之間的整數。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/second-%E5%87%BD%E6%95%B0-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/second-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: '日期序號', detail: '要找的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
+            serialNumber: { name: '日期序號', detail: '必須。 這是包含要尋找之秒鐘的時間。 時間可以在引號之內以文字字串輸入 (例如，"6:45 PM")，或以小數輸入 (例如 0.78125，表示 6:45 PM)，也能夠以其他公式或函數的結果輸入 (例如，TIMEVALUE("6:45 PM"))。' },
         },
     },
     TIME: {
@@ -258,7 +258,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/time-%E5%87%BD%E6%95%B0-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/time-function',
             },
         ],
         functionParameter: {
@@ -273,7 +273,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/timevalue-%E5%87%BD%E6%95%B0-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -281,16 +281,16 @@ const locale: typeof enUS = {
         },
     },
     TO_DATE: {
-        description: '將指定數字轉換成日期',
-        abstract: '將指定數字轉換成日期',
+        description: '將指定數字轉換成日期。',
+        abstract: '將指定數字轉換成日期。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3094239?hl=zh-Hant&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '要轉換成日期的引數或儲存格參照。' },
+            value: { name: '值', detail: '要轉換成日期的引數或儲存格參照。 日期 IF 值 is a number or a reference to a cell containing a numeric value, TO_DATE returns 值 converted to a date, 解讀中… 值 as number of days since 30 December, Negative values are interpreted as days before this date, and fractional values indicate time of day past midnight. IF 值 is not a number or a reference to a cell containing a numeric value, TO_DATE returns 值 without modification.' },
         },
     },
     TODAY: {
@@ -299,7 +299,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/today-%E5%87%BD%E6%95%B0-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/today-function',
             },
         ],
         functionParameter: {
@@ -311,7 +311,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/weekday-%E5%87%BD%E6%95%B0-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -325,7 +325,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/weeknum-%E5%87%BD%E6%95%B0-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -339,7 +339,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/workday-%E5%87%BD%E6%95%B0-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -354,7 +354,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/workday-intl-%E5%87%BD%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/year-%E5%87%BD%E6%95%B0-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -383,7 +383,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/yearfrac-%E5%87%BD%E6%95%B0-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

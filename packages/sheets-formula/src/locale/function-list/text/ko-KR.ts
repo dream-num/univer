@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/asc-함수-0b6abf1c-c663-4004-a964-ebc00b723266',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/asc-function',
             },
         ],
         functionParameter: {
@@ -36,7 +36,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/arraytotext-함수-9cdcad46-2fa5-4c6b-ac92-14e7bc862b8b',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/arraytotext-function',
             },
         ],
         functionParameter: {
@@ -50,7 +50,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/bahttext-함수-5ba4d0b4-abd3-4325-8d22-7a92d59aab9c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bahttext-function',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/char-함수-bbd249c8-b36e-4a91-8017-1c133f9b837a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/char-function',
             },
         ],
         functionParameter: {
@@ -76,7 +76,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/clean-함수-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/clean-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/code-함수-c32b692b-2ed0-4a04-bdd9-75640144b928',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/code-function',
             },
         ],
         functionParameter: {
@@ -102,7 +102,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/concat-함수-9b1a9a3f-94ff-41af-9736-694cbd6b4ca2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/concat-function',
             },
         ],
         functionParameter: {
@@ -116,7 +116,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/concatenate-함수-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/concatenate-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dbcs-함수-a4025e73-63d2-4958-9423-21a24794c9e5',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dbcs-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dollar-함수-a6cd05d9-9740-4ad3-a469-8109d18ff611',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dollar-function',
             },
         ],
         functionParameter: {
@@ -157,7 +157,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/exact-함수-d3087698-fc15-4a15-9631-12575cf29926',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/exact-function',
             },
         ],
         functionParameter: {
@@ -171,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/find-findb-함수-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -186,7 +186,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/find-findb-함수-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -201,7 +201,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/fixed-함수-ffd5723c-324c-45e9-8b96-e41be2a8274a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/fixed-function',
             },
         ],
         functionParameter: {
@@ -216,7 +216,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/left-leftb-함수-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -230,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/left-leftb-함수-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -244,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/len-lenb-함수-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/len-lenb-함수-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -270,7 +270,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/lower-함수-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/lower-function',
             },
         ],
         functionParameter: {
@@ -283,7 +283,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/mid-midb-함수-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -298,7 +298,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/mid-midb-함수-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -308,8 +308,8 @@ const locale: typeof enUS = {
         },
     },
     NUMBERSTRING: {
-        description: 'Convert numbers to Chinese strings',
-        abstract: 'Convert numbers to Chinese strings',
+        description: '숫자를 중국어 문자열로 변환합니다.',
+        abstract: '숫자를 중국어 문자열로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
@@ -317,8 +317,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The value converted to a Chinese string.' },
-            type: { name: 'type', detail: 'The type of the returned result. \n1. Chinese lowercase \n2. Chinese uppercase \n3. Reading and Writing Chinese Characters' },
+            number: { name: 'number', detail: '중국어 문자열로 변환할 값입니다.' },
+            type: { name: 'type', detail: '반환할 결과의 유형입니다. 1은 중국어 소문자, 2는 중국어 대문자, 3은 중국어 읽기 및 쓰기 문자입니다.' },
         },
     },
     NUMBERVALUE: {
@@ -327,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/numbervalue-함수-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/numbervalue-function',
             },
         ],
         functionParameter: {
@@ -342,12 +342,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/phonetic-함수-9a329dac-0c0f-42f8-9a55-639086988554',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/phonetic-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '참조', detail: '추출할 윗주 텍스트가 포함된 텍스트, 범위 또는 참조입니다.' },
         },
     },
     PROPER: {
@@ -356,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/proper-함수-52a5a283-e8b2-49be-8506-b2887b889f94',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/proper-function',
             },
         ],
         functionParameter: {
@@ -364,26 +363,26 @@ const locale: typeof enUS = {
         },
     },
     REGEXEXTRACT: {
-        description: '정규식과 일치하는 텍스트의 첫 번째 부분을 추출합니다',
-        abstract: '정규식과 일치하는 텍스트의 첫 번째 부분을 추출합니다',
+        description: '정규 표현식에 따라 첫 번째로 일치하는 하위 문자열을 추출합니다.',
+        abstract: '정규 표현식에 따라 첫 번째로 일치하는 하위 문자열을 추출합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3098244?hl=ko&sjid=10110901065663498429-AP',
+                url: 'https://support.google.com/docs/answer/3098244?hl=ko',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '입력 텍스트입니다.' },
+            text: { name: 'text', detail: '도움말: 위의 예에서는 데이터의 열 2개가 반환되며 첫 번째 열에는 \'값\', 두 번째 열에는 \'추출\'이 반환됩니다.' },
             regularExpression: { name: 'regular_expression', detail: '추출할 텍스트의 일부입니다.' },
         },
     },
     REGEXMATCH: {
-        description: '텍스트의 일부가 정규식과 일치하는지 확인합니다',
-        abstract: '텍스트의 일부가 정규식과 일치하는지 확인합니다',
+        description: '텍스트 일부가 정규 표현식과 일치하는지 여부입니다.',
+        abstract: '텍스트 일부가 정규 표현식과 일치하는지 여부입니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3098292?hl=ko&sjid=10110901065663498429-AP',
+                url: 'https://support.google.com/docs/answer/3098292?hl=ko',
             },
         ],
         functionParameter: {
@@ -392,12 +391,12 @@ const locale: typeof enUS = {
         },
     },
     REGEXREPLACE: {
-        description: '정규식을 사용하여 텍스트 문자열의 일부를 다른 텍스트 문자열로 바꿉니다',
-        abstract: '정규식을 사용하여 텍스트 문자열의 일부를 다른 텍스트 문자열로 바꿉니다',
+        description: '정규 표현식을 사용하여 텍스트 문자열의 일부를 다른 텍스트 문자열로 대체합니다.',
+        abstract: '정규 표현식을 사용하여 텍스트 문자열의 일부를 다른 텍스트 문자열로 대체합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3098245?hl=ko&sjid=10110901065663498429-AP',
+                url: 'https://support.google.com/docs/answer/3098245?hl=ko',
             },
         ],
         functionParameter: {
@@ -412,7 +411,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/replace-replaceb-함수-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -428,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/replace-replaceb-함수-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -444,7 +443,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/rept-함수-04c4d778-e712-43b4-9c15-d656582bb061',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/rept-function',
             },
         ],
         functionParameter: {
@@ -458,7 +457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/right-rightb-함수-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -472,7 +471,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/right-rightb-함수-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -486,7 +485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/search-searchb-함수-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -501,7 +500,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/search-searchb-함수-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -516,7 +515,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/substitute-함수-6434944e-a904-4336-a9b0-1e58df3bc332',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/substitute-function',
             },
         ],
         functionParameter: {
@@ -532,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/t-함수-fb83aeec-45e7-4924-af95-53e073541228',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/t-function',
             },
         ],
         functionParameter: {
@@ -545,7 +544,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/text-함수-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/text-function',
             },
         ],
         functionParameter: {
@@ -559,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/textafter-함수-c8db2546-5b51-416a-9690-c7e6722e90b4',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/textafter-function',
             },
         ],
         functionParameter: {
@@ -577,7 +576,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/textbefore-함수-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/textbefore-function',
             },
         ],
         functionParameter: {
@@ -595,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/textjoin-함수-357b449a-ec91-49d0-80c3-0e8fc845691c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/textjoin-function',
             },
         ],
         functionParameter: {
@@ -611,7 +610,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/textsplit-함수-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/textsplit-function',
             },
         ],
         functionParameter: {
@@ -629,7 +628,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/trim-함수-410388fa-c5df-49c6-b16c-9e5630b479f9',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/trim-function',
             },
         ],
         functionParameter: {
@@ -642,7 +641,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/unichar-함수-ffeb64f5-f131-44c6-b332-5cd72f0659b8',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/unichar-function',
             },
         ],
         functionParameter: {
@@ -655,7 +654,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/unicode-함수-adb74aaa-a2a5-4dde-aff6-966e4e81f16f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/unicode-function',
             },
         ],
         functionParameter: {
@@ -668,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/upper-함수-c11f29b3-d1a3-4537-8df6-04d0049963d6',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/upper-function',
             },
         ],
         functionParameter: {
@@ -681,7 +680,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/value-함수-257d0108-07dc-437d-ae1c-bc2d3953d8c2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/value-function',
             },
         ],
         functionParameter: {
@@ -694,7 +693,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/valuetotext-함수-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/valuetotext-function',
             },
         ],
         functionParameter: {
@@ -703,45 +702,51 @@ const locale: typeof enUS = {
         },
     },
     CALL: {
-        description: 'Calls a procedure in a dynamic link library or code resource',
-        abstract: 'Calls a procedure in a dynamic link library or code resource',
+        description: '동적 링크 라이브러리 또는 코드 리소스에서 프로시저를 호출합니다. 이 함수에는 두 가지 구문 형식이 있습니다. REGISTER 함수의 인수를 사용하는 이전에 등록된 코드 리소스에서만 구문 1을 사용합니다. 구문 2a 또는 2b를 사용하여 코드 리소스를 동시에 등록하고 호출합니다.',
+        abstract: '동적 링크 라이브러리 또는 코드 리소스에서 프로시저를 호출합니다. 이 함수에는 두 가지 구문 형식이 있습니다. REGISTER 함수의 인수를 사용하는 이전에 등록된 코드 리소스에서만 구문 1을 사용합니다. 구문 2a 또는 2b를 사용하여 코드 리소스를 동시에 등록하고 호출합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/call-function-32d58445-e646-4ffd-8d5e-b45077a5e995',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/call-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'Module_text', detail: '필수. 따옴표 붙은 텍스트로서, Windows용 Microsoft Excel의 프로시저를 포함하는 동적 연결 라이브러리의 이름을 지정합니다.' },
+            procedure: { name: '절차', detail: '필수. Windows용 Microsoft Excel의 DLL에서 함수의 이름을 지정하는 텍스트입니다. 모듈 정의 파일(.DEF)의 EXPORTS 문에 지정되어 있는 함수의 순서 값을 사용할 수도 있습니다. 순서 값은 텍스트 형식이 될 수 없습니다.' },
+            typeText: { name: 'Type_text', detail: '필수. 반환 값의 데이터 형식과 DLL 또는 코드 리소스의 모든 인수 데이터 형식을 지정하는 텍스트입니다. type_text의 첫째 문자는 반환 값을 지정합니다. type_text에 사용하는 코드에 대한 자세한 내용을 보려면 CALL 및 REGISTER 함수 사용 을 참조하세요. 독립 실행형 DLL이나 코드 리소스(XLL)의 경우 이 인수를 생략할 수 있습니다.' },
+            argument1: { name: 'Argument1,...', detail: '선택적. 프로시저에 전달될 인수입니다.' },
         },
     },
     EUROCONVERT: {
-        description: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
-        abstract: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        description: '숫자를 유로화로, 유로화에서 유로 회원국 통화로 또는 유로화를 매개 통화로 사용하여 숫자를 현재 유로 회원국 통화에서 다른 유로 회원국 통화로 변환(3각 변환)합니다. 변환할 수 있는 통화는 유로화를 채택한 유럽 연합(EU) 회원국들의 통화입니다. 이 함수는 EU에서 설정한 고정 변환율을 사용합니다.',
+        abstract: '숫자를 유로화로, 유로화에서 유로 회원국 통화로 또는 유로화를 매개 통화로 사용하여 숫자를 현재 유로 회원국 통화에서 다른 유로 회원국 통화로 변환(3각 변환)합니다. 변환할 수 있는 통화는 유로화를 채택한 유럽 연합(EU) 회원국들의 통화입니다. 이 함수는 EU에서 설정한 고정 변환율을 사용합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/euroconvert-function-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/euroconvert-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 통화 값 또는 값이 들어 있는 셀에 대한 참조입니다.' },
+            source: { name: '소스', detail: '필수. 원본 통화에 대한 ISO 코드에 해당하는 세 자리 문자열 또는 그 문자열이 들어 있는 셀에 대한 참조입니다. EUROCONVERT 함수에서 사용할 수 있는 통화 코드는 다음과 같습니다.' },
+            target: { name: '대상', detail: '필수. 숫자를 변환할 대상 통화의 ISO 코드에 해당하는 세 자리 문자열 또는 셀 참조입니다. ISO 코드에 대해서는 앞에 나오는 원본 통화 관련 표를 참조하세요.' },
+            fullPrecision: { name: 'Full_precision', detail: '필수. 결과를 표시하는 방법을 지정하는 논리값(TRUE, FALSE) 또는 TRUE나 FALSE 값을 나타내는 식입니다.' },
+            triangulationPrecision: { name: 'Triangulation_precision', detail: '필수. 두 유로 회원국 통화 간 변환을 할 때 매개 유로 값에 사용될 유효 자릿수를 지정하는 3보다 크거나 같은 정수입니다. 이 인수를 생략하면 Excel에서 매개 유로 값은 반올림되지 않습니다. 유로 회원국 통화를 유로화로 변환할 때 이 인수를 포함하면 유로 회원국 통화로 변환될 수 있는 매개 유로 값이 계산됩니다.' },
         },
     },
     REGISTER_ID: {
-        description: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
-        abstract: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        description: '지정한 DLL(동적 연결 라이브러리) 또는 이전에 등록한 코드 리소스의 레지스터 ID를 반환합니다. DLL이나 코드 리소스가 등록되지 않았으면 DLL이나 코드 리소스를 등록한 후 레지스터 ID를 반환합니다.',
+        abstract: '지정한 DLL(동적 연결 라이브러리) 또는 이전에 등록한 코드 리소스의 레지스터 ID를 반환합니다. DLL이나 코드 리소스가 등록되지 않았으면 DLL이나 코드 리소스를 등록한 후 레지스터 ID를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/register-id-function-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/register-id-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'Module_text', detail: '필수. Windows용 Microsoft Excel에서 함수가 포함된 DLL의 이름을 지정하는 텍스트입니다.' },
+            procedure: { name: '절차', detail: '필수. Windows용 Microsoft Excel의 DLL에서 함수의 이름을 지정하는 텍스트입니다. 모듈 정의 파일(.DEF)의 EXPORTS 문에 지정되어 있는 함수의 순서 값을 사용할 수도 있습니다. 서수 값이나 리소스 ID 번호는 텍스트 형식이 될 수 없습니다.' },
+            typeText: { name: 'Type_text', detail: '선택적. 반환 값의 데이터 형식과 DLL의 모든 인수 데이터 형식을 지정하는 텍스트입니다. type_text의 첫째 문자는 반환 값을 지정합니다. 함수나 코드 리소스가 이미 등록된 경우에는 이 인수를 생략할 수 있습니다.' },
         },
     },
 };

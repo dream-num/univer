@@ -21,7 +21,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cell-function-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -35,7 +35,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/en-us/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -48,12 +48,11 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/info-function-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/en-us/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            typeText: { name: 'Type_text', detail: 'Required. Text that specifies what type of information you want returned.' },
         },
     },
     ISBETWEEN: {
@@ -62,15 +61,15 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/10538337?hl=en&sjid=7730820672019533290-AP',
+                url: 'https://support.google.com/docs/answer/10538337?hl=en',
             },
         ],
         functionParameter: {
             valueToCompare: { name: 'value_to_compare', detail: 'The value to test as being between `lower_value` and `upper_value`.' },
             lowerValue: { name: 'lower_value', detail: 'The lower boundary of the range of values that `value_to_compare` can fall within.' },
             upperValue: { name: 'upper_value', detail: 'The upper boundary of the range of values that `value_to_compare` can fall within.' },
-            lowerValueIsInclusive: { name: 'lower_value_is_inclusive', detail: 'Whether the range of values includes the `lower_value`. By default this is TRUE.' },
-            upperValueIsInclusive: { name: 'upper_value_is_inclusive', detail: 'Whether the range of values includes the `upper_value`. By default this is TRUE.' },
+            lowerValueIsInclusive: { name: 'lower_value_is_inclusive', detail: 'Whether the range of values includes the `lower_value`. By default this is TRUE' },
+            upperValueIsInclusive: { name: 'upper_value_is_inclusive', detail: 'Whether the range of values includes the `upper_value`. By default this is TRUE' },
         },
     },
     ISBLANK: {
@@ -79,7 +78,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -87,12 +86,12 @@ const locale = {
         },
     },
     ISDATE: {
-        description: 'Returns whether a value is a date.',
-        abstract: 'Returns whether a value is a date.',
+        description: 'The ISDATE function returns whether a value is a date.',
+        abstract: 'The ISDATE function returns whether a value is a date.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/9061381?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9061381?hl=en',
             },
         ],
         functionParameter: {
@@ -100,12 +99,12 @@ const locale = {
         },
     },
     ISEMAIL: {
-        description: 'Checks if a value is a valid email address',
-        abstract: 'Checks if a value is a valid email address',
+        description: 'To check if a value is a valid email address, use the ISEMAIL function. This checks if the value follows a commonly accepted format for email addresses but doesn’t verify its existence.',
+        abstract: 'To check if a value is a valid email address, use the ISEMAIL function. This checks if the value follows a commonly accepted format for email addresses but doesn’t verify its existence.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3256503?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3256503?hl=en',
             },
         ],
         functionParameter: {
@@ -118,7 +117,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -131,7 +130,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -139,16 +138,16 @@ const locale = {
         },
     },
     ISEVEN: {
-        description: 'Returns TRUE if the number is even',
-        abstract: 'Returns TRUE if the number is even',
+        description: 'Returns TRUE if number is even, or FALSE if number is odd.',
+        abstract: 'Returns TRUE if number is even, or FALSE if number is odd.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/iseven-function-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/en-us/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: 'The value to test. If number is not an integer, it is truncated.' },
+            value: { name: 'value', detail: 'Required. The value to test. If number is not an integer, it is truncated.' },
         },
     },
     ISFORMULA: {
@@ -157,7 +156,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/isformula-function-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/en-us/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
@@ -170,7 +169,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -183,7 +182,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -196,7 +195,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -209,7 +208,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -222,7 +221,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/isodd-function-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -235,12 +234,11 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/isomitted-function-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            argument: { name: 'argument', detail: 'The value you want to test, such as a LAMBDA parameter.' },
         },
     },
     ISREF: {
@@ -249,7 +247,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -262,7 +260,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/en-us/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -275,7 +273,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3256501?hl=en&sjid=7312884847858065932-AP',
+                url: 'https://support.google.com/docs/answer/3256501?hl=en',
             },
         ],
         functionParameter: {
@@ -288,7 +286,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/n-function-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/en-us/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -301,7 +299,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/na-function-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -313,7 +311,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/sheet-function-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/en-us/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -326,7 +324,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/sheets-function-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -338,7 +336,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/type-function-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/en-us/excel/functions/type-function',
             },
         ],
         functionParameter: {

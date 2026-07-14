@@ -2088,9 +2088,9 @@ export class RichTextBuilder extends RichTextValue {
         const columns: ISectionColumnProperties[] | undefined = options.count === 1
             ? undefined
             : Array.from({ length: options.count }, (_, index) => ({
-                    width: 0,
-                    paddingEnd: index === options.count - 1 ? 0 : spacing,
-                }));
+                width: 0,
+                paddingEnd: index === options.count - 1 ? 0 : spacing,
+            }));
 
         for (const sectionBreak of sectionBreaks) {
             if (columns) {

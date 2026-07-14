@@ -1,5 +1,87 @@
 # Changelog
 
+## [1.0.0-alpha.3](https://github.com/dream-num/univer/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2026-07-14)
+
+### Bug Fixes
+
+* **design:** merge Univer-prefixed Tailwind utilities ([#7261](https://github.com/dream-num/univer/issues/7261)) ([63a807c](https://github.com/dream-num/univer/commit/63a807c9863810a46039802f96b91a6a4d022a49))
+* **sheets-ui:** reorder tabs correctly with hidden sheets ([#7259](https://github.com/dream-num/univer/issues/7259)) ([e2ece01](https://github.com/dream-num/univer/commit/e2ece01f613630c80573421061ae1507cf9dda82))
+* **docs-ui:** align IME input with cursor ([#7256](https://github.com/dream-num/univer/issues/7256)) ([d23c8df](https://github.com/dream-num/univer/commit/d23c8df3116909e5fed7c5b6f50a4530cbfa9ed1))
+* **sheets-drawing-ui:** guard getAllFloatDoms against float doms without a backing drawing param ([#7241](https://github.com/dream-num/univer/issues/7241)) ([6efa263](https://github.com/dream-num/univer/commit/6efa2634790a3e812fd07e350d2c8dcd62d053c6))
+* fix transform position ([#7253](https://github.com/dream-num/univer/issues/7253)) ([35ab8bd](https://github.com/dream-num/univer/commit/35ab8bd761dd1aae9bf8289bb25ad8b376f4e8fd))
+* fix translation text ([#7250](https://github.com/dream-num/univer/issues/7250)) ([988dcf5](https://github.com/dream-num/univer/commit/988dcf582e5f908daf0af57433fc5e290e5ab90c))
+* **docs:** preserve shape text layout fidelity ([#7245](https://github.com/dream-num/univer/issues/7245)) ([d519744](https://github.com/dream-num/univer/commit/d5197448c6f2998ac77e56af776cfa4ca6375e3e))
+* **sheets:** fix printing issues ([#7248](https://github.com/dream-num/univer/issues/7248)) ([656de76](https://github.com/dream-num/univer/commit/656de76ee422c33339753305352b47b05f0ad1a0))
+* **drawing-ui:** align chart interactions across editors ([#7247](https://github.com/dream-num/univer/issues/7247)) ([911b3ec](https://github.com/dream-num/univer/commit/911b3ec0918937f5d946746fd3bf870edf86a0b4))
+* **engine-formula:** refresh table AST cache ([#7242](https://github.com/dream-num/univer/issues/7242)) ([d2b0983](https://github.com/dream-num/univer/commit/d2b09831da877ba94a22a5f9f9482e0142063416))
+* **engine-formula:** use base field type enum in tests ([#7238](https://github.com/dream-num/univer/issues/7238)) ([6c69c9e](https://github.com/dream-num/univer/commit/6c69c9ec134d21748ea39396a43259d0aaa52fb0))
+* **sheets-formula:** preserve formula reference highlights ([#7235](https://github.com/dream-num/univer/issues/7235)) ([e0b727e](https://github.com/dream-num/univer/commit/e0b727ee32e9be88170d668aff6d3b15c5327181))
+* **docs:** stabilize structural boundary editing ([#7231](https://github.com/dream-num/univer/issues/7231)) ([eaa67e7](https://github.com/dream-num/univer/commit/eaa67e79f075d8e81c5be890c4d23730a1188477))
+* **ui:** support calendar RTL and reset ribbon dropdown state ([#7229](https://github.com/dream-num/univer/issues/7229)) ([b388ba2](https://github.com/dream-num/univer/commit/b388ba2acc7114e51dabe3fc52c37b5c103c6c79))
+* **docs:** keep table end boundary stable ([#7227](https://github.com/dream-num/univer/issues/7227)) ([363c00b](https://github.com/dream-num/univer/commit/363c00b80ab6aaff98ff79512e966c13c84109cb))
+* **docs:** stabilize TextX metadata apply ([#7226](https://github.com/dream-num/univer/issues/7226)) ([350f997](https://github.com/dream-num/univer/commit/350f9979e0a6d22810e9868e150b7900ae30fad1))
+* export menu schemas from package entries ([#7225](https://github.com/dream-num/univer/issues/7225)) ([e4c75ba](https://github.com/dream-num/univer/commit/e4c75ba7bf8986f8e1a36eba3d25e25b80519c15))
+* **docs:** stabilize structural text editing ([#7223](https://github.com/dream-num/univer/issues/7223)) ([4943935](https://github.com/dream-num/univer/commit/4943935f268f2390e605f3960124bff4c6bf1ff7))
+* **sheets-ui:** account for sheet bar scroll while dragging tabs ([#7220](https://github.com/dream-num/univer/issues/7220)) ([431dffb](https://github.com/dream-num/univer/commit/431dffbc895ef40c257c0a1d002c34baba62b618))
+* fix unit empty snapshot export ([#7219](https://github.com/dream-num/univer/issues/7219)) ([423bb61](https://github.com/dream-num/univer/commit/423bb61fc1ff5ee9a4aaa984b31ee05a3d60429a))
+* **engine-formula:** improve formula compatibility stability ([#7212](https://github.com/dream-num/univer/issues/7212)) ([124836d](https://github.com/dream-num/univer/commit/124836d4df90096501eaeb353cc688aa0a08a2e1))
+* **docs:** handle docx sample rendering ([#7213](https://github.com/dream-num/univer/issues/7213)) ([9b932fa](https://github.com/dream-num/univer/commit/9b932fa4db9028afe32215214bcf476a5df90b38))
+* improve RTL and locale-sensitive UI rendering ([#7211](https://github.com/dream-num/univer/issues/7211)) ([7b9803a](https://github.com/dream-num/univer/commit/7b9803a655c71f2341173a3952ebd8dded39c22b))
+* tidy up locale-sensitive UI behavior ([#7209](https://github.com/dream-num/univer/issues/7209)) ([b7d5bbc](https://github.com/dream-num/univer/commit/b7d5bbc80913c1add16ddda9cbcbeb26baafa07e))
+* **sheets:** fix sheets editor ([#7208](https://github.com/dream-num/univer/issues/7208)) ([80f8f50](https://github.com/dream-num/univer/commit/80f8f50e7da484bcf37dcaa1d5682b0ee50b44f9))
+* improve RTL support across UI components ([#7206](https://github.com/dream-num/univer/issues/7206)) ([6c50c50](https://github.com/dream-num/univer/commit/6c50c50604e66d71f8c209bad8f09c2138abea62))
+* **ui:** coordinate ribbon toolbar dropdown state ([#7200](https://github.com/dream-num/univer/issues/7200)) ([e4ce29a](https://github.com/dream-num/univer/commit/e4ce29ab7fad7b7fa3725c75691eb7216c888e0b))
+* **engine-render:** refine transformer controls ([#7194](https://github.com/dream-num/univer/issues/7194)) ([8646abc](https://github.com/dream-num/univer/commit/8646abc08b77395927085e788c3f5c1ad6e98d3d))
+
+### Features
+
+* **ui:** make FloatDom content insets configurable ([#7249](https://github.com/dream-num/univer/issues/7249)) ([d6d9d0b](https://github.com/dream-num/univer/commit/d6d9d0bd39eb9b78ee3dc93e18505e2d70c1c3b9))
+* **formula:** expand function metadata and locale coverage ([#7254](https://github.com/dream-num/univer/issues/7254)) ([1ddbc46](https://github.com/dream-num/univer/commit/1ddbc46734c0de333d215ffd9e81623fa45da6d9))
+* **docs:** add section and agent-friendly facade APIs ([#7243](https://github.com/dream-num/univer/issues/7243)) ([9bd60cd](https://github.com/dream-num/univer/commit/9bd60cd87919da74debb0cbee1963e4cc9f5facf))
+* **core:** add rich text container alignment ([#7237](https://github.com/dream-num/univer/issues/7237)) ([1976289](https://github.com/dream-num/univer/commit/1976289368321353776d40cf4502f0df46e01b7c))
+* **core:** add runtime enums for bases ([#7234](https://github.com/dream-num/univer/issues/7234)) ([6853617](https://github.com/dream-num/univer/commit/68536170034a425e2e626364d86ea50290435dba))
+* **core:** extend rich text facade builder ([#7232](https://github.com/dream-num/univer/issues/7232)) ([2e54bd0](https://github.com/dream-num/univer/commit/2e54bd0074e172a3c23d967b20ca8e9a861f5a0f))
+* **docs:** support default paragraph style ([#7230](https://github.com/dream-num/univer/issues/7230)) ([92f1702](https://github.com/dream-num/univer/commit/92f1702f872fe9c3cfcabb057ae2a6ba7d0f4d2a))
+* **docs-ui:** polish paragraph editing UX, localization, and RTL support ([#7228](https://github.com/dream-num/univer/issues/7228)) ([41de8dd](https://github.com/dream-num/univer/commit/41de8dd63ac1fbcac576546096626278ef84e9cc))
+* export menu schemas ([#7224](https://github.com/dream-num/univer/issues/7224)) ([3960201](https://github.com/dream-num/univer/commit/39602015047751d0118281825036180bc4e6e71e))
+* **docs-drawing-ui:** expose floating toolbar adapter items ([#7222](https://github.com/dream-num/univer/issues/7222)) ([4e66dcc](https://github.com/dream-num/univer/commit/4e66dcc45b7874fe1a1935110caf34f9556ab24f))
+* **design:** add icon button size variant ([#7221](https://github.com/dream-num/univer/issues/7221)) ([849686b](https://github.com/dream-num/univer/commit/849686be96c902bcaeba2a802714564937df041c))
+* **docs:** add chart lifecycle extension seams ([#7216](https://github.com/dream-num/univer/issues/7216)) ([fa718c3](https://github.com/dream-num/univer/commit/fa718c33943d7c51d2d2130d40503f7ef1eac0db))
+* **embed:** add shared embed runtime ([#7089](https://github.com/dream-num/univer/issues/7089)) ([6078ae8](https://github.com/dream-num/univer/commit/6078ae8a142108ae8e7f5f55f61ef96cd1ca1f44))
+* core facade f-enum add ImageSourceType ([#7202](https://github.com/dream-num/univer/issues/7202)) ([600eaf2](https://github.com/dream-num/univer/commit/600eaf2b62b9fc337337b7ae9f393ae3ea1fd45b))
+* **engine-render:** support custom range glyph width ([#7199](https://github.com/dream-num/univer/issues/7199)) ([7e13071](https://github.com/dream-num/univer/commit/7e13071958661f06c0e10884e9e3b8af9caec4a6))
+* support chart element float menu ([#7192](https://github.com/dream-num/univer/issues/7192)) ([5f15f74](https://github.com/dream-num/univer/commit/5f15f7421808fa747b5f8be4a92f40e8bf2612a9))
+* support drawing object list metadata ([#7195](https://github.com/dream-num/univer/issues/7195)) ([f58a537](https://github.com/dream-num/univer/commit/f58a5372b46ee7d06dd3e326da5f478c7dcdf487))
+* support doc type ([#7193](https://github.com/dream-num/univer/issues/7193)) ([a8c069d](https://github.com/dream-num/univer/commit/a8c069ded3818bcd044284d6522ab55c167af731))
+* **board:** support explicit locale exports ([#7182](https://github.com/dream-num/univer/issues/7182)) ([5ea2285](https://github.com/dream-num/univer/commit/5ea22853229f996ac14a04f5cdaa21b69e51cbd2))
+
+### Performance Improvements
+
+* **sheet:** optimize incremental scroll rendering ([#7207](https://github.com/dream-num/univer/issues/7207)) ([1a61313](https://github.com/dream-num/univer/commit/1a6131305533e413f7a3ab2c025ae379b4fa0893))
+
+### Other Changes (chore)
+
+* update dependencies ([#7205](https://github.com/dream-num/univer/issues/7205)) ([891bb82](https://github.com/dream-num/univer/commit/891bb825ecacfbe3712dc10661dcc4ad86623cd9))
+* **ui:** use jsdelivr for cldr emoji data downloads ([#7203](https://github.com/dream-num/univer/issues/7203)) ([9a88ba3](https://github.com/dream-num/univer/commit/9a88ba3a669a5018f248a396d9ac882be254592a))
+* update `@univerjs/icons` ([#7201](https://github.com/dream-num/univer/issues/7201)) ([14bb4b0](https://github.com/dream-num/univer/commit/14bb4b0578138fb7e7b98aa3539fed9ba18e54cf))
+* update `@univerjs/icons` ([#7198](https://github.com/dream-num/univer/issues/7198)) ([1acb1cf](https://github.com/dream-num/univer/commit/1acb1cf296b09fb0fbd64df7045df7a839825017))
+
+### Other Changes (docs)
+
+* fix facade api jsdoc inconsistencies ([#7191](https://github.com/dream-num/univer/issues/7191)) ([b8f7f6f](https://github.com/dream-num/univer/commit/b8f7f6ff64eea8ea2ea9d38918f084ee1588aebe))
+
+### Other Changes (refactor)
+
+* **base:** remove deleted snapshot fields ([#7239](https://github.com/dream-num/univer/issues/7239)) ([ccf2a8c](https://github.com/dream-num/univer/commit/ccf2a8cae8118a31804fe21171736b9fbd800ba4))
+* simplify UI compatibility helpers ([#7236](https://github.com/dream-num/univer/issues/7236)) ([abb1277](https://github.com/dream-num/univer/commit/abb1277c98944d3275a2df582ba5d41453ed13d1))
+* use interface tokens for service injection ([#7233](https://github.com/dream-num/univer/issues/7233)) ([36e17fe](https://github.com/dream-num/univer/commit/36e17fe70525fbab90fb14533486b20f1237bc4d))
+* harden custom code execution paths and remove Uniscript ([#7217](https://github.com/dream-num/univer/issues/7217)) ([20a7103](https://github.com/dream-num/univer/commit/20a71033acbb383f3597c73891ad4d94de979143))
+* **drawing:** import image IO APIs from core ([#7210](https://github.com/dream-num/univer/issues/7210)) ([3eac792](https://github.com/dream-num/univer/commit/3eac792a4f171547670f22b1ce4d31b2ea987470))
+
+### Other Changes (test)
+
+* reorganize and deduplicate service tests ([#7255](https://github.com/dream-num/univer/issues/7255)) ([b8303ad](https://github.com/dream-num/univer/commit/b8303adaf647a5a9efb482a04be701fa85b3ab8d))
+
 ## [1.0.0-alpha.2](https://github.com/dream-num/univer/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2026-07-04)
 
 ### Bug Fixes

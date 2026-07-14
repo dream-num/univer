@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-thread-comment-ui",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0-alpha.3",
     "private": false,
     "description": "Thread comment UI integration for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

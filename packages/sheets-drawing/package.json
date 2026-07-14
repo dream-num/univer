@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-drawing",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0-alpha.3",
     "private": false,
     "description": "Drawing model integration for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

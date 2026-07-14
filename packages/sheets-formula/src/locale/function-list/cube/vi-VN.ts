@@ -18,104 +18,111 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     CUBEKPIMEMBER: {
-        description: 'Trả về các thuộc tính của Chỉ số Hiệu suất Chính (KPI) và hiển thị tên KPI trong ô. KPI là một thước đo có thể đo lường để theo dõi hiệu suất của đơn vị, như tổng lợi nhuận hàng tháng hoặc sự điều chỉnh của nhân viên hàng quý.',
-        abstract: 'Trả về các thuộc tính của Chỉ số Hiệu suất Chính (KPI) và hiển thị tên KPI trong ô. KPI là một thước đo có thể đo lường để theo dõi hiệu suất của đơn vị, như tổng lợi nhuận hàng tháng hoặc sự điều chỉnh của nhân viên hàng quý.',
+        description: 'Trả về thuộc tính chỉ số hiệu suất then chốt (KPI) và hiển thị tên KPI trong ô. KPI là một số đo có thể định lượng được, chẳng hạn như lãi gộp hàng tháng hoặc số lượng nhân viên luân chuyển, dùng để theo dõi hoạt động của một tổ chức.',
+        abstract: 'Trả về thuộc tính chỉ số hiệu suất then chốt (KPI) và hiển thị tên KPI trong ô. KPI là một số đo có thể định lượng được, chẳng hạn như lãi gộp hàng tháng hoặc số lượng nhân viên luân chuyển, dùng để theo dõi hoạt động của một tổ chức.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cubekpimember-%E5%87%BD%E6%95%B0-744608bf-2c62-42cd-b67a-a56109f4b03b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cubekpimember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            connection: { name: 'Kết nối', detail: 'Yêu cầu. Chuỗi văn bản tên của kết nối tới khối.' },
+            kpiName: { name: 'Kpi_name', detail: 'Yêu cầu. Chuỗi văn bản của tên KPI trong khối.' },
+            kpiProperty: { name: 'Kpi_property', detail: 'Yêu cầu. Cấu phần KPI được trả về và có thể là một trong các dạng sau:' },
+            caption: { name: 'Chú thích', detail: 'Tùy chọn. Một chuỗi văn bản thay thế được hiển thị trong ô thay cho kpi_name và kpi_property.' },
         },
     },
     CUBEMEMBER: {
-        description: 'Trả về thành viên hoặc tuple trong tập dữ liệu. Sử dụng để xác minh thành viên hoặc tuple có tồn tại trong tập dữ liệu hay không.',
-        abstract: 'Trả về thành viên hoặc tuple trong tập dữ liệu. Sử dụng để xác minh thành viên hoặc tuple có tồn tại trong tập dữ liệu hay không.',
+        description: 'Trả về một phần tử hoặc một bộ từ khối. Dùng để xác thực rằng phần tử hoặc bộ tồn tại trong khối.',
+        abstract: 'Trả về một phần tử hoặc một bộ từ khối. Dùng để xác thực rằng phần tử hoặc bộ tồn tại trong khối.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cubemember-%E5%87%BD%E6%95%B0-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cubemember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            connection: { name: 'Kết nối', detail: 'Yêu cầu. Chuỗi văn bản tên của kết nối tới khối.' },
+            memberExpression: { name: 'Member_expression', detail: 'Yêu cầu. Một chuỗi văn bản biểu thức đa chiều (DMX) định trị một phần tử duy nhất trong khối. Theo cách khác, member_expression có thể là một bộ, được xác định như là một phạm vi ô hoặc một hằng số mảng.' },
+            caption: { name: 'Chú thích', detail: 'Tùy chọn. Một chuỗi văn bản được hiển thị trong ô thay cho chú thích từ ô, nếu như có một chú thích được xác định từ khối. Khi một bộ được trả về, chú thích được dùng là chú thích cho phần tử cuối cùng trong bộ.' },
         },
     },
     CUBEMEMBERPROPERTY: {
-        description: 'Trả về giá trị thuộc tính của thành viên trong tập dữ liệu. Sử dụng để xác minh thành viên có tồn tại trong tập dữ liệu hay không và trả về thuộc tính cụ thể của thành viên đó.',
-        abstract: 'Trả về giá trị thuộc tính của thành viên trong tập dữ liệu. Sử dụng để xác minh thành viên có tồn tại trong tập dữ liệu hay không và trả về thuộc tính cụ thể của thành viên đó.',
+        description: 'Hàm CUBEMEMBERPROPERTY , một trong các hàm Cube trong Excel, trả về giá trị của một thuộc tính phần tử từ một khối. Dùng để xác thực một tên phần tử tồn tại trong cube và trả về thuộc tính được chỉ định cho phần tử này.',
+        abstract: 'Hàm CUBEMEMBERPROPERTY , một trong các hàm Cube trong Excel, trả về giá trị của một thuộc tính phần tử từ một khối. Dùng để xác thực một tên phần tử tồn tại trong cube và trả về thuộc tính được chỉ định cho phần tử này.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cubememberproperty-%E5%87%BD%E6%95%B0-001e57d6-b35a-49e5-abcd-05ff599e8951',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cubememberproperty-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            connection: { name: 'Kết nối', detail: 'Yêu cầu. Chuỗi văn bản tên của kết nối tới khối.' },
+            memberExpression: { name: 'Member_expression', detail: 'Yêu cầu. Chuỗi văn bản biểu thức đa chiều (MDX) của một phần tử trong một khối.' },
+            property: { name: 'Tài sản', detail: 'Yêu cầu. Chuỗi văn bản tên của thuộc tính được trả về hoặc tham chiếu tới một ô có chứa tên của thuộc tính.' },
         },
     },
     CUBERANKEDMEMBER: {
-        description: 'Trả về thành viên thứ n hoặc xếp hạng trong một tập hợp. Sử dụng để trả về một hoặc nhiều phần tử trong tập hợp, như nhân viên bán hàng tốt nhất hoặc top 10 sinh viên.',
-        abstract: 'Trả về thành viên thứ n hoặc xếp hạng trong một tập hợp. Sử dụng để trả về một hoặc nhiều phần tử trong tập hợp, như nhân viên bán hàng tốt nhất hoặc top 10 sinh viên.',
+        description: 'Trả về phần tử thứ n hoặc được xếp hạng trong một tập hợp. Dùng để trả về một hoặc các thành phần trong một tập hợp, chẳng hạn như nhân viên kinh doanh đứng đầu hoặc 10 học sinh đứng đầu.',
+        abstract: 'Trả về phần tử thứ n hoặc được xếp hạng trong một tập hợp. Dùng để trả về một hoặc các thành phần trong một tập hợp, chẳng hạn như nhân viên kinh doanh đứng đầu hoặc 10 học sinh đứng đầu.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cuberankedmember-%E5%87%BD%E6%95%B0-07efecde-e669-4075-b4bf-6b40df2dc4b3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cuberankedmember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            connection: { name: 'Kết nối', detail: 'Yêu cầu. Chuỗi văn bản tên của kết nối tới khối.' },
+            setExpression: { name: 'Set_expression', detail: 'Yêu cầu. Một chuỗi văn bản của một biểu thức tập hợp, chẳng hạn như "{[Item1].children}". member_expression cũng có thể là hàm CUBESET, hoặc tham chiếu tới một ô có chứa hàm CUBESET.' },
+            rank: { name: 'Xếp hạng', detail: 'Yêu cầu. Một giá trị số nguyên chỉ rõ giá trị trên cùng cần trả về. Nếu thứ hạng là giá trị 1, nó trả về giá trị cao nhất, nếu thứ hạng là giá trị 2, nó trả về giá trị cao thứ hai, v.v. Để trả về 5 giá trị hàng đầu, hãy dùng hàm CUBERANKEDMEMBER năm lần, xác định một thứ hạng khác nhau, từ 1 đến 5, mỗi lần.' },
+            caption: { name: 'Chú thích', detail: 'Tùy chọn. Một chuỗi văn bản được hiển thị trong ô thay cho chú thích từ ô, nếu như có một chú thích được xác định từ khối.' },
         },
     },
     CUBESET: {
-        description: 'Định nghĩa một tập hợp các thành viên hoặc tuple được tính toán. Bằng cách gửi một biểu thức tập hợp tới tập dữ liệu trên máy chủ, biểu thức này tạo tập hợp và sau đó trả tập hợp đó về Microsoft Excel.',
-        abstract: 'Định nghĩa một tập hợp các thành viên hoặc tuple được tính toán. Bằng cách gửi một biểu thức tập hợp tới tập dữ liệu trên máy chủ, biểu thức này tạo tập hợp và sau đó trả tập hợp đó về Microsoft Excel.',
+        description: 'Xác định một tập hợp phần tử được tính hoặc bộ bằng cách gửi một biểu thức tập hợp tới khối trên máy chủ, tạo tập hợp rồi trả tập hợp đó về Microsoft Excel.',
+        abstract: 'Xác định một tập hợp phần tử được tính hoặc bộ bằng cách gửi một biểu thức tập hợp tới khối trên máy chủ, tạo tập hợp rồi trả tập hợp đó về Microsoft Excel.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cubeset-%E5%87%BD%E6%95%B0-5b2146bd-62d6-4d04-9d8f-670e993ee1d9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cubeset-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            connection: { name: 'Kết nối', detail: 'Yêu cầu. Chuỗi văn bản tên của kết nối tới khối.' },
+            setExpression: { name: 'Set_expression', detail: 'Yêu cầu. Một chuỗi văn bản set_expression trả về kết quả là một tập hợp các phần tử hoặc các bộ. Set_expression cũng có thể là một tham chiếu ô tới một phạm vi Excel có chứa một hoặc nhiều phần tử, bộ hoặc tập hợp được bao gồm trong tập hợp đó.' },
+            caption: { name: 'Chú thích', detail: 'Tùy chọn. Một chuỗi văn bản được hiển thị trong ô thay cho chú thích từ ô, nếu như có một chú thích được xác định.' },
+            sortOrder: { name: 'Sort_order', detail: 'Tùy chọn. Kiểu sắp xếp, nếu có, cần thực hiện và có thể là một trong các kiểu sau đây:' },
+            sortBy: { name: 'Sort_by', detail: 'Tùy chọn. Một chuỗi văn bản gồm các giá trị cần sắp xếp theo đó. Ví dụ, để có được thành phố có doanh thu lớn nhất, set_expression phải là một tập hợp các thành phố và sort_by là số đo về doanh thu. Hoặc để có được thành phố đông dân nhất, set_expression phải là một tập hợp các thành phố và sort_by là số dân. Nếu sort_order yêu cầu phải có sort_by, và sort_by được bỏ qua, thì CUBESET trả về thông báo lỗi #VALUE! .' },
         },
     },
     CUBESETCOUNT: {
-        description: 'Trả về số lượng mục trong tập hợp.',
-        abstract: 'Trả về số lượng mục trong tập hợp.',
+        description: 'Trả về số mục trong một tập hợp.',
+        abstract: 'Trả về số mục trong một tập hợp.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cubesetcount-%E5%87%BD%E6%95%B0-c4c2a438-c1ff-4061-80fe-982f2d705286',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cubesetcount-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            set: { name: 'Thiết lập', detail: 'Yêu cầu. Một chuỗi văn bản của biểu thức Microsoft Excel mà biểu thức này định trị một giá trị được xác định bởi hàm CUBESET. Tập hợp cũng có thể là hàm CUBESET, hoặc tham chiếu tới một ô có chứa hàm CUBESET.' },
         },
     },
     CUBEVALUE: {
-        description: 'Trả về giá trị tổng hợp từ tập dữ liệu.',
-        abstract: 'Trả về giá trị tổng hợp từ tập dữ liệu.',
+        description: 'Trả về một giá trị tổng hợp từ khối.',
+        abstract: 'Trả về một giá trị tổng hợp từ khối.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cubevalue-%E5%87%BD%E6%95%B0-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cubevalue-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            connection: { name: 'Kết nối', detail: 'Yêu cầu. Chuỗi văn bản tên của kết nối tới khối.' },
+            memberExpression: { name: 'Member_expression', detail: 'Tùy chọn. Một chuỗi văn bản biểu thức đa chiều (DMX) định trị một phần tử hoặc một bộ trong khối. Hoặc theo cách khác, biểu thức phần tử có thể là một tập hợp được xác định với hàm CUBESET. Hãy dùng biểu thức phần tử như một slicer để xác định phần của khối mà giá trị tổng hợp cho nó được trả về. Nếu không có số đo nào được xác định trong biểu thức phần tử, thì sẽ dùng số đo mặc định của khối đó.' },
         },
     },
-}
-;
+};
 
 export default locale;

@@ -24,6 +24,7 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Oddlyield extends BaseFunction {
+    // TODO(formula-contract): Align these bounds with the seven required arguments plus optional basis used by calculate.
     override minParams = 8;
 
     override maxParams = 9;

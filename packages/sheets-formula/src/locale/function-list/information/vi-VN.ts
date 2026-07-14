@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cell-%E5%87%BD%E6%95%B0-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/error-type-%E5%87%BD%E6%95%B0-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -45,34 +45,33 @@ const locale: typeof enUS = {
         },
     },
     INFO: {
-        description: 'Returns information about the current operating environment',
-        abstract: 'Returns information about the current operating environment',
+        description: 'Trả về thông tin về môi trường điều hành hiện thời.',
+        abstract: 'Trả về thông tin về môi trường điều hành hiện thời.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/info-function-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            typeText: { name: 'Type_text', detail: 'Yêu cầu. Văn bản chỉ rõ kiểu thông tin bạn muốn được trả về.' },
         },
     },
     ISBETWEEN: {
-        description: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác',
-        abstract: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác',
+        description: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác (lớn hơn hoặc bằng giới hạn dưới và nhỏ hơn hoặc bằng giới hạn trên; hoặc lớn hơn giới hạn dưới và nhỏ hơn giới hạn trên) hay không.',
+        abstract: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác (lớn hơn hoặc bằng giới hạn dưới và nhỏ hơn hoặc bằng giới hạn trên; hoặc lớn hơn giới hạn dưới và nhỏ hơn giới hạn trên) hay không.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/10538337?hl=vi&sjid=7730820672019533290-AP',
+                url: 'https://support.google.com/docs/answer/10538337?hl=vi',
             },
         ],
         functionParameter: {
             valueToCompare: { name: 'giá_trị_muốn_so_sánh', detail: 'Giá trị muốn kiểm tra khi nằm trong khoảng từ `giới_hạn_dưới` đến `giới_hạn_trên`.' },
             lowerValue: { name: 'giới_hạn_dưới', detail: 'Cận dưới của miền giá trị mà `giá_trị_muốn_so_sánh` có thể thuộc miền đó.' },
             upperValue: { name: 'giới_hạn_trên', detail: 'Cận trên của miền giá trị mà `giá_trị_muốn_so_sánh` có thể thuộc miền đó.' },
-            lowerValueIsInclusive: { name: 'bao_gồm_cả_giới_hạn_dưới', detail: 'Liệu miền giá trị có bao gồm `giới_hạn_trên` hay không. Theo mặc định, hàm sẽ trả về TRUE.' },
-            upperValueIsInclusive: { name: 'bao_gồm_cả_giới_hạn_trên', detail: 'Liệu miền giá trị có bao gồm `giới_hạn_trên` hay không. Theo mặc định, hàm sẽ trả về TRUE.' },
+            lowerValueIsInclusive: { name: 'bao_gồm_cả_giới_hạn_dưới', detail: 'Liệu miền giá trị có bao gồm `giới_hạn_trên` hay không. Theo mặc định, hàm sẽ trả về TRUE' },
+            upperValueIsInclusive: { name: 'bao_gồm_cả_giới_hạn_trên', detail: 'Liệu miền giá trị có bao gồm `giới_hạn_trên` hay không. Theo mặc định, hàm sẽ trả về TRUE' },
         },
     },
     ISBLANK: {
@@ -81,7 +80,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -89,12 +88,12 @@ const locale: typeof enUS = {
         },
     },
     ISDATE: {
-        description: 'xác định xem một giá trị có phải là ngày không.',
-        abstract: 'xác định xem một giá trị có phải là ngày không.',
+        description: 'Hàm ISDATE xác định xem một giá trị có phải là ngày không.',
+        abstract: 'Hàm ISDATE xác định xem một giá trị có phải là ngày không.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/9061381?hl=vi&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9061381?hl=vi',
             },
         ],
         functionParameter: {
@@ -102,16 +101,16 @@ const locale: typeof enUS = {
         },
     },
     ISEMAIL: {
-        description: 'Tra xem một giá trị có phải là địa chỉ email hợp lệ hay không bằng.',
-        abstract: 'Tra xem một giá trị có phải là địa chỉ email hợp lệ hay không bằng.',
+        description: 'Để kiểm tra xem một giá trị có phải là địa chỉ email hợp lệ hay không, hãy sử dụng hàm ISEMAIL. Hàm này kiểm tra xem giá trị có tuân theo định dạng thường được chấp nhận cho địa chỉ email hay không nhưng không xác minh sự tồn tại của địa chỉ đó.',
+        abstract: 'Để kiểm tra xem một giá trị có phải là địa chỉ email hợp lệ hay không, hãy sử dụng hàm ISEMAIL. Hàm này kiểm tra xem giá trị có tuân theo định dạng thường được chấp nhận cho địa chỉ email hay không nhưng không xác minh sự tồn tại của địa chỉ đó.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3256503?hl=vi&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3256503?hl=vi',
             },
         ],
         functionParameter: {
-            value: { name: 'Giá trị', detail: 'Giá trị được xác minh là một địa chỉ email.' },
+            value: { name: 'Giá trị', detail: 'Hàm ISEMAIL("johndoe@yourname.com")' },
         },
     },
     ISERR: {
@@ -120,7 +119,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -133,7 +132,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -146,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/iseven-%E5%87%BD%E6%95%B0-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
@@ -159,7 +158,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/isformula-%E5%87%BD%E6%95%B0-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
@@ -172,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -185,7 +184,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -198,7 +197,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -211,7 +210,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/isodd-%E5%87%BD%E6%95%B0-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -232,17 +231,16 @@ const locale: typeof enUS = {
         },
     },
     ISOMITTED: {
-        description: 'Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE',
-        abstract: 'Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE',
+        description: 'Kiểm tra xem giá trị trong LAMBDA bị thiếu hay không và trả về TRUE hoặc FALSE.',
+        abstract: 'Kiểm tra xem giá trị trong LAMBDA bị thiếu hay không và trả về TRUE hoặc FALSE.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/isomitted-function-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            argument: { name: 'Tranh luận', detail: 'Giá trị bạn muốn kiểm tra, chẳng hạn như tham số LAMBDA.' },
         },
     },
     ISREF: {
@@ -251,7 +249,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -264,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -277,11 +275,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3256501?hl=vi&sjid=7312884847858065932-AP',
+                url: 'https://support.google.com/docs/answer/3256501?hl=vi',
             },
         ],
         functionParameter: {
-            value: { name: 'Giá trị', detail: 'Giá trị được xác minh là một URL.' },
+            value: { name: 'Giá trị', detail: 'ISURL("www.google.com")' },
         },
     },
     N: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/n-%E5%87%BD%E6%95%B0-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/na-%E5%87%BD%E6%95%B0-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -315,7 +313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/sheet-%E5%87%BD%E6%95%B0-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -328,7 +326,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/sheets-%E5%87%BD%E6%95%B0-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -340,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/type-%E5%87%BD%E6%95%B0-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/type-function',
             },
         ],
         functionParameter: {

@@ -18,183 +18,183 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     DAVERAGE: {
-        description: '선택한 데이터베이스 항목의 평균을 반환합니다',
-        abstract: '선택한 데이터베이스 항목의 평균을 반환합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 값의 평균을 계산합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 값의 평균을 계산합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/daverage-함수-a6a2d5ac-4b4b-48cd-a1d8-7b37834e5aee',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/daverage-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '는 목록 또는 데이터베이스를 구성하는 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '함수에 사용되는 열을 나타냅니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '은 지정한 조건을 포함하는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DCOUNT: {
-        description: '데이터베이스에서 숫자가 있는 셀의 개수를 계산합니다',
-        abstract: '데이터베이스에서 숫자가 있는 셀의 개수를 계산합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자가 있는 셀의 개수를 계산합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자가 있는 셀의 개수를 계산합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dcount-함수-c1fc7b93-fb0d-4d8d-97db-8d5f076eaeb1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dcount-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DCOUNTA: {
-        description: '데이터베이스에서 비어 있지 않은 셀의 개수를 계산합니다',
-        abstract: '데이터베이스에서 비어 있지 않은 셀의 개수를 계산합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 셀 중 비어 있지 않은 셀의 개수를 계산합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 셀 중 비어 있지 않은 셀의 개수를 계산합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dcounta-함수-00232a6d-5a66-4a01-a25b-c1653fda1244',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dcounta-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '선택적. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DGET: {
-        description: '지정한 조건과 일치하는 단일 레코드를 데이터베이스에서 추출합니다',
-        abstract: '지정한 조건과 일치하는 단일 레코드를 데이터베이스에서 추출합니다',
+        description: '목록이나 데이터베이스의 열에서 지정한 조건에 맞는 하나의 값을 추출합니다.',
+        abstract: '목록이나 데이터베이스의 열에서 지정한 조건에 맞는 하나의 값을 추출합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dget-함수-455568bf-4eef-45f7-90f0-ec250d00892e',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dget-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DMAX: {
-        description: '선택한 데이터베이스 항목에서 최대값을 반환합니다',
-        abstract: '선택한 데이터베이스 항목에서 최대값을 반환합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 가장 큰 값을 반환합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 가장 큰 값을 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dmax-함수-f4e8209d-8958-4c3d-a1ee-6351665d41c2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dmax-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DMIN: {
-        description: '선택한 데이터베이스 항목에서 최소값을 반환합니다',
-        abstract: '선택한 데이터베이스 항목에서 최소값을 반환합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 가장 작은 값을 반환합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 가장 작은 값을 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dmin-함수-4ae6f1d9-1f26-40f1-a783-6dc3680192a3',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dmin-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DPRODUCT: {
-        description: '데이터베이스에서 조건과 일치하는 레코드의 특정 필드에 있는 값을 곱합니다',
-        abstract: '데이터베이스에서 조건과 일치하는 레코드의 특정 필드에 있는 값을 곱합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 값을 곱합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 값을 곱합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dproduct-함수-4f96b13e-d49c-47a7-b769-22f6d017cb31',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dproduct-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DSTDEV: {
-        description: '선택한 데이터베이스 항목의 표본을 기준으로 표준 편차를 추정합니다',
-        abstract: '선택한 데이터베이스 항목의 표본을 기준으로 표준 편차를 추정합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 표본을 기반으로 한 모집단의 표준 편차를 추정합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 표본을 기반으로 한 모집단의 표준 편차를 추정합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dstdev-함수-026b8c73-616d-4b5e-b072-241871c4ab96',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dstdev-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DSTDEVP: {
-        description: '선택한 데이터베이스 항목의 전체 모집단을 기준으로 표준 편차를 계산합니다',
-        abstract: '선택한 데이터베이스 항목의 전체 모집단을 기준으로 표준 편차를 계산합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 전체 모집단을 기반으로 한 모집단의 표준 편차를 계산합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 전체 모집단을 기반으로 한 모집단의 표준 편차를 계산합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dstdevp-함수-04b78995-da03-4813-bbd9-d74fd0f5d94b',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dstdevp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DSUM: {
-        description: '조건과 일치하는 데이터베이스의 레코드 필드 열에 있는 숫자를 더합니다',
-        abstract: '조건과 일치하는 데이터베이스의 레코드 필드 열에 있는 숫자를 더합니다',
+        description: '목록 또는 데이터베이스에서 DSUM은 지정된 조건과 일치하는 레코드의 필드(열)에 있는 숫자의 합계를 제공합니다.',
+        abstract: '목록 또는 데이터베이스에서 DSUM은 지정된 조건과 일치하는 레코드의 필드(열)에 있는 숫자의 합계를 제공합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dsum-함수-53181285-0c4b-4f5a-aaa3-529a322be41b',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dsum-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 목록 또는 데이터베이스를 구성하는 셀 범위입니다. 데이터베이스는 관련 정보의 행이 레코드 이고 데이터 열이 필드 인 관련 데이터의 목록입니다. 목록의 첫 번째 행에는 해당 열마다 레이블이 포함됩니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. 예를 들어 "Age" 또는 "Yield"와 같이 큰따옴표 사이에 묶인 열 레이블을 지정합니다. 또는 목록 내의 열 위치를 나타내는 숫자(따옴표 제외)를 지정할 수 있습니다( 예: 첫 번째 열의 경우 1 , 두 번째 열의 경우 2 등).' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 포함된 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DVAR: {
-        description: '선택한 데이터베이스 항목의 표본을 기준으로 분산을 추정합니다',
-        abstract: '선택한 데이터베이스 항목의 표본을 기준으로 분산을 추정합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 표본을 기반으로 한 모집단의 분산을 추정합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 표본을 기반으로 한 모집단의 분산을 추정합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dvar-함수-d6747ca9-99c7-48bb-996e-9d7af00f3ed1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dvar-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
     DVARP: {
-        description: '선택한 데이터베이스 항목의 전체 모집단을 기준으로 분산을 계산합니다',
-        abstract: '선택한 데이터베이스 항목의 전체 모집단을 기준으로 분산을 계산합니다',
+        description: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 전체 모집단을 기반으로 한 모집단의 분산을 계산합니다.',
+        abstract: '목록이나 데이터베이스의 레코드 필드(열)에서 지정한 조건에 맞는 숫자를 사용하여 전체 모집단을 기반으로 한 모집단의 분산을 계산합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/dvarp-함수-eb0ba387-9cb7-45c8-81e9-0394912502fc',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dvarp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: '목록이나 데이터베이스를 구성하는 셀 범위입니다.' },
-            field: { name: 'field', detail: '함수에서 사용되는 열을 나타냅니다.' },
-            criteria: { name: 'criteria', detail: '지정한 조건이 포함된 셀 범위입니다.' },
+            database: { name: 'database', detail: '필수. 데이터베이스나 목록으로 지정할 셀 범위입니다. 데이터베이스는 레코드(관련 정보 행)와 필드(데이터 열)로 이루어진 관련 데이터 목록입니다. 목록의 첫째 행에는 각 열의 레이블이 있습니다.' },
+            field: { name: 'field', detail: '필수. 함수에 사용되는 열을 지정합니다. field 인수는 "나이" 또는 "수확량"처럼 열 레이블을 큰따옴표로 묶어 텍스트로 지정하거나 첫째 열을 1, 둘째 열을 2 등 목록 내의 열 위치를 나타내는 숫자로 지정할 수 있습니다.' },
+            criteria: { name: 'criteria', detail: '필수. 지정한 조건이 있는 셀 범위입니다. 적어도 하나의 열 레이블이 있고 열 레이블 아래에 열 조건을 지정할 셀이 하나 이상 포함된 범위를 criteria 인수로 사용할 수 있습니다.' },
         },
     },
 };

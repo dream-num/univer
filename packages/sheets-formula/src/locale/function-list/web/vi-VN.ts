@@ -18,44 +18,43 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: 'Trả về một chuỗi được mã hóa URL.',
-        abstract: 'Trả về một chuỗi được mã hóa URL.',
+        description: 'Hàm ENCODEURL trả về một chuỗi được mã hóa URL, thay thế một số ký tự không phải là chữ và số bằng ký hiệu phần trăm (%) và một số thập lục phân.',
+        abstract: 'Hàm ENCODEURL trả về một chuỗi được mã hóa URL, thay thế một số ký tự không phải là chữ và số bằng ký hiệu phần trăm (%) và một số thập lục phân.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/encodeurl-%E5%87%BD%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
-            text: { name: 'văn bản', detail: 'Một chuỗi cần mã hóa URL.' },
+            text: { name: 'văn bản', detail: 'Một chuỗi cần mã hóa URL' },
         },
     },
     FILTERXML: {
-        description: 'Returns specific data from the XML content by using the specified XPath',
-        abstract: 'Returns specific data from the XML content by using the specified XPath',
+        description: 'Hàm FILTERXML trả về dữ liệu cụ thể từ nội dung XML bằng cách sử dụng xpath đã xác định.',
+        abstract: 'Hàm FILTERXML trả về dữ liệu cụ thể từ nội dung XML bằng cách sử dụng xpath đã xác định.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xml: { name: 'xml', detail: 'Một chuỗi ở định dạng XML hợp lệ.' },
+            xpath: { name: 'xpath', detail: 'Một chuỗi ở định dạng XPath chuẩn.' },
         },
     },
     WEBSERVICE: {
-        description: 'Returns data from a web service',
-        abstract: 'Returns data from a web service',
+        description: 'Hàm WEBSERVICE trả về dữ liệu từ một dịch vụ web trên Internet hoặc Intranet.',
+        abstract: 'Hàm WEBSERVICE trả về dữ liệu từ một dịch vụ web trên Internet hoặc Intranet.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: 'URL của dịch vụ web.' },
         },
     },
 };

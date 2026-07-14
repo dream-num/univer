@@ -25,6 +25,7 @@ import { BaseFunction } from '../../base-function';
 export class Ifs extends BaseFunction {
     override minParams = 2;
 
+    // TODO(formula-contract): Restrict the maximum to 254 so condition/value pairs cannot be truncated at an odd count.
     override maxParams = 255;
 
     override calculate(...params: BaseValueObject[]) {

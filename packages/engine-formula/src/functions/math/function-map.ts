@@ -50,6 +50,7 @@ import { FloorPrecise } from './floor-precise';
 import { FUNCTION_NAMES_MATH } from './function-names';
 import { Gcd } from './gcd';
 import { Int } from './int';
+// import { IsoCeiling } from './iso-ceiling';
 import { Lcm } from './lcm';
 import { Ln } from './ln';
 import { Log } from './log';
@@ -133,6 +134,7 @@ export const functionMath = [
     [FloorPrecise, FUNCTION_NAMES_MATH.FLOOR_PRECISE],
     [Gcd, FUNCTION_NAMES_MATH.GCD],
     [Int, FUNCTION_NAMES_MATH.INT],
+    // [IsoCeiling, FUNCTION_NAMES_MATH.ISO_CEILING],
     [Lcm, FUNCTION_NAMES_MATH.LCM],
     [Ln, FUNCTION_NAMES_MATH.LN],
     [Log, FUNCTION_NAMES_MATH.LOG],

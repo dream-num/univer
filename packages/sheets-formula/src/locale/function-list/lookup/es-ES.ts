@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/address-function-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/es-es/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -55,7 +55,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/areas-function-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/es-es/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -68,7 +68,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/es-es/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -83,7 +83,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/choosecols-function-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/es-es/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -98,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/chooserows-function-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/es-es/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -113,7 +113,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/column-function-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/es-es/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -126,7 +126,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/columns-function-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/es-es/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -139,7 +139,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/drop-function-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/es-es/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -154,7 +154,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/expand-function-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/es-es/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -170,7 +170,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/filter-function-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/es-es/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -185,7 +185,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/formulatext-function-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/es-es/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -193,45 +193,35 @@ const locale: typeof enUS = {
         },
     },
     GETPIVOTDATA: {
-        description: 'Devuelve datos almacenados en un informe de tabla dinámica',
-        abstract: 'Devuelve datos almacenados en un informe de tabla dinámica',
+        description: 'La captura de pantalla siguiente muestra el diseño de tabla dinámica que se usa en las siguientes secciones. En este ejemplo, =IMPORTARDATOSDINAMICOS("Ventas",A3) devuelve el importe total de ventas:',
+        abstract: 'La captura de pantalla siguiente muestra el diseño de tabla dinámica que se usa en las siguientes secciones. En este ejemplo, =IMPORTARDATOSDINAMICOS("Ventas",A3) devuelve el importe total de ventas:',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/getpivotdata-function-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primero' },
-            number2: { name: 'número2', detail: 'segundo' },
+            dataField: { name: 'dataField', detail: 'Nombre del campo de tabla dinámica que contiene los datos que quiere recuperar. Debe estar entre comillas. Ejemplo: =IMPORTARDATOSDINAMICOS("Ventas"; A3). Aquí, "Ventas" es el campo Valores que queremos recuperar. Dado que no se especifica ningún otro campo, IMPORTARDATOSDINAMICOS devuelve el importe total de ventas.' },
+            pivotTable: { name: 'pivotTable', detail: 'Es una referencia a cualquier celda, rango de celdas o rango de celdas en una tabla dinámica. Esta información se usa para determinar cuál tabla dinámica contiene los datos que desea recuperar. Ejemplo: =IMPORTARDATOSDINAMICOS("Ventas"; A3). Aquí, A3 es una referencia dentro de la tabla dinámica e indica a la fórmula qué tabla dinámica usar.' },
+            field1: { name: 'field1', detail: 'De 1 a 126 parejas de nombres de campo y elemento que describen los datos que desea recuperar. Las parejas pueden estar en cualquier orden. Los nombres de campo y elemento que no son fechas ni números deben estar entre comillas. Ejemplo: =IMPORTARDATOSDINAMICOS("Ventas"; A3; "Mes"; "Mar"). Aquí, "Mes" es el campo y "Mar" es el elemento. Para especificar varios elementos para un campo, escríbalos entre llaves (por ejemplo: {"Mar", "Abr"}). En las tablas dinámicas OLAP , los elementos pueden contener el nombre de origen de la dimensión y también el nombre de origen del elemento. Una pareja de campo y elemento de una tabla dinámica OLAP puede tener el siguiente aspecto: "[Producto]","[Producto].[Todos los productos].[Alimentos].[Bollería]"' },
+            item1: { name: 'item1', detail: 'De 1 a 126 parejas de nombres de campo y elemento que describen los datos que desea recuperar. Las parejas pueden estar en cualquier orden. Los nombres de campo y elemento que no son fechas ni números deben estar entre comillas. Ejemplo: =IMPORTARDATOSDINAMICOS("Ventas"; A3; "Mes"; "Mar"). Aquí, "Mes" es el campo y "Mar" es el elemento. Para especificar varios elementos para un campo, escríbalos entre llaves (por ejemplo: {"Mar", "Abr"}). En las tablas dinámicas OLAP , los elementos pueden contener el nombre de origen de la dimensión y también el nombre de origen del elemento. Una pareja de campo y elemento de una tabla dinámica OLAP puede tener el siguiente aspecto: "[Producto]","[Producto].[Todos los productos].[Alimentos].[Bollería]"' },
         },
     },
     HLOOKUP: {
-        description: 'Busca en la fila superior de una matriz y devuelve el valor de la celda indicada',
-        abstract: 'Busca en la fila superior de una matriz y devuelve el valor de la celda indicada',
+        description: 'Busca un valor en la fila superior de una tabla o una matriz de valores y, después, devuelve un valor en la misma columna de una fila especificada en la tabla o matriz. Use BUSCARH cuando los valores de comparación se encuentren en una fila en la parte superior de una tabla de datos y desee encontrar información que se halle dentro de un número especificado de filas. Use BUSCARV cuando los valores de comparación se encuentren en una columna a la izquierda de los datos que desea encontrar.',
+        abstract: 'Busca un valor en la fila superior de una tabla o una matriz de valores y, después, devuelve un valor en la misma columna de una fila especificada en la tabla o matriz. Use BUSCARH cuando los valores de comparación se encuentren en una fila en la parte superior de una tabla de datos y desee encontrar información que se halle dentro de un número especificado de filas. Use BUSCARV cuando los valores de comparación se encuentren en una columna a la izquierda de los datos que desea encontrar.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/hlookup-function-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: 'valor_buscado',
-                detail: 'El valor que se buscará en la primera fila de la tabla. Valor_buscado puede ser un valor, una referencia o una cadena de texto.',
-            },
-            tableArray: {
-                name: 'tabla_matriz',
-                detail: 'Una tabla de información en la que se buscan datos. Use una referencia a un rango o un nombre de rango.',
-            },
-            rowIndexNum: {
-                name: 'índice_fila_núm',
-                detail: 'El número de fila en tabla_matriz desde el cual se devolverá el valor coincidente. Un índice_fila_núm de 1 devuelve el valor de la primera fila en tabla_matriz, un índice_fila_núm de 2 devuelve el valor de la segunda fila en tabla_matriz, y así sucesivamente.',
-            },
-            rangeLookup: {
-                name: 'búsqueda_rango',
-                detail: 'Un valor lógico que especifica si desea que BUSCARH encuentre una coincidencia exacta o una coincidencia aproximada.',
-            },
+            lookupValue: { name: 'valor_buscado', detail: 'Obligatorio. Es el valor que se busca en la primera fila de la tabla. Valor_buscado puede ser un valor, una referencia o una cadena de texto.' },
+            tableArray: { name: 'tabla_matriz', detail: 'Obligatorio. Es una tabla de información en la que se buscan los datos. Use una referencia a un rango o el nombre de un rango. Los valores de la primera fila del argumento matriz_buscar_en pueden ser texto, números o valores lógicos. Si ordenado es VERDADERO, los valores de la primera fila de matriz_buscar_en deben colocarse en orden ascendente: ...-2, -1, 0, 1, 2, ..., A-Z, FALSO, VERDADERO; de lo contrario, BUSCARH puede devolver un valor incorrecto. Si ordenado es FALSO, no es necesario ordenar matriz_buscar_en. Las mayúsculas y minúsculas del texto son equivalentes. Ordene los valores en orden ascendente, de izquierda a derecha. Para obtener más información, vea Ordenar datos en un rango o tabla .' },
+            rowIndexNum: { name: 'índice_fila_núm', detail: 'Obligatorio. El número de fila en matriz_tabla desde el cual se devolverá el valor coincidente. Un indicador_filas de 1, devuelve el primer valor de la fila en matriz_tabla, un indicador_filas de 2 devuelve el segundo valor de la fila en matriz_tabla y así sucesivamente. Si indicador_filas es menor que 1, BUSCARH devuelve el valor de error #¡VALOR!; si indicador_filas es mayor que el número de filas en tabla_matriz BUSCARH devuelve el valor de error #¡REF!. error #¡NUM!.' },
+            rangeLookup: { name: 'búsqueda_rango', detail: 'Opcional. Es un valor lógico que especifica si BUSCARH debe localizar una coincidencia exacta o aproximada. Si lo omite o es VERDADERO, devolverá una coincidencia aproximada. Es decir, si no encuentra ninguna coincidencia exacta, devolverá el siguiente valor mayor que sea inferior a valor_buscado. Si es FALSO, BUSCARH encontrará una coincidencia exacta. Si no encuentra ninguna, devolverá el valor de error #N/A.' },
         },
     },
     HSTACK: {
@@ -240,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/hstack-function-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/es-es/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
@@ -249,26 +239,26 @@ const locale: typeof enUS = {
         },
     },
     HYPERLINK: {
-        description: 'Crea un hipervínculo dentro de una celda.',
-        abstract: 'Crea un hipervínculo dentro de una celda.',
+        description: 'Crea un hiperenlace en una celda.',
+        abstract: 'Crea un hiperenlace en una celda.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=es',
+                url: 'https://support.google.com/docs/answer/3093313?hl=es',
             },
         ],
         functionParameter: {
-            url: { name: 'url', detail: 'La URL completa de la ubicación del enlace entre comillas, o una referencia a una celda que contenga dicha URL.' },
-            linkLabel: { name: 'etiqueta_enlace', detail: 'El texto que se mostrará en la celda como el enlace, entre comillas, o una referencia a una celda que contenga dicha etiqueta.' },
+            url: { name: 'url', detail: 'URL completa de la ubicación del enlace escrita entre comillas, o una referencia a una celda que contenga dicha URL. Solo se permiten determinados tipos de enlaces: http:// , https:// , mailto: , aim: , ftp:// , gopher:// , telnet:// y news:// . El resto están prohibidos. Si se especifica otro protocolo, se mostrará link_label en la celda, pero no se creará un hiperenlace. Si no se especifica ningún protocolo, se utilizará http:// de forma predeterminada y se antepondrá a url .' },
+            linkLabel: { name: 'etiqueta_enlace', detail: '[ OPCIONAL: url de forma predeterminada ] : texto que se muestra en la celda como enlace, entre comillas, o referencia a una celda que contenga dicha etiqueta. Si link_label es una referencia a una celda vacía, url se mostrará como un enlace si es válida o como texto sin formato en caso contrario. Si link_label es la cadena literal vacía (""), la celda aparecerá vacía, pero se podrá acceder al enlace haciendo clic en la celda o moviéndose hasta ella.' },
         },
     },
     IMAGE: {
-        description: 'Devuelve una imagen de una fuente determinada',
-        abstract: 'Devuelve una imagen de una fuente determinada',
+        description: 'La función IMAGEN inserta imágenes en celdas desde una ubicación de origen junto con texto alternativo. Después, puede mover y cambiar el tamaño de las celdas, ordenar y filtrar, y trabajar con imágenes dentro de una tabla de Excel. Use esta función para mejorar visualmente listas de datos, como inventarios, juegos, empleados y conceptos matemáticos.',
+        abstract: 'La función IMAGEN inserta imágenes en celdas desde una ubicación de origen junto con texto alternativo. Después, puede mover y cambiar el tamaño de las celdas, ordenar y filtrar, y trabajar con imágenes dentro de una tabla de Excel. Use esta función para mejorar visualmente listas de datos, como inventarios, juegos, empleados y conceptos matemáticos.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/es-es/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -285,7 +275,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/index-function-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/es-es/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -301,7 +291,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/es-es/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -315,7 +305,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/es-es/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -339,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/match-function-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/es-es/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -354,7 +344,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/offset-function-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/es-es/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -371,7 +361,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/row-function-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/es-es/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -384,7 +374,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/rows-function-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/es-es/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -397,12 +387,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/rtd-function-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/es-es/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primero' },
-            number2: { name: 'número2', detail: 'segundo' },
+            progId: { name: 'Identificador de programa', detail: 'Nombre del identificador de programa del complemento de automatización COM instalado localmente.' },
+            server: { name: 'Servidor', detail: 'Nombre del servidor donde se ejecuta el complemento; use una cadena vacía para el servidor local.' },
+            topic1: { name: 'Tema 1', detail: 'Primer texto que especifica los datos en tiempo real que se recuperan.' },
+            topic2: { name: 'Tema 2', detail: 'Opcional. Textos adicionales que especifican los datos en tiempo real.' },
         },
     },
     SORT: {
@@ -411,7 +403,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/sort-function-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -427,7 +419,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/sortby-function-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -444,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/take-function-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/es-es/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -459,7 +451,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/tocol-function-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/es-es/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -474,7 +466,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/torow-function-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/es-es/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -489,7 +481,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/transpose-function-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/es-es/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -502,7 +494,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/unique-function-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/es-es/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -517,7 +509,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/vlookup-function-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/es-es/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -545,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/vstack-function-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -559,7 +551,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/wrapcols-function-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/es-es/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -574,7 +566,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/wraprows-function-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/es-es/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -589,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/xlookup-function-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/es-es/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -619,7 +611,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/xmatch-function-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/es-es/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

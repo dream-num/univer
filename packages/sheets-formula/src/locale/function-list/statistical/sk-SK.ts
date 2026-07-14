@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/avedev-function-58fe8d65-2a84-4dc7-8052-f3f87b5c6639',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/avedev-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/average-function-047bac88-d466-426c-a32b-8f33eb960cf6',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/average-function',
             },
         ],
         functionParameter: {
@@ -57,7 +57,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/9084098?hl=en&ref_topic=3105600&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9084098?hl=sk',
             },
         ],
         functionParameter: {
@@ -73,7 +73,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/averagea-function-f5f84098-d453-4f4c-bbba-3d2c66356091',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/averagea-function',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/averageif-function-faec8e2e-0dec-4308-af69-f5576d8ac642',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/averageif-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/averageifs-function-48910c45-1fc0-4389-a028-f7c5c3001690',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/averageifs-function',
             },
         ],
         functionParameter: {
@@ -125,7 +125,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/beta-dist-function-11188c9c-780a-42c7-ba43-9ecb5a878d31',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/beta-dist-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/beta-inv-function-e84cb8aa-8df0-4cf6-9892-83a341d252eb',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/beta-inv-function',
             },
         ],
         functionParameter: {
@@ -160,7 +160,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/binom-dist-function-c5ae37b6-f39c-4be2-94c2-509a1480770c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/binom-dist-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/binom-dist-range-function-17331329-74c7-4053-bb4c-6653a7421595',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/binom-dist-range-function',
             },
         ],
         functionParameter: {
@@ -192,7 +192,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/binom-inv-function-80a0370c-ada6-49b4-83e7-05a91ba77ac9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/binom-inv-function',
             },
         ],
         functionParameter: {
@@ -207,7 +207,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/chisq-dist-function-8486b05e-5c05-4942-a9ea-f6b341518732',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/chisq-dist-function',
             },
         ],
         functionParameter: {
@@ -222,7 +222,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/chisq-dist-rt-function-dc4832e8-ed2b-49ae-8d7c-b28d5804c0f2',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/chisq-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -236,7 +236,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/chisq-inv-function-400db556-62b3-472d-80b3-254723e7092f',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/chisq-inv-function',
             },
         ],
         functionParameter: {
@@ -250,7 +250,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/chisq-inv-rt-function-435b5ed8-98d5-4da6-823f-293e2cbc94fe',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/chisq-inv-rt-function',
             },
         ],
         functionParameter: {
@@ -264,7 +264,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/chisq-test-function-2e8a7861-b14a-4985-aa93-fb88de3f260f',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/chisq-test-function',
             },
         ],
         functionParameter: {
@@ -278,7 +278,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/confidence-norm-function-7cec58a6-85bb-488d-91c3-63828d4fbfd4',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/confidence-norm-function',
             },
         ],
         functionParameter: {
@@ -293,7 +293,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/confidence-t-function-e8eca395-6c3a-4ba9-9003-79ccc61d3c53',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/confidence-t-function',
             },
         ],
         functionParameter: {
@@ -308,7 +308,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/correl-function-995dcef7-0c0a-4bed-a3fb-239d7b68ca92',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/correl-function',
             },
         ],
         functionParameter: {
@@ -322,7 +322,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/count-function-a59cd7fc-b623-4d93-87a4-d23bf411294c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/count-function',
             },
         ],
         functionParameter: {
@@ -336,17 +336,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/counta-function-7dc98875-d5c1-46f1-9a82-53f3219e2509',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/counta-function',
             },
         ],
         functionParameter: {
-            number1: {
+            value1: {
                 name: 'hodnota1',
-                detail: 'Prvá hodnota, odkaz na bunku alebo rozsah, pre ktorý chcete zistiť počet neprázdnych buniek.',
+                detail: 'Prvé číslo, odkaz na bunku alebo rozsah, pre ktorý chcete priemer.',
             },
-            number2: {
+            value2: {
                 name: 'hodnota2',
-                detail: 'Ďalšie hodnoty, odkazy na bunky alebo rozsahy, pre ktoré chcete zistiť počet neprázdnych buniek, maximálne 255.',
+                detail: 'Ďalšie čísla, odkazy na bunky alebo rozsahy, pre ktoré chcete priemer, maximálne 255.',
             },
         },
     },
@@ -356,7 +356,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/countblank-function-6a92d772-675c-4bee-b346-24af6bd3ac22',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/countblank-function',
             },
         ],
         functionParameter: {
@@ -369,7 +369,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/countif-function-e0de10c6-f885-4e71-abb4-1f464816df34',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/use-the-countif-function-in-microsoft-excel',
             },
         ],
         functionParameter: {
@@ -383,7 +383,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/countifs-function-dda3dc6e-f74e-4aee-88bc-aa8c2a866842',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/countifs-function',
             },
         ],
         functionParameter: {
@@ -399,7 +399,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/covariance-p-function-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/covariance-p-function',
             },
         ],
         functionParameter: {
@@ -413,7 +413,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/covariance-s-function-0a539b74-7371-42aa-a18f-1f5320314977',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/covariance-s-function',
             },
         ],
         functionParameter: {
@@ -427,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/devsq-function-8b739616-8376-4df5-8bd0-cfe0a6caf444',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/devsq-function',
             },
         ],
         functionParameter: {
@@ -441,7 +441,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/expon-dist-function-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/expon-dist-function',
             },
         ],
         functionParameter: {
@@ -456,7 +456,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/f-dist-function-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/f-dist-function',
             },
         ],
         functionParameter: {
@@ -472,7 +472,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/f-dist-rt-function-d74cbb00-6017-4ac9-b7d7-6049badc0520',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/f-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -487,7 +487,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/f-inv-function-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/f-inv-function',
             },
         ],
         functionParameter: {
@@ -502,7 +502,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/f-inv-rt-function-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/f-inv-rt-function',
             },
         ],
         functionParameter: {
@@ -517,7 +517,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/f-test-function-100a59e7-4108-46f8-8443-78ffacb6c0a7',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/f-test-function',
             },
         ],
         functionParameter: {
@@ -531,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/fisher-function-d656523c-5076-4f95-b87b-7741bf236c69',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/fisher-function',
             },
         ],
         functionParameter: {
@@ -544,7 +544,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/fisherinv-function-62504b39-415a-4284-a285-19c8e82f86bb',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/fisherinv-function',
             },
         ],
         functionParameter: {
@@ -557,7 +557,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/forecast-and-forecast-linear-functions',
             },
         ],
         functionParameter: {
@@ -572,12 +572,16 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/forecast-ets-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'číslo1', detail: 'prvý' },
-            number2: { name: 'číslo2', detail: 'druhý' },
+            targetDate: { name: 'Cieľový dátum', detail: 'Údajový bod, pre ktorý chcete predpovedať hodnotu.' },
+            values: { name: 'Hodnoty', detail: 'Historické hodnoty použité na prognózu.' },
+            timeline: { name: 'Časová os', detail: 'Nezávislý rozsah alebo pole číselných dátumov či časov s konštantným krokom.' },
+            seasonality: { name: 'Sezónnosť', detail: 'Voliteľné. 1 pre automatické zistenie a 0 bez sezónnosti.' },
+            dataCompletion: { name: 'Doplnenie údajov', detail: 'Voliteľné. Použite 1 na interpoláciu chýbajúcich bodov alebo 0 na ich nahradenie nulou.' },
+            aggregation: { name: 'Agregácia', detail: 'Voliteľné. Hodnota 1 až 7 určuje agregáciu duplicitných časových pečiatok.' },
         },
     },
     FORECAST_ETS_CONFINT: {
@@ -586,12 +590,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/forecast-ets-confint-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'číslo1', detail: 'prvý' },
-            number2: { name: 'číslo2', detail: 'druhý' },
+            targetDate: { name: 'Cieľový dátum', detail: 'Údajový bod, pre ktorý chcete predpovedať hodnotu.' },
+            values: { name: 'Hodnoty', detail: 'Historické hodnoty použité na prognózu.' },
+            timeline: { name: 'Časová os', detail: 'Nezávislý rozsah alebo pole číselných dátumov či časov s konštantným krokom.' },
+            confidenceLevel: { name: 'Úroveň spoľahlivosti', detail: 'Voliteľné. Číslo od 0 do 1; predvolená hodnota je 0,95.' },
+            seasonality: { name: 'Sezónnosť', detail: 'Voliteľné. 1 pre automatické zistenie a 0 bez sezónnosti.' },
+            dataCompletion: { name: 'Doplnenie údajov', detail: 'Voliteľné. Použite 1 na interpoláciu chýbajúcich bodov alebo 0 na ich nahradenie nulou.' },
+            aggregation: { name: 'Agregácia', detail: 'Voliteľné. Hodnota 1 až 7 určuje agregáciu duplicitných časových pečiatok.' },
         },
     },
     FORECAST_ETS_SEASONALITY: {
@@ -600,12 +609,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.SEASONALITY',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/forecast-ets-seasonality-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'číslo1', detail: 'prvý' },
-            number2: { name: 'číslo2', detail: 'druhý' },
+            values: { name: 'Hodnoty', detail: 'Historické hodnoty použité na prognózu.' },
+            timeline: { name: 'Časová os', detail: 'Nezávislý rozsah alebo pole číselných dátumov či časov s konštantným krokom.' },
+            dataCompletion: { name: 'Doplnenie údajov', detail: 'Voliteľné. Použite 1 na interpoláciu chýbajúcich bodov alebo 0 na ich nahradenie nulou.' },
+            aggregation: { name: 'Agregácia', detail: 'Voliteľné. Hodnota 1 až 7 určuje agregáciu duplicitných časových pečiatok.' },
         },
     },
     FORECAST_ETS_STAT: {
@@ -614,12 +625,16 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.STAT',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/forecast-ets-stat-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'číslo1', detail: 'prvý' },
-            number2: { name: 'číslo2', detail: 'druhý' },
+            values: { name: 'Hodnoty', detail: 'Historické hodnoty použité na prognózu.' },
+            timeline: { name: 'Časová os', detail: 'Nezávislý rozsah alebo pole číselných dátumov či časov s konštantným krokom.' },
+            statisticType: { name: 'Typ štatistiky', detail: 'Hodnota 1 až 8 určuje vrátenú štatistiku prognózy.' },
+            seasonality: { name: 'Sezónnosť', detail: 'Voliteľné. 1 pre automatické zistenie a 0 bez sezónnosti.' },
+            dataCompletion: { name: 'Doplnenie údajov', detail: 'Voliteľné. Použite 1 na interpoláciu chýbajúcich bodov alebo 0 na ich nahradenie nulou.' },
+            aggregation: { name: 'Agregácia', detail: 'Voliteľné. Hodnota 1 až 7 určuje agregáciu duplicitných časových pečiatok.' },
         },
     },
     FORECAST_LINEAR: {
@@ -628,7 +643,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/forecast-and-forecast-linear-functions',
             },
         ],
         functionParameter: {
@@ -643,7 +658,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/frequency-function-44e3be2b-eca0-42cd-a3f7-fd9ea898fdb9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/frequency-function',
             },
         ],
         functionParameter: {
@@ -657,7 +672,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/gamma-function-ce1702b1-cf55-471d-8307-f83be0fc5297',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/gamma-function',
             },
         ],
         functionParameter: {
@@ -670,7 +685,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/gamma-dist-function-9b6f1538-d11c-4d5f-8966-21f6a2201def',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/gamma-dist-function',
             },
         ],
         functionParameter: {
@@ -686,7 +701,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/gamma-inv-function-74991443-c2b0-4be5-aaab-1aa4d71fbb18',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/gamma-inv-function',
             },
         ],
         functionParameter: {
@@ -701,7 +716,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/gammaln-function-b838c48b-c65f-484f-9e1d-141c55470eb9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/gammaln-function',
             },
         ],
         functionParameter: {
@@ -714,7 +729,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/gammaln-precise-function-5cdfe601-4e1e-4189-9d74-241ef1caa599',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/gammaln-precise-function',
             },
         ],
         functionParameter: {
@@ -727,7 +742,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/gauss-function-069f1b4e-7dee-4d6a-a71f-4b69044a6b33',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/gauss-function',
             },
         ],
         functionParameter: {
@@ -740,7 +755,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/geomean-function-db1ac48d-25a5-40a0-ab83-0b38980e40d5',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/geomean-function',
             },
         ],
         functionParameter: {
@@ -754,7 +769,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/growth-function-541a91dc-3d5e-437d-b156-21324e68b80d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/growth-function',
             },
         ],
         functionParameter: {
@@ -770,7 +785,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/harmean-function-5efd9184-fab5-42f9-b1d3-57883a1d3bc6',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/harmean-function',
             },
         ],
         functionParameter: {
@@ -784,7 +799,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/hypgeom-dist-function-6dbd547f-1d12-4b1f-8ae5-b0d9e3d22fbf',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/hypgeom-dist-function',
             },
         ],
         functionParameter: {
@@ -801,7 +816,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/intercept-function-2a9b74e2-9d47-4772-b663-3bca70bf63ef',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/intercept-function',
             },
         ],
         functionParameter: {
@@ -815,7 +830,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/kurt-function-bc3a265c-5da4-4dcb-b7fd-c237789095ab',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/kurt-function',
             },
         ],
         functionParameter: {
@@ -829,7 +844,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/large-function-3af0af19-1190-42bb-bb8b-01672ec00a64',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/large-function',
             },
         ],
         functionParameter: {
@@ -843,7 +858,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/linest-function-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/linest-function',
             },
         ],
         functionParameter: {
@@ -859,7 +874,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/logest-function-f27462d8-3657-4030-866b-a272c1d18b4b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/logest-function',
             },
         ],
         functionParameter: {
@@ -875,7 +890,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/lognorm-dist-function-eb60d00b-48a9-4217-be2b-6074aee6b070',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/lognorm-dist-function',
             },
         ],
         functionParameter: {
@@ -891,7 +906,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/lognorm-inv-function-fe79751a-f1f2-4af8-a0a1-e151b2d4f600',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/lognorm-inv-function',
             },
         ],
         functionParameter: {
@@ -906,7 +921,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/12487850?hl=en&sjid=11250989209896695200-AP',
+                url: 'https://support.google.com/docs/answer/12487850?hl=sk',
             },
         ],
         functionParameter: {
@@ -920,7 +935,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/max-function-e0012414-9ac8-4b34-9a47-73e662c08098',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/max-function',
             },
         ],
         functionParameter: {
@@ -934,7 +949,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/maxa-function-814bda1e-3840-4bff-9365-2f59ac2ee62d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/maxa-function',
             },
         ],
         functionParameter: {
@@ -948,7 +963,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/maxifs-function-dfd611e6-da2c-488a-919b-9b6376b28883',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/maxifs-function',
             },
         ],
         functionParameter: {
@@ -965,7 +980,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/median-function-d0916313-4753-414c-8537-ce85bdd967d2',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/median-function',
             },
         ],
         functionParameter: {
@@ -979,7 +994,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/min-function-61635d12-920f-4ce2-a70f-96f202dcc152',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/min-function',
             },
         ],
         functionParameter: {
@@ -993,7 +1008,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/mina-function-245a6f46-7ca5-4dc7-ab49-805341bc31d3',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/mina-function',
             },
         ],
         functionParameter: {
@@ -1007,7 +1022,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/minifs-function-6ca1ddaa-079b-4e74-80cc-72eef32e6599',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/minifs-function',
             },
         ],
         functionParameter: {
@@ -1024,7 +1039,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/mode-mult-function-50fd9464-b2ba-4191-b57a-39446689ae8c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/mode-mult-function',
             },
         ],
         functionParameter: {
@@ -1038,7 +1053,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/mode-sngl-function-f1267c16-66c6-4386-959f-8fba5f8bb7f8',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/mode-sngl-function',
             },
         ],
         functionParameter: {
@@ -1052,7 +1067,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/negbinom-dist-function-c8239f89-c2d0-45bd-b6af-172e570f8599',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/negbinom-dist-function',
             },
         ],
         functionParameter: {
@@ -1068,7 +1083,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/norm-dist-function-edb1cc14-a21c-4e53-839d-8082074c9f8d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/norm-dist-function',
             },
         ],
         functionParameter: {
@@ -1084,7 +1099,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/norm-inv-function-54b30935-fee7-493c-bedb-2278a9db7e13',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/norm-inv-function',
             },
         ],
         functionParameter: {
@@ -1099,7 +1114,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/norm-s-dist-function-1e787282-3832-4520-a9ae-bd2a8d99ba88',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/norm-s-dist-function',
             },
         ],
         functionParameter: {
@@ -1113,7 +1128,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/norm-s-inv-function-d6d556b4-ab7f-49cd-b526-5a20918452b1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/norm-s-inv-function',
             },
         ],
         functionParameter: {
@@ -1126,7 +1141,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/pearson-function-0c3e30fc-e5af-49c4-808a-3ef66e034c18',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/pearson-function',
             },
         ],
         functionParameter: {
@@ -1140,7 +1155,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/percentile-exc-function-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/percentile-exc-function',
             },
         ],
         functionParameter: {
@@ -1154,7 +1169,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/percentile-inc-function-680f9539-45eb-410b-9a5e-c1355e5fe2ed',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/percentile-inc-function',
             },
         ],
         functionParameter: {
@@ -1168,7 +1183,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/percentrank-exc-function-d8afee96-b7e2-4a2f-8c01-8fcdedaa6314',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/percentrank-exc-function',
             },
         ],
         functionParameter: {
@@ -1183,7 +1198,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/percentrank-inc-function-149592c9-00c0-49ba-86c1-c1f45b80463a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/percentrank-inc-function',
             },
         ],
         functionParameter: {
@@ -1198,7 +1213,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/permut-function-3bd1cb9a-2880-41ab-a197-f246a7a602d3',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/permut-function',
             },
         ],
         functionParameter: {
@@ -1212,7 +1227,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/permutationa-function-6c7d7fdc-d657-44e6-aa19-2857b25cae4e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/permutationa-function',
             },
         ],
         functionParameter: {
@@ -1226,7 +1241,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/phi-function-23e49bc6-a8e8-402d-98d3-9ded87f6295c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/phi-function',
             },
         ],
         functionParameter: {
@@ -1239,7 +1254,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/poisson-dist-function-8fe148ff-39a2-46cb-abf3-7772695d9636',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/poisson-dist-function',
             },
         ],
         functionParameter: {
@@ -1254,7 +1269,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/prob-function-9ac30561-c81c-4259-8253-34f0a238fc49',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/prob-function',
             },
         ],
         functionParameter: {
@@ -1270,7 +1285,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/quartile-exc-function-5a355b7a-840b-4a01-b0f1-f538c2864cad',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/quartile-exc-function',
             },
         ],
         functionParameter: {
@@ -1284,7 +1299,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/quartile-inc-function-1bbacc80-5075-42f1-aed6-47d735c4819d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/quartile-inc-function',
             },
         ],
         functionParameter: {
@@ -1298,7 +1313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/rank-avg-function-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/rank-avg-function',
             },
         ],
         functionParameter: {
@@ -1313,7 +1328,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/rank-eq-function-284858ce-8ef6-450e-b662-26245be04a40',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/rank-eq-function',
             },
         ],
         functionParameter: {
@@ -1328,12 +1343,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/rsq-function-d7161715-250d-4a01-b80d-a8364f2be08f',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/rsq-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'pole1', detail: 'Známe hodnoty y.' },
-            array2: { name: 'pole2', detail: 'Známe hodnoty x.' },
+            knownYs: { name: 'známe_y', detail: 'Závislé hodnoty vynesené v známom rozsahu.' },
+            knownXs: { name: 'známe_x', detail: 'Nezávislé hodnoty vynesené v známom rozsahu.' },
         },
     },
     SKEW: {
@@ -1342,7 +1357,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/skew-function-bdf49d86-b1ef-4804-a046-28eaea69c9fa',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/skew-function',
             },
         ],
         functionParameter: {
@@ -1356,7 +1371,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/skew-p-function-76530a5c-99b9-48a1-8392-26632d542fcb',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/skew-p-function',
             },
         ],
         functionParameter: {
@@ -1370,7 +1385,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/slope-function-11fb8f97-3117-4813-98aa-61d7e01276b9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/slope-function',
             },
         ],
         functionParameter: {
@@ -1384,7 +1399,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/small-function-17da8222-7c82-42b2-961b-14c45384df07',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/small-function',
             },
         ],
         functionParameter: {
@@ -1398,7 +1413,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/standardize-function-81d66554-2d54-40ec-ba83-6437108ee775',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/standardize-function',
             },
         ],
         functionParameter: {
@@ -1413,7 +1428,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/stdev-p-function-6e917c05-31a0-496f-ade7-4f4e7462f285',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/stdev-p-function',
             },
         ],
         functionParameter: {
@@ -1427,7 +1442,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/stdev-s-function-7d69cf97-0c1f-4acf-be27-f3e83904cc23',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/stdev-s-function',
             },
         ],
         functionParameter: {
@@ -1441,7 +1456,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/stdeva-function-5ff38888-7ea5-48de-9a6d-11ed73b29e9d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/stdeva-function',
             },
         ],
         functionParameter: {
@@ -1455,7 +1470,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/stdevpa-function-5578d4d6-455a-4308-9991-d405afe2c28c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/stdevpa-function',
             },
         ],
         functionParameter: {
@@ -1469,7 +1484,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/steyx-function-6ce74b2c-449d-4a6e-b9ac-f9cef5ba48ab',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/steyx-function',
             },
         ],
         functionParameter: {
@@ -1483,7 +1498,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/t-dist-function-4329459f-ae91-48c2-bba8-1ead1c6c21b2',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/t-dist-function',
             },
         ],
         functionParameter: {
@@ -1498,7 +1513,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/t-dist-2t-function-198e9340-e360-4230-bd21-f52f22ff5c28',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/t-dist-2t-function',
             },
         ],
         functionParameter: {
@@ -1512,7 +1527,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/t-dist-rt-function-20a30020-86f9-4b35-af1f-7ef6ae683eda',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/t-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -1526,7 +1541,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/t-inv-function-2908272b-4e61-4942-9df9-a25fec9b0e2e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/t-inv-function',
             },
         ],
         functionParameter: {
@@ -1540,7 +1555,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/t-inv-2t-function-ce72ea19-ec6c-4be7-bed2-b9baf2264f17',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/t-inv-2t-function',
             },
         ],
         functionParameter: {
@@ -1554,7 +1569,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/t-test-function-d4e08ec3-c545-485f-962e-276f7cbed055',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/t-test-function',
             },
         ],
         functionParameter: {
@@ -1570,7 +1585,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/trend-function-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/trend-function',
             },
         ],
         functionParameter: {
@@ -1586,7 +1601,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/trimmean-function-d90c9878-a119-4746-88fa-63d988f511d3',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/trimmean-function',
             },
         ],
         functionParameter: {
@@ -1600,7 +1615,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/var-p-function-73d1285c-108c-4843-ba5d-a51f90656f3a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/var-p-function',
             },
         ],
         functionParameter: {
@@ -1614,7 +1629,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/var-s-function-913633de-136b-449d-813e-65a00b2b990b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/var-s-function',
             },
         ],
         functionParameter: {
@@ -1628,7 +1643,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/vara-function-3de77469-fa3a-47b4-85fd-81758a1e1d07',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/vara-function',
             },
         ],
         functionParameter: {
@@ -1642,7 +1657,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/varpa-function-59a62635-4e89-4fad-88ac-ce4dc0513b96',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/varpa-function',
             },
         ],
         functionParameter: {
@@ -1656,7 +1671,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/weibull-dist-function-4e783c39-9325-49be-bbc9-a83ef82b45db',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/weibull-dist-function',
             },
         ],
         functionParameter: {
@@ -1672,7 +1687,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/z-test-function-d633d5a3-2031-4614-a016-92180ad82bee',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/z-test-function',
             },
         ],
         functionParameter: {

@@ -23,11 +23,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.google.com/docs/answer/3267036?hl=en&sjid=8484774178571403392-AP',
+                url: 'https://support.google.com/docs/answer/3267036?hl=ca',
             },
         ],
         functionParameter: {
-            inputRange: { name: 'interval_entrada', detail: "L'interval a restringir." },
+            inputRange: { name: 'interval_entrada', detail: 'ARRAY_CONSTRAIN(SORT(A1:F100; 1; TRUE); 10; 6)' },
             numRows: { name: 'num_files', detail: 'El nombre de files que ha de contenir el resultat.' },
             numCols: { name: 'num_columnes', detail: 'El nombre de columnes que ha de contenir el resultat' },
         },
@@ -38,7 +38,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+                url: 'https://support.google.com/docs/answer/10307761?hl=ca',
             },
         ],
         functionParameter: {

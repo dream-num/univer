@@ -21,7 +21,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/accrint-function-fe45d089-6722-4fb3-9379-e1f911d8dc74',
+                url: 'https://support.microsoft.com/en-us/excel/functions/accrint-function',
             },
         ],
         functionParameter: {
@@ -41,7 +41,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/accrintm-function-f62f01f9-5754-4cc4-805b-0e70199328a7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/accrintm-function',
             },
         ],
         functionParameter: {
@@ -58,12 +58,17 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/amordegrc-function-a14d0ca1-64a4-42eb-9b3d-b0dededf9e51',
+                url: 'https://support.microsoft.com/en-us/excel/functions/amordegrc-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The cost of the asset.' },
+            datePurchased: { name: 'date_purchased', detail: 'The date of the purchase of the asset.' },
+            firstPeriod: { name: 'first_period', detail: 'The date of the end of the first period.' },
+            salvage: { name: 'salvage', detail: 'The salvage value at the end of the life of the asset.' },
+            period: { name: 'period', detail: 'The period.' },
+            rate: { name: 'rate', detail: 'The rate of depreciation.' },
+            basis: { name: 'basis', detail: 'The year basis to be used.' },
         },
     },
     AMORLINC: {
@@ -72,7 +77,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/amorlinc-function-7d417b45-f7f5-4dba-a0a5-3451a81079a8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/amorlinc-function',
             },
         ],
         functionParameter: {
@@ -91,7 +96,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/coupdaybs-function-eb9a8dfb-2fb2-4c61-8e5d-690b320cf872',
+                url: 'https://support.microsoft.com/en-us/excel/functions/coupdaybs-function',
             },
         ],
         functionParameter: {
@@ -107,7 +112,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/coupdays-function-cc64380b-315b-4e7b-950c-b30b0a76f671',
+                url: 'https://support.microsoft.com/en-us/excel/functions/coupdays-function',
             },
         ],
         functionParameter: {
@@ -123,7 +128,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/coupdaysnc-function-5ab3f0b2-029f-4a8b-bb65-47d525eea547',
+                url: 'https://support.microsoft.com/en-us/excel/functions/coupdaysnc-function',
             },
         ],
         functionParameter: {
@@ -139,7 +144,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/coupncd-function-fd962fef-506b-4d9d-8590-16df5393691f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/coupncd-function',
             },
         ],
         functionParameter: {
@@ -155,7 +160,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/coupnum-function-a90af57b-de53-4969-9c99-dd6139db2522',
+                url: 'https://support.microsoft.com/en-us/excel/functions/coupnum-function',
             },
         ],
         functionParameter: {
@@ -171,7 +176,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/couppcd-function-2eb50473-6ee9-4052-a206-77a9a385d5b3',
+                url: 'https://support.microsoft.com/en-us/excel/functions/couppcd-function',
             },
         ],
         functionParameter: {
@@ -187,7 +192,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cumipmt-function-61067bb0-9016-427d-b95b-1a752af0e606',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cumipmt-function',
             },
         ],
         functionParameter: {
@@ -205,7 +210,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cumprinc-function-94a4516d-bd65-41a1-bc16-053a6af4c04d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cumprinc-function',
             },
         ],
         functionParameter: {
@@ -223,7 +228,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/db-function-354e7d28-5f93-4ff1-8a52-eb4ee549d9d7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/db-function',
             },
         ],
         functionParameter: {
@@ -240,7 +245,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ddb-function-519a7a37-8772-4c96-85c0-ed2c209717a5',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ddb-function',
             },
         ],
         functionParameter: {
@@ -257,7 +262,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/disc-function-71fce9f3-3f05-4acf-a5a3-eac6ef4daa53',
+                url: 'https://support.microsoft.com/en-us/excel/functions/disc-function',
             },
         ],
         functionParameter: {
@@ -274,7 +279,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dollarde-function-db85aab0-1677-428a-9dfd-a38476693427',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dollarde-function',
             },
         ],
         functionParameter: {
@@ -288,7 +293,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dollarfr-function-0835d163-3023-4a33-9824-3042c5d4f495',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dollarfr-function',
             },
         ],
         functionParameter: {
@@ -302,7 +307,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/duration-function-b254ea57-eadc-4602-a86a-c8e369334038',
+                url: 'https://support.microsoft.com/en-us/excel/functions/duration-function',
             },
         ],
         functionParameter: {
@@ -315,17 +320,17 @@ const locale = {
         },
     },
     EFFECT: {
-        description: 'Returns the effective annual interest rate',
-        abstract: 'Returns the effective annual interest rate',
+        description: 'Returns the effective annual interest rate, given the nominal annual interest rate and the number of compounding periods per year.',
+        abstract: 'Returns the effective annual interest rate, given the nominal annual interest rate and the number of compounding periods per year.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/effect-function-910d4e4c-79e2-4009-95e6-507e04f11bc4',
+                url: 'https://support.microsoft.com/en-us/excel/functions/effect-function',
             },
         ],
         functionParameter: {
-            nominalRate: { name: 'nominal_rate', detail: 'The nominal interest rate.' },
-            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
+            nominalRate: { name: 'nominal_rate', detail: 'Required. The nominal interest rate.' },
+            npery: { name: 'npery', detail: 'Required. The number of compounding periods per year.' },
         },
     },
     FV: {
@@ -334,7 +339,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/fv-function-2eef9f44-a084-4c61-bdd8-4fe4bb1b71b3',
+                url: 'https://support.microsoft.com/en-us/excel/functions/fv-function',
             },
         ],
         functionParameter: {
@@ -351,7 +356,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/fvschedule-function-bec29522-bd87-4082-bab9-a241f3fb251d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/fvschedule-function',
             },
         ],
         functionParameter: {
@@ -360,38 +365,38 @@ const locale = {
         },
     },
     INTRATE: {
-        description: 'Returns the interest rate for a fully invested security',
-        abstract: 'Returns the interest rate for a fully invested security',
+        description: 'Returns the interest rate for a fully invested security.',
+        abstract: 'Returns the interest rate for a fully invested security.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/intrate-function-5cb34dde-a221-4cb6-b3eb-0b9e55e1316f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/intrate-function',
             },
         ],
         functionParameter: {
-            settlement: { name: 'settlement', detail: "The security's settlement date." },
-            maturity: { name: 'maturity', detail: "The security's maturity date." },
-            investment: { name: 'investment', detail: 'The amount invested in the security.' },
-            redemption: { name: 'redemption', detail: 'The amount to be received at maturity.' },
-            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
+            settlement: { name: 'settlement', detail: 'Required. The security\'s settlement date. The security settlement date is the date after the issue date when the security is traded to the buyer.' },
+            maturity: { name: 'maturity', detail: 'Required. The security\'s maturity date. The maturity date is the date when the security expires.' },
+            investment: { name: 'investment', detail: 'Required. The amount invested in the security.' },
+            redemption: { name: 'redemption', detail: 'Required. The amount to be received at maturity.' },
+            basis: { name: 'basis', detail: 'Optional. The type of day count basis to use.' },
         },
     },
     IPMT: {
-        description: 'Returns the interest payment for an investment for a given period',
-        abstract: 'Returns the interest payment for an investment for a given period',
+        description: 'Returns the interest payment for a given period for an investment based on periodic, constant payments and a constant interest rate.',
+        abstract: 'Returns the interest payment for a given period for an investment based on periodic, constant payments and a constant interest rate.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ipmt-function-5cce0ad6-8402-4a41-8d29-61a0b054cb6f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ipmt-function',
             },
         ],
         functionParameter: {
-            rate: { name: 'rate', detail: 'The interest rate per period.' },
-            per: { name: 'per', detail: 'The period for which you want to find the interest and must be in the range 1 to nper.' },
-            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
-            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
-            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
-            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
+            rate: { name: 'rate', detail: 'Required. The interest rate per period.' },
+            per: { name: 'per', detail: 'Required. The period for which you want to find the interest and must be in the range 1 to nper.' },
+            nper: { name: 'nper', detail: 'Required. The total number of payment periods in an annuity.' },
+            pv: { name: 'pv', detail: 'Required. The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'Optional. The future value, or a cash balance you want to attain after the last payment is made. If fv is omitted, it is assumed to be 0 (the future value of a loan, for example, is 0).' },
+            type: { name: 'type', detail: 'Optional. The number 0 or 1 and indicates when payments are due. If type is omitted, it is assumed to be 0.' },
         },
     },
     IRR: {
@@ -400,7 +405,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/irr-function-64925eaa-9988-495b-b290-3ad0c163c1bc',
+                url: 'https://support.microsoft.com/en-us/excel/functions/irr-function',
             },
         ],
         functionParameter: {
@@ -414,7 +419,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ispmt-function-fa58adb6-9d39-4ce0-8f43-75399cea56cc',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ispmt-function',
             },
         ],
         functionParameter: {
@@ -430,7 +435,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/mduration-function-b3786a69-4f20-469a-94ad-33e5b90a763c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/mduration-function',
             },
         ],
         functionParameter: {
@@ -448,7 +453,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/mirr-function-b020f038-7492-4fb4-93c1-35c345b53524',
+                url: 'https://support.microsoft.com/en-us/excel/functions/mirr-function',
             },
         ],
         functionParameter: {
@@ -463,7 +468,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/nominal-function-7f1ae29b-6b92-435e-b950-ad8b190ddd2b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/nominal-function',
             },
         ],
         functionParameter: {
@@ -477,7 +482,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/nper-function-240535b5-6653-4d2d-bfcf-b6a38151d815',
+                url: 'https://support.microsoft.com/en-us/excel/functions/nper-function',
             },
         ],
         functionParameter: {
@@ -494,7 +499,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/npv-function-8672cb67-2576-4d07-b67b-ac28acf2a568',
+                url: 'https://support.microsoft.com/en-us/excel/functions/npv-function',
             },
         ],
         functionParameter: {
@@ -509,7 +514,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oddfprice-function-d7d664a8-34df-4233-8d2b-922bcf6a69e1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/oddfprice-function',
             },
         ],
         functionParameter: {
@@ -530,7 +535,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oddfyield-function-66bc8b7b-6501-4c93-9ce3-2fd16220fe37',
+                url: 'https://support.microsoft.com/en-us/excel/functions/oddfyield-function',
             },
         ],
         functionParameter: {
@@ -551,7 +556,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oddlprice-function-fb657749-d200-4902-afaf-ed5445027fc4',
+                url: 'https://support.microsoft.com/en-us/excel/functions/oddlprice-function',
             },
         ],
         functionParameter: {
@@ -571,7 +576,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oddlyield-function-c873d088-cf40-435f-8d41-c8232fee9238',
+                url: 'https://support.microsoft.com/en-us/excel/functions/oddlyield-function',
             },
         ],
         functionParameter: {
@@ -591,7 +596,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/pduration-function-44f33460-5be5-4c90-b857-22308892adaf',
+                url: 'https://support.microsoft.com/en-us/excel/functions/pduration-function',
             },
         ],
         functionParameter: {
@@ -606,7 +611,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/pmt-function-0214da64-9a63-4996-bc20-214433fa6441',
+                url: 'https://support.microsoft.com/en-us/excel/functions/pmt-function',
             },
         ],
         functionParameter: {
@@ -623,7 +628,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/ppmt-function-c370d9e3-7749-4ca4-beea-b06c6ac95e1b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/ppmt-function',
             },
         ],
         functionParameter: {
@@ -641,7 +646,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/price-function-3ea9deac-8dfa-436f-a7c8-17ea02c21b0a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/price-function',
             },
         ],
         functionParameter: {
@@ -660,7 +665,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/pricedisc-function-d06ad7c1-380e-4be7-9fd9-75e3079acfd3',
+                url: 'https://support.microsoft.com/en-us/excel/functions/pricedisc-function',
             },
         ],
         functionParameter: {
@@ -677,7 +682,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/pricemat-function-52c3b4da-bc7e-476a-989f-a95f675cae77',
+                url: 'https://support.microsoft.com/en-us/excel/functions/pricemat-function',
             },
         ],
         functionParameter: {
@@ -695,7 +700,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/pv-function-23879d31-0e02-4321-be01-da16e8168cbd',
+                url: 'https://support.microsoft.com/en-us/excel/functions/pv-function',
             },
         ],
         functionParameter: {
@@ -712,7 +717,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rate-function-9f665657-4a7e-4bb7-a030-83fc59e748ce',
+                url: 'https://support.microsoft.com/en-us/excel/functions/rate-function',
             },
         ],
         functionParameter: {
@@ -730,7 +735,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/received-function-7a3f8b93-6611-4f81-8576-828312c9b5e5',
+                url: 'https://support.microsoft.com/en-us/excel/functions/received-function',
             },
         ],
         functionParameter: {
@@ -747,7 +752,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rri-function-6f5822d8-7ef1-4233-944c-79e8172930f4',
+                url: 'https://support.microsoft.com/en-us/excel/functions/rri-function',
             },
         ],
         functionParameter: {
@@ -762,7 +767,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/sln-function-cdb666e5-c1c6-40a7-806a-e695edc2f1c8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/sln-function',
             },
         ],
         functionParameter: {
@@ -777,7 +782,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/syd-function-069f8106-b60b-4ca2-98e0-2a0f206bdb27',
+                url: 'https://support.microsoft.com/en-us/excel/functions/syd-function',
             },
         ],
         functionParameter: {
@@ -793,7 +798,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/tbilleq-function-2ab72d90-9b4d-4efe-9fc2-0f81f2c19c8c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/tbilleq-function',
             },
         ],
         functionParameter: {
@@ -808,7 +813,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/tbillprice-function-eacca992-c29d-425a-9eb8-0513fe6035a2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/tbillprice-function',
             },
         ],
         functionParameter: {
@@ -823,7 +828,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/tbillyield-function-6d381232-f4b0-4cd5-8e97-45b9c03468ba',
+                url: 'https://support.microsoft.com/en-us/excel/functions/tbillyield-function',
             },
         ],
         functionParameter: {
@@ -838,7 +843,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/vdb-function-dde4e207-f3fa-488d-91d2-66d55e861d73',
+                url: 'https://support.microsoft.com/en-us/excel/functions/vdb-function',
             },
         ],
         functionParameter: {
@@ -857,7 +862,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/xirr-function-de1242ec-6477-445b-b11b-a303ad9adc9d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/xirr-function',
             },
         ],
         functionParameter: {
@@ -872,7 +877,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/xnpv-function-1b42bbf6-370f-4532-a0eb-d67c16b664b7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/xnpv-function',
             },
         ],
         functionParameter: {
@@ -887,7 +892,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/yield-function-f5f5ca43-c4bd-434f-8bd2-ed3c9727a4fe',
+                url: 'https://support.microsoft.com/en-us/excel/functions/yield-function',
             },
         ],
         functionParameter: {
@@ -906,7 +911,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/yielddisc-function-a9dbdbae-7dae-46de-b995-615faffaaed7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/yielddisc-function',
             },
         ],
         functionParameter: {
@@ -923,7 +928,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/yieldmat-function-ba7d1809-0d33-4bcb-96c7-6c56ec62ef6f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/yieldmat-function',
             },
         ],
         functionParameter: {

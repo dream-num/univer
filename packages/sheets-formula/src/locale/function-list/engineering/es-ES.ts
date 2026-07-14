@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/besseli-function-8d33855c-9a8d-444b-98e0-852267b1c0df',
+                url: 'https://support.microsoft.com/es-es/excel/functions/besseli-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/besselj-function-839cb181-48de-408b-9d80-bd02982d94f7',
+                url: 'https://support.microsoft.com/es-es/excel/functions/besselj-function',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/besselk-function-606d11bc-06d3-4d53-9ecb-2803e2b90b70',
+                url: 'https://support.microsoft.com/es-es/excel/functions/besselk-function',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bessely-function-f3a356b3-da89-42c3-8974-2da54d6353a2',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bessely-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bin2dec-function-63905b57-b3a0-453d-99f4-647bb519cd6c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bin2dec-function',
             },
         ],
         functionParameter: {
@@ -92,7 +92,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bin2hex-function-0375e507-f5e5-4077-9af8-28d84f9f41cc',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bin2hex-function',
             },
         ],
         functionParameter: {
@@ -106,7 +106,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bin2oct-function-0a4e01ba-ac8d-4158-9b29-16c25c4c23fd',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bin2oct-function',
             },
         ],
         functionParameter: {
@@ -120,7 +120,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bitand-function-8a2be3d7-91c3-4b48-9517-64548008563a',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bitand-function',
             },
         ],
         functionParameter: {
@@ -134,7 +134,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bitlshift-function-c55bb27e-cacd-4c7c-b258-d80861a03c9c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bitlshift-function',
             },
         ],
         functionParameter: {
@@ -148,7 +148,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bitor-function-f6ead5c8-5b98-4c9e-9053-8ad5234919b2',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bitor-function',
             },
         ],
         functionParameter: {
@@ -162,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bitrshift-function-274d6996-f42c-4743-abdb-4ff95351222c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bitrshift-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/bitxor-function-c81306a1-03f9-4e89-85ac-b86c3cba10e4',
+                url: 'https://support.microsoft.com/es-es/excel/functions/bitxor-function',
             },
         ],
         functionParameter: {
@@ -190,7 +190,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/complex-function-f0b8f3a9-51cc-4d6d-86fb-3a9362fa4128',
+                url: 'https://support.microsoft.com/es-es/excel/functions/complex-function',
             },
         ],
         functionParameter: {
@@ -205,7 +205,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/convert-function-d785bef1-808e-4aac-bdcd-666c810f9af2',
+                url: 'https://support.microsoft.com/es-es/excel/functions/convert-function',
             },
         ],
         functionParameter: {
@@ -220,7 +220,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/dec2bin-function-0f63dd0e-5d1a-42d8-b511-5bf5c6d43838',
+                url: 'https://support.microsoft.com/es-es/excel/functions/dec2bin-function',
             },
         ],
         functionParameter: {
@@ -234,7 +234,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/dec2hex-function-6344ee8b-b6b5-4c6a-a672-f64666704619',
+                url: 'https://support.microsoft.com/es-es/excel/functions/dec2hex-function',
             },
         ],
         functionParameter: {
@@ -248,7 +248,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/dec2oct-function-c9d835ca-20b7-40c4-8a9e-d3be351ce00f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/dec2oct-function',
             },
         ],
         functionParameter: {
@@ -262,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/delta-function-2f763672-c959-4e07-ac33-fe03220ba432',
+                url: 'https://support.microsoft.com/es-es/excel/functions/delta-function',
             },
         ],
         functionParameter: {
@@ -276,7 +276,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/erf-function-c53c7e7b-5482-4b6c-883e-56df3c9af349',
+                url: 'https://support.microsoft.com/es-es/excel/functions/erf-function',
             },
         ],
         functionParameter: {
@@ -290,7 +290,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/erf-precise-function-9a349593-705c-4278-9a98-e4122831a8e0',
+                url: 'https://support.microsoft.com/es-es/excel/functions/erf-precise-function',
             },
         ],
         functionParameter: {
@@ -303,7 +303,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/erfc-function-736e0318-70ba-4e8b-8d08-461fe68b71b3',
+                url: 'https://support.microsoft.com/es-es/excel/functions/erfc-function',
             },
         ],
         functionParameter: {
@@ -316,7 +316,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/erfc-precise-function-e90e6bab-f45e-45df-b2ac-cd2eb4d4a273',
+                url: 'https://support.microsoft.com/es-es/excel/functions/erfc-precise-function',
             },
         ],
         functionParameter: {
@@ -329,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/gestep-function-f37e7d2a-41da-4129-be95-640883fca9df',
+                url: 'https://support.microsoft.com/es-es/excel/functions/gestep-function',
             },
         ],
         functionParameter: {
@@ -343,7 +343,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/hex2bin-function-a13aafaa-5737-4920-8424-643e581828c1',
+                url: 'https://support.microsoft.com/es-es/excel/functions/hex2bin-function',
             },
         ],
         functionParameter: {
@@ -357,7 +357,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/hex2dec-function-8c8c3155-9f37-45a5-a3ee-ee5379ef106e',
+                url: 'https://support.microsoft.com/es-es/excel/functions/hex2dec-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/hex2oct-function-54d52808-5d19-4bd0-8a63-1096a5d11912',
+                url: 'https://support.microsoft.com/es-es/excel/functions/hex2oct-function',
             },
         ],
         functionParameter: {
@@ -384,7 +384,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imabs-function-b31e73c6-d90c-4062-90bc-8eb351d765a1',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imabs-function',
             },
         ],
         functionParameter: {
@@ -397,7 +397,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imaginary-function-dd5952fd-473d-44d9-95a1-9a17b23e428a',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imaginary-function',
             },
         ],
         functionParameter: {
@@ -405,16 +405,16 @@ const locale: typeof enUS = {
         },
     },
     IMARGUMENT: {
-        description: 'Devuelve el argumento theta, un ángulo expresado en radianes',
-        abstract: 'Devuelve el argumento theta, un ángulo expresado en radianes',
+        description: 'Devuelve el argumento (theta), un ángulo expresado en radianes, de tal forma que:',
+        abstract: 'Devuelve el argumento (theta), un ángulo expresado en radianes, de tal forma que:',
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imargument-function-eed37ec1-23b3-4f59-b9f3-d340358a034a',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imargument-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'núm_imaginario', detail: 'Un número complejo del que desea obtener el argumento theta.' },
+            inumber: { name: 'núm_imaginario', detail: 'Obligatorio. Es el número complejo cuyo argumento desea conocer.' },
         },
     },
     IMCONJUGATE: {
@@ -423,7 +423,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imconjugate-function-2e2fc1ea-f32b-4f9b-9de6-233853bafd42',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imconjugate-function',
             },
         ],
         functionParameter: {
@@ -436,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imcos-function-dad75277-f592-4a6b-ad6c-be93a808a53c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imcos-function',
             },
         ],
         functionParameter: {
@@ -449,7 +449,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imcosh-function-053e4ddb-4122-458b-be9a-457c405e90ff',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imcosh-function',
             },
         ],
         functionParameter: {
@@ -462,7 +462,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imcot-function-dc6a3607-d26a-4d06-8b41-8931da36442c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imcot-function',
             },
         ],
         functionParameter: {
@@ -470,16 +470,16 @@ const locale: typeof enUS = {
         },
     },
     IMCOTH: {
-        description: 'Devuelve la cotangente hiperbólica de un número complejo',
-        abstract: 'Devuelve la cotangente hiperbólica de un número complejo',
+        description: 'La función IM.COTH devuelve la cotangente hiperbólica del número complejo especificado. Por ejemplo, un número complejo dado, como "x+yi", devuelve "coth(x+yi)".',
+        abstract: 'La función IM.COTH devuelve la cotangente hiperbólica del número complejo especificado. Por ejemplo, un número complejo dado, como "x+yi", devuelve "coth(x+yi)".',
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.google.com/docs/answer/9366256?hl=en&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366256?hl=es',
             },
         ],
         functionParameter: {
-            inumber: { name: 'núm_imaginario', detail: 'Un número complejo del que desea obtener la cotangente hiperbólica.' },
+            inumber: { name: 'núm_imaginario', detail: 'Número complejo del que se desea calcular la cotangente hiperbólica. Este argumento puede ser el resultado de la función COMPLEJO, un número real (que se interpreta como un número complejo con las partes imaginarias igual a 0), o una cadena con el formato "x + yi", donde x e y son números.' },
         },
     },
     IMCSC: {
@@ -488,7 +488,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imcsc-function-9e158d8f-2ddf-46cd-9b1d-98e29904a323',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imcsc-function',
             },
         ],
         functionParameter: {
@@ -501,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imcsch-function-c0ae4f54-5f09-4fef-8da0-dc33ea2c5ca9',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imcsch-function',
             },
         ],
         functionParameter: {
@@ -514,7 +514,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imdiv-function-a505aff7-af8a-4451-8142-77ec3d74d83f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imdiv-function',
             },
         ],
         functionParameter: {
@@ -523,16 +523,16 @@ const locale: typeof enUS = {
         },
     },
     IMEXP: {
-        description: 'Devuelve la exponencial de un número complejo',
-        abstract: 'Devuelve la exponencial de un número complejo',
+        description: 'Devuelve el valor exponencial de un número complejo con el formato de texto x + yi o x + yj.',
+        abstract: 'Devuelve el valor exponencial de un número complejo con el formato de texto x + yi o x + yj.',
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imexp-function-c6f8da1f-e024-4c0c-b802-a60e7147a95f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imexp-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'núm_imaginario', detail: 'Un número complejo del que desea obtener la exponencial.' },
+            inumber: { name: 'núm_imaginario', detail: 'Obligatorio. Es el número complejo cuyo valor exponencial desea calcular.' },
         },
     },
     IMLN: {
@@ -541,7 +541,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imln-function-32b98bcf-8b81-437c-a636-6fb3aad509d8',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imln-function',
             },
         ],
         functionParameter: {
@@ -549,17 +549,17 @@ const locale: typeof enUS = {
         },
     },
     IMLOG: {
-        description: 'Devuelve el logaritmo de un número complejo para una base especificada',
-        abstract: 'Devuelve el logaritmo de un número complejo para una base especificada',
+        description: 'La función IM.LOG devuelve el logaritmo de un número complejo en la base especificada.',
+        abstract: 'La función IM.LOG devuelve el logaritmo de un número complejo en la base especificada.',
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hans&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366486?hl=es',
             },
         ],
         functionParameter: {
-            inumber: { name: 'núm_imaginario', detail: 'Un número complejo cuyo logaritmo a una base específica se debe calcular.' },
-            base: { name: 'base', detail: 'La base que se usa al calcular el logaritmo.' },
+            inumber: { name: 'núm_imaginario', detail: 'Valor introducido de la función de logaritmo. El número se puede introducir solo, por ejemplo, 1, y se interpretará como un número real. También se pueden introducir números entre comillas para especificar tanto los coeficientes reales como los complejos.' },
+            base: { name: 'base', detail: 'Base que se va a usar para calcular el logaritmo. Debe ser un número real positivo.' },
         },
     },
     IMLOG10: {
@@ -568,7 +568,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imlog10-function-58200fca-e2a2-4271-8a98-ccd4360213a5',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imlog10-function',
             },
         ],
         functionParameter: {
@@ -581,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imlog2-function-152e13b4-bc79-486c-a243-e6a676878c51',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imlog2-function',
             },
         ],
         functionParameter: {
@@ -594,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/impower-function-210fd2f5-f8ff-4c6a-9d60-30e34fbdef39',
+                url: 'https://support.microsoft.com/es-es/excel/functions/impower-function',
             },
         ],
         functionParameter: {
@@ -608,7 +608,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/improduct-function-2fb8651a-a4f2-444f-975e-8ba7aab3a5ba',
+                url: 'https://support.microsoft.com/es-es/excel/functions/improduct-function',
             },
         ],
         functionParameter: {
@@ -622,7 +622,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imreal-function-d12bc4c0-25d0-4bb3-a25f-ece1938bf366',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imreal-function',
             },
         ],
         functionParameter: {
@@ -635,7 +635,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsec-function-6df11132-4411-4df4-a3dc-1f17372459e0',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsec-function',
             },
         ],
         functionParameter: {
@@ -648,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsech-function-f250304f-788b-4505-954e-eb01fa50903b',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsech-function',
             },
         ],
         functionParameter: {
@@ -661,7 +661,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsin-function-1ab02a39-a721-48de-82ef-f52bf37859f6',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsin-function',
             },
         ],
         functionParameter: {
@@ -674,7 +674,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsinh-function-dfb9ec9e-8783-4985-8c42-b028e9e8da3d',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsinh-function',
             },
         ],
         functionParameter: {
@@ -687,7 +687,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsqrt-function-e1753f80-ba11-4664-a10e-e17368396b70',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsqrt-function',
             },
         ],
         functionParameter: {
@@ -700,7 +700,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsub-function-2e404b4d-4935-4e85-9f52-cb08b9a45054',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsub-function',
             },
         ],
         functionParameter: {
@@ -714,7 +714,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imsum-function-81542999-5f1c-4da6-9ffe-f1d7aaa9457f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imsum-function',
             },
         ],
         functionParameter: {
@@ -728,7 +728,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/imtan-function-8478f45d-610a-43cf-8544-9fc0b553a132',
+                url: 'https://support.microsoft.com/es-es/excel/functions/imtan-function',
             },
         ],
         functionParameter: {
@@ -736,16 +736,16 @@ const locale: typeof enUS = {
         },
     },
     IMTANH: {
-        description: 'Devuelve la tangente hiperbólica de un número complejo',
-        abstract: 'Devuelve la tangente hiperbólica de un número complejo',
+        description: 'La función IM.TANH devuelve la tangente hiperbólica del número complejo especificado. Por ejemplo, un número complejo dado, como "x+yi", devuelve "tanh(x+yi)".',
+        abstract: 'La función IM.TANH devuelve la tangente hiperbólica del número complejo especificado. Por ejemplo, un número complejo dado, como "x+yi", devuelve "tanh(x+yi)".',
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.google.com/docs/answer/9366655?hl=en&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366655?hl=es',
             },
         ],
         functionParameter: {
-            inumber: { name: 'núm_imaginario', detail: 'Un número complejo del que desea obtener la tangente hiperbólica.' },
+            inumber: { name: 'núm_imaginario', detail: 'Número complejo del que se desea calcular la tangente hiperbólica. Este argumento puede ser el resultado de la función COMPLEJO, un número real (que se interpreta como un número complejo con las partes imaginarias igual a 0), o una cadena con el formato "x + yi", donde x e y son números.' },
         },
     },
     OCT2BIN: {
@@ -754,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/oct2bin-function-55383471-3c56-4d27-9522-1a8ec646c589',
+                url: 'https://support.microsoft.com/es-es/excel/functions/oct2bin-function',
             },
         ],
         functionParameter: {
@@ -768,7 +768,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/oct2dec-function-87606014-cb98-44b2-8dbb-e48f8ced1554',
+                url: 'https://support.microsoft.com/es-es/excel/functions/oct2dec-function',
             },
         ],
         functionParameter: {
@@ -781,7 +781,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucciones',
-                url: 'https://support.microsoft.com/en-us/office/oct2hex-function-912175b4-d497-41b4-a029-221f051b858f',
+                url: 'https://support.microsoft.com/es-es/excel/functions/oct2hex-function',
             },
         ],
         functionParameter: {

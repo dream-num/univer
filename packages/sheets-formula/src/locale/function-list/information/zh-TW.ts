@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/cell-%E5%87%BD%E6%95%B0-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/error-type-%E5%87%BD%E6%95%B0-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -50,51 +50,50 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/info-%E5%87%BD%E6%95%B0-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            typeText: { name: '類型文字', detail: '指定要傳回資訊類型的文字。' },
         },
     },
     ISBETWEEN: {
-        description: '檢查提供的數字是否介於另外兩個值之間',
-        abstract: '檢查提供的數字是否介於另外兩個值之間',
+        description: '檢查提供的數字是否介於另外兩個值之間 (無論是否包含這兩個值)。',
+        abstract: '檢查提供的數字是否介於另外兩個值之間 (無論是否包含這兩個值)。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hant&sjid=7730820672019533290-AP',
+                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            valueToCompare: { name: '比較值', detail: '要比較的值，以查看該值是否介於「最小值」和「最大值」之間。' },
-            lowerValue: { name: '最小值', detail: '範圍的下限值，「比較值」可能落在這個範圍內。' },
-            upperValue: { name: '最大值', detail: '範圍的上限值，「比較值」可能落在這個範圍內。' },
-            lowerValueIsInclusive: { name: '包括最小值', detail: '用於指定「最小值」這個值是否包含在範圍中 (預設是 TRUE)。' },
-            upperValueIsInclusive: { name: '包括最大值', detail: '用於指定「最大值」這個值是否包含在範圍中 (預設是 TRUE)。' },
+            valueToCompare: { name: '比較值', detail: '要比較的值，以查看該值是否介於「lower_value」和「upper_value」之間。' },
+            lowerValue: { name: '最小值', detail: '範圍的下限值，「value_to_compare」可能落在這個範圍內。' },
+            upperValue: { name: '最大值', detail: '範圍的上限值，「value_to_compare」可能落在這個範圍內。' },
+            lowerValueIsInclusive: { name: '包括最小值', detail: '用於指定「lower_value」這個值是否包含在範圍中 (預設是 TRUE)' },
+            upperValueIsInclusive: { name: '包括最大值', detail: '用於指定「upper_value」這個值是否包含在範圍中 (預設是 TRUE)' },
         },
     },
     ISBLANK: {
-        description: '如果值為空，則傳回 TRUE',
-        abstract: '若值為空，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISDATE: {
-        description: '針對特定值是否可轉換為日期傳回結果',
-        abstract: '針對特定值是否可轉換為日期傳回結果',
+        description: 'ISDATE 函式會針對特定值是否可轉換為日期傳回結果。',
+        abstract: 'ISDATE 函式會針對特定值是否可轉換為日期傳回結果。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/9061381?hl=zh-Hant&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9061381?hl=zh-Hant',
             },
         ],
         functionParameter: {
@@ -102,42 +101,42 @@ const locale: typeof enUS = {
         },
     },
     ISEMAIL: {
-        description: '檢查某個值是否為有效的電子郵件地址',
-        abstract: '檢查某個值是否為有效的電子郵件地址',
+        description: '如要檢查值是否為有效的電子郵件地址，請使用 ISEMAIL 函式。這項檢查會確認值是否符合一般接受的電子郵件地址格式，但不會驗證該地址是否存在。',
+        abstract: '如要檢查值是否為有效的電子郵件地址，請使用 ISEMAIL 函式。這項檢查會確認值是否符合一般接受的電子郵件地址格式，但不會驗證該地址是否存在。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hant&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '要驗證是否為電子郵件地址的值。' },
+            value: { name: '值', detail: 'ISEMAIL("johndoe@yourname.com")' },
         },
     },
     ISERR: {
-        description: '如果值為 #N/A 以外的任何錯誤值，則傳回 TRUE',
-        abstract: '如果值為 #N/A 以外的任何錯誤值，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISERROR: {
-        description: '如果值為任何錯誤值，則傳回 TRUE',
-        abstract: '如果值為任何錯誤值，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISEVEN: {
@@ -146,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/iseven-%E5%87%BD%E6%95%B0-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
@@ -159,63 +158,63 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/isformula-%E5%87%BD%E6%95%B0-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
-            reference: { name: '參照', detail: '是要測試之儲存格的參照。' },
+            reference: { name: '參照', detail: '必須。 參考是指你想測試的儲存格。 參考可以是儲存格參考、公式，或是指向儲存格的名稱。' },
         },
     },
     ISLOGICAL: {
-        description: '如果值為邏輯值，則傳回 TRUE',
-        abstract: '如果值為邏輯值，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISNA: {
-        description: '如果值為錯誤值 #N/A，則傳回 TRUE',
-        abstract: '如果值為錯誤值 #N/A，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISNONTEXT: {
-        description: '如果值不是文本，則傳回 TRUE',
-        abstract: '如果值不是文本，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISNUMBER: {
-        description: '如果值為數字，則傳回 TRUE',
-        abstract: '如果值為數字，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISODD: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/isodd-%E5%87%BD%E6%95%B0-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -237,47 +236,46 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/isomitted-%E5%87%BD%E6%95%B0-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            argument: { name: '引數', detail: '要檢查是否省略的值，例如 LAMBDA 參數。' },
         },
     },
     ISREF: {
-        description: '如果值為參考值，則傳回 TRUE',
-        abstract: '如果值為參考值，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISTEXT: {
-        description: '如果值為文本，則傳回 TRUE',
-        abstract: '如果值為文本，則傳回 TRUE',
+        description: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
+        abstract: '這些函數統稱為 IS 函數，每個函數都會檢查指定的值，並根據結果傳回 TRUE 或 FALSE。 例如，如果數值引數為空白儲存格的參照， ISBLANK 函數就會傳回邏輯值 TRUE；否則便傳回 FALSE。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+            value: { name: '值', detail: '必須。 這是要檢定的值。 Value 引數可以是空的 (空白儲存格)、錯誤、邏輯值、文字、數字，或參照值，或是上述任何項目的名稱。' },
         },
     },
     ISURL: {
-        description: '檢查特定值是否為有效的網址',
-        abstract: '檢查特定值是否為有效的網址',
+        description: '檢查特定值是否為有效的網址。',
+        abstract: '檢查特定值是否為有效的網址。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hant&sjid=7312884847858065932-AP',
+                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hant',
             },
         ],
         functionParameter: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/n-%E5%87%BD%E6%95%B0-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/na-%E5%87%BD%E6%95%B0-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -315,7 +313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/sheet-%E5%87%BD%E6%95%B0-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -328,7 +326,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/sheets-%E5%87%BD%E6%95%B0-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -340,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/type-%E5%87%BD%E6%95%B0-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/type-function',
             },
         ],
         functionParameter: {

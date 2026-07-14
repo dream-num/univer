@@ -18,12 +18,12 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: 'URL 形式でエンコードされた文字列を返します。',
-        abstract: 'URL 形式でエンコードされた文字列を返します。',
+        description: 'ENCODEURL 関数は、URL でエンコードされた文字列を返し、特定の英数字以外の文字をパーセント記号 (%) と 16 進数に置き換えます。',
+        abstract: 'ENCODEURL 関数は、URL でエンコードされた文字列を返し、特定の英数字以外の文字をパーセント記号 (%) と 16 進数に置き換えます。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/encodeurl-%E9%96%A2%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
@@ -31,31 +31,30 @@ const locale: typeof enUS = {
         },
     },
     FILTERXML: {
-        description: '指定された XPath に基づいて XML コンテンツの特定のデータを返します。',
-        abstract: '指定された XPath に基づいて XML コンテンツの特定のデータを返します。',
+        description: 'FILTERXML 関数は、指定された xpath を使用して XML コンテンツから特定のデータを返します。',
+        abstract: 'FILTERXML 関数は、指定された xpath を使用して XML コンテンツから特定のデータを返します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/filterxml-%E9%96%A2%E6%95%B0-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xml: { name: 'xml', detail: '有効な XML 形式の文字列。' },
+            xpath: { name: 'xpath', detail: '標準の XPath 形式の文字列。' },
         },
     },
     WEBSERVICE: {
-        description: 'Web サービスからのデータを返します。',
-        abstract: 'Web サービスからのデータを返します。',
+        description: 'WEBSERVICE 関数は、インターネットまたはイントラネット上の Web サービスからデータを返します。',
+        abstract: 'WEBSERVICE 関数は、インターネットまたはイントラネット上の Web サービスからデータを返します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/webservice-%E9%96%A2%E6%95%B0-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: 'Web サービスの URL。' },
         },
     },
 };

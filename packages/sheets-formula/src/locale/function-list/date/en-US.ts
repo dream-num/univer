@@ -21,7 +21,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/date-function-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/en-us/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -36,13 +36,13 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/datedif-function-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'start_date', detail: 'A date that represents the first, or starting date of a given period.' },
+            startDate: { name: 'start_date', detail: 'A date that represents the first, or starting date of a given period. Dates may be entered as text strings within quotation marks (for example, "2001/1/30"), as serial numbers (for example, 36921, which represents January 30, 2001, if you\'re using the 1900 date system), or as the results of other formulas or functions (for example, DATEVALUE("2001/1/30")).' },
             endDate: { name: 'end_date', detail: 'A date that represents the last, or ending, date of the period.' },
-            method: { name: 'method', detail: 'The type of information that you want returned.' },
+            unit: { name: 'Unit', detail: 'The type of information that you want returned, where: Unit****Returns " Y "The number of complete years in the period." M "The number of complete months in the period." D "The number of days in the period." MD "The difference between the days in start_date and end_date. The months and years of the dates are ignored. Important: We don\'t recommend using the "MD" argument, as there are known limitations with it. See the known issues section below." YM "The difference between the months in start_date and end_date. The days and years of the dates are ignored" YD "The difference between the days of start_date and end_date. The years of the dates are ignored.' },
         },
     },
     DATEVALUE: {
@@ -51,7 +51,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/en-us/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -64,7 +64,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/day-function-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/en-us/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -72,17 +72,17 @@ const locale = {
         },
     },
     DAYS: {
-        description: 'Returns the number of days between two dates',
-        abstract: 'Returns the number of days between two dates',
+        description: 'Returns the number of days between two dates.',
+        abstract: 'Returns the number of days between two dates.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/days-function-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/en-us/excel/functions/days-function',
             },
         ],
         functionParameter: {
-            endDate: { name: 'end_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
-            startDate: { name: 'start_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
+            endDate: { name: 'end_date', detail: 'Required. Start_date and End_date are the two dates between which you want to know the number of days.' },
+            startDate: { name: 'start_date', detail: 'Required. Start_date and End_date are the two dates between which you want to know the number of days.' },
         },
     },
     DAYS360: {
@@ -91,7 +91,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -106,7 +106,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/edate-function-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/en-us/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -120,7 +120,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/eomonth-function-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/en-us/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -139,7 +139,7 @@ const locale = {
         ],
         functionParameter: {
             timestamp: { name: 'timestamp', detail: 'A Unix epoch timestamp, in seconds, milliseconds, or microseconds.' },
-            unit: { name: 'unit', detail: 'The unit of time in which the timestamp is expressed. 1 by default: \n1 indicates the time unit is seconds. \n2 indicates the time unit is milliseconds.\n3 indicates the time unit is microseconds.' },
+            unit: { name: 'unit', detail: '[OPTIONAL – 1 by default]: The unit of time in which the timestamp is expressed.' },
         },
     },
     HOUR: {
@@ -148,7 +148,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hour-function-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -161,7 +161,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
@@ -169,44 +169,44 @@ const locale = {
         },
     },
     MINUTE: {
-        description: 'Converts a serial number to a minute',
-        abstract: 'Converts a serial number to a minute',
+        description: 'Returns the minutes of a time value. The minute is given as an integer, ranging from 0 to 59.',
+        abstract: 'Returns the minutes of a time value. The minute is given as an integer, ranging from 0 to 59.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/minute-function-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/en-us/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: 'The date of the day you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
+            serialNumber: { name: 'serial_number', detail: 'Required. The time that contains the minute you want to find. Times may be entered as text strings within quotation marks (for example, "6:45 PM"), as decimal numbers (for example, 0.78125, which represents 6:45 PM), or as results of other formulas or functions (for example, TIMEVALUE("6:45 PM")).' },
         },
     },
     MONTH: {
         description: 'Returns the month of a date represented by a serial number. The month is given as an integer, ranging from 1 (January) to 12 (December).',
-        abstract: 'Converts a serial number to a month',
+        abstract: 'Returns the month of a date represented by a serial number. The month is given as an integer, ranging from 1 (January) to 12 (December).',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/month-function-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/month-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: 'The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
+            serialNumber: { name: 'serial_number', detail: 'Required. The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text .' },
         },
     },
     NETWORKDAYS: {
-        description: 'Returns the number of whole workdays between two dates',
-        abstract: 'Returns the number of whole workdays between two dates',
+        description: 'Returns the number of whole working days between start_date and end_date. Working days exclude weekends and any dates identified in holidays. Use NETWORKDAYS to calculate employee benefits that accrue based on the number of days worked during a specific term.',
+        abstract: 'Returns the number of whole working days between start_date and end_date. Working days exclude weekends and any dates identified in holidays. Use NETWORKDAYS to calculate employee benefits that accrue based on the number of days worked during a specific term.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/networkdays-function-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
-            endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
-            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays' },
+            startDate: { name: 'start_date', detail: 'Required. A date that represents the start date.' },
+            endDate: { name: 'end_date', detail: 'Required. A date that represents the end date.' },
+            holidays: { name: 'holidays', detail: 'Optional. An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. The list can be either a range of cells that contains the dates or an array constant of the serial numbers that represent the dates.' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -215,7 +215,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/networkdays-intl-function-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/en-us/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -226,43 +226,43 @@ const locale = {
         },
     },
     NOW: {
-        description: 'Returns the serial number of the current date and time.',
-        abstract: 'Returns the serial number of the current date and time',
+        description: 'Returns the serial number of the current date and time. If the cell format was General before the function was entered, Excel changes the cell format so that it matches the date and time format of your regional settings. You can change the date and time format for the cell by using the commands in the Number group of the Home tab on the Ribbon.',
+        abstract: 'Returns the serial number of the current date and time. If the cell format was General before the function was entered, Excel changes the cell format so that it matches the date and time format of your regional settings. You can change the date and time format for the cell by using the commands in the Number group of the Home tab on the Ribbon.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/now-function-3337fd29-145a-4347-b2e6-20c904739c46',
+                url: 'https://support.microsoft.com/en-us/excel/functions/now-function',
             },
         ],
         functionParameter: {
         },
     },
     SECOND: {
-        description: 'Converts a serial number to a second',
-        abstract: 'Converts a serial number to a second',
+        description: 'Returns the seconds of a time value. The second is given as an integer in the range 0 (zero) to 59.',
+        abstract: 'Returns the seconds of a time value. The second is given as an integer in the range 0 (zero) to 59.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/second-function-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/second-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: 'The date of the day you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
+            serialNumber: { name: 'serial_number', detail: 'Required. The time that contains the seconds you want to find. Times may be entered as text strings within quotation marks (for example, "6:45 PM"), as decimal numbers (for example, 0.78125, which represents 6:45 PM), or as results of other formulas or functions (for example, TIMEVALUE("6:45 PM")).' },
         },
     },
     TIME: {
-        description: 'Returns the serial number of a particular time.',
-        abstract: 'Returns the serial number of a particular time',
+        description: 'Returns the decimal number for a particular time. If the cell format was General before the function was entered, the result is formatted as a date.',
+        abstract: 'Returns the decimal number for a particular time. If the cell format was General before the function was entered, the result is formatted as a date.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/time-function-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/en-us/excel/functions/time-function',
             },
         ],
         functionParameter: {
-            hour: { name: 'hour', detail: 'A number from 0 (zero) to 32767 representing the hour. Any value greater than 23 will be divided by 24 and the remainder will be treated as the hour value. For example, TIME(27,0,0) = TIME(3,0,0) = .125 or 3:00 AM.' },
-            minute: { name: 'minute', detail: 'A number from 0 to 32767 representing the minute. Any value greater than 59 will be converted to hours and minutes. For example, TIME(0,750,0) = TIME(12,30,0) = .520833 or 12:30 PM.' },
-            second: { name: 'second', detail: 'A number from 0 to 32767 representing the second. Any value greater than 59 will be converted to hours, minutes, and seconds. For example, TIME(0,0,2000) = TIME(0,33,22) = .023148 or 12:33:20 AM.' },
+            hour: { name: 'hour', detail: 'Required. A number from 0 (zero) to 32767 representing the hour. Any value greater than 23 will be divided by 24 and the remainder will be treated as the hour value. For example, TIME(27,0,0) = TIME(3,0,0) = .125 or 3:00 AM.' },
+            minute: { name: 'minute', detail: 'Required. A number from 0 to 32767 representing the minute. Any value greater than 59 will be converted to hours and minutes. For example, TIME(0,750,0) = TIME(12,30,0) = .520833 or 12:30 PM.' },
+            second: { name: 'second', detail: 'Required. A number from 0 to 32767 representing the second. Any value greater than 59 will be converted to hours, minutes, and seconds. For example, TIME(0,0,2000) = TIME(0,33,22) = .023148 or 12:33:20 AM' },
         },
     },
     TIMEVALUE: {
@@ -271,7 +271,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/timevalue-function-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/en-us/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -284,11 +284,11 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3094239?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=en',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: 'The argument or reference to a cell to be converted to a date.' },
+            value: { name: 'value', detail: 'The argument or reference to a cell to be converted to a date. If value is a number or a reference to a cell containing a numeric value, TO_DATE returns value converted to a date, interpreting value as number of days since December 30, 1899. Negative values are interpreted as days before this date, and fractional values indicate time of day past midnight. If value is not a number or a reference to a cell containing a numeric value, TO_DATE returns value without modification.' },
         },
     },
     TODAY: {
@@ -297,7 +297,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/today-function-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/en-us/excel/functions/today-function',
             },
         ],
         functionParameter: {
@@ -309,7 +309,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -323,7 +323,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/en-us/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -337,7 +337,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/workday-function-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/en-us/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -352,7 +352,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/workday-intl-function-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -368,7 +368,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/year-function-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/en-us/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -381,7 +381,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/yearfrac-function-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

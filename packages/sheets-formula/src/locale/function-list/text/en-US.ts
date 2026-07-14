@@ -21,7 +21,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/asc-function-0b6abf1c-c663-4004-a964-ebc00b723266',
+                url: 'https://support.microsoft.com/en-us/excel/functions/asc-function',
             },
         ],
         functionParameter: {
@@ -34,7 +34,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/arraytotext-function-9cdcad46-2fa5-4c6b-ac92-14e7bc862b8b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/arraytotext-function',
             },
         ],
         functionParameter: {
@@ -48,7 +48,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bahttext-function-5ba4d0b4-abd3-4325-8d22-7a92d59aab9c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/bahttext-function',
             },
         ],
         functionParameter: {
@@ -61,7 +61,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/char-function',
             },
         ],
         functionParameter: {
@@ -74,7 +74,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/clean-function-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41',
+                url: 'https://support.microsoft.com/en-us/excel/functions/clean-function',
             },
         ],
         functionParameter: {
@@ -87,7 +87,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/code-function-c32b692b-2ed0-4a04-bdd9-75640144b928',
+                url: 'https://support.microsoft.com/en-us/excel/functions/code-function',
             },
         ],
         functionParameter: {
@@ -100,7 +100,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/concat-function-9b1a9a3f-94ff-41af-9736-694cbd6b4ca2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/concat-function',
             },
         ],
         functionParameter: {
@@ -114,7 +114,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/concatenate-function-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
+                url: 'https://support.microsoft.com/en-us/excel/functions/concatenate-function',
             },
         ],
         functionParameter: {
@@ -128,7 +128,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dbcs-function-a4025e73-63d2-4958-9423-21a24794c9e5',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dbcs-function',
             },
         ],
         functionParameter: {
@@ -141,7 +141,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dollar-function-a6cd05d9-9740-4ad3-a469-8109d18ff611',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dollar-function',
             },
         ],
         functionParameter: {
@@ -155,7 +155,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/exact-function-d3087698-fc15-4a15-9631-12575cf29926',
+                url: 'https://support.microsoft.com/en-us/excel/functions/exact-function',
             },
         ],
         functionParameter: {
@@ -169,7 +169,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/find-findb-functions-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/en-us/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -184,7 +184,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/find-findb-functions-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/en-us/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -199,7 +199,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/fixed-function-ffd5723c-324c-45e9-8b96-e41be2a8274a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/fixed-function',
             },
         ],
         functionParameter: {
@@ -214,7 +214,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/left-leftb-functions-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -228,7 +228,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/left-leftb-functions-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -242,7 +242,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/len-lenb-functions-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/en-us/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -255,7 +255,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/len-lenb-functions-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/en-us/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -268,7 +268,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/lower-function-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
+                url: 'https://support.microsoft.com/en-us/excel/functions/lower-function',
             },
         ],
         functionParameter: {
@@ -281,7 +281,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/en-us/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -296,7 +296,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/en-us/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -325,7 +325,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/numbervalue-function-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+                url: 'https://support.microsoft.com/en-us/excel/functions/numbervalue-function',
             },
         ],
         functionParameter: {
@@ -340,12 +340,11 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/phonetic-function-9a329dac-0c0f-42f8-9a55-639086988554',
+                url: 'https://support.microsoft.com/en-us/excel/functions/phonetic-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'Reference', detail: 'Required. Text string or a reference to a single cell or a range of cells that contain a furigana text string.' },
         },
     },
     PROPER: {
@@ -354,7 +353,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/proper-function-52a5a283-e8b2-49be-8506-b2887b889f94',
+                url: 'https://support.microsoft.com/en-us/excel/functions/proper-function',
             },
         ],
         functionParameter: {
@@ -367,7 +366,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=en',
+                url: 'https://support.google.com/docs/answer/3098244?hl=en',
             },
         ],
         functionParameter: {
@@ -381,7 +380,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=en',
+                url: 'https://support.google.com/docs/answer/3098292?hl=en',
             },
         ],
         functionParameter: {
@@ -395,7 +394,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=en',
+                url: 'https://support.google.com/docs/answer/3098245?hl=en',
             },
         ],
         functionParameter: {
@@ -410,7 +409,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/replace-replaceb-functions-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -426,7 +425,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/replace-replaceb-functions-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/en-us/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -442,7 +441,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rept-function-04c4d778-e712-43b4-9c15-d656582bb061',
+                url: 'https://support.microsoft.com/en-us/excel/functions/rept-function',
             },
         ],
         functionParameter: {
@@ -456,7 +455,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/right-rightb-functions-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -470,7 +469,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/right-rightb-functions-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -484,7 +483,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/search-searchb-functions-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/en-us/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -499,7 +498,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/search-searchb-functions-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/en-us/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -514,7 +513,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/substitute-function-6434944e-a904-4336-a9b0-1e58df3bc332',
+                url: 'https://support.microsoft.com/en-us/excel/functions/substitute-function',
             },
         ],
         functionParameter: {
@@ -530,7 +529,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/t-function-fb83aeec-45e7-4924-af95-53e073541228',
+                url: 'https://support.microsoft.com/en-us/excel/functions/t-function',
             },
         ],
         functionParameter: {
@@ -543,7 +542,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/text-function-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/text-function',
             },
         ],
         functionParameter: {
@@ -557,7 +556,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/textafter-function-c8db2546-5b51-416a-9690-c7e6722e90b4',
+                url: 'https://support.microsoft.com/en-us/excel/functions/textafter-function',
             },
         ],
         functionParameter: {
@@ -575,7 +574,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/textbefore-function-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+                url: 'https://support.microsoft.com/en-us/excel/functions/textbefore-function',
             },
         ],
         functionParameter: {
@@ -593,7 +592,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/textjoin-function-357b449a-ec91-49d0-80c3-0e8fc845691c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/textjoin-function',
             },
         ],
         functionParameter: {
@@ -609,7 +608,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/textsplit-function-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/textsplit-function',
             },
         ],
         functionParameter: {
@@ -627,7 +626,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9',
+                url: 'https://support.microsoft.com/en-us/excel/functions/trim-function',
             },
         ],
         functionParameter: {
@@ -640,7 +639,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/unichar-function-ffeb64f5-f131-44c6-b332-5cd72f0659b8',
+                url: 'https://support.microsoft.com/en-us/excel/functions/unichar-function',
             },
         ],
         functionParameter: {
@@ -653,7 +652,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/unicode-function-adb74aaa-a2a5-4dde-aff6-966e4e81f16f',
+                url: 'https://support.microsoft.com/en-us/excel/functions/unicode-function',
             },
         ],
         functionParameter: {
@@ -666,7 +665,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/upper-function-c11f29b3-d1a3-4537-8df6-04d0049963d6',
+                url: 'https://support.microsoft.com/en-us/excel/functions/upper-function',
             },
         ],
         functionParameter: {
@@ -679,7 +678,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/value-function-257d0108-07dc-437d-ae1c-bc2d3953d8c2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/value-function',
             },
         ],
         functionParameter: {
@@ -692,7 +691,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/valuetotext-function-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+                url: 'https://support.microsoft.com/en-us/excel/functions/valuetotext-function',
             },
         ],
         functionParameter: {
@@ -706,12 +705,14 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/call-function-32d58445-e646-4ffd-8d5e-b45077a5e995',
+                url: 'https://support.microsoft.com/en-us/excel/functions/call-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'Module_text', detail: 'Required. Quoted text specifying the name of the dynamic link library (DLL) that contains the procedure in Microsoft Excel for Windows.' },
+            procedure: { name: 'Procedure', detail: 'Required. Text specifying the name of the function in the DLL in Microsoft Excel for Windows. You can also use the ordinal value of the function from the EXPORTS statement in the module-definition file (.DEF). The ordinal value must not be in the form of text.' },
+            typeText: { name: 'Type_text', detail: 'Required. Text specifying the data type of the return value and the data types of all arguments to the DLL or code resource. The first letter of type_text specifies the return value. The codes you use for type_text are described in detail in Using the CALL and REGISTER functions . For stand-alone DLLs or code resources (XLLs), you can omit this argument.' },
+            argument1: { name: 'Argument1,...', detail: 'Optional. The arguments to be passed to the procedure.' },
         },
     },
     EUROCONVERT: {
@@ -720,12 +721,15 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/euroconvert-function-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+                url: 'https://support.microsoft.com/en-us/excel/functions/euroconvert-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'Number', detail: 'Required. The currency value you want to convert, or a reference to a cell containing the value.' },
+            source: { name: 'Source', detail: 'Required. A three-letter string, or reference to a cell containing the string, corresponding to the ISO code for the source currency. The following currency codes are available in the EUROCONVERT function:' },
+            target: { name: 'Target', detail: 'Required. A three-letter string, or cell reference, corresponding to the ISO code of the currency to which you want to convert the number. See the previous Source table for the ISO codes.' },
+            fullPrecision: { name: 'Full_precision', detail: 'Required. A logical value (TRUE or FALSE), or an expression that evaluates to a value of TRUE or FALSE, that specifies how to display the result.' },
+            triangulationPrecision: { name: 'Triangulation_precision', detail: 'Required. An integer equal to or greater than 3 that specifies the number of significant digits to be used for the intermediate euro value when converting between two euro member currencies. If you omit this argument, Excel does not round the intermediate euro value. If you include this argument when converting from a euro member currency to the euro, Excel calculates the intermediate euro value that could then be converted to a euro member currency.' },
         },
     },
     REGISTER_ID: {
@@ -734,12 +738,13 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/register-id-function-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+                url: 'https://support.microsoft.com/en-us/excel/functions/register-id-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'Module_text', detail: 'Required. Text specifying the name of the DLL that contains the function in Microsoft Excel for Windows.' },
+            procedure: { name: 'Procedure', detail: 'Required. Text specifying the name of the function in the DLL in Microsoft Excel for Windows. You can also use the ordinal value of the function from the EXPORTS statement in the module-definition file (.DEF). The ordinal value or resource ID number must not be in text form.' },
+            typeText: { name: 'Type_text', detail: 'Optional. Text specifying the data type of the return value and the data types of all arguments to the DLL. The first letter of type_text specifies the return value. If the function or code resource is already registered, you can omit this argument.' },
         },
     },
 };

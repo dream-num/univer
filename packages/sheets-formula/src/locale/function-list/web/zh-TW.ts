@@ -18,44 +18,43 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: '傳回 URL 編碼的字串',
-        abstract: '傳回 URL 編碼的字串',
+        description: 'ENCODEURL 函式會回傳一個 URL 編碼的字串，將某些非字母數字字元替換為百分比符號 (%) 並以十六進位數字表示。',
+        abstract: 'ENCODEURL 函式會回傳一個 URL 編碼的字串，將某些非字母數字字元替換為百分比符號 (%) 並以十六進位數字表示。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/encodeurl-%E5%87%BD%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '要編碼 URL 的字串' },
+            text: { name: '文字', detail: '一個要編碼為 URL 的字串' },
         },
     },
     FILTERXML: {
-        description: '透過使用指定的 XPath，傳回 XML 內容中的特定資料',
-        abstract: '透過使用指定的 XPath，傳回 XML 內容中的特定資料',
+        description: 'FILTERXML 函式透過指定的 xpath 從 XML 內容中回傳特定資料。',
+        abstract: 'FILTERXML 函式透過指定的 xpath 從 XML 內容中回傳特定資料。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/filterxml-%E5%87%BD%E6%95%B0-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xml: { name: 'xml', detail: '有效 XML 格式的字串。' },
+            xpath: { name: 'xpath', detail: '標準 XPath 格式的字串。' },
         },
     },
     WEBSERVICE: {
-        description: '傳回 Web 服務中的資料。',
-        abstract: '傳回 Web 服務中的資料。',
+        description: 'WEBSERVICE 函式會回傳來自網際網路或內聯網網路上的網路服務資料。',
+        abstract: 'WEBSERVICE 函式會回傳來自網際網路或內聯網網路上的網路服務資料。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/webservice-%E5%87%BD%E6%95%B0-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: '網頁服務的 URL。' },
         },
     },
 };

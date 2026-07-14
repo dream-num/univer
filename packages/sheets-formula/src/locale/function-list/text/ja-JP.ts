@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/asc-%E9%96%A2%E6%95%B0-0b6abf1c-c663-4004-a964-ebc00b723266',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/asc-function',
             },
         ],
         functionParameter: {
@@ -36,7 +36,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/arraytotext-%E9%96%A2%E6%95%B0-9cdcad46-2fa5-4c6b-ac92-14e7bc862b8b',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/arraytotext-function',
             },
         ],
         functionParameter: {
@@ -50,7 +50,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bahttext-%E9%96%A2%E6%95%B0-5ba4d0b4-abd3-4325-8d22-7a92d59aab9c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bahttext-function',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/char-%E9%96%A2%E6%95%B0-bbd249c8-b36e-4a91-8017-1c133f9b837a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/char-function',
             },
         ],
         functionParameter: {
@@ -76,7 +76,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/clean-%E9%96%A2%E6%95%B0-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/clean-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/code-%E9%96%A2%E6%95%B0-c32b692b-2ed0-4a04-bdd9-75640144b928',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/code-function',
             },
         ],
         functionParameter: {
@@ -102,7 +102,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/concat-%E9%96%A2%E6%95%B0-9b1a9a3f-94ff-41af-9736-694cbd6b4ca2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/concat-function',
             },
         ],
         functionParameter: {
@@ -116,7 +116,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/concatenate-%E9%96%A2%E6%95%B0-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/concatenate-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/dbcs-%E9%96%A2%E6%95%B0-a4025e73-63d2-4958-9423-21a24794c9e5',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/dbcs-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/dollar-%E9%96%A2%E6%95%B0-a6cd05d9-9740-4ad3-a469-8109d18ff611',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/dollar-function',
             },
         ],
         functionParameter: {
@@ -157,7 +157,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/exact-%E9%96%A2%E6%95%B0-d3087698-fc15-4a15-9631-12575cf29926',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/exact-function',
             },
         ],
         functionParameter: {
@@ -171,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/find-%E9%96%A2%E6%95%B0-findb-%E9%96%A2%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -186,7 +186,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/find-%E9%96%A2%E6%95%B0-findb-%E9%96%A2%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -201,7 +201,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/fixed-%E9%96%A2%E6%95%B0-ffd5723c-324c-45e9-8b96-e41be2a8274a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/fixed-function',
             },
         ],
         functionParameter: {
@@ -216,7 +216,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/left-%E9%96%A2%E6%95%B0-leftb-%E9%96%A2%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -230,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/left-%E9%96%A2%E6%95%B0-leftb-%E9%96%A2%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -244,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/len-%E9%96%A2%E6%95%B0-lenb-%E9%96%A2%E6%95%B0-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/len-%E9%96%A2%E6%95%B0-lenb-%E9%96%A2%E6%95%B0-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -270,7 +270,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/lower-%E9%96%A2%E6%95%B0-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/lower-function',
             },
         ],
         functionParameter: {
@@ -283,7 +283,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/mid-%E9%96%A2%E6%95%B0-midb-%E9%96%A2%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -298,7 +298,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/mid-%E9%96%A2%E6%95%B0-midb-%E9%96%A2%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -327,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/numbervalue-%E9%96%A2%E6%95%B0-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/numbervalue-function',
             },
         ],
         functionParameter: {
@@ -342,12 +342,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/phonetic-%E9%96%A2%E6%95%B0-9a329dac-0c0f-42f8-9a55-639086988554',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/phonetic-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '参照', detail: 'ふりがなを取り出す文字列、セル範囲、または参照です。' },
         },
     },
     PROPER: {
@@ -356,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/proper-%E9%96%A2%E6%95%B0-52a5a283-e8b2-49be-8506-b2887b889f94',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/proper-function',
             },
         ],
         functionParameter: {
@@ -369,11 +368,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=ja',
+                url: 'https://support.google.com/docs/answer/3098244?hl=ja',
             },
         ],
         functionParameter: {
-            text: { name: 'テキスト', detail: '代入するテキストです。' },
+            text: { name: 'テキスト', detail: 'ヒント: 上の例では 2 列のデータが返されます（最初に「値」、2 番目に「抽出」）。' },
             regularExpression: { name: '正規表現', detail: 'この正規表現に一致する最初のテキスト部分が返されます。' },
         },
     },
@@ -383,7 +382,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=ja',
+                url: 'https://support.google.com/docs/answer/3098292?hl=ja',
             },
         ],
         functionParameter: {
@@ -397,7 +396,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=ja',
+                url: 'https://support.google.com/docs/answer/3098245?hl=ja',
             },
         ],
         functionParameter: {
@@ -412,7 +411,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -428,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -444,7 +443,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/rept-%E9%96%A2%E6%95%B0-04c4d778-e712-43b4-9c15-d656582bb061',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/rept-function',
             },
         ],
         functionParameter: {
@@ -458,7 +457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/right-%E9%96%A2%E6%95%B0-rightb-%E9%96%A2%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -472,7 +471,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/right-%E9%96%A2%E6%95%B0-rightb-%E9%96%A2%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -486,7 +485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/search-%E9%96%A2%E6%95%B0-searchb-%E9%96%A2%E6%95%B0-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -501,7 +500,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/search-%E9%96%A2%E6%95%B0-searchb-%E9%96%A2%E6%95%B0-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -516,7 +515,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/substitute-%E9%96%A2%E6%95%B0-6434944e-a904-4336-a9b0-1e58df3bc332',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/substitute-function',
             },
         ],
         functionParameter: {
@@ -532,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/t-%E9%96%A2%E6%95%B0-fb83aeec-45e7-4924-af95-53e073541228',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/t-function',
             },
         ],
         functionParameter: {
@@ -545,7 +544,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/text-%E9%96%A2%E6%95%B0-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/text-function',
             },
         ],
         functionParameter: {
@@ -559,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/textafter-%E9%96%A2%E6%95%B0-c8db2546-5b51-416a-9690-c7e6722e90b4',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/textafter-function',
             },
         ],
         functionParameter: {
@@ -577,7 +576,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/textbefore-%E9%96%A2%E6%95%B0-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/textbefore-function',
             },
         ],
         functionParameter: {
@@ -595,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/textjoin-%E9%96%A2%E6%95%B0-357b449a-ec91-49d0-80c3-0e8fc845691c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/textjoin-function',
             },
         ],
         functionParameter: {
@@ -611,7 +610,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/textsplit-%E9%96%A2%E6%95%B0-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/textsplit-function',
             },
         ],
         functionParameter: {
@@ -629,7 +628,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/trim-%E9%96%A2%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479f9',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/trim-function',
             },
         ],
         functionParameter: {
@@ -642,7 +641,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/unichar-%E9%96%A2%E6%95%B0-ffeb64f5-f131-44c6-b332-5cd72f0659b8',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/unichar-function',
             },
         ],
         functionParameter: {
@@ -655,7 +654,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/unicode-%E9%96%A2%E6%95%B0-adb74aaa-a2a5-4dde-aff6-966e4e81f16f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/unicode-function',
             },
         ],
         functionParameter: {
@@ -668,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/upper-%E9%96%A2%E6%95%B0-c11f29b3-d1a3-4537-8df6-04d0049963d6',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/upper-function',
             },
         ],
         functionParameter: {
@@ -681,7 +680,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/value-%E9%96%A2%E6%95%B0-257d0108-07dc-437d-ae1c-bc2d3953d8c2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/value-function',
             },
         ],
         functionParameter: {
@@ -694,7 +693,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/valetotext-%E9%96%A2%E6%95%B0-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/valuetotext-function',
             },
         ],
         functionParameter: {
@@ -708,12 +707,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/call-%E9%96%A2%E6%95%B0-32d58445-e646-4ffd-8d5e-b45077a5e995',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/call-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'モジュール文字列', detail: 'プロシージャを含むダイナミック リンク ライブラリ (DLL) の名前です。' },
+            procedure: { name: 'プロシージャ', detail: 'DLL 内のプロシージャ名または序数です。' },
+            typeText: { name: '型文字列', detail: '引数と戻り値のデータ型を指定する文字列です。' },
+            argument1: { name: '引数 1', detail: '省略可能。プロシージャに渡す最初の引数です。' },
         },
     },
     EUROCONVERT: {
@@ -722,12 +723,15 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/euroconvert-%E9%96%A2%E6%95%B0-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/euroconvert-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '換算する通貨の値です。' },
+            source: { name: '換算元', detail: '換算元通貨のコードです。' },
+            target: { name: '換算先', detail: '換算先通貨のコードです。' },
+            fullPrecision: { name: '完全精度', detail: '通貨固有の丸め規則を使用するかどうかを指定する論理値です。' },
+            triangulationPrecision: { name: '三角換算精度', detail: '省略可能。ユーロを介した中間換算の有効桁数です。' },
         },
     },
     REGISTER_ID: {
@@ -736,12 +740,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/register-id-%E9%96%A2%E6%95%B0-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/register-id-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            moduleText: { name: 'モジュール文字列', detail: 'プロシージャを含む DLL またはコード リソースの名前です。' },
+            procedure: { name: 'プロシージャ', detail: 'プロシージャ名または序数です。' },
+            typeText: { name: '型文字列', detail: '省略可能。引数と戻り値のデータ型を指定する文字列です。' },
         },
     },
 };

@@ -16,12 +16,12 @@
 
 const locale = {
     ENCODEURL: {
-        description: 'Returns a URL-encoded string',
-        abstract: 'Returns a URL-encoded string',
+        description: 'The ENCODEURL function returns a URL-encoded string, replacing certain non-alphanumeric characters with the percentage symbol (%) and a hexadecimal number.',
+        abstract: 'The ENCODEURL function returns a URL-encoded string, replacing certain non-alphanumeric characters with the percentage symbol (%) and a hexadecimal number.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
@@ -29,31 +29,30 @@ const locale = {
         },
     },
     FILTERXML: {
-        description: 'Returns specific data from the XML content by using the specified XPath',
-        abstract: 'Returns specific data from the XML content by using the specified XPath',
+        description: 'The FILTERXML function returns specific data from XML content by using the specified xpath.',
+        abstract: 'The FILTERXML function returns specific data from XML content by using the specified xpath.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/en-us/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xml: { name: 'xml', detail: 'A string in valid XML format.' },
+            xpath: { name: 'xpath', detail: 'A string in standard XPath format.' },
         },
     },
     WEBSERVICE: {
-        description: 'Returns data from a web service',
-        abstract: 'Returns data from a web service',
+        description: 'The WEBSERVICE function returns data from a web service on the Internet or Intranet.',
+        abstract: 'The WEBSERVICE function returns data from a web service on the Internet or Intranet.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/en-us/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: 'The URL of the web service.' },
         },
     },
 };

@@ -18,100 +18,100 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     BESSELI: {
-        description: 'Returns the modified Bessel function In(x)',
-        abstract: 'Returns the modified Bessel function In(x)',
+        description: '순허수 인수를 사용하여 계산된 Bessel 함수인 수정된 Bessel 함수를 반환합니다.',
+        abstract: '순허수 인수를 사용하여 계산된 Bessel 함수인 수정된 Bessel 함수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/besseli-function-8d33855c-9a8d-444b-98e0-852267b1c0df',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/besseli-function',
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
-            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
+            x: { name: 'X', detail: '필수 요소입니다. 함수를 계산할 값입니다.' },
+            n: { name: 'N', detail: '필수 요소입니다. Bessel 함수의 차수입니다. n이 정수가 아니면 소수점 이하는 무시됩니다.' },
         },
     },
     BESSELJ: {
-        description: 'Returns the Bessel function Jn(x)',
-        abstract: 'Returns the Bessel function Jn(x)',
+        description: 'Bessel 함수를 반환합니다.',
+        abstract: 'Bessel 함수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/besselj-function-839cb181-48de-408b-9d80-bd02982d94f7',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/besselj-function',
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
-            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
+            x: { name: 'X', detail: '필수 요소입니다. 함수를 계산할 값입니다.' },
+            n: { name: 'N', detail: '필수 요소입니다. Bessel 함수의 차수입니다. n이 정수가 아니면 소수점 이하는 무시됩니다.' },
         },
     },
     BESSELK: {
-        description: 'Returns the modified Bessel function Kn(x)',
-        abstract: 'Returns the modified Bessel function Kn(x)',
+        description: '순허수 인수를 사용하여 계산된 Bessel 함수인 수정된 Bessel 함수를 반환합니다.',
+        abstract: '순허수 인수를 사용하여 계산된 Bessel 함수인 수정된 Bessel 함수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/besselk-function-606d11bc-06d3-4d53-9ecb-2803e2b90b70',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/besselk-function',
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
-            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
+            x: { name: 'X', detail: '필수 요소입니다. 함수를 계산할 값입니다.' },
+            n: { name: 'N', detail: '필수 요소입니다. 함수의 차수입니다. n이 정수가 아니면 소수점 이하는 무시됩니다.' },
         },
     },
     BESSELY: {
-        description: 'Returns the Bessel function Yn(x)',
-        abstract: 'Returns the Bessel function Yn(x)',
+        description: 'Weber 함수 또는 Neumann 함수라고도 하는 Bessel 함수를 반환합니다.',
+        abstract: 'Weber 함수 또는 Neumann 함수라고도 하는 Bessel 함수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bessely-function-f3a356b3-da89-42c3-8974-2da54d6353a2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bessely-function',
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
-            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
+            x: { name: 'X', detail: '필수 요소입니다. 함수를 계산할 값입니다.' },
+            n: { name: 'N', detail: '필수 요소입니다. 함수의 차수입니다. n이 정수가 아니면 소수점 이하는 무시됩니다.' },
         },
     },
     BIN2DEC: {
-        description: 'Converts a binary number to decimal',
-        abstract: 'Converts a binary number to decimal',
+        description: '2진수를 10진수로 변환합니다.',
+        abstract: '2진수를 10진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bin2dec-function-63905b57-b3a0-453d-99f4-647bb519cd6c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bin2dec-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The binary number you want to convert.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환하려는 2진수입니다. 숫자는 10자(10비트)를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 9 비트는 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
         },
     },
     BIN2HEX: {
-        description: 'Converts a binary number to hexadecimal',
-        abstract: 'Converts a binary number to hexadecimal',
+        description: '2진수를 16진수로 변환합니다.',
+        abstract: '2진수를 16진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bin2hex-function-0375e507-f5e5-4077-9af8-28d84f9f41cc',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bin2hex-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The binary number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환하려는 2진수입니다. 숫자는 10자(10비트)를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 9 비트는 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택적. 사용할 자릿수입니다. places를 생략하면 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     BIN2OCT: {
-        description: 'Converts a binary number to octal',
-        abstract: 'Converts a binary number to octal',
+        description: '2진수를 8진수로 변환합니다.',
+        abstract: '2진수를 8진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bin2oct-function-0a4e01ba-ac8d-4158-9b29-16c25c4c23fd',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bin2oct-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The binary number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환하려는 2진수입니다. 숫자는 10자(10비트)를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 9 비트는 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택 사항입니다. 사용할 자릿수입니다. places를 생략하면 BIN2OCT에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     BITAND: {
@@ -120,7 +120,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bitand-function-8a2be3d7-91c3-4b48-9517-64548008563a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bitand-function',
             },
         ],
         functionParameter: {
@@ -129,83 +129,83 @@ const locale: typeof enUS = {
         },
     },
     BITLSHIFT: {
-        description: 'Returns a value number shifted left by shift_amount bits',
-        abstract: 'Returns a value number shifted left by shift_amount bits',
+        description: '지정된 비트만큼 왼쪽으로 이동한 숫자를 반환합니다.',
+        abstract: '지정된 비트만큼 왼쪽으로 이동한 숫자를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bitlshift-function-c55bb27e-cacd-4c7c-b258-d80861a03c9c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bitlshift-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'Number must be an integer greater than or equal to 0.' },
-            shiftAmount: { name: 'shift_amount', detail: 'Shift_amount must be an integer.' },
+            number: { name: 'number', detail: '필수 요소입니다. number는 0보다 크거나 같은 정수여야 합니다.' },
+            shiftAmount: { name: 'shift_amount', detail: '필수. Shift_amount 정수여야 합니다.' },
         },
     },
     BITOR: {
-        description: 'Returns a bitwise OR of 2 numbers',
-        abstract: 'Returns a bitwise OR of 2 numbers',
+        description: '두 숫자의 비트 단위 \'OR\'를 반환합니다.',
+        abstract: '두 숫자의 비트 단위 \'OR\'를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bitor-function-f6ead5c8-5b98-4c9e-9053-8ad5234919b2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bitor-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
-            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number1: { name: 'number1', detail: '필수. 10진수 형식이어야 하며 0보다 크거나 같아야 합니다.' },
+            number2: { name: 'number2', detail: '필수. 10진수 형식이어야 하며 0보다 크거나 같아야 합니다.' },
         },
     },
     BITRSHIFT: {
-        description: 'Returns a value number shifted right by shift_amount bits',
-        abstract: 'Returns a value number shifted right by shift_amount bits',
+        description: '지정된 비트만큼 오른쪽으로 이동한 숫자를 반환합니다.',
+        abstract: '지정된 비트만큼 오른쪽으로 이동한 숫자를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bitrshift-function-274d6996-f42c-4743-abdb-4ff95351222c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bitrshift-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'Number must be an integer greater than or equal to 0.' },
-            shiftAmount: { name: 'shift_amount', detail: 'Shift_amount must be an integer.' },
+            number: { name: 'number', detail: '필수 요소입니다. 0보다 크거나 같은 정수여야 합니다.' },
+            shiftAmount: { name: 'shift_amount', detail: '필수. 정수여야 합니다.' },
         },
     },
     BITXOR: {
-        description: 'Returns a bitwise \'Exclusive Or\' of two numbers',
-        abstract: 'Returns a bitwise \'Exclusive Or\' of two numbers',
+        description: '두 숫자의 비트 단위 \'XOR\'를 반환합니다.',
+        abstract: '두 숫자의 비트 단위 \'XOR\'를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/bitxor-function-c81306a1-03f9-4e89-85ac-b86c3cba10e4',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/bitxor-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
-            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number1: { name: 'number1', detail: '필수. 0보다 크거나 같아야 합니다.' },
+            number2: { name: 'number2', detail: '필수. 0보다 크거나 같아야 합니다.' },
         },
     },
     COMPLEX: {
-        description: 'Converts real and imaginary coefficients into a complex number',
-        abstract: 'Converts real and imaginary coefficients into a complex number',
+        description: '실수와 허수 계수를 x + yi 또는 x + yj 형태의 복소수로 변환합니다.',
+        abstract: '실수와 허수 계수를 x + yi 또는 x + yj 형태의 복소수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/complex-function-f0b8f3a9-51cc-4d6d-86fb-3a9362fa4128',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/complex-function',
             },
         ],
         functionParameter: {
-            realNum: { name: 'real_num', detail: 'The real coefficient of the complex number.' },
-            iNum: { name: 'i_num', detail: 'The imaginary coefficient of the complex number.' },
-            suffix: { name: 'suffix', detail: 'The suffix for the imaginary component of the complex number. If omitted, suffix is assumed to be "i".' },
+            realNum: { name: 'real_num', detail: '필수. 복소수의 실수 계수입니다.' },
+            iNum: { name: 'i_num', detail: '필수. 복소수의 허수 계수입니다.' },
+            suffix: { name: 'suffix', detail: '선택적. 복소수의 허수부에 표시할 접미사입니다. 생략하면 "i"가 사용됩니다.' },
         },
     },
     CONVERT: {
-        description: 'Converts a number from one measurement system to another',
-        abstract: 'Converts a number from one measurement system to another',
+        description: '다른 단위 체계의 숫자로 변환합니다. 예를 들면 CONVERT 함수를 사용하여 마일 단위의 거리를 킬로미터 단위로 변환할 수 있습니다.',
+        abstract: '다른 단위 체계의 숫자로 변환합니다. 예를 들면 CONVERT 함수를 사용하여 마일 단위의 거리를 킬로미터 단위로 변환할 수 있습니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/convert-function-d785bef1-808e-4aac-bdcd-666c810f9af2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/convert-function',
             },
         ],
         functionParameter: {
@@ -215,297 +215,297 @@ const locale: typeof enUS = {
         },
     },
     DEC2BIN: {
-        description: 'Converts a decimal number to binary',
-        abstract: 'Converts a decimal number to binary',
+        description: '10진수를 2진수로 변환합니다.',
+        abstract: '10진수를 2진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dec2bin-function-0f63dd0e-5d1a-42d8-b511-5bf5c6d43838',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dec2bin-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The decimal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 10진수 정수입니다. number가 음수이면 유효한 위치 값이 무시되고 DEC2BIN 가장 중요한 비트가 부호 비트인 10자(10비트) 이진 번호를 반환합니다. 나머지 9 비트는 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택적. 사용할 자릿수입니다. places를 생략하면 DEC2BIN에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     DEC2HEX: {
-        description: 'Converts a decimal number to hexadecimal',
-        abstract: 'Converts a decimal number to hexadecimal',
+        description: '10진수를 16진수로 변환합니다.',
+        abstract: '10진수를 16진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dec2hex-function-6344ee8b-b6b5-4c6a-a672-f64666704619',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dec2hex-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The decimal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 10진수 정수입니다. number가 음수이면 자리가 무시되고 DEC2HEX 가장 중요한 비트가 부호 비트인 10자(40비트) 16진수를 반환합니다. 나머지 39비트 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택적. 사용할 자릿수입니다. places를 생략하면 DEC2HEX에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     DEC2OCT: {
-        description: 'Converts a decimal number to octal',
-        abstract: 'Converts a decimal number to octal',
+        description: '10진수를 8진수로 변환합니다.',
+        abstract: '10진수를 8진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dec2oct-function-c9d835ca-20b7-40c4-8a9e-d3be351ce00f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/dec2oct-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The decimal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 10진수 정수입니다. number가 음수이면 위치가 무시되고 DEC2OCT 가장 중요한 비트가 부호 비트인 10자(30비트) 8진수를 반환합니다. 나머지 29비트 는 진도 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택 사항입니다. 사용할 자릿수입니다. places를 생략하면 DEC2OCT에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     DELTA: {
-        description: 'Tests whether two values are equal',
-        abstract: 'Tests whether two values are equal',
+        description: '두 값이 같은지 여부를 검사합니다. number1 = number2이면 1을 반환하고, 그렇지 않으면 0을 반환합니다. 이 함수를 사용하면 값 집합을 필터링할 수 있습니다. 예를 들어 DELTA 함수 몇 개의 합을 구하여 값이 같은 쌍의 개수를 계산할 수 있습니다. 이 함수는 Kronecker Delta 함수라고도 합니다.',
+        abstract: '두 값이 같은지 여부를 검사합니다. number1 = number2이면 1을 반환하고, 그렇지 않으면 0을 반환합니다. 이 함수를 사용하면 값 집합을 필터링할 수 있습니다. 예를 들어 DELTA 함수 몇 개의 합을 구하여 값이 같은 쌍의 개수를 계산할 수 있습니다. 이 함수는 Kronecker Delta 함수라고도 합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/delta-function-2f763672-c959-4e07-ac33-fe03220ba432',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/delta-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'The first number.' },
-            number2: { name: 'number2', detail: 'The second number. If omitted, number2 is assumed to be zero.' },
+            number1: { name: 'number1', detail: '필수. 첫 번째 숫자입니다.' },
+            number2: { name: 'number2', detail: '선택적. 두 번째 숫자입니다. 생략하면 0으로 간주됩니다.' },
         },
     },
     ERF: {
-        description: 'Returns the error function',
-        abstract: 'Returns the error function',
+        description: 'lower_limit에서 upper_limit까지 적분된 오차 함수를 반환합니다.',
+        abstract: 'lower_limit에서 upper_limit까지 적분된 오차 함수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/erf-function-c53c7e7b-5482-4b6c-883e-56df3c9af349',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/erf-function',
             },
         ],
         functionParameter: {
-            lowerLimit: { name: 'lower_limit', detail: 'The lower bound for integrating ERF.' },
-            upperLimit: { name: 'upper_limit', detail: 'The upper bound for integrating ERF. If omitted, ERF integrates between zero and lower_limit.' },
+            lowerLimit: { name: 'lower_limit', detail: '필수. ERF 적분의 하한값입니다.' },
+            upperLimit: { name: 'upper_limit', detail: '선택적. ERF 적분의 상한값입니다. 생략하면 0에서 lower_limit까지 적분됩니다.' },
         },
     },
     ERF_PRECISE: {
-        description: 'Returns the error function',
-        abstract: 'Returns the error function',
+        description: '오차 함수를 반환합니다.',
+        abstract: '오차 함수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/erf-precise-function-9a349593-705c-4278-9a98-e4122831a8e0',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/erf-precise-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The lower bound for integrating ERF.PRECISE.' },
+            x: { name: 'x', detail: '필수 요소입니다. ERF.PRECISE 적분의 하한값입니다.' },
         },
     },
     ERFC: {
-        description: 'Returns the complementary error function',
-        abstract: 'Returns the complementary error function',
+        description: 'x에서 무한대까지 적분된 ERF 함수의 여값을 반환합니다.',
+        abstract: 'x에서 무한대까지 적분된 ERF 함수의 여값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/erfc-function-736e0318-70ba-4e8b-8d08-461fe68b71b3',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/erfc-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The lower bound for integrating ERFC.' },
+            x: { name: 'x', detail: '필수 요소입니다. ERFC 적분의 하한값입니다.' },
         },
     },
     ERFC_PRECISE: {
-        description: 'Returns the complementary ERF function integrated between x and infinity',
-        abstract: 'Returns the complementary ERF function integrated between x and infinity',
+        description: 'x에서 무한대까지 적분된 ERF 함수의 여값을 반환합니다.',
+        abstract: 'x에서 무한대까지 적분된 ERF 함수의 여값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/erfc-precise-function-e90e6bab-f45e-45df-b2ac-cd2eb4d4a273',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/erfc-precise-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'The lower bound for integrating ERFC.PRECISE.' },
+            x: { name: 'x', detail: '필수 요소입니다. ERFC.PRECISE 적분의 하한값입니다.' },
         },
     },
     GESTEP: {
-        description: 'Tests whether a number is greater than a threshold value',
-        abstract: 'Tests whether a number is greater than a threshold value',
+        description: 'number ≥ step이면 1을 반환하고 그렇지 않으면 0을 반환합니다. 이 함수를 사용하면 값 집합을 필터링할 수 있습니다. 예를 들어 GESTEP 함수 몇 개를 더하여 임계값을 초과하는 값의 개수를 계산합니다.',
+        abstract: 'number ≥ step이면 1을 반환하고 그렇지 않으면 0을 반환합니다. 이 함수를 사용하면 값 집합을 필터링할 수 있습니다. 예를 들어 GESTEP 함수 몇 개를 더하여 임계값을 초과하는 값의 개수를 계산합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/gestep-function-f37e7d2a-41da-4129-be95-640883fca9df',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/gestep-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The value to test against step.' },
-            step: { name: 'step', detail: 'The threshold value. If you omit a value for step, GESTEP uses zero.' },
+            number: { name: 'number', detail: '필수 요소입니다. step과 비교할 값입니다.' },
+            step: { name: 'step', detail: '선택적. 임계값입니다. 생략하면 GESTEP에서는 0이 사용됩니다.' },
         },
     },
     HEX2BIN: {
-        description: 'Converts a hexadecimal number to binary',
-        abstract: 'Converts a hexadecimal number to binary',
+        description: '16진수를 2진수로 변환합니다.',
+        abstract: '16진수를 2진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hex2bin-function-a13aafaa-5737-4920-8424-643e581828c1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/hex2bin-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The hexadecimal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 16진수입니다. 숫자는 10자를 초과할 수 없습니다. 숫자의 가장 중요한 비트는 부호 비트(오른쪽에서 40비트)입니다. 나머지 9 비트는 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택 사항입니다. 사용할 자릿수입니다. places를 생략하면 HEX2BIN에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     HEX2DEC: {
-        description: 'Converts a hexadecimal number to decimal',
-        abstract: 'Converts a hexadecimal number to decimal',
+        description: '16진수를 10진수로 변환합니다.',
+        abstract: '16진수를 10진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hex2dec-function-8c8c3155-9f37-45a5-a3ee-ee5379ef106e',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/hex2dec-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The hexadecimal number you want to convert.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 16진수입니다. 숫자는 10자(40비트)를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 39비트 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
         },
     },
     HEX2OCT: {
-        description: 'Converts a hexadecimal number to octal',
-        abstract: 'Converts a hexadecimal number to octal',
+        description: '16진수를 8진수로 변환합니다.',
+        abstract: '16진수를 8진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hex2oct-function-54d52808-5d19-4bd0-8a63-1096a5d11912',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/hex2oct-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The hexadecimal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 16진수입니다. 숫자는 10자를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 39비트 크기 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택 사항입니다. 사용할 자릿수입니다. places를 생략하면 HEX2OCT에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     IMABS: {
-        description: 'Returns the absolute value (modulus) of a complex number',
-        abstract: 'Returns the absolute value (modulus) of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 절대값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 절대값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imabs-function-b31e73c6-d90c-4062-90bc-8eb351d765a1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imabs-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the absolute value.' },
+            inumber: { name: 'inumber', detail: '필수. 절대값을 계산할 복소수입니다.' },
         },
     },
     IMAGINARY: {
-        description: 'Returns the imaginary coefficient of a complex number',
-        abstract: 'Returns the imaginary coefficient of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 허수부 계수를 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 허수부 계수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imaginary-function-dd5952fd-473d-44d9-95a1-9a17b23e428a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imaginary-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the imaginary coefficient.' },
+            inumber: { name: 'inumber', detail: '필수. 허수부 계수를 구할 복소수입니다.' },
         },
     },
     IMARGUMENT: {
-        description: 'Returns the argument theta, an angle expressed in radians',
-        abstract: 'Returns the argument theta, an angle expressed in radians',
+        description: '다음과 같이 라디안으로 표현된 각도인 (theta) 인수를 반환합니다.',
+        abstract: '다음과 같이 라디안으로 표현된 각도인 (theta) 인수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imargument-function-eed37ec1-23b3-4f59-b9f3-d340358a034a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imargument-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the argument theta.' },
+            inumber: { name: 'inumber', detail: '필수. Theta 인수를 사용할 복소수입니다 .' },
         },
     },
     IMCONJUGATE: {
-        description: 'Returns the complex conjugate of a complex number',
-        abstract: 'Returns the complex conjugate of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 켤레 복소수를 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 켤레 복소수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imconjugate-function-2e2fc1ea-f32b-4f9b-9de6-233853bafd42',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imconjugate-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the conjugate.' },
+            inumber: { name: 'inumber', detail: '필수. 켤레 복소수를 구할 복소수입니다.' },
         },
     },
     IMCOS: {
-        description: 'Returns the cosine of a complex number',
-        abstract: 'Returns the cosine of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 코사인 값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 코사인 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imcos-function-dad75277-f592-4a6b-ad6c-be93a808a53c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imcos-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the cosine.' },
+            inumber: { name: 'inumber', detail: '필수. 코사인 값을 계산할 복소수입니다.' },
         },
     },
     IMCOSH: {
-        description: 'Returns the hyperbolic cosine of a complex number',
-        abstract: 'Returns the hyperbolic cosine of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 하이퍼볼릭 코사인 값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 하이퍼볼릭 코사인 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imcosh-function-053e4ddb-4122-458b-be9a-457c405e90ff',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imcosh-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic cosine.' },
+            inumber: { name: 'inumber', detail: '필수. 하이퍼볼릭 코사인을 원하는 복소수입니다.' },
         },
     },
     IMCOT: {
-        description: 'Returns the cotangent of a complex number',
-        abstract: 'Returns the cotangent of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 코탄젠트 값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 코탄젠트 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imcot-function-dc6a3607-d26a-4d06-8b41-8931da36442c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imcot-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the cotangent.' },
+            inumber: { name: 'inumber', detail: '코탄젠트를 구할 복소수입니다.' },
         },
     },
     IMCOTH: {
-        description: 'Returns the hyperbolic cotangent of a complex number',
-        abstract: 'Returns the hyperbolic cotangent of a complex number',
+        description: 'IMCOTH 함수는 주어진 복소수의 쌍곡선 코탄젠트값을 반환합니다. 예를 들어 복소수 \'x+yi\'가 주어지면 \'coth(x+yi)\'가 반환됩니다.',
+        abstract: 'IMCOTH 함수는 주어진 복소수의 쌍곡선 코탄젠트값을 반환합니다. 예를 들어 복소수 \'x+yi\'가 주어지면 \'coth(x+yi)\'가 반환됩니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/9366256?hl=en&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366256?hl=ko',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic cotangent.' },
+            inumber: { name: 'inumber', detail: '쌍곡선 코탄젠트를 구하려는 복소수입니다. 이는 COMPLEX 함수의 결과, 허수부가 0인 복소수로 해석되는 실수 또는 x와 y가 숫자인 \'x + yi\' 형식의 문자열일 수 있습니다.' },
         },
     },
     IMCSC: {
-        description: 'Returns the cosecant of a complex number',
-        abstract: 'Returns the cosecant of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 코시컨트 값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 코시컨트 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imcsc-function-9e158d8f-2ddf-46cd-9b1d-98e29904a323',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imcsc-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the cosecant.' },
+            inumber: { name: 'inumber', detail: '필수. 코시컨트를 사용할 복소수입니다.' },
         },
     },
     IMCSCH: {
-        description: 'Returns the hyperbolic cosecant of a complex number',
-        abstract: 'Returns the hyperbolic cosecant of a complex number',
+        description: 'x+yi 또는 x+yj 텍스트 형식으로 복소수의 하이퍼볼릭 코시컨트를 반환합니다.',
+        abstract: 'x+yi 또는 x+yj 텍스트 형식으로 복소수의 하이퍼볼릭 코시컨트를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imcsch-function-c0ae4f54-5f09-4fef-8da0-dc33ea2c5ca9',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imcsch-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic cosecant.' },
+            inumber: { name: 'inumber', detail: '필수. 하이퍼볼릭 코시컨트를 원하는 복소수입니다.' },
         },
     },
     IMDIV: {
@@ -514,7 +514,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imdiv-function-a505aff7-af8a-4451-8142-77ec3d74d83f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imdiv-function',
             },
         ],
         functionParameter: {
@@ -523,270 +523,270 @@ const locale: typeof enUS = {
         },
     },
     IMEXP: {
-        description: 'Returns the exponential of a complex number',
-        abstract: 'Returns the exponential of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 지수를 계산합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 지수를 계산합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imexp-function-c6f8da1f-e024-4c0c-b802-a60e7147a95f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imexp-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the exponential.' },
+            inumber: { name: 'inumber', detail: '필수. 지수를 계산할 복소수입니다.' },
         },
     },
     IMLN: {
-        description: 'Returns the natural logarithm of a complex number',
-        abstract: 'Returns the natural logarithm of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 자연 로그값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 자연 로그값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imln-function-32b98bcf-8b81-437c-a636-6fb3aad509d8',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imln-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the natural logarithm.' },
+            inumber: { name: 'inumber', detail: '필수. 자연 로그값을 계산할 복소수입니다.' },
         },
     },
     IMLOG: {
-        description: 'Returns the logarithm of a complex number for a specified base',
-        abstract: 'Returns the logarithm of a complex number for a specified base',
+        description: 'IMLOG 함수는 지정된 값을 밑으로 하는 복소수의 로그 값을 반환합니다.',
+        abstract: 'IMLOG 함수는 지정된 값을 밑으로 하는 복소수의 로그 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hans&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366486?hl=ko',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number whose logarithm to a specific base needs to be calculated.' },
-            base: { name: 'base', detail: 'The base to use when calculating the logarithm.' },
+            inumber: { name: 'inumber', detail: '로그 함수의 입력값입니다. 1과 같은 일반적인 숫자를 쓸 수 있습니다(실수로 해석됨). 실계수와 복합계수를 모두 지정하기 위해 숫자를 인용된 텍스트로 쓸 수 있습니다.' },
+            base: { name: 'base', detail: '대수를 계산하는 데 사용하는 밑입니다. 양의 실수여야 합니다.' },
         },
     },
     IMLOG10: {
-        description: 'Returns the base-10 logarithm of a complex number',
-        abstract: 'Returns the base-10 logarithm of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 상용 로그값(밑이 10)을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 상용 로그값(밑이 10)을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imlog10-function-58200fca-e2a2-4271-8a98-ccd4360213a5',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imlog10-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the common logarithm.' },
+            inumber: { name: 'inumber', detail: '필수. 상용 로그값을 계산할 복소수입니다.' },
         },
     },
     IMLOG2: {
-        description: 'Returns the base-2 logarithm of a complex number',
-        abstract: 'Returns the base-2 logarithm of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 밑이 2인 로그값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 밑이 2인 로그값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imlog2-function-152e13b4-bc79-486c-a243-e6a676878c51',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imlog2-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the base-2 logarithm.' },
+            inumber: { name: 'inumber', detail: '필수. 밑이 2인 로그값을 계산할 복소수입니다.' },
         },
     },
     IMPOWER: {
-        description: 'Returns a complex number raised to an integer power',
-        abstract: 'Returns a complex number raised to an integer power',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 멱을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 멱을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/impower-function-210fd2f5-f8ff-4c6a-9d60-30e34fbdef39',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/impower-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number you want to raise to a power.' },
-            number: { name: 'number', detail: 'The power to which you want to raise the complex number.' },
+            inumber: { name: 'inumber', detail: '필수. 멱을 계산할 복소수입니다.' },
+            number: { name: 'number', detail: '필수 요소입니다. 멱의 지수입니다.' },
         },
     },
     IMPRODUCT: {
-        description: 'Returns the product of from 1 to 255 complex numbers',
-        abstract: 'Returns the product of from 1 to 255 complex numbers',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수를 1개에서 255개까지 곱한 결과를 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수를 1개에서 255개까지 곱한 결과를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/improduct-function-2fb8651a-a4f2-444f-975e-8ba7aab3a5ba',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/improduct-function',
             },
         ],
         functionParameter: {
-            inumber1: { name: 'inumber1', detail: '1 to 255 complex numbers to multiply.' },
-            inumber2: { name: 'inumber2', detail: '1 to 255 complex numbers to multiply.' },
+            inumber1: { name: 'inumber1', detail: 'inumber1은 필수 요소이고, 이후의 inumber는 선택 요소입니다. 곱할 복소수로, 1개에서 255개까지 지정할 수 있습니다.' },
+            inumber2: { name: 'inumber2', detail: 'inumber1은 필수 요소이고, 이후의 inumber는 선택 요소입니다. 곱할 복소수로, 1개에서 255개까지 지정할 수 있습니다.' },
         },
     },
     IMREAL: {
-        description: 'Returns the real coefficient of a complex number',
-        abstract: 'Returns the real coefficient of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 실수부 계수를 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 실수부 계수를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imreal-function-d12bc4c0-25d0-4bb3-a25f-ece1938bf366',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imreal-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the real coefficient.' },
+            inumber: { name: 'inumber', detail: '필수. 실수부 계수를 계산할 복소수입니다.' },
         },
     },
     IMSEC: {
-        description: 'Returns the secant of a complex number',
-        abstract: 'Returns the secant of a complex number',
+        description: 'x+yi 또는 x+yj 텍스트 형식인 복소수의 시컨트 값을 반환합니다.',
+        abstract: 'x+yi 또는 x+yj 텍스트 형식인 복소수의 시컨트 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsec-function-6df11132-4411-4df4-a3dc-1f17372459e0',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsec-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the secant.' },
+            inumber: { name: 'inumber', detail: '필수. 시컨트를 구할 복소수입니다.' },
         },
     },
     IMSECH: {
-        description: 'Returns the hyperbolic secant of a complex number',
-        abstract: 'Returns the hyperbolic secant of a complex number',
+        description: 'x+yi 또는 x+yj 텍스트 형식인 복소수의 하이퍼볼릭 시컨트 값을 반환합니다.',
+        abstract: 'x+yi 또는 x+yj 텍스트 형식인 복소수의 하이퍼볼릭 시컨트 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsech-function-f250304f-788b-4505-954e-eb01fa50903b',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsech-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic secant.' },
+            inumber: { name: 'inumber', detail: '필수. 하이퍼볼릭 시컨트를 구할 복소수입니다.' },
         },
     },
     IMSIN: {
-        description: 'Returns the sine of a complex number',
-        abstract: 'Returns the sine of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 사인 값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 사인 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsin-function-1ab02a39-a721-48de-82ef-f52bf37859f6',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsin-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the sine.' },
+            inumber: { name: 'inumber', detail: '필수. 사인 값을 계산할 복소수입니다.' },
         },
     },
     IMSINH: {
-        description: 'Returns the hyperbolic sine of a complex number',
-        abstract: 'Returns the hyperbolic sine of a complex number',
+        description: 'x+yi 또는 x+yj 텍스트 형식인 복소수의 하이퍼볼릭 사인 값을 반환합니다.',
+        abstract: 'x+yi 또는 x+yj 텍스트 형식인 복소수의 하이퍼볼릭 사인 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsinh-function-dfb9ec9e-8783-4985-8c42-b028e9e8da3d',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsinh-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic sine.' },
+            inumber: { name: 'inumber', detail: '필수. 하이퍼볼릭 사인을 구할 복소수입니다.' },
         },
     },
     IMSQRT: {
-        description: 'Returns the square root of a complex number',
-        abstract: 'Returns the square root of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 제곱근을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 제곱근을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsqrt-function-e1753f80-ba11-4664-a10e-e17368396b70',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsqrt-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the square root.' },
+            inumber: { name: 'inumber', detail: '필수. 제곱근을 계산할 복소수입니다.' },
         },
     },
     IMSUB: {
-        description: 'Returns the difference between two complex numbers',
-        abstract: 'Returns the difference between two complex numbers',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 두 복소수의 차를 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 두 복소수의 차를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsub-function-2e404b4d-4935-4e85-9f52-cb08b9a45054',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsub-function',
             },
         ],
         functionParameter: {
-            inumber1: { name: 'inumber1', detail: 'inumber1.' },
-            inumber2: { name: 'inumber2', detail: 'inumber2.' },
+            inumber1: { name: 'inumber1', detail: '필수. 피감수인 복소수입니다.' },
+            inumber2: { name: 'inumber2', detail: '필수. 감수인 복소수입니다.' },
         },
     },
     IMSUM: {
-        description: 'Returns the sum of complex numbers',
-        abstract: 'Returns the sum of complex numbers',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 두 개 이상의 복소수의 합을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 두 개 이상의 복소수의 합을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imsum-function-81542999-5f1c-4da6-9ffe-f1d7aaa9457f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imsum-function',
             },
         ],
         functionParameter: {
-            inumber1: { name: 'inumber1', detail: '1 to 255 complex numbers to add.' },
-            inumber2: { name: 'inumber2', detail: '1 to 255 complex numbers to add.' },
+            inumber1: { name: 'inumber1', detail: 'Inumber1이 필요하며 후속 숫자는 필요하지 않습니다. 더할 복소수로, 1개에서 255개까지 지정할 수 있습니다.' },
+            inumber2: { name: 'inumber2', detail: 'Inumber1이 필요하며 후속 숫자는 필요하지 않습니다. 더할 복소수로, 1개에서 255개까지 지정할 수 있습니다.' },
         },
     },
     IMTAN: {
-        description: 'Returns the tangent of a complex number',
-        abstract: 'Returns the tangent of a complex number',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 탄젠트 값을 반환합니다.',
+        abstract: 'x + yi 또는 x + yj 텍스트 형식인 복소수의 탄젠트 값을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/imtan-function-8478f45d-610a-43cf-8544-9fc0b553a132',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/imtan-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the tangent.' },
+            inumber: { name: 'inumber', detail: '필수. 탄젠트를 사용할 복소수입니다.' },
         },
     },
     IMTANH: {
-        description: 'Returns the hyperbolic tangent of a complex number',
-        abstract: 'Returns the hyperbolic tangent of a complex number',
+        description: 'IMTANH 함수는 주어진 복소수의 쌍곡선 탄젠트값을 반환합니다. 예를 들어 복소수 \'x+yi\'가 주어지면 \'tanh(x+yi)\'가 반환됩니다.',
+        abstract: 'IMTANH 함수는 주어진 복소수의 쌍곡선 탄젠트값을 반환합니다. 예를 들어 복소수 \'x+yi\'가 주어지면 \'tanh(x+yi)\'가 반환됩니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/9366655?hl=en&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366655?hl=ko',
             },
         ],
         functionParameter: {
-            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic tangent.' },
+            inumber: { name: 'inumber', detail: '쌍곡선 탄젠트를 구하려는 복소수입니다. 이는 COMPLEX 함수의 결과, 허수부가 0인 복소수로 해석되는 실수 또는 x와 y가 숫자인 \'x + yi\' 형식의 문자열일 수 있습니다.' },
         },
     },
     OCT2BIN: {
-        description: 'Converts an octal number to binary',
-        abstract: 'Converts an octal number to binary',
+        description: '8진수를 2진수로 변환합니다.',
+        abstract: '8진수를 2진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oct2bin-function-55383471-3c56-4d27-9522-1a8ec646c589',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/oct2bin-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The octal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 8진수입니다. 숫자는 10자를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 29비트 는 진도 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택 사항입니다. 사용할 자릿수입니다. places를 생략하면 OCT2BIN에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
     OCT2DEC: {
-        description: 'Converts an octal number to decimal',
-        abstract: 'Converts an octal number to decimal',
+        description: '8진수를 10진수로 변환합니다.',
+        abstract: '8진수를 10진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oct2dec-function-87606014-cb98-44b2-8dbb-e48f8ced1554',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/oct2dec-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The octal number you want to convert.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 8진수입니다. 숫자는 10 8진수(30비트)를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 29비트 는 진도 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
         },
     },
     OCT2HEX: {
-        description: 'Converts an octal number to hexadecimal',
-        abstract: 'Converts an octal number to hexadecimal',
+        description: '8진수를 16진수로 변환합니다.',
+        abstract: '8진수를 16진수로 변환합니다.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/oct2hex-function-912175b4-d497-41b4-a029-221f051b858f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/oct2hex-function',
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The octal number you want to convert.' },
-            places: { name: 'places', detail: 'The number of characters to use.' },
+            number: { name: 'number', detail: '필수 요소입니다. 변환할 8진수입니다. 숫자는 10 8진수(30비트)를 초과할 수 없습니다. Number의 최상위 비트는 부호 비트입니다. 나머지 29비트 는 진도 비트입니다. 음수는 2의 보수 표기법으로 표시됩니다.' },
+            places: { name: 'places', detail: '선택 사항입니다. 사용할 자릿수입니다. places를 생략하면 OCT2HEX에서는 필요한 최소 자릿수가 사용됩니다. places를 지정하면 반환 값의 앞부분을 0으로 채울 수 있습니다.' },
         },
     },
 };

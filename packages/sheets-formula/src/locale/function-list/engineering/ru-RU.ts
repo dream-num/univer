@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B5%D1%81%D1%81%D0%B5%D0%BB%D1%8C-i-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B5%D1%81%D1%81%D0%B5%D0%BB%D1%8C-i-8d33855c-9a8d-444b-98e0-852267b1c0df',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/besseli-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B5%D1%81%D1%81%D0%B5%D0%BB%D1%8C-j-839cb181-48de-408b-9d80-bd02982d94f7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/besselj-function',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B5%D1%81%D1%81%D0%B5%D0%BB%D1%8C-k-606d11bc-06d3-4d53-9ecb-2803e2b90b70',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/besselk-function',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B5%D1%81%D1%81%D0%B5%D0%BB%D1%8C-y-f3a356b3-da89-42c3-8974-2da54d6353a2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bessely-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B2-%D0%B2-%D0%B4%D0%B5%D1%81-63905b57-b3a0-453d-99f4-647bb519cd6c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bin2dec-function',
             },
         ],
         functionParameter: {
@@ -92,7 +92,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B2-%D0%B2-%D1%88%D0%B5%D1%81%D1%82%D0%BD-0375e507-f5e5-4077-9af8-28d84f9f41cc',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bin2hex-function',
             },
         ],
         functionParameter: {
@@ -101,17 +101,17 @@ const locale: typeof enUS = {
         },
     },
     BIN2OCT: {
-        description: 'Преобразует двоичное число в восьмеричное',
-        abstract: 'Преобразует двоичное число в восьмеричное',
+        description: 'Преобразует двоичное число в восьмеричное.',
+        abstract: 'Преобразует двоичное число в восьмеричное.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B2-%D0%B2-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-0a4e01ba-ac8d-4158-9b29-16c25c4c23fd',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bin2oct-function',
             },
         ],
         functionParameter: {
-            number: { name: 'число', detail: 'Преобразуемое двоичное число.' },
-            places: { name: 'разрядность', detail: 'Количество знаков в записи числа.' },
+            number: { name: 'число', detail: 'Обязательный аргумент. Преобразуемое двоичное число. Число не должно содержать более 10 знаков (10 бит). Первый значащий бит числа является знаковым битом. Остальные 9 бит являются битами значения. Отрицательные числа представляются в дополнительных кодах.' },
+            places: { name: 'разрядность', detail: 'Дополнительные. Количество знаков в записи числа. Если разрядность не указана, функция ДВ.В.ВОСЬМ использует минимальное необходимое количество знаков. Разрядность используется для дополнения возвращаемого значения ведущими нулями.' },
         },
     },
     BITAND: {
@@ -120,7 +120,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D1%82-%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D1%82-%D0%B8-8a2be3d7-91c3-4b48-9517-64548008563a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bitand-function',
             },
         ],
         functionParameter: {
@@ -134,7 +134,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D1%82-%D1%81%D0%B4%D0%B2%D0%B8%D0%B3%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D1%82-%D1%81%D0%B4%D0%B2%D0%B8%D0%B3%D0%BB-c55bb27e-cacd-4c7c-b258-d80861a03c9c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bitlshift-function',
             },
         ],
         functionParameter: {
@@ -148,7 +148,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D1%82-%D0%B8%D0%BB%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D1%82-%D0%B8%D0%BB%D0%B8-f6ead5c8-5b98-4c9e-9053-8ad5234919b2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bitor-function',
             },
         ],
         functionParameter: {
@@ -162,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D1%82-%D1%81%D0%B4%D0%B2%D0%B8%D0%B3%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D1%82-%D1%81%D0%B4%D0%B2%D0%B8%D0%B3%D0%BF-274d6996-f42c-4743-abdb-4ff95351222c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bitrshift-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D1%82-%D0%B8%D1%81%D0%BA%D0%BB%D0%B8%D0%BB%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D1%82-%D0%B8%D1%81%D0%BA%D0%BB%D0%B8%D0%BB%D0%B8-c81306a1-03f9-4e89-85ac-b86c3cba10e4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/bitxor-function',
             },
         ],
         functionParameter: {
@@ -190,7 +190,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D0%BC%D0%BF%D0%BB%D0%B5%D0%BA%D1%81%D0%BD-f0b8f3a9-51cc-4d6d-86fb-3a9362fa4128',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/complex-function',
             },
         ],
         functionParameter: {
@@ -205,7 +205,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%B5%D0%BE%D0%B1%D1%80-d785bef1-808e-4aac-bdcd-666c810f9af2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/convert-function',
             },
         ],
         functionParameter: {
@@ -220,7 +220,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B5%D1%81-%D0%B2-%D0%B4%D0%B2-0f63dd0e-5d1a-42d8-b511-5bf5c6d43838',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/dec2bin-function',
             },
         ],
         functionParameter: {
@@ -234,7 +234,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B5%D1%81-%D0%B2-%D1%88%D0%B5%D1%81%D1%82%D0%BD-6344ee8b-b6b5-4c6a-a672-f64666704619',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/dec2hex-function',
             },
         ],
         functionParameter: {
@@ -248,7 +248,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B5%D1%81-%D0%B2-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-c9d835ca-20b7-40c4-8a9e-d3be351ce00f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/dec2oct-function',
             },
         ],
         functionParameter: {
@@ -262,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B5%D0%BB%D1%8C%D1%82%D0%B0-2f763672-c959-4e07-ac33-fe03220ba432',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/delta-function',
             },
         ],
         functionParameter: {
@@ -276,7 +276,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84%D0%BE%D1%88-c53c7e7b-5482-4b6c-883e-56df3c9af349',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/erf-function',
             },
         ],
         functionParameter: {
@@ -290,7 +290,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/erf-precise-function-9a349593-705c-4278-9a98-e4122831a8e0',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/erf-precise-function',
             },
         ],
         functionParameter: {
@@ -303,7 +303,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D1%84%D0%BE%D1%88-736e0318-70ba-4e8b-8d08-461fe68b71b3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/erfc-function',
             },
         ],
         functionParameter: {
@@ -316,7 +316,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D1%84%D0%BE%D1%88-%D1%82%D0%BE%D1%87%D0%BD-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D1%84%D0%BE%D1%88-%D1%82%D0%BE%D1%87%D0%BD-e90e6bab-f45e-45df-b2ac-cd2eb4d4a273',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/erfc-precise-function',
             },
         ],
         functionParameter: {
@@ -329,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D1%80%D0%BE%D0%B3-f37e7d2a-41da-4129-be95-640883fca9df',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gestep-function',
             },
         ],
         functionParameter: {
@@ -343,7 +343,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%88%D0%B5%D1%81%D1%82%D0%BD-%D0%B2-%D0%B4%D0%B2-a13aafaa-5737-4920-8424-643e581828c1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hex2bin-function',
             },
         ],
         functionParameter: {
@@ -357,7 +357,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%88%D0%B5%D1%81%D1%82%D0%BD-%D0%B2-%D0%B4%D0%B5%D1%81-8c8c3155-9f37-45a5-a3ee-ee5379ef106e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hex2dec-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%88%D0%B5%D1%81%D1%82%D0%BD-%D0%B2-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%88%D0%B5%D1%81%D1%82%D0%BD-%D0%B2-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-54d52808-5d19-4bd0-8a63-1096a5d11912',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hex2oct-function',
             },
         ],
         functionParameter: {
@@ -384,7 +384,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-abs-b31e73c6-d90c-4062-90bc-8eb351d765a1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imabs-function',
             },
         ],
         functionParameter: {
@@ -392,16 +392,16 @@ const locale: typeof enUS = {
         },
     },
     IMAGINARY: {
-        description: 'Возвращает коэффициент при мнимой части комплексного числа',
-        abstract: 'Возвращает коэффициент при мнимой части комплексного числа',
+        description: 'Возвращает коэффициент при мнимой части комплексного числа, представленного в формате x + yi или x + yj.',
+        abstract: 'Возвращает коэффициент при мнимой части комплексного числа, представленного в формате x + yi или x + yj.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D1%87%D0%B0%D1%81%D1%82%D1%8C-dd5952fd-473d-44d9-95a1-9a17b23e428a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imaginary-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'комлексное число', detail: 'Комплексное число, для которого требуется определить коэффициент при мнимой части.' },
+            inumber: { name: 'комлексное число', detail: 'Обязательно. Комплексное число, для которого требуется определить коэффициент при мнимой части.' },
         },
     },
     IMARGUMENT: {
@@ -410,7 +410,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D0%B0%D1%80%D0%B3%D1%83%D0%BC%D0%B5%D0%BD%D1%82-eed37ec1-23b3-4f59-b9f3-d340358a034a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imargument-function',
             },
         ],
         functionParameter: {
@@ -423,7 +423,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-%D1%81%D0%BE%D0%BF%D1%80%D1%8F%D0%B6-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D1%81%D0%BE%D0%BF%D1%80%D1%8F%D0%B6-2e2fc1ea-f32b-4f9b-9de6-233853bafd42',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imconjugate-function',
             },
         ],
         functionParameter: {
@@ -436,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-cos-dad75277-f592-4a6b-ad6c-be93a808a53c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imcos-function',
             },
         ],
         functionParameter: {
@@ -449,7 +449,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-cosh-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-cosh-053e4ddb-4122-458b-be9a-457c405e90ff',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imcosh-function',
             },
         ],
         functionParameter: {
@@ -462,7 +462,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-cot-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-cot-dc6a3607-d26a-4d06-8b41-8931da36442c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imcot-function',
             },
         ],
         functionParameter: {
@@ -470,16 +470,16 @@ const locale: typeof enUS = {
         },
     },
     IMCOTH: {
-        description: 'Возвращает гиперболический котангенс заданного комплексного числа.',
-        abstract: 'Возвращает гиперболический котангенс заданного комплексного числа.',
+        description: 'Функция IMCOTH возвращает гиперболический котангенс заданного комплексного числа. Например, для заданного комплексного числа "x + yi" будет возвращено значение "coth(x + yi)".',
+        abstract: 'Функция IMCOTH возвращает гиперболический котангенс заданного комплексного числа. Например, для заданного комплексного числа "x + yi" будет возвращено значение "coth(x + yi)".',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/9366256?hl=ru&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366256?hl=ru',
             },
         ],
         functionParameter: {
-            inumber: { name: 'комлексное число', detail: 'Комплексное число, гиперболический котангенс которого нужно вычислить.' },
+            inumber: { name: 'комлексное число', detail: 'Комплексное число, гиперболический котангенс которого нужно вычислить. Это может быть или результат функции COMPLEX, или вещественное число (комплексное число с мнимыми частями, равными 0), или строка в формате "x + yi", где x и y – числовые значения.' },
         },
     },
     IMCSC: {
@@ -488,7 +488,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-csc-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-csc-9e158d8f-2ddf-46cd-9b1d-98e29904a323',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imcsc-function',
             },
         ],
         functionParameter: {
@@ -501,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-csch-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-csch-c0ae4f54-5f09-4fef-8da0-dc33ea2c5ca9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imcsch-function',
             },
         ],
         functionParameter: {
@@ -514,7 +514,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D0%B4%D0%B5%D0%BB-a505aff7-af8a-4451-8142-77ec3d74d83f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imdiv-function',
             },
         ],
         functionParameter: {
@@ -523,16 +523,16 @@ const locale: typeof enUS = {
         },
     },
     IMEXP: {
-        description: 'Возвращает экспоненту комплексного числа',
-        abstract: 'Возвращает экспоненту комплексного числа',
+        description: 'Возвращает экспоненту комплексного числа, представленного в текстовом формате x + yi или x + yj.',
+        abstract: 'Возвращает экспоненту комплексного числа, представленного в текстовом формате x + yi или x + yj.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-exp-c6f8da1f-e024-4c0c-b802-a60e7147a95f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imexp-function',
             },
         ],
         functionParameter: {
-            inumber: { name: 'комлексное число', detail: 'Комплексное число, для которого требуется определить экспоненту.' },
+            inumber: { name: 'комлексное число', detail: 'Обязательно. Комплексное число, для которого требуется определить экспоненту.' },
         },
     },
     IMLN: {
@@ -541,7 +541,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-ln-32b98bcf-8b81-437c-a636-6fb3aad509d8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imln-function',
             },
         ],
         functionParameter: {
@@ -549,17 +549,17 @@ const locale: typeof enUS = {
         },
     },
     IMLOG: {
-        description: 'Возвращает логарифм комплексного числа по указанному основанию',
-        abstract: 'Возвращает логарифм комплексного числа по указанному основанию',
+        description: 'Функция IMLOG возвращает логарифм комплексного числа по указанному основанию.',
+        abstract: 'Функция IMLOG возвращает логарифм комплексного числа по указанному основанию.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/9366486?hl=ru-Hans&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366486?hl=ru',
             },
         ],
         functionParameter: {
-            inumber: { name: 'комлексное число', detail: 'Значение логарифмической функции, которое нужно указать.' },
-            base: { name: 'основание', detail: 'Основание для вычисления логарифма.' },
+            inumber: { name: 'комлексное число', detail: 'Значение логарифмической функции, которое нужно указать. Чтобы введенное значение было интерпретировано как действительное число, используйте цифры (например, 1). Чтобы указать действительный и комплексный коэффициенты, запишите число в виде текста в кавычках.' },
+            base: { name: 'основание', detail: 'Основание для вычисления логарифма. Значение должно быть положительным действительным числом.' },
         },
     },
     IMLOG10: {
@@ -568,7 +568,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-log10-58200fca-e2a2-4271-8a98-ccd4360213a5',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imlog10-function',
             },
         ],
         functionParameter: {
@@ -581,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-log2-152e13b4-bc79-486c-a243-e6a676878c51',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imlog2-function',
             },
         ],
         functionParameter: {
@@ -594,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D1%81%D1%82%D0%B5%D0%BF%D0%B5%D0%BD%D1%8C-210fd2f5-f8ff-4c6a-9d60-30e34fbdef39',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/impower-function',
             },
         ],
         functionParameter: {
@@ -608,7 +608,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%B5%D0%B4-2fb8651a-a4f2-444f-975e-8ba7aab3a5ba',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/improduct-function',
             },
         ],
         functionParameter: {
@@ -622,7 +622,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D0%B2%D0%B5%D1%89-d12bc4c0-25d0-4bb3-a25f-ece1938bf366',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imreal-function',
             },
         ],
         functionParameter: {
@@ -635,7 +635,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-sec-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-sec-6df11132-4411-4df4-a3dc-1f17372459e0',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsec-function',
             },
         ],
         functionParameter: {
@@ -648,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-sech-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-sech-f250304f-788b-4505-954e-eb01fa50903b',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsech-function',
             },
         ],
         functionParameter: {
@@ -661,7 +661,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/imsin-function-1ab02a39-a721-48de-82ef-f52bf37859f6',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsin-function',
             },
         ],
         functionParameter: {
@@ -674,7 +674,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-sinh-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-sinh-dfb9ec9e-8783-4985-8c42-b028e9e8da3d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsinh-function',
             },
         ],
         functionParameter: {
@@ -687,7 +687,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-%D0%BA%D0%BE%D1%80%D0%B5%D0%BD%D1%8C-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D0%BA%D0%BE%D1%80%D0%B5%D0%BD%D1%8C-e1753f80-ba11-4664-a10e-e17368396b70',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsqrt-function',
             },
         ],
         functionParameter: {
@@ -700,7 +700,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D1%80%D0%B0%D0%B7%D0%BD-2e404b4d-4935-4e85-9f52-cb08b9a45054',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsub-function',
             },
         ],
         functionParameter: {
@@ -714,7 +714,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-%D1%81%D1%83%D0%BC%D0%BC-81542999-5f1c-4da6-9ffe-f1d7aaa9457f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imsum-function',
             },
         ],
         functionParameter: {
@@ -728,7 +728,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BD%D0%B8%D0%BC-tan-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BD%D0%B8%D0%BC-tan-8478f45d-610a-43cf-8544-9fc0b553a132',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/imtan-function',
             },
         ],
         functionParameter: {
@@ -736,16 +736,16 @@ const locale: typeof enUS = {
         },
     },
     IMTANH: {
-        description: 'Возвращает гиперболический тангенс комплексного числа',
-        abstract: 'Возвращает гиперболический тангенс комплексного числа',
+        description: 'Функция IMTANH возвращает гиперболический тангенс заданного комплексного числа. Например, для заданного комплексного числа "x + yi" будет возвращено значение "tanh(x + yi)".',
+        abstract: 'Функция IMTANH возвращает гиперболический тангенс заданного комплексного числа. Например, для заданного комплексного числа "x + yi" будет возвращено значение "tanh(x + yi)".',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/9366655?hl=ru&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366655?hl=ru',
             },
         ],
         functionParameter: {
-            inumber: { name: 'комлексное число', detail: 'Комплексное число, гиперболический тангенс которого нужно вычислить.' },
+            inumber: { name: 'комлексное число', detail: 'Комплексное число, гиперболический тангенс которого нужно вычислить. Это может быть или результат функции COMPLEX, или вещественное число (комплексное число с мнимыми частями, равными 0), или строка в формате "x + yi", где x и y – числовые значения.' },
         },
     },
     OCT2BIN: {
@@ -754,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-%D0%B2-%D0%B4%D0%B2-55383471-3c56-4d27-9522-1a8ec646c589',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oct2bin-function',
             },
         ],
         functionParameter: {
@@ -768,7 +768,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-%D0%B2-%D0%B4%D0%B5%D1%81-87606014-cb98-44b2-8dbb-e48f8ced1554',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oct2dec-function',
             },
         ],
         functionParameter: {
@@ -781,7 +781,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D0%BE%D1%81%D1%8C%D0%BC-%D0%B2-%D1%88%D0%B5%D1%81%D1%82%D0%BD-912175b4-d497-41b4-a029-221f051b858f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/oct2hex-function',
             },
         ],
         functionParameter: {

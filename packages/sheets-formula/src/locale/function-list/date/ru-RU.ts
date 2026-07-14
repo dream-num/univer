@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%B0%D1%82%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%82%D0%B0-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -38,13 +38,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%80%D0%B0%D0%B7%D0%BD%D0%B4%D0%B0%D1%82-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'начальная дата', detail: 'Дата, представляющая первую или начальную дату заданного периода.' },
+            startDate: { name: 'начальная дата', detail: 'Дата, представляющая первую или начальную дату заданного периода. Даты можно вводить в виде текстовых строк в кавычках (например, "30.1.2001"), в виде порядковых номеров (например, 36921 представляет 30 января 2001 г., если используется система дат 1900) или как результаты вычисления других формул или функций (например ДАТАЗНАЧ("30.1.2001")).' },
             endDate: { name: 'конечная дата', detail: 'Дата окончания периода.' },
-            method: { name: 'тип', detail: 'Тип возвращаемых сведений.' },
+            unit: { name: 'единица', detail: 'Тип возвращаемых сведений, где: Unit***Return " Y "Количество полных лет в периоде. M "Количество завершенных месяцев в периоде". D "Количество дней в периоде". MD "Разница между днями в start_date и end_date. Месяцы и годы дат не учитываются. Важно: Мы не рекомендуем использовать аргумент MD, так как к нему существуют известные ограничения. См. раздел известных проблем ниже. YM "Разница между месяцами в start_date и end_date. Дни и годы дат игнорируются" YD "Разница между днями start_date и end_date. Годы дат не учитываются.' },
         },
     },
     DATEVALUE: {
@@ -53,7 +53,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%82%D0%B0%D0%B7%D0%BD%D0%B0%D1%87-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -66,7 +66,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B5%D0%BD%D1%8C-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -74,17 +74,17 @@ const locale: typeof enUS = {
         },
     },
     DAYS: {
-        description: 'Возвращает количество дней между двумя датами',
-        abstract: 'Возвращает количество дней между двумя датами',
+        description: 'Возвращает количество дней между двумя датами.',
+        abstract: 'Возвращает количество дней между двумя датами.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%BD%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BD%D0%B8-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/days-function',
             },
         ],
         functionParameter: {
-            endDate: { name: 'конечная дата', detail: 'Начальная дата и конечная дата — две даты, количество дней между которыми необходимо вычислить.' },
-            startDate: { name: 'начальная дата', detail: 'Начальная дата и конечная дата — две даты, количество дней между которыми необходимо вычислить.' },
+            endDate: { name: 'конечная дата', detail: 'Обязательно. Нач_дата и кон_дата — две даты, количество дней между которыми необходимо вычислить.' },
+            startDate: { name: 'начальная дата', detail: 'Обязательно. Нач_дата и кон_дата — две даты, количество дней между которыми необходимо вычислить.' },
         },
     },
     DAYS360: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BD%D0%B5%D0%B9360-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%82%D0%B0%D0%BC%D0%B5%D1%81-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -122,7 +122,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D0%BD%D0%BC%D0%B5%D1%81%D1%8F%D1%86%D0%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -140,8 +140,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            timestamp: { name: 'временная метка', detail: 'Unix-время в секундах, миллисекундах или микросекундах.' },
-            unit: { name: 'единица', detail: 'Eдиница измерения времени во временной метке (значение по умолчанию: 1): \n1 - секунды. \n2 - миллисекунды.\n3 - микросекунды' },
+            timestamp: { name: 'временная метка', detail: 'EPOCHTODATE(1655908429662,2)' },
+            unit: { name: 'единица', detail: 'EPOCHTODATE(1655906710)' },
         },
     },
     HOUR: {
@@ -150,7 +150,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B0%D1%81-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -163,7 +163,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
@@ -171,53 +171,53 @@ const locale: typeof enUS = {
         },
     },
     MINUTE: {
-        description: 'Возвращает минуты, соответствующие аргументу время в числовом формате',
-        abstract: 'Возвращает минуты, соответствующие аргументу время в числовом формате',
+        description: 'Возвращает минуты, соответствующие аргументу время_в_числовом_формате. Минуты определяются как целое число в интервале от 0 до 59.',
+        abstract: 'Возвращает минуты, соответствующие аргументу время_в_числовом_формате. Минуты определяются как целое число в интервале от 0 до 59.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B8%D0%BD%D1%83%D1%82%D1%8B-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'дата в числовом формате', detail: 'Дата, которую необходимо найти. Даты вводятся с использованием функции ДАТА или как результат других формул и функций. Например, для указания даты 23 мая 2008 года следует воспользоваться выражением ДАТА(2008;5;23)' },
+            serialNumber: { name: 'дата в числовом формате', detail: 'Обязательно. Время, для которого требуется выделить минуты. Время может быть задано текстовой строкой в кавычках (например, "18:45"), десятичным числом (например, значение 0,78125 соответствует 18:45) или результатом других формул или функций (например, ВРЕМЗНАЧ("18:45")).' },
         },
     },
     MONTH: {
-        description: 'Возвращает месяц для даты, заданной в числовом формате. Месяц возвращается как целое число в диапазоне от 1 (январь) до 12 (декабрь)',
-        abstract: 'Возвращает месяц для даты, заданной в числовом формате',
+        description: 'Возвращает месяц для даты, заданной в числовом формате. Месяц возвращается как целое число в диапазоне от 1 (январь) до 12 (декабрь).',
+        abstract: 'Возвращает месяц для даты, заданной в числовом формате. Месяц возвращается как целое число в диапазоне от 1 (январь) до 12 (декабрь).',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%B5%D1%81%D1%8F%D1%86-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B5%D1%81%D1%8F%D1%86-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/month-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'дата в числовом формате', detail: 'Дата месяца, который необходимо найти. Дата должна быть введена с использованием функции ДАТА либо как результат других формул или функций. Например, для указания даты 23 мая 2008 года следует воспользоваться выражением ДАТА(2008;5;23).' },
+            serialNumber: { name: 'дата в числовом формате', detail: 'Обязательно. Дата месяца, который необходимо найти. Дата должна быть введена с использованием функции ДАТА либо как результат других формул или функций. Например, для указания даты 23 мая 2008 года следует воспользоваться выражением ДАТА(2008;5;23). Если даты вводятся как текст, это может привести к возникновению проблем .' },
         },
     },
     NETWORKDAYS: {
-        description: 'Возвращает количество рабочих дней между датами "начальная дата" и "конечная дата"',
-        abstract: 'Возвращает количество рабочих дней между датами "начальная дата" и "конечная дата"',
+        description: 'Возвращает количество рабочих дней между датами "нач_дата" и "кон_дата". Праздники и выходные в это число не включаются. Функцию ЧИСТРАБДНИ можно использовать для вычисления заработной платы работника на основе количества дней, отработанных в указанный период.',
+        abstract: 'Возвращает количество рабочих дней между датами "нач_дата" и "кон_дата". Праздники и выходные в это число не включаются. Функцию ЧИСТРАБДНИ можно использовать для вычисления заработной платы работника на основе количества дней, отработанных в указанный период.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%87%D0%B8%D1%81%D1%82%D1%80%D0%B0%D0%B1%D0%B4%D0%BD%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B8%D1%81%D1%82%D1%80%D0%B0%D0%B1%D0%B4%D0%BD%D0%B8-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'начальная дата', detail: 'Начальная дата.' },
-            endDate: { name: 'конечная дата', detail: 'Конечная дата.' },
-            holidays: { name: 'праздники', detail: 'Список из одной или нескольких дат, которые требуется исключить из рабочего календаря, например государственные праздники. Список может представлять собой диапазон ячеек, содержащих даты, или константу массива, содержащую числа, которые представляют даты.' },
+            startDate: { name: 'начальная дата', detail: 'Обязательно. Начальная дата.' },
+            endDate: { name: 'конечная дата', detail: 'Обязательно. Конечная дата.' },
+            holidays: { name: 'праздники', detail: 'Дополнительные. Список из одной или нескольких дат, которые требуется исключить из рабочего календаря, например государственные праздники. Список может представлять собой диапазон ячеек, содержащих даты, или константу массива, содержащую числа, которые представляют даты.' },
         },
     },
     NETWORKDAYS_INTL: {
-        description: 'Возвращает количество рабочих дней между двумя датами с использованием параметров, определяющих, сколько в неделе выходных и какие дни являются выходными. Выходные и любые праздники не считаются рабочими днями',
+        description: 'Возвращает количество рабочих дней между двумя датами с использованием параметров, определяющих, сколько в неделе выходных и какие дни являются выходными. Выходные и любые праздники не считаются рабочими днями.',
         abstract: 'Возвращает количество рабочих дней между двумя датами с использованием параметров, определяющих, сколько в неделе выходных и какие дни являются выходными. Выходные и любые праздники не считаются рабочими днями.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B8%D1%81%D1%82%D1%80%D0%B0%D0%B1%D0%B4%D0%BD%D0%B8-%D0%BC%D0%B5%D0%B6%D0%B4-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -228,28 +228,28 @@ const locale: typeof enUS = {
         },
     },
     NOW: {
-        description: 'Возвращает текущую дату и время в числовом формате',
-        abstract: 'Возвращает текущую дату и время в числовом формате',
+        description: 'Возвращает текущую дату и время в числовом формате. Если до ввода этой функции для ячейки был задан формат Общий , он будет изменен на формат даты и времени, соответствующий региональным параметрам. Формат даты и времени для ячейки можно изменить с помощью команд на вкладке ленты Главная в группе Число .',
+        abstract: 'Возвращает текущую дату и время в числовом формате. Если до ввода этой функции для ячейки был задан формат Общий , он будет изменен на формат даты и времени, соответствующий региональным параметрам. Формат даты и времени для ячейки можно изменить с помощью команд на вкладке ленты Главная в группе Число .',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%82%D0%B4%D0%B0%D1%82%D0%B0-3337fd29-145a-4347-b2e6-20c904739c46',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/now-function',
             },
         ],
         functionParameter: {
         },
     },
     SECOND: {
-        description: 'Возвращает секунды, соответствующие аргументу время в числовом формате',
-        abstract: 'Возвращает секунды, соответствующие аргументу время в числовом формате',
+        description: 'Возвращает секунды, соответствующие аргументу время_в_числовом_формате. Секунды определяются как целое число в интервале от 0 до 59.',
+        abstract: 'Возвращает секунды, соответствующие аргументу время_в_числовом_формате. Секунды определяются как целое число в интервале от 0 до 59.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%B5%D0%BA%D1%83%D0%BD%D0%B4%D1%8B-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/second-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'дата в числовом формате', detail: 'Дата, которую необходимо найти. Даты вводятся с использованием функции ДАТА или как результат других формул и функций. Например, для указания даты 23 мая 2008 года следует воспользоваться выражением ДАТА(2008;5;23)' },
+            serialNumber: { name: 'дата в числовом формате', detail: 'Обязательно. Время, для которого требуется выделить секунды. Время может быть задано текстовой строкой в кавычках (например, "18:45"), десятичным числом (например, значение 0,78125 соответствует 18:45) или являться результатом других формул или функций (например, ВРЕМЗНАЧ("18:45")).' },
         },
     },
     TIME: {
@@ -258,7 +258,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%80%D0%B5%D0%BC%D1%8F-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/time-function',
             },
         ],
         functionParameter: {
@@ -273,7 +273,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D1%80%D0%B5%D0%BC%D0%B7%D0%BD%D0%B0%D1%87-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -281,16 +281,16 @@ const locale: typeof enUS = {
         },
     },
     TO_DATE: {
-        description: 'Преобразует число в значение даты',
-        abstract: 'Преобразует число в значение даты',
+        description: 'Преобразует число в значение даты.',
+        abstract: 'Преобразует число в значение даты.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/3094239?hl=ru&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=ru',
             },
         ],
         functionParameter: {
-            value: { name: 'значение', detail: 'Число, которое необходимо преобразовать в дату, или ссылка на ячейку, содержащую такое число' },
+            value: { name: 'значение', detail: 'TO_DATE(A2)' },
         },
     },
     TODAY: {
@@ -299,7 +299,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%B5%D0%B3%D0%BE%D0%B4%D0%BD%D1%8F-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/today-function',
             },
         ],
         functionParameter: {
@@ -311,7 +311,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B5%D0%BD%D1%8C%D0%BD%D0%B5%D0%B4-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -325,7 +325,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D0%BC%D0%BD%D0%B5%D0%B4%D0%B5%D0%BB%D0%B8-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -339,7 +339,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D0%B0%D0%B1%D0%B4%D0%B5%D0%BD%D1%8C-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -354,7 +354,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D0%B0%D0%B1%D0%B4%D0%B5%D0%BD%D1%8C-%D0%BC%D0%B5%D0%B6%D0%B4-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%BE%D0%B4-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -383,7 +383,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D0%BB%D1%8F%D0%B3%D0%BE%D0%B4%D0%B0-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

@@ -18,12 +18,12 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: '返回 URL 编码的字符串',
-        abstract: '返回 URL 编码的字符串',
+        description: 'ENCODEURL 函数返回 URL 编码的字符串，将某些非字母数字字符替换为百分比符号 (%) 和十六进制数字。',
+        abstract: 'ENCODEURL 函数返回 URL 编码的字符串，将某些非字母数字字符替换为百分比符号 (%) 和十六进制数字。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/encodeurl-%E5%87%BD%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
@@ -31,31 +31,30 @@ const locale: typeof enUS = {
         },
     },
     FILTERXML: {
-        description: '通过使用指定的 XPath，返回 XML 内容中的特定数据',
-        abstract: '通过使用指定的 XPath，返回 XML 内容中的特定数据',
+        description: 'FILTERXML 函数使用指定的 xpath 从 XML 内容返回特定数据。',
+        abstract: 'FILTERXML 函数使用指定的 xpath 从 XML 内容返回特定数据。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/filterxml-%E5%87%BD%E6%95%B0-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xml: { name: 'xml', detail: '有效 XML 格式的字符串。' },
+            xpath: { name: 'xpath', detail: '采用标准 XPath 格式的字符串。' },
         },
     },
     WEBSERVICE: {
-        description: '返回 Web 服务中的数据。',
-        abstract: '返回 Web 服务中的数据。',
+        description: 'WEBSERVICE 函数从 Internet 或 Intranet 上的 Web 服务返回数据。',
+        abstract: 'WEBSERVICE 函数从 Internet 或 Intranet 上的 Web 服务返回数据。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/webservice-%E5%87%BD%E6%95%B0-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: 'Web 服务的 URL。' },
         },
     },
 };

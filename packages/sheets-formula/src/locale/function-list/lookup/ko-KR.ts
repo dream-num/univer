@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/address-함수-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -55,7 +55,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/areas-함수-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -68,7 +68,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/choose-함수-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -83,7 +83,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/choosecols-함수-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -98,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/chooserows-함수-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -113,7 +113,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/column-함수-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -126,7 +126,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/columns-함수-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -139,7 +139,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/drop-함수-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -154,7 +154,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/expand-함수-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -170,7 +170,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/filter-함수-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -185,7 +185,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/formulatext-함수-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -198,68 +198,58 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/getpivotdata-함수-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: '첫 번째' },
-            number2: { name: 'number2', detail: '두 번째' },
+            dataField: { name: '데이터 필드', detail: '검색할 데이터가 들어 있는 데이터 필드의 이름입니다.' },
+            pivotTable: { name: '피벗 테이블', detail: '피벗 테이블의 셀, 범위 또는 이름이 지정된 범위에 대한 참조입니다.' },
+            field1: { name: '필드 1', detail: '선택 사항입니다. 데이터를 설명하는 첫 번째 필드 이름입니다.' },
+            item1: { name: '항목 1', detail: '선택 사항입니다. 필드의 첫 번째 항목 이름입니다.' },
         },
     },
     HLOOKUP: {
-        description: '배열의 첫 행에서 찾고 표시된 셀의 값을 반환합니다',
-        abstract: '배열의 첫 행에서 찾고 표시된 셀의 값을 반환합니다',
+        description: '표의 첫 행 또는 값의 배열에서 값을 검색한 다음 표나 배열에 지정한 행에서 동일한 열의 값을 반환합니다. 비교값이 데이터 표의 위쪽에 있을 때 지정한 행 수를 위에서 아래로 조사하려면 HLOOKUP을 사용합니다. 비교값이 찾으려는 데이터의 왼쪽 열에 있으면 VLOOKUP을 사용합니다.',
+        abstract: '표의 첫 행 또는 값의 배열에서 값을 검색한 다음 표나 배열에 지정한 행에서 동일한 열의 값을 반환합니다. 비교값이 데이터 표의 위쪽에 있을 때 지정한 행 수를 위에서 아래로 조사하려면 HLOOKUP을 사용합니다. 비교값이 찾으려는 데이터의 왼쪽 열에 있으면 VLOOKUP을 사용합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/hlookup-함수-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: 'lookup_value',
-                detail: '표의 첫 번째 행에서 찾을 값입니다. Lookup_value는 값, 참조 또는 텍스트 문자열일 수 있습니다.',
-            },
-            tableArray: {
-                name: 'table_array',
-                detail: '데이터를 조회할 정보 표입니다. 범위에 대한 참조 또는 범위 이름을 사용합니다.',
-            },
-            rowIndexNum: {
-                name: 'row_index_num',
-                detail: '일치하는 값이 반환될 table_array의 행 번호입니다. row_index_num이 1이면 table_array의 첫 번째 행 값을 반환하고, row_index_num이 2이면 table_array의 두 번째 행 값을 반환하는 식입니다.',
-            },
-            rangeLookup: {
-                name: 'range_lookup',
-                detail: 'HLOOKUP이 정확히 일치하는 항목을 찾을지 대략적으로 일치하는 항목을 찾을지를 지정하는 논리값입니다.',
-            },
+            lookupValue: { name: 'lookup_value', detail: '필수. 표의 첫 행에서 찾을 값입니다. lookup_value는 값, 참조 또는 텍스트 문자열일 수 있습니다.' },
+            tableArray: { name: 'table_array', detail: '필수. 데이터를 찾을 정보 표입니다. 범위에 대한 참조나 범위 이름을 사용합니다. table_array의 첫째 행의 값은 텍스트, 숫자 또는 논리값이 될 수 있습니다. range_lookup이 TRUE면 table_array의 첫째 행 값은 반드시 오름차순( ...-2, -1, 0, 1, 2,... , A-Z, FALSE, TRUE)으로 정렬되어 있어야 하고, 그렇지 않으면 HLOOKUP에서는 정확한 값을 찾을 수 없습니다. range_lookup이 FALSE면 table_array가 정렬되지 않아도 무방합니다. 대/소문자는 구분하지 않습니다. 값을 오름차순으로 왼쪽에서 오른쪽으로 정렬합니다. 자세한 내용은 범위 또는 표의 데이터 정렬 을 참조하세요.' },
+            rowIndexNum: { name: 'row_index_num', detail: '필수. 반환하려는 값이 있는 table_array의 행 번호입니다. row_index_num이 1이면 table_array의 첫 번째 행 값을, 2이면 두 번째 행 값을 반환합니다. row_index_num이 1보다 작으면 HLOOKUP에서는 #VALUE! 오류 값이 반환되고, row_index_num이 table_array의 행 수보다 크면 HLOOKUP에서는 #REF! 오류 값이 반환됩니다.' },
+            rangeLookup: { name: 'range_lookup', detail: '선택적. HLOOKUP이 정확히 일치하는지 또는 대략적인 일치 항목을 찾을지 여부를 지정하는 논리 값입니다. TRUE 또는 생략하면 대략적인 일치 항목이 반환됩니다. 즉, 정확한 일치 항목을 찾을 수 없으면 lookup_value 미만인 다음으로 큰 값이 반환됩니다. FALSE이면 HLOOKUP에서 정확히 일치하는 항목을 찾습니다. 오류 값을 찾을 수 없으면 #N/A 오류 값이 반환됩니다.' },
         },
     },
     HSTACK: {
-        description: '배열을 가로로 순서대로 추가하여 더 큰 배열을 반환합니다',
-        abstract: '배열을 가로로 순서대로 추가하여 더 큰 배열을 반환합니다',
+        description: '배열을 가로 및 순서대로 추가하여 더 큰 배열을 반환합니다.',
+        abstract: '배열을 가로 및 순서대로 추가하여 더 큰 배열을 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/hstack-함수-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
-            array1: { name: '배열', detail: '추가할 배열입니다.' },
-            array2: { name: '배열', detail: '추가할 배열입니다.' },
+            array1: { name: '배열', detail: '각 배열 인수의 최대 행 수입니다.' },
+            array2: { name: '배열', detail: '각 배열 인수의 모든 열의 결합된 개수입니다.' },
         },
     },
     HYPERLINK: {
-        description: '셀 내부에 하이퍼링크를 만듭니다.',
-        abstract: '셀 내부에 하이퍼링크를 만듭니다.',
+        description: '셀 안에 하이퍼링크를 만듭니다.',
+        abstract: '셀 안에 하이퍼링크를 만듭니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=ko',
+                url: 'https://support.google.com/docs/answer/3093313?hl=ko',
             },
         ],
         functionParameter: {
-            url: { name: 'url', detail: '따옴표로 묶인 링크 위치의 전체 URL 또는 이러한 URL을 포함하는 셀에 대한 참조입니다.' },
-            linkLabel: { name: 'link_label', detail: '셀에 링크로 표시할 텍스트로, 따옴표로 묶이거나 이러한 레이블을 포함하는 셀에 대한 참조입니다.' },
+            url: { name: 'url', detail: '링크 위치의 전체 URL(따옴표 안에 표시)이나 이러한 URL을 포함하는 셀 참조입니다. 특정 링크 유형만 허용됩니다. http:// , https:// , mailto: , aim: , ftp:// , gopher:// , telnet:// , news:// 는 허용되지만 다른 링크는 명시적으로 금지됩니다. 다른 프로토콜이 지정된 경우 link_label 이 셀에 표시되지만 하이퍼링크되지는 않습니다. 프로토콜을 지정하지 않으면 http:// 가 사용되며 url 앞에 붙습니다.' },
+            linkLabel: { name: 'link_label', detail: '[ 선택사항 - 기본값은 url ] - 셀에 링크로 표시할 텍스트입니다. 따옴표로 묶거나 이러한 라벨이 포함된 셀을 참조합니다. link_label 이 빈 셀에 대한 참조인 경우 url 이 유효하면 링크로 표시되고, 그렇지 않으면 일반 텍스트로 표시됩니다. link_label 이 빈 문자열 리터럴 ("")인 경우 셀이 비어 있는 것으로 표시되지만 셀을 클릭하거나 셀로 이동하면 링크에 계속 액세스할 수 있습니다.' },
         },
     },
     IMAGE: {
@@ -268,7 +258,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/image-함수-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -285,7 +275,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/index-함수-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -301,7 +291,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/indirect-함수-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -315,7 +305,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/lookup-함수-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -339,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/match-함수-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -354,7 +344,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/offset-함수-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -371,7 +361,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/row-함수-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -384,7 +374,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/rows-함수-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -397,12 +387,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/rtd-함수-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: '첫 번째' },
-            number2: { name: 'number2', detail: '두 번째' },
+            progId: { name: '프로그램 ID', detail: '로컬에 설치된 COM 자동화 추가 기능의 프로그램 ID입니다.' },
+            server: { name: '서버', detail: '추가 기능을 실행할 서버 이름입니다. 로컬 서버는 빈 문자열을 사용합니다.' },
+            topic1: { name: '항목 1', detail: '검색할 실시간 데이터를 지정하는 첫 번째 텍스트입니다.' },
+            topic2: { name: '항목 2', detail: '선택 사항입니다. 실시간 데이터를 지정하는 추가 텍스트입니다.' },
         },
     },
     SORT: {
@@ -411,7 +403,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/sort-함수-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -427,7 +419,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/sortby-함수-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -444,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/take-함수-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -459,7 +451,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/tocol-함수-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -474,7 +466,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/torow-함수-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -489,7 +481,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/transpose-함수-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -502,7 +494,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/unique-함수-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -517,7 +509,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/vlookup-함수-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -545,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/vstack-함수-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -559,7 +551,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/wrapcols-함수-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -574,7 +566,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/wraprows-함수-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -589,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/xlookup-함수-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -619,7 +611,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/xmatch-함수-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

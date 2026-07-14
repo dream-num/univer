@@ -17,6 +17,7 @@
 import { Arraytotext } from './arraytotext';
 import { Asc } from './asc';
 import { Bahttext } from './bahttext';
+// import { Call } from './call';
 import { Char } from './char';
 import { Clean } from './clean';
 import { Code } from './code';
@@ -24,6 +25,7 @@ import { Concat } from './concat';
 import { Concatenate } from './concatenate';
 import { Dbcs } from './dbcs';
 import { Dollar } from './dollar';
+// import { Euroconvert } from './euroconvert';
 import { Exact } from './exact';
 import { Find } from './find';
 import { Findb } from './findb';
@@ -38,10 +40,12 @@ import { Mid } from './mid';
 import { Midb } from './midb';
 import { Numberstring } from './numberstring';
 import { Numbervalue } from './numbervalue';
+// import { Phonetic } from './phonetic';
 import { Proper } from './proper';
 import { Regexextract } from './regexextract';
 import { Regexmatch } from './regexmatch';
 import { Regexreplace } from './regexreplace';
+// import { RegisterId } from './register-id';
 import { Replace } from './replace';
 import { Replaceb } from './replaceb';
 import { Rept } from './rept';
@@ -67,6 +71,7 @@ export const functionText = [
     [Asc, FUNCTION_NAMES_TEXT.ASC],
     [Arraytotext, FUNCTION_NAMES_TEXT.ARRAYTOTEXT],
     [Bahttext, FUNCTION_NAMES_TEXT.BAHTTEXT],
+    // [Call, FUNCTION_NAMES_TEXT.CALL],
     [Char, FUNCTION_NAMES_TEXT.CHAR],
     [Clean, FUNCTION_NAMES_TEXT.CLEAN],
     [Code, FUNCTION_NAMES_TEXT.CODE],
@@ -75,6 +80,7 @@ export const functionText = [
     [Dbcs, FUNCTION_NAMES_TEXT.DBCS],
     [Dollar, FUNCTION_NAMES_TEXT.DOLLAR],
     [Exact, FUNCTION_NAMES_TEXT.EXACT],
+    // [Euroconvert, FUNCTION_NAMES_TEXT.EUROCONVERT],
     [Find, FUNCTION_NAMES_TEXT.FIND],
     [Findb, FUNCTION_NAMES_TEXT.FINDB],
     [Fixed, FUNCTION_NAMES_TEXT.FIXED],
@@ -87,6 +93,7 @@ export const functionText = [
     [Midb, FUNCTION_NAMES_TEXT.MIDB],
     [Numberstring, FUNCTION_NAMES_TEXT.NUMBERSTRING],
     [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
+    // [Phonetic, FUNCTION_NAMES_TEXT.PHONETIC],
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXTEST],
@@ -95,6 +102,7 @@ export const functionText = [
     [Replace, FUNCTION_NAMES_TEXT.REPLACE],
     [Replaceb, FUNCTION_NAMES_TEXT.REPLACEB],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
+    // [RegisterId, FUNCTION_NAMES_TEXT.REGISTER_ID],
     [Right, FUNCTION_NAMES_TEXT.RIGHT],
     [Rightb, FUNCTION_NAMES_TEXT.RIGHTB],
     [Search, FUNCTION_NAMES_TEXT.SEARCH],

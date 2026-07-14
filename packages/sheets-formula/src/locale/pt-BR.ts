@@ -16,21 +16,21 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/en-US';
-import compatibility from './function-list/compatibility/en-US';
-import cube from './function-list/cube/en-US';
-import database from './function-list/database/en-US';
-import date from './function-list/date/en-US';
-import engineering from './function-list/engineering/en-US';
-import financial from './function-list/financial/en-US';
-import information from './function-list/information/en-US';
-import logical from './function-list/logical/en-US';
-import lookup from './function-list/lookup/en-US';
-import math from './function-list/math/en-US';
-import statistical from './function-list/statistical/en-US';
-import text from './function-list/text/en-US';
-import univer from './function-list/univer/en-US';
-import web from './function-list/web/en-US';
+import array from './function-list/array/pt-BR';
+import compatibility from './function-list/compatibility/pt-BR';
+import cube from './function-list/cube/pt-BR';
+import database from './function-list/database/pt-BR';
+import date from './function-list/date/pt-BR';
+import engineering from './function-list/engineering/pt-BR';
+import financial from './function-list/financial/pt-BR';
+import information from './function-list/information/pt-BR';
+import logical from './function-list/logical/pt-BR';
+import lookup from './function-list/lookup/pt-BR';
+import math from './function-list/math/pt-BR';
+import statistical from './function-list/statistical/pt-BR';
+import text from './function-list/text/pt-BR';
+import univer from './function-list/univer/pt-BR';
+import web from './function-list/web/pt-BR';
 
 const locale: typeof enUS = {
     'sheets-formula': {

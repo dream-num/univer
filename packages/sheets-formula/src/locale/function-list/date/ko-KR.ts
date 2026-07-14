@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/date-함수-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -38,13 +38,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/datedif-함수-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'start_date', detail: '지정된 기간의 첫 번째 또는 시작 날짜를 나타내는 날짜입니다.' },
-            endDate: { name: 'end_date', detail: '기간의 마지막 또는 종료 날짜를 나타내는 날짜입니다.' },
-            method: { name: 'method', detail: '반환하려는 정보의 유형입니다.' },
+            startDate: { name: 'start_date', detail: '특정 기간의 첫 번째 날짜 또는 시작 날짜를 나타내는 날짜입니다. 날짜는 따옴표로 묶인 텍스트 문자열(예: "2001-01-30"), 일련 번호(예: 1900 날짜 체계를 사용할 경우 2001년 1월 30일을 나타내는 값인 36921), 다른 수식 또는 함수의 결과(예: DATEVALUE("2001-01-30"))로 입력할 수 있습니다.' },
+            endDate: { name: 'end_date', detail: '기간의 마지막 날짜나 종료 날짜를 나타내는 날짜입니다.' },
+            unit: { name: 'Unit', detail: '반환하려는 정보의 유형입니다. 여기서: Unit****Returns " Y "기간의 완료 연도 수입니다." M "기간의 완료 월 수입니다." D "기간의 일 수입니다." MD "start_date 일과 end_date 간의 차이입니다. 두 날짜의 월이나 연도는 무시됩니다. 중요: 알려진 제한 사항이 있으므로 "MD" 인수를 사용하지 않는 것이 좋습니다. 아래의 알려진 문제 섹션을 참조하세요." YM "start_date 월과 end_date 간의 차이입니다. 날짜의 일과 연도는 무시됩니다" YD "start_date 일과 end_date 사이의 차이입니다. 두 날짜의 연도는 무시됩니다.' },
         },
     },
     DATEVALUE: {
@@ -53,7 +53,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/datevalue-함수-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -66,7 +66,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/day-함수-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/days-함수-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/days-function',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/days360-함수-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/edate-함수-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -122,7 +122,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/eomonth-함수-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -131,17 +131,17 @@ const locale: typeof enUS = {
         },
     },
     EPOCHTODATE: {
-        description: 'Unix epoch 타임스탬프(초, 밀리초 또는 마이크로초)를 UTC(협정 세계시)의 날짜/시간으로 변환합니다.',
-        abstract: 'Unix epoch 타임스탬프(초, 밀리초 또는 마이크로초)를 UTC(협정 세계시)의 날짜/시간으로 변환합니다.',
+        description: '초, 밀리초 또는 마이크로초 단위의 Unix epoch 타임스탬프를 협정 세계시(UTC) 기준의 날짜 및 시간으로 변환합니다.',
+        abstract: '초, 밀리초 또는 마이크로초 단위의 Unix epoch 타임스탬프를 협정 세계시(UTC) 기준의 날짜 및 시간으로 변환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/13193461?hl=ko&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/13193461?hl=ko',
             },
         ],
         functionParameter: {
-            timestamp: { name: 'timestamp', detail: '초, 밀리초 또는 마이크로초 단위의 Unix epoch 타임스탬프입니다.' },
-            unit: { name: 'unit', detail: '타임스탬프가 표현되는 시간 단위입니다. 기본값은 1입니다: \n1은 시간 단위가 초임을 나타냅니다. \n2는 시간 단위가 밀리초임을 나타냅니다.\n3은 시간 단위가 마이크로초임을 나타냅니다.' },
+            timestamp: { name: 'timestamp', detail: 'EPOCHTODATE(1655908429662,2)' },
+            unit: { name: 'unit', detail: 'EPOCHTODATE(1655906710)' },
         },
     },
     HOUR: {
@@ -150,7 +150,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/hour-함수-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -158,42 +158,42 @@ const locale: typeof enUS = {
         },
     },
     ISOWEEKNUM: {
-        description: '지정된 날짜의 연도의 ISO 주 번호를 반환합니다',
-        abstract: '지정된 날짜의 연도의 ISO 주 번호를 반환합니다',
+        description: '지정된 날짜의 연도에 해당하는 ISO 주 번호를 반환합니다.',
+        abstract: '지정된 날짜의 연도에 해당하는 ISO 주 번호를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/isoweeknum-함수-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
-            date: { name: 'date', detail: '날짜는 Excel에서 날짜 및 시간 계산에 사용하는 날짜-시간 코드입니다.' },
+            date: { name: 'date', detail: '필수. 날짜는 날짜 및 시간 계산을 위해 Excel에서 사용하는 날짜-시간 코드입니다.' },
         },
     },
     MINUTE: {
-        description: '일련 번호를 분으로 변환합니다',
-        abstract: '일련 번호를 분으로 변환합니다',
+        description: '시간 값의 분을 반환합니다. 분은 0에서 59 사이의 정수로 표시됩니다.',
+        abstract: '시간 값의 분을 반환합니다. 분은 0에서 59 사이의 정수로 표시됩니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/minute-함수-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: '찾으려는 분의 날짜입니다. 날짜는 DATE 함수를 사용하여 입력하거나 다른 수식 또는 함수의 결과로 입력해야 합니다. 예를 들어, 2008년 5월 23일에는 DATE(2008,5,23)을 사용합니다.' },
+            serialNumber: { name: 'serial_number', detail: '필수. 분을 계산할 시간 값입니다. 따옴표로 묶은 텍스트 문자열(예: "6:45 PM"), 10진수(6:45 PM을 나타내는 0.78125) 또는 다른 수식이나 함수의 결과(예: TIMEVALUE("6:45 PM"))를 입력할 수 있습니다.' },
         },
     },
     MONTH: {
-        description: '일련 번호로 나타낸 날짜의 월을 반환합니다. 월은 1(1월)에서 12(12월) 사이의 정수로 지정됩니다.',
-        abstract: '일련 번호를 월로 변환합니다',
+        description: '일련 번호가 나타내는 날짜의 월을 반환합니다. 월은 1(1월)에서 12(12월) 사이의 정수로 표시됩니다.',
+        abstract: '일련 번호가 나타내는 날짜의 월을 반환합니다. 월은 1(1월)에서 12(12월) 사이의 정수로 표시됩니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/month-함수-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/month-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: '찾으려는 월의 날짜입니다. 날짜는 DATE 함수를 사용하여 입력하거나 다른 수식 또는 함수의 결과로 입력해야 합니다. 예를 들어, 2008년 5월 23일에는 DATE(2008,5,23)을 사용합니다.' },
+            serialNumber: { name: 'serial_number', detail: '필수. 월을 구할 날짜입니다. 날짜는 DATE 함수를 사용하거나 다른 수식 또는 함수의 결과로 입력해야 합니다. 예를 들어 2008년 5월 23일에 대해서는 DATE(2008,5,23)을 사용합니다. 날짜를 텍스트로 입력 하면 문제가 발생할 수 있습니다.' },
         },
     },
     NETWORKDAYS: {
@@ -202,7 +202,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/networkdays-함수-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
@@ -217,7 +217,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/networkdays-intl-함수-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -228,28 +228,28 @@ const locale: typeof enUS = {
         },
     },
     NOW: {
-        description: '현재 날짜 및 시간의 일련 번호를 반환합니다.',
-        abstract: '현재 날짜 및 시간의 일련 번호를 반환합니다',
+        description: '현재 날짜와 시간의 일련 번호를 반환합니다. 함수를 입력하기 전 셀 형식이 일반 인 경우 셀 형식이 국가별 설정의 날짜 및 시간 형식과 일치하도록 변경됩니다. 리본 메뉴의 홈 탭에 있는 표시 형식 그룹의 명령을 사용하여 셀의 날짜 및 시간 형식을 변경할 수 있습니다.',
+        abstract: '현재 날짜와 시간의 일련 번호를 반환합니다. 함수를 입력하기 전 셀 형식이 일반 인 경우 셀 형식이 국가별 설정의 날짜 및 시간 형식과 일치하도록 변경됩니다. 리본 메뉴의 홈 탭에 있는 표시 형식 그룹의 명령을 사용하여 셀의 날짜 및 시간 형식을 변경할 수 있습니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/now-함수-3337fd29-145a-4347-b2e6-20c904739c46',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/now-function',
             },
         ],
         functionParameter: {
         },
     },
     SECOND: {
-        description: '일련 번호를 초로 변환합니다',
-        abstract: '일련 번호를 초로 변환합니다',
+        description: '시간 값의 초를 반환합니다. 초는 0에서 59 사이의 정수로 제공됩니다.',
+        abstract: '시간 값의 초를 반환합니다. 초는 0에서 59 사이의 정수로 제공됩니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/second-함수-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/second-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: '찾으려는 초의 날짜입니다. 날짜는 DATE 함수를 사용하여 입력하거나 다른 수식 또는 함수의 결과로 입력해야 합니다. 예를 들어, 2008년 5월 23일에는 DATE(2008,5,23)을 사용합니다.' },
+            serialNumber: { name: 'serial_number', detail: '필수. 초를 계산할 시간 값입니다. 따옴표로 묶은 텍스트 문자열(예: "6:45 PM"), 10진수(6:45 PM을 나타내는 0.78125) 또는 다른 수식이나 함수의 결과(예: TIMEVALUE("6:45 PM"))를 입력할 수 있습니다.' },
         },
     },
     TIME: {
@@ -258,7 +258,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/time-함수-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/time-function',
             },
         ],
         functionParameter: {
@@ -273,7 +273,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/timevalue-함수-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -281,16 +281,16 @@ const locale: typeof enUS = {
         },
     },
     TO_DATE: {
-        description: '제공된 숫자를 날짜로 변환합니다.',
-        abstract: '제공된 숫자를 날짜로 변환합니다.',
+        description: '입력된 숫자를 날짜로 변환합니다.',
+        abstract: '입력된 숫자를 날짜로 변환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3094239?hl=ko&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=ko',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '날짜로 변환할 인수 또는 셀에 대한 참조입니다.' },
+            value: { name: 'value', detail: 'TO_DATE(A2)' },
         },
     },
     TODAY: {
@@ -299,7 +299,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/today-함수-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/today-function',
             },
         ],
         functionParameter: {
@@ -311,7 +311,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/weekday-함수-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -325,7 +325,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/weeknum-함수-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -339,7 +339,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/workday-함수-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -354,7 +354,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/workday-intl-함수-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/year-함수-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -383,7 +383,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/yearfrac-함수-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

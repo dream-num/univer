@@ -67,6 +67,7 @@ export type { IUniverEngineRenderConfig } from './config/config';
 export * from './context';
 export * from './custom';
 export { DrawingGroupObject } from './drawing-group';
+export type { IDrawingGroupShadow } from './drawing-group';
 export * from './engine';
 export * from './group';
 export * from './layer';

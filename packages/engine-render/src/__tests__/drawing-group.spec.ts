@@ -43,6 +43,10 @@ function createContext() {
         lineDashOffset: 0,
         lineJoin: 'round',
         miterLimit: 0,
+        shadowColor: '',
+        shadowBlur: 0,
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
     } as any;
 }
 
@@ -125,6 +129,12 @@ describe('drawing group', () => {
         });
         const childRenderSpy = vi.spyOn(child, 'render').mockImplementation(() => child);
         drawingGroup.addObject(child);
+        drawingGroup.setOuterShadow({
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            shadowBlur: 12,
+            shadowOffsetX: -4,
+            shadowOffsetY: 4,
+        });
 
         const ctx = createContext();
         drawingGroup.render(ctx, {
@@ -133,6 +143,10 @@ describe('drawing group', () => {
 
         expect(ctx.transform).toHaveBeenCalled();
         expect(childRenderSpy).toHaveBeenCalled();
+        expect(ctx.shadowColor).toBe('rgba(0, 0, 0, 0.5)');
+        expect(ctx.shadowBlur).toBe(12);
+        expect(ctx.shadowOffsetX).toBe(-4);
+        expect(ctx.shadowOffsetY).toBe(4);
     });
 
     it('maps children of nested drawing groups through the parent rendered bound', () => {

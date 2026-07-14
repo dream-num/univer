@@ -14,14 +14,41 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, IDisposable, INeedCheckDisposable, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    DrawingTypeEnum,
+    ICommandInfo,
+    IDisposable,
+    INeedCheckDisposable,
+    Injector,
+    IRange,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
-import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    fromEventSubject,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    IRefSelectionsService,
+    RefRangeService,
+    SetFrozenMutation,
+    SetSelectionsOperation,
+    SetWorksheetRowAutoHeightMutation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';

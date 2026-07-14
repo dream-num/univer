@@ -17,7 +17,13 @@
 import type { IDisposable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { ICellDropdown } from '../views/dropdown';
-import { createIdentifier, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    Inject,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { dropdownMap } from '../views/dropdown';

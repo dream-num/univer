@@ -36,4 +36,15 @@ describe('ErrorService', () => {
 
         expect(errors).toEqual(['permission-denied', 'network-timeout']);
     });
+
+    it('completes the error stream when its injector is disposed', () => {
+        const injector = new Injector([[ErrorService]]);
+        const disposableService = injector.get(ErrorService);
+        let completed = false;
+
+        disposableService.error$.subscribe({ complete: () => completed = true });
+        injector.dispose();
+
+        expect(completed).toBe(true);
+    });
 });

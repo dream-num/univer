@@ -31,6 +31,7 @@ import {
 } from '@univerjs/core';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
 import {
+    SelectRangeCommand,
     SheetRangeThemeModel,
     SheetsSelectionsService,
     WorkbookEditablePermission,
@@ -44,8 +45,12 @@ import {
     TableManager,
 } from '@univerjs/sheets-table';
 import {
+    ExpandSelectionCommand,
     getTransformCoord,
     ISheetSelectionRenderService,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+    SelectAllCommand,
     SetScrollOperation,
     SetZoomRatioOperation,
     SHEET_VIEW_KEY,
@@ -70,6 +75,13 @@ const TABLE_CONTROL_GAP_ROW = 0;
 const TABLE_RENDER_REFRESH_COMMANDS = new Set([
     SetScrollOperation.id,
     SetZoomRatioOperation.id,
+]);
+const SELECTION_ONLY_COMMANDS = new Set([
+    MoveSelectionCommand.id,
+    MoveSelectionEnterAndTabCommand.id,
+    ExpandSelectionCommand.id,
+    SelectAllCommand.id,
+    SelectRangeCommand.id,
 ]);
 
 type TopGapSnapshot = { size: number; color?: string; stripeColor?: string } | null;
@@ -138,6 +150,10 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     private _initRefresh(): void {
         const commandExecuted$ = fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
             .pipe(filter(([command]) => {
+                if (command.id.startsWith('doc.') || SELECTION_ONLY_COMMANDS.has(command.id)) {
+                    return false;
+                }
+
                 if (command.type === CommandType.OPERATION && TABLE_RENDER_REFRESH_COMMANDS.has(command.id)) {
                     this._closeFloatingControls();
                     return true;
@@ -157,22 +173,29 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             this._sheetTableThemeUIController.refreshTable$,
             this._workbookPermissionService.unitPermissionInitStateChange$,
             this._permissionService.permissionPointUpdate$,
-            this._sheetsSelectionsService.selectionChanged$,
             commandExecuted$
         ).subscribe(() => {
             this._closeFloatingControls();
             this._refresh();
         }));
+
+        this.disposeWithMe(this._sheetsSelectionsService.selectionChanged$.subscribe(() => {
+            this._closeFloatingControls();
+            this._refresh(false);
+        }));
     }
 
-    private _refresh(): void {
+    private _refresh(invalidateScene = true): void {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
         const worksheet = this._context.unit.getActiveSheet();
 
         if (!skeleton || !worksheet || !this._canEditWorkbook()) {
             this._shape.setItems([]);
             this._shape.refreshBounds();
-            this._context.scene.makeDirty();
+            this._shape.makeDirty(true);
+            if (invalidateScene) {
+                this._context.scene.makeDirty();
+            }
             return;
         }
 
@@ -200,7 +223,9 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         this._shape.setItems(items);
         this._shape.refreshBounds();
         this._shape.makeDirty(true);
-        this._context.scene.makeDirty();
+        if (invalidateScene) {
+            this._context.scene.makeDirty();
+        }
     }
 
     private _canEditWorkbook(): boolean {

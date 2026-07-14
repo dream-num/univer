@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/3267036?hl=en&sjid=8484774178571403392-AP',
+                url: 'https://support.google.com/docs/answer/3267036?hl=sk',
             },
         ],
         functionParameter: {
@@ -38,7 +38,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+                url: 'https://support.google.com/docs/answer/10307761?hl=sk',
             },
         ],
         functionParameter: {

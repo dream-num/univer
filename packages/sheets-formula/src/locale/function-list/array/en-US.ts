@@ -21,7 +21,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/3267036?hl=en&sjid=8484774178571403392-AP',
+                url: 'https://support.google.com/docs/answer/3267036?hl=en',
             },
         ],
         functionParameter: {
@@ -36,12 +36,12 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+                url: 'https://support.google.com/docs/answer/10307761?hl=en',
             },
         ],
         functionParameter: {
             range1: { name: 'range1', detail: 'The first range to flatten.' },
-            range2: { name: 'range2', detail: 'Additional ranges to flatten.' },
+            range2: { name: 'range2', detail: '[optional] repeatable Additional ranges to flatten.' },
         },
     },
 };

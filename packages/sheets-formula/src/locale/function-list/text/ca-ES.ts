@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/asc-function-0b6abf1c-c663-4004-a964-ebc00b723266',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/asc-function',
             },
         ],
         functionParameter: {
@@ -36,7 +36,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/arraytotext-function-9cdcad46-2fa5-4c6b-ac92-14e7bc862b8b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/arraytotext-function',
             },
         ],
         functionParameter: {
@@ -50,7 +50,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/bahttext-function-5ba4d0b4-abd3-4325-8d22-7a92d59aab9c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/bahttext-function',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/char-function',
             },
         ],
         functionParameter: {
@@ -76,7 +76,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/clean-function-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/clean-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/code-function-c32b692b-2ed0-4a04-bdd9-75640144b928',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/code-function',
             },
         ],
         functionParameter: {
@@ -102,7 +102,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/concat-function-9b1a9a3f-94ff-41af-9736-694cbd6b4ca2',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/concat-function',
             },
         ],
         functionParameter: {
@@ -116,7 +116,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/concatenate-function-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/concatenate-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/dbcs-function-a4025e73-63d2-4958-9423-21a24794c9e5',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dbcs-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/dollar-function-a6cd05d9-9740-4ad3-a469-8109d18ff611',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dollar-function',
             },
         ],
         functionParameter: {
@@ -157,7 +157,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/exact-function-d3087698-fc15-4a15-9631-12575cf29926',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/exact-function',
             },
         ],
         functionParameter: {
@@ -171,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/find-findb-functions-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -186,7 +186,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/find-findb-functions-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/this-article-has-been-retired',
             },
         ],
         functionParameter: {
@@ -201,7 +201,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/fixed-function-ffd5723c-324c-45e9-8b96-e41be2a8274a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/fixed-function',
             },
         ],
         functionParameter: {
@@ -216,7 +216,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/left-leftb-functions-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -230,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/left-leftb-functions-9203d2d2-7960-479b-84c6-1ea52b99640c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/left-function',
             },
         ],
         functionParameter: {
@@ -244,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/len-lenb-functions-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/len-lenb-functions-29236f94-cedc-429d-affd-b5e33d2c67cb',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/len-function',
             },
         ],
         functionParameter: {
@@ -270,7 +270,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/lower-function-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/lower-function',
             },
         ],
         functionParameter: {
@@ -283,7 +283,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -298,7 +298,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/mid-function',
             },
         ],
         functionParameter: {
@@ -327,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/numbervalue-function-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/numbervalue-function',
             },
         ],
         functionParameter: {
@@ -342,12 +342,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/phonetic-function-9a329dac-0c0f-42f8-9a55-639086988554',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/phonetic-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            reference: { name: 'Referència', detail: 'Text, interval o referència que conté el text fonètic que voleu extreure.' },
         },
     },
     PROPER: {
@@ -356,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/proper-function-52a5a283-e8b2-49be-8506-b2887b889f94',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/proper-function',
             },
         ],
         functionParameter: {
@@ -364,46 +363,46 @@ const locale: typeof enUS = {
         },
     },
     REGEXEXTRACT: {
-        description: 'Extreu les primeres subcadenes coincidents segons una expressió regular.',
-        abstract: 'Extreu les primeres subcadenes coincidents segons una expressió regular.',
+        description: 'Extreu subcadenes coincidents d\'acord amb una expressió regular.',
+        abstract: 'Extreu subcadenes coincidents d\'acord amb una expressió regular.',
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=ca',
+                url: 'https://support.google.com/docs/answer/3098244?hl=ca',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'El text d\'entrada.' },
+            text: { name: 'text', detail: 'Consell : l\'exemple anterior tornarà dues columnes de dades: "extreure" a la primera i "valors" a la segona.' },
             regularExpression: { name: 'expressió_regular', detail: 'Es retornarà la primera part del text que coincideixi amb aquesta expressió.' },
         },
     },
     REGEXMATCH: {
-        description: 'Indica si un fragment de text coincideix amb una expressió regular.',
-        abstract: 'Indica si un fragment de text coincideix amb una expressió regular.',
+        description: 'Determina si una part del text coincideix amb una expressió regular.',
+        abstract: 'Determina si una part del text coincideix amb una expressió regular.',
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=ca',
+                url: 'https://support.google.com/docs/answer/3098292?hl=ca',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'El text a provar amb l\'expressió regular.' },
-            regularExpression: { name: 'expressió_regular', detail: 'L\'expressió regular amb la qual provar el text.' },
+            text: { name: 'text', detail: 'text que cal contrastar amb l\'expressió regular.' },
+            regularExpression: { name: 'expressió_regular', detail: 'expressió regular amb què es contrastarà el text.' },
         },
     },
     REGEXREPLACE: {
-        description: 'Substitueix part d\'una cadena de text per una altra cadena de text mitjançant expressions regulars.',
-        abstract: 'Substitueix part d\'una cadena de text per una altra cadena de text mitjançant expressions regulars.',
+        description: 'Substitueix part d\'una cadena de text per una altra cadena de text utilitzant expressions regulars.',
+        abstract: 'Substitueix part d\'una cadena de text per una altra cadena de text utilitzant expressions regulars.',
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=ca',
+                url: 'https://support.google.com/docs/answer/3098245?hl=ca',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'El text, una part del qual serà substituïda.' },
-            regularExpression: { name: 'expressió_regular', detail: 'L\'expressió regular. Totes les instàncies coincidents en el text seran substituïdes.' },
-            replacement: { name: 'substitució', detail: 'El text que s\'inserirà en el text original.' },
+            text: { name: 'text', detail: 'text, una part del qual cal substituir.' },
+            regularExpression: { name: 'expressió_regular', detail: 'l\'expressió regular. Totes les coincidències de l\'argument text se substituiran.' },
+            replacement: { name: 'substitució', detail: 'text que cal inserir al text original.' },
         },
     },
     REPLACE: {
@@ -412,7 +411,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/replace-replaceb-functions-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -428,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/replace-replaceb-functions-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/replace-function',
             },
         ],
         functionParameter: {
@@ -444,7 +443,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/rept-function-04c4d778-e712-43b4-9c15-d656582bb061',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/rept-function',
             },
         ],
         functionParameter: {
@@ -458,7 +457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/right-rightb-functions-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -472,7 +471,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/right-rightb-functions-240267ee-9afa-4639-a02b-f19e1786cf2f',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/right-function',
             },
         ],
         functionParameter: {
@@ -486,7 +485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/search-searchb-functions-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -501,7 +500,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/search-searchb-functions-9ab04538-0e55-4719-a72e-b6f54513b495',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/search-function',
             },
         ],
         functionParameter: {
@@ -516,7 +515,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/substitute-function-6434944e-a904-4336-a9b0-1e58df3bc332',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/substitute-function',
             },
         ],
         functionParameter: {
@@ -532,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/t-function-fb83aeec-45e7-4924-af95-53e073541228',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/t-function',
             },
         ],
         functionParameter: {
@@ -545,7 +544,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/text-function-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/text-function',
             },
         ],
         functionParameter: {
@@ -559,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/textafter-function-c8db2546-5b51-416a-9690-c7e6722e90b4',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/textafter-function',
             },
         ],
         functionParameter: {
@@ -577,7 +576,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/textbefore-function-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/textbefore-function',
             },
         ],
         functionParameter: {
@@ -595,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/textjoin-function-357b449a-ec91-49d0-80c3-0e8fc845691c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/textjoin-function',
             },
         ],
         functionParameter: {
@@ -611,7 +610,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/textsplit-function-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/textsplit-function',
             },
         ],
         functionParameter: {
@@ -629,7 +628,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/trim-function',
             },
         ],
         functionParameter: {
@@ -642,7 +641,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/unichar-function-ffeb64f5-f131-44c6-b332-5cd72f0659b8',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/unichar-function',
             },
         ],
         functionParameter: {
@@ -655,7 +654,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/unicode-function-adb74aaa-a2a5-4dde-aff6-966e4e81f16f',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/unicode-function',
             },
         ],
         functionParameter: {
@@ -668,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/upper-function-c11f29b3-d1a3-4537-8df6-04d0049963d6',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/upper-function',
             },
         ],
         functionParameter: {
@@ -681,7 +680,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/value-function-257d0108-07dc-437d-ae1c-bc2d3953d8c2',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/value-function',
             },
         ],
         functionParameter: {
@@ -694,7 +693,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/valuetotext-function-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/valuetotext-function',
             },
         ],
         functionParameter: {
@@ -708,12 +707,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/call-function-32d58445-e646-4ffd-8d5e-b45077a5e995',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/call-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            moduleText: { name: 'Text del mòdul', detail: 'Nom de la biblioteca d’enllaç dinàmic (DLL) que conté el procediment.' },
+            procedure: { name: 'Procediment', detail: 'Nom o número ordinal del procediment de la DLL.' },
+            typeText: { name: 'Text del tipus', detail: 'Text que especifica els tipus de dades dels arguments i del valor retornat.' },
+            argument1: { name: 'Argument 1', detail: 'Opcional. Primer argument que es passa al procediment.' },
         },
     },
     EUROCONVERT: {
@@ -722,12 +723,15 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/euroconvert-function-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/euroconvert-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            number: { name: 'Nombre', detail: 'Valor de moneda que s’ha de convertir.' },
+            source: { name: 'Origen', detail: 'Codi de la moneda d’origen.' },
+            target: { name: 'Destinació', detail: 'Codi de la moneda de destinació.' },
+            fullPrecision: { name: 'Precisió completa', detail: 'Valor lògic que controla si s’arrodoneix amb les regles específiques de la moneda.' },
+            triangulationPrecision: { name: 'Precisió de triangulació', detail: 'Opcional. Nombre de dígits significatius per a la conversió intermèdia a euros.' },
         },
     },
     REGISTER_ID: {
@@ -736,12 +740,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/register-id-function-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/register-id-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            moduleText: { name: 'Text del mòdul', detail: 'Nom de la DLL o del recurs de codi que conté el procediment.' },
+            procedure: { name: 'Procediment', detail: 'Nom o número ordinal del procediment.' },
+            typeText: { name: 'Text del tipus', detail: 'Opcional. Text que especifica els tipus de dades dels arguments i del valor retornat.' },
         },
     },
 };

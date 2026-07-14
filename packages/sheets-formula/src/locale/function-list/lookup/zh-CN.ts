@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/address-%E5%87%BD%E6%95%B0-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -46,7 +46,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/areas-%E5%87%BD%E6%95%B0-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -59,7 +59,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/choose-%E5%87%BD%E6%95%B0-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -74,7 +74,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/choosecols-%E5%87%BD%E6%95%B0-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/chooserows-%E5%87%BD%E6%95%B0-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -104,7 +104,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/column-%E5%87%BD%E6%95%B0-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -117,7 +117,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/columns-%E5%87%BD%E6%95%B0-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/drop-%E5%87%BD%E6%95%B0-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -145,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/expand-%E5%87%BD%E6%95%B0-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -161,7 +161,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/filter-%E5%87%BD%E6%95%B0-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/formulatext-%E5%87%BD%E6%95%B0-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -184,68 +184,58 @@ const locale: typeof enUS = {
         },
     },
     GETPIVOTDATA: {
-        description: '返回存储在数据透视表中的数据',
-        abstract: '返回存储在数据透视表中的数据',
+        description: 'GETPIVOTDATA 函数返回数据透视表中的可见数据。',
+        abstract: 'GETPIVOTDATA 函数返回数据透视表中的可见数据。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/getpivotdata-%E5%87%BD%E6%95%B0-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataField: { name: 'dataField', detail: '包含要检索的数据的数据透视表字段的名称。 这需要用引号括起。 示例： =GETPIVOTDATA (“Sales”，A3) 。 此处，“Sales”是要检索的“值”字段。 由于未指定其他字段，因此 GETPIVOTDATA 返回总销售额。' },
+            pivotTable: { name: 'pivotTable', detail: '对数据透视表中任何单元格、单元格区域或单元格已命名区域的引用。 此信息用于确定包含要检索数据的数据透视表。 示例： =GETPIVOTDATA (“Sales”，A3) 。 此处，A3 是数据透视表中的引用，它告知公式要使用哪个数据透视表。' },
+            field1: { name: 'field1', detail: '描述要检索的数据的 1 到 126 个字段名称对和项目名称对。 这些对可按任何顺序排列。 除日期和数字以外的项的字段名称和名称需要用引号引起来。 示例： =GETPIVOTDATA (“Sales”、A3、“Month”、“Mar”) 。 此处，“Month”是字段，“Mar”是项。 若要为字段指定多个项，请将它们括在大括号 (例如：{“Mar”、“Apr”}) 。 对于 OLAP 数据透视表 ，项可以包含维度的源名称和项的源名称。 OLAP 数据透视表的字段和项目对可能类似于： "[产品]","[产品].[所有产品].[食品].[烤制食品]"' },
+            item1: { name: 'item1', detail: '描述要检索的数据的 1 到 126 个字段名称对和项目名称对。 这些对可按任何顺序排列。 除日期和数字以外的项的字段名称和名称需要用引号引起来。 示例： =GETPIVOTDATA (“Sales”、A3、“Month”、“Mar”) 。 此处，“Month”是字段，“Mar”是项。 若要为字段指定多个项，请将它们括在大括号 (例如：{“Mar”、“Apr”}) 。 对于 OLAP 数据透视表 ，项可以包含维度的源名称和项的源名称。 OLAP 数据透视表的字段和项目对可能类似于： "[产品]","[产品].[所有产品].[食品].[烤制食品]"' },
         },
     },
     HLOOKUP: {
-        description: '在表格的首行或数值数组中搜索值，然后返回表格或数组中指定行的所在列中的值。',
-        abstract: '查找数组的首行，并返回指定单元格的值',
+        description: '在表格的首行或值数组中搜索值，然后返回表格或数组中指定行的所在列中的值。 当比较值位于数据表格的首行时，如果要向下查看指定的行数，则可使用 HLOOKUP。 当比较值位于所需查找的数据的左边一列时，则可使用 VLOOKUP。',
+        abstract: '在表格的首行或值数组中搜索值，然后返回表格或数组中指定行的所在列中的值。 当比较值位于数据表格的首行时，如果要向下查看指定的行数，则可使用 HLOOKUP。 当比较值位于所需查找的数据的左边一列时，则可使用 VLOOKUP。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/hlookup-%E5%87%BD%E6%95%B0-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: '查找值',
-                detail: '要查找的值。 要查找的值必须位于 table_array 参数中指定的单元格区域的第一行中。',
-            },
-            tableArray: {
-                name: '范围',
-                detail: 'VLOOKUP 在其中搜索 lookup_value 和返回值的单元格区域。在其中查找数据的信息表。 使用对区域或区域名称的引用。',
-            },
-            rowIndexNum: {
-                name: '行号',
-                detail: '行号table_array匹配值将返回的行号（row_index_num为 1，则返回 table_array 中的第一行值，row_index_num 2 返回 table_array 中的第二行值）。',
-            },
-            rangeLookup: {
-                name: '查询类型',
-                detail: '指定希望查找精确匹配值还是近似匹配值：默认近似匹配 - 1/TRUE, 完全匹配 - 0/FALSE',
-            },
+            lookupValue: { name: '查找值', detail: '必填。 要在表格的第一行中查找的值。 Lookup_value 可以是数值、引用或文本字符串。' },
+            tableArray: { name: '范围', detail: '必填。 在其中查找数据的信息表。 使用对区域或区域名称的引用。 Table_array 的第一行的数值可以为文本、数字或逻辑值。 如果 range_lookup 为 TRUE，则 table_array 的第一行的数值必须按升序排列：...-2、-1、0、1、2、...、A-Z、FALSE、TRUE；否则，HLOOKUP 将不能给出正确的数值。 如果 range_lookup 为 FALSE，则 table_array 不必进行排序。 文本不区分大小写。 将数值从左到右按升序排序。 有关详细信息，请参阅 对区域或表中的数据排序 。' },
+            rowIndexNum: { name: '行号', detail: '必填。 将从中返回匹配值的table_array中的行号。 row_index_num 1 返回table_array中的第一行值，row_index_num 2 返回table_array中的第二行值，依此以类。 如果row_index_num小于 1，HLOOKUP 将返回 #VALUE！ error 值;如果row_index_num大于table_array上的行数，HLOOKUP 将返回 #REF！ 错误值。' },
+            rangeLookup: { name: '查询类型', detail: '选。 一个逻辑值，指定希望 HLOOKUP 查找精确匹配值还是近似匹配值。 如果为 TRUE 或省略，则返回近似匹配值。 换言之，如果找不到精确匹配值，则返回小于 lookup_value 的最大值。 如果为 False，则 HLOOKUP 将查找精确匹配值。 如果找不到精确匹配值，则返回错误值 #N/A。' },
         },
     },
     HSTACK: {
-        description: '水平和顺序追加数组以返回较大的数组',
-        abstract: '水平和顺序追加数组以返回较大的数组',
+        description: '按顺序水平追加数组，以返回更大的数组。',
+        abstract: '按顺序水平追加数组，以返回更大的数组。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/hstack-%E5%87%BD%E6%95%B0-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
-            array1: { name: '数组', detail: '要追加的数组。' },
-            array2: { name: '数组', detail: '要追加的数组。' },
+            array1: { name: '数组', detail: '每个数组参数的行计数最大值。' },
+            array2: { name: '数组', detail: '每个数组参数中所有列的组合计数。' },
         },
     },
     HYPERLINK: {
-        description: '在单元格内创建一个超链接',
-        abstract: '在单元格内创建一个超链接',
+        description: '在单元格内创建一个超链接。',
+        abstract: '在单元格内创建一个超链接。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=zh-Hans',
+                url: 'https://support.google.com/docs/answer/3093313?hl=zh-Hans',
             },
         ],
         functionParameter: {
@@ -259,7 +249,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/image-%E5%87%BD%E6%95%B0-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -276,7 +266,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/index-%E5%87%BD%E6%95%B0-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -292,7 +282,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/indirect-%E5%87%BD%E6%95%B0-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -306,7 +296,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/lookup-%E5%87%BD%E6%95%B0-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -327,7 +317,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/match-%E5%87%BD%E6%95%B0-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -342,7 +332,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/offset-%E5%87%BD%E6%95%B0-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -359,7 +349,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/row-%E5%87%BD%E6%95%B0-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -372,7 +362,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/rows-%E5%87%BD%E6%95%B0-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -385,12 +375,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/rtd-%E5%87%BD%E6%95%B0-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            progId: { name: '程序标识符', detail: '本地安装的 COM 自动化加载项的程序标识符。' },
+            server: { name: '服务器', detail: '运行加载项的服务器名称；本地服务器使用空字符串。' },
+            topic1: { name: '主题 1', detail: '指定要检索的实时数据的第一个文本。' },
+            topic2: { name: '主题 2', detail: '可选。指定实时数据的其他文本。' },
         },
     },
     SORT: {
@@ -399,7 +391,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/sort-%E5%87%BD%E6%95%B0-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -415,7 +407,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/sortby-%E5%87%BD%E6%95%B0-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -432,7 +424,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/take-%E5%87%BD%E6%95%B0-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -447,7 +439,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/tocol-%E5%87%BD%E6%95%B0-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -462,7 +454,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/torow-%E5%87%BD%E6%95%B0-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -477,7 +469,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/transpose-%E5%87%BD%E6%95%B0-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -490,7 +482,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/unique-%E5%87%BD%E6%95%B0-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -506,7 +498,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/vlookup-%E5%87%BD%E6%95%B0-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -534,7 +526,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/vstack-%E5%87%BD%E6%95%B0-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -548,7 +540,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/wrapcols-%E5%87%BD%E6%95%B0-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -563,7 +555,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/wraprows-%E5%87%BD%E6%95%B0-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -579,7 +571,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/xlookup-%E5%87%BD%E6%95%B0-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -609,7 +601,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/xmatch-%E5%87%BD%E6%95%B0-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

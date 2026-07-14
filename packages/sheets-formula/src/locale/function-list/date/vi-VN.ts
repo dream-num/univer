@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/date-%E5%87%BD%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -47,13 +47,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/datedif-%E5%87%BD%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'ngày bắt đầu', detail: 'Ngày đại diện cho ngày đầu tiên hoặc ngày bắt đầu của một khoảng thời gian đã cho.' },
+            startDate: { name: 'ngày bắt đầu', detail: 'Ngày đại diện cho ngày đầu tiên hoặc ngày bắt đầu của một khoảng thời gian đã cho. Ngày tháng có thể được nhập ở dạng chuỗi văn bản trong dấu ngoặc kép (ví dụ, "30/1/2001" ), dưới dạng số sê-ri (ví dụ, 36921, biểu thị cho ngày 30 tháng 1 năm 2001, nếu bạn đang sử dụng hệ thống ngày tháng 1900), hoặc là kết quả của các công thức hoặc hàm khác (ví dụ, hàm DATEVALUE("30/1/2001")).' },
             endDate: { name: 'ngày kết thúc', detail: 'Ngày đại diện cho ngày cuối cùng hoặc ngày kết thúc khoảng thời gian.' },
-            method: { name: 'Loại thông tin', detail: 'Kiểu thông tin mà bạn muốn được trả về.' },
+            unit: { name: 'Unit', detail: 'Kiểu thông tin mà bạn muốn trả về, trong đó: Unit****Returns " Y "Số năm hoàn thành trong kỳ." M "Số tháng hoàn tất trong kỳ." D "Số ngày trong khoảng thời gian." MD "Sự khác biệt giữa các ngày trong start_date và end_date. Đã bỏ qua tháng và năm của ngày. Quan trọng: Chúng tôi khuyên bạn không nên sử dụng tham đối "MD", vì có những giới hạn đã biết kèm theo. Hãy xem phần sự cố đã biết bên dưới." YM "Sự khác biệt giữa các tháng trong start_date và end_date. Ngày và năm của ngày được bỏ qua" YD "Sự khác biệt giữa các ngày trong ngày start_date ngày end_date. Đã bỏ qua năm của ngày.' },
         },
     },
     DATEVALUE: {
@@ -62,7 +62,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/datevalue-%E5%87%BD%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -78,7 +78,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/day-%E5%87%BD%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -94,7 +94,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/days-%E5%87%BD%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/days-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/days360-%E5%87%BD%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -123,7 +123,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/edate-%E5%87%BD%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/eomonth-%E5%87%BD%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -163,12 +163,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/13193461?hl=vi&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/13193461?hl=vi',
             },
         ],
         functionParameter: {
-            timestamp: { name: 'dấu thời gian', detail: 'Dấu thời gian bắt đầu của hệ thống Unix ở dạng giây, mili giây hoặc micrô giây.' },
-            unit: { name: 'đơn vị thời gian', detail: 'Đơn vị thời gian mà dấu thời gian thể hiện. 1 theo mặc định: \n1 cho biết đơn vị thời gian là giây. \n2 cho biết đơn vị thời gian là mili giây.\n3 cho biết đơn vị thời gian là micrô giây.' },
+            timestamp: { name: 'dấu thời gian', detail: 'EPOCHTODATE(1655908429662,2)' },
+            unit: { name: 'đơn vị thời gian', detail: 'EPOCHTODATE(1655906710)' },
         },
     },
     HOUR: {
@@ -177,7 +177,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/hour-%E5%87%BD%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -193,27 +193,24 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/isoweeknum-%E5%87%BD%E6%95%B0-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
-            date: { name: 'Ngày', detail: 'Ngày là mã ngày-giờ được Excel dùng để tính toán ngày và giờ.' },
+            date: { name: 'Ngày', detail: 'Yêu cầu. Ngày là mã ngày-giờ được Excel dùng để tính toán ngày và giờ.' },
         },
     },
     MINUTE: {
-        description: 'Chuyển đổi số sê-ri thành phút',
-        abstract: 'Chuyển đổi số sê-ri thành phút',
+        description: 'Trả về phút của một giá trị thời gian. Phút được trả về dưới dạng số nguyên, trong phạm vi từ 0 tới 59.',
+        abstract: 'Trả về phút của một giá trị thời gian. Phút được trả về dưới dạng số nguyên, trong phạm vi từ 0 tới 59.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/minute-%E5%87%BD%E6%95%B0-9a3db35c-256c-45da-86bf-d82cde6d4fcb',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: {
-                name: 'Số sê-ri ngày',
-                detail: 'Ngày cần tìm. Nên sử dụng hàm DATE để nhập ngày hoặc nhập ngày dưới dạng kết quả của các công thức hoặc hàm khác. Ví dụ, sử dụng hàm DATE(2008,5,23) để nhập ngày 23 tháng 5 năm 2008.',
-            },
+            serialNumber: { name: 'Số sê-ri ngày', detail: 'Yêu cầu. Thời gian có chứa phút mà bạn muốn tìm. Thời gian có thể được nhập vào dưới dạng chuỗi văn bản đặt trong dấu ngoặc kép, (ví dụ "6:45 CH"), dạng số thập phân (ví dụ 0,78125, biểu thị cho 6:45 CH) hoặc dạng kết quả của các công thức hoặc hàm khác (ví dụ TIMEVALUE("6:45 CH")).' },
         },
     },
     MONTH: {
@@ -222,7 +219,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/month-%E5%87%BD%E6%95%B0-0df62f6e-672d-4c78-9a70-a764de937b5e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/month-function',
             },
         ],
         functionParameter: {
@@ -238,7 +235,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/networkdays-%E5%87%BD%E6%95%B0-c48cafe0-1b60-4dd7-afac-81521ff6f53b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
@@ -248,12 +245,12 @@ const locale: typeof enUS = {
         },
     },
     NETWORKDAYS_INTL: {
-        description: 'Trả về số ngày làm việc trọn vẹn ở giữa hai ngày bằng cách dùng tham số để cho biết có bao nhiêu ngày cuối tuần và đó là những ngày nào.',
-        abstract: 'Trả về số ngày làm việc trọn vẹn ở giữa hai ngày bằng cách dùng tham số để cho biết có bao nhiêu ngày cuối tuần và đó là những ngày nào.',
+        description: 'Trả về số ngày làm việc trọn vẹn ở giữa hai ngày bằng cách dùng tham số để cho biết có bao nhiêu ngày cuối tuần và đó là những ngày nào. Ngày cuối tuần và bất kỳ ngày nào được chỉ rõ là ngày lễ sẽ không được coi là ngày làm việc.',
+        abstract: 'Trả về số ngày làm việc trọn vẹn ở giữa hai ngày bằng cách dùng tham số để cho biết có bao nhiêu ngày cuối tuần và đó là những ngày nào. Ngày cuối tuần và bất kỳ ngày nào được chỉ rõ là ngày lễ sẽ không được coi là ngày làm việc.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/networkdays-intl-%E5%87%BD%E6%95%B0-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -264,12 +261,12 @@ const locale: typeof enUS = {
         },
     },
     NOW: {
-        description: 'Trả về số sê-ri của ngày và thời gian hiện tại.',
-        abstract: 'Trả về số sê-ri của ngày và thời gian hiện tại.',
+        description: 'Trả về số sê-ri của ngày và thời gian hiện tại. Nếu trước khi bạn nhập hàm vào ô, định dạng ô là Chung , thì Excel thay đổi định dạng ô để khớp với định dạng ngày và thời gian trong thiết đặt vùng của bạn. Bạn có thể thay đổi định dạng ngày và thời gian cho ô bằng các lệnh trong nhóm Số của tab Trang đầu trên Ribbon.',
+        abstract: 'Trả về số sê-ri của ngày và thời gian hiện tại. Nếu trước khi bạn nhập hàm vào ô, định dạng ô là Chung , thì Excel thay đổi định dạng ô để khớp với định dạng ngày và thời gian trong thiết đặt vùng của bạn. Bạn có thể thay đổi định dạng ngày và thời gian cho ô bằng các lệnh trong nhóm Số của tab Trang đầu trên Ribbon.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/now-%E5%87%BD%E6%95%B0-3337fd29-145a-4347-b2e6-20c904739c46',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/now-function',
             },
         ],
         functionParameter: {
@@ -281,7 +278,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/second-%E5%87%BD%E6%95%B0-44921a95-0b32-4f8b-8317-82ef1d22bb84',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/second-function',
             },
         ],
         functionParameter: {
@@ -297,7 +294,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/time-%E5%87%BD%E6%95%B0-3607e6cc-0f46-4c3b-8357-40fe314d7b3c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/time-function',
             },
         ],
         functionParameter: {
@@ -312,7 +309,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/timevalue-%E5%87%BD%E6%95%B0-d7c29d57-399f-4a11-a7d8-379e01c7130d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -328,11 +325,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3094239?hl=vi&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=vi',
             },
         ],
         functionParameter: {
-            value: { name: 'giá trị', detail: 'Đối số hoặc tham chiếu đến một ô sẽ được chuyển đổi thành ngày tháng.' },
+            value: { name: 'giá trị', detail: 'TO_DATE(A2)' },
         },
     },
     TODAY: {
@@ -341,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/today-%E5%87%BD%E6%95%B0-49540925-3611-41c5-90e3-f1b6e8e5f029',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/today-function',
             },
         ],
         functionParameter: {},
@@ -352,7 +349,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/weekday-%E5%87%BD%E6%95%B0-f3651330-3a06-4892-9d89-12cc7dadaabd',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -366,7 +363,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/weeknum-%E5%87%BD%E6%95%B0-2fdd388d-8f4d-4208-95de-8f2ad40187af',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -380,7 +377,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/workday-%E5%87%BD%E6%95%B0-5570eab1-e9e5-49d0-9650-efda88d7d0b8',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -404,7 +401,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/workday-intl-%E5%87%BD%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -420,7 +417,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/year-%E5%87%BD%E6%95%B0-371d2722-0a8d-48de-8b7c-9bd6b289b93c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -436,7 +433,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/yearfrac-%E5%87%BD%E6%95%B0-7b2a6219-4830-40b8-b8e3-9b7c0b6ab0d0',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

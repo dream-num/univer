@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/address-%E9%96%A2%E6%95%B0-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -46,7 +46,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/areas-%E9%96%A2%E6%95%B0-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -59,7 +59,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/choose-%E9%96%A2%E6%95%B0-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -74,7 +74,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/choosecols-%E9%96%A2%E6%95%B0-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/chooserows-%E9%96%A2%E6%95%B0-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -104,7 +104,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/column-%E9%96%A2%E6%95%B0-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -117,7 +117,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/columns-%E9%96%A2%E6%95%B0-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/drop-%E9%96%A2%E6%95%B0-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -145,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/expand-%E9%96%A2%E6%95%B0-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -161,7 +161,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/filter-%E9%96%A2%E6%95%B0-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/formulatext-%E9%96%A2%E6%95%B0-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -189,54 +189,44 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/getpivotdata-%E9%96%A2%E6%95%B0-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataField: { name: 'データ フィールド', detail: '取得するデータを含むデータ フィールドの名前です。' },
+            pivotTable: { name: 'ピボットテーブル', detail: 'ピボットテーブル内のセル、範囲、または名前付き範囲への参照です。' },
+            field1: { name: 'フィールド 1', detail: '省略可能。データを表す最初のフィールド名です。' },
+            item1: { name: 'アイテム 1', detail: '省略可能。フィールド内の最初のアイテム名です。' },
         },
     },
     HLOOKUP: {
-        description: '配テーブルの上端行または配列内の特定の値を検索し、テーブルまたは配列内の指定した行から同じ列の値を返します。',
-        abstract: '配列の上端行で特定の値を検索し、対応するセルの値を返します。',
+        description: 'テーブルの最初の行または値の配列の値を検索し、テーブルまたは配列で指定した行から同じ列の値を返します。 HLOOKUP 関数は、比較する値がデータ テーブルの上端行にあり、指定した行数分だけ下を参照する場合に使用します。 比較する値が検索データの左側の列にある場合は、VLOOKUP 関数を使用してください。',
+        abstract: 'テーブルの最初の行または値の配列の値を検索し、テーブルまたは配列で指定した行から同じ列の値を返します。 HLOOKUP 関数は、比較する値がデータ テーブルの上端行にあり、指定した行数分だけ下を参照する場合に使用します。 比較する値が検索データの左側の列にある場合は、VLOOKUP 関数を使用してください。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hlookup-%E9%96%A2%E6%95%B0-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: '検索値',
-                detail: '必ず指定します。 テーブルの上端行で検索する値を指定します。',
-            },
-            tableArray: {
-                name: '範囲',
-                detail: 'データを検索する情報のテーブルです。 セル範囲への参照またはセル範囲名を使用します。',
-            },
-            rowIndexNum: {
-                name: '行番号',
-                detail: ' 一致する値を返す、範囲内の行番号。 行番号に 1 を指定すると、範囲の最初の行の値が返され、行番号に 2 を指定すると、範囲の 2 番目の行の値が返され、以降同様に処理されます。',
-            },
-            rangeLookup: {
-                name: '検索の型',
-                detail: 'HLOOKUP を使用して検索値と完全に一致する値だけを検索するか、その近似値を含めて検索するかを指定する論理値です。',
-            },
+            lookupValue: { name: '検索値', detail: '必須。 テーブルの上端行で検索する値を指定します。 検索値には、値、参照、または文字列を指定します。' },
+            tableArray: { name: '範囲', detail: '必須。 データを検索する情報のテーブルです。 セル範囲への参照またはセル範囲名を使用します。 範囲の上端行の列のデータは、文字列、数値、論理値のいずれでもかまいません。 検索の型に TRUE を指定した場合、範囲の上端行の列のデータは、昇順で配置しておく必要があります。つまりは、～-2、-1、0、1、2～、A～Z、FALSE から TRUE の順となります。その他の場合、HLOOKUP では正しい値を得られない場合があります。 検索の型に FALSE を指定した場合、範囲を並べ替える必要はありません。 英字の大文字と小文字は区別されません。 値を昇順に、左から右に並べ替えます。 詳細については、「 範囲またはテーブルのデータを並べ替える 」を参照してください。' },
+            rowIndexNum: { name: '行番号', detail: '必須。 一致する値を返す、範囲内の行番号。 行番号に 1 を指定すると、範囲の最初の行の値が返され、行番号に 2 を指定すると、範囲の 2 番目の行の値が返され、以降同様に処理されます。 行番号が 1 より小さい場合、エラー値 #VALUE! が返され、行番号が範囲の行数より大きい場合は、エラー値 #REF! が返されます。' },
+            rangeLookup: { name: '検索の型', detail: 'オプション。 HLOOKUP を使用して検索値と完全に一致する値だけを検索するか、その近似値を含めて検索するかを指定する論理値です。 TRUE を指定するか省略した場合、近似値が返されます。 つまり、完全に一致する値が見つからない場合は、検索値未満の最大値が使用されます。 FALSE を指定した場合、HLOOKUP では完全に一致する値が検索されます。 完全に一致する値が見つからない場合は、エラー値 #N/A が返されます。' },
         },
     },
     HSTACK: {
-        description: '配列を水平方向および順番に追加して、大きな配列を返します',
-        abstract: '配列を水平方向および順番に追加して、大きな配列を返します',
+        description: '配列を水平方向に順番に追加して、より大きな配列を返します。',
+        abstract: '配列を水平方向に順番に追加して、より大きな配列を返します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hstack-%E9%96%A2%E6%95%B0-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
-            array1: { name: '配列', detail: '追加する配列。' },
-            array2: { name: '配列', detail: '追加する配列。' },
+            array1: { name: '配列', detail: '各配列引数からの行数の最大値。' },
+            array2: { name: '配列', detail: '各配列引数のすべての列の合計カウント。' },
         },
     },
     HYPERLINK: {
@@ -245,21 +235,21 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=ja',
+                url: 'https://support.google.com/docs/answer/3093313?hl=ja',
             },
         ],
         functionParameter: {
-            url: { name: 'URL', detail: 'リンクの場所の完全な URL を二重引用符で囲んで指定します。または、URL を含むセルへの参照を指定します。' },
-            linkLabel: { name: 'リンクラベル', detail: 'セルにリンクとして表示するテキストを二重引用符で囲んで指定します。または、ラベルを含むセルへの参照を指定します。' },
+            url: { name: 'URL', detail: 'リンクの場所の完全な URL を二重引用符で囲んで指定します。または、URL を含むセルの参照を指定します。 使用できるリンク タイプは、 http:// 、 https:// 、 mailto: 、 aim: 、 ftp:// 、 gopher:// 、 telnet:// 、 news:// のみで、その他のタイプは明示的に禁止されています。別のプロトコルを指定すると、セルに リンクラベル は表示されますが、ハイパーリンクされません。 プロトコルを何も指定しない場合は、 http:// が URL の先頭に追加されます。' },
+            linkLabel: { name: 'リンクラベル', detail: '[ 省略可 - デフォルトは URL ] - セルにリンクとして表示するテキストを二重引用符で囲んで指定します。または、ラベルを含むセルの参照を指定します。 リンクラベル が空のセルへの参照である場合、 URL が有効であればリンクとして表示され、無効であれば通常のテキストとして表示されます。 リンクラベル が空の文字列リテラル（""）である場合、セルは空として表示されますが、クリックするかセルに移動するとリンクにアクセスできます。' },
         },
     },
     IMAGE: {
-        description: '特定のソースからイメージを返します',
-        abstract: '特定のソースからイメージを返します',
+        description: 'IMAGE 関数は、代替テキストと共にソースの場所からセルに画像を挿入します。 その後、セルの移動とサイズ変更、並べ替えとフィルター処理、Excel テーブル内の画像の操作を行うことができます。 この関数を使用して、在庫、ゲーム、従業員、数学的概念などのデータのリストを視覚的に拡張します。',
+        abstract: 'IMAGE 関数は、代替テキストと共にソースの場所からセルに画像を挿入します。 その後、セルの移動とサイズ変更、並べ替えとフィルター処理、Excel テーブル内の画像の操作を行うことができます。 この関数を使用して、在庫、ゲーム、従業員、数学的概念などのデータのリストを視覚的に拡張します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/image-%E9%96%A2%E6%95%B0-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -276,7 +266,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/index-%E9%96%A2%E6%95%B0-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -292,7 +282,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/indirect-%E9%96%A2%E6%95%B0-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -306,7 +296,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/lookup-%E9%96%A2%E6%95%B0-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -330,7 +320,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/match-%E9%96%A2%E6%95%B0-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -345,7 +335,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/offset-%E9%96%A2%E6%95%B0-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -362,7 +352,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/row-%E9%96%A2%E6%95%B0-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -375,7 +365,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/rows-%E9%96%A2%E6%95%B0-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -388,12 +378,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/rtd-%E9%96%A2%E6%95%B0-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            progId: { name: 'プログラム ID', detail: 'ローカルにインストールされている COM オートメーション アドインのプログラム ID です。' },
+            server: { name: 'サーバー', detail: 'アドインを実行するサーバー名です。ローカルの場合は空の文字列を指定します。' },
+            topic1: { name: 'トピック 1', detail: '取得するリアルタイム データを指定する最初の文字列です。' },
+            topic2: { name: 'トピック 2', detail: '省略可能。リアルタイム データを指定する追加の文字列です。' },
         },
     },
     SORT: {
@@ -402,7 +394,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/sort-%E9%96%A2%E6%95%B0-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -418,7 +410,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/sortby-%E9%96%A2%E6%95%B0-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -435,7 +427,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/take-%E9%96%A2%E6%95%B0-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -450,7 +442,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/tocol-%E9%96%A2%E6%95%B0-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -465,7 +457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/torow-%E9%96%A2%E6%95%B0-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -480,7 +472,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/transpose-%E9%96%A2%E6%95%B0-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -493,7 +485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/unique-%E9%96%A2%E6%95%B0-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -508,7 +500,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/vlookup-%E9%96%A2%E6%95%B0-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -536,7 +528,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/vstack-%E9%96%A2%E6%95%B0-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -550,7 +542,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/wrapcols-%E9%96%A2%E6%95%B0-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -565,7 +557,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/wraprows-%E9%96%A2%E6%95%B0-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -580,7 +572,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/xlookup-%E9%96%A2%E6%95%B0-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -610,7 +602,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/xmatch-%E9%96%A2%E6%95%B0-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

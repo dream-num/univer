@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-beta-function-49f1b9a9-a5da-470f-8077-5f1730b5fd47',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/betadist-function',
             },
         ],
         functionParameter: {
@@ -40,7 +40,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-beta-inv-function-8b914ade-b902-43c1-ac9c-c05c54f10d6c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/betainv-function',
             },
         ],
         functionParameter: {
@@ -57,7 +57,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-binom-function-506a663e-c4ca-428d-b9a8-05583d68789c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/binomdist-function',
             },
         ],
         functionParameter: {
@@ -73,7 +73,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-chi-function-c90d0fbc-5b56-4f5f-ab57-34af1bf6897e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/chidist-function',
             },
         ],
         functionParameter: {
@@ -87,7 +87,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/inv-chi-function-cfbea3f6-6e4f-40c9-a87f-20472e0512af',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/chiinv-function',
             },
         ],
         functionParameter: {
@@ -101,7 +101,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/prova-chi-function-981ff871-b694-4134-848e-38ec704577ac',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/chitest-function',
             },
         ],
         functionParameter: {
@@ -115,7 +115,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/interval-confianza-function-75ccc007-f77c-4343-bc14-673642091ad6',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/confidence-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/covar-function-50479552-2c03-4daf-bd71-a5ab88b2db03',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/covar-function',
             },
         ],
         functionParameter: {
@@ -144,7 +144,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/critbinom-function-eb6b871d-796b-4d21-b69b-e4350d5f407b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/critbinom-function',
             },
         ],
         functionParameter: {
@@ -159,7 +159,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-exp-function-68ab45fd-cd6d-4887-9770-9357eb8ee06a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/expondist-function',
             },
         ],
         functionParameter: {
@@ -174,7 +174,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-f-function-ecf76fba-b3f1-4e7d-a57e-6a5b7460b786',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/fdist-function',
             },
         ],
         functionParameter: {
@@ -189,7 +189,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-f-inv-function-4d46c97c-c368-4852-bc15-41e8e31140b1',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/finv-function',
             },
         ],
         functionParameter: {
@@ -204,7 +204,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/prova-f-function-4c9e1202-53fe-428c-a737-976f6fc3f9fd',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/ftest-function',
             },
         ],
         functionParameter: {
@@ -218,7 +218,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-gamma-function-7327c94d-0f05-4511-83df-1dd7ed23e19e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/gammadist-function',
             },
         ],
         functionParameter: {
@@ -234,7 +234,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/gamma-inv-function-06393558-37ab-47d0-aa63-432f99e7916d',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/gammainv-function',
             },
         ],
         functionParameter: {
@@ -249,7 +249,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-hipergeom-function-23e37961-2871-4195-9629-d0b2c108a12e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/hypgeomdist-function',
             },
         ],
         functionParameter: {
@@ -257,7 +257,6 @@ const locale: typeof enUS = {
             numberSample: { name: 'nombre_mostra', detail: 'La mida de la mostra.' },
             populationS: { name: 'població_èxit', detail: 'El nombre d\'èxits a la població.' },
             numberPop: { name: 'nombre_població', detail: 'La mida de la població.' },
-            cumulative: { name: 'acumulat', detail: 'Un valor lògic que determina la forma de la funció. Si és CERT, DISTR.HIPERGEOM retorna la funció de distribució acumulada; si és FALS, retorna la funció de densitat de probabilitat.' },
         },
     },
     LOGINV: {
@@ -266,7 +265,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-log-inv-function-0bd7631a-2725-482b-afb4-de23df77acfe',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/loginv-function',
             },
         ],
         functionParameter: {
@@ -281,14 +280,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-log-norm-function-f8d194cb-9ee3-4034-8c75-1bdb3884100b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/lognormdist-function',
             },
         ],
         functionParameter: {
             x: { name: 'x', detail: 'El valor per al qual voleu la distribució.' },
             mean: { name: 'mitjana', detail: 'La mitjana aritmètica de la distribució.' },
             standardDev: { name: 'desv_estàndard', detail: 'La desviació estàndard de la distribució.' },
-            cumulative: { name: 'acumulat', detail: 'Un valor lògic que determina la forma de la funció. Si és CERT, DIST.LOGNORM retorna la funció de distribució acumulada; si és FALS, retorna la funció de densitat de probabilitat.' },
         },
     },
     MODE: {
@@ -297,7 +295,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/moda-function-e45192ce-9122-4980-82ed-4bdc34973120',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/mode-function',
             },
         ],
         functionParameter: {
@@ -311,14 +309,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-neg-bin-function-f59b0a37-bae2-408d-b115-a315609ba714',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/negbinomdist-function',
             },
         ],
         functionParameter: {
             numberF: { name: 'nombre_fracassos', detail: 'El nombre de fracassos.' },
             numberS: { name: 'nombre_èxits', detail: 'El nombre llindar d\'èxits.' },
             probabilityS: { name: 'prob_èxit', detail: 'La probabilitat d\'un èxit.' },
-            cumulative: { name: 'acumulat', detail: 'Un valor lògic que determina la forma de la funció. Si és CERT, DISTR.NEGBINOM retorna la funció de distribució acumulada; si és FALS, retorna la funció de densitat de probabilitat.' },
         },
     },
     NORMDIST: {
@@ -327,7 +324,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-norm-function-126db625-c53e-4591-9a22-c9ff422d6d58',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/normdist-function',
             },
         ],
         functionParameter: {
@@ -343,7 +340,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-norm-inv-function-87981ab8-2de0-4cb0-b1aa-e21d4cb879b8',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/norminv-function',
             },
         ],
         functionParameter: {
@@ -358,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-norm-estand-function-463369ea-0345-445d-802a-4ff0d6ce7cac',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/normsdist-function',
             },
         ],
         functionParameter: {
@@ -371,7 +368,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-norm-estand-inv-function-8d1bce66-8e4d-4f3b-967c-30eed61f019d',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/normsinv-function',
             },
         ],
         functionParameter: {
@@ -384,7 +381,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/percentil-function-91b43a53-543c-4708-93de-d626debdddca',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/percentile-function',
             },
         ],
         functionParameter: {
@@ -398,7 +395,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/rang-percentil-function-f1b5836c-9619-4847-9fc9-080ec9024442',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/percentrank-function',
             },
         ],
         functionParameter: {
@@ -413,7 +410,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/poisson-function-d81f7294-9d7c-4f75-bc23-80aa8624173a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/poisson-function',
             },
         ],
         functionParameter: {
@@ -428,7 +425,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/quartil-function-93cf8f62-60cd-4fdb-8a92-8451041e1a2a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/quartile-function',
             },
         ],
         functionParameter: {
@@ -442,7 +439,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/jerarquia-function-6a2fc49d-1831-4a03-9d8c-c279cf99f723',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/rank-function',
             },
         ],
         functionParameter: {
@@ -457,7 +454,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/desvest-function-51fecaaa-231e-4bbb-9230-33650a72c9b0',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/stdev-function',
             },
         ],
         functionParameter: {
@@ -471,7 +468,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/desvestp-function-1f7c1c88-1bec-4422-8242-e9f7dc8bb195',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/stdevp-function',
             },
         ],
         functionParameter: {
@@ -485,7 +482,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/distr-t-function-630a7695-4021-4853-9468-4a1f9dcdd192',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/tdist-function',
             },
         ],
         functionParameter: {
@@ -500,7 +497,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/inv-t-function-a7c85b9d-90f5-41fe-9ca5-1cd2f3e1ed7c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/tinv-function',
             },
         ],
         functionParameter: {
@@ -514,7 +511,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/prova-t-function-1696ffc1-4811-40fd-9d13-a0eaad83c7ae',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/ttest-function',
             },
         ],
         functionParameter: {
@@ -530,7 +527,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/var-function-1f2b7ab2-954d-4e17-ba2c-9e58b15a7da2',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/var-function',
             },
         ],
         functionParameter: {
@@ -544,7 +541,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/varp-function-26a541c4-ecee-464d-a731-bd4c575b1a6b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/varp-function',
             },
         ],
         functionParameter: {
@@ -558,7 +555,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/weibull-function-b83dc2c6-260b-4754-bef2-633196f6fdcc',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/weibull-function',
             },
         ],
         functionParameter: {
@@ -574,7 +571,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/ca-es/office/prova-z-function-8f33be8a-6bd6-4ecc-8e3a-d9a4420c4a6a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/ztest-function',
             },
         ],
         functionParameter: {

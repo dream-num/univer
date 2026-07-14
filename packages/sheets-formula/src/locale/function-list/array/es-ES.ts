@@ -23,27 +23,27 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.google.com/docs/answer/3267036?hl=en&sjid=8484774178571403392-AP',
+                url: 'https://support.google.com/docs/answer/3267036?hl=es',
             },
         ],
         functionParameter: {
-            inputRange: { name: 'rango_entrada', detail: 'El rango a restringir.' },
+            inputRange: { name: 'rango_entrada', detail: 'ARRAY_CONSTRAIN(SORT(A1:F100, 1, TRUE), 10, 6)' },
             numRows: { name: 'num_filas', detail: 'El número de filas que debe contener el resultado.' },
             numCols: { name: 'num_columnas', detail: 'El número de columnas que debe contener el resultado' },
         },
     },
     FLATTEN: {
-        description: 'Aplana todos los valores de uno o más rangos en una sola columna.',
-        abstract: 'Aplana todos los valores de uno o más rangos en una sola columna.',
+        description: 'Combina todos los valores de uno o varios intervalos en una sola columna.',
+        abstract: 'Combina todos los valores de uno o varios intervalos en una sola columna.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+                url: 'https://support.google.com/docs/answer/10307761?hl=es',
             },
         ],
         functionParameter: {
-            range1: { name: 'rango1', detail: 'El primer rango a aplanar.' },
-            range2: { name: 'rango2', detail: 'Rangos adicionales a aplanar.' },
+            range1: { name: 'rango1', detail: 'Es el primer intervalo que se va a combinar.' },
+            range2: { name: 'rango2', detail: '[opcional] repetible Otros intervalos que se pueden combinar.' },
         },
     },
 };

@@ -16,183 +16,183 @@
 
 const locale = {
     DAVERAGE: {
-        description: 'Returns the average of selected database entries',
-        abstract: 'Returns the average of selected database entries',
+        description: 'Averages the values in a field (column) of records in a list or database that match conditions you specify.',
+        abstract: 'Averages the values in a field (column) of records in a list or database that match conditions you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/daverage-function-a6a2d5ac-4b4b-48cd-a1d8-7b37834e5aee',
+                url: 'https://support.microsoft.com/en-us/excel/functions/daverage-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'is the range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'is the range of cells that contains the conditions you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DCOUNT: {
-        description: 'Counts the cells that contain numbers in a database',
-        abstract: 'Counts the cells that contain numbers in a database',
+        description: 'Counts the cells that contain numbers in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Counts the cells that contain numbers in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dcount-function-c1fc7b93-fb0d-4d8d-97db-8d5f076eaeb1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dcount-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as the argument includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DCOUNTA: {
-        description: 'Counts nonblank cells in a database',
-        abstract: 'Counts nonblank cells in a database',
+        description: 'Counts the nonblank cells in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Counts the nonblank cells in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dcounta-function-00232a6d-5a66-4a01-a25b-c1653fda1244',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dcounta-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Optional. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DGET: {
-        description: 'Extracts from a database a single record that matches the specified criteria',
-        abstract: 'Extracts from a database a single record that matches the specified criteria',
+        description: 'Extracts a single value from a column of a list or database that matches conditions that you specify.',
+        abstract: 'Extracts a single value from a column of a list or database that matches conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dget-function-455568bf-4eef-45f7-90f0-ec250d00892e',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dget-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DMAX: {
-        description: 'Returns the maximum value from selected database entries',
-        abstract: 'Returns the maximum value from selected database entries',
+        description: 'Returns the largest number in a field (column) of records in a list or database that matches conditions you that specify.',
+        abstract: 'Returns the largest number in a field (column) of records in a list or database that matches conditions you that specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dmax-function-f4e8209d-8958-4c3d-a1ee-6351665d41c2',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dmax-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DMIN: {
-        description: 'Returns the minimum value from selected database entries',
-        abstract: 'Returns the minimum value from selected database entries',
+        description: 'Returns the smallest number in a field (column) of records in a list or database that matches conditions that you specify.',
+        abstract: 'Returns the smallest number in a field (column) of records in a list or database that matches conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dmin-function-4ae6f1d9-1f26-40f1-a783-6dc3680192a3',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dmin-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DPRODUCT: {
-        description: 'Multiplies the values in a particular field of records that match the criteria in a database',
-        abstract: 'Multiplies the values in a particular field of records that match the criteria in a database',
+        description: 'Multiplies the values in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Multiplies the values in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dproduct-function-4f96b13e-d49c-47a7-b769-22f6d017cb31',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dproduct-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DSTDEV: {
-        description: 'Estimates the standard deviation based on a sample of selected database entries',
-        abstract: 'Estimates the standard deviation based on a sample of selected database entries',
+        description: 'Estimates the standard deviation of a population based on a sample by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Estimates the standard deviation of a population based on a sample by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dstdev-function-026b8c73-616d-4b5e-b072-241871c4ab96',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dstdev-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DSTDEVP: {
-        description: 'Calculates the standard deviation based on the entire population of selected database entries',
-        abstract: 'Calculates the standard deviation based on the entire population of selected database entries',
+        description: 'Calculates the standard deviation of a population based on the entire population by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Calculates the standard deviation of a population based on the entire population by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dstdevp-function-04b78995-da03-4813-bbd9-d74fd0f5d94b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dstdevp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DSUM: {
-        description: 'Adds the numbers in the field column of records in the database that match the criteria',
-        abstract: 'Adds the numbers in the field column of records in the database that match the criteria',
+        description: 'In a list or database, DSUM provides the sum of the numbers in fields (columns) of records that match your specified conditions.',
+        abstract: 'In a list or database, DSUM provides the sum of the numbers in fields (columns) of records that match your specified conditions.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dsum-function-53181285-0c4b-4f5a-aaa3-529a322be41b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dsum-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. This is the range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records , and columns of data are fields . The first row of a list contains labels for each column therein.' },
+            field: { name: 'field', detail: 'Required. This specifies which column is used in the function. Specify the column label enclosed between double quotation marks, such as "Age" or "Yield," for example. Alternatively, you can specify a number (without quotation marks) that represents the position of the column within the list: e.g., 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. This is the range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DVAR: {
-        description: 'Estimates variance based on a sample from selected database entries',
-        abstract: 'Estimates variance based on a sample from selected database entries',
+        description: 'Estimates the variance of a population based on a sample by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Estimates the variance of a population based on a sample by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dvar-function-d6747ca9-99c7-48bb-996e-9d7af00f3ed1',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dvar-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
     DVARP: {
-        description: 'Calculates variance based on the entire population of selected database entries',
-        abstract: 'Calculates variance based on the entire population of selected database entries',
+        description: 'Calculates the variance of a population based on the entire population by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
+        abstract: 'Calculates the variance of a population based on the entire population by using the numbers in a field (column) of records in a list or database that match conditions that you specify.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/dvarp-function-eb0ba387-9cb7-45c8-81e9-0394912502fc',
+                url: 'https://support.microsoft.com/en-us/excel/functions/dvarp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
-            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
-            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
+            database: { name: 'database', detail: 'Required. The range of cells that makes up the list or database. A database is a list of related data in which rows of related information are records, and columns of data are fields. The first row of the list contains labels for each column.' },
+            field: { name: 'field', detail: 'Required. Indicates which column is used in the function. Enter the column label enclosed between double quotation marks, such as "Age" or "Yield," or a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on.' },
+            criteria: { name: 'criteria', detail: 'Required. The range of cells that contains the conditions that you specify. You can use any range for the criteria argument, as long as it includes at least one column label and at least one cell below the column label in which you specify a condition for the column.' },
         },
     },
 };

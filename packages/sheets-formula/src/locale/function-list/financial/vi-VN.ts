@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/accrint-%E5%87%BD%E6%95%B0-fe45d089-6722-4fb3-9379-e1f911d8dc74',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/accrint-function',
             },
         ],
         functionParameter: {
@@ -43,7 +43,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/accrintm-%E5%87%BD%E6%95%B0-f62f01f9-5754-4cc4-805b-0e70199328a7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/accrintm-function',
             },
         ],
         functionParameter: {
@@ -60,12 +60,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/amordegrc-%E5%87%BD%E6%95%B0-a14d0ca1-64a4-42eb-9b3d-b0dededf9e51',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/amordegrc-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'trị giá', detail: 'Chi phí của tài sản.' },
+            datePurchased: { name: 'ngày mua', detail: 'Ngày mua tài sản.' },
+            firstPeriod: { name: 'kỳ đầu tiên', detail: 'Ngày kết thúc của kỳ thứ nhất.' },
+            salvage: { name: 'giá trị còn lại', detail: 'Giá trị thu hồi khi kết thúc vòng đời của tài sản.' },
+            period: { name: 'kỳ', detail: 'Kỳ.' },
+            rate: { name: 'tỷ lệ khấu hao', detail: 'Tỷ lệ khấu hao.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     AMORLINC: {
@@ -74,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/amorlinc-%E5%87%BD%E6%95%B0-7d417b45-f7f5-4dba-a0a5-3451a81079a8',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/amorlinc-function',
             },
         ],
         functionParameter: {
@@ -93,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/coupdaybs-%E5%87%BD%E6%95%B0-eb9a8dfb-2fb2-4c61-8e5d-690b320cf872',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/coupdaybs-function',
             },
         ],
         functionParameter: {
@@ -109,7 +114,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/coupdays-%E5%87%BD%E6%95%B0-cc64380b-315b-4e7b-950c-b30b0a76f671',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/coupdays-function',
             },
         ],
         functionParameter: {
@@ -125,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/coupdaysnc-%E5%87%BD%E6%95%B0-5ab3f0b2-029f-4a8b-bb65-47d525eea547',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/coupdaysnc-function',
             },
         ],
         functionParameter: {
@@ -141,7 +146,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/coupncd-%E5%87%BD%E6%95%B0-fd962fef-506b-4d9d-8590-16df5393691f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/coupncd-function',
             },
         ],
         functionParameter: {
@@ -157,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/coupnum-%E5%87%BD%E6%95%B0-a90af57b-de53-4969-9c99-dd6139db2522',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/coupnum-function',
             },
         ],
         functionParameter: {
@@ -173,7 +178,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/couppcd-%E5%87%BD%E6%95%B0-2eb50473-6ee9-4052-a206-77a9a385d5b3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/couppcd-function',
             },
         ],
         functionParameter: {
@@ -189,7 +194,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cumipmt-%E5%87%BD%E6%95%B0-61067bb0-9016-427d-b95b-1a752af0e606',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cumipmt-function',
             },
         ],
         functionParameter: {
@@ -207,7 +212,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/cumprinc-%E5%87%BD%E6%95%B0-fcda5a29-0e85-406b-b7b0-4306ac693e72',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/cumprinc-function',
             },
         ],
         functionParameter: {
@@ -225,7 +230,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/db-%E5%87%BD%E6%95%B0-2067732b-d7f3-482a-b732-3edb72811830',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/db-function',
             },
         ],
         functionParameter: {
@@ -242,7 +247,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/ddb-%E5%87%BD%E6%95%B0-4f40f492-79ab-4a7a-b7b5-08d08d1f861e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ddb-function',
             },
         ],
         functionParameter: {
@@ -259,7 +264,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/disc-%E5%87%BD%E6%95%B0-c6d9b13b-2551-4b22-b6ca-3bb2ab8a4177',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/disc-function',
             },
         ],
         functionParameter: {
@@ -276,7 +281,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dollarde-%E5%87%BD%E6%95%B0-34b88814-bda8-4bb1-92fc-e3c2fda9b897',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dollarde-function',
             },
         ],
         functionParameter: {
@@ -290,7 +295,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dollarfr-%E5%87%BD%E6%95%B0-d964f8f1-c216-4e63-8b7d-15ec61515a8e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dollarfr-function',
             },
         ],
         functionParameter: {
@@ -304,7 +309,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/duration-%E5%87%BD%E6%95%B0-7c5ae5c5-e22a-4c6e-bfc5-43c7b41f1974',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/duration-function',
             },
         ],
         functionParameter: {
@@ -322,7 +327,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/effect-%E5%87%BD%E6%95%B0-6a44539a-378e-4c42-9041-29b1d9d189a9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/effect-function',
             },
         ],
         functionParameter: {
@@ -331,51 +336,51 @@ const locale: typeof enUS = {
         },
     },
     FV: {
-        description: 'Trả về giá trị tương lai của một khoản đầu tư dựa trên lãi suất không đổi',
-        abstract: 'Trả về giá trị tương lai của một khoản đầu tư dựa trên lãi suất không đổi',
+        description: 'FV , một trong các hàm tài chính , tính toán giá trị tương lai của một khoản đầu tư dựa trên một mức lãi suất cố định. Bạn có thể sử dụng FV với các khoản thanh toán bằng nhau định kỳ, hoặc thanh toán một lần duy nhất.',
+        abstract: 'FV , một trong các hàm tài chính , tính toán giá trị tương lai của một khoản đầu tư dựa trên một mức lãi suất cố định. Bạn có thể sử dụng FV với các khoản thanh toán bằng nhau định kỳ, hoặc thanh toán một lần duy nhất.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/fv-%E5%87%BD%E6%95%B0-3517001d-d592-4af2-ab7d-b0a13a34a5ff',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/fv-function',
             },
         ],
         functionParameter: {
-            rate: { name: 'lãi suất', detail: 'Lãi suất.' },
-            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
-            pmt: { name: 'số tiền', detail: 'Số tiền phải trả trong mỗi kỳ không thay đổi trong suốt thời hạn niên kim.' },
-            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
-            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
+            rate: { name: 'lãi suất', detail: 'Yêu cầu. Lãi suất theo kỳ hạn.' },
+            nper: { name: 'tổng số kỳ', detail: 'Yêu cầu. Tổng số kỳ hạn thanh toán trong một niên kim.' },
+            pmt: { name: 'số tiền', detail: 'Yêu cầu. Khoản thanh toán cho mỗi kỳ; khoản này không đổi trong suốt vòng đời của niên kim. Thông thường, pmt có chứa tiền gốc và lãi, nhưng không chứa các khoản phí và thuế khác. Nếu pmt được bỏ qua, bạn phải đưa vào đối số pv.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Tùy chọn. Giá trị hiện tại, hoặc số tiền trả một lần hiện tại đáng giá ngang với một chuỗi các khoản thanh toán tương lai. Nếu bỏ qua đối số pv, thì nó được giả định là 0 (không) và bạn phải đưa vào đối số pmt.' },
+            type: { name: 'loại', detail: 'Tùy chọn. Số 0 hoặc 1 chỉ rõ thời điểm thanh toán đến hạn. Nếu đối số kiểu bị bỏ qua, thì nó được giả định là 0.' },
         },
     },
     FVSCHEDULE: {
-        description: 'Trả về giá trị tương lai của một khoản gốc ban đầu sau khi áp dụng một chuỗi các lãi suất phức',
-        abstract: 'Trả về giá trị tương lai của một khoản gốc ban đầu sau khi áp dụng một chuỗi các lãi suất phức',
+        description: 'Trả về giá trị tương lai của số tiền gốc ban đầu sau khi áp dụng một chuỗi các lãi suất kép. Dùng hàm FVSCHEDULE để tính toán giá trị tương lai của một khoản đầu tư với lãi suất biến đổi hoặc có thể điều chỉnh.',
+        abstract: 'Trả về giá trị tương lai của số tiền gốc ban đầu sau khi áp dụng một chuỗi các lãi suất kép. Dùng hàm FVSCHEDULE để tính toán giá trị tương lai của một khoản đầu tư với lãi suất biến đổi hoặc có thể điều chỉnh.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/fvschedule-%E5%87%BD%E6%95%B0-e04bfa3a-4a37-430e-a132-4aafcacf2cd7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/fvschedule-function',
             },
         ],
         functionParameter: {
-            principal: { name: 'hiệu trưởng', detail: 'giá trị hiện tại.' },
-            schedule: { name: 'mảng lãi suất', detail: 'Mảng lãi suất áp dụng.' },
+            principal: { name: 'hiệu trưởng', detail: 'Yêu cầu. Giá trị hiện tại.' },
+            schedule: { name: 'mảng lãi suất', detail: 'Yêu cầu. Một mảng gồm các lãi suất sẽ áp dụng.' },
         },
     },
     INTRATE: {
-        description: 'Trả về lãi suất cho một khoản đầu tư hoàn toàn',
-        abstract: 'Trả về lãi suất cho một khoản đầu tư hoàn toàn',
+        description: 'Trả về lãi suất của một chứng khoán đã đầu tư toàn bộ.',
+        abstract: 'Trả về lãi suất của một chứng khoán đã đầu tư toàn bộ.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/intrate-%E5%87%BD%E6%95%B0-9d01bd51-7f48-41c5-b0d2-47d10409b27f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/intrate-function',
             },
         ],
         functionParameter: {
-            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
-            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
-            investment: { name: 'số tiền đầu', detail: 'Số tiền đầu tư vào chứng khoán có thể bán được.' },
-            redemption: { name: 'giá thanh lý', detail: 'Giá trị trao đổi của chứng khoán khi đáo hạn.' },
-            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
+            settlement: { name: 'ngày thanh toán', detail: 'Yêu cầu. Ngày thanh toán chứng khoán. Ngày thanh toán chứng khoán là ngày sau ngày phát hành khi chứng khoán được bán cho người mua.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Yêu cầu. Ngày đáo hạn của chứng khoán. Ngày đáo hạn là ngày mà chứng khoán hết hạn.' },
+            investment: { name: 'số tiền đầu', detail: 'Yêu cầu. Số tiền đã đầu tư vào chứng khoán.' },
+            redemption: { name: 'giá thanh lý', detail: 'Yêu cầu. Số tiền sẽ nhận được khi đáo hạn.' },
+            basis: { name: 'điểm chuẩn', detail: 'Tùy chọn. Loại cơ sở đếm ngày sẽ dùng.' },
         },
     },
     IPMT: {
@@ -384,7 +389,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/ipmt-%E5%87%BD%E6%95%B0-5c44f1d6-7dc0-4f1b-86ec-409cda192b15',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ipmt-function',
             },
         ],
         functionParameter: {
@@ -402,7 +407,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/irr-%E5%87%BD%E6%95%B0-649f8b21-3c9e-4e79-b7e7-df88b1ef7d5a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/irr-function',
             },
         ],
         functionParameter: {
@@ -411,19 +416,19 @@ const locale: typeof enUS = {
         },
     },
     ISPMT: {
-        description: 'Trả về số tiền lãi trả trong một kỳ đã xác định của một khoản đầu tư dựa trên lãi suất không đổi',
-        abstract: 'Trả về số tiền lãi trả trong một kỳ đã xác định của một khoản đầu tư dựa trên lãi suất không đổi',
+        description: 'Tính tiền lãi đã trả (hoặc đã nhận) cho kỳ hạn đã xác định của khoản vay (hoặc khoản đầu tư) với các khoản thanh toán nợ gốc.',
+        abstract: 'Tính tiền lãi đã trả (hoặc đã nhận) cho kỳ hạn đã xác định của khoản vay (hoặc khoản đầu tư) với các khoản thanh toán nợ gốc.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/ispmt-%E5%87%BD%E6%95%B0-84a33b93-01c4-4149-b7a4-dbd9c3c6b1e3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ispmt-function',
             },
         ],
         functionParameter: {
-            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
-            per: { name: 'kỳ', detail: 'Số kỳ dùng để tính số tiền lãi phải nằm trong khoảng từ 1 đến nper.' },
-            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
-            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            rate: { name: 'lãi suất', detail: 'Bắt buộc. Lãi suất của khoản đầu tư.' },
+            per: { name: 'kỳ', detail: 'Bắt buộc. Kỳ hạn mà bạn muốn tính lãi và phải nằm trong khoảng từ 1 đến Nper.' },
+            nper: { name: 'tổng số kỳ', detail: 'Bắt buộc. Tổng số kỳ thanh toán của khoản đầu tư.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Bắt buộc. Giá trị hiện tại của khoản đầu tư. Đối với khoản vay, Pv là số tiền vay.' },
         },
     },
     MDURATION: {
@@ -432,7 +437,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mduration-%E5%87%BD%E6%95%B0-7c5ae5c5-e22a-4c6e-bfc5-43c7b41f1974',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mduration-function',
             },
         ],
         functionParameter: {
@@ -450,7 +455,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mirr-%E5%87%BD%E6%95%B0-687e9c9e-8d77-4c5f-927f-2db18fc07e11',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mirr-function',
             },
         ],
         functionParameter: {
@@ -465,7 +470,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/nominal-%E5%87%BD%E6%95%B0-2f197f05-054d-41ef-8549-0f6fb4c497fa',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/nominal-function',
             },
         ],
         functionParameter: {
@@ -479,7 +484,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/nper-%E5%87%BD%E6%95%B0-0e013941-c680-4d8f-9560-89fda87bc92b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/nper-function',
             },
         ],
         functionParameter: {
@@ -496,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/npv-%E5%87%BD%E6%95%B0-3f9ecada-b772-44d8-9b46-4d7ae0d6a156',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/npv-function',
             },
         ],
         functionParameter: {
@@ -511,7 +516,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/oddfprice-%E5%87%BD%E6%95%B0-8e1dc9c8-8c7e-48cd-bcf7-39b8a1a54c6f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/oddfprice-function',
             },
         ],
         functionParameter: {
@@ -532,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/oddfyield-%E5%87%BD%E6%95%B0-97f0d152-3814-40f0-8c6a-e0cb5800e58c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/oddfyield-function',
             },
         ],
         functionParameter: {
@@ -553,7 +558,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/oddlprice-%E5%87%BD%E6%95%B0-f0b3b76a-8e65-4b4d-8f6d-d493891a8d62',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/oddlprice-function',
             },
         ],
         functionParameter: {
@@ -573,7 +578,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/oddlyield-%E5%87%BD%E6%95%B0-f1a101ed-f4f4-42e4-ae71-372dd6713d94',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/oddlyield-function',
             },
         ],
         functionParameter: {
@@ -593,7 +598,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/pduration-%E5%87%BD%E6%95%B0-44f33460-5be5-4c90-b857-22308892adaf',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/pduration-function',
             },
         ],
         functionParameter: {
@@ -608,7 +613,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/pmt-%E5%87%BD%E6%95%B0-0214da64-9d6e-4bcc-8567-92b403e0a164',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/pmt-function',
             },
         ],
         functionParameter: {
@@ -625,7 +630,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/ppmt-%E5%87%BD%E6%95%B0-3d37d3e1-0b04-4734-bb2d-15b9b76dbb18',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ppmt-function',
             },
         ],
         functionParameter: {
@@ -643,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/price-%E5%87%BD%E6%95%B0-82b8176e-4817-4a76-b68f-7f83f1b3378b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/price-function',
             },
         ],
         functionParameter: {
@@ -662,7 +667,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/pricedisc-%E5%87%BD%E6%95%B0-3369e2ea-9a16-49f1-85bb-41e42b02d6e5',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/pricedisc-function',
             },
         ],
         functionParameter: {
@@ -679,7 +684,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/pricemat-%E5%87%BD%E6%95%B0-7f8e5d67-3124-4b8b-a1aa-8ae189e9345b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/pricemat-function',
             },
         ],
         functionParameter: {
@@ -697,7 +702,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/pv-%E5%87%BD%E6%95%B0-28334a0e-2a78-433a-ab9c-9e441eb38e6e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/pv-function',
             },
         ],
         functionParameter: {
@@ -714,7 +719,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rate-%E5%87%BD%E6%95%B0-fc8413b8-b76e-4022-b9d7-36d17d15d51b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rate-function',
             },
         ],
         functionParameter: {
@@ -732,7 +737,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/received-%E5%87%BD%E6%95%B0-ea351090-829e-451b-bb56-bf8d3ef27a5d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/received-function',
             },
         ],
         functionParameter: {
@@ -749,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rri-%E5%87%BD%E6%95%B0-6f5822d8-7ef1-4233-944c-79e8172930f4',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rri-function',
             },
         ],
         functionParameter: {
@@ -764,7 +769,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/sln-%E5%87%BD%E6%95%B0-ae2bbdc0-4e48-4101-83b1-3e78bfa3084e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/sln-function',
             },
         ],
         functionParameter: {
@@ -779,7 +784,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/syd-%E5%87%BD%E6%95%B0-c276a91d-8f1d-45b2-b07d-8d2707e969d0',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/syd-function',
             },
         ],
         functionParameter: {
@@ -795,7 +800,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/tbilleq-%E5%87%BD%E6%95%B0-8e9eb7a4-1dbe-4d4a-a932-84aeba2b9c72',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/tbilleq-function',
             },
         ],
         functionParameter: {
@@ -810,7 +815,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/tbillprice-%E5%87%BD%E6%95%B0-30f495e2-b69f-4f67-8372-9cfc9bfc1b3d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/tbillprice-function',
             },
         ],
         functionParameter: {
@@ -825,7 +830,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/tbillyield-%E5%87%BD%E6%95%B0-4a9b30c3-ff25-4114-8e37-86c605208f99',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/tbillyield-function',
             },
         ],
         functionParameter: {
@@ -840,7 +845,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/vdb-%E5%87%BD%E6%95%B0-0ba3b999-b7e7-4b48-8a96-7c47640a7d28',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/vdb-function',
             },
         ],
         functionParameter: {
@@ -859,7 +864,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/xirr-%E5%87%BD%E6%95%B0-f5a995a9-d4a4-4d82-8b9e-1bbad6677a3b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/xirr-function',
             },
         ],
         functionParameter: {
@@ -874,7 +879,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/xnpv-%E5%87%BD%E6%95%B0-fb947d21-98a2-4a59-9f39-88323c2c7087',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/xnpv-function',
             },
         ],
         functionParameter: {
@@ -889,7 +894,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/yield-%E5%87%BD%E6%95%B0-809cabff-6db1-4a56-99db-f9540465b3c7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/yield-function',
             },
         ],
         functionParameter: {
@@ -908,7 +913,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/yielddisc-%E5%87%BD%E6%95%B0-0d1fd9d0-7623-4f0a-bc24-fcfafa7b7e9f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/yielddisc-function',
             },
         ],
         functionParameter: {
@@ -925,7 +930,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/yieldmat-%E5%87%BD%E6%95%B0-0b05b481-7a08-4e65-b38d-c8d4d57f03a8',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/yieldmat-function',
             },
         ],
         functionParameter: {

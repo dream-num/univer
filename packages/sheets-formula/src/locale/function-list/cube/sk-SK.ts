@@ -18,101 +18,109 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     CUBEKPIMEMBER: {
-        description: 'Vracia vlastnosť kľúčového ukazovateľa výkonnosti (KPI) a zobrazí názov KPI v bunke. KPI je merateľný ukazovateľ, napríklad mesačný hrubý zisk alebo štvrťročná fluktuácia zamestnancov, ktorý sa používa na sledovanie výkonnosti organizácie.',
-        abstract: 'Vracia vlastnosť KPI a zobrazí názov KPI v bunke.',
+        description: 'Vráti vlastnosť kľúčového indikátora výkonu (KPI) a v bunke zobrazí názov KPI. Kľúčový indikátor výkonu (KPI) je kvantitatívna miera, ako napríklad hrubý mesačný zisk alebo štvrťročná fluktuácia zamestnancov, ktoré sa používajú na sledovanie výkonu organizácie.',
+        abstract: 'Vráti vlastnosť kľúčového indikátora výkonu (KPI) a v bunke zobrazí názov KPI. Kľúčový indikátor výkonu (KPI) je kvantitatívna miera, ako napríklad hrubý mesačný zisk alebo štvrťročná fluktuácia zamestnancov, ktoré sa používajú na sledovanie výkonu organizácie.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cubekpimember-function-744608bf-2c62-42cd-b67a-a56109f4b03b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cubekpimember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            connection: { name: 'Pripojenie', detail: 'Povinné. Predstavuje textový reťazec názvu pripojenia ku kocke.' },
+            kpiName: { name: 'Kpi_name', detail: 'Povinné. Predstavuje textový reťazec názvu indikátora KPI v kocke.' },
+            kpiProperty: { name: 'Kpi_property', detail: 'Povinné. Predstavuje vrátený komponent indikátora KPI a môže byť jedným z nasledovných:' },
+            caption: { name: 'Titulky', detail: 'Voliteľný argument. Predstavuje alternatívny textový reťazec, ktorý sa zobrazí v bunke namiesto argumentov názov_kuv a vlastnosť_kuv.' },
         },
     },
     CUBEMEMBER: {
-        description: 'Vracia člena alebo n-ticu z kocky. Použite na overenie, že člen alebo n-tica existuje v kocke.',
-        abstract: 'Vracia člena alebo n-ticu z kocky.',
+        description: 'Vráti člen alebo n-ticu kocky. Používa sa na overenie existencie člena alebo n-tice v kocke.',
+        abstract: 'Vráti člen alebo n-ticu kocky. Používa sa na overenie existencie člena alebo n-tice v kocke.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cubemember-function-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cubemember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            connection: { name: 'Pripojenie', detail: 'Povinné. Predstavuje textový reťazec názvu pripojenia ku kocke.' },
+            memberExpression: { name: 'Member_expression', detail: 'Povinné. Predstavuje textový reťazec multidimenzionálneho výrazu (MDX), ktorý sa vyhodnocuje ako jedinečný člen v kocke. Argument členský_výraz môže byť n-tica určená ako rozsah buniek alebo pole konštánt.' },
+            caption: { name: 'Titulky', detail: 'Voliteľný argument. Predstavuje textový reťazec, ktorý sa zobrazí v bunke namiesto nadpisu (ak je definovaný) z kocky. Ak je vrátená n-tica, použije sa nadpis posledného člena n-tice.' },
         },
     },
     CUBEMEMBERPROPERTY: {
-        description: 'Vracia hodnotu vlastnosti člena z kocky. Použite na overenie, že názov člena existuje v kocke, a na vrátenie zadanej vlastnosti tohto člena.',
-        abstract: 'Vracia hodnotu vlastnosti člena z kocky.',
+        description: 'Funkcia CUBEMEMBERPROPERTY , jedna z funkcií kocky v Exceli, vráti hodnotu vlastnosti člena kocky. Používa sa na overenie existencie názvu člena kocky a vráti určitú vlastnosť tohto člena.',
+        abstract: 'Funkcia CUBEMEMBERPROPERTY , jedna z funkcií kocky v Exceli, vráti hodnotu vlastnosti člena kocky. Používa sa na overenie existencie názvu člena kocky a vráti určitú vlastnosť tohto člena.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cubememberproperty-function-001e57d6-b35a-49e5-abcd-05ff599e8951',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cubememberproperty-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            connection: { name: 'Pripojenie', detail: 'Povinné. Predstavuje textový reťazec názvu pripojenia ku kocke.' },
+            memberExpression: { name: 'Member_expression', detail: 'Povinné. Predstavuje textový reťazec multidimenzionálneho výrazu (MDX) člena kocky.' },
+            property: { name: 'Vlastnosť', detail: 'Povinné. Predstavuje textový reťazec názvu vrátenej vlastnosti alebo referenciu na bunku obsahujúcu názov vlastnosti.' },
         },
     },
     CUBERANKEDMEMBER: {
-        description: 'Vracia n-tého (zoradeného) člena v množine. Použite na vrátenie jedného alebo viacerých prvkov v množine, napríklad najlepšieho predajcu alebo top 10 študentov.',
-        abstract: 'Vracia n-tého (zoradeného) člena v množine.',
+        description: 'Vráti n-tého alebo zoradeného člena množiny. Používa sa na vrátenie jedného alebo viacerých prvkov množiny, ako napríklad najpredávanejšieho interpreta alebo 10 najlepších študentov.',
+        abstract: 'Vráti n-tého alebo zoradeného člena množiny. Používa sa na vrátenie jedného alebo viacerých prvkov množiny, ako napríklad najpredávanejšieho interpreta alebo 10 najlepších študentov.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cuberankedmember-function-07efecde-e669-4075-b4bf-6b40df2dc4b3',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cuberankedmember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            connection: { name: 'Pripojenie', detail: 'Povinné. Predstavuje textový reťazec názvu pripojenia ku kocke.' },
+            setExpression: { name: 'Set_expression', detail: 'Povinné. Predstavuje textový reťazec výrazu množiny, ako napríklad "{[Položka1].children}". Argumentom výraz_množiny môže byť aj funkcia CUBESET alebo odkaz na bunku obsahujúcu funkciu CUBESET.' },
+            rank: { name: 'Pozícia', detail: 'Povinné. Predstavuje celočíselnú hodnotu určujúcu, ktorá najvyššia hodnota sa má vrátiť. Ak má argument poradie hodnotu 1, vráti sa najvyššia hodnota, ak má argument poradie hodnotu 2, vráti sa druhá najvyššia hodnota, atď. Ak chcete vrátiť prvých 5 hodnôt, použite funkciu CUBERANKEDMEMBER päťkrát a zakaždým určite odlišný argument poradie, od 1 po 5.' },
+            caption: { name: 'Titulky', detail: 'Voliteľný argument. Predstavuje textový reťazec, ktorý sa zobrazí v bunke namiesto nadpisu (ak je definovaný) z kocky.' },
         },
     },
     CUBESET: {
-        description: 'Definuje vypočítanú množinu členov alebo n-tíc odoslaním výrazu množiny do kocky na serveri, ktorá množinu vytvorí, a potom ju vráti do Microsoft Excelu.',
-        abstract: 'Definuje vypočítanú množinu členov alebo n-tíc a vráti ju do Excelu.',
+        description: 'Definuje vypočítavanú množinu členov alebo n-tíc odoslaním výrazu pre množinu do kocky na serveri, ktorý vytvára množinu, a potom ju odošle programu Microsoft Excel.',
+        abstract: 'Definuje vypočítavanú množinu členov alebo n-tíc odoslaním výrazu pre množinu do kocky na serveri, ktorý vytvára množinu, a potom ju odošle programu Microsoft Excel.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cubeset-function-5b2146bd-62d6-4d04-9d8f-670e993ee1d9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cubeset-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            connection: { name: 'Pripojenie', detail: 'Povinné. Predstavuje textový reťazec názvu pripojenia ku kocke.' },
+            setExpression: { name: 'Set_expression', detail: 'Povinné. Predstavuje textový reťazec výrazu množiny, ktorého výsledkom je množina členov alebo n-tíc. Argumentom výraz_množiny môže byť aj odkaz na rozsah buniek programu Excel obsahujúci jeden alebo viacero členov, n-tíc alebo množín obsiahnutých v množine.' },
+            caption: { name: 'Titulky', detail: 'Voliteľný argument. Predstavuje textový reťazec, ktorý sa zobrazí v bunke namiesto nadpisu (ak je definovaný) z kocky.' },
+            sortOrder: { name: 'Sort_order', detail: 'Voliteľný argument. Predstavuje druh radenia, aké sa v prípade jeho zadania vykoná, pričom môže byť jedným z nasledovných:' },
+            sortBy: { name: 'Sort_by', detail: 'Voliteľný argument. Predstavuje textový reťazec hodnoty, podľa ktorej sa má zoraďovať. Ak napríklad chcete získať mesto s najvyšším predajom, set_expression by predstavovala množina miest a sort_by bola miera predaja. Ak by sme chceli získať mesto s najvyššou populáciou, set_expression by išlo o množinu miest a sort_by by bola miera počtu obyvateľov. Ak sort_order vyžaduje sort_by a sort_by nie je zadaná, funkcia CUBESET vráti #VALUE! chybové hlásenie.' },
         },
     },
     CUBESETCOUNT: {
-        description: 'Vracia počet položiek v množine.',
-        abstract: 'Vracia počet položiek v množine.',
+        description: 'Vráti počet položiek v množine.',
+        abstract: 'Vráti počet položiek v množine.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cubesetcount-function-c4c2a438-c1ff-4061-80fe-982f2d705286',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cubesetcount-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            set: { name: 'Nastaviť', detail: 'Povinné. Predstavuje textový reťazec výrazu programu Microsoft Excel, ktorý nadobúda hodnotu množiny definovanej funkciou CUBESET. Argumentom množina môže byť aj funkcia CUBESET alebo odkaz na bunku obsahujúcu funkciu CUBESET.' },
         },
     },
     CUBEVALUE: {
-        description: 'Vracia agregovanú hodnotu z kocky.',
-        abstract: 'Vracia agregovanú hodnotu z kocky.',
+        description: 'Vráti súhrnnú hodnotu kocky.',
+        abstract: 'Vráti súhrnnú hodnotu kocky.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cubevalue-function-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cubevalue-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            connection: { name: 'Pripojenie', detail: 'Povinné. Predstavuje textový reťazec názvu pripojenia ku kocke.' },
+            memberExpression: { name: 'Member_expression', detail: 'Voliteľný argument. Predstavuje textový reťazec multidimenzionálneho výrazu (MDX), ktorý sa vyhodnocuje ako jedinečný člen alebo n-tica v kocke. Argumentom členský_výraz môže byť aj množina definovaná funkciou CUBESET. Argument členský_výraz používajte ako rozdeľovač, ktorým definujete časť kocky, ktorej agregátnu hodnotu chcete vrátiť. Ak argument členský_výraz neurčuje žiadnu mieru, použije sa predvolená miera kocky.' },
         },
     },
 };

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/daverage-function-a6a2d5ac-4b4b-48cd-a1d8-7b37834e5aee',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/daverage-function',
             },
         ],
         functionParameter: {
@@ -38,7 +38,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dcount-function-c1fc7b93-fb0d-4d8d-97db-8d5f076eaeb1',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dcount-function',
             },
         ],
         functionParameter: {
@@ -53,7 +53,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dcounta-function-00232a6d-5a66-4a01-a25b-c1653fda1244',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dcounta-function',
             },
         ],
         functionParameter: {
@@ -68,7 +68,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dget-function-455568bf-4eef-45f7-90f0-ec250d00892e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dget-function',
             },
         ],
         functionParameter: {
@@ -83,7 +83,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dmax-function-f4e8209d-8958-4c3d-a1ee-6351665d41c2',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dmax-function',
             },
         ],
         functionParameter: {
@@ -98,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dmin-function-4ae6f1d9-1f26-40f1-a783-6dc3680192a3',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dmin-function',
             },
         ],
         functionParameter: {
@@ -113,7 +113,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dproduct-function-4f96b13e-d49c-47a7-b769-22f6d017cb31',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dproduct-function',
             },
         ],
         functionParameter: {
@@ -128,7 +128,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dstdev-function-026b8c73-616d-4b5e-b072-241871c4ab96',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dstdev-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dstdevp-function-04b78995-da03-4813-bbd9-d74fd0f5d94b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dstdevp-function',
             },
         ],
         functionParameter: {
@@ -158,7 +158,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dsum-function-53181285-0c4b-4f5a-aaa3-529a322be41b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dsum-function',
             },
         ],
         functionParameter: {
@@ -173,7 +173,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dvar-function-d6747ca9-99c7-48bb-996e-9d7af00f3ed1',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dvar-function',
             },
         ],
         functionParameter: {
@@ -188,7 +188,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/dvarp-function-eb0ba387-9cb7-45c8-81e9-0394912502fc',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/dvarp-function',
             },
         ],
         functionParameter: {

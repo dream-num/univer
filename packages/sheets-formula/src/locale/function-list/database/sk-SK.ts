@@ -18,183 +18,183 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     DAVERAGE: {
-        description: 'Vracia priemer vybraných záznamov databázy',
-        abstract: 'Vracia priemer vybraných záznamov databázy',
+        description: 'Vypočíta priemer tých hodnôt poľa (stĺpca) zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
+        abstract: 'Vypočíta priemer tých hodnôt poľa (stĺpca) zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/daverage-function-a6a2d5ac-4b4b-48cd-a1d8-7b37834e5aee',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/daverage-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'je rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'je rozsah buniek, ktorý obsahuje zadané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DCOUNT: {
-        description: 'Počíta bunky, ktoré obsahujú čísla v databáze',
-        abstract: 'Počíta bunky, ktoré obsahujú čísla v databáze',
+        description: 'Spočíta bunky obsahujúce čísla v poli (stĺpci) zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
+        abstract: 'Spočíta bunky obsahujúce čísla v poli (stĺpci) zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dcount-function-c1fc7b93-fb0d-4d8d-97db-8d5f076eaeb1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dcount-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak argument obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DCOUNTA: {
-        description: 'Počíta neprázdne bunky v databáze',
-        abstract: 'Počíta neprázdne bunky v databáze',
+        description: 'Vráti počet buniek v poli (stĺpci) zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
+        abstract: 'Vráti počet buniek v poli (stĺpci) zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dcounta-function-00232a6d-5a66-4a01-a25b-c1653fda1244',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dcounta-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Voliteľný argument. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DGET: {
-        description: 'Z databázy extrahuje jeden záznam, ktorý zodpovedá zadaným kritériám',
-        abstract: 'Z databázy extrahuje jeden záznam, ktorý zodpovedá zadaným kritériám',
+        description: 'Zo stĺpca zoznamu alebo z databázy vyberie jednu hodnotu, ktorá spĺňa zadané kritériá.',
+        abstract: 'Zo stĺpca zoznamu alebo z databázy vyberie jednu hodnotu, ktorá spĺňa zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dget-function-455568bf-4eef-45f7-90f0-ec250d00892e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dget-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DMAX: {
-        description: 'Vracia maximálnu hodnotu z vybraných záznamov databázy',
-        abstract: 'Vracia maximálnu hodnotu z vybraných záznamov databázy',
+        description: 'Vráti maximálnu hodnotu v poli (stĺpci) zoznamu alebo databázy, ktorá spĺňa zadané kritériá.',
+        abstract: 'Vráti maximálnu hodnotu v poli (stĺpci) zoznamu alebo databázy, ktorá spĺňa zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dmax-function-f4e8209d-8958-4c3d-a1ee-6351665d41c2',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dmax-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DMIN: {
-        description: 'Vracia minimálnu hodnotu z vybraných záznamov databázy',
-        abstract: 'Vracia minimálnu hodnotu z vybraných záznamov databázy',
+        description: 'Vráti minimálnu hodnotu v poli (stĺpci) zoznamu alebo databázy, ktorá spĺňa zadané kritériá.',
+        abstract: 'Vráti minimálnu hodnotu v poli (stĺpci) zoznamu alebo databázy, ktorá spĺňa zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dmin-function-4ae6f1d9-1f26-40f1-a783-6dc3680192a3',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dmin-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DPRODUCT: {
-        description: 'Násobí hodnoty v konkrétnom poli záznamov, ktoré spĺňajú kritériá v databáze',
-        abstract: 'Násobí hodnoty v konkrétnom poli záznamov, ktoré spĺňajú kritériá v databáze',
+        description: 'Vynásobí hodnoty v poli (stĺpci) položiek zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
+        abstract: 'Vynásobí hodnoty v poli (stĺpci) položiek zoznamu alebo databázy, ktoré spĺňajú zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dproduct-function-4f96b13e-d49c-47a7-b769-22f6d017cb31',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dproduct-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DSTDEV: {
-        description: 'Odhaduje smerodajnú odchýlku na základe vzorky vybraných záznamov databázy',
-        abstract: 'Odhaduje smerodajnú odchýlku na základe vzorky vybraných záznamov databázy',
+        description: 'Pomocou čísel vzorky, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá, odhadne smerodajnú odchýlku základného súboru.',
+        abstract: 'Pomocou čísel vzorky, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá, odhadne smerodajnú odchýlku základného súboru.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dstdev-function-026b8c73-616d-4b5e-b072-241871c4ab96',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dstdev-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DSTDEVP: {
-        description: 'Vypočíta smerodajnú odchýlku na základe celej populácie vybraných záznamov databázy',
-        abstract: 'Vypočíta smerodajnú odchýlku na základe celej populácie vybraných záznamov databázy',
+        description: 'Vypočíta smerodajnú odchýlku základného súboru pomocou tých čísel celého základného súboru, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá.',
+        abstract: 'Vypočíta smerodajnú odchýlku základného súboru pomocou tých čísel celého základného súboru, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dstdevp-function-04b78995-da03-4813-bbd9-d74fd0f5d94b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dstdevp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DSUM: {
-        description: 'Sčíta čísla v stĺpci poľa záznamov v databáze, ktoré spĺňajú kritériá',
-        abstract: 'Sčíta čísla v stĺpci poľa záznamov v databáze, ktoré spĺňajú kritériá',
+        description: 'V zozname alebo databáze poskytuje DSUM súčet čísel v poliach (stĺpcoch) záznamov, ktoré spĺňajú zadané podmienky.',
+        abstract: 'V zozname alebo databáze poskytuje DSUM súčet čísel v poliach (stĺpcoch) záznamov, ktoré spĺňajú zadané podmienky.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dsum-function-53181285-0c4b-4f5a-aaa3-529a322be41b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dsum-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Toto je rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia . Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Táto možnosť určuje, ktorý stĺpec funkcia používa. Zadajte označenie stĺpca v úvodzovkách, napríklad "Vek" alebo "Výnos". Prípadne môžete zadať číslo (bez úvodzoviek), ktoré predstavuje pozíciu stĺpca v zozname: napríklad 1 pre prvý stĺpec, 2 pre druhý stĺpec a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Toto je rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DVAR: {
-        description: 'Odhaduje rozptyl na základe vzorky vybraných záznamov databázy',
-        abstract: 'Odhaduje rozptyl na základe vzorky vybraných záznamov databázy',
+        description: 'Na základe čísiel vzorky, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá, odhadne odchýlku od základného súboru.',
+        abstract: 'Na základe čísiel vzorky, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá, odhadne odchýlku od základného súboru.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dvar-function-d6747ca9-99c7-48bb-996e-9d7af00f3ed1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dvar-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
     DVARP: {
-        description: 'Vypočíta rozptyl na základe celej populácie vybraných záznamov databázy',
-        abstract: 'Vypočíta rozptyl na základe celej populácie vybraných záznamov databázy',
+        description: 'Vypočíta odchýlku od základného súboru z čísel celého základného súboru, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá.',
+        abstract: 'Vypočíta odchýlku od základného súboru z čísel celého základného súboru, ktoré v poli (stĺpci) položiek zoznamu alebo databázy spĺňajú zadané kritériá.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/dvarp-function-eb0ba387-9cb7-45c8-81e9-0394912502fc',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/dvarp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'databáza', detail: 'Rozsah buniek, ktorý tvorí zoznam alebo databázu.' },
-            field: { name: 'pole', detail: 'Určuje, ktorý stĺpec sa použije vo funkcii.' },
-            criteria: { name: 'kritériá', detail: 'Rozsah buniek, ktorý obsahuje zadané podmienky.' },
+            database: { name: 'databáza', detail: 'Povinné. Rozsah buniek tvoriacich zoznam alebo databázu. Databáza je zoznam súvisiacich údajov, v ktorom riadky so súvisiacimi informáciami predstavujú záznamy a stĺpce s údajmi predstavujú polia. Prvý riadok zoznamu obsahuje označenia jednotlivých stĺpcov.' },
+            field: { name: 'pole', detail: 'Povinné. Označuje, ktorý stĺpec funkcia používa. Zadajte názov stĺpca ako text v úvodzovkách, napríklad "Vek" alebo "Výnos", alebo ako číslo označujúce pozíciu stĺpca v zozname: 1 pre prvý stĺpec, 2 pre druhý stĺpec, a tak ďalej.' },
+            criteria: { name: 'kritériá', detail: 'Povinné. Rozsah buniek, ktorý obsahuje dané podmienky. Pre argument kritériá môžete použiť ľubovoľný rozsah, ak obsahuje aspoň jedno označenie stĺpca a aspoň jednu bunku pod týmto označením, ktorá určuje podmienku pre stĺpec.' },
         },
     },
 };

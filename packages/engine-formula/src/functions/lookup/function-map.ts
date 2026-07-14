@@ -27,6 +27,7 @@ import { Expand } from './expand';
 import { Filter } from './filter';
 import { Formulatext } from './formulatext';
 import { FUNCTION_NAMES_LOOKUP } from './function-names';
+// import { Getpivotdata } from './getpivotdata';
 import { Hlookup } from './hlookup';
 import { Hstack } from './hstack';
 import { Hyperlink } from './hyperlink';
@@ -38,6 +39,7 @@ import { Match } from './match';
 import { Offset } from './offset';
 import { Row } from './row';
 import { Rows } from './rows';
+// import { Rtd } from './rtd';
 import { Sort } from './sort';
 import { Sortby } from './sortby';
 import { Take } from './take';
@@ -65,6 +67,7 @@ export const functionLookup = [
     [Expand, FUNCTION_NAMES_LOOKUP.EXPAND],
     [Filter, FUNCTION_NAMES_LOOKUP.FILTER],
     [Formulatext, FUNCTION_NAMES_LOOKUP.FORMULATEXT],
+    // [Getpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA],
     [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Hstack, FUNCTION_NAMES_LOOKUP.HSTACK],
     [Hyperlink, FUNCTION_NAMES_LOOKUP.HYPERLINK],
@@ -74,6 +77,7 @@ export const functionLookup = [
     [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],
     [Match, FUNCTION_NAMES_LOOKUP.MATCH],
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
+    // [Rtd, FUNCTION_NAMES_LOOKUP.RTD],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
     [Sort, FUNCTION_NAMES_LOOKUP.SORT],

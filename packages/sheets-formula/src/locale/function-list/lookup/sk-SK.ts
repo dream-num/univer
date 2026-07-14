@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/address-function-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -55,7 +55,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/areas-function-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -68,7 +68,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -83,7 +83,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/choosecols-function-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -98,7 +98,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/chooserows-function-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -113,7 +113,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/column-function-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -126,7 +126,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/columns-function-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -139,7 +139,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/drop-function-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -154,7 +154,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/expand-function-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -170,7 +170,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/filter-function-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -185,7 +185,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/formulatext-function-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -193,59 +193,49 @@ const locale: typeof enUS = {
         },
     },
     GETPIVOTDATA: {
-        description: 'Vracia údaje uložené v zostave kontingenčnej tabuľky',
-        abstract: 'Vracia údaje uložené v zostave kontingenčnej tabuľky',
+        description: 'Nižšie zobrazená snímka obrazovky znázorňuje rozloženie kontingenčnej tabuľky použité v ďalších častiach. V tomto príklade funkcia =GETPIVOTDATA("Predaj";A3) vráti celkovú čiastku predaja:',
+        abstract: 'Nižšie zobrazená snímka obrazovky znázorňuje rozloženie kontingenčnej tabuľky použité v ďalších častiach. V tomto príklade funkcia =GETPIVOTDATA("Predaj";A3) vráti celkovú čiastku predaja:',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/getpivotdata-function-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            dataField: { name: 'dataField', detail: '' },
+            pivotTable: { name: 'pivotTable', detail: '' },
+            field1: { name: 'field1', detail: '' },
+            item1: { name: 'item1', detail: '' },
         },
     },
     HLOOKUP: {
-        description: 'Vyhľadá v hornom riadku poľa a vráti hodnotu z určeného riadka',
-        abstract: 'Vyhľadá v hornom riadku poľa a vráti hodnotu z určeného riadka',
+        description: 'Vyhľadá hodnotu v hornom riadku tabuľky alebo poľa hodnoty a potom vráti hodnotu v tom istom stĺpci počnúc riadkom, ktorý ste v tabuľke alebo poli zadali. Funkcia HLOOKUP sa používa pri vyhľadávaní hodnôt v zadaných riadkoch tabuľky, v ktorej sú porovnávané hodnoty zoradené v prvom riadku tabuľky. Pri vyhľadávaní hodnôt v tabuľke, v ktorej sú porovnávané hodnoty zoradené v prvom stĺpci tabuľky, sa používa funkcia VLOOKUP.',
+        abstract: 'Vyhľadá hodnotu v hornom riadku tabuľky alebo poľa hodnoty a potom vráti hodnotu v tom istom stĺpci počnúc riadkom, ktorý ste v tabuľke alebo poli zadali. Funkcia HLOOKUP sa používa pri vyhľadávaní hodnôt v zadaných riadkoch tabuľky, v ktorej sú porovnávané hodnoty zoradené v prvom riadku tabuľky. Pri vyhľadávaní hodnôt v tabuľke, v ktorej sú porovnávané hodnoty zoradené v prvom stĺpci tabuľky, sa používa funkcia VLOOKUP.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/hlookup-function-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: 'hľadaná_hodnota',
-                detail: 'Hodnota, ktorú chcete nájsť v prvom riadku tabuľky. Môže to byť hodnota, odkaz alebo textový reťazec.',
-            },
-            tableArray: {
-                name: 'tabuľka',
-                detail: 'Tabuľka údajov, v ktorej sa vyhľadáva. Použite odkaz na rozsah alebo názov rozsahu.',
-            },
-            rowIndexNum: {
-                name: 'číslo_riadka',
-                detail: 'Číslo riadka v table_array, z ktorého sa vráti zodpovedajúca hodnota. Hodnota 1 vráti prvý riadok, 2 druhý atď.',
-            },
-            rangeLookup: {
-                name: 'približná_zhoda',
-                detail: 'Logická hodnota určujúca, či má HLOOKUP nájsť presnú alebo približnú zhodu.',
-            },
+            lookupValue: { name: 'hľadaná_hodnota', detail: 'Povinné. Hodnota, ktorá sa nachádza v prvom riadku tabuľky. Vyhľadávaná_hodnota môže byť hodnotou, odkazom na bunku alebo textovým reťazcom.' },
+            tableArray: { name: 'tabuľka', detail: 'Povinné. Tabuľka s informáciami, kde sa hľadajú údaje. Použite odkaz na rozsah alebo názov rozsahu. Hodnoty v prvom riadku tabuľky môžu byť textové, číselné alebo logické. Ak má argument rozsah hodnotu TRUE, musia byť hodnoty v prvom riadku tabuľky zoradené zostupne: ... -2, -1, 0, 1, 2, ..., A-Z, FALSE, TRUE; inak môže funkcia HLOOKUP vrátiť nesprávnu hodnotu. Ak má argument rozsah hodnotu FALSE, hodnoty v prvom riadku tabuľky nemusia byť zoradené. Nerozlišujú sa malé a veľké písmená. Hodnoty sa zoradia vo vzostupnom poradí, zľava doprava. Ďalšie informácie nájdete v téme Zoraďovanie údajov v rozsahu alebo tabuľke .' },
+            rowIndexNum: { name: 'číslo_riadka', detail: 'Povinné. Číslo riadka v argumente pole_tabuľky, z ktorého sa vráti hodnota. Argument číslo_indexu_riadka s hodnotou 1 vráti hodnotu prvého riadka v argumente pole_tabuľky, argument číslo_indexu_riadka s hodnotou 2 vráti hodnotu druhého riadka v argumente pole_tabuľky a tak ďalej. Ak je hodnota argumentu číslo_indexu_riadka menšia ako 1, funkcia HLOOKUP vráti chybovú hodnotu #HODNOTA!, ak je hodnota argumentu číslo_indexu_riadka väčšia ako počet riadkov v argumente pole_tabuľky, funkcia HLOOKUP vráti chybovú hodnotu #ODKAZ! .' },
+            rangeLookup: { name: 'približná_zhoda', detail: 'Voliteľný argument. Logická hodnota, ktorá určuje, či má funkcia HLOOKUP vyhľadať úplnú alebo približnú zhodu. Ak je hodnota TRUE alebo nie je zadaná, vráti približnú zhodu. Inými slovami, ak sa nenájde presná zhoda, vráti sa ďalšia najväčšia hodnota, ktorá je menšia ako hodnota argumentu vyhľadávaná_hodnota. Ak je hodnota FALSE, funkcia HLOOKUP nájde presnú zhodu. Ak v niektorom prípade nenájde, vráti sa chybová hodnota #NEDOSTUPNÝ.' },
         },
     },
     HSTACK: {
-        description: 'Pripojí polia horizontálne a postupne, aby vrátilo väčšie pole',
-        abstract: 'Pripojí polia horizontálne a postupne, aby vrátilo väčšie pole',
+        description: 'Pripojí polia vodorovne a v postupnosti, aby sa vrátilo väčšie pole.',
+        abstract: 'Pripojí polia vodorovne a v postupnosti, aby sa vrátilo väčšie pole.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/hstack-function-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'pole', detail: 'Polia, ktoré sa majú pripojiť.' },
-            array2: { name: 'pole', detail: 'Polia, ktoré sa majú pripojiť.' },
+            array1: { name: 'pole', detail: 'Maximum počtu riadkov z každého argumentu poľa.' },
+            array2: { name: 'pole', detail: 'Skombinovaný počet všetkých stĺpcov z každého argumentu poľa.' },
         },
     },
     HYPERLINK: {
@@ -254,7 +244,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=en',
+                url: 'https://support.google.com/docs/answer/3093313?hl=sk',
             },
         ],
         functionParameter: {
@@ -268,7 +258,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -285,7 +275,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/index-function-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -301,7 +291,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -315,7 +305,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -339,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/match-function-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -354,7 +344,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/offset-function-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -371,7 +361,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/row-function-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -384,7 +374,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/rows-function-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -397,12 +387,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/rtd-function-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            progId: { name: 'Identifikátor programu', detail: 'Identifikátor lokálne nainštalovaného doplnku automatizácie COM.' },
+            server: { name: 'Server', detail: 'Názov servera doplnku; pre lokálny server použite prázdny reťazec.' },
+            topic1: { name: 'Téma 1', detail: 'Prvý text určujúci údaje v reálnom čase, ktoré sa majú načítať.' },
+            topic2: { name: 'Téma 2', detail: 'Voliteľné. Ďalšie texty určujúce údaje v reálnom čase.' },
         },
     },
     SORT: {
@@ -411,7 +403,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/sort-function-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -427,7 +419,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/sortby-function-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -444,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/take-function-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -459,7 +451,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/tocol-function-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -474,7 +466,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/torow-function-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -489,7 +481,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/transpose-function-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -502,7 +494,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/unique-function-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -517,7 +509,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/vlookup-function-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -545,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/vstack-function-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -559,7 +551,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/wrapcols-function-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -574,7 +566,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/wraprows-function-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -589,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/xlookup-function-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -619,7 +611,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/xmatch-function-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

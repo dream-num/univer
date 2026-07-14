@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/date-function-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -41,13 +41,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/datedif-function-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: 'začiatočný_dátum', detail: 'Dátum, ktorý predstavuje prvý, alebo začiatočný dátum obdobia.' },
-            endDate: { name: 'koncový_dátum', detail: 'Dátum, ktorý predstavuje posledný, alebo koncový dátum obdobia.' },
-            method: { name: 'metóda', detail: 'Typ informácie, ktorú chcete vrátiť.' },
+            startDate: { name: 'začiatočný_dátum', detail: 'Dátum, ktorý predstavuje prvý alebo počiatočný dátum daného obdobia. Dátumy možno zadať ako textové reťazce v úvodzovkách (napríklad "30.1.2001"), ako poradové čísla (napríklad 36921, čo predstavuje 30. január 2001, ak používate kalendárny systém 1900) alebo ako výsledok iných vzorcov alebo funkcií (napríklad DATEVALUE("30.1.2001")).' },
+            endDate: { name: 'koncový_dátum', detail: 'Dátum, ktorý predstavuje koncový dátum príslušného obdobia.' },
+            unit: { name: 'jednotka', detail: 'Typ informácie, ktorá sa má vrátiť, kde: Jednotka****Vráti" Y "Počet celých rokov v príslušnom období." M "Počet celých mesiacov v príslušnom období." D "Počet dní v príslušnom období." MD: " Rozdiel medzi dňami v start_date a end_date. Mesiace a roky dátumov sa ignorujú. Dôležité: Z dôvodu známych obmedzení argumentu "MD" neodporúčame jeho použitie. Pozrite si nižšie časť o známych problémoch." YM "Rozdiel medzi mesiacmi v start_date a end_date. Dni a roky dátumov sa ignorujú" YD "Rozdiel medzi dňami start_date a end_date. Roky dátumov sa ignorujú.' },
         },
     },
     DATEVALUE: {
@@ -56,7 +56,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -72,7 +72,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/day-function-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -80,17 +80,17 @@ const locale: typeof enUS = {
         },
     },
     DAYS: {
-        description: 'Vracia počet dní medzi dvoma dátumami',
-        abstract: 'Vracia počet dní medzi dvoma dátumami',
+        description: 'Vráti počet dní medzi dvomi dátumami.',
+        abstract: 'Vráti počet dní medzi dvomi dátumami.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/days-function-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/days-function',
             },
         ],
         functionParameter: {
-            endDate: { name: 'koncový_dátum', detail: 'Start_date a end_date sú dva dátumy, medzi ktorými chcete zistiť počet dní.' },
-            startDate: { name: 'začiatočný_dátum', detail: 'Start_date a end_date sú dva dátumy, medzi ktorými chcete zistiť počet dní.' },
+            endDate: { name: 'koncový_dátum', detail: 'Povinné. Počiatočný_dátum a koncový_dátum sú dva dátumy, medzi ktorými chcete spočítať počet dní.' },
+            startDate: { name: 'začiatočný_dátum', detail: 'Povinné. Počiatočný_dátum a koncový_dátum sú dva dátumy, medzi ktorými chcete spočítať počet dní.' },
         },
     },
     DAYS360: {
@@ -99,7 +99,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -114,7 +114,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/edate-function-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -128,7 +128,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/eomonth-function-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -142,7 +142,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/13193461?hl=en',
+                url: 'https://support.google.com/docs/answer/13193461?hl=sk',
             },
         ],
         functionParameter: {
@@ -159,7 +159,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/hour-function-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -172,7 +172,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
@@ -180,29 +180,29 @@ const locale: typeof enUS = {
         },
     },
     MINUTE: {
-        description: 'Konvertuje sériové číslo na minútu',
-        abstract: 'Konvertuje sériové číslo na minútu',
+        description: 'Vráti minúty časovej hodnoty. Minúta je daná ako celé číslo z intervalu od 0 do 59.',
+        abstract: 'Vráti minúty časovej hodnoty. Minúta je daná ako celé číslo z intervalu od 0 do 59.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/minute-function-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'sériové_číslo', detail: 'Dátum, pre ktorý chcete nájsť minútu. Dátumy zadávajte pomocou funkcie DATE alebo ako výsledky iných vzorcov či funkcií. Napríklad použite DATE(2008,5,23) pre 23. máj 2008.' },
+            serialNumber: { name: 'sériové_číslo', detail: 'Povinné. Časový údaj obsahujúci minútu, ktorú chcete nájsť. Čas možno zadať ako textový reťazec v úvodzovkách (napríklad "18:45"), ako desatinné číslo (napríklad 0,78125, čo zodpovedá času 18:45) alebo ako výsledok iných vzorcov alebo funkcií (napríklad TIMEVALUE("18:45")).' },
         },
     },
     MONTH: {
-        description: 'Vracia mesiac dátumu reprezentovaného sériovým číslom. Mesiac je celé číslo od 1 (január) do 12 (december).',
-        abstract: 'Konvertuje sériové číslo na mesiac',
+        description: 'Vráti mesiac dátumu, ktorý je vyjadrený poradovým číslom. Mesiac je daný ako celé číslo z intervalu od 1 (január) do 12 (december).',
+        abstract: 'Vráti mesiac dátumu, ktorý je vyjadrený poradovým číslom. Mesiac je daný ako celé číslo z intervalu od 1 (január) do 12 (december).',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/month-function-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/month-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'sériové_číslo', detail: 'Dátum, pre ktorý chcete nájsť mesiac. Dátumy zadávajte pomocou funkcie DATE alebo ako výsledky iných vzorcov či funkcií. Napríklad použite DATE(2008,5,23) pre 23. máj 2008.' },
+            serialNumber: { name: 'sériové_číslo', detail: 'Povinné. Dátum v mesiaci, ktorý sa pokúšate nájsť. Dátumy by sa mali zadávať pomocou funkcie DATE alebo ako výsledok iných vzorcov alebo funkcií. Pre 23. Ak zadáte dátum ako text, môžu sa vyskytnúť problémy.' },
         },
     },
     NETWORKDAYS: {
@@ -211,7 +211,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/networkdays-function-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
@@ -221,12 +221,12 @@ const locale: typeof enUS = {
         },
     },
     NETWORKDAYS_INTL: {
-        description: 'Vracia počet celých pracovných dní medzi dvoma dátumami s parametrami, ktoré určujú, ktoré a koľko dní sú víkendové',
-        abstract: 'Vracia počet celých pracovných dní medzi dvoma dátumami s parametrami, ktoré určujú, ktoré a koľko dní sú víkendové',
+        description: 'Vráti počet celých pracovných dní medzi dvoma dátumami s použitím parametrov určujúcich, ktoré dni sú víkendové a koľko ich je. Víkendové dni a dni určené ako sviatky sa nepovažujú za pracovné dni.',
+        abstract: 'Vráti počet celých pracovných dní medzi dvoma dátumami s použitím parametrov určujúcich, ktoré dni sú víkendové a koľko ich je. Víkendové dni a dni určené ako sviatky sa nepovažujú za pracovné dni.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/networkdays-intl-function-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -237,27 +237,28 @@ const locale: typeof enUS = {
         },
     },
     NOW: {
-        description: 'Vracia sériové číslo aktuálneho dátumu a času.',
-        abstract: 'Vracia sériové číslo aktuálneho dátumu a času',
+        description: 'Vráti poradové číslo aktuálneho dátumu a času. Ak bola bunka pred zadaním funkcie nastavená na formát Všeobecné , program Excel zmení formát bunky na ten formát dátumu a času, ktorý je v počítači zadaný v rámci miestnych nastavení pre dátum a čas. Formát dátumu a času pre bunku môžete zmeniť pomocou príkazov v skupine Číslo na karte Domov na páse s nástrojmi.',
+        abstract: 'Vráti poradové číslo aktuálneho dátumu a času. Ak bola bunka pred zadaním funkcie nastavená na formát Všeobecné , program Excel zmení formát bunky na ten formát dátumu a času, ktorý je v počítači zadaný v rámci miestnych nastavení pre dátum a čas. Formát dátumu a času pre bunku môžete zmeniť pomocou príkazov v skupine Číslo na karte Domov na páse s nástrojmi.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/now-function-3337fd29-145a-4347-b2e6-20c904739c46',
-            },
-        ],
-        functionParameter: {},
-    },
-    SECOND: {
-        description: 'Konvertuje sériové číslo na sekundu',
-        abstract: 'Konvertuje sériové číslo na sekundu',
-        links: [
-            {
-                title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/second-function-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/now-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'sériové_číslo', detail: 'Dátum, pre ktorý chcete nájsť sekundu. Dátumy zadávajte pomocou funkcie DATE alebo ako výsledky iných vzorcov či funkcií. Napríklad použite DATE(2008,5,23) pre 23. máj 2008.' },
+        },
+    },
+    SECOND: {
+        description: 'Vracia sekundy časovej hodnoty. Sekunda je daná ako celé číslo z intervalu od 0 (nuly) do 59.',
+        abstract: 'Vracia sekundy časovej hodnoty. Sekunda je daná ako celé číslo z intervalu od 0 (nuly) do 59.',
+        links: [
+            {
+                title: 'Inštrukcia',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/second-function',
+            },
+        ],
+        functionParameter: {
+            serialNumber: { name: 'sériové_číslo', detail: 'Povinné. Časový údaj obsahujúci sekundu, ktorú chcete vyhľadať. Čas možno zadať ako textový reťazec v úvodzovkách (napríklad "18:45"), ako desatinné číslo (napríklad 0,78125, čo predstavuje čas 18:45) alebo ako výsledok iných vzorcov alebo funkcií (napríklad TIMEVALUE("18:45")).' },
         },
     },
     TIME: {
@@ -266,7 +267,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/time-function-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/time-function',
             },
         ],
         functionParameter: {
@@ -290,7 +291,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/timevalue-function-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -303,7 +304,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/3094239?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=sk',
             },
         ],
         functionParameter: {
@@ -316,7 +317,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/today-function-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/today-function',
             },
         ],
         functionParameter: {},
@@ -327,7 +328,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -341,7 +342,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -355,7 +356,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/workday-function-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -370,7 +371,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/workday-intl-function-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -386,7 +387,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/year-function-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -399,7 +400,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/yearfrac-function-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

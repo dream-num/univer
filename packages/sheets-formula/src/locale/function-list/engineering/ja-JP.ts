@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/besseli-%E9%96%A2%E6%95%B0-8d33855c-9a8d-444b-98e0-852267b1c0df',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/besseli-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/besselj-%E9%96%A2%E6%95%B0-839cb181-48de-408b-9d80-bd02982d94f7',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/besselj-function',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/besselk-%E9%96%A2%E6%95%B0-606d11bc-06d3-4d53-9ecb-2803e2b90b70',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/besselk-function',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bessely-%E9%96%A2%E6%95%B0-f3a356b3-da89-42c3-8974-2da54d6353a2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bessely-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bin2dec-%E9%96%A2%E6%95%B0-63905b57-b3a0-453d-99f4-647bb519cd6c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bin2dec-function',
             },
         ],
         functionParameter: {
@@ -92,7 +92,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bin2hex-%E9%96%A2%E6%95%B0-0375e507-f5e5-4077-9af8-28d84f9f41cc',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bin2hex-function',
             },
         ],
         functionParameter: {
@@ -106,12 +106,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bin2oct-%E9%96%A2%E6%95%B0-0a4e01ba-ac8d-4158-9b29-16c25c4c23fd',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bin2oct-function',
             },
         ],
         functionParameter: {
-            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
-            places: { name: '桁数', detail: '使用する文字数を指定します。' },
+            number: { name: '2 進数', detail: '必ず指定します。 変換する 2 進数を指定します。 数値に指定できる文字数は 10 文字 (10 ビット) までです。 数値の最上位のビットは符号を表します。 残りの 9 ビットは数値の大きさを表します。 負の数は 2 の補数を使って表します。' },
+            places: { name: '桁数', detail: 'オプション。 使用する文字数を指定します。 桁数を省略すると、必要最小限の桁数で結果が返されます。 桁数は、戻り値が桁数に満たないときに 0 (ゼロ) を前に付加して桁を埋める場合に役立ちます。' },
         },
     },
     BITAND: {
@@ -120,7 +120,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bitand-%E9%96%A2%E6%95%B0-8a2be3d7-91c3-4b48-9517-64548008563a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bitand-function',
             },
         ],
         functionParameter: {
@@ -134,7 +134,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bitlshift-%E9%96%A2%E6%95%B0-c55bb27e-cacd-4c7c-b258-d80861a03c9c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bitlshift-function',
             },
         ],
         functionParameter: {
@@ -148,7 +148,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bitor-%E9%96%A2%E6%95%B0-f6ead5c8-5b98-4c9e-9053-8ad5234919b2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bitor-function',
             },
         ],
         functionParameter: {
@@ -162,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bitrshift-%E9%96%A2%E6%95%B0-274d6996-f42c-4743-abdb-4ff95351222c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bitrshift-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/bitxor-%E9%96%A2%E6%95%B0-c81306a1-03f9-4e89-85ac-b86c3cba10e4',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/bitxor-function',
             },
         ],
         functionParameter: {
@@ -190,7 +190,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/complex-%E9%96%A2%E6%95%B0-f0b8f3a9-51cc-4d6d-86fb-3a9362fa4128',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/complex-function',
             },
         ],
         functionParameter: {
@@ -205,7 +205,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/convert-%E9%96%A2%E6%95%B0-d785bef1-808e-4aac-bdcd-666c810f9af2',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/convert-function',
             },
         ],
         functionParameter: {
@@ -220,7 +220,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/dec2bin-%E9%96%A2%E6%95%B0-0f63dd0e-5d1a-42d8-b511-5bf5c6d43838',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/dec2bin-function',
             },
         ],
         functionParameter: {
@@ -234,7 +234,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/dec2hex-%E9%96%A2%E6%95%B0-6344ee8b-b6b5-4c6a-a672-f64666704619',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/dec2hex-function',
             },
         ],
         functionParameter: {
@@ -248,7 +248,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/dec2oct-%E9%96%A2%E6%95%B0-c9d835ca-20b7-40c4-8a9e-d3be351ce00f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/dec2oct-function',
             },
         ],
         functionParameter: {
@@ -262,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/delta-%E9%96%A2%E6%95%B0-2f763672-c959-4e07-ac33-fe03220ba432',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/delta-function',
             },
         ],
         functionParameter: {
@@ -276,7 +276,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/erf-%E9%96%A2%E6%95%B0-c53c7e7b-5482-4b6c-883e-56df3c9af349',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/erf-function',
             },
         ],
         functionParameter: {
@@ -290,7 +290,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/erf-precise-%E9%96%A2%E6%95%B0-9a349593-705c-4278-9a98-e4122831a8e0',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/erf-precise-function',
             },
         ],
         functionParameter: {
@@ -303,7 +303,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/erfc-%E9%96%A2%E6%95%B0-736e0318-70ba-4e8b-8d08-461fe68b71b3',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/erfc-function',
             },
         ],
         functionParameter: {
@@ -316,7 +316,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/erfc-precise-%E9%96%A2%E6%95%B0-e90e6bab-f45e-45df-b2ac-cd2eb4d4a273',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/erfc-precise-function',
             },
         ],
         functionParameter: {
@@ -329,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/gestep-%E9%96%A2%E6%95%B0-f37e7d2a-41da-4129-be95-640883fca9df',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/gestep-function',
             },
         ],
         functionParameter: {
@@ -343,7 +343,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hex2bin-%E9%96%A2%E6%95%B0-a13aafaa-5737-4920-8424-643e581828c1',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/hex2bin-function',
             },
         ],
         functionParameter: {
@@ -357,7 +357,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hex2dec-%E9%96%A2%E6%95%B0-8c8c3155-9f37-45a5-a3ee-ee5379ef106e',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/hex2dec-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hex2oct-%E9%96%A2%E6%95%B0-54d52808-5d19-4bd0-8a63-1096a5d11912',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/hex2oct-function',
             },
         ],
         functionParameter: {
@@ -384,7 +384,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imabs-%E9%96%A2%E6%95%B0-b31e73c6-d90c-4062-90bc-8eb351d765a1',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imabs-function',
             },
         ],
         functionParameter: {
@@ -392,16 +392,16 @@ const locale: typeof enUS = {
         },
     },
     IMAGINARY: {
-        description: '指定した複素数の虚数係数を返します。',
-        abstract: '指定した複素数の虚数係数を返します。',
+        description: '文字列 "x+yi" または "x+yj" の形式で指定された複素数の虚数係数を返します。',
+        abstract: '文字列 "x+yi" または "x+yj" の形式で指定された複素数の虚数係数を返します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imaginary-%E9%96%A2%E6%95%B0-dd5952fd-473d-44d9-95a1-9a17b23e428a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imaginary-function',
             },
         ],
         functionParameter: {
-            inumber: { name: '複素数', detail: '虚数係数を求める複素数を指定します。' },
+            inumber: { name: '複素数', detail: '必須。 虚数係数を求める複素数を指定します。' },
         },
     },
     IMARGUMENT: {
@@ -410,7 +410,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imargument-%E9%96%A2%E6%95%B0-eed37ec1-23b3-4f59-b9f3-d340358a034a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imargument-function',
             },
         ],
         functionParameter: {
@@ -423,7 +423,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imconjugate-%E9%96%A2%E6%95%B0-2e2fc1ea-f32b-4f9b-9de6-233853bafd42',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imconjugate-function',
             },
         ],
         functionParameter: {
@@ -436,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imcos-%E9%96%A2%E6%95%B0-dad75277-f592-4a6b-ad6c-be93a808a53c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imcos-function',
             },
         ],
         functionParameter: {
@@ -449,7 +449,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imcosh-%E9%96%A2%E6%95%B0-053e4ddb-4122-458b-be9a-457c405e90ff',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imcosh-function',
             },
         ],
         functionParameter: {
@@ -462,7 +462,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imcot-%E9%96%A2%E6%95%B0-dc6a3607-d26a-4d06-8b41-8931da36442c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imcot-function',
             },
         ],
         functionParameter: {
@@ -470,16 +470,16 @@ const locale: typeof enUS = {
         },
     },
     IMCOTH: {
-        description: '複素数の双曲線余接を返します。',
-        abstract: '複素数の双曲線余接を返します。',
+        description: 'IMCOTH 関数は、指定された複素数の双曲線余接を返します。 たとえば、「x+yi」形式で複素数を指定すると「coth(x+yi)」が返されます。',
+        abstract: 'IMCOTH 関数は、指定された複素数の双曲線余接を返します。 たとえば、「x+yi」形式で複素数を指定すると「coth(x+yi)」が返されます。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/9366256?hl=ja&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366256?hl=ja',
             },
         ],
         functionParameter: {
-            inumber: { name: '複素数', detail: '双曲線余接を求める複素数を指定します。' },
+            inumber: { name: '複素数', detail: '双曲線コタンジェントを求める複素数です。 COMPLEX 関数の結果の 0 の虚数部を持つ複素数として解釈される実数、または「x+yi」形式の文字列（x と y は数値）を指定できます。' },
         },
     },
     IMCSC: {
@@ -488,7 +488,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imcsc-%E9%96%A2%E6%95%B0-9e158d8f-2ddf-46cd-9b1d-98e29904a323',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imcsc-function',
             },
         ],
         functionParameter: {
@@ -501,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imcsch-%E9%96%A2%E6%95%B0-c0ae4f54-5f09-4fef-8da0-dc33ea2c5ca9',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imcsch-function',
             },
         ],
         functionParameter: {
@@ -514,7 +514,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imdiv-%E9%96%A2%E6%95%B0-a505aff7-af8a-4451-8142-77ec3d74d83f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imdiv-function',
             },
         ],
         functionParameter: {
@@ -523,16 +523,16 @@ const locale: typeof enUS = {
         },
     },
     IMEXP: {
-        description: '複素数のべき乗を返します。',
-        abstract: '複素数のべき乗を返します。',
+        description: '文字列 "x+yi" または "x+yj" の形式で指定された複素数のべき乗を返します。',
+        abstract: '文字列 "x+yi" または "x+yj" の形式で指定された複素数のべき乗を返します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imexp-%E9%96%A2%E6%95%B0-c6f8da1f-e024-4c0c-b802-a60e7147a95f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imexp-function',
             },
         ],
         functionParameter: {
-            inumber: { name: '複素数', detail: 'べき乗を求める複素数を指定します。' },
+            inumber: { name: '複素数', detail: '必須。 べき乗を求める複素数を指定します。' },
         },
     },
     IMLN: {
@@ -541,7 +541,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imln-%E9%96%A2%E6%95%B0-32b98bcf-8b81-437c-a636-6fb3aad509d8',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imln-function',
             },
         ],
         functionParameter: {
@@ -549,17 +549,17 @@ const locale: typeof enUS = {
         },
     },
     IMLOG: {
-        description: '指定された値を底とする複素数の対数を返します。',
-        abstract: '指定された値を底とする複素数の対数を返します。',
+        description: 'IMLOG 関数は、指定された値を底とする複素数の対数を返します。',
+        abstract: 'IMLOG 関数は、指定された値を底とする複素数の対数を返します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/9366486?hl=ja&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366486?hl=ja',
             },
         ],
         functionParameter: {
-            inumber: { name: '複素数', detail: '特定の底に対する対数を計算する必要がある複素数。' },
-            base: { name: '底', detail: '対数を求めるときに使用する底です。' },
+            inumber: { name: '複素数', detail: '対数関数の入力値です。 数値は、実数として解釈されるように、通常の数値（1 など）を記述できます。 数値は、文字を引用符で囲んで記述して、実数係数と複素係数の両方を指定できます。' },
+            base: { name: '底', detail: '対数を求めるときに使用する底です。 正の実数を指定してください。' },
         },
     },
     IMLOG10: {
@@ -568,7 +568,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imlog10-%E9%96%A2%E6%95%B0-58200fca-e2a2-4271-8a98-ccd4360213a5',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imlog10-function',
             },
         ],
         functionParameter: {
@@ -581,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imlog2-%E9%96%A2%E6%95%B0-152e13b4-bc79-486c-a243-e6a676878c51',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imlog2-function',
             },
         ],
         functionParameter: {
@@ -594,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/impower-%E9%96%A2%E6%95%B0-210fd2f5-f8ff-4c6a-9d60-30e34fbdef39',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/impower-function',
             },
         ],
         functionParameter: {
@@ -608,7 +608,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/improduct-%E9%96%A2%E6%95%B0-2fb8651a-a4f2-444f-975e-8ba7aab3a5ba',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/improduct-function',
             },
         ],
         functionParameter: {
@@ -622,7 +622,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imreal-%E9%96%A2%E6%95%B0-d12bc4c0-25d0-4bb3-a25f-ece1938bf366',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imreal-function',
             },
         ],
         functionParameter: {
@@ -635,7 +635,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsec-%E9%96%A2%E6%95%B0-6df11132-4411-4df4-a3dc-1f17372459e0',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsec-function',
             },
         ],
         functionParameter: {
@@ -648,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsech-%E9%96%A2%E6%95%B0-f250304f-788b-4505-954e-eb01fa50903b',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsech-function',
             },
         ],
         functionParameter: {
@@ -661,7 +661,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsin-%E9%96%A2%E6%95%B0-1ab02a39-a721-48de-82ef-f52bf37859f6',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsin-function',
             },
         ],
         functionParameter: {
@@ -674,7 +674,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsinh-%E9%96%A2%E6%95%B0-dfb9ec9e-8783-4985-8c42-b028e9e8da3d',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsinh-function',
             },
         ],
         functionParameter: {
@@ -687,7 +687,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsqrt-%E9%96%A2%E6%95%B0-e1753f80-ba11-4664-a10e-e17368396b70',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsqrt-function',
             },
         ],
         functionParameter: {
@@ -700,7 +700,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsub-%E9%96%A2%E6%95%B0-2e404b4d-4935-4e85-9f52-cb08b9a45054',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsub-function',
             },
         ],
         functionParameter: {
@@ -714,7 +714,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imsum-%E9%96%A2%E6%95%B0-81542999-5f1c-4da6-9ffe-f1d7aaa9457f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imsum-function',
             },
         ],
         functionParameter: {
@@ -728,7 +728,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/imtan-%E9%96%A2%E6%95%B0-8478f45d-610a-43cf-8544-9fc0b553a132',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/imtan-function',
             },
         ],
         functionParameter: {
@@ -736,16 +736,16 @@ const locale: typeof enUS = {
         },
     },
     IMTANH: {
-        description: '複素数の双曲線正接を返します。',
-        abstract: '複素数の双曲線正接を返します。',
+        description: 'IMTANH 関数は、指定された複素数の双曲線正接を返します。 たとえば、複素数「x+yi」を指定すると「tanh(x+yi)」が返されます。',
+        abstract: 'IMTANH 関数は、指定された複素数の双曲線正接を返します。 たとえば、複素数「x+yi」を指定すると「tanh(x+yi)」が返されます。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/9366655?hl=ja&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366655?hl=ja',
             },
         ],
         functionParameter: {
-            inumber: { name: '複素数', detail: '双曲線正接を求める接線を指定します。' },
+            inumber: { name: '複素数', detail: '双曲線正接を求める複素数です。 COMPLEX 関数の結果、0 の虚数部を持つ複素数として解釈される実数、「x+yi」形式の文字列（x と y は数値）を指定できます。' },
         },
     },
     OCT2BIN: {
@@ -754,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/oct2bin-%E9%96%A2%E6%95%B0-55383471-3c56-4d27-9522-1a8ec646c589',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/oct2bin-function',
             },
         ],
         functionParameter: {
@@ -768,7 +768,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/oct2dec-%E9%96%A2%E6%95%B0-87606014-cb98-44b2-8dbb-e48f8ced1554',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/oct2dec-function',
             },
         ],
         functionParameter: {
@@ -781,7 +781,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/oct2hex-%E9%96%A2%E6%95%B0-912175b4-d497-41b4-a029-221f051b858f',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/oct2hex-function',
             },
         ],
         functionParameter: {

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/cell-function-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/es-es/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/es-es/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -50,17 +50,16 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/info-function-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/es-es/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primero' },
-            number2: { name: 'número2', detail: 'segundo' },
+            typeText: { name: 'Tipo de texto', detail: 'Texto que especifica el tipo de información que se devuelve.' },
         },
     },
     ISBETWEEN: {
-        description: 'Comprueba si un número proporcionado se encuentra entre otros dos números, de forma inclusiva o exclusiva.',
-        abstract: 'Comprueba si un número proporcionado se encuentra entre otros dos números, de forma inclusiva o exclusiva.',
+        description: 'Comprueba si un número proporcionado se encuentra entre otros dos números, ya sea de forma inclusiva o exclusiva.',
+        abstract: 'Comprueba si un número proporcionado se encuentra entre otros dos números, ya sea de forma inclusiva o exclusiva.',
         links: [
             {
                 title: 'Instrucción',
@@ -68,11 +67,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            valueToCompare: { name: 'valor_a_comparar', detail: 'El valor a comprobar si está entre `valor_inferior` y `valor_superior`.' },
-            lowerValue: { name: 'valor_inferior', detail: 'El límite inferior del rango de valores en el que puede caer `valor_a_comparar`.' },
-            upperValue: { name: 'valor_superior', detail: 'El límite superior del rango de valores en el que puede caer `valor_a_comparar`.' },
-            lowerValueIsInclusive: { name: 'valor_inferior_es_inclusivo', detail: 'Indica si el rango de valores incluye el `valor_inferior`. Por defecto es VERDADERO.' },
-            upperValueIsInclusive: { name: 'valor_superior_es_inclusivo', detail: 'Indica si el rango de valores incluye el `valor_superior`. Por defecto es VERDADERO.' },
+            valueToCompare: { name: 'valor_a_comparar', detail: 'Valor que se va a comprobar si se encuentra entre `valor_inferior` y `valor_superior`.' },
+            lowerValue: { name: 'valor_inferior', detail: 'Límite inferior del intervalo de valores dentro del cual puede encontrarse el `valor_para_comparar`.' },
+            upperValue: { name: 'valor_superior', detail: 'Límite superior del intervalo de valores dentro del cual puede encontrarse el `valor_para_comparar`.' },
+            lowerValueIsInclusive: { name: 'valor_inferior_es_inclusivo', detail: 'Comprueba si el intervalo de valores incluye el `valor_inferior`; de manera predeterminada, está establecido en TRUE' },
+            upperValueIsInclusive: { name: 'valor_superior_es_inclusivo', detail: 'Comprueba si el intervalo de valores incluye el `valor_superior`; de manera predeterminada, está establecido en TRUE' },
         },
     },
     ISBLANK: {
@@ -81,7 +80,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -89,8 +88,8 @@ const locale: typeof enUS = {
         },
     },
     ISDATE: {
-        description: 'Devuelve si un valor es una fecha.',
-        abstract: 'Devuelve si un valor es una fecha.',
+        description: 'La función ISDATE devuelve si el valor es una fecha.',
+        abstract: 'La función ISDATE devuelve si el valor es una fecha.',
         links: [
             {
                 title: 'Instrucción',
@@ -98,12 +97,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            value: { name: 'valor', detail: 'El valor que se verificará como fecha.' },
+            value: { name: 'valor', detail: 'Valor que se comprueba si es una fecha.' },
         },
     },
     ISEMAIL: {
-        description: 'Comprueba si un valor es una dirección de correo electrónico válida',
-        abstract: 'Comprueba si un valor es una dirección de correo electrónico válida',
+        description: 'Para comprobar si un valor es una dirección de correo válida, usa la función ISEMAIL. Comprueba si el valor sigue un formato aceptado habitualmente para las direcciones de correo, pero no verifica si existe.',
+        abstract: 'Para comprobar si un valor es una dirección de correo válida, usa la función ISEMAIL. Comprueba si el valor sigue un formato aceptado habitualmente para las direcciones de correo, pero no verifica si existe.',
         links: [
             {
                 title: 'Instrucción',
@@ -111,7 +110,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            value: { name: 'valor', detail: 'El valor que se verificará como una dirección de correo electrónico.' },
+            value: { name: 'valor', detail: 'ISEMAIL("juangarcia@tunombre.com")' },
         },
     },
     ISERR: {
@@ -120,7 +119,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -133,7 +132,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -141,29 +140,29 @@ const locale: typeof enUS = {
         },
     },
     ISEVEN: {
-        description: 'Devuelve VERDADERO si el número es par',
-        abstract: 'Devuelve VERDADERO si el número es par',
+        description: 'Devuelve VERDADERO si el número es par y FALSO si el número es impar.',
+        abstract: 'Devuelve VERDADERO si el número es par y FALSO si el número es impar.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/iseven-function-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/es-es/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
-            value: { name: 'valor', detail: 'El valor a probar. Si el número no es un entero, se trunca.' },
+            value: { name: 'valor', detail: 'Obligatorio. El valor que se desea probar. Si el argumento número no es un entero, se trunca.' },
         },
     },
     ISFORMULA: {
-        description: 'Devuelve VERDADERO si hay una referencia a una celda que contiene una fórmula',
-        abstract: 'Devuelve VERDADERO si hay una referencia a una celda que contiene una fórmula',
+        description: 'Comprueba si existe una referencia a una celda que contiene una fórmula y devuelve TRUE o FALSE.',
+        abstract: 'Comprueba si existe una referencia a una celda que contiene una fórmula y devuelve TRUE o FALSE.',
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/isformula-function-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/es-es/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
-            reference: { name: 'referencia', detail: 'Referencia es una referencia a la celda que desea probar.' },
+            reference: { name: 'referencia', detail: 'Obligatorio. Referencia es una referencia a la celda que se desea probar. Referencia puede ser una referencia de celda, una fórmula o un nombre que hace referencia a una celda.' },
         },
     },
     ISLOGICAL: {
@@ -172,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -185,7 +184,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -198,7 +197,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -211,7 +210,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/isodd-function-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/es-es/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -237,12 +236,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/isomitted-function-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/es-es/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primero' },
-            number2: { name: 'número2', detail: 'segundo' },
+            argument: { name: 'Argumento', detail: 'Valor que se comprueba para determinar si se ha omitido, como un parámetro de LAMBDA.' },
         },
     },
     ISREF: {
@@ -251,7 +249,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -264,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/es-es/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -281,7 +279,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            value: { name: 'valor', detail: 'El valor que se verificará como una URL.' },
+            value: { name: 'valor', detail: 'ISURL("www.google.com")' },
         },
     },
     N: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/n-function-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/es-es/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/na-function-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/es-es/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -315,7 +313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/sheet-function-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/es-es/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -328,7 +326,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/sheets-function-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/es-es/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -340,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucción',
-                url: 'https://support.microsoft.com/es-es/office/type-function-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/es-es/excel/functions/type-function',
             },
         ],
         functionParameter: {

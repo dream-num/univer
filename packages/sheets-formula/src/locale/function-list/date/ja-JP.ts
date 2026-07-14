@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/date-%E9%96%A2%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -38,13 +38,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/datedif-%E9%96%A2%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日', detail: '指定した期間の最初の日付または開始日を表す日付。' },
+            startDate: { name: '開始日', detail: '指定した期間の最初の日付または開始日を表す日付。 日付は、引用符 ("2001/1/30" など) 内のテキスト文字列として、シリアル番号 (たとえば、1900 年 1 月 30 日を表す 36921 など) として、または他の数式または関数の結果として入力できます (例: DATEVALUE("2001/1/30")。' },
             endDate: { name: '終了日', detail: '期間の最後の日付または終了日を表す日付。' },
-            method: { name: '単位', detail: '返される情報の種類。' },
+            unit: { name: '単位', detail: '返される情報の種類。ここで: Unit****Returns " Y "期間の完全な年数。 M "期間の完了した月の数" D "期間の日数" MD "start_dateとend_dateの日数の違い。 日付の月数および年数は無視されます。 大事な： "MD" 引数には既知の制限があるため、使用することはお勧めしません。 以下の既知の問題に関するセクションを参照してください。 YM "start_dateとend_dateの月の違い。 日付の日数と年は無視されます" YD "start_date日とend_date日の違い。 日付の年数は無視されます。' },
         },
     },
     DATEVALUE: {
@@ -53,7 +53,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/datevalue-%E9%96%A2%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -66,7 +66,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/day-%E9%96%A2%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/days-%E9%96%A2%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/days-function',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/days360-%E9%96%A2%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/edate-%E9%96%A2%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -122,7 +122,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/eomonth-%E9%96%A2%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -136,12 +136,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/13193461?hl=ja&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/13193461?hl=ja',
             },
         ],
         functionParameter: {
-            timestamp: { name: 'タイムスタンプ', detail: 'Unix エポック タイムスタンプ（秒、ミリ秒、またはマイクロ秒）。' },
-            unit: { name: '時間の単位', detail: 'タイムスタンプを表示する時間の単位。デフォルト値は 1: \n1 は時間単位が秒であることを示します。\n2 は時間単位がミリ秒であることを示します。\n3 は時間単位がマイクロ秒であることを示します。' },
+            timestamp: { name: 'タイムスタンプ', detail: 'EPOCHTODATE(1655908429662,2)' },
+            unit: { name: '時間の単位', detail: 'EPOCHTODATE(1655906710)' },
         },
     },
     HOUR: {
@@ -150,7 +150,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hour-%E9%96%A2%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -163,52 +163,52 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/isoweeknum-%E9%96%A2%E6%95%B0-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
-            date: { name: '日付', detail: 'で日付や時刻の計算に使用されるコードのことです。' },
+            date: { name: '日付', detail: '必須。 日付とは、Excel で日付や時刻の計算に使用されるコードのことです。' },
         },
     },
     MINUTE: {
-        description: 'シリアル値を時刻の分に変換します。',
-        abstract: 'シリアル値を時刻の分に変換します。',
+        description: '時刻の分を返します。 戻り値は 0 (分) ～ 59 (分) の範囲の整数となります。',
+        abstract: '時刻の分を返します。 戻り値は 0 (分) ～ 59 (分) の範囲の整数となります。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/minute-%E9%96%A2%E6%95%B0-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/minute-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
+            serialNumber: { name: 'シリアル値', detail: '必須。 検索する分が含まれている時刻を指定します。 時刻には、半角の二重引用符 (") で囲んだ文字列 ("6:45 PM" など)、小数 (6:45 PM を表す 0.78125)、または他の数式や関数の結果 (TIMEVALUE("6:45 PM") など) を指定します。' },
         },
     },
     MONTH: {
-        description: 'シリアル値を月に変換します。',
-        abstract: 'シリアル値を月に変換します。',
+        description: 'データに含まれる月をシリアル値で返します。 戻り値は 1 (月) ～ 12 (月) の範囲の整数となります。',
+        abstract: 'データに含まれる月をシリアル値で返します。 戻り値は 1 (月) ～ 12 (月) の範囲の整数となります。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/month-%E9%96%A2%E6%95%B0-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/month-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'シリアル値', detail: '検索する月の日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果として指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
+            serialNumber: { name: 'シリアル値', detail: '必須。 検索する月の日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果として指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。 日付を文字列として入力 した場合、エラーが発生することがあります。' },
         },
     },
     NETWORKDAYS: {
-        description: '開始日と終了日を指定して、その期間内の稼動日の日数を返します。',
-        abstract: '開始日と終了日を指定して、その期間内の稼動日の日数を返します。',
+        description: '開始日から終了日までの期間に含まれる稼動日の日数を返します。 稼働日とは、土曜、日曜、および指定された休日を除く日のことです。 この関数は、特定期間内の稼動日数を基準にして従業員の給与を計算するときに使用します。',
+        abstract: '開始日から終了日までの期間に含まれる稼動日の日数を返します。 稼働日とは、土曜、日曜、および指定された休日を除く日のことです。 この関数は、特定期間内の稼動日数を基準にして従業員の給与を計算するときに使用します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/networkdays-%E9%96%A2%E6%95%B0-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
-            endDate: { name: '終了日', detail: '対象期間の最終日を表す日付を指定します。' },
-            holidays: { name: '休日', detail: '国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。' },
+            startDate: { name: '開始日', detail: '必須。 起算日を表す日付を指定します。' },
+            endDate: { name: '終了日', detail: '必須。 対象期間の最終日を表す日付を指定します。' },
+            holidays: { name: '休日', detail: 'オプション。 国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。 日付を含む一連のセルか、日付を示すシリアル値の配列定数で指定できます。' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -217,7 +217,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/networkdays-intl-%E9%96%A2%E6%95%B0-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -228,43 +228,43 @@ const locale: typeof enUS = {
         },
     },
     NOW: {
-        description: '現在の日付と時刻に対応するシリアル値を返します。',
-        abstract: '現在の日付と時刻に対応するシリアル値を返します',
+        description: '現在の日付と時刻に対応するシリアル値を返します。 関数が入力される前に、セルの表示形式が [ 標準 ] であった場合、セルの書式は、地域の設定の日付と時刻の書式に合わせて変更されます。 リボンの [ ホーム ] タブにある [ 数値 ] のコマンドを使用して、セルの日付と時刻の書式を変更できます。',
+        abstract: '現在の日付と時刻に対応するシリアル値を返します。 関数が入力される前に、セルの表示形式が [ 標準 ] であった場合、セルの書式は、地域の設定の日付と時刻の書式に合わせて変更されます。 リボンの [ ホーム ] タブにある [ 数値 ] のコマンドを使用して、セルの日付と時刻の書式を変更できます。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/now-%E9%96%A2%E6%95%B0-3337fd29-145a-4347-b2e6-20c904739c46',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/now-function',
             },
         ],
         functionParameter: {
         },
     },
     SECOND: {
-        description: 'シリアル値を時刻の秒に変換します。',
-        abstract: 'シリアル値を時刻の秒に変換します。',
+        description: '時刻の秒を返します。 戻り値は 0 (秒) ～ 59 (秒) の範囲の整数となります。',
+        abstract: '時刻の秒を返します。 戻り値は 0 (秒) ～ 59 (秒) の範囲の整数となります。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/second-%E9%96%A2%E6%95%B0-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/second-function',
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
+            serialNumber: { name: 'シリアル値', detail: '必須。 検索する秒が含まれている時刻を指定します。 時刻には、半角の二重引用符 (") で囲んだ文字列 ("6:45 PM" など)、小数 (6:45 PM を表す 0.78125)、または他の数式や関数の結果 (TIMEVALUE("6:45 PM") など) を指定します。' },
         },
     },
     TIME: {
-        description: '指定した時刻に対応するシリアル値を返します。',
-        abstract: '指定した時刻に対応するシリアル値を返します',
+        description: '指定した時刻に対応する小数を返します。 この関数を挿入する前のセルの表示形式が [ 標準 ] であった場合、結果は日付形式になります。',
+        abstract: '指定した時刻に対応する小数を返します。 この関数を挿入する前のセルの表示形式が [ 標準 ] であった場合、結果は日付形式になります。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/time-%E9%96%A2%E6%95%B0-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/time-function',
             },
         ],
         functionParameter: {
-            hour: { name: '時', detail: '時間を表す 0 (ゼロ) から 32767 までの数値。 23 より大きい値は 24 で割られ、残りは時間値として扱われます。 たとえば、TIME(27,0,0) = TIME(3,0,0) = .125 または 3:00 AM。' },
-            minute: { name: '分', detail: '分を表す 0 から 32767 までの数値。 59 より大きい値は、時間と分に変換されます。 たとえば、TIME(0,750,0) = TIME(12,30,0) = .520833 または 12:30 PM。' },
-            second: { name: '秒', detail: '2 番目を表す 0 から 32767 までの数値。 59 を超える値は、時間、分、秒に変換されます。 たとえば、TIME(0,0,2000) = TIME(0,33,22) = .023148 または 12:33:20 AM。' },
+            hour: { name: '時', detail: '必須。 時間を表す 0 (ゼロ) から 32767 までの数値。 23 より大きい値は 24 で割られ、残りは時間値として扱われます。 たとえば、TIME(27,0,0) = TIME(3,0,0) = .125 または 3:00 AM。' },
+            minute: { name: '分', detail: '必須。 分を表す 0 から 32767 までの数値。 59 より大きい値は、時間と分に変換されます。 たとえば、TIME(0,750,0) = TIME(12,30,0) = .520833 または 12:30 PM。' },
+            second: { name: '秒', detail: '必須。 2 番目を表す 0 から 32767 までの数値。 59 を超える値は、時間、分、秒に変換されます。 たとえば、TIME(0,0,2000) = TIME(0,33,22) = .023148 または 12:33:20 AM' },
         },
     },
     TIMEVALUE: {
@@ -273,7 +273,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/timevalue-%E9%96%A2%E6%95%B0-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -286,11 +286,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.google.com/docs/answer/3094239?hl=ja&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=ja',
             },
         ],
         functionParameter: {
-            value: { name: '値', detail: '日付に変換する引数またはセルへの参照です。' },
+            value: { name: '値', detail: 'TO_DATE(A2)' },
         },
     },
     TODAY: {
@@ -299,7 +299,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/today-%E9%96%A2%E6%95%B0-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/today-function',
             },
         ],
         functionParameter: {
@@ -311,7 +311,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/weekday-%E9%96%A2%E6%95%B0-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -325,7 +325,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/weeknum-%E9%96%A2%E6%95%B0-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -339,7 +339,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/workday-%E9%96%A2%E6%95%B0-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -354,7 +354,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/workday-intl-%E9%96%A2%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/year-%E9%96%A2%E6%95%B0-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -383,7 +383,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/yearfrac-%E9%96%A2%E6%95%B0-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/ja-jp/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

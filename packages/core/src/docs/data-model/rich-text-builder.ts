@@ -24,6 +24,7 @@ import type {
     INumberUnit,
     IParagraphBorder,
     IParagraphStyle,
+    ISectionColumnProperties,
     IShading,
     ITabStop,
     ITextDecoration,
@@ -208,6 +209,13 @@ export interface IRichTextAlignment {
     horizontal?: HorizontalAlign;
     /** Vertical alignment inside the host text container. */
     vertical?: VerticalAlign;
+}
+
+export interface IRichTextColumnsOptions {
+    /** Number of text-flow columns. Use 1 to clear multi-column layout. */
+    count: number;
+    /** Spacing between columns in px. Defaults to 0. */
+    spacing?: number;
 }
 
 /**
@@ -2027,6 +2035,69 @@ export class RichTextBuilder extends RichTextValue {
 
         if (alignment.vertical !== undefined) {
             renderConfig.verticalAlign = alignment.vertical;
+        }
+
+        return this;
+    }
+
+    /**
+     * Sets the column layout for this rich-text document.
+     *
+     * Columns are stored in the rich-text document section layout. This creates text-flow columns, not table columns.
+     * The host renderer must support rich-text columns for the layout to be visible.
+     *
+     * @param options The column layout options.
+     * @param options.count The number of text columns. Must be a positive integer. Use `1` to clear multi-column layout.
+     * @param options.spacing The spacing between columns, in px. Defaults to `0`.
+     * @returns The current builder for chaining.
+     *
+     * @example
+     * ```ts
+     * const presentation = univerAPI.getActivePresentation();
+     * if (!presentation) throw new Error('No active presentation');
+     *
+     * const slide = presentation.getSlideByIndex(0);
+     * const richText = univerAPI.newRichText()
+     *   .columns({ count: 2, spacing: 12 })
+     *   .text('Column text');
+     *
+     * const shapeInfo = slide.newShape()
+     *   .setRichText(richText)
+     *   .setAbsolutePosition(80, 80)
+     *   .setSize(360, 160)
+     *   .build();
+     *
+     * slide.insertShape(shapeInfo);
+     * ```
+     */
+    columns(options: IRichTextColumnsOptions): RichTextBuilder {
+        if (!Number.isInteger(options.count) || options.count < 1) {
+            throw new RangeError('Rich text column count must be a positive integer.');
+        }
+
+        const body = this._data.body ??= { dataStream: '\r\n' };
+        const sectionBreaks = body.sectionBreaks ??= [];
+        if (!sectionBreaks.length) {
+            sectionBreaks.push({
+                sectionId: createSectionId(new Set()),
+                startIndex: Math.max(0, (body.dataStream?.length ?? 0) - 1),
+            });
+        }
+
+        const spacing = Math.max(0, options.spacing ?? 0);
+        const columns: ISectionColumnProperties[] | undefined = options.count === 1
+            ? undefined
+            : Array.from({ length: options.count }, (_, index) => ({
+                width: 0,
+                paddingEnd: index === options.count - 1 ? 0 : spacing,
+            }));
+
+        for (const sectionBreak of sectionBreaks) {
+            if (columns) {
+                sectionBreak.columnProperties = columns.map((column) => ({ ...column }));
+            } else {
+                delete sectionBreak.columnProperties;
+            }
         }
 
         return this;

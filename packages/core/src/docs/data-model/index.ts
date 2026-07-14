@@ -31,6 +31,7 @@ export {
     TextStyleBuilder,
     TextStyleValue,
 } from './rich-text-builder';
+export type { IRichTextColumnsOptions } from './rich-text-builder';
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './subdocument';
 export { ActionIterator } from './text-x/action-iterator';
 export { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './text-x/action-types';

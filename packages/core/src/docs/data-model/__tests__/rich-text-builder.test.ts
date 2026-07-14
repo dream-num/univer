@@ -594,6 +594,21 @@ describe('RichTextBuilder', () => {
             expect(data.body?.paragraphs?.[0]?.paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
         });
 
+        it('should set and clear rich text columns', () => {
+            const builder = RichTextBuilder.create()
+                .columns({ count: 2, spacing: 12 })
+                .text('Columns');
+
+            expect(builder.getData().body?.sectionBreaks?.[0]?.columnProperties).toEqual([
+                { width: 0, paddingEnd: 12 },
+                { width: 0, paddingEnd: 0 },
+            ]);
+
+            builder.columns({ count: 1 });
+
+            expect(builder.getData().body?.sectionBreaks?.[0]?.columnProperties).toBeUndefined();
+        });
+
         it('should start a paragraph chain without a leading blank paragraph', () => {
             const builder = RichTextBuilder.create()
                 .paragraph()

@@ -16,9 +16,16 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ICancelMarkDirtyRowAutoHeightOperationParams, IMarkDirtyRowAutoHeightOperationParams } from '@univerjs/sheets';
+import type {
+    ICancelMarkDirtyRowAutoHeightOperationParams,
+    IMarkDirtyRowAutoHeightOperationParams,
+} from '@univerjs/sheets';
 import { createIdentifier, Disposable, ICommandService, Inject, Rectangle } from '@univerjs/core';
-import { CancelMarkDirtyRowAutoHeightOperation, MarkDirtyRowAutoHeightOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import {
+    CancelMarkDirtyRowAutoHeightOperation,
+    MarkDirtyRowAutoHeightOperation,
+    SetWorksheetRowAutoHeightMutation,
+} from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IAutoHeightTask {

@@ -519,4 +519,56 @@ describe('PluginService', () => {
         expect(constructed).toEqual(['started-sheet-plugin']);
         univer.dispose();
     });
+
+    it('should accept plugins built with the current core version', () => {
+        class SameVersionPlugin extends Plugin {
+            static override pluginName = 'same-version-plugin';
+            static override packageName = '@univerjs/same-version-plugin';
+            static override version = Plugin.version;
+            static override type = UniverInstanceType.UNIVER_SHEET;
+
+            constructor(
+                _config: undefined,
+                @Inject(Injector) override readonly _injector: Injector
+            ) {
+                super();
+            }
+        }
+
+        const univer = new Univer();
+
+        expect(() => univer.registerPlugin(SameVersionPlugin)).not.toThrow();
+        univer.dispose();
+    });
+
+    it('should report the package name when a plugin version does not match core', () => {
+        class MismatchVersionPlugin extends Plugin {
+            static override pluginName = 'mismatch-version-plugin';
+            static override packageName = '@univerjs/mismatch-version-plugin';
+            static override version = '__MISMATCH_VERSION__';
+            static override type = UniverInstanceType.UNIVER_SHEET;
+
+            constructor(
+                _config: undefined,
+                @Inject(Injector) override readonly _injector: Injector
+            ) {
+                super();
+            }
+        }
+
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const univer = new Univer();
+
+        expect(() => univer.registerPlugin(MismatchVersionPlugin)).not.toThrow();
+        expect(errorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[PluginService]'),
+            expect.stringContaining('Plugin version mismatch.')
+        );
+        expect(errorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[PluginService]'),
+            expect.stringContaining('package: "@univerjs/mismatch-version-plugin"')
+        );
+
+        univer.dispose();
+    });
 });

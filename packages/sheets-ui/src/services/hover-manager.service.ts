@@ -15,7 +15,13 @@
  */
 
 import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IBoundRectNoAngle, IDocumentSkeletonDrawing, IMouseEvent, IPointerEvent, IRender } from '@univerjs/engine-render';
+import type {
+    IBoundRectNoAngle,
+    IDocumentSkeletonDrawing,
+    IMouseEvent,
+    IPointerEvent,
+    IRender,
+} from '@univerjs/engine-render';
 import type { ISheetLocation, ISheetLocationBase, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { CellValueType, Disposable, isRealNum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';

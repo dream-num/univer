@@ -171,9 +171,9 @@ describe('FloatDomSingle', () => {
 
         const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
         const wrapper = inner.parentElement as HTMLDivElement;
-        expect(wrapper.className).toBe('univer-z-10');
+        expect(wrapper.className).toBe('univer-absolute univer-z-10 univer-origin-center');
         expect(inner.className).toBe('univer-absolute univer-overflow-hidden');
-        expect(wrapper.style.cssText).toBe('position: absolute; top: 20px; left: 10px; width: 98px; height: 98px; transform: rotate(0deg); opacity: 1; overflow: hidden; transform-origin: center center;');
+        expect(wrapper.style.cssText).toBe('top: 20px; left: 10px; width: 98px; height: 98px; transform: rotate(0deg); opacity: 1; overflow: hidden;');
         expect(inner.style.cssText).toBe('width: 96px; height: 96px; left: 0px; top: 0px; right: auto; bottom: auto; overflow: hidden;');
 
         fireEvent.pointerDown(inner);

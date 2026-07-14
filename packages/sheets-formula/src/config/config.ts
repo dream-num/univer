@@ -50,11 +50,6 @@ export interface IUniverSheetsFormulaBaseConfig {
      * Define the calculation mode during initialization, default is `WHEN_EMPTY`
      */
     initialFormulaComputing?: CalculationMode;
-
-    /**
-     * If true, the plugin will write array formula results to the snapshot. Normally you should not set this value.
-     */
-    writeArrayFormulaToSnapshot?: boolean;
 }
 
 export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};

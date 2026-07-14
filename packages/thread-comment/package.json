@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0-alpha.3",
     "private": false,
     "description": "Shared thread comment models, commands, and services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

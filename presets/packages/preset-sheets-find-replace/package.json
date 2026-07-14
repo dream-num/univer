@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-sheets-find-replace",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0-alpha.3",
     "private": false,
     "description": "Preset for find and replace capabilities in Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

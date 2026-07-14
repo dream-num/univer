@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0-alpha.3",
     "private": false,
     "description": "Shared application UI framework, workbench services, menus, dialogs, and Facade UI APIs for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

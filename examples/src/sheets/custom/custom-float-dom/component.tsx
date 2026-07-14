@@ -18,3 +18,16 @@ export const CustomRangeLoading = () => {
         </div>
     );
 };
+
+export const FloatDomContentBoxProbe = ({ data }: { data?: { border?: boolean } }) => (
+    <div
+        data-float-dom-content-box-probe=""
+        style={{
+            width: '100%',
+            height: '100%',
+            boxSizing: 'border-box',
+            border: data?.border ? '1px solid #f00' : 'none',
+            background: 'rgba(255, 255, 255, 0.25)',
+        }}
+    />
+);

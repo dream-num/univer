@@ -30,6 +30,13 @@ export interface IFloatDomLayout extends IPosition {
     opacity?: number;
 }
 
+export interface IFloatDomContentBoxConfig {
+    /** Amount subtracted from the visible wrapper width and height. @default 2 */
+    wrapperInset?: number;
+    /** Amount subtracted from the content width and height. @default 4 */
+    contentInset?: number;
+}
+
 export interface IFloatDom {
     position$: Observable<IFloatDomLayout>;
     id: string;
@@ -47,6 +54,11 @@ export interface IFloatDom {
      * their DOM portal is not filtered out when the child handles focus.
      */
     preserveOnFocusChange?: boolean;
+    /**
+     * Insets subtracted from FloatDom's wrapper and content dimensions.
+     * Omitted values preserve the historical wrapper/content insets of 2/4.
+     */
+    contentBox?: IFloatDomContentBoxConfig;
     onPointerMove: (evt: PointerEvent | MouseEvent) => void;
     onPointerDown: (evt: PointerEvent | MouseEvent) => void;
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;

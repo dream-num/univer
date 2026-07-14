@@ -306,6 +306,22 @@ function createRender(skeleton: SpreadsheetSkeleton, scene: Scene): IRender {
     } as unknown as IRender;
 }
 
+function createDrawingUITestBedWithRender() {
+    const testBed = createDrawingUITestBed([
+        [IRenderManagerService, { useClass: TestRenderManagerService }],
+    ]);
+    const modelWorksheet = testBed.workbook.getActiveSheet();
+    const skeleton = testBed.injector.createInstance(
+        SpreadsheetSkeleton,
+        modelWorksheet,
+        testBed.workbook.getStyles()
+    ).calculate() as SpreadsheetSkeleton;
+    const renderManager = testBed.injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+    renderManager.configure(createRender(skeleton, new TestRenderScene() as unknown as Scene));
+
+    return testBed;
+}
+
 describe('sheets-drawing-ui facade', () => {
     let univer: Univer;
     let injector: Injector;
@@ -384,21 +400,11 @@ describe('sheets-drawing-ui facade', () => {
 
     it('adds, reads, updates, batch updates and disposes float doms through the worksheet facade', async () => {
         univer.dispose();
-        const testBed = createDrawingUITestBed([
-            [IRenderManagerService, { useClass: TestRenderManagerService }],
-        ]);
+        const testBed = createDrawingUITestBedWithRender();
         univer = testBed.univer;
         injector = testBed.injector;
         univerAPI = FUniver.newAPI(injector);
 
-        const modelWorksheet = testBed.workbook.getActiveSheet();
-        const skeleton = injector.createInstance(
-            SpreadsheetSkeleton,
-            modelWorksheet,
-            testBed.workbook.getStyles()
-        ).calculate() as SpreadsheetSkeleton;
-        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
-        renderManager.configure(createRender(skeleton, new TestRenderScene() as unknown as Scene));
         const sheetDrawingService = injector.get(ISheetDrawingService);
         const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
 
@@ -530,6 +536,32 @@ describe('sheets-drawing-ui facade', () => {
         expect(worksheet.getFloatDomById('order-card')).toBeNull();
         worksheet.removeFloatDom('status-card');
         expect(worksheet.getAllFloatDoms()).toEqual([]);
+    });
+
+    it('omits float doms without backing drawing params', async () => {
+        univer.dispose();
+        const testBed = createDrawingUITestBedWithRender();
+        univer = testBed.univer;
+        injector = testBed.injector;
+        univerAPI = FUniver.newAPI(injector);
+
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        worksheet.addFloatDomToPosition({
+            componentKey: 'OrderCard',
+            initPosition: { startX: 20, startY: 30, endX: 140, endY: 90 },
+        }, 'order-card');
+        worksheet.addFloatDomToPosition({
+            componentKey: 'MissingCard',
+            initPosition: { startX: 40, startY: 50, endX: 160, endY: 110 },
+        }, 'missing-card');
+        await Promise.resolve();
+
+        const drawingData = sheetDrawingService.getDrawingData('test', 'sheet1');
+        delete drawingData['missing-card'];
+
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'missing-card' })).toBeUndefined();
+        expect(worksheet.getAllFloatDoms().map((dom) => dom.id)).toEqual(['order-card']);
     });
 
     it('saves cell images from range and worksheet selections', async () => {

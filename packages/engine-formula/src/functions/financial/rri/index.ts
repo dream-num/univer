@@ -26,6 +26,7 @@ import { BaseFunction } from '../../base-function';
 export class Rri extends BaseFunction {
     override minParams = 3;
 
+    // TODO(formula-contract): Restrict the runtime maximum to the three documented arguments handled by calculate.
     override maxParams = 6;
 
     override calculate(nper: BaseValueObject, pv: BaseValueObject, fv: BaseValueObject): BaseValueObject {

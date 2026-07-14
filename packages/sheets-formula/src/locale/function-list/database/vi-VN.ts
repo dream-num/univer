@@ -18,183 +18,183 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     DAVERAGE: {
-        description: 'Trả về giá trị trung bình của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Trả về giá trị trung bình của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Tính trung bình các giá trị trong một trường (cột) bản ghi trong danh sách hay cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Tính trung bình các giá trị trong một trường (cột) bản ghi trong danh sách hay cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/daverage-%E5%87%BD%E6%95%B0-a6a2d5ac-4b4b-48cd-a1d8-7b37834e5aee',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/daverage-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'sở dữ liệu là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'cho biết cột nào được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Hoa lợi" hay một số (không có dấu trích dẫn) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô có chứa các điều kiện bạn xác định. Bạn có thể dùng bất kỳ phạm vi nào cho đối số criteria, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó, mà trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DCOUNT: {
-        description: 'Đếm số ô chứa số trong cơ sở dữ liệu',
-        abstract: 'Đếm số ô chứa số trong cơ sở dữ liệu',
+        description: 'Đếm số ô chứa số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Đếm số ô chứa số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dcount-%E5%87%BD%E6%95%B0-c1fc7b93-fb0d-4d8d-97db-8d5f076eaeb1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dcount-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa các điều kiện mà bạn xác định. Bạn có thể dùng bất kỳ phạm vi nào cho đối số criteria, miễn là đối số đó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó, mà trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DCOUNTA: {
-        description: 'Đếm số ô không trống trong cơ sở dữ liệu',
-        abstract: 'Đếm số ô không trống trong cơ sở dữ liệu',
+        description: 'Đếm các ô không trống trong một trường (cột) của bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với những điều kiện bạn xác định.',
+        abstract: 'Đếm các ô không trống trong một trường (cột) của bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với những điều kiện bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dcounta-%E5%87%BD%E6%95%B0-00232a6d-5a66-4a01-a25b-c1653fda1244',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dcounta-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Tùy chọn. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DGET: {
-        description: 'Trích xuất một bản ghi duy nhất từ cơ sở dữ liệu khớp với các điều kiện đã chỉ định',
-        abstract: 'Trích xuất một bản ghi duy nhất từ cơ sở dữ liệu khớp với các điều kiện đã chỉ định',
+        description: 'Trích một giá trị từ cột danh sách hay cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Trích một giá trị từ cột danh sách hay cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dget-%E5%87%BD%E6%95%B0-455568bf-4eef-45f7-90f0-ec250d00892e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dget-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DMAX: {
-        description: 'Trả về giá trị lớn nhất của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Trả về giá trị lớn nhất của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Trả về số lớn nhất trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Trả về số lớn nhất trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dmax-%E5%87%BD%E6%95%B0-f4e8209d-8958-4c3d-a1ee-6351665d41c2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dmax-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DMIN: {
-        description: 'Trả về giá trị nhỏ nhất của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Trả về giá trị nhỏ nhất của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Trả về số nhỏ nhất trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Trả về số nhỏ nhất trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dmin-%E5%87%BD%E6%95%B0-4ae6f1d9-1f26-40f1-a783-6dc3680192a3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dmin-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DPRODUCT: {
-        description: 'Nhân các giá trị trong trường cụ thể của các bản ghi trong cơ sở dữ liệu khớp với các điều kiện đã chỉ định',
-        abstract: 'Nhân các giá trị trong trường cụ thể của các bản ghi trong cơ sở dữ liệu khớp với các điều kiện đã chỉ định',
+        description: 'Nhân các giá trị trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Nhân các giá trị trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dproduct-%E5%87%BD%E6%95%B0-4f96b13e-d49c-47a7-b769-22f6d017cb31',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dproduct-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DSTDEV: {
-        description: 'Ước tính độ lệch chuẩn dựa trên mẫu của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Ước tính độ lệch chuẩn dựa trên mẫu của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Ước tính độ lệch chuẩn của một tập hợp dựa trên một mẫu bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Ước tính độ lệch chuẩn của một tập hợp dựa trên một mẫu bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dstdev-%E5%87%BD%E6%95%B0-026b8c73-616d-4b5e-b072-241871c4ab96',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dstdev-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DSTDEVP: {
-        description: 'Tính toán độ lệch chuẩn dựa trên tổng thể mẫu của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Tính toán độ lệch chuẩn dựa trên tổng thể mẫu của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Tính toán độ lệch chuẩn của một tập hợp dựa trên toàn bộ tập hợp đó bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Tính toán độ lệch chuẩn của một tập hợp dựa trên toàn bộ tập hợp đó bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dstdevp-%E5%87%BD%E6%95%B0-04b78995-da03-4813-bbd9-d74fd0f5d94b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dstdevp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DSUM: {
-        description: 'Tính tổng các số trong cột trường của các bản ghi trong cơ sở dữ liệu khớp với các điều kiện đã chỉ định',
-        abstract: 'Tính tổng các số trong cột trường của các bản ghi trong cơ sở dữ liệu khớp với các điều kiện đã chỉ định',
+        description: 'Trong danh sách hoặc cơ sở dữ liệu, DSUM cung cấp tổng số trong các trường (cột) bản ghi khớp với các điều kiện đã xác định của bạn.',
+        abstract: 'Trong danh sách hoặc cơ sở dữ liệu, DSUM cung cấp tổng số trong các trường (cột) bản ghi khớp với các điều kiện đã xác định của bạn.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dsum-%E5%87%BD%E6%95%B0-53181285-0c4b-4f5a-aaa3-529a322be41b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dsum-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Đây là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu. Cơ sở dữ liệu là danh sách các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và cột dữ liệu là các trường . Hàng đầu tiên của danh sách chứa nhãn cho mỗi cột trong đó.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Điều này chỉ rõ cột nào được dùng trong hàm. Xác định nhãn cột nằm giữa dấu ngoặc kép, chẳng hạn như ví dụ như "Tuổi" hoặc "Hoa lợi". Ngoài ra, bạn có thể chỉ định một số (không có dấu ngoặc kép) thể hiện vị trí của cột trong danh sách: ví dụ: 1 cho cột đầu tiên, 2 cho cột thứ hai, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Đây là phạm vi ô có chứa các điều kiện mà bạn chỉ định. Bạn có thể dùng bất kỳ phạm vi nào cho đối số criteria, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó, mà trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DVAR: {
-        description: 'Ước tính phương sai dựa trên mẫu của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Ước tính phương sai dựa trên mẫu của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Ước tính phương sai của một tập hợp dựa trên một mẫu bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Ước tính phương sai của một tập hợp dựa trên một mẫu bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dvar-%E5%87%BD%E6%95%B0-d6747ca9-99c7-48bb-996e-9d7af00f3ed1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dvar-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
     DVARP: {
-        description: 'Tính toán phương sai dựa trên tổng thể mẫu của các mục được chọn trong cơ sở dữ liệu',
-        abstract: 'Tính toán phương sai dựa trên tổng thể mẫu của các mục được chọn trong cơ sở dữ liệu',
+        description: 'Tính toán phương sai của một tập hợp dựa trên toàn bộ tập hợp đó bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
+        abstract: 'Tính toán phương sai của một tập hợp dựa trên toàn bộ tập hợp đó bằng cách dùng các số trong một trường (cột) bản ghi trong danh sách hoặc cơ sở dữ liệu khớp với các điều kiện mà bạn xác định.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/dvarp-%E5%87%BD%E6%95%B0-eb0ba387-9cb7-45c8-81e9-0394912502fc',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/dvarp-function',
             },
         ],
         functionParameter: {
-            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
-            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
-            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
+            database: { name: 'cơ sở dữ liệu', detail: 'Yêu cầu. Phạm vi ô tạo thành danh sách hay cơ sở dữ liệu. Cơ sở dữ liệu là một danh sách chứa các dữ liệu liên quan, trong đó các hàng thông tin liên quan là các bản ghi và các cột dữ liệu là các trường. Hàng đầu tiên của danh sách có chứa nhãn cho mỗi cột.' },
+            field: { name: 'cánh đồng', detail: 'Yêu cầu. Chỉ rõ cột được dùng trong hàm. Hãy nhập nhãn cột đặt trong dấu ngoặc kép, ví dụ như "Tuổi" hoặc "Lợi tức" hay một số (không có dấu ngoặc kép) thể hiện vị trí cột trong danh sách: 1 cho cột đầu tiên, 2 cho cột thứ 2, v.v.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'Yêu cầu. Phạm vi ô có chứa điều kiện mà bạn xác định. Bạn có thể sử dụng bất kỳ phạm vi nào cho đối số tiêu chí, miễn là nó có chứa ít nhất một nhãn cột và ít nhất một ô bên dưới nhãn cột đó trong đó bạn xác định điều kiện cho cột đó.' },
         },
     },
 };

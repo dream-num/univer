@@ -23,12 +23,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cubekpimember-function-744608bf-2c62-42cd-b67a-a56109f4b03b',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cubekpimember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            connection: { name: 'Connexió', detail: 'Text amb el nom de la connexió al cub.' },
+            kpiName: { name: 'Nom de l’KPI', detail: 'Text amb el nom de l’indicador clau de rendiment (KPI) del cub.' },
+            kpiProperty: { name: 'Propietat de l’KPI', detail: 'Component de l’KPI que s’ha de retornar.' },
+            caption: { name: 'Títol', detail: 'Opcional. Text alternatiu que es mostra a la cel·la.' },
         },
     },
     CUBEMEMBER: {
@@ -37,12 +39,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cubemember-function-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cubemember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            connection: { name: 'Connexió', detail: 'Text amb el nom de la connexió al cub.' },
+            memberExpression: { name: 'Expressió de membre', detail: 'Text d’una expressió multidimensional (MDX) que avalua un membre o una tupla del cub.' },
+            caption: { name: 'Títol', detail: 'Opcional. Text alternatiu que es mostra a la cel·la.' },
         },
     },
     CUBEMEMBERPROPERTY: {
@@ -51,12 +54,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cubememberproperty-function-001e57d6-b35a-49e5-abcd-05ff599e8951',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cubememberproperty-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            connection: { name: 'Connexió', detail: 'Text amb el nom de la connexió al cub.' },
+            memberExpression: { name: 'Expressió de membre', detail: 'Text d’una expressió multidimensional (MDX) d’un membre del cub.' },
+            property: { name: 'Propietat', detail: 'Nom de la propietat que s’ha de retornar.' },
         },
     },
     CUBERANKEDMEMBER: {
@@ -65,12 +69,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cuberankedmember-function-07efecde-e669-4075-b4bf-6b40df2dc4b3',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cuberankedmember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            connection: { name: 'Connexió', detail: 'Text amb el nom de la connexió al cub.' },
+            setExpression: { name: 'Expressió de conjunt', detail: 'Text d’una expressió que defineix un conjunt del cub.' },
+            rank: { name: 'Rang', detail: 'Enter que indica la posició del membre que s’ha de retornar.' },
+            caption: { name: 'Títol', detail: 'Opcional. Text alternatiu que es mostra a la cel·la.' },
         },
     },
     CUBESET: {
@@ -79,12 +85,15 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cubeset-function-5b2146bd-62d6-4d04-9d8f-670e993ee1d9',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cubeset-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            connection: { name: 'Connexió', detail: 'Text amb el nom de la connexió al cub.' },
+            setExpression: { name: 'Expressió de conjunt', detail: 'Text d’una expressió que produeix un conjunt de membres o tuples.' },
+            caption: { name: 'Títol', detail: 'Opcional. Text alternatiu que es mostra a la cel·la.' },
+            sortOrder: { name: 'Ordre', detail: 'Opcional. Tipus d’ordenació que s’ha d’aplicar.' },
+            sortBy: { name: 'Ordena per', detail: 'Opcional. Valor pel qual s’ha d’ordenar el conjunt.' },
         },
     },
     CUBESETCOUNT: {
@@ -93,12 +102,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cubesetcount-function-c4c2a438-c1ff-4061-80fe-982f2d705286',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cubesetcount-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            set: { name: 'Conjunt', detail: 'Expressió que avalua un conjunt definit per CUBESET, o una referència que el conté.' },
         },
     },
     CUBEVALUE: {
@@ -107,12 +115,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/cubevalue-function-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/cubevalue-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'número1', detail: 'primer' },
-            number2: { name: 'número2', detail: 'segon' },
+            connection: { name: 'Connexió', detail: 'Text amb el nom de la connexió al cub.' },
+            memberExpression: { name: 'Expressió de membre', detail: 'Opcional. Expressió MDX que avalua un membre o una tupla del cub.' },
         },
     },
 };

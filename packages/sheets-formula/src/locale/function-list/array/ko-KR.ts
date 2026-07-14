@@ -27,14 +27,14 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            inputRange: { name: 'input_range', detail: '제한할 범위입니다.' },
+            inputRange: { name: 'input_range', detail: 'ARRAY_CONSTRAIN(SORT(A1:F100, 1, TRUE), 10, 6)' },
             numRows: { name: 'num_rows', detail: '결과에 포함할 행의 수입니다.' },
             numCols: { name: 'num_cols', detail: '결과에 포함할 열의 수입니다.' },
         },
     },
     FLATTEN: {
-        description: '하나 이상의 범위에서 모든 값을 하나의 열로 평면화합니다.',
-        abstract: '하나 이상의 범위에서 모든 값을 하나의 열로 평면화합니다.',
+        description: '하나 이상의 범위에 있는 모든 값을 단일 열로 평면화합니다.',
+        abstract: '하나 이상의 범위에 있는 모든 값을 단일 열로 평면화합니다.',
         links: [
             {
                 title: '사용법',
@@ -42,8 +42,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            range1: { name: 'range1', detail: '첫 번째로 평면화할 범위입니다.' },
-            range2: { name: 'range2', detail: '추가로 평면화할 범위입니다.' },
+            range1: { name: 'range1', detail: '평면화할 첫 번째 범위입니다.' },
+            range2: { name: 'range2', detail: '[선택사항] 반복 가능 평면화할 추가 범위입니다.' },
         },
     },
 };

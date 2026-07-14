@@ -68,8 +68,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.DATEDIF.functionParameter.method.name',
-                detail: 'sheets-formula.functionList.DATEDIF.functionParameter.method.detail',
+                name: 'sheets-formula.functionList.DATEDIF.functionParameter.unit.name',
+                detail: 'sheets-formula.functionList.DATEDIF.functionParameter.unit.detail',
                 example: '"D"',
                 require: 1,
                 repeat: 0,

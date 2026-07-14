@@ -21,12 +21,14 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cubekpimember-function-744608bf-2c62-42cd-b67a-a56109f4b03b',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cubekpimember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: 'Connection', detail: 'Required. A text string of the name of the connection to the cube.' },
+            kpiName: { name: 'Kpi_name', detail: 'Required. A text string of the name of the KPI in the cube.' },
+            kpiProperty: { name: 'Kpi_property', detail: 'Required. The KPI component returned and can be one of the following:' },
+            caption: { name: 'Caption', detail: 'Optional. An alternative text string that is displayed in the cell instead of kpi_name and kpi_property.' },
         },
     },
     CUBEMEMBER: {
@@ -35,26 +37,28 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cubemember-function-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cubemember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: 'Connection', detail: 'Required. A text string of the name of the connection to the cube.' },
+            memberExpression: { name: 'Member_expression', detail: 'Required. A text string of a multidimensional expression (MDX) that evaluates to a unique member in the cube. Alternatively, member_expression can be a tuple, specified as a cell range or an array constant.' },
+            caption: { name: 'Caption', detail: 'Optional. A text string displayed in the cell instead of the caption, if one is defined, from the cube. When a tuple is returned, the caption used is the one for the last member in the tuple.' },
         },
     },
     CUBEMEMBERPROPERTY: {
-        description: 'Returns the value of a member property from the cube. Use to validate that a member name exists within the cube and to return the specified property for this member.',
-        abstract: 'Returns the value of a member property from the cube. Use to validate that a member name exists within the cube and to return the specified property for this member.',
+        description: 'The CUBEMEMBERPROPERTY function, one of the Cube functions in Excel, returns the value of a member property from a cube. Use it to validate that a member name exists within the cube, and to return the specified property for this member.',
+        abstract: 'The CUBEMEMBERPROPERTY function, one of the Cube functions in Excel, returns the value of a member property from a cube. Use it to validate that a member name exists within the cube, and to return the specified property for this member.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cubememberproperty-function-001e57d6-b35a-49e5-abcd-05ff599e8951',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cubememberproperty-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: 'Connection', detail: 'Required. A text string of the name of the connection to the cube.' },
+            memberExpression: { name: 'Member_expression', detail: 'Required. A text string of a multidimensional expression (MDX) of a member within the cube.' },
+            property: { name: 'Property', detail: 'Required. A text string of the name of the property returned or a reference to a cell that contains the name of the property.' },
         },
     },
     CUBERANKEDMEMBER: {
@@ -63,12 +67,14 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cuberankedmember-function-07efecde-e669-4075-b4bf-6b40df2dc4b3',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cuberankedmember-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: 'Connection', detail: 'Required. A text string of the name of the connection to the cube.' },
+            setExpression: { name: 'Set_expression', detail: 'Required. A text string of a set expression, such as "{[Item1].children}". Set_expression can also be the CUBESET function, or a reference to a cell that contains the CUBESET function.' },
+            rank: { name: 'Rank', detail: 'Required. An integer value specifying the top value to return. If rank is a value of 1, it returns the top value, if rank is a value of 2, it returns the second most top value, and so on. To return the top 5 values, use CUBERANKEDMEMBER five times, specifying a different rank, 1 through 5, each time.' },
+            caption: { name: 'Caption', detail: 'Optional. A text string displayed in the cell instead of the caption, if one is defined, from the cube.' },
         },
     },
     CUBESET: {
@@ -77,12 +83,15 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cubeset-function-5b2146bd-62d6-4d04-9d8f-670e993ee1d9',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cubeset-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: 'Connection', detail: 'Required. A text string of the name of the connection to the cube.' },
+            setExpression: { name: 'Set_expression', detail: 'Required. A text string of a set expression that results in a set of members or tuples. Set_expression can also be a cell reference to an Excel range that contains one or more members, tuples, or sets included in the set.' },
+            caption: { name: 'Caption', detail: 'Optional. A text string that is displayed in the cell instead of the caption, if one is defined, from the cube.' },
+            sortOrder: { name: 'Sort_order', detail: 'Optional. The type of sort, if any, to perform and can be one of the following:' },
+            sortBy: { name: 'Sort_by', detail: 'Optional. A text string of the value by which to sort. For example, to get the city with the highest sales, set_expression would be a set of cities, and sort_by would be the sales measure. Or, to get the city with the highest population, set_expression would be a set of cities, and sort_by would be the population measure. If sort_order requires sort_by, and sort_by is omitted, CUBESET returns the #VALUE! error message.' },
         },
     },
     CUBESETCOUNT: {
@@ -91,12 +100,11 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cubesetcount-function-c4c2a438-c1ff-4061-80fe-982f2d705286',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cubesetcount-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            set: { name: 'Set', detail: 'Required. A text string of a Microsoft Excel expression that evaluates to a set defined by the CUBESET function. Set can also be the CUBESET function, or a reference to a cell that contains the CUBESET function.' },
         },
     },
     CUBEVALUE: {
@@ -105,12 +113,12 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/cubevalue-function-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
+                url: 'https://support.microsoft.com/en-us/excel/functions/cubevalue-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            connection: { name: 'Connection', detail: 'Required. A text string of the name of the connection to the cube.' },
+            memberExpression: { name: 'Member_expression', detail: 'Optional. A text string of a multidimensional expression (MDX) that evaluates to a member or tuple within the cube. Alternatively, member_expression can be a set defined with the CUBESET function. Use member_expression as a slicer to define the portion of the cube for which the aggregated value is returned. If no measure is specified in member_expression, the default measure for that cube is used.' },
         },
     },
 };

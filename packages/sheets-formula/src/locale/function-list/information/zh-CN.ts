@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/cell-%E5%87%BD%E6%95%B0-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/error-type-%E5%87%BD%E6%95%B0-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -50,51 +50,50 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/info-%E5%87%BD%E6%95%B0-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            typeText: { name: '类型文本', detail: '指定要返回的信息类型的文本。' },
         },
     },
     ISBETWEEN: {
-        description: '检查所提供的数值是否介于其他两个数字之间',
-        abstract: '检查所提供的数值是否介于其他两个数字之间',
+        description: '检查所提供的数值是否介于其他两个数字之间（含端值，还是不含端值）。',
+        abstract: '检查所提供的数值是否介于其他两个数字之间（含端值，还是不含端值）。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hans&sjid=7730820672019533290-AP',
+                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hans',
             },
         ],
         functionParameter: {
-            valueToCompare: { name: '比较值', detail: '要测试的值，看是否介于“最小值”和“最大值”之间。' },
-            lowerValue: { name: '最小值', detail: '范围的下限值，“比较值”的值可能落入这个范围内。' },
-            upperValue: { name: '最大值', detail: '范围的上限值，“比较值”的值可能落入这个范围内。' },
-            lowerValueIsInclusive: { name: '包括最小值', detail: '用于指定值的范围是否包含“最小值”。默认情况下为“TRUE”。' },
-            upperValueIsInclusive: { name: '包括最大值', detail: '用于指定值的范围是否包含“最大值”。默认情况下为“TRUE”。' },
+            valueToCompare: { name: '比较值', detail: '要测试的值，看是否介于“lower_value”和“upper_value”之间。' },
+            lowerValue: { name: '最小值', detail: '范围的下限值，“value_to_compare”的值可能落入这个范围内。' },
+            upperValue: { name: '最大值', detail: '范围的上限值，“value_to_compare”的值可能落入这个范围内。' },
+            lowerValueIsInclusive: { name: '包括最小值', detail: '用于指定值的范围是否包含“lower_value”。默认情况下为“TRUE”' },
+            upperValueIsInclusive: { name: '包括最大值', detail: '用于指定值的范围是否包含“upper_value”。默认情况下为“TRUE”' },
         },
     },
     ISBLANK: {
-        description: '如果值为空，则返回 TRUE',
-        abstract: '如果值为空，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISDATE: {
-        description: '返回某个值是否为日期',
-        abstract: '返回某个值是否为日期',
+        description: 'ISDATE 函数会返回某个值是否为日期。',
+        abstract: 'ISDATE 函数会返回某个值是否为日期。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.google.com/docs/answer/9061381?hl=zh-Hans&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9061381?hl=zh-Hans',
             },
         ],
         functionParameter: {
@@ -102,12 +101,12 @@ const locale: typeof enUS = {
         },
     },
     ISEMAIL: {
-        description: '检查输入的值是否为有效的电子邮件地址',
-        abstract: '检查输入的值是否为有效的电子邮件地址',
+        description: '如需检查某个值是否为有效的邮箱，请使用 ISEMAIL 函数。此函数会检查该值是否符合常见的邮箱格式，但不会验证该地址是否实际存在。',
+        abstract: '如需检查某个值是否为有效的邮箱，请使用 ISEMAIL 函数。此函数会检查该值是否符合常见的邮箱格式，但不会验证该地址是否实际存在。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hans&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hans',
             },
         ],
         functionParameter: {
@@ -115,29 +114,29 @@ const locale: typeof enUS = {
         },
     },
     ISERR: {
-        description: '如果值为除 #N/A 以外的任何错误值，则返回 TRUE',
-        abstract: '如果值为除 #N/A 以外的任何错误值，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISERROR: {
-        description: '如果值为任何错误值，则返回 TRUE',
-        abstract: '如果值为任何错误值，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISEVEN: {
@@ -146,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/iseven-%E5%87%BD%E6%95%B0-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
@@ -159,7 +158,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/isformula-%E5%87%BD%E6%95%B0-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
@@ -167,55 +166,55 @@ const locale: typeof enUS = {
         },
     },
     ISLOGICAL: {
-        description: '如果值为逻辑值，则返回 TRUE',
-        abstract: '如果值为逻辑值，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISNA: {
-        description: '如果值为错误值 #N/A，则返回 TRUE',
-        abstract: '如果值为错误值 #N/A，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISNONTEXT: {
-        description: '如果值不是文本，则返回 TRUE',
-        abstract: '如果值不是文本，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISNUMBER: {
-        description: '如果值为数字，则返回 TRUE',
-        abstract: '如果值为数字，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISODD: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/isodd-%E5%87%BD%E6%95%B0-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -237,47 +236,46 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/isomitted-%E5%87%BD%E6%95%B0-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            argument: { name: '参数', detail: '要检查是否被省略的值，例如 LAMBDA 参数。' },
         },
     },
     ISREF: {
-        description: '如果值为引用值，则返回 TRUE',
-        abstract: '如果值为引用值，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISTEXT: {
-        description: '如果值为文本，则返回 TRUE',
-        abstract: '如果值为文本，则返回 TRUE',
+        description: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
+        abstract: '这些函数统称为 IS 函数，此类函数可检验指定值并根据结果返回 TRUE 或 FALSE。 例如，如果参数 value 引用的是空单元格，则 ISBLANK 函数返回逻辑值 TRUE；否则，返回 FALSE。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '必填。 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISURL: {
-        description: '检查某个值是否为有效网址',
-        abstract: '检查某个值是否为有效网址',
+        description: '检查某个值是否为有效网址。',
+        abstract: '检查某个值是否为有效网址。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hans&sjid=7312884847858065932-AP',
+                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hans',
             },
         ],
         functionParameter: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/n-%E5%87%BD%E6%95%B0-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/na-%E5%87%BD%E6%95%B0-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -315,7 +313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/sheet-%E5%87%BD%E6%95%B0-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -328,7 +326,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/sheets-%E5%87%BD%E6%95%B0-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -340,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/type-%E5%87%BD%E6%95%B0-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/zh-cn/excel/functions/type-function',
             },
         ],
         functionParameter: {

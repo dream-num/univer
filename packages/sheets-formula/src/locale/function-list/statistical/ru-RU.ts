@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%BE%D1%82%D0%BA%D0%BB-58fe8d65-2a84-4dc7-8052-f3f87b5c6639',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/avedev-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%80%D0%B7%D0%BD%D0%B0%D1%87-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%B7%D0%BD%D0%B0%D1%87-047bac88-d466-426c-a32b-8f33eb960cf6',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/average-function',
             },
         ],
         functionParameter: {
@@ -52,19 +52,19 @@ const locale: typeof enUS = {
         },
     },
     AVERAGE_WEIGHTED: {
-        description: 'Находит средневзвешенное значение набора значений по заданным значениям и соответствующим весам',
-        abstract: 'Находит средневзвешенное значение набора значений по заданным значениям и соответствующим весам',
+        description: 'Функция AVERAGE.WEIGHTED вычисляет средневзвешенное значение набора величин с учетом соответствующих весов.',
+        abstract: 'Функция AVERAGE.WEIGHTED вычисляет средневзвешенное значение набора величин с учетом соответствующих весов.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/9084098?hl=ru&ref_topic=3105600&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9084098?hl=ru',
             },
         ],
         functionParameter: {
-            values: { name: 'значения', detail: 'Значения для расчета среднего.' },
-            weights: { name: 'взвешенные', detail: 'Список соответствующих взвешенных величин, которые необходимо применить.' },
-            additionalValues: { name: 'дополнительные значения', detail: 'Дополнительные значения для расчета среднего.' },
-            additionalWeights: { name: 'дополнительные взвешенные', detail: 'Дополнительные взвешенные, которые необходимо применить.' },
+            values: { name: 'значения', detail: 'Значения для расчета среднего. Значения или диапазон ячеек.' },
+            weights: { name: 'взвешенные', detail: 'Список соответствующих взвешенных величин, которые необходимо применить. Взвешенные или диапазон ячеек. Взвешенные не могут быть отрицательными числами. Допустимо значение 0. Хотя бы одно из взвешенных должно быть положительным числом. Диапазон ячеек должен содержать столько же строк и столбцов, сколько содержится в диапазоне значений.' },
+            additionalValues: { name: 'дополнительные значения', detail: 'Дополнительные значения для расчета среднего. Дополнительные значения указывать необязательно.' },
+            additionalWeights: { name: 'дополнительные взвешенные', detail: 'Дополнительные взвешенные, которые необходимо применить. Дополнительные взвешенные указывать необязательно, но каждому дополнительному_значению должно соответствовать одно дополнительное_взвешенное .' },
         },
     },
     AVERAGEA: {
@@ -73,7 +73,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%B7%D0%BD%D0%B0%D1%87%D0%B0-f5f84098-d453-4f4c-bbba-3d2c66356091',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/averagea-function',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D1%81%D0%BB%D0%B8-faec8e2e-0dec-4308-af69-f5576d8ac642',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/averageif-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%80%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D1%81%D0%BB%D0%B8%D0%BC%D0%BD-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D1%81%D0%BB%D0%B8%D0%BC%D0%BD-48910c45-1fc0-4389-a028-f7c5c3001690',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/averageifs-function',
             },
         ],
         functionParameter: {
@@ -125,7 +125,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B5%D1%82%D0%B0-%D1%80%D0%B0%D1%81%D0%BF-11188c9c-780a-42c7-ba43-9ecb5a878d31',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/beta-dist-function',
             },
         ],
         functionParameter: {
@@ -143,7 +143,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B5%D1%82%D0%B0-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B5%D1%82%D0%B0-%D0%BE%D0%B1%D1%80-e84cb8aa-8df0-4cf6-9892-83a341d252eb',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/beta-inv-function',
             },
         ],
         functionParameter: {
@@ -160,7 +160,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-c5ae37b6-f39c-4be2-94c2-509a1480770c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/binom-dist-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-%D0%B4%D0%B8%D0%B0%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-%D0%B4%D0%B8%D0%B0%D0%BF-17331329-74c7-4053-bb4c-6653a7421595',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/binom-dist-range-function',
             },
         ],
         functionParameter: {
@@ -192,7 +192,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D0%BE%D0%B1%D1%80-80a0370c-ada6-49b4-83e7-05a91ba77ac9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/binom-inv-function',
             },
         ],
         functionParameter: {
@@ -207,7 +207,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%85%D0%B82-%D1%80%D0%B0%D1%81%D0%BF-8486b05e-5c05-4942-a9ea-f6b341518732',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/chisq-dist-function',
             },
         ],
         functionParameter: {
@@ -222,7 +222,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%85%D0%B82-%D1%80%D0%B0%D1%81%D0%BF-%D0%BF%D1%85-dc4832e8-ed2b-49ae-8d7c-b28d5804c0f2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/chisq-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -236,7 +236,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%85%D0%B82-%D0%BE%D0%B1%D1%80-400db556-62b3-472d-80b3-254723e7092f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/chisq-inv-function',
             },
         ],
         functionParameter: {
@@ -250,7 +250,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%85%D0%B82-%D0%BE%D0%B1%D1%80-%D0%BF%D1%85-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%85%D0%B82-%D0%BE%D0%B1%D1%80-%D0%BF%D1%85-435b5ed8-98d5-4da6-823f-293e2cbc94fe',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/chisq-inv-rt-function',
             },
         ],
         functionParameter: {
@@ -264,7 +264,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%85%D0%B82-%D1%82%D0%B5%D1%81%D1%82-2e8a7861-b14a-4985-aa93-fb88de3f260f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/chisq-test-function',
             },
         ],
         functionParameter: {
@@ -278,7 +278,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%BE%D0%B2%D0%B5%D1%80%D0%B8%D1%82-%D0%BD%D0%BE%D1%80%D0%BC-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D0%B2%D0%B5%D1%80%D0%B8%D1%82-%D0%BD%D0%BE%D1%80%D0%BC-7cec58a6-85bb-488d-91c3-63828d4fbfd4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/confidence-norm-function',
             },
         ],
         functionParameter: {
@@ -293,7 +293,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%BE%D0%B2%D0%B5%D1%80%D0%B8%D1%82-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-e8eca395-6c3a-4ba9-9003-79ccc61d3c53',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/confidence-t-function',
             },
         ],
         functionParameter: {
@@ -308,7 +308,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D1%80%D1%80%D0%B5%D0%BB-995dcef7-0c0a-4bed-a3fb-239d7b68ca92',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/correl-function',
             },
         ],
         functionParameter: {
@@ -322,7 +322,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%87%D1%91%D1%82-a59cd7fc-b623-4d93-87a4-d23bf411294c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/count-function',
             },
         ],
         functionParameter: {
@@ -342,17 +342,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%87%D1%91%D1%82%D0%B7-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%87%D1%91%D1%82%D0%B7-7dc98875-d5c1-46f1-9a82-53f3219e2509',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/counta-function',
             },
         ],
         functionParameter: {
-            number1: {
+            value1: {
                 name: 'значение1',
-                detail: 'Первый аргумент, представляющий значения, количество которые требуется подсчитать.',
+                detail: 'первое число, ссылка на ячейку или диапазон, для которого требуется вычислить среднее значение.',
             },
-            number2: {
+            value2: {
                 name: 'значение2',
-                detail: 'Дополнительные аргументы, представляющие значения, количество которых требуется подсчитать. Аргументов может быть не более 255.',
+                detail: 'Дополнительные числа, ссылки на ячейки или диапазоны, для которых необходимо вычислить среднее значение, максимум до 255.',
             },
         },
     },
@@ -362,7 +362,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%87%D0%B8%D1%82%D0%B0%D1%82%D1%8C%D0%BF%D1%83%D1%81%D1%82%D0%BE%D1%82%D1%8B-6a92d772-675c-4bee-b346-24af6bd3ac22',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/countblank-function',
             },
         ],
         functionParameter: {
@@ -375,7 +375,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%87%D1%91%D1%82%D0%B5%D1%81%D0%BB%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%87%D1%91%D1%82%D0%B5%D1%81%D0%BB%D0%B8-e0de10c6-f885-4e71-abb4-1f464816df34',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/use-the-countif-function-in-microsoft-excel',
             },
         ],
         functionParameter: {
@@ -389,7 +389,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%87%D1%91%D1%82%D0%B5%D1%81%D0%BB%D0%B8%D0%BC%D0%BD-dda3dc6e-f74e-4aee-88bc-aa8c2a866842',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/countifs-function',
             },
         ],
         functionParameter: {
@@ -405,7 +405,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BA%D0%BE%D0%B2%D0%B0%D1%80%D0%B8%D0%B0%D1%86%D0%B8%D1%8F-%D0%B3-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D0%B2%D0%B0%D1%80%D0%B8%D0%B0%D1%86%D0%B8%D1%8F-%D0%B3-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/covariance-p-function',
             },
         ],
         functionParameter: {
@@ -419,7 +419,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BA%D0%BE%D0%B2%D0%B0%D1%80%D0%B8%D0%B0%D1%86%D0%B8%D1%8F-%D0%B2-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D0%B2%D0%B0%D1%80%D0%B8%D0%B0%D1%86%D0%B8%D1%8F-%D0%B2-0a539b74-7371-42aa-a18f-1f5320314977',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/covariance-s-function',
             },
         ],
         functionParameter: {
@@ -433,7 +433,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%B2%D0%B0%D0%B4%D1%80%D0%BE%D1%82%D0%BA%D0%BB-8b739616-8376-4df5-8bd0-cfe0a6caf444',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/devsq-function',
             },
         ],
         functionParameter: {
@@ -447,7 +447,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%8D%D0%BA%D1%81%D0%BF-%D1%80%D0%B0%D1%81%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%8D%D0%BA%D1%81%D0%BF-%D1%80%D0%B0%D1%81%D0%BF-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/expon-dist-function',
             },
         ],
         functionParameter: {
@@ -462,7 +462,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/f-%D1%80%D0%B0%D1%81%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-f-%D1%80%D0%B0%D1%81%D0%BF-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/f-dist-function',
             },
         ],
         functionParameter: {
@@ -478,7 +478,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/f-%D1%80%D0%B0%D1%81%D0%BF-%D0%BF%D1%85-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-f-%D1%80%D0%B0%D1%81%D0%BF-%D0%BF%D1%85-d74cbb00-6017-4ac9-b7d7-6049badc0520',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/f-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -493,7 +493,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/f-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-f-%D0%BE%D0%B1%D1%80-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/f-inv-function',
             },
         ],
         functionParameter: {
@@ -508,7 +508,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/f-%D0%BE%D0%B1%D1%80-%D0%BF%D1%85-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-f-%D0%BE%D0%B1%D1%80-%D0%BF%D1%85-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/f-inv-rt-function',
             },
         ],
         functionParameter: {
@@ -523,7 +523,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-f-%D1%82%D0%B5%D1%81%D1%82-100a59e7-4108-46f8-8443-78ffacb6c0a7',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/f-test-function',
             },
         ],
         functionParameter: {
@@ -537,7 +537,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84%D0%B8%D1%88%D0%B5%D1%80-d656523c-5076-4f95-b87b-7741bf236c69',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/fisher-function',
             },
         ],
         functionParameter: {
@@ -550,7 +550,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84%D0%B8%D1%88%D0%B5%D1%80%D0%BE%D0%B1%D1%80-62504b39-415a-4284-a285-19c8e82f86bb',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/fisherinv-function',
             },
         ],
         functionParameter: {
@@ -563,7 +563,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8-forecast-%D0%B8-forecast-linear-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/forecast-and-forecast-linear-functions',
             },
         ],
         functionParameter: {
@@ -578,12 +578,16 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%B5%D0%B4%D1%81%D0%BA%D0%B0%D0%B7-ets-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%B5%D0%B4%D1%81%D0%BA%D0%B0%D0%B7-ets-15389b8b-677e-4fbd-bd95-21d464333f41',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/forecast-ets-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'число1', detail: 'первое' },
-            number2: { name: 'число2', detail: 'второе' },
+            targetDate: { name: 'Целевая дата', detail: 'Точка данных, для которой требуется спрогнозировать значение.' },
+            values: { name: 'Значения', detail: 'Исторические значения, используемые для прогноза.' },
+            timeline: { name: 'Временная шкала', detail: 'Независимый диапазон или массив числовых дат либо времени с постоянным шагом.' },
+            seasonality: { name: 'Сезонность', detail: 'Необязательно. 1 — автоопределение, 0 — без сезонности.' },
+            dataCompletion: { name: 'Заполнение данных', detail: 'Необязательно. 1 интерполирует пропуски, 0 считает их нулевыми.' },
+            aggregation: { name: 'Агрегация', detail: 'Необязательно. Значение от 1 до 7 задает агрегацию повторяющихся меток времени.' },
         },
     },
     FORECAST_ETS_CONFINT: {
@@ -592,12 +596,17 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/forecast-ets-confint-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'число1', detail: 'первое' },
-            number2: { name: 'число2', detail: 'второе' },
+            targetDate: { name: 'Целевая дата', detail: 'Точка данных, для которой требуется спрогнозировать значение.' },
+            values: { name: 'Значения', detail: 'Исторические значения, используемые для прогноза.' },
+            timeline: { name: 'Временная шкала', detail: 'Независимый диапазон или массив числовых дат либо времени с постоянным шагом.' },
+            confidenceLevel: { name: 'Уровень доверия', detail: 'Необязательно. Число от 0 до 1; по умолчанию 0,95.' },
+            seasonality: { name: 'Сезонность', detail: 'Необязательно. 1 — автоопределение, 0 — без сезонности.' },
+            dataCompletion: { name: 'Заполнение данных', detail: 'Необязательно. 1 интерполирует пропуски, 0 считает их нулевыми.' },
+            aggregation: { name: 'Агрегация', detail: 'Необязательно. Значение от 1 до 7 задает агрегацию повторяющихся меток времени.' },
         },
     },
     FORECAST_ETS_SEASONALITY: {
@@ -606,12 +615,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%B5%D0%B4%D1%81%D0%BA%D0%B0%D0%B7-ets-%D1%81%D0%B5%D0%B7%D0%BE%D0%BD%D0%BD%D0%BE%D1%81%D1%82%D1%8C-32a27a3b-d22f-42ce-8c5d-ef3649269f3c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/forecast-ets-seasonality-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'число1', detail: 'первое' },
-            number2: { name: 'число2', detail: 'второе' },
+            values: { name: 'Значения', detail: 'Исторические значения, используемые для прогноза.' },
+            timeline: { name: 'Временная шкала', detail: 'Независимый диапазон или массив числовых дат либо времени с постоянным шагом.' },
+            dataCompletion: { name: 'Заполнение данных', detail: 'Необязательно. 1 интерполирует пропуски, 0 считает их нулевыми.' },
+            aggregation: { name: 'Агрегация', detail: 'Необязательно. Значение от 1 до 7 задает агрегацию повторяющихся меток времени.' },
         },
     },
     FORECAST_ETS_STAT: {
@@ -620,12 +631,16 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%B5%D0%B4%D1%81%D0%BA%D0%B0%D0%B7-ets-%D1%81%D1%82%D0%B0%D1%82-60f2ae14-d0cf-465e-9736-625ccaaa60b4',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/forecast-ets-stat-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'число1', detail: 'первое' },
-            number2: { name: 'число2', detail: 'второе' },
+            values: { name: 'Значения', detail: 'Исторические значения, используемые для прогноза.' },
+            timeline: { name: 'Временная шкала', detail: 'Независимый диапазон или массив числовых дат либо времени с постоянным шагом.' },
+            statisticType: { name: 'Тип статистики', detail: 'Значение от 1 до 8 задает возвращаемую статистику прогноза.' },
+            seasonality: { name: 'Сезонность', detail: 'Необязательно. 1 — автоопределение, 0 — без сезонности.' },
+            dataCompletion: { name: 'Заполнение данных', detail: 'Необязательно. 1 интерполирует пропуски, 0 считает их нулевыми.' },
+            aggregation: { name: 'Агрегация', detail: 'Необязательно. Значение от 1 до 7 задает агрегацию повторяющихся меток времени.' },
         },
     },
     FORECAST_LINEAR: {
@@ -634,7 +649,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/forecast-and-forecast-linear-functions',
             },
         ],
         functionParameter: {
@@ -649,7 +664,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82%D0%B0-44e3be2b-eca0-42cd-a3f7-fd9ea898fdb9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/frequency-function',
             },
         ],
         functionParameter: {
@@ -663,7 +678,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0-ce1702b1-cf55-471d-8307-f83be0fc5297',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gamma-function',
             },
         ],
         functionParameter: {
@@ -676,7 +691,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0-%D1%80%D0%B0%D1%81%D0%BF-9b6f1538-d11c-4d5f-8966-21f6a2201def',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gamma-dist-function',
             },
         ],
         functionParameter: {
@@ -692,7 +707,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0-%D0%BE%D0%B1%D1%80-74991443-c2b0-4be5-aaab-1aa4d71fbb18',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gamma-inv-function',
             },
         ],
         functionParameter: {
@@ -707,7 +722,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0%D0%BD%D0%BB%D0%BE%D0%B3-b838c48b-c65f-484f-9e1d-141c55470eb9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gammaln-function',
             },
         ],
         functionParameter: {
@@ -720,7 +735,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0%D0%BD%D0%BB%D0%BE%D0%B3-%D1%82%D0%BE%D1%87%D0%BD-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B0%D0%BC%D0%BC%D0%B0%D0%BD%D0%BB%D0%BE%D0%B3-%D1%82%D0%BE%D1%87%D0%BD-5cdfe601-4e1e-4189-9d74-241ef1caa599',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gammaln-precise-function',
             },
         ],
         functionParameter: {
@@ -733,7 +748,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B3%D0%B0%D1%83%D1%81%D1%81-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B0%D1%83%D1%81%D1%81-069f1b4e-7dee-4d6a-a71f-4b69044a6b33',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/gauss-function',
             },
         ],
         functionParameter: {
@@ -746,7 +761,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%B3%D0%B5%D0%BE%D0%BC-db1ac48d-25a5-40a0-ab83-0b38980e40d5',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/geomean-function',
             },
         ],
         functionParameter: {
@@ -760,7 +775,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D0%BE%D1%81%D1%82-541a91dc-3d5e-437d-b156-21324e68b80d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/growth-function',
             },
         ],
         functionParameter: {
@@ -776,7 +791,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%80%D0%B3%D0%B0%D1%80%D0%BC-5efd9184-fab5-42f9-b1d3-57883a1d3bc6',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/harmean-function',
             },
         ],
         functionParameter: {
@@ -790,7 +805,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B3%D0%B8%D0%BF%D0%B5%D1%80%D0%B3%D0%B5%D0%BE%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-6dbd547f-1d12-4b1f-8ae5-b0d9e3d22fbf',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/hypgeom-dist-function',
             },
         ],
         functionParameter: {
@@ -807,7 +822,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BE%D1%82%D1%80%D0%B5%D0%B7%D0%BE%D0%BA-2a9b74e2-9d47-4772-b663-3bca70bf63ef',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/intercept-function',
             },
         ],
         functionParameter: {
@@ -821,7 +836,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%8D%D0%BA%D1%81%D1%86%D0%B5%D1%81%D1%81-bc3a265c-5da4-4dcb-b7fd-c237789095ab',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/kurt-function',
             },
         ],
         functionParameter: {
@@ -835,7 +850,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%B0%D0%B8%D0%B1%D0%BE%D0%BB%D1%8C%D1%88%D0%B8%D0%B9-3af0af19-1190-42bb-bb8b-01672ec00a64',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/large-function',
             },
         ],
         functionParameter: {
@@ -849,7 +864,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BB%D0%B8%D0%BD%D0%B5%D0%B9%D0%BD-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/linest-function',
             },
         ],
         functionParameter: {
@@ -865,7 +880,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BB%D0%B3%D1%80%D1%84%D0%BF%D1%80%D0%B8%D0%B1%D0%BB-f27462d8-3657-4030-866b-a272c1d18b4b',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/logest-function',
             },
         ],
         functionParameter: {
@@ -881,7 +896,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BB%D0%BE%D0%B3%D0%BD%D0%BE%D1%80%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BB%D0%BE%D0%B3%D0%BD%D0%BE%D1%80%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-eb60d00b-48a9-4217-be2b-6074aee6b070',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/lognorm-dist-function',
             },
         ],
         functionParameter: {
@@ -897,7 +912,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BB%D0%BE%D0%B3%D0%BD%D0%BE%D1%80%D0%BC-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BB%D0%BE%D0%B3%D0%BD%D0%BE%D1%80%D0%BC-%D0%BE%D0%B1%D1%80-fe79751a-f1f2-4af8-a0a1-e151b2d4f600',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/lognorm-inv-function',
             },
         ],
         functionParameter: {
@@ -907,16 +922,16 @@ const locale: typeof enUS = {
         },
     },
     MARGINOFERROR: {
-        description: 'Рассчитывает предельную погрешность исходя из диапазона значений и уровня доверия',
-        abstract: 'Рассчитывает предельную погрешность исходя из диапазона значений и уровня доверия',
+        description: 'Эта функция рассчитывает предельную погрешность исходя из диапазона значений и уровня доверия.',
+        abstract: 'Эта функция рассчитывает предельную погрешность исходя из диапазона значений и уровня доверия.',
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.google.com/docs/answer/12487850?hl=ru&sjid=11250989209896695200-AP',
+                url: 'https://support.google.com/docs/answer/12487850?hl=ru',
             },
         ],
         functionParameter: {
-            range: { name: 'диапазон', detail: 'Диапазон значений, который используется для расчета предельной погрешности.' },
+            range: { name: 'диапазон', detail: 'MARGINOFERROR(A1:C3, 0,99)' },
             confidence: { name: 'доверие', detail: 'Нужный уровень доверия в интервале от 0 до 1.' },
         },
     },
@@ -926,7 +941,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B0%D0%BA%D1%81-e0012414-9ac8-4b34-9a47-73e662c08098',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/max-function',
             },
         ],
         functionParameter: {
@@ -946,7 +961,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B0%D0%BA%D1%81%D0%B0-814bda1e-3840-4bff-9365-2f59ac2ee62d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/maxa-function',
             },
         ],
         functionParameter: {
@@ -960,7 +975,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%B0%D0%BA%D1%81%D0%B5%D1%81%D0%BB%D0%B8-dfd611e6-da2c-488a-919b-9b6376b28883',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/maxifs-function',
             },
         ],
         functionParameter: {
@@ -977,7 +992,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B5%D0%B4%D0%B8%D0%B0%D0%BD%D0%B0-d0916313-4753-414c-8537-ce85bdd967d2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/median-function',
             },
         ],
         functionParameter: {
@@ -991,7 +1006,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B8%D0%BD-61635d12-920f-4ce2-a70f-96f202dcc152',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/min-function',
             },
         ],
         functionParameter: {
@@ -1011,7 +1026,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B8%D0%BD%D0%B0-245a6f46-7ca5-4dc7-ab49-805341bc31d3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/mina-function',
             },
         ],
         functionParameter: {
@@ -1025,7 +1040,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%B8%D0%BD%D0%B5%D1%81%D0%BB%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%B8%D0%BD%D0%B5%D1%81%D0%BB%D0%B8-6ca1ddaa-079b-4e74-80cc-72eef32e6599',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/minifs-function',
             },
         ],
         functionParameter: {
@@ -1042,7 +1057,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BC%D0%BE%D0%B4%D0%B0-%D0%BD%D1%81%D0%BA-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BC%D0%BE%D0%B4%D0%B0-%D0%BD%D1%81%D0%BA-50fd9464-b2ba-4191-b57a-39446689ae8c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/mode-mult-function',
             },
         ],
         functionParameter: {
@@ -1056,7 +1071,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/mode-sngl-function-f1267c16-66c6-4386-959f-8fba5f8bb7f8',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/mode-sngl-function',
             },
         ],
         functionParameter: {
@@ -1070,7 +1085,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BE%D1%82%D1%80%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BE%D1%82%D1%80%D0%B1%D0%B8%D0%BD%D0%BE%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-c8239f89-c2d0-45bd-b6af-172e570f8599',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/negbinom-dist-function',
             },
         ],
         functionParameter: {
@@ -1086,7 +1101,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D1%80%D0%BC-%D1%80%D0%B0%D1%81%D0%BF-edb1cc14-a21c-4e53-839d-8082074c9f8d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/norm-dist-function',
             },
         ],
         functionParameter: {
@@ -1102,7 +1117,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D1%80%D0%BC-%D0%BE%D0%B1%D1%80-54b30935-fee7-493c-bedb-2278a9db7e13',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/norm-inv-function',
             },
         ],
         functionParameter: {
@@ -1117,7 +1132,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D1%80%D0%BC-%D1%81%D1%82-%D1%80%D0%B0%D1%81%D0%BF-1e787282-3832-4520-a9ae-bd2a8d99ba88',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/norm-s-dist-function',
             },
         ],
         functionParameter: {
@@ -1131,7 +1146,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BD%D0%BE%D1%80%D0%BC-%D1%81%D1%82-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D1%80%D0%BC-%D1%81%D1%82-%D0%BE%D0%B1%D1%80-d6d556b4-ab7f-49cd-b526-5a20918452b1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/norm-s-inv-function',
             },
         ],
         functionParameter: {
@@ -1144,7 +1159,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%B8%D1%80%D1%81%D0%BE%D0%BD-0c3e30fc-e5af-49c4-808a-3ef66e034c18',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/pearson-function',
             },
         ],
         functionParameter: {
@@ -1158,7 +1173,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8C-%D0%B8%D1%81%D0%BA%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8C-%D0%B8%D1%81%D0%BA%D0%BB-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/percentile-exc-function',
             },
         ],
         functionParameter: {
@@ -1172,7 +1187,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8C-%D0%B2%D0%BA%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8C-%D0%B2%D0%BA%D0%BB-680f9539-45eb-410b-9a5e-c1355e5fe2ed',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/percentile-inc-function',
             },
         ],
         functionParameter: {
@@ -1186,7 +1201,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BD%D0%B3-%D0%B8%D1%81%D0%BA%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BD%D0%B3-%D0%B8%D1%81%D0%BA%D0%BB-d8afee96-b7e2-4a2f-8c01-8fcdedaa6314',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/percentrank-exc-function',
             },
         ],
         functionParameter: {
@@ -1201,7 +1216,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BD%D0%B3-%D0%B2%D0%BA%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BD%D0%B3-%D0%B2%D0%BA%D0%BB-149592c9-00c0-49ba-86c1-c1f45b80463a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/percentrank-inc-function',
             },
         ],
         functionParameter: {
@@ -1216,7 +1231,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82-3bd1cb9a-2880-41ab-a197-f246a7a602d3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/permut-function',
             },
         ],
         functionParameter: {
@@ -1230,7 +1245,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82%D0%B0-6c7d7fdc-d657-44e6-aa19-2857b25cae4e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/permutationa-function',
             },
         ],
         functionParameter: {
@@ -1244,7 +1259,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D0%B8-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%84%D0%B8-23e49bc6-a8e8-402d-98d3-9ded87f6295c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/phi-function',
             },
         ],
         functionParameter: {
@@ -1257,7 +1272,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/poisson-dist-function-8fe148ff-39a2-46cb-abf3-7772695d9636',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/poisson-dist-function',
             },
         ],
         functionParameter: {
@@ -1272,7 +1287,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D0%B5%D1%80%D0%BE%D1%8F%D1%82%D0%BD%D0%BE%D1%81%D1%82%D1%8C-9ac30561-c81c-4259-8253-34f0a238fc49',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/prob-function',
             },
         ],
         functionParameter: {
@@ -1288,7 +1303,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D0%BB%D1%8C-%D0%B8%D1%81%D0%BA%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D0%BB%D1%8C-%D0%B8%D1%81%D0%BA%D0%BB-5a355b7a-840b-4a01-b0f1-f538c2864cad',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/quartile-exc-function',
             },
         ],
         functionParameter: {
@@ -1302,7 +1317,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D0%BB%D1%8C-%D0%B2%D0%BA%D0%BB-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D0%BB%D1%8C-%D0%B2%D0%BA%D0%BB-1bbacc80-5075-42f1-aed6-47d735c4819d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/quartile-inc-function',
             },
         ],
         functionParameter: {
@@ -1316,7 +1331,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%80%D0%B0%D0%BD%D0%B3-%D1%81%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%80%D0%B0%D0%BD%D0%B3-%D1%81%D1%80-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rank-avg-function',
             },
         ],
         functionParameter: {
@@ -1331,7 +1346,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/rank-eq-function-284858ce-8ef6-450e-b662-26245be04a40',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rank-eq-function',
             },
         ],
         functionParameter: {
@@ -1346,12 +1361,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA%D0%B2%D0%BF%D0%B8%D1%80%D1%81%D0%BE%D0%BD-d7161715-250d-4a01-b80d-a8364f2be08f',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/rsq-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'массив1', detail: 'Зависимый массив или интервал данных.' },
-            array2: { name: 'массив2', detail: 'Независимый массив или интервал данных.' },
+            knownYs: { name: 'известные значения Y', detail: 'Зависимый массив или интервал данных.' },
+            knownXs: { name: 'известные значения X', detail: 'Независимый массив или интервал данных.' },
         },
     },
     SKEW: {
@@ -1360,7 +1375,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%BA%D0%BE%D1%81-bdf49d86-b1ef-4804-a046-28eaea69c9fa',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/skew-function',
             },
         ],
         functionParameter: {
@@ -1374,7 +1389,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D0%BA%D0%BE%D1%81-%D0%B3-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D0%BA%D0%BE%D1%81-%D0%B3-76530a5c-99b9-48a1-8392-26632d542fcb',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/skew-p-function',
             },
         ],
         functionParameter: {
@@ -1388,7 +1403,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%B0%D0%BA%D0%BB%D0%BE%D0%BD-11fb8f97-3117-4813-98aa-61d7e01276b9',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/slope-function',
             },
         ],
         functionParameter: {
@@ -1402,7 +1417,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%B0%D0%B8%D0%BC%D0%B5%D0%BD%D1%8C%D1%88%D0%B8%D0%B9-17da8222-7c82-42b2-961b-14c45384df07',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/small-function',
             },
         ],
         functionParameter: {
@@ -1416,7 +1431,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%BD%D0%BE%D1%80%D0%BC%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-81d66554-2d54-40ec-ba83-6437108ee775',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/standardize-function',
             },
         ],
         functionParameter: {
@@ -1431,7 +1446,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD-%D0%B3-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD-%D0%B3-6e917c05-31a0-496f-ade7-4f4e7462f285',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/stdev-p-function',
             },
         ],
         functionParameter: {
@@ -1445,7 +1460,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD-%D0%B2-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD-%D0%B2-7d69cf97-0c1f-4acf-be27-f3e83904cc23',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/stdev-s-function',
             },
         ],
         functionParameter: {
@@ -1459,7 +1474,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD%D0%B0-5ff38888-7ea5-48de-9a6d-11ed73b29e9d',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/stdeva-function',
             },
         ],
         functionParameter: {
@@ -1473,7 +1488,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD%D0%BF%D0%B0-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D0%BE%D1%82%D0%BA%D0%BB%D0%BE%D0%BD%D0%BF%D0%B0-5578d4d6-455a-4308-9991-d405afe2c28c',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/stdevpa-function',
             },
         ],
         functionParameter: {
@@ -1487,7 +1502,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D0%BE%D1%88yx-6ce74b2c-449d-4a6e-b9ac-f9cef5ba48ab',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/steyx-function',
             },
         ],
         functionParameter: {
@@ -1501,7 +1516,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D1%80%D0%B0%D1%81%D0%BF-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D1%80%D0%B0%D1%81%D0%BF-4329459f-ae91-48c2-bba8-1ead1c6c21b2',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/t-dist-function',
             },
         ],
         functionParameter: {
@@ -1516,7 +1531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D1%80%D0%B0%D1%81%D0%BF-2%D1%85-198e9340-e360-4230-bd21-f52f22ff5c28',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/t-dist-2t-function',
             },
         ],
         functionParameter: {
@@ -1530,7 +1545,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D1%80%D0%B0%D1%81%D0%BF-%D0%BF%D1%85-20a30020-86f9-4b35-af1f-7ef6ae683eda',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/t-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -1544,7 +1559,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D0%BE%D0%B1%D1%80-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D0%BE%D0%B1%D1%80-2908272b-4e61-4942-9df9-a25fec9b0e2e',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/t-inv-function',
             },
         ],
         functionParameter: {
@@ -1558,7 +1573,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D0%BE%D0%B1%D1%80-2%D1%85-ce72ea19-ec6c-4be7-bed2-b9baf2264f17',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/t-inv-2t-function',
             },
         ],
         functionParameter: {
@@ -1572,7 +1587,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%81%D1%82%D1%8C%D1%8E%D0%B4%D0%B5%D0%BD%D1%82-%D1%82%D0%B5%D1%81%D1%82-d4e08ec3-c545-485f-962e-276f7cbed055',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/t-test-function',
             },
         ],
         functionParameter: {
@@ -1588,7 +1603,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%82%D0%B5%D0%BD%D0%B4%D0%B5%D0%BD%D1%86%D0%B8%D1%8F-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%82%D0%B5%D0%BD%D0%B4%D0%B5%D0%BD%D1%86%D0%B8%D1%8F-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/trend-function',
             },
         ],
         functionParameter: {
@@ -1604,7 +1619,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D1%83%D1%80%D0%B5%D0%B7%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D0%B5%D0%B5-d90c9878-a119-4746-88fa-63d988f511d3',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/trimmean-function',
             },
         ],
         functionParameter: {
@@ -1618,7 +1633,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%B8%D1%81%D0%BF-%D0%B3-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B8%D1%81%D0%BF-%D0%B3-73d1285c-108c-4843-ba5d-a51f90656f3a',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/var-p-function',
             },
         ],
         functionParameter: {
@@ -1632,7 +1647,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D0%B4%D0%B8%D1%81%D0%BF-%D0%B2-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B8%D1%81%D0%BF-%D0%B2-913633de-136b-449d-813e-65a00b2b990b',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/var-s-function',
             },
         ],
         functionParameter: {
@@ -1646,7 +1661,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B8%D1%81%D0%BF%D0%B0-3de77469-fa3a-47b4-85fd-81758a1e1d07',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/vara-function',
             },
         ],
         functionParameter: {
@@ -1660,7 +1675,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B4%D0%B8%D1%81%D0%BF%D1%80%D0%B0-59a62635-4e89-4fad-88ac-ce4dc0513b96',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/varpa-function',
             },
         ],
         functionParameter: {
@@ -1674,7 +1689,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-%D0%B2%D0%B5%D0%B9%D0%B1%D1%83%D0%BB%D0%BB-%D1%80%D0%B0%D1%81%D0%BF-4e783c39-9325-49be-bbc9-a83ef82b45db',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/weibull-dist-function',
             },
         ],
         functionParameter: {
@@ -1690,7 +1705,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Инструкция',
-                url: 'https://support.microsoft.com/ru-ru/office/z-%D1%82%D0%B5%D1%81%D1%82-%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D1%8F-z-%D1%82%D0%B5%D1%81%D1%82-d633d5a3-2031-4614-a016-92180ad82bee',
+                url: 'https://support.microsoft.com/ru-ru/excel/functions/z-test-function',
             },
         ],
         functionParameter: {

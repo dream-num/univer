@@ -16,6 +16,7 @@
 
 import type enUS from './en-US';
 
-const locale: typeof enUS = {};
+const locale: typeof enUS = {
+};
 
 export default locale;

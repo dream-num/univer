@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/address-%E5%87%BD%E6%95%B0-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -46,7 +46,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/areas-%E5%87%BD%E6%95%B0-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -59,7 +59,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/choose-%E5%87%BD%E6%95%B0-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -74,7 +74,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/choosecols-%E5%87%BD%E6%95%B0-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -89,7 +89,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/chooserows-%E5%87%BD%E6%95%B0-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -104,7 +104,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/column-%E5%87%BD%E6%95%B0-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -117,7 +117,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/columns-%E5%87%BD%E6%95%B0-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -130,7 +130,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/drop-%E5%87%BD%E6%95%B0-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -145,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/expand-%E5%87%BD%E6%95%B0-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -161,7 +161,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/filter-%E5%87%BD%E6%95%B0-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/formulatext-%E5%87%BD%E6%95%B0-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -184,17 +184,19 @@ const locale: typeof enUS = {
         },
     },
     GETPIVOTDATA: {
-        description: '傳回儲存在資料透視表中的資料',
-        abstract: '傳回儲存在資料透視表中的資料',
+        description: 'GETPIVOTDATA 函數會傳回樞紐分析表中的可見資料。',
+        abstract: 'GETPIVOTDATA 函數會傳回樞紐分析表中的可見資料。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/getpivotdata-%E5%87%BD%E6%95%B0-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataField: { name: 'dataField', detail: '樞紐分析表欄位名稱，該欄位包含您要擷取的資料。 這必須以引號括住。 範例： =GETPIVOTDATA (「銷售」，A3) 。 這裡，「銷售」是我們想要取得的價值欄位。 由於未指定其他欄位，GETPIVOTDATA 會回傳總銷售金額。' },
+            pivotTable: { name: 'pivotTable', detail: '這是樞紐分析表中之任何儲存格、儲存格範圍或已命名儲存格範圍的參照。 此資訊是用來判斷哪個樞紐分析表含有所要擷取的資料。 範例： =GETPIVOTDATA (「銷售」，A3) 。 這裡，A3 是樞紐分析表內的參考，並告訴公式該使用哪個樞紐分析表。' },
+            field1: { name: 'field1', detail: '這是 1 至 126 對的欄位名稱和項目名稱，用以描述所要擷取的資料。 這些配對組合可以依任意次序排列。 欄位名稱以及非日期和數字的項目名稱都必須以引號括住。 範例： =GETPIVOTDATA (「銷售」、A3、「月份」、「三月」) 。 這裡，「月份」是欄位，「Mar」是項目。 若要指定欄位中的多個項目，請將它們包圍在捲括 (例如：{“Mar”， “Apr”}) 。 若是 OLAP 樞紐分析表 ，項目可以包含維度的來源名稱，也可以包含項目的來源名稱。 OLAP 樞紐分析表的欄位和項目配對看起來可能像這樣： "[產品]","[產品].[所有產品].[食物].[烘培食物]"' },
+            item1: { name: 'item1', detail: '這是 1 至 126 對的欄位名稱和項目名稱，用以描述所要擷取的資料。 這些配對組合可以依任意次序排列。 欄位名稱以及非日期和數字的項目名稱都必須以引號括住。 範例： =GETPIVOTDATA (「銷售」、A3、「月份」、「三月」) 。 這裡，「月份」是欄位，「Mar」是項目。 若要指定欄位中的多個項目，請將它們包圍在捲括 (例如：{“Mar”， “Apr”}) 。 若是 OLAP 樞紐分析表 ，項目可以包含維度的來源名稱，也可以包含項目的來源名稱。 OLAP 樞紐分析表的欄位和項目配對看起來可能像這樣： "[產品]","[產品].[所有產品].[食物].[烘培食物]"' },
         },
     },
     HLOOKUP: {
@@ -203,7 +205,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hlookup-%E5%87%BD%E6%95%B0-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
@@ -226,26 +228,26 @@ const locale: typeof enUS = {
         },
     },
     HSTACK: {
-        description: '水平和順序追加數組以傳回較大的陣列',
-        abstract: '水平和順序追加數組以傳回較大的陣列',
+        description: '水平並按順序附加陣列，以傳回較大的陣列。',
+        abstract: '水平並按順序附加陣列，以傳回較大的陣列。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hstack-%E5%87%BD%E6%95%B0-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
-            array1: { name: '陣列', detail: '要附加的陣列。' },
-            array2: { name: '陣列', detail: '要附加的陣列。' },
+            array1: { name: '陣列', detail: '每個陣列參數的列數最大值。' },
+            array2: { name: '陣列', detail: '每個陣列參數中所有欄位的總和。' },
         },
     },
     HYPERLINK: {
-        description: '在儲存格內建立超連結',
-        abstract: '在儲存格內建立超連結',
+        description: '在儲存格內建立超連結。',
+        abstract: '在儲存格內建立超連結。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=zh-Hant',
+                url: 'https://support.google.com/docs/answer/3093313?hl=zh-Hant',
             },
         ],
         functionParameter: {
@@ -259,7 +261,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/image-%E5%87%BD%E6%95%B0-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -276,7 +278,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/index-%E5%87%BD%E6%95%B0-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -292,7 +294,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/indirect-%E5%87%BD%E6%95%B0-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -306,7 +308,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/lookup-%E5%87%BD%E6%95%B0-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -327,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/match-%E5%87%BD%E6%95%B0-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -342,7 +344,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/offset-%E5%87%BD%E6%95%B0-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -359,7 +361,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/row-%E5%87%BD%E6%95%B0-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -372,7 +374,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/rows-%E5%87%BD%E6%95%B0-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -385,12 +387,14 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/rtd-%E5%87%BD%E6%95%B0-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            progId: { name: '程式識別碼', detail: '本機安裝之 COM 自動化增益集的程式識別碼。' },
+            server: { name: '伺服器', detail: '執行增益集的伺服器名稱；本機伺服器請使用空字串。' },
+            topic1: { name: '主題 1', detail: '指定要擷取之即時資料的第一個文字。' },
+            topic2: { name: '主題 2', detail: '選用。指定即時資料的其他文字。' },
         },
     },
     SORT: {
@@ -399,7 +403,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/sort-%E5%87%BD%E6%95%B0-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -415,7 +419,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/sortby-%E5%87%BD%E6%95%B0-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -432,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/take-%E5%87%BD%E6%95%B0-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -447,7 +451,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/tocol-%E5%87%BD%E6%95%B0-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -462,7 +466,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/torow-%E5%87%BD%E6%95%B0-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -477,7 +481,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/transpose-%E5%87%BD%E6%95%B0-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -490,7 +494,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/unique-%E5%87%BD%E6%95%B0-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -506,7 +510,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/vlookup-%E5%87%BD%E6%95%B0-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -534,7 +538,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/vstack-%E5%87%BD%E6%95%B0-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -548,7 +552,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/wrapcols-%E5%87%BD%E6%95%B0-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -563,7 +567,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/wraprows-%E5%87%BD%E6%95%B0-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -579,7 +583,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/xlookup-%E5%87%BD%E6%95%B0-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -609,7 +613,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/xmatch-%E5%87%BD%E6%95%B0-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/address-%E5%87%BD%E6%95%B0-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/address-function',
             },
         ],
         functionParameter: {
@@ -46,7 +46,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/areas-%E5%87%BD%E6%95%B0-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/areas-function',
             },
         ],
         functionParameter: {
@@ -59,7 +59,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/choose-%E5%87%BD%E6%95%B0-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/choose-function',
             },
         ],
         functionParameter: {
@@ -80,7 +80,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/choosecols-%E5%87%BD%E6%95%B0-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/choosecols-function',
             },
         ],
         functionParameter: {
@@ -95,7 +95,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/chooserows-%E5%87%BD%E6%95%B0-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chooserows-function',
             },
         ],
         functionParameter: {
@@ -110,7 +110,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/column-%E5%87%BD%E6%95%B0-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/column-function',
             },
         ],
         functionParameter: {
@@ -123,7 +123,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/columns-%E5%87%BD%E6%95%B0-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/columns-function',
             },
         ],
         functionParameter: {
@@ -136,7 +136,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/drop-%E5%87%BD%E6%95%B0-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/drop-function',
             },
         ],
         functionParameter: {
@@ -151,7 +151,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/expand-%E5%87%BD%E6%95%B0-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/expand-function',
             },
         ],
         functionParameter: {
@@ -167,7 +167,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/filter-%E5%87%BD%E6%95%B0-f4f7cb66-82eb-4767-8f7c-4877ad80c759',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/filter-function',
             },
         ],
         functionParameter: {
@@ -182,7 +182,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/formulatext-%E5%87%BD%E6%95%B0-0a786771-54fd-4ae2-96ee-09cda35439c8',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/formulatext-function',
             },
         ],
         functionParameter: {
@@ -190,54 +190,44 @@ const locale: typeof enUS = {
         },
     },
     GETPIVOTDATA: {
-        description: 'Returns data stored in a PivotTable report',
-        abstract: 'Returns data stored in a PivotTable report',
+        description: 'Hàm GETPIVOTDATA trả về dữ liệu hiển thị từ PivotTable.',
+        abstract: 'Hàm GETPIVOTDATA trả về dữ liệu hiển thị từ PivotTable.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/getpivotdata-function-8c083b99-a922-4ca0-af5e-3af55960761f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/getpivotdata-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataField: { name: 'dataField', detail: 'Tên của trường PivotTable có chứa dữ liệu mà bạn muốn truy xuất. Thông tin này cần nằm trong dấu ngoặc kép. Ví dụ: =GETPIVOTDATA("Doanh số", A3). Ở đây, "Doanh số" là trường Giá trị mà chúng tôi muốn truy xuất. Vì không có trường nào khác được xác định, hàm GETPIVOTDATA trả về tổng doanh thu.' },
+            pivotTable: { name: 'pivotTable', detail: 'Tham chiếu tới bất kỳ ô, phạm vi ô hoặc phạm vi ô đã đặt tên trong PivotTable. Thông tin này dùng để xác định PivotTable nào có chứa dữ liệu mà bạn muốn truy xuất. Ví dụ: =GETPIVOTDATA("Doanh số", A3). Ở đây, A3 là một tham chiếu bên trong PivotTable và cho công thức biết cần dùng PivotTable nào.' },
+            field1: { name: 'field1', detail: '1 tới 126 tên trường và tên mục mô tả dữ liệu mà bạn muốn truy xuất. Các cặp có thể theo bất kỳ trật tự nào. Tên trường và tên mục không phải là ngày tháng và số cần được đặt trong dấu ngoặc kép. Ví dụ: =GETPIVOTDATA("Doanh số", A3, "Tháng", "Tháng Ba"). Ở đây, "Tháng" là trường và "Tháng Ba" là mục. Để chỉ định nhiều mục cho một trường, hãy đặt chúng trong dấu ngoặc nhọn (ví dụ: {"Mar", "Tháng 4"}). Đối với PivotTable OLAP , các mục có thể chứa tên nguồn của kích thước cũng như tên nguồn của mục. Một cặp trường và mục cho một OLAP PivotTable có thể giống như thế này: "[Sản phẩm]","[Sản phẩm].[Tất cả Sản phẩm].[Thực phẩm].[Đồ Nướng]"' },
+            item1: { name: 'item1', detail: '1 tới 126 tên trường và tên mục mô tả dữ liệu mà bạn muốn truy xuất. Các cặp có thể theo bất kỳ trật tự nào. Tên trường và tên mục không phải là ngày tháng và số cần được đặt trong dấu ngoặc kép. Ví dụ: =GETPIVOTDATA("Doanh số", A3, "Tháng", "Tháng Ba"). Ở đây, "Tháng" là trường và "Tháng Ba" là mục. Để chỉ định nhiều mục cho một trường, hãy đặt chúng trong dấu ngoặc nhọn (ví dụ: {"Mar", "Tháng 4"}). Đối với PivotTable OLAP , các mục có thể chứa tên nguồn của kích thước cũng như tên nguồn của mục. Một cặp trường và mục cho một OLAP PivotTable có thể giống như thế này: "[Sản phẩm]","[Sản phẩm].[Tất cả Sản phẩm].[Thực phẩm].[Đồ Nướng]"' },
         },
     },
     HLOOKUP: {
-        description: 'Tìm kiếm một giá trị ở hàng đầu tiên của bảng hoặc trong một mảng số và trả về giá trị trong cột của hàng được chỉ định trong bảng hoặc mảng.',
-        abstract: 'Tìm hàng đầu tiên của mảng và trả về giá trị của ô đã chỉ định',
+        description: 'Tìm kiếm một giá trị trong hàng trên cùng của một bảng hoặc một mảng giá trị, rồi trả về một giá trị trong cùng một cột từ một hàng mà bạn chỉ định trong bảng hoặc mảng. Dùng hàm HLOOKUP khi các giá trị so sánh của bạn nằm ở một hàng nằm ngang ở trên cùng một bảng dữ liệu và bạn muốn tìm xuôi xuống một số hàng đã xác định. Dùng VLOOKUP khi các giá trị so sánh của bạn nằm trong một cột ở bên trái của dữ liệu mà bạn muốn tìm.',
+        abstract: 'Tìm kiếm một giá trị trong hàng trên cùng của một bảng hoặc một mảng giá trị, rồi trả về một giá trị trong cùng một cột từ một hàng mà bạn chỉ định trong bảng hoặc mảng. Dùng hàm HLOOKUP khi các giá trị so sánh của bạn nằm ở một hàng nằm ngang ở trên cùng một bảng dữ liệu và bạn muốn tìm xuôi xuống một số hàng đã xác định. Dùng VLOOKUP khi các giá trị so sánh của bạn nằm trong một cột ở bên trái của dữ liệu mà bạn muốn tìm.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/hlookup-%E5%87%BD%E6%95%B0-a3034eec-b719-4ba3-bb65-e1ad662ed95f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/hlookup-function',
             },
         ],
         functionParameter: {
-            lookupValue: {
-                name: 'tìm giá trị',
-                detail: 'Giá trị cần tìm. Giá trị được tìm thấy phải nằm ở hàng đầu tiên của phạm vi ô được chỉ định trong tham số table_array.',
-            },
-            tableArray: {
-                name: 'phạm vi',
-                detail: 'Phạm vi ô trong đó VLOOKUP tìm kiếm lookup_value và trả về giá trị. Bảng thông tin để tìm dữ liệu. Sử dụng tham chiếu đến một vùng hoặc tên vùng.',
-            },
-            rowIndexNum: {
-                name: 'số dòng',
-                detail: 'Giá trị khớp số hàng table_array sẽ trả về số hàng (row_index_num là 1, trả về giá trị hàng đầu tiên trong table_array, row_index_num 2 trả về giá trị hàng thứ hai trong table_array).',
-            },
-            rangeLookup: {
-                name: 'loại truy vấn',
-                detail: 'Chỉ định xem bạn muốn tìm kết quả khớp chính xác hay kết quả khớp gần đúng: kết quả khớp gần đúng mặc định - 1/TRUE, kết quả khớp chính xác - 0/FALSE.',
-            },
+            lookupValue: { name: 'tìm giá trị', detail: 'Yêu cầu. Giá trị cần tìm trong hàng thứ nhất của bảng. Lookup_value có thể là một giá trị, tham chiếu hoặc chuỗi văn bản.' },
+            tableArray: { name: 'phạm vi', detail: 'Yêu cầu. Một bảng thông tin để tìm kiếm dữ liệu trong đó. Hãy dùng tham chiếu tới một phạm vi hoặc một tên phạm vi. Các giá trị trong hàng thứ nhất của table_array có thể là văn bản, số hoặc giá trị lô-gic. Nếu range_lookup là TRUE, các giá trị trong hàng thứ nhất của table_array phải được đặt theo thứ tự tăng dần: ...-2, -1, 0, 1, 2,... , A-Z, FALSE, TRUE; nếu không, hàm HLOOKUP có thể đưa ra giá trị không đúng. Nếu range_lookup là FALSE, thì không cần phải sắp xếp table_array. Văn bản chữ hoa và chữ thường tương đương nhau. Sắp xếp các giá trị theo thứ tự tăng dần, từ trái sang phải. Để biết thêm thông tin, vui lòng xem mục Sắp xếp dữ liệu trong dải ô hoặc bảng .' },
+            rowIndexNum: { name: 'số dòng', detail: 'Yêu cầu. Số hàng trong ô table_array giá trị khớp sẽ được trả về từ đó. Một row_index_num của 1 trả về giá trị hàng thứ nhất trong table_array, một row_index_num/2 trả về giá trị hàng thứ hai trong table_array, v.v. Nếu row_index_num nhỏ hơn 1, hàm HLOOKUP trả về giá #VALUE! giá trị lỗi; nếu row_index_num lớn hơn số hàng trên table_array, hàm HLOOKUP trả về giá #REF! .' },
+            rangeLookup: { name: 'loại truy vấn', detail: 'Tùy chọn. Một giá trị lô-gic cho biết bạn có muốn HLOOKUP tìm thấy một kết quả khớp chính xác hay kết quả khớp tương đối. Nếu đối số này là TRUE hoặc được bỏ qua, thì hàm sẽ trả về kết quả khớp tương đối. Nói cách khác, nếu không tìm thấy một kết quả khớp chính xác thì hàm sẽ trả về giá trị lớn nhất kế tiếp nhỏ hơn lookup_value. Nếu đối số này là FALSE, hàm HLOOKUP sẽ tìm một kết quả khớp chính xác. Nếu không tìm thấy kết quả khớp chính xác, hàm sẽ trả về giá trị lỗi #N/A.' },
         },
     },
     HSTACK: {
-        description: 'Nối mảng theo chiều ngang và tuần tự để trả về mảng lớn hơn',
-        abstract: 'Nối mảng theo chiều ngang và tuần tự để trả về mảng lớn hơn',
+        description: 'Nối các mảng theo chiều ngang và theo trình tự để trả về một mảng lớn hơn.',
+        abstract: 'Nối các mảng theo chiều ngang và theo trình tự để trả về một mảng lớn hơn.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/hstack-%E5%87%BD%E6%95%B0-98c4ab76-10fe-4b4f-8d5f-af1c125fe8c2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/hstack-function',
             },
         ],
         functionParameter: {
@@ -246,26 +236,26 @@ const locale: typeof enUS = {
         },
     },
     HYPERLINK: {
-        description: 'Tạo một đường siêu liên kết bên trong ô',
-        abstract: 'Tạo một đường siêu liên kết bên trong ô',
+        description: 'Tạo một đường siêu liên kết bên trong ô.',
+        abstract: 'Tạo một đường siêu liên kết bên trong ô.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=vi',
+                url: 'https://support.google.com/docs/answer/3093313?hl=vi',
             },
         ],
         functionParameter: {
-            url: { name: 'url', detail: 'URL đầy đủ về vị trí liên kết được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa URL này.' },
-            linkLabel: { name: 'nhãn_đường_liên_kết', detail: 'Văn bản cần hiển thị trong ô như là một đường liên kết, được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa nhãn này.' },
+            url: { name: 'url', detail: 'URL đầy đủ về vị trí liên kết được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa URL này. Chỉ cho phép một số loại đường liên kết nhất định. Cho phép http:// , https:// , mailto: , aim: , ftp:// , gopher:// , telnet:// và news:// ; các loại khác rõ ràng không được phép. Nếu xác định một giao thức khác, link_label sẽ hiển thị trong ô, nhưng sẽ không biến thành siêu liên kết. Nếu không xác định giao thức, thì giao thức mặc định sẽ là http:// và được thêm vào đầu url .' },
+            linkLabel: { name: 'nhãn_đường_liên_kết', detail: '[ KHÔNG BẮT BUỘC – url theo mặc định ] – Văn bản cần hiển thị trong ô như là một đường liên kết, được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa nhãn này. Nếu nhãn_đường_liên_kết là tham chiếu đến một ô rỗng, url sẽ hiển thị dưới dạng đường liên kết nếu hợp lệ, ngược lại là văn bản thuần túy. Nếu link_label là chuỗi rỗng tuyệt đối (""), ô sẽ trông như trống, nhưng vẫn có thể truy cập vào đường liên kết bằng cách nhấp hoặc di chuyển vào ô.' },
         },
     },
     IMAGE: {
-        description: 'Trả về hình ảnh từ một nguồn nhất định.',
-        abstract: 'Trả về hình ảnh từ một nguồn nhất định.',
+        description: 'Hàm IMAGE chèn hình ảnh vào các ô từ vị trí nguồn cùng với văn bản thay thế. Sau đó, bạn có thể di chuyển và thay đổi kích thước ô, sắp xếp và lọc cũng như làm việc với hình ảnh trong bảng Excel. Sử dụng hàm này để cải thiện trực quan các danh sách dữ liệu như hàng tồn kho, trò chơi, nhân viên và các khái niệm toán học.',
+        abstract: 'Hàm IMAGE chèn hình ảnh vào các ô từ vị trí nguồn cùng với văn bản thay thế. Sau đó, bạn có thể di chuyển và thay đổi kích thước ô, sắp xếp và lọc cũng như làm việc với hình ảnh trong bảng Excel. Sử dụng hàm này để cải thiện trực quan các danh sách dữ liệu như hàng tồn kho, trò chơi, nhân viên và các khái niệm toán học.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/image-function',
             },
         ],
         functionParameter: {
@@ -282,7 +272,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/index-%E5%87%BD%E6%95%B0-a5dcf0dd-996d-40a4-a822-b56b061328bd',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/index-function',
             },
         ],
         functionParameter: {
@@ -298,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/indirect-%E5%87%BD%E6%95%B0-474b3a3a-8a26-4f44-b491-92b6306fa261',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/indirect-function',
             },
         ],
         functionParameter: {
@@ -312,7 +302,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/lookup-%E5%87%BD%E6%95%B0-446d94af-663b-451d-8251-369d5e3864cb',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/lookup-function',
             },
         ],
         functionParameter: {
@@ -333,7 +323,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/match-%E5%87%BD%E6%95%B0-e8dffd45-c762-47d6-bf89-533f4a37673a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/match-function',
             },
         ],
         functionParameter: {
@@ -348,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/offset-%E5%87%BD%E6%95%B0-c8de19ae-dd79-4b9b-a14e-b4d906d11b66',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/offset-function',
             },
         ],
         functionParameter: {
@@ -365,7 +355,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/row-%E5%87%BD%E6%95%B0-3a63b74a-c4d0-4093-b49a-e76eb49a6d8d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/row-function',
             },
         ],
         functionParameter: {
@@ -378,7 +368,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rows-%E5%87%BD%E6%95%B0-b592593e-3fc2-47f2-bec1-bda493811597',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rows-function',
             },
         ],
         functionParameter: {
@@ -386,17 +376,19 @@ const locale: typeof enUS = {
         },
     },
     RTD: {
-        description: 'Retrieves real-time data from a program that supports COM automation',
-        abstract: 'Retrieves real-time data from a program that supports COM automation',
+        description: 'Truy xuất dữ liệu thời gian thực từ một chương trình có hỗ trợ tự động hóa COM.',
+        abstract: 'Truy xuất dữ liệu thời gian thực từ một chương trình có hỗ trợ tự động hóa COM.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/rtd-function-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rtd-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            progId: { name: 'progId', detail: 'Yêu cầu. Tên progID của bổ trợ tự động hóa COM đã đăng ký đã được cài đặt trên máy tính cục bộ. Tên đặt trong dấu ngoặc kép.' },
+            server: { name: 'server', detail: 'Yêu cầu. Tên của máy chủ nơi cần chạy bổ trợ. Nếu không có máy chủ và chương trình hiện đang chạy cục bộ, hãy để trống đối số này. Nếu không thì hãy đặt tên máy chủ trong dấu ngoặc kép (""). Khi đang dùng RTD trong Visual Basic for Applications (VBA), cần phải có cho máy chủ dấu ngoặc kép hoặc thuộc tính NullString của VBA, ngay cả khi máy chủ đang chạy cục bộ.' },
+            topic1: { name: 'topic1', detail: 'Topic1 là bắt buộc, các chủ đề tiếp theo là tùy chọn. Các tham số từ 1 đến 253 cùng đại diện cho phần dữ liệu thời gian thực duy nhất.' },
+            topic2: { name: 'topic2', detail: 'Topic1 là bắt buộc, các chủ đề tiếp theo là tùy chọn. Các tham số từ 1 đến 253 cùng đại diện cho phần dữ liệu thời gian thực duy nhất.' },
         },
     },
     SORT: {
@@ -405,7 +397,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/sort-%E5%87%BD%E6%95%B0-22f63bd0-ccc8-492f-953d-c20e8e44b86c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/sort-function',
             },
         ],
         functionParameter: {
@@ -421,7 +413,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/sortby-%E5%87%BD%E6%95%B0-cd2d7a62-1b93-435c-b561-d6a35134f28f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/sortby-function',
             },
         ],
         functionParameter: {
@@ -438,7 +430,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/take-%E5%87%BD%E6%95%B0-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/take-function',
             },
         ],
         functionParameter: {
@@ -453,7 +445,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/tocol-%E5%87%BD%E6%95%B0-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/tocol-function',
             },
         ],
         functionParameter: {
@@ -468,7 +460,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/torow-%E5%87%BD%E6%95%B0-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/torow-function',
             },
         ],
         functionParameter: {
@@ -483,7 +475,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/transpose-%E5%87%BD%E6%95%B0-ed039415-ed8a-4a81-93e9-4b6dfac76027',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/transpose-function',
             },
         ],
         functionParameter: {
@@ -496,7 +488,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/unique-%E5%87%BD%E6%95%B0-c5ab87fd-30a3-4ce9-9d1a-40204fb85e1e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/unique-function',
             },
         ],
         functionParameter: {
@@ -511,7 +503,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/vlookup-%E5%87%BD%E6%95%B0-0bbc8083-26fe-4963-8ab8-93a18ad188a1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/vlookup-function',
             },
         ],
         functionParameter: {
@@ -539,7 +531,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/vstack-%E5%87%BD%E6%95%B0-a4b86897-be0f-48fc-adca-fcc10d795a9c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/vstack-function',
             },
         ],
         functionParameter: {
@@ -553,7 +545,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/wrapcols-%E5%87%BD%E6%95%B0-d038b05a-57b7-4ee0-be94-ded0792511e2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/wrapcols-function',
             },
         ],
         functionParameter: {
@@ -568,7 +560,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/wraprows-%E5%87%BD%E6%95%B0-796825f3-975a-4cee-9c84-1bbddf60ade0',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/wraprows-function',
             },
         ],
         functionParameter: {
@@ -583,7 +575,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/xlookup-%E5%87%BD%E6%95%B0-b7fd680e-6d10-43e6-84f9-88eae8bf5929',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/xlookup-function',
             },
         ],
         functionParameter: {
@@ -613,7 +605,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/xmatch-%E5%87%BD%E6%95%B0-d966da31-7a6b-4a13-a1c6-5a33ed6a0312',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/xmatch-function',
             },
         ],
         functionParameter: {

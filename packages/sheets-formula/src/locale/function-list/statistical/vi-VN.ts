@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/avedev-%E5%87%BD%E6%95%B0-58fe8d65-2a84-4dc7-8052-f3f87b5c6639',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/avedev-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/average-%E5%87%BD%E6%95%B0-047bac88-d466-426c-a32b-8f33eb960cf6',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/average-function',
             },
         ],
         functionParameter: {
@@ -46,19 +46,19 @@ const locale: typeof enUS = {
         },
     },
     AVERAGE_WEIGHTED: {
-        description: 'Tìm trung bình cộng gia quyền của một tập giá trị khi biết các giá trị và trọng số tương ứng.',
-        abstract: 'Tìm trung bình cộng gia quyền của một tập giá trị khi biết các giá trị và trọng số tương ứng.',
+        description: 'Hàm AVERAGE.WEIGHTED tìm trung bình cộng gia quyền của một tập giá trị khi biết trước các giá trị và trọng số tương ứng.',
+        abstract: 'Hàm AVERAGE.WEIGHTED tìm trung bình cộng gia quyền của một tập giá trị khi biết trước các giá trị và trọng số tương ứng.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/9084098?hl=vi&ref_topic=3105600&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9084098?hl=vi',
             },
         ],
         functionParameter: {
-            values: { name: 'giá_trị', detail: 'Giá trị cần tính trung bình.' },
-            weights: { name: 'trọng_số', detail: 'Danh sách trọng số tương ứng để áp dụng.' },
-            additionalValues: { name: 'giá_trị_bổ_sung', detail: 'Các giá trị bổ sung cần tính trung bình.' },
-            additionalWeights: { name: 'trọng_số_bổ_sung', detail: 'Các trọng số bổ sung để áp dụng.' },
+            values: { name: 'giá_trị', detail: 'Giá trị cần tính trung bình. Có thể tham chiếu một dải ô hoặc có thể chứa chính các giá trị đó.' },
+            weights: { name: 'trọng_số', detail: 'Danh sách trọng số tương ứng để áp dụng. Có thể tham chiếu một dải ô hoặc có thể chứa chính các trọng số đó. Trọng số không được âm nhưng có thể là số 0. Phải có ít nhất một trọng số là số dương. Nếu dùng dải ô thì dải ô đó phải có cùng số hàng và cột giống với phạm vi của các giá trị.' },
+            additionalValues: { name: 'giá_trị_bổ_sung', detail: 'Các giá trị bổ sung cần tính trung bình. Không bắt buộc phải có các giá trị bổ sung.' },
+            additionalWeights: { name: 'trọng_số_bổ_sung', detail: 'Các trọng số bổ sung để áp dụng. Không bắt buộc phải có các trọng số bổ sung, nhưng mỗi giá_trị_bổ_sung phải đi kèm với đúng một trọng_số_bổ_sung.' },
         },
     },
     AVERAGEA: {
@@ -67,7 +67,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/averagea-%E5%87%BD%E6%95%B0-f5f84098-d453-4f4c-bbba-3d2c66356091',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/averagea-function',
             },
         ],
         functionParameter: {
@@ -81,7 +81,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/averageif-%E5%87%BD%E6%95%B0-faec8e2e-0dec-4308-af69-f5576d8ac642',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/averageif-function',
             },
         ],
         functionParameter: {
@@ -96,7 +96,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/averageifs-%E5%87%BD%E6%95%B0-48910c45-1fc0-4389-a028-f7c5c3001690',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/averageifs-function',
             },
         ],
         functionParameter: {
@@ -113,7 +113,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/beta-dist-%E5%87%BD%E6%95%B0-11188c9c-780a-42c7-ba43-9ecb5a878d31',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/beta-dist-function',
             },
         ],
         functionParameter: {
@@ -131,7 +131,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/beta-inv-%E5%87%BD%E6%95%B0-e84cb8aa-8df0-4cf6-9892-83a341d252eb',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/beta-inv-function',
             },
         ],
         functionParameter: {
@@ -148,7 +148,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/binom-dist-%E5%87%BD%E6%95%B0-c5ae37b6-f39c-4be2-94c2-509a1480770c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/binom-dist-function',
             },
         ],
         functionParameter: {
@@ -164,7 +164,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/binom-dist-range-%E5%87%BD%E6%95%B0-17331329-74c7-4053-bb4c-6653a7421595',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/binom-dist-range-function',
             },
         ],
         functionParameter: {
@@ -180,7 +180,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/binom-inv-%E5%87%BD%E6%95%B0-80a0370c-ada6-49b4-83e7-05a91ba77ac9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/binom-inv-function',
             },
         ],
         functionParameter: {
@@ -195,7 +195,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/chisq-dist-%E5%87%BD%E6%95%B0-8486b05e-5c05-4942-a9ea-f6b341518732',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chisq-dist-function',
             },
         ],
         functionParameter: {
@@ -210,7 +210,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/chisq-dist-rt-%E5%87%BD%E6%95%B0-dc4832e8-ed2b-49ae-8d7c-b28d5804c0f2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chisq-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -224,7 +224,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/chisq-inv-%E5%87%BD%E6%95%B0-400db556-62b3-472d-80b3-254723e7092f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chisq-inv-function',
             },
         ],
         functionParameter: {
@@ -238,7 +238,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/chisq-inv-rt-%E5%87%BD%E6%95%B0-435b5ed8-98d5-4da6-823f-293e2cbc94fe',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chisq-inv-rt-function',
             },
         ],
         functionParameter: {
@@ -252,7 +252,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/chisq-test-%E5%87%BD%E6%95%B0-2e8a7861-b14a-4985-aa93-fb88de3f260f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chisq-test-function',
             },
         ],
         functionParameter: {
@@ -266,7 +266,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Dạy học',
-                url: 'https://support.microsoft.com/vi-vn/office/confidence-norm-%E5%87%BD%E6%95%B0-7cec58a6-85bb-488d-91c3-63828d4fbfd4',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/confidence-norm-function',
             },
         ],
         functionParameter: {
@@ -281,7 +281,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/confidence-t-%E5%87%BD%E6%95%B0-e8eca395-6c3a-4ba9-9003-79ccc61d3c53',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/confidence-t-function',
             },
         ],
         functionParameter: {
@@ -296,7 +296,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/correl-%E5%87%BD%E6%95%B0-995dcef7-0c0a-4bed-a3fb-239d7b68ca92',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/correl-function',
             },
         ],
         functionParameter: {
@@ -310,7 +310,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/count-%E5%87%BD%E6%95%B0-a59cd7fc-b623-4d93-87a4-d23bf411294c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/count-function',
             },
         ],
         functionParameter: {
@@ -331,18 +331,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/counta-%E5%87%BD%E6%95%B0-7dc98875-d5c1-46f1-9a82-53f3219e2509',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/counta-function',
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'số 1',
-                detail: 'Tham số đầu tiên đại diện cho giá trị mà bạn muốn đếm',
-            },
-            number2: {
-                name: 'số 2',
-                detail: 'Các đối số khác đại diện cho giá trị bạn muốn đếm, có thể chứa tối đa 255 đối số.',
-            },
+            value1: { name: 'Giá trị 1', detail: 'Giá trị đầu tiên, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình.' },
+            value2: { name: 'Giá trị 2', detail: 'Các giá trị khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
         },
     },
     COUNTBLANK: {
@@ -351,7 +345,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/countblank-%E5%87%BD%E6%95%B0-6a92d772-675c-4bee-b346-24af6bd3ac22',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/countblank-function',
             },
         ],
         functionParameter: {
@@ -364,7 +358,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/countif-%E5%87%BD%E6%95%B0-e0de10c6-f885-4e71-abb4-1f464816df34',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/use-the-countif-function-in-microsoft-excel',
             },
         ],
         functionParameter: {
@@ -378,7 +372,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/countifs-%E5%87%BD%E6%95%B0-dda3dc6e-f74e-4aee-88bc-aa8c2a866842',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/countifs-function',
             },
         ],
         functionParameter: {
@@ -394,7 +388,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/covariance-p-%E5%87%BD%E6%95%B0-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/covariance-p-function',
             },
         ],
         functionParameter: {
@@ -408,7 +402,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/covariance-s-%E5%87%BD%E6%95%B0-0a539b74-7371-42aa-a18f-1f5320314977',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/covariance-s-function',
             },
         ],
         functionParameter: {
@@ -422,7 +416,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/devsq-%E5%87%BD%E6%95%B0-8b739616-8376-4df5-8bd0-cfe0a6caf444',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/devsq-function',
             },
         ],
         functionParameter: {
@@ -436,7 +430,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/expon-dist-%E5%87%BD%E6%95%B0-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/expon-dist-function',
             },
         ],
         functionParameter: {
@@ -451,7 +445,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/f-dist-%E5%87%BD%E6%95%B0-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/f-dist-function',
             },
         ],
         functionParameter: {
@@ -467,7 +461,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/f-dist-rt-%E5%87%BD%E6%95%B0-d74cbb00-6017-4ac9-b7d7-6049badc0520',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/f-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -482,7 +476,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/f-inv-%E5%87%BD%E6%95%B0-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/f-inv-function',
             },
         ],
         functionParameter: {
@@ -497,7 +491,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/f-inv-rt-%E5%87%BD%E6%95%B0-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/f-inv-rt-function',
             },
         ],
         functionParameter: {
@@ -512,7 +506,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/f-test-%E5%87%BD%E6%95%B0-100a59e7-4108-46f8-8443-78ffacb6c0a7',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/f-test-function',
             },
         ],
         functionParameter: {
@@ -526,7 +520,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/fisher-%E5%87%BD%E6%95%B0-d656523c-5076-4f95-b87b-7741bf236c69',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/fisher-function',
             },
         ],
         functionParameter: {
@@ -539,7 +533,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/fisherinv-%E5%87%BD%E6%95%B0-62504b39-415a-4284-a285-19c8e82f86bb',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/fisherinv-function',
             },
         ],
         functionParameter: {
@@ -552,7 +546,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/forecast-and-forecast-linear-functions',
             },
         ],
         functionParameter: {
@@ -562,59 +556,74 @@ const locale: typeof enUS = {
         },
     },
     FORECAST_ETS: {
-        description: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
-        abstract: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
+        description: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
+        abstract: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/forecast-ets-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            targetDate: { name: 'Ngày đích', detail: 'Điểm dữ liệu mà bạn muốn dự đoán giá trị.' },
+            values: { name: 'Giá trị', detail: 'Các giá trị lịch sử dùng để dự báo.' },
+            timeline: { name: 'Dòng thời gian', detail: 'Phạm vi hoặc mảng độc lập gồm ngày hoặc giờ dạng số với bước không đổi.' },
+            seasonality: { name: 'Tính thời vụ', detail: 'Tùy chọn. 1 để tự động phát hiện và 0 để không dùng tính thời vụ.' },
+            dataCompletion: { name: 'Hoàn thành dữ liệu', detail: 'Tùy chọn. Dùng 1 để nội suy điểm bị thiếu hoặc 0 để coi chúng là số không.' },
+            aggregation: { name: 'Tổng hợp', detail: 'Tùy chọn. Giá trị từ 1 đến 7 chỉ định cách tổng hợp dấu thời gian trùng lặp.' },
         },
     },
     FORECAST_ETS_CONFINT: {
-        description: 'Returns a confidence interval for the forecast value at the specified target date',
-        abstract: 'Returns a confidence interval for the forecast value at the specified target date',
+        description: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
+        abstract: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/forecast-ets-confint-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            targetDate: { name: 'Ngày đích', detail: 'Điểm dữ liệu mà bạn muốn dự đoán giá trị.' },
+            values: { name: 'Giá trị', detail: 'Các giá trị lịch sử dùng để dự báo.' },
+            timeline: { name: 'Dòng thời gian', detail: 'Phạm vi hoặc mảng độc lập gồm ngày hoặc giờ dạng số với bước không đổi.' },
+            confidenceLevel: { name: 'Mức tin cậy', detail: 'Tùy chọn. Số từ 0 đến 1; mặc định là 0,95.' },
+            seasonality: { name: 'Tính thời vụ', detail: 'Tùy chọn. 1 để tự động phát hiện và 0 để không dùng tính thời vụ.' },
+            dataCompletion: { name: 'Hoàn thành dữ liệu', detail: 'Tùy chọn. Dùng 1 để nội suy điểm bị thiếu hoặc 0 để coi chúng là số không.' },
+            aggregation: { name: 'Tổng hợp', detail: 'Tùy chọn. Giá trị từ 1 đến 7 chỉ định cách tổng hợp dấu thời gian trùng lặp.' },
         },
     },
     FORECAST_ETS_SEASONALITY: {
-        description: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
-        abstract: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
+        description: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
+        abstract: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.SEASONALITY',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/forecast-ets-seasonality-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'Giá trị', detail: 'Các giá trị lịch sử dùng để dự báo.' },
+            timeline: { name: 'Dòng thời gian', detail: 'Phạm vi hoặc mảng độc lập gồm ngày hoặc giờ dạng số với bước không đổi.' },
+            dataCompletion: { name: 'Hoàn thành dữ liệu', detail: 'Tùy chọn. Dùng 1 để nội suy điểm bị thiếu hoặc 0 để coi chúng là số không.' },
+            aggregation: { name: 'Tổng hợp', detail: 'Tùy chọn. Giá trị từ 1 đến 7 chỉ định cách tổng hợp dấu thời gian trùng lặp.' },
         },
     },
     FORECAST_ETS_STAT: {
-        description: 'Returns a statistical value as a result of time series forecasting',
-        abstract: 'Returns a statistical value as a result of time series forecasting',
+        description: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
+        abstract: 'Bạn luôn có thể yêu cầu chuyên gia trong Cộng đồng Kỹ thuật Excel hoặc nhận hỗ trợ trong Cộng đồng .',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.STAT',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/forecast-ets-stat-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'Giá trị', detail: 'Các giá trị lịch sử dùng để dự báo.' },
+            timeline: { name: 'Dòng thời gian', detail: 'Phạm vi hoặc mảng độc lập gồm ngày hoặc giờ dạng số với bước không đổi.' },
+            statisticType: { name: 'Loại thống kê', detail: 'Giá trị từ 1 đến 8 chỉ định thống kê dự báo cần trả về.' },
+            seasonality: { name: 'Tính thời vụ', detail: 'Tùy chọn. 1 để tự động phát hiện và 0 để không dùng tính thời vụ.' },
+            dataCompletion: { name: 'Hoàn thành dữ liệu', detail: 'Tùy chọn. Dùng 1 để nội suy điểm bị thiếu hoặc 0 để coi chúng là số không.' },
+            aggregation: { name: 'Tổng hợp', detail: 'Tùy chọn. Giá trị từ 1 đến 7 chỉ định cách tổng hợp dấu thời gian trùng lặp.' },
         },
     },
     FORECAST_LINEAR: {
@@ -623,7 +632,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/forecast-and-forecast-linear-functions',
             },
         ],
         functionParameter: {
@@ -638,7 +647,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/frequency-%E5%87%BD%E6%95%B0-44e3be2b-eca0-42cd-a3f7-fd9ea898fdb9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/frequency-function',
             },
         ],
         functionParameter: {
@@ -652,7 +661,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/gamma-%E5%87%BD%E6%95%B0-ce1702b1-cf55-471d-8307-f83be0fc5297',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gamma-function',
             },
         ],
         functionParameter: {
@@ -665,7 +674,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/gamma-dist-%E5%87%BD%E6%95%B0-9b6f1538-d11c-4d5f-8966-21f6a2201def',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gamma-dist-function',
             },
         ],
         functionParameter: {
@@ -681,7 +690,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/gamma-inv-%E5%87%BD%E6%95%B0-74991443-c2b0-4be5-aaab-1aa4d71fbb18',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gamma-inv-function',
             },
         ],
         functionParameter: {
@@ -696,7 +705,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/gammaln-%E5%87%BD%E6%95%B0-b838c48b-c65f-484f-9e1d-141c55470eb9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gammaln-function',
             },
         ],
         functionParameter: {
@@ -709,7 +718,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/gammaln-precise-%E5%87%BD%E6%95%B0-5cdfe601-4e1e-4189-9d74-241ef1caa599',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gammaln-precise-function',
             },
         ],
         functionParameter: {
@@ -722,7 +731,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/gauss-%E5%87%BD%E6%95%B0-069f1b4e-7dee-4d6a-a71f-4b69044a6b33',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gauss-function',
             },
         ],
         functionParameter: {
@@ -735,7 +744,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/geomean-%E5%87%BD%E6%95%B0-db1ac48d-25a5-40a0-ab83-0b38980e40d5',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/geomean-function',
             },
         ],
         functionParameter: {
@@ -749,7 +758,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/growth-%E5%87%BD%E6%95%B0-541a91dc-3d5e-437d-b156-21324e68b80d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/growth-function',
             },
         ],
         functionParameter: {
@@ -765,7 +774,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/harmean-%E5%87%BD%E6%95%B0-5efd9184-fab5-42f9-b1d3-57883a1d3bc6',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/harmean-function',
             },
         ],
         functionParameter: {
@@ -779,7 +788,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/hypgeom-dist-%E5%87%BD%E6%95%B0-6dbd547f-1d12-4b1f-8ae5-b0d9e3d22fbf',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/hypgeom-dist-function',
             },
         ],
         functionParameter: {
@@ -796,7 +805,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/intercept-%E5%87%BD%E6%95%B0-2a9b74e2-9d47-4772-b663-3bca70bf63ef',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/intercept-function',
             },
         ],
         functionParameter: {
@@ -810,7 +819,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/kurt-%E5%87%BD%E6%95%B0-bc3a265c-5da4-4dcb-b7fd-c237789095ab',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/kurt-function',
             },
         ],
         functionParameter: {
@@ -824,7 +833,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/large-%E5%87%BD%E6%95%B0-3af0af19-1190-42bb-bb8b-01672ec00a64',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/large-function',
             },
         ],
         functionParameter: {
@@ -838,7 +847,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/linest-%E5%87%BD%E6%95%B0-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/linest-function',
             },
         ],
         functionParameter: {
@@ -854,7 +863,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/logest-%E5%87%BD%E6%95%B0-f27462d8-3657-4030-866b-a272c1d18b4b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/logest-function',
             },
         ],
         functionParameter: {
@@ -870,7 +879,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/lognorm-dist-%E5%87%BD%E6%95%B0-eb60d00b-48a9-4217-be2b-6074aee6b070',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/lognorm-dist-function',
             },
         ],
         functionParameter: {
@@ -886,7 +895,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/lognorm-inv-%E5%87%BD%E6%95%B0-fe79751a-f1f2-4af8-a0a1-e151b2d4f600',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/lognorm-inv-function',
             },
         ],
         functionParameter: {
@@ -896,16 +905,16 @@ const locale: typeof enUS = {
         },
     },
     MARGINOFERROR: {
-        description: 'Tính biên độ sai số của một dải giá trị và mức tin cậy.',
-        abstract: 'Tính biên độ sai số của một dải giá trị và mức tin cậy.',
+        description: 'Hàm này tính biên độ sai số của một dải giá trị và mức tin cậy.',
+        abstract: 'Hàm này tính biên độ sai số của một dải giá trị và mức tin cậy.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.google.com/docs/answer/12487850?hl=vi&sjid=11250989209896695200-AP',
+                url: 'https://support.google.com/docs/answer/12487850?hl=vi',
             },
         ],
         functionParameter: {
-            range: { name: 'dải_ô', detail: 'Dải giá trị dùng để tính biên độ sai số.' },
+            range: { name: 'dải_ô', detail: 'MARGINOFERROR(A1:C3; 0.99)' },
             confidence: { name: 'mức_tin_cậy', detail: 'Mức tin cậy mong muốn trong khoảng (0, 1).' },
         },
     },
@@ -915,7 +924,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/max-%E5%87%BD%E6%95%B0-e0012414-9ac8-4b34-9a47-73e662c08098',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/max-function',
             },
         ],
         functionParameter: {
@@ -935,7 +944,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/maxa-%E5%87%BD%E6%95%B0-814bda1e-3840-4bff-9365-2f59ac2ee62d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/maxa-function',
             },
         ],
         functionParameter: {
@@ -949,7 +958,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/maxifs-%E5%87%BD%E6%95%B0-dfd611e6-da2c-488a-919b-9b6376b28883',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/maxifs-function',
             },
         ],
         functionParameter: {
@@ -966,7 +975,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/median-%E5%87%BD%E6%95%B0-d0916313-4753-414c-8537-ce85bdd967d2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/median-function',
             },
         ],
         functionParameter: {
@@ -980,7 +989,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/min-%E5%87%BD%E6%95%B0-61635d12-920f-4ce2-a70f-96f202dcc152',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/min-function',
             },
         ],
         functionParameter: {
@@ -1000,7 +1009,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mina-%E5%87%BD%E6%95%B0-245a6f46-7ca5-4dc7-ab49-805341bc31d3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mina-function',
             },
         ],
         functionParameter: {
@@ -1014,7 +1023,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/minifs-%E5%87%BD%E6%95%B0-6ca1ddaa-079b-4e74-80cc-72eef32e6599',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/minifs-function',
             },
         ],
         functionParameter: {
@@ -1031,7 +1040,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mode-mult-%E5%87%BD%E6%95%B0-50fd9464-b2ba-4191-b57a-39446689ae8c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mode-mult-function',
             },
         ],
         functionParameter: {
@@ -1045,7 +1054,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mode-sngl-%E5%87%BD%E6%95%B0-f1267c16-66c6-4386-959f-8fba5f8bb7f8',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mode-sngl-function',
             },
         ],
         functionParameter: {
@@ -1059,7 +1068,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/negbinom-dist-%E5%87%BD%E6%95%B0-c8239f89-c2d0-45bd-b6af-172e570f8599',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/negbinom-dist-function',
             },
         ],
         functionParameter: {
@@ -1075,7 +1084,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/norm-dist-%E5%87%BD%E6%95%B0-edb1cc14-a21c-4e53-839d-8082074c9f8d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/norm-dist-function',
             },
         ],
         functionParameter: {
@@ -1091,7 +1100,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/norm-inv-%E5%87%BD%E6%95%B0-54b30935-fee7-493c-bedb-2278a9db7e13',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/norm-inv-function',
             },
         ],
         functionParameter: {
@@ -1106,7 +1115,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/norm-s-dist-%E5%87%BD%E6%95%B0-1e787282-3832-4520-a9ae-bd2a8d99ba88',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/norm-s-dist-function',
             },
         ],
         functionParameter: {
@@ -1120,7 +1129,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/norm-s-inv-%E5%87%BD%E6%95%B0-d6d556b4-ab7f-49cd-b526-5a20918452b1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/norm-s-inv-function',
             },
         ],
         functionParameter: {
@@ -1133,7 +1142,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/pearson-%E5%87%BD%E6%95%B0-0c3e30fc-e5af-49c4-808a-3ef66e034c18',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/pearson-function',
             },
         ],
         functionParameter: {
@@ -1147,7 +1156,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/percentile-exc-%E5%87%BD%E6%95%B0-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/percentile-exc-function',
             },
         ],
         functionParameter: {
@@ -1161,7 +1170,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/percentile-inc-%E5%87%BD%E6%95%B0-680f9539-45eb-410b-9a5e-c1355e5fe2ed',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/percentile-inc-function',
             },
         ],
         functionParameter: {
@@ -1175,7 +1184,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/percentrank-exc-%E5%87%BD%E6%95%B0-d8afee96-b7e2-4a2f-8c01-8fcdedaa6314',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/percentrank-exc-function',
             },
         ],
         functionParameter: {
@@ -1190,7 +1199,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/percentrank-inc-%E5%87%BD%E6%95%B0-149592c9-00c0-49ba-86c1-c1f45b80463a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/percentrank-inc-function',
             },
         ],
         functionParameter: {
@@ -1205,7 +1214,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/permut-%E5%87%BD%E6%95%B0-3bd1cb9a-2880-41ab-a197-f246a7a602d3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/permut-function',
             },
         ],
         functionParameter: {
@@ -1219,7 +1228,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/permutationa-%E5%87%BD%E6%95%B0-6c7d7fdc-d657-44e6-aa19-2857b25cae4e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/permutationa-function',
             },
         ],
         functionParameter: {
@@ -1233,7 +1242,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/phi-%E5%87%BD%E6%95%B0-23e49bc6-a8e8-402d-98d3-9ded87f6295c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/phi-function',
             },
         ],
         functionParameter: {
@@ -1246,7 +1255,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/poisson-dist-%E5%87%BD%E6%95%B0-8fe148ff-39a2-46cb-abf3-7772695d9636',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/poisson-dist-function',
             },
         ],
         functionParameter: {
@@ -1261,7 +1270,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/prob-%E5%87%BD%E6%95%B0-9ac30561-c81c-4259-8253-34f0a238fc49',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/prob-function',
             },
         ],
         functionParameter: {
@@ -1277,7 +1286,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/quartile-exc-%E5%87%BD%E6%95%B0-5a355b7a-840b-4a01-b0f1-f538c2864cad',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/quartile-exc-function',
             },
         ],
         functionParameter: {
@@ -1291,7 +1300,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/quartile-inc-%E5%87%BD%E6%95%B0-1bbacc80-5075-42f1-aed6-47d735c4819d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/quartile-inc-function',
             },
         ],
         functionParameter: {
@@ -1305,7 +1314,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rank-avg-%E5%87%BD%E6%95%B0-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rank-avg-function',
             },
         ],
         functionParameter: {
@@ -1320,7 +1329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rank-eq-%E5%87%BD%E6%95%B0-284858ce-8ef6-450e-b662-26245be04a40',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rank-eq-function',
             },
         ],
         functionParameter: {
@@ -1335,12 +1344,12 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rsq-%E5%87%BD%E6%95%B0-d7161715-250d-4a01-b80d-a8364f2be08f',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rsq-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng 1', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
-            array2: { name: 'mảng 2', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+            knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
         },
     },
     SKEW: {
@@ -1349,7 +1358,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/skew-%E5%87%BD%E6%95%B0-bdf49d86-b1ef-4804-a046-28eaea69c9fa',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/skew-function',
             },
         ],
         functionParameter: {
@@ -1363,7 +1372,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/skew-p-%E5%87%BD%E6%95%B0-76530a5c-99b9-48a1-8392-26632d542fcb',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/skew-p-function',
             },
         ],
         functionParameter: {
@@ -1377,7 +1386,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/slope-%E5%87%BD%E6%95%B0-11fb8f97-3117-4813-98aa-61d7e01276b9',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/slope-function',
             },
         ],
         functionParameter: {
@@ -1391,7 +1400,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/small-%E5%87%BD%E6%95%B0-17da8222-7c82-42b2-961b-14c45384df07',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/small-function',
             },
         ],
         functionParameter: {
@@ -1405,7 +1414,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/standardize-%E5%87%BD%E6%95%B0-81d66554-2d54-40ec-ba83-6437108ee775',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/standardize-function',
             },
         ],
         functionParameter: {
@@ -1420,7 +1429,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/stdev-p-%E5%87%BD%E6%95%B0-6e917c05-31a0-496f-ade7-4f4e7462f285',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/stdev-p-function',
             },
         ],
         functionParameter: {
@@ -1434,7 +1443,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/stdev-s-%E5%87%BD%E6%95%B0-7d69cf97-0c1f-4acf-be27-f3e83904cc23',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/stdev-s-function',
             },
         ],
         functionParameter: {
@@ -1448,7 +1457,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/stdeva-%E5%87%BD%E6%95%B0-5ff38888-7ea5-48de-9a6d-11ed73b29e9d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/stdeva-function',
             },
         ],
         functionParameter: {
@@ -1462,7 +1471,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/stdevpa-%E5%87%BD%E6%95%B0-5578d4d6-455a-4308-9991-d405afe2c28c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/stdevpa-function',
             },
         ],
         functionParameter: {
@@ -1476,7 +1485,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/steyx-%E5%87%BD%E6%95%B0-6ce74b2c-449d-4a6e-b9ac-f9cef5ba48ab',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/steyx-function',
             },
         ],
         functionParameter: {
@@ -1490,7 +1499,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-dist-%E5%87%BD%E6%95%B0-4329459f-ae91-48c2-bba8-1ead1c6c21b2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-dist-function',
             },
         ],
         functionParameter: {
@@ -1505,7 +1514,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-dist-2t-%E5%87%BD%E6%95%B0-198e9340-e360-4230-bd21-f52f22ff5c28',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-dist-2t-function',
             },
         ],
         functionParameter: {
@@ -1519,7 +1528,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-dist-rt-%E5%87%BD%E6%95%B0-20a30020-86f9-4b35-af1f-7ef6ae683eda',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-dist-rt-function',
             },
         ],
         functionParameter: {
@@ -1533,7 +1542,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-inv-%E5%87%BD%E6%95%B0-2908272b-4e61-4942-9df9-a25fec9b0e2e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-inv-function',
             },
         ],
         functionParameter: {
@@ -1547,7 +1556,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-inv-2t-%E5%87%BD%E6%95%B0-ce72ea19-ec6c-4be7-bed2-b9baf2264f17',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-inv-2t-function',
             },
         ],
         functionParameter: {
@@ -1561,7 +1570,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/t-test-%E5%87%BD%E6%95%B0-d4e08ec3-c545-485f-962e-276f7cbed055',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/t-test-function',
             },
         ],
         functionParameter: {
@@ -1577,7 +1586,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/trend-%E5%87%BD%E6%95%B0-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/trend-function',
             },
         ],
         functionParameter: {
@@ -1593,7 +1602,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/trimmean-%E5%87%BD%E6%95%B0-d90c9878-a119-4746-88fa-63d988f511d3',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/trimmean-function',
             },
         ],
         functionParameter: {
@@ -1607,7 +1616,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/var-p-%E5%87%BD%E6%95%B0-73d1285c-108c-4843-ba5d-a51f90656f3a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/var-p-function',
             },
         ],
         functionParameter: {
@@ -1621,7 +1630,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/var-s-%E5%87%BD%E6%95%B0-913633de-136b-449d-813e-65a00b2b990b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/var-s-function',
             },
         ],
         functionParameter: {
@@ -1635,7 +1644,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/vara-%E5%87%BD%E6%95%B0-3de77469-fa3a-47b4-85fd-81758a1e1d07',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/vara-function',
             },
         ],
         functionParameter: {
@@ -1649,7 +1658,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/varpa-%E5%87%BD%E6%95%B0-59a62635-4e89-4fad-88ac-ce4dc0513b96',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/varpa-function',
             },
         ],
         functionParameter: {
@@ -1663,7 +1672,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/weibull-dist-%E5%87%BD%E6%95%B0-4e783c39-9325-49be-bbc9-a83ef82b45db',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/weibull-dist-function',
             },
         ],
         functionParameter: {
@@ -1679,7 +1688,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/z-test-%E5%87%BD%E6%95%B0-d633d5a3-2031-4614-a016-92180ad82bee',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/z-test-function',
             },
         ],
         functionParameter: {

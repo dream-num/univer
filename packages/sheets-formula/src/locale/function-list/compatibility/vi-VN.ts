@@ -18,95 +18,95 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     BETADIST: {
-        description: 'Trả về hàm phân phối tích lũy beta',
-        abstract: 'Trả về hàm phân phối tích lũy beta',
+        description: 'Trả về hàm mật độ xác suất beta lũy tích. Phân bố beta thường được dùng để nghiên cứu sự biến thiên theo tỷ lệ phần trăm của một số thứ qua các mẫu, chẳng hạn như thời gian trong ngày mà người ta dành để xem ti vi.',
+        abstract: 'Trả về hàm mật độ xác suất beta lũy tích. Phân bố beta thường được dùng để nghiên cứu sự biến thiên theo tỷ lệ phần trăm của một số thứ qua các mẫu, chẳng hạn như thời gian trong ngày mà người ta dành để xem ti vi.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/betadist-%E5%87%BD%E6%95%B0-49f1b9a9-a5da-470f-8077-5f1730b5fd47',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/betadist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'số', detail: 'Giá trị được sử dụng để tính toán hàm của nó, giữa giá trị giới hạn dưới và giá trị giới hạn trên.' },
-            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
-            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
-            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
-            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
+            x: { name: 'số', detail: 'buộc. Giá trị giữa A và B dùng để định trị hàm.' },
+            alpha: { name: 'alpha', detail: 'Yêu cầu. Một tham biến của phân phối.' },
+            beta: { name: 'beta', detail: 'Yêu cầu. Một tham biến của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Tùy chọn. Cận dưới của khoảng x.' },
+            B: { name: 'giới hạn trên', detail: 'chọn. Cận trên của khoảng x.' },
         },
     },
     BETAINV: {
-        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy beta đã cho',
-        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy beta đã cho',
+        description: 'Trả về giá trị nghịch đảo của hàm mật độ xác suất beta lũy tích cho một phân bố beta đã xác định. Tức là, nếu xác suất = BETADIST(x,...) thì BETAINV(xác suất,...) = x. Có thể dùng phân bố beta trong lập kế hoạch dự án để làm mẫu thời gian có thể hoàn thành trên cơ sở thời gian dự kiến và khả năng có sự thay đổi.',
+        abstract: 'Trả về giá trị nghịch đảo của hàm mật độ xác suất beta lũy tích cho một phân bố beta đã xác định. Tức là, nếu xác suất = BETADIST(x,...) thì BETAINV(xác suất,...) = x. Có thể dùng phân bố beta trong lập kế hoạch dự án để làm mẫu thời gian có thể hoàn thành trên cơ sở thời gian dự kiến và khả năng có sự thay đổi.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/betainv-%E5%87%BD%E6%95%B0-8b914ade-b902-43c1-ac9c-c05c54f10d6c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/betainv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố beta.' },
-            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
-            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
-            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
-            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Xác suất gắn với phân bố beta.' },
+            alpha: { name: 'alpha', detail: 'Yêu cầu. Một tham biến của phân phối.' },
+            beta: { name: 'beta', detail: 'Yêu cầu. Tham số phân bố.' },
+            A: { name: 'giới hạn dưới', detail: 'Tùy chọn. Cận dưới của khoảng x.' },
+            B: { name: 'giới hạn trên', detail: 'chọn. Cận trên của khoảng x.' },
         },
     },
     BINOMDIST: {
-        description: 'Trả về xác suất của phân phối nhị thức đơn',
-        abstract: 'Trả về xác suất của phân phối nhị thức đơn',
+        description: 'Trả về xác suất phân bố nhị thức của thuật ngữ riêng lẻ. Hãy dùng BINOMDIST trong các vấn đề có số lượng kiểm định hoặc phép thử ấn định khi kết quả của bất kỳ phép thử nào chỉ là thành công hay thất bại, khi các phép thử là độc lập và khi xác suất thành công không đổi trong suốt quá trình thử nghiệm. Ví dụ, BINOMDIST có thể tính toán xác suất rằng hai trong số ba em bé tiếp theo là bé trai.',
+        abstract: 'Trả về xác suất phân bố nhị thức của thuật ngữ riêng lẻ. Hãy dùng BINOMDIST trong các vấn đề có số lượng kiểm định hoặc phép thử ấn định khi kết quả của bất kỳ phép thử nào chỉ là thành công hay thất bại, khi các phép thử là độc lập và khi xác suất thành công không đổi trong suốt quá trình thử nghiệm. Ví dụ, BINOMDIST có thể tính toán xác suất rằng hai trong số ba em bé tiếp theo là bé trai.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/binomdist-%E5%87%BD%E6%95%B0-506a663e-c4ca-428d-b9a8-05583d68789c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/binomdist-function',
             },
         ],
         functionParameter: {
-            numberS: { name: 'số lần thành công', detail: 'Số lần thành công trong các phép thử.' },
-            trials: { name: 'số phép thử', detail: 'Số phép thử độc lập.' },
-            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm BINOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            numberS: { name: 'số lần thành công', detail: 'Yêu cầu. Số lần thành công trong các phép thử.' },
+            trials: { name: 'số phép thử', detail: 'Yêu cầu. Số phép thử độc lập.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Yêu cầu. Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Yêu cầu. Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì BINOMDIST trả về hàm phân bố lũy tích, là xác suất có nhiều nhất số lần thành công; nếu SAI, nó trả về hàm khối xác suất, là xác suất có số lần thành công.' },
         },
     },
     CHIDIST: {
-        description: 'Trả về xác suất bên phải của phân bố χ2',
-        abstract: 'Trả về xác suất bên phải của phân bố χ2',
+        description: 'Trả về xác suất đầu bên phải của phân bố khi bình phương. Phân bố χ2 gắn với kiểm thử χ2. Hãy dùng kiểm thử χ2 để so sánh các giá trị quan sát được và dự kiến. Ví dụ, thí nghiệm di truyền có thể đưa ra giả thuyết rằng thế hệ tiếp theo của cây trồng sẽ có một bộ màu nhất định. Bằng cách so sánh kết quả quan sát được với kết quả dự kiến, bạn có thể xác định giả thuyết ban đầu của mình có hợp lệ hay không.',
+        abstract: 'Trả về xác suất đầu bên phải của phân bố khi bình phương. Phân bố χ2 gắn với kiểm thử χ2. Hãy dùng kiểm thử χ2 để so sánh các giá trị quan sát được và dự kiến. Ví dụ, thí nghiệm di truyền có thể đưa ra giả thuyết rằng thế hệ tiếp theo của cây trồng sẽ có một bộ màu nhất định. Bằng cách so sánh kết quả quan sát được với kết quả dự kiến, bạn có thể xác định giả thuyết ban đầu của mình có hợp lệ hay không.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/chidist-%E5%87%BD%E6%95%B0-c90d0fbc-5b56-4f5f-ab57-34af1bf6897e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chidist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
-            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
+            x: { name: 'số', detail: 'buộc. Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Yêu cầu. Số bậc tự do.' },
         },
     },
     CHIINV: {
-        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
-        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
+        description: 'Trả về giá trị nghịch đảo của xác suất đầu bên phải của phân bố khi bình phương. Nếu xác suất = CHIDIST(x,...) thì CHIINV(xác suất,...) = x. Hãy dùng hàm này để so sánh kết quả quan sát được với kết quả dự kiến để xác định giả thuyết ban đầu của bạn có hợp lệ hay không.',
+        abstract: 'Trả về giá trị nghịch đảo của xác suất đầu bên phải của phân bố khi bình phương. Nếu xác suất = CHIDIST(x,...) thì CHIINV(xác suất,...) = x. Hãy dùng hàm này để so sánh kết quả quan sát được với kết quả dự kiến để xác định giả thuyết ban đầu của bạn có hợp lệ hay không.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/chiinv-%E5%87%BD%E6%95%B0-cfbea3f6-6e4f-40c9-a87f-20472e0512af',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chiinv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
-            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Xác suất gắn với phân bố khi bình phương.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Yêu cầu. Số bậc tự do.' },
         },
     },
     CHITEST: {
-        description: 'Trả về giá trị kiểm định độc lập',
-        abstract: 'Trả về giá trị kiểm định độc lập',
+        description: 'Trả về kiểm định tính độc lập. CHITEST trả về giá trị từ phân bố (χ2) khi bình phương cho thống kê và bậc tự do phù hợp. Bạn có thể dùng kiểm định χ2 để xác định kết quả được giả thuyết có được thí nghiệm xác nhận hay không.',
+        abstract: 'Trả về kiểm định tính độc lập. CHITEST trả về giá trị từ phân bố (χ2) khi bình phương cho thống kê và bậc tự do phù hợp. Bạn có thể dùng kiểm định χ2 để xác định kết quả được giả thuyết có được thí nghiệm xác nhận hay không.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/chitest-%E5%87%BD%E6%95%B0-981ff871-b694-4134-848e-38ec704577ac',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/chitest-function',
             },
         ],
         functionParameter: {
-            actualRange: { name: 'phạm vi quan sát', detail: 'Phạm vi dữ liệu chứa các quan sát để kiểm thử đối với các giá trị dự kiến.' },
-            expectedRange: { name: 'phạm vi dự kiến', detail: 'Phạm vi dữ liệu chứa tỷ lệ của phép nhân tổng hàng và tổng cột với tổng cộng.' },
+            actualRange: { name: 'phạm vi quan sát', detail: 'Yêu cầu. Phạm vi dữ liệu chứa các quan sát để kiểm thử đối với các giá trị dự kiến.' },
+            expectedRange: { name: 'phạm vi dự kiến', detail: 'Yêu cầu. Phạm vi dữ liệu chứa tỷ lệ của phép nhân tổng hàng và tổng cột với tổng cộng.' },
         },
     },
     CONFIDENCE: {
@@ -115,476 +115,471 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/confidence-%E5%87%BD%E6%95%B0-75ccc007-f77c-4343-bc14-673642091ad6',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/confidence-function',
             },
         ],
         functionParameter: {
-            alpha: { name: 'alpha', detail: 'Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
-            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
-            size: { name: 'cỡ mẫu', detail: 'Cỡ mẫu.' },
+            alpha: { name: 'alpha', detail: 'Yêu cầu. Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
+            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Yêu cầu. Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
+            size: { name: 'cỡ mẫu', detail: 'Yêu cầu. Cỡ mẫu.' },
         },
     },
     COVAR: {
-        description: 'Trả về hiệp phương sai của tập hợp, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
-        abstract: 'Trả về hiệp phương sai của tập hợp',
+        description: 'Trả về hiệp phương sai, trung bình tích của các độ lệch cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai, trung bình tích của các độ lệch cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/covar-%E5%87%BD%E6%95%B0-50479552-2c03-4daf-bd71-a5ab88b2db03',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/covar-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
-            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
+            array1: { name: 'mảng 1', detail: 'Yêu cầu. Phạm vi ô thứ nhất chứa các số nguyên.' },
+            array2: { name: 'mảng 2', detail: 'Yêu cầu. Phạm vi ô thứ hai chứa các số nguyên.' },
         },
     },
     CRITBINOM: {
-        description: 'Trả về giá trị nhỏ nhất mà phân phối nhị thức tích lũy nhỏ hơn hoặc bằng giá trị tới hạn',
-        abstract: 'Trả về giá trị nhỏ nhất mà phân phối nhị thức tích lũy nhỏ hơn hoặc bằng giá trị tới hạn',
+        description: 'Trả về giá trị nhỏ nhất sao cho phân bố nhị thức lũy tích lớn hơn hoặc bằng một giá trị tiêu chí. Dùng hàm này cho các ứng dụng bảo đảm chất lượng. Ví dụ, dùng hàm CRITBINOM để xác định số lượng bộ phận bị hỏng lớn nhất được cho phép để chạy dây chuyền lắp ráp mà không từ chối toàn bộ lô hàng.',
+        abstract: 'Trả về giá trị nhỏ nhất sao cho phân bố nhị thức lũy tích lớn hơn hoặc bằng một giá trị tiêu chí. Dùng hàm này cho các ứng dụng bảo đảm chất lượng. Ví dụ, dùng hàm CRITBINOM để xác định số lượng bộ phận bị hỏng lớn nhất được cho phép để chạy dây chuyền lắp ráp mà không từ chối toàn bộ lô hàng.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/critbinom-%E5%87%BD%E6%95%B0-eb6b871d-796b-4d21-b69b-e4350d5f407b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/critbinom-function',
             },
         ],
         functionParameter: {
-            trials: { name: 'số phép thử', detail: 'Số phép thử Bernoulli.' },
-            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
-            alpha: { name: 'xác suất mục tiêu', detail: 'Giá trị tiêu chí.' },
+            trials: { name: 'số phép thử', detail: 'Yêu cầu. Số phép thử Bernoulli.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Yêu cầu. Xác suất thành công của mỗi phép thử.' },
+            alpha: { name: 'xác suất mục tiêu', detail: 'Yêu cầu. Giá trị tiêu chí.' },
         },
     },
     EXPONDIST: {
-        description: 'Trả về phân phối mũ',
-        abstract: 'Trả về phân phối mũ',
+        description: 'Trả về phân bố hàm mũ. Dùng hàm EXPONDIST để làm mẫu thời gian giữa các sự kiện, chẳng hạn như máy rút tiền tự động cần bao nhiêu thời gian để giao tiền mặt. Ví dụ, bạn có thể dùng hàm EXPONDIST để xác định xác suất quá trình này diễn ra trong nhiều nhất là 1 phút.',
+        abstract: 'Trả về phân bố hàm mũ. Dùng hàm EXPONDIST để làm mẫu thời gian giữa các sự kiện, chẳng hạn như máy rút tiền tự động cần bao nhiêu thời gian để giao tiền mặt. Ví dụ, bạn có thể dùng hàm EXPONDIST để xác định xác suất quá trình này diễn ra trong nhiều nhất là 1 phút.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/expondist-%E5%87%BD%E6%95%B0-68ab45fd-cd6d-4887-9770-9357eb8ee06a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/expondist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
-            lambda: { name: 'lambda', detail: 'Giá trị tham số.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì EXPONDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+            x: { name: 'số', detail: 'buộc. Giá trị của hàm.' },
+            lambda: { name: 'lambda', detail: 'Yêu cầu. Giá trị tham số.' },
+            cumulative: { name: 'tích lũy', detail: 'Yêu cầu. Giá trị lô-gic cho biết cung cấp kiểu hàm mũ nào. Nếu cumulative là TRUE, hàm EXPONDIST trả về hàm phân bố lũy tích; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     FDIST: {
-        description: 'Trả về phân bố xác suất F (đuôi bên phải)',
-        abstract: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        description: 'Trả về phân bố xác suất (mức đa dạng) F (bên phải) cho hai tập dữ liệu. Bạn có thể dùng hàm này để xác định hai tập dữ liệu có mức đa dạng khác nhau hay không. Ví dụ, bạn có thể xem xét điểm kiểm tra của học sinh nam và học sinh nữ tại trường trung học và xác định mức biến đổi trong học sinh nữ có khác với mức đó trong học sinh nam không.',
+        abstract: 'Trả về phân bố xác suất (mức đa dạng) F (bên phải) cho hai tập dữ liệu. Bạn có thể dùng hàm này để xác định hai tập dữ liệu có mức đa dạng khác nhau hay không. Ví dụ, bạn có thể xem xét điểm kiểm tra của học sinh nam và học sinh nữ tại trường trung học và xác định mức biến đổi trong học sinh nữ có khác với mức đó trong học sinh nam không.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/fdist-%E5%87%BD%E6%95%B0-ecf76fba-b3f1-4e7d-a57e-6a5b7460b786',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/fdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
-            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
-            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+            x: { name: 'số', detail: 'buộc. Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Yêu cầu. Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Yêu cầu. Bậc tự do ở mẫu số.' },
         },
     },
     FINV: {
-        description: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
-        abstract: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        description: 'Trả về nghịch đảo của phân bố xác suất F (đầu bên phải). Nếu p = FDIST(x,...), thì FINV(p,...) = x.',
+        abstract: 'Trả về nghịch đảo của phân bố xác suất F (đầu bên phải). Nếu p = FDIST(x,...), thì FINV(p,...) = x.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/finv-%E5%87%BD%E6%95%B0-4d46c97c-c368-4852-bc15-41e8e31140b1',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/finv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
-            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
-            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Yêu cầu. Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Yêu cầu. Bậc tự do ở mẫu số.' },
         },
     },
     FTEST: {
-        description: 'Trả về kết quả kiểm định F',
-        abstract: 'Trả về kết quả kiểm định F',
+        description: 'Trả về kết quả của kiểm tra F-test. Một kiểm tra F-test trả về xác suất hai đầu mà phương sai trong array1 và array1 khác nhau không đáng kể. Dùng hàm này để xác định xem hai mẫu có các phương sai khác nhau không. Ví dụ, biết điểm kiểm tra của các trường công lập và trường tư thục, bạn có thể kiểm tra xem những trường này có các mức điểm số kiểm tra khác nhau hay không.',
+        abstract: 'Trả về kết quả của kiểm tra F-test. Một kiểm tra F-test trả về xác suất hai đầu mà phương sai trong array1 và array1 khác nhau không đáng kể. Dùng hàm này để xác định xem hai mẫu có các phương sai khác nhau không. Ví dụ, biết điểm kiểm tra của các trường công lập và trường tư thục, bạn có thể kiểm tra xem những trường này có các mức điểm số kiểm tra khác nhau hay không.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/ftest-%E5%87%BD%E6%95%B0-4c9e1202-53fe-428c-a737-976f6fc3f9fd',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ftest-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
-            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
+            array1: { name: 'mảng 1', detail: 'Yêu cầu. Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Yêu cầu. Mảng thứ hai của phạm vi dữ liệu.' },
         },
     },
     GAMMADIST: {
-        description: 'Trả về phân phối γ',
-        abstract: 'Trả về phân phối γ',
+        description: 'Trả về phân bố gamma. Bạn có thể dùng hàm này để nghiên cứu các biến số có thể có phân bố lệch. Phân bố gamma thường được dùng trong phân tích hàng đợi.',
+        abstract: 'Trả về phân bố gamma. Bạn có thể dùng hàm này để nghiên cứu các biến số có thể có phân bố lệch. Phân bố gamma thường được dùng trong phân tích hàng đợi.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/gammadist-%E5%87%BD%E6%95%B0-7327c94d-0f05-4511-83df-1dd7ed23e19e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gammadist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
-            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
-            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm GAMMADIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            x: { name: 'x', detail: 'buộc. Giái trị bạn muốn đánh giá phân phối.' },
+            alpha: { name: 'alpha', detail: 'Yêu cầu. Một tham biến tới phân phối.' },
+            beta: { name: 'beta', detail: 'Yêu cầu. Một tham biến tới phân phối. Nếu beta = 1, GAMMADIST trả về phân bố gamma chuẩn.' },
+            cumulative: { name: 'tích lũy', detail: 'Yêu cầu. Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm GAMMADIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     GAMMAINV: {
-        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy γ',
-        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy γ',
+        description: 'Trả về giá trị đảo của phân bố lũy tích gamma. Nếu p = GAMMADIST(x,...), thì GAMMAINV(p,...) = x. Bạn có thể dùng hàm này để nghiên cứu các biến số mà phân bố của chúng có thể là đối xứng lệch.',
+        abstract: 'Trả về giá trị đảo của phân bố lũy tích gamma. Nếu p = GAMMADIST(x,...), thì GAMMAINV(p,...) = x. Bạn có thể dùng hàm này để nghiên cứu các biến số mà phân bố của chúng có thể là đối xứng lệch.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/gammainv-%E5%87%BD%E6%95%B0-06393558-37ab-47d0-aa63-432f99e7916d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/gammainv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố gamma.' },
-            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
-            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Xác xuất gắn với phân bố gamma.' },
+            alpha: { name: 'alpha', detail: 'Yêu cầu. Một tham biến tới phân phối.' },
+            beta: { name: 'beta', detail: 'Yêu cầu. Một tham biến tới phân phối. Nếu beta = 1, GAMMAINV trả về phân bố gamma chuẩn.' },
         },
     },
     HYPGEOMDIST: {
-        description: 'Trả về phân bố siêu bội.',
-        abstract: 'Trả về phân bố siêu bội.',
+        description: 'Trả về phân bố siêu bội. Hàm HYPGEOMDIST trả về xác suất của số lần thành công mẫu đã biết, biết trước kích thước mẫu, thành công của tập hợp và kích cỡ của tập hợp. Dùng hàm HYPGEOMDIST cho các vấn đề về tập hợp hữu hạn, trong đó mỗi quan sát có thể là thành công hoặc thất bại và trong đó mỗi tập con có kích thước đã biết được chọn với khả năng như nhau.',
+        abstract: 'Trả về phân bố siêu bội. Hàm HYPGEOMDIST trả về xác suất của số lần thành công mẫu đã biết, biết trước kích thước mẫu, thành công của tập hợp và kích cỡ của tập hợp. Dùng hàm HYPGEOMDIST cho các vấn đề về tập hợp hữu hạn, trong đó mỗi quan sát có thể là thành công hoặc thất bại và trong đó mỗi tập con có kích thước đã biết được chọn với khả năng như nhau.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/hypgeomdist-%E5%87%BD%E6%95%B0-23e37961-2871-4195-9629-d0b2c108a12e',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/hypgeomdist-function',
             },
         ],
         functionParameter: {
-            sampleS: { name: 'Số lần thành công mẫu', detail: 'Số lần thành công trong mẫu.' },
-            numberSample: { name: 'Kích thước mẫu', detail: 'Kích thước mẫu.' },
-            populationS: { name: 'Tổng số thành công', detail: 'Số lượng thành công trong dân số.' },
-            numberPop: { name: 'Kích thước tổng thể', detail: 'Kích thước tổng thể.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm HYPGEOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            sampleS: { name: 'Số lần thành công mẫu', detail: 'Yêu cầu. Số lần thành công trong mẫu.' },
+            numberSample: { name: 'Kích thước mẫu', detail: 'Yêu cầu. Kích thước của mẫu.' },
+            populationS: { name: 'Tổng số thành công', detail: 'Yêu cầu. Số lần thành công trong tập hợp.' },
+            numberPop: { name: 'Kích thước tổng thể', detail: 'Yêu cầu. Kích thước của tập hợp.' },
         },
     },
     LOGINV: {
-        description: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
-        abstract: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
+        description: 'Trả về nghịch đảo của hàm phân phối lô-ga-rit chuẩn lũy tích của x, trong đó ln(x) thường được phân bố với tham số trung bình và độ lệch chuẩn. Nếu p = LOGNORMDIST(x,...), khi đó LOGINV(p,...) = x.',
+        abstract: 'Trả về nghịch đảo của hàm phân phối lô-ga-rit chuẩn lũy tích của x, trong đó ln(x) thường được phân bố với tham số trung bình và độ lệch chuẩn. Nếu p = LOGNORMDIST(x,...), khi đó LOGINV(p,...) = x.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/loginv-%E5%87%BD%E6%95%B0-0bd7631a-2725-482b-afb4-de23df77acfe',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/loginv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố lô-ga-rit chuẩn.' },
-            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
-            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Một xác suất gắn với phân bố lô-ga-rit chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Yêu cầu. Trung bình của ln(x).' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Yêu cầu. Độ lệch chuẩn của ln(x).' },
         },
     },
     LOGNORMDIST: {
-        description: 'Trả về phân bố chuẩn lô-ga-rít của',
-        abstract: 'Trả về phân bố chuẩn lô-ga-rít của',
+        description: 'Trả về phân bố chuẩn lô-ga-rít lũy tích của x, trong đó ln(x) thường được phân bố với trung bình tham số và độ lệch chuẩn. Dùng hàm này để phân tích những dữ liệu đã được biến đổi theo lô-ga-rit.',
+        abstract: 'Trả về phân bố chuẩn lô-ga-rít lũy tích của x, trong đó ln(x) thường được phân bố với trung bình tham số và độ lệch chuẩn. Dùng hàm này để phân tích những dữ liệu đã được biến đổi theo lô-ga-rit.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/lognormdist-%E5%87%BD%E6%95%B0-f8d194cb-9ee3-4034-8c75-1bdb3884100b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/lognormdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
-            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
-            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì LOGNORMDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+            x: { name: 'x', detail: 'buộc. Giá trị để đánh giá hàm.' },
+            mean: { name: 'trung độ số', detail: 'Yêu cầu. Trung bình của ln(x).' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Yêu cầu. Độ lệch chuẩn của ln(x).' },
         },
     },
     MODE: {
-        description: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
-        abstract: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
+        description: 'Giả sử bạn muốn tìm hiểu số lượng loài chim phổ biến nhất bị nhìn thấy trong một mẫu số lượng chim tại một vùng ngập nước quan trọng trong khoảng thời gian 30 năm, hoặc bạn muốn tìm số lượng cuộc gọi điện thoại thường xuyên nhất tại một trung tâm hỗ trợ qua điện thoại trong giờ thấp điểm. Để tính toán chế độ của một nhóm số, hãy sử dụng hàm MODE .',
+        abstract: 'Giả sử bạn muốn tìm hiểu số lượng loài chim phổ biến nhất bị nhìn thấy trong một mẫu số lượng chim tại một vùng ngập nước quan trọng trong khoảng thời gian 30 năm, hoặc bạn muốn tìm số lượng cuộc gọi điện thoại thường xuyên nhất tại một trung tâm hỗ trợ qua điện thoại trong giờ thấp điểm. Để tính toán chế độ của một nhóm số, hãy sử dụng hàm MODE .',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/mode-%E5%87%BD%E6%95%B0-e45192ce-9122-4980-82ed-4bdc34973120',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/mode-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô mà chế độ sẽ được tính toán.' },
-            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính chế độ.' },
+            number1: { name: 'số 1', detail: 'Yêu cầu. Đối số dạng số đầu tiên cho những gì bạn muốn tính số yếu vị.' },
+            number2: { name: 'số 2', detail: 'Tùy chọn. Các đối số dạng số từ 2 tới 255 mà bạn muốn tính toán số yếu vị trong đó. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
         },
     },
     NEGBINOMDIST: {
-        description: 'Trả về phân bố nhị thức âm',
-        abstract: 'Trả về phân bố nhị thức âm',
+        description: 'Trả về phân bố nhị thức âm. Hàm NEGBINOMDIST trả về xác suất sẽ có number_f lần thất bại trước thành công thứ number_s, khi xác suất không đổi của một lần thành công là probability_s. Hàm này tương tự như phân bố nhị thức, ngoại trừ việc số lần thành công được cố định và số lần thử biến đổi. Giống như phân bố nhị thức, số lần thử được giả định là độc lập.',
+        abstract: 'Trả về phân bố nhị thức âm. Hàm NEGBINOMDIST trả về xác suất sẽ có number_f lần thất bại trước thành công thứ number_s, khi xác suất không đổi của một lần thành công là probability_s. Hàm này tương tự như phân bố nhị thức, ngoại trừ việc số lần thành công được cố định và số lần thử biến đổi. Giống như phân bố nhị thức, số lần thử được giả định là độc lập.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/negbinomdist-%E5%87%BD%E6%95%B0-f59b0a37-bae2-408d-b115-a315609ba714',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/negbinomdist-function',
             },
         ],
         functionParameter: {
-            numberF: { name: 'số lần thất bại.', detail: 'Số lần thất bại.' },
-            numberS: { name: 'số lần thành công', detail: 'Số ngưỡng thành công.' },
-            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm NEGBINOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            numberF: { name: 'số lần thất bại.', detail: 'Yêu cầu. Số lần thất bại.' },
+            numberS: { name: 'số lần thành công', detail: 'Yêu cầu. Số ngưỡng thành công.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Yêu cầu. Xác suất thành công.' },
         },
     },
     NORMDIST: {
-        description: 'Trả về hàm phân phối tích lũy chuẩn',
-        abstract: 'Trả về hàm phân phối tích lũy chuẩn',
+        description: 'Hàm NORMDIST trả về phân bố chuẩn cho độ lệch chuẩn và giá trị trung độ đã xác định. Hàm này có một loạt các ứng dụng trong thống kê, bao gồm kiểm tra giả thuyết.',
+        abstract: 'Hàm NORMDIST trả về phân bố chuẩn cho độ lệch chuẩn và giá trị trung độ đã xác định. Hàm này có một loạt các ứng dụng trong thống kê, bao gồm kiểm tra giả thuyết.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/normdist-%E5%87%BD%E6%95%B0-126db625-c53e-4591-9a22-c9ff422d6d58',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/normdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
-            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
-            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORMDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+            x: { name: 'x', detail: 'buộc. Giá trị mà bạn muốn có phân bố của nó' },
+            mean: { name: 'trung độ số', detail: 'Yêu cầu. Trung bình số học của phân bố' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Yêu cầu. Độ lệch chuẩn của phân bố' },
+            cumulative: { name: 'tích lũy', detail: 'Yêu cầu. Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là TRUE, thì hàm NORMDIST trả về hàm phân bố lũy tích; nếu lũy tích là FALSE, nó trả về hàm khối xác suất.' },
         },
     },
     NORMINV: {
-        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy chuẩn',
-        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy chuẩn',
+        description: 'Trả về nghịch đảo của phân bố lũy tích chuẩn với độ lệch chuẩn và giá trị trung độ đã xác định.',
+        abstract: 'Trả về nghịch đảo của phân bố lũy tích chuẩn với độ lệch chuẩn và giá trị trung độ đã xác định.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/norminv-%E5%87%BD%E6%95%B0-87981ab8-2de0-4cb0-b1aa-e21d4cb879b8',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/norminv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
-            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
-            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Một xác suất tương ứng với phân bố chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Yêu cầu. Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Yêu cầu. Độ lệch chuẩn của phân phối.' },
         },
     },
     NORMSDIST: {
-        description: 'Trả về hàm phân phối tích lũy chuẩn hóa',
-        abstract: 'Trả về hàm phân phối tích lũy chuẩn hóa',
+        description: 'Trả về hàm phân bố lũy tích chuẩn chuẩn hóa. Phân bố có giá trị trung độ bằng 0 (không) và độ lệch chuẩn là một. Dùng hàm này thay cho bảng chứa các vùng đường cong chuẩn chuẩn hóa.',
+        abstract: 'Trả về hàm phân bố lũy tích chuẩn chuẩn hóa. Phân bố có giá trị trung độ bằng 0 (không) và độ lệch chuẩn là một. Dùng hàm này thay cho bảng chứa các vùng đường cong chuẩn chuẩn hóa.',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/vi-vn/office/normsdist-%E5%87%BD%E6%95%B0-463369ea-0345-445d-802a-4ff0d6ce7cac',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/normsdist-function',
             },
         ],
         functionParameter: {
-            z: { name: 'z', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            z: { name: 'z', detail: 'buộc. Giá trị mà bạn muốn có phân bố của nó.' },
         },
     },
-
     NORMSINV: {
-        description: 'Trả về hàm nghịch đảo phân phối chuẩn chuẩn hóa',
-        abstract: 'Trả về hàm nghịch đảo phân phối chuẩn chuẩn hóa',
+        description: 'Trả về giá trị đảo của phân bố lũy tích chuẩn chuẩn hóa. Phân bố có giá trị trung bình bằng không và độ lệch chuẩn là một.',
+        abstract: 'Trả về giá trị đảo của phân bố lũy tích chuẩn chuẩn hóa. Phân bố có giá trị trung bình bằng không và độ lệch chuẩn là một.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/normsinv-%E5%87%BD%E6%95%B0-8d1bce66-8e4d-4f3b-967c-30eed61f019d',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/normsinv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Một xác suất tương ứng với phân bố chuẩn.' },
         },
     },
     PERCENTILE: {
-        description: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
-        abstract: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
+        description: 'Trả về phân vị thứ k của các giá trị trong phạm vi. Bạn có thể dùng hàm này để thiết lập ngưỡng chấp nhận. Ví dụ, bạn có thể quyết định kiểm tra những ứng viên đạt điểm cao hơn phân vị thứ 90.',
+        abstract: 'Trả về phân vị thứ k của các giá trị trong phạm vi. Bạn có thể dùng hàm này để thiết lập ngưỡng chấp nhận. Ví dụ, bạn có thể quyết định kiểm tra những ứng viên đạt điểm cao hơn phân vị thứ 90.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/percentile-%E5%87%BD%E6%95%B0-91b43a53-543c-4708-93de-d626debdddca',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/percentile-function',
             },
         ],
         functionParameter: {
-            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
-            k: { name: 'k', detail: 'Giá trị phần trăm từ 0 đến 1 (bao gồm 0 và 1).' },
+            array: { name: 'mảng', detail: 'Yêu cầu. Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            k: { name: 'k', detail: 'buộc. Giá trị phân vị trong phạm vi 0..1, bao gồm cả 0 và 1.' },
         },
     },
     PERCENTRANK: {
-        description: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
-        abstract: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
+        description: 'Hàm PERCENTRANK trả về thứ hạng của một giá trị trong tập dữ liệu dưới dạng tỷ lệ phần trăm của tập dữ liệu -- về cơ bản, vị trí tương đối của một giá trị trong toàn bộ tập dữ liệu. Ví dụ, bạn có thể dùng hàm PERCENTRANK để xác định vị thế của điểm kiểm tra của một cá nhân trong số tất cả các điểm số của cùng một bài kiểm tra.',
+        abstract: 'Hàm PERCENTRANK trả về thứ hạng của một giá trị trong tập dữ liệu dưới dạng tỷ lệ phần trăm của tập dữ liệu -- về cơ bản, vị trí tương đối của một giá trị trong toàn bộ tập dữ liệu. Ví dụ, bạn có thể dùng hàm PERCENTRANK để xác định vị thế của điểm kiểm tra của một cá nhân trong số tất cả các điểm số của cùng một bài kiểm tra.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/percentrank-%E5%87%BD%E6%95%B0-f1b5836c-9619-4847-9fc9-080ec9024442',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/percentrank-function',
             },
         ],
         functionParameter: {
-            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
-            x: { name: 'x', detail: 'Giá trị mà bạn muốn biết thứ hạng của nó.' },
-            significance: { name: 'chữ số có nghĩa', detail: 'Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK dùng ba chữ số (0.xxx).' },
+            array: { name: 'mảng', detail: 'Yêu cầu. Phạm vi dữ liệu (hoặc mảng xác định trước) của các giá trị số trong đó thứ hạng phần trăm được xác định.' },
+            x: { name: 'x', detail: 'buộc. Giá trị mà bạn muốn biết thứ hạng trong mảng.' },
+            significance: { name: 'chữ số có nghĩa', detail: 'Tùy chọn. Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK dùng ba chữ số (0.xxx).' },
         },
     },
     POISSON: {
-        description: 'Trả về phân bố Poisson.',
-        abstract: 'Trả về phân bố Poisson.',
+        description: 'Trả về phân bố Poisson. Một ứng dụng thường gặp của phân bố Poisson là để dự đoán số sự kiện trong một thời gian cụ thể, chẳng hạn như số xe tới một trạm thu phí trong 1 phút.',
+        abstract: 'Trả về phân bố Poisson. Một ứng dụng thường gặp của phân bố Poisson là để dự đoán số sự kiện trong một thời gian cụ thể, chẳng hạn như số xe tới một trạm thu phí trong 1 phút.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/poisson-%E5%87%BD%E6%95%B0-d81f7294-9d7c-4f75-bc23-80aa8624173a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/poisson-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
-            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì POISSON trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+            x: { name: 'x', detail: 'buộc. Số sự kiện.' },
+            mean: { name: 'trung độ số', detail: 'Yêu cầu. Giá trị dạng số ước tính.' },
+            cumulative: { name: 'tích lũy', detail: 'Yêu cầu. Giá trị lô-gic xác định dạng thức của phân bố xác suất được trả về. Nếu lũy tích là TRUE, thì hàm POISSON trả về xác xuất Poisson lũy tích mà một số sự kiện ngẫu nhiên sẽ xảy ra từ không đến x, bao gồm cả không và x; nếu FALSE, nó trả về hàm khối xác xuất Poission mà số sự kiện xảy ra sẽ chính xác là x.' },
         },
     },
     QUARTILE: {
-        description: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
-        abstract: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
+        description: 'Trả về tứ phân vị của tập dữ liệu. Tứ phân vị được dùng trong dữ liệu khảo sát và bán hàng để chia tập hợp thành các nhóm. Ví dụ, bạn có thể dùng hàm QUARTILE để tìm ra 25% số người có thu nhập cao nhất trong một tập hợp dân cư.',
+        abstract: 'Trả về tứ phân vị của tập dữ liệu. Tứ phân vị được dùng trong dữ liệu khảo sát và bán hàng để chia tập hợp thành các nhóm. Ví dụ, bạn có thể dùng hàm QUARTILE để tìm ra 25% số người có thu nhập cao nhất trong một tập hợp dân cư.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/quartile-%E5%87%BD%E6%95%B0-93cf8f62-60cd-4fdb-8a92-8451041e1a2a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/quartile-function',
             },
         ],
         functionParameter: {
-            array: { name: 'mảng', detail: 'Một mảng hoặc phạm vi dữ liệu yêu cầu giá trị tứ phân vị.' },
-            quart: { name: 'giá trị tứ phân', detail: 'Giá trị tứ phân vị cần trả về.' },
+            array: { name: 'mảng', detail: 'Yêu cầu. Mảng hoặc phạm vi ô có chứa các giá trị số mà bạn muốn tìm giá trị tứ phân vị.' },
+            quart: { name: 'giá trị tứ phân', detail: 'Yêu cầu. Chỉ rõ giá trị nào cần trả về.' },
         },
     },
     RANK: {
-        description: 'Trả về xếp hạng của một chuỗi số',
-        abstract: 'Trả về xếp hạng của một chuỗi số',
+        description: 'Trả về thứ hạng của một số trong danh sách các số. Thứ hạng của số là kích thước của nó trong tương quan với các giá trị khác trong danh sách. (Nếu bạn cần sắp xếp danh sách, thì thứ hạng của số là vị trí của nó).',
+        abstract: 'Trả về thứ hạng của một số trong danh sách các số. Thứ hạng của số là kích thước của nó trong tương quan với các giá trị khác trong danh sách. (Nếu bạn cần sắp xếp danh sách, thì thứ hạng của số là vị trí của nó).',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/rank-%E5%87%BD%E6%95%B0-6a2fc49d-1831-4a03-9d8c-c279cf99f723',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/rank-function',
             },
         ],
         functionParameter: {
-            number: { name: 'số', detail: 'Số mà bạn muốn tìm thứ hạng của nó.' },
-            ref: { name: 'danh sách các số', detail: 'Tham chiếu tới danh sách các số. Các giá trị không phải là số trong tham chiếu sẽ được bỏ qua.' },
-            order: { name: 'xếp hạng số', detail: 'Một con số chỉ rõ cách xếp hạng số. 0 hoặc bị bỏ qua đối với thứ tự giảm dần, khác 0 đối với thứ tự tăng dần.' },
+            number: { name: 'số', detail: 'Yêu cầu. Số mà bạn muốn tìm thứ hạng của nó.' },
+            ref: { name: 'danh sách các số', detail: 'Yêu cầu. Tham chiếu tới danh sách các số. Các giá trị không phải là số trong tham chiếu sẽ được bỏ qua.' },
+            order: { name: 'xếp hạng số', detail: 'Tùy chọn. Một con số chỉ rõ cách xếp hạng số. Nếu thứ tự là 0 (không) hoặc được bỏ qua, thì Microsoft Excel xếp hạng số giống như khi tham chiếu là một danh sách theo thứ tự giảm dần. Nếu thứ tự là bất kỳ giá trị nào khác không, thì Microsoft Excel xếp hạng số giống như khi tham chiếu là một danh sách theo thứ tự tăng dần.' },
         },
     },
     STDEV: {
-        description: 'Ước tính độ lệch chuẩn dựa trên mẫu. Độ lệch chuẩn đo lường phạm vi phân bố của các giá trị xung quanh giá trị trung bình (hay trung vị).',
-        abstract: 'Ước tính độ lệch chuẩn dựa trên mẫu',
+        description: 'Ước tính độ lệch chuẩn dựa trên một mẫu. Độ lệch chuẩn là số đo độ phân tán của các giá trị so với giá trị trung bình (trung độ).',
+        abstract: 'Ước tính độ lệch chuẩn dựa trên một mẫu. Độ lệch chuẩn là số đo độ phân tán của các giá trị so với giá trị trung bình (trung độ).',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/stdev-%E5%87%BD%E6%95%B0-51fecaaa-231e-4bbb-9230-33650a72c9b0',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/stdev-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số số 1, tương ứng với giá trị mẫu đầu tiên.' },
-            number2: { name: 'number2', detail: 'Tham số số 2, tương ứng với các giá trị mẫu từ 2 đến 255. Cũng có thể sử dụng mảng đơn hoặc tham chiếu đến mảng thay vì sử dụng các tham số được phân tách bằng dấu phẩy.' },
+            number1: { name: 'number1', detail: 'Yêu cầu. Đối số dạng số đầu tiên tương ứng với mẫu tổng thể.' },
+            number2: { name: 'number2', detail: 'Tùy chọn. Đối số dạng số từ 2 đến 255 tương ứng với mẫu tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
         },
     },
     STDEVP: {
-        description: 'Tính độ lệch chuẩn của toàn bộ quần thể được cung cấp dưới dạng tham số.',
-        abstract: 'Tính độ lệch chuẩn của toàn bộ quần thể được cung cấp dưới dạng tham số',
+        description: 'Tính toán độ lệch chuẩn dựa trên toàn bộ tổng thể được cung cấp ở dạng đối số. Độ lệch chuẩn là số đo độ phân tán của các giá trị so với giá trị trung bình (trung độ).',
+        abstract: 'Tính toán độ lệch chuẩn dựa trên toàn bộ tổng thể được cung cấp ở dạng đối số. Độ lệch chuẩn là số đo độ phân tán của các giá trị so với giá trị trung bình (trung độ).',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/stdevp-%E5%87%BD%E6%95%B0-1f7c1c88-1bec-4422-8242-e9f7dc8bb195',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/stdevp-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số số 1, tương ứng với giá trị mẫu đầu tiên.' },
-            number2: { name: 'number2', detail: 'Tham số số 2, tương ứng với các giá trị mẫu từ 2 đến 255. Cũng có thể sử dụng mảng đơn hoặc tham chiếu đến mảng thay vì sử dụng các tham số được phân tách bằng dấu phẩy.' },
+            number1: { name: 'number1', detail: 'Yêu cầu. Đối số dạng số đầu tiên tương ứng với tổng thể.' },
+            number2: { name: 'number2', detail: 'Tùy chọn. Đối số dạng số từ 2 đến 255 tương ứng với tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
         },
     },
     TDIST: {
-        description: 'Trả về phân phối xác suất t-Student của Học sinh',
-        abstract: 'Trả về phân phối xác suất t-Student của Học sinh',
+        description: 'Trả về các Điểm Phần trăm (xác suất) cho phân bố t Student, trong đó giá trị số (x) là giá trị tính toán của t và được dùng để tính các Điểm Phần trăm. Phân bố t được dùng trong kiểm tra giả thuyết của các tập dữ liệu mẫu có số lượng nhỏ. Hàm này được dùng thay cho bảng các giá trị cực độ của phân phối t.',
+        abstract: 'Trả về các Điểm Phần trăm (xác suất) cho phân bố t Student, trong đó giá trị số (x) là giá trị tính toán của t và được dùng để tính các Điểm Phần trăm. Phân bố t được dùng trong kiểm tra giả thuyết của các tập dữ liệu mẫu có số lượng nhỏ. Hàm này được dùng thay cho bảng các giá trị cực độ của phân phối t.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/tdist-%E5%87%BD%E6%95%B0-630a7695-4021-4853-9468-4a1f9dcdd192',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/tdist-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'Cần tính giá trị số của phân bố.' },
-            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
-            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số phần dư của phân bố được trả về. Nếu Tails = 1, hàm TDIST sẽ trả về phân bố một phía. Nếu Tails = 2, hàm TDIST sẽ trả về phân bố hai phía.' },
+            x: { name: 'x', detail: 'buộc. Giá trị số dùng để đánh giá phân bố.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Yêu cầu. Là một số nguyên cho biết số bậc tự do.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Yêu cầu. Xác định số phần dư của phân bố được trả về. Nếu Tails = 1, hàm TDIST sẽ trả về phân bố một phía. Nếu Tails = 2, hàm TDIST sẽ trả về phân bố hai phía.' },
         },
     },
     TINV: {
-        description: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
-        abstract: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
+        description: 'Trả về nghịch đảo hai phía của phân bố t Student.',
+        abstract: 'Trả về nghịch đảo hai phía của phân bố t Student.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/tinv-%E5%87%BD%E6%95%B0-a7c85b9d-90f5-41fe-9ca5-1cd2f3e1ed7c',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/tinv-function',
             },
         ],
         functionParameter: {
-            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối t-Student của Sinh viên.' },
-            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+            probability: { name: 'xác suất', detail: 'Yêu cầu. Xác xuất kết hợp với phân bố t Student hai phía.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Yêu cầu. Số bậc tự do biểu thị đặc điểm của phân bố.' },
         },
     },
     TTEST: {
-        description: 'Trả về xác suất kết hợp với Phép thử t-Student.',
-        abstract: 'Trả về xác suất kết hợp với Phép thử t-Student.',
+        description: 'Trả về xác suất kết hợp với Phép thử t Student. Dùng hàm TTEST để xác định xem hai mẫu thử có xuất phát từ hai tập hợp gốc có cùng giá trị trung bình hay không.',
+        abstract: 'Trả về xác suất kết hợp với Phép thử t Student. Dùng hàm TTEST để xác định xem hai mẫu thử có xuất phát từ hai tập hợp gốc có cùng giá trị trung bình hay không.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/ttest-%E5%87%BD%E6%95%B0-1696ffc1-4811-40fd-9d13-a0eaad83c7ae',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ttest-function',
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
-            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
-            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số đuôi của phân phối. Nếu đuôi = 1, TTEST sử dụng phân phối một phía. Nếu đuôi = 2, TTEST sử dụng phân phối hai phía.' },
-            type: { name: 'loại Phép thử', detail: 'Loại Phép thử t cần thực hiện.' },
+            array1: { name: 'mảng 1', detail: 'Yêu cầu. Tập dữ liệu thứ nhất.' },
+            array2: { name: 'mảng 2', detail: 'Yêu cầu. Tập dữ liệu thứ hai.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Yêu cầu. Xác định số phần dư của phân bố. Nếu tails = 1, hàm TTEST dùng phân bố một phía. Nếu tails = 2, hàm TTEST dùng phân bố hai phía.' },
+            type: { name: 'loại Phép thử', detail: 'Yêu cầu. Kiểu phép thử t-Test cần thực hiện.' },
         },
     },
     VAR: {
-        description: 'Tính toán phương sai dựa trên mẫu cho tập dữ liệu cho trước.',
-        abstract: 'Tính toán phương sai dựa trên mẫu',
+        description: 'Ước tính phương sai dựa trên mẫu.',
+        abstract: 'Ước tính phương sai dựa trên mẫu.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/var-%E5%87%BD%E6%95%B0-1f2b7ab2-954d-4e17-ba2c-9e58b15a7da2',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/var-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số số 1, tương ứng với giá trị mẫu đầu tiên.' },
-            number2: { name: 'number2', detail: 'Tham số số 2, tương ứng với các giá trị mẫu từ 2 đến 255.' },
+            number1: { name: 'number1', detail: 'Yêu cầu. Đối số dạng số đầu tiên tương ứng với mẫu tổng thể.' },
+            number2: { name: 'number2', detail: 'Tùy chọn. Là các đối số dạng số từ 2 đến 255 tương ứng với một mẫu của một tập hợp.' },
         },
     },
     VARP: {
-        description: 'Tính toán phương sai dựa trên toàn bộ quần thể cho tập dữ liệu cho trước.',
-        abstract: 'Tính toán phương sai dựa trên toàn bộ quần thể',
+        description: 'Tính toán phương sai dựa trên toàn bộ tập hợp.',
+        abstract: 'Tính toán phương sai dựa trên toàn bộ tập hợp.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/varp-%E5%87%BD%E6%95%B0-26a541c4-ecee-464d-a731-bd4c575b1a6b',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/varp-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số số 1, tương ứng với giá trị mẫu đầu tiên.' },
-            number2: { name: 'number2', detail: 'Tham số số 2, tương ứng với các giá trị mẫu từ 2 đến 255.' },
+            number1: { name: 'number1', detail: 'Yêu cầu. Đối số dạng số đầu tiên tương ứng với tổng thể.' },
+            number2: { name: 'number2', detail: 'Tùy chọn. Là các đối số dạng số từ 2 đến 255 tương ứng với một tập hợp.' },
         },
     },
     WEIBULL: {
-        description: 'Trả về phân bố Weibull.',
-        abstract: 'Trả về phân bố Weibull.',
+        description: 'Trả về phân bố Weibull. Dùng phân bố này trong phân tích độ tin cậy, chẳng hạn như tính toán tuổi thọ trung bình của một thiết bị.',
+        abstract: 'Trả về phân bố Weibull. Dùng phân bố này trong phân tích độ tin cậy, chẳng hạn như tính toán tuổi thọ trung bình của một thiết bị.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/weibull-%E5%87%BD%E6%95%B0-b83dc2c6-260b-4754-bef2-633196f6fdcc',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/weibull-function',
             },
         ],
         functionParameter: {
-            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
-            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
-            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm WEIBULL trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            x: { name: 'x', detail: 'buộc. Giá trị để đánh giá hàm.' },
+            alpha: { name: 'alpha', detail: 'Yêu cầu. Một tham biến tới phân phối.' },
+            beta: { name: 'beta', detail: 'Yêu cầu. Một tham biến tới phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Yêu cầu. Xác định dạng hàm.' },
         },
     },
     ZTEST: {
-        description: 'Trả về giá trị xác suất một phía của kiểm tra z.',
-        abstract: 'Trả về giá trị xác suất một phía của kiểm tra z.',
+        description: 'Trả về giá trị xác suất một phía của kiểm tra z. Đối với một trung bình tổng thể giả thuyết nhất định, μ0, hàm ZTEST trả về xác suất rằng trung độ mẫu sẽ lớn hơn trung bình quan sát trong bộ dữ liệu (mảng) — tức là, trung độ mẫu quan sát được.',
+        abstract: 'Trả về giá trị xác suất một phía của kiểm tra z. Đối với một trung bình tổng thể giả thuyết nhất định, μ0, hàm ZTEST trả về xác suất rằng trung độ mẫu sẽ lớn hơn trung bình quan sát trong bộ dữ liệu (mảng) — tức là, trung độ mẫu quan sát được.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/ztest-%E5%87%BD%E6%95%B0-8f33be8a-6bd6-4ecc-8e3a-d9a4420c4a6a',
+                url: 'https://support.microsoft.com/vi-vn/excel/functions/ztest-function',
             },
         ],
         functionParameter: {
-            array: { name: 'mảng', detail: 'Mảng hay khoảng dữ liệu để kiểm tra x.' },
-            x: { name: 'x', detail: 'Giá trị cần kiểm tra.' },
-            sigma: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn tổng thể (đã biết). Nếu bỏ qua, độ lệch chuẩn mẫu sẽ được dùng.' },
+            array: { name: 'mảng', detail: 'Yêu cầu. Mảng hay khoảng dữ liệu để kiểm tra x.' },
+            x: { name: 'x', detail: 'buộc. Giá trị cần kiểm tra.' },
+            sigma: { name: 'Độ lệch chuẩn', detail: 'Tùy chọn. Độ lệch chuẩn tổng thể (đã biết). Nếu bỏ qua, độ lệch chuẩn mẫu sẽ được dùng.' },
         },
     },
-
 };
 
 export default locale;

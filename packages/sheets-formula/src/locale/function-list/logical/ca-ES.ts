@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/and-function-5f19b2e8-e1df-4408-897a-ce285a19e9d9',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/and-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/bycol-function-58463999-7de5-49ce-8f38-b7f7a2192bfb',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/bycol-function',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/byrow-function-2e04c677-78c8-4e6b-8c10-a4602f2602bb',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/byrow-function',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/false-function-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/false-function',
             },
         ],
         functionParameter: {},
@@ -76,7 +76,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/if-function-69aed7c9-4e8a-4755-a9bc-aa8bbff73be2',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/if-function',
             },
         ],
         functionParameter: {
@@ -97,7 +97,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/iferror-function-c526fd07-caeb-47b8-8bb6-63f3e417f611',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/iferror-function',
             },
         ],
         functionParameter: {
@@ -111,7 +111,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/ifna-function-6626c961-a569-42fc-a49d-79b4951fd461',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/ifna-function',
             },
         ],
         functionParameter: {
@@ -125,7 +125,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/ifs-function-36329a26-37b2-467c-972b-4a39bd951d45',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/ifs-function',
             },
         ],
         functionParameter: {
@@ -141,7 +141,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/lambda-function-bd212d27-1cd1-4321-a34a-ccbf254b8b67',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/lambda-function',
             },
         ],
         functionParameter: {
@@ -161,7 +161,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/let-function-34842dd8-b92b-4d3f-b325-b8b8f9908999',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/let-function',
             },
         ],
         functionParameter: {
@@ -178,7 +178,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/makearray-function-b80da5ad-b338-4149-a523-5b221da09097',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/makearray-function',
             },
         ],
         functionParameter: {
@@ -196,7 +196,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/map-function-48006093-f97c-47c1-bfcc-749263bb1f01',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/map-function',
             },
         ],
         functionParameter: {
@@ -211,7 +211,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/not-function-9cfc6011-a054-40c7-a140-cd4ba2d87d77',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/not-function',
             },
         ],
         functionParameter: {
@@ -224,7 +224,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/or-function-7d17ad14-8700-4281-b308-00b131e22af0',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/or-function',
             },
         ],
         functionParameter: {
@@ -238,7 +238,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/reduce-function-42e39910-b345-45f3-84b8-0642b568b7cb',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/reduce-function',
             },
         ],
         functionParameter: {
@@ -253,7 +253,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/scan-function-d58dfd11-9969-4439-b2dc-e7062724de29',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/scan-function',
             },
         ],
         functionParameter: {
@@ -268,7 +268,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/switch-function-47ab33c0-28ce-4530-8a45-d532ec4aa25e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/switch-function',
             },
         ],
         functionParameter: {
@@ -285,7 +285,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/true-function-7652c6e3-8987-48d0-97cd-ef223246b3fb',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/true-function',
             },
         ],
         functionParameter: {},
@@ -296,7 +296,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instrucció',
-                url: 'https://support.microsoft.com/ca-es/office/xor-function-1548d4c2-5e47-4f77-9a92-0533bba14f37',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/xor-function',
             },
         ],
         functionParameter: {

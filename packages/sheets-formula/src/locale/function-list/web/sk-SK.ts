@@ -18,44 +18,43 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ENCODEURL: {
-        description: 'Vracia URL-kódovaný reťazec',
-        abstract: 'Vracia URL-kódovaný reťazec',
+        description: 'Funkcia ENCODEURL vráti reťazec zakódovaný URL a niektoré nealfanumerické znaky nahradí symbolom percenta (%) a šestnástkovým číslom.',
+        abstract: 'Funkcia ENCODEURL vráti reťazec zakódovaný URL a niektoré nealfanumerické znaky nahradí symbolom percenta (%) a šestnástkovým číslom.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/encodeurl-function',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Reťazec, ktorý sa má URL-kódovať.' },
+            text: { name: 'text', detail: 'Reťazec, ktorého URL adresa sa má zakódovať' },
         },
     },
     FILTERXML: {
-        description: 'Vracia konkrétne údaje z obsahu XML pomocou zadaného XPath',
-        abstract: 'Vracia konkrétne údaje z obsahu XML pomocou zadaného XPath',
+        description: 'Funkcia FILTERXML vráti určité údaje z obsahu XML s použitím zadanej xpath.',
+        abstract: 'Funkcia FILTERXML vráti určité údaje z obsahu XML s použitím zadanej xpath.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/filterxml-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            xml: { name: 'xml', detail: 'Reťazec v platnom formáte XML.' },
+            xpath: { name: 'xpath', detail: 'Reťazec v štandardnom formáte XPath.' },
         },
     },
     WEBSERVICE: {
-        description: 'Vracia údaje z webovej služby',
-        abstract: 'Vracia údaje z webovej služby',
+        description: 'Funkcia WEBSERVICE vráti údaje z webovej služby na internete alebo intranete.',
+        abstract: 'Funkcia WEBSERVICE vráti údaje z webovej služby na internete alebo intranete.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/webservice-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            url: { name: 'url', detail: 'Adresa URL webovej služby.' },
         },
     },
 };

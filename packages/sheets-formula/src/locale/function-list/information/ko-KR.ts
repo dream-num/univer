@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/cell-함수-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/error-type-함수-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -50,94 +50,93 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/info-함수-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: '첫 번째' },
-            number2: { name: 'number2', detail: '두 번째' },
+            typeText: { name: '유형 텍스트', detail: '반환할 정보 유형을 지정하는 텍스트입니다.' },
         },
     },
     ISBETWEEN: {
-        description: '제공된 숫자가 포함적으로 또는 제외적으로 다른 두 숫자 사이에 있는지 확인합니다.',
-        abstract: '제공된 숫자가 포함적으로 또는 제외적으로 다른 두 숫자 사이에 있는지 확인합니다.',
+        description: '제공된 숫자가 다른 두 숫자 사이에 있는지 확인합니다. 다른 두 숫자는 각각 범위에 포함하거나 포함하지 않을 수 있습니다.',
+        abstract: '제공된 숫자가 다른 두 숫자 사이에 있는지 확인합니다. 다른 두 숫자는 각각 범위에 포함하거나 포함하지 않을 수 있습니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/10538337?hl=ko&sjid=7730820672019533290-AP',
+                url: 'https://support.google.com/docs/answer/10538337?hl=ko',
             },
         ],
         functionParameter: {
-            valueToCompare: { name: 'value_to_compare', detail: '`lower_value`와 `upper_value` 사이에 있는지 테스트할 값입니다.' },
-            lowerValue: { name: 'lower_value', detail: '`value_to_compare`가 속할 수 있는 값 범위의 하한입니다.' },
-            upperValue: { name: 'upper_value', detail: '`value_to_compare`가 속할 수 있는 값 범위의 상한입니다.' },
-            lowerValueIsInclusive: { name: 'lower_value_is_inclusive', detail: '값 범위에 `lower_value`가 포함되는지 여부입니다. 기본적으로 TRUE입니다.' },
-            upperValueIsInclusive: { name: 'upper_value_is_inclusive', detail: '값 범위에 `upper_value`가 포함되는지 여부입니다. 기본적으로 TRUE입니다.' },
+            valueToCompare: { name: 'value_to_compare', detail: '`낮은_값`과 `높은_값` 사이에서 테스트되는 값입니다.' },
+            lowerValue: { name: 'lower_value', detail: '값 범위의 하한으로, `비교할_값`이 포함될 수 있습니다.' },
+            upperValue: { name: 'upper_value', detail: '값 범위의 상한으로, `비교할_값`이 포함될 수 있습니다.' },
+            lowerValueIsInclusive: { name: 'lower_value_is_inclusive', detail: '값 범위에 `낮은_값`이 포함되는지를 지정합니다. 기본값은 TRUE입니다.' },
+            upperValueIsInclusive: { name: 'upper_value_is_inclusive', detail: '값 범위에 `높은_값`이 포함되는지를 지정합니다. 기본값은 TRUE입니다.' },
         },
     },
     ISBLANK: {
-        description: '값이 비어 있으면 TRUE를 반환합니다',
-        abstract: '값이 비어 있으면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISDATE: {
-        description: '값이 날짜인지 여부를 반환합니다.',
-        abstract: '값이 날짜인지 여부를 반환합니다.',
+        description: 'ISDATE 함수는 값이 날짜인지 여부를 반환합니다.',
+        abstract: 'ISDATE 함수는 값이 날짜인지 여부를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/9061381?hl=ko&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9061381?hl=ko',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '날짜로 확인할 값입니다.' },
+            value: { name: 'value', detail: '날짜인지 확인할 값입니다.' },
         },
     },
     ISEMAIL: {
-        description: '값이 유효한 이메일 주소인지 확인합니다',
-        abstract: '값이 유효한 이메일 주소인지 확인합니다',
+        description: '값이 유효한 이메일 주소인지 확인하려면 ISEMAIL 함수를 사용합니다. 이 함수는 값이 일반적으로 허용되는 이메일 주소 형식을 따르는지 확인하지만 존재 여부는 확인하지 않습니다.',
+        abstract: '값이 유효한 이메일 주소인지 확인하려면 ISEMAIL 함수를 사용합니다. 이 함수는 값이 일반적으로 허용되는 이메일 주소 형식을 따르는지 확인하지만 존재 여부는 확인하지 않습니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3256503?hl=ko&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3256503?hl=ko',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '이메일 주소로 확인할 값입니다.' },
+            value: { name: 'value', detail: '유효한 이메일 주소인지 확인할 값입니다.' },
         },
     },
     ISERR: {
-        description: '값이 #N/A를 제외한 오류 값이면 TRUE를 반환합니다',
-        abstract: '값이 #N/A를 제외한 오류 값이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISERROR: {
-        description: '값이 오류 값이면 TRUE를 반환합니다',
-        abstract: '값이 오류 값이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISEVEN: {
@@ -146,7 +145,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/iseven-함수-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
@@ -159,7 +158,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/isformula-함수-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
@@ -167,55 +166,55 @@ const locale: typeof enUS = {
         },
     },
     ISLOGICAL: {
-        description: '값이 논리값이면 TRUE를 반환합니다',
-        abstract: '값이 논리값이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISNA: {
-        description: '값이 #N/A 오류 값이면 TRUE를 반환합니다',
-        abstract: '값이 #N/A 오류 값이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISNONTEXT: {
-        description: '값이 텍스트가 아니면 TRUE를 반환합니다',
-        abstract: '값이 텍스트가 아니면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISNUMBER: {
-        description: '값이 숫자이면 TRUE를 반환합니다',
-        abstract: '값이 숫자이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISODD: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/isodd-함수-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -237,51 +236,50 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/isomitted-함수-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: '첫 번째' },
-            number2: { name: 'number2', detail: '두 번째' },
+            argument: { name: '인수', detail: 'LAMBDA 매개 변수처럼 인수가 생략되었는지 검사할 값입니다.' },
         },
     },
     ISREF: {
-        description: '값이 참조이면 TRUE를 반환합니다',
-        abstract: '값이 참조이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISTEXT: {
-        description: '값이 텍스트이면 TRUE를 반환합니다',
-        abstract: '값이 텍스트이면 TRUE를 반환합니다',
+        description: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
+        abstract: '이 문서에서 소개하는 여러 함수는 통틀어 IS 함수라고 불리며 각 함수에서는 값의 유형을 검사하고 그 결과에 따라 TRUE 또는 FALSE를 반환합니다. 예를 들어 ISBLANK 함수는 값 인수가 빈 셀에 대한 참조이면 논리값 TRUE를 반환하고, 그렇지 않으면 FALSE를 반환합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/is-함수-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/is-functions',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: '테스트하려는 값입니다. value 인수는 빈 값(빈 셀), 오류, 논리값, 텍스트, 숫자 또는 참조 값이거나 이들 중 하나를 참조하는 이름일 수 있습니다.' },
+            value: { name: 'value', detail: '필수. 테스트할 값입니다. value 인수는 빈 셀, 오류, 논리값, 텍스트, 숫자, 참조 값 또는 이러한 항목을 가리키는 이름일 수 있습니다.' },
         },
     },
     ISURL: {
-        description: '값이 유효한 URL인지 확인합니다.',
-        abstract: '값이 유효한 URL인지 확인합니다.',
+        description: '유효한 URL 값인지 확인합니다.',
+        abstract: '유효한 URL 값인지 확인합니다.',
         links: [
             {
                 title: '사용법',
-                url: 'https://support.google.com/docs/answer/3256501?hl=ko&sjid=7312884847858065932-AP',
+                url: 'https://support.google.com/docs/answer/3256501?hl=ko',
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: 'URL로 확인할 값입니다.' },
+            value: { name: 'value', detail: '유효한 URL인지 확인할 값입니다.' },
         },
     },
     N: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/n-함수-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/na-함수-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/na-function',
             },
         ],
         functionParameter: {
@@ -315,7 +313,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/sheet-함수-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -328,7 +326,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/sheets-함수-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/sheets-function',
             },
         ],
         functionParameter: {
@@ -340,7 +338,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '사용법',
-                url: 'https://support.microsoft.com/ko-kr/office/type-함수-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/ko-kr/excel/functions/type-function',
             },
         ],
         functionParameter: {

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/date-function-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/date-function',
             },
         ],
         functionParameter: {
@@ -38,13 +38,13 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/datedif-function-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/datedif-function',
             },
         ],
         functionParameter: {
             startDate: { name: 'data_inicial', detail: 'Una data que representa la primera data, o data d\'inici d\'un període determinat.' },
             endDate: { name: 'data_final', detail: 'Una data que representa l\'última data, o data de finalització del període.' },
-            method: { name: 'mètode', detail: 'El tipus d\'informació que voleu que es retorni.' },
+            unit: { name: 'Unitat', detail: 'La unitat de temps que voleu que es retorni.' },
         },
     },
     DATEVALUE: {
@@ -53,7 +53,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/datevalue-function',
             },
         ],
         functionParameter: {
@@ -66,7 +66,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/day-function-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/day-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/days-function-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/days-function',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/days360-function',
             },
         ],
         functionParameter: {
@@ -108,7 +108,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/edate-function-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/edate-function',
             },
         ],
         functionParameter: {
@@ -122,7 +122,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/eomonth-function-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/eomonth-function',
             },
         ],
         functionParameter: {
@@ -131,17 +131,17 @@ const locale: typeof enUS = {
         },
     },
     EPOCHTODATE: {
-        description: 'Converteix una marca de temps d\'època Unix en segons, mil·lisegons o microsegons a una data i hora en Temps Universal Coordinat (UTC).',
-        abstract: 'Converteix una marca de temps d\'època Unix en segons, mil·lisegons o microsegons a una data i hora en Temps Universal Coordinat (UTC).',
+        description: 'Converteix una marca de temps en època d\'Unix expressada en segons, mil·lisegons o microsegons en una data i hora en temps universal coordinat (UTC).',
+        abstract: 'Converteix una marca de temps en època d\'Unix expressada en segons, mil·lisegons o microsegons en una data i hora en temps universal coordinat (UTC).',
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hans&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/13193461?hl=ca',
             },
         ],
         functionParameter: {
-            timestamp: { name: 'marca_temps', detail: 'Una marca de temps d\'època Unix, en segons, mil·lisegons o microsegons.' },
-            unit: { name: 'unitat', detail: 'La unitat de temps en què s\'expressa la marca de temps. 1 per defecte: \\n1 indica que la unitat de temps són segons. \\n2 indica que la unitat de temps són mil·lisegons.\\n3 indica que la unitat de temps són microsegons.' },
+            timestamp: { name: 'marca_temps', detail: 'marca de temps en època d\'Unix expressada en segons, mil·lisegons o microsegons.' },
+            unit: { name: 'unitat', detail: '(OPCIONAL; -1 de manera predeterminada): unitat de temps en què s\'expressa la marca de temps.' },
         },
     },
     HOUR: {
@@ -150,7 +150,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/hour-function-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/hour-function',
             },
         ],
         functionParameter: {
@@ -163,7 +163,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/isoweeknum-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/minute-function-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/minute-function',
             },
         ],
         functionParameter: {
@@ -189,7 +189,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/month-function-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/month-function',
             },
         ],
         functionParameter: {
@@ -202,7 +202,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/networkdays-function-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/networkdays-function',
             },
         ],
         functionParameter: {
@@ -217,7 +217,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/networkdays-intl-function-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/networkdays-intl-function',
             },
         ],
         functionParameter: {
@@ -233,7 +233,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/now-function-3337fd29-145a-4347-b2e6-20c904739c46',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/now-function',
             },
         ],
         functionParameter: {
@@ -245,7 +245,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/second-function-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/second-function',
             },
         ],
         functionParameter: {
@@ -258,7 +258,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/time-function-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/time-function',
             },
         ],
         functionParameter: {
@@ -273,7 +273,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/timevalue-function-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/timevalue-function',
             },
         ],
         functionParameter: {
@@ -281,16 +281,16 @@ const locale: typeof enUS = {
         },
     },
     TO_DATE: {
-        description: 'Converteix un número proporcionat a una data.',
-        abstract: 'Converteix un número proporcionat a una data.',
+        description: 'Converteix un número proporcionat en una data.',
+        abstract: 'Converteix un número proporcionat en una data.',
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.google.com/docs/answer/3094239?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3094239?hl=ca',
             },
         ],
         functionParameter: {
-            value: { name: 'valor', detail: 'L\'argument o referència a una cel·la que es convertirà a una data.' },
+            value: { name: 'valor', detail: 'TO_DATE(A2)' },
         },
     },
     TODAY: {
@@ -299,7 +299,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/today-function-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/today-function',
             },
         ],
         functionParameter: {
@@ -311,7 +311,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/weekday-function',
             },
         ],
         functionParameter: {
@@ -325,7 +325,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/weeknum-function',
             },
         ],
         functionParameter: {
@@ -339,7 +339,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/workday-function-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/workday-function',
             },
         ],
         functionParameter: {
@@ -354,7 +354,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/workday-intl-function-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/workday-intl-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/year-function-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/year-function',
             },
         ],
         functionParameter: {
@@ -383,7 +383,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Instruccions',
-                url: 'https://support.microsoft.com/en-us/office/yearfrac-function-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/ca-es/excel/functions/yearfrac-function',
             },
         ],
         functionParameter: {

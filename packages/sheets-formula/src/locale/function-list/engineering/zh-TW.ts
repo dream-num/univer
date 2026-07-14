@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/besseli-%E5%87%BD%E6%95%B0-8d33855c-9a8d-444b-98e0-852267b1c0df',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/besseli-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/besselj-%E5%87%BD%E6%95%B0-839cb181-48de-408b-9d80-bd02982d94f7',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/besselj-function',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/besselk-%E5%87%BD%E6%95%B0-606d11bc-06d3-4d53-9ecb-2803e2b90b70',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/besselk-function',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bessely-%E5%87%BD%E6%95%B0-f3a356b3-da89-42c3-8974-2da54d6353a2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bessely-function',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bin2dec-%E5%87%BD%E6%95%B0-63905b57-b3a0-453d-99f4-647bb519cd6c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bin2dec-function',
             },
         ],
         functionParameter: {
@@ -92,7 +92,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bin2hex-%E5%87%BD%E6%95%B0-0375e507-f5e5-4077-9af8-28d84f9f41cc',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bin2hex-function',
             },
         ],
         functionParameter: {
@@ -101,17 +101,17 @@ const locale: typeof enUS = {
         },
     },
     BIN2OCT: {
-        description: '將二進位數轉換為八進位數',
-        abstract: '將二進位數轉換為八進位數',
+        description: '將二進位數字轉換成八進位。',
+        abstract: '將二進位數字轉換成八進位。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bin2oct-%E5%87%BD%E6%95%B0-0a4e01ba-ac8d-4158-9b29-16c25c4c23fd',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bin2oct-function',
             },
         ],
         functionParameter: {
-            number: { name: '二進位數', detail: '要轉換的二進位數。' },
-            places: { name: '字元數', detail: '要使用的字元數。' },
+            number: { name: '二進位數', detail: '必要。 您要轉換的二進位數字。 Number 不能包含超過 10 個字元 (10 個位元)。 Number 最高有效位元是正負號位元。 其餘的 9 個位元則為量級位元。 負數是使用 2 的補數表示法來表示。' },
+            places: { name: '字元數', detail: '可選的。 這是要使用的字元數。 如果省略 places，BIN2OCT 會使用所需字元數的最小值。 當您要使用前置 0 (零) 來填補傳回值時，places 非常有用。' },
         },
     },
     BITAND: {
@@ -120,7 +120,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bitand-%E5%87%BD%E6%95%B0-8a2be3d7-91c3-4b48-9517-64548008563a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bitand-function',
             },
         ],
         functionParameter: {
@@ -134,7 +134,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bitlshift-%E5%87%BD%E6%95%B0-c55bb27e-cacd-4c7c-b258-d80861a03c9c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bitlshift-function',
             },
         ],
         functionParameter: {
@@ -148,7 +148,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bitor-%E5%87%BD%E6%95%B0-f6ead5c8-5b98-4c9e-9053-8ad5234919b2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bitor-function',
             },
         ],
         functionParameter: {
@@ -162,7 +162,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bitrshift-%E5%87%BD%E6%;95%B0-274d6996-f42c-4743-abdb-4ff95351222c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bitrshift-function',
             },
         ],
         functionParameter: {
@@ -176,7 +176,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/bitxor-%E5%87%BD%E6%95%B0-c81306a1-03f9-4e89-85ac-b86c3cba10e4',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/bitxor-function',
             },
         ],
         functionParameter: {
@@ -190,7 +190,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/complex-%E5%87%BD%E6%95%B0-f0b8f3a9-51cc-4d6d-86fb-3a9362fa4128',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/complex-function',
             },
         ],
         functionParameter: {
@@ -205,7 +205,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/convert-%E5%87%BD%E6%95%B0-d785bef1-808e-4aac-bdcd-666c810f9af2',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/convert-function',
             },
         ],
         functionParameter: {
@@ -220,7 +220,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dec2bin-%E5%87%BD%E6%95%B0-0f63dd0e-5d1a-42d8-b511-5bf5c6d43838',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dec2bin-function',
             },
         ],
         functionParameter: {
@@ -234,7 +234,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dec2hex-%E5%87%BD%E6%95%B0-6344ee8b-b6b5-4c6a-a672-f646666704619',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dec2hex-function',
             },
         ],
         functionParameter: {
@@ -248,7 +248,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/dec2oct-%E5%87%BD%E6%95%B0-c9d835ca-20b7-40c4-8a9e-d3be351ce00f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/dec2oct-function',
             },
         ],
         functionParameter: {
@@ -262,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/delta-%E5%87%BD%E6%95%B0-2f763672-c959-4e07-ac33-fe03220ba432',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/delta-function',
             },
         ],
         functionParameter: {
@@ -276,7 +276,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/erf-%E5%87%BD%E6%95%B0-c53c7e7b-5482-4b6c-883e-56df3c9af349',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/erf-function',
             },
         ],
         functionParameter: {
@@ -290,7 +290,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/erf-precise-%E5%87%BD%E6%95%B0-9a349593-705c-4278-9a98-e4122831a8e0',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/erf-precise-function',
             },
         ],
         functionParameter: {
@@ -303,7 +303,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/erfc-%E5%87%BD%E6%95%B0-736e0318-70ba-4e8b-8d08-461fe68b71b3',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/erfc-function',
             },
         ],
         functionParameter: {
@@ -316,7 +316,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/erfc-precise-%E5%87%BD%E6%95%B0-e90e6bab-f45e-45df-b2ac-cd2eb4d4a273',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/erfc-precise-function',
             },
         ],
         functionParameter: {
@@ -329,7 +329,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/gestep-%E5%87%BD%E6%95%B0-f37e7d2a-41da-4129-be95-640883fca9df',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/gestep-function',
             },
         ],
         functionParameter: {
@@ -343,7 +343,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hex2bin-%E5%87%BD%E6%95%B0-a13aafaa-5737-4920-8424-643e581828c1',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/hex2bin-function',
             },
         ],
         functionParameter: {
@@ -357,7 +357,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hex2dec-%E5%87%BD%E6%95%B0-8c8c3155-9f37-45a5-a3ee-ee5379ef106e',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/hex2dec-function',
             },
         ],
         functionParameter: {
@@ -370,7 +370,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hex2oct-%E5%87%BD%E6%95%B0-54d52808-5d19-4bd0-8a63-1096a5d11912',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/hex2oct-function',
             },
         ],
         functionParameter: {
@@ -384,7 +384,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imabs-%E5%87%BD%E6%95%B0-b31e73c6-d90c-4062-90bc-8eb351d765a1',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imabs-function',
             },
         ],
         functionParameter: {
@@ -397,7 +397,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imaginary-%E5%87%BD%E6%95%B0-dd5952fd-473d-44d9-95a1-9a17b23e428a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imaginary-function',
             },
         ],
         functionParameter: {
@@ -410,7 +410,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imargument-%E5%87%BD%E6%95%B0-eed37ec1-23b3-4f59-b9f3-d340358a034a',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imargument-function',
             },
         ],
         functionParameter: {
@@ -423,7 +423,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imconjugate-%E5%87%BD%E6%95%B0-2e2fc1ea-f32b-4f9b-9de6-233853bafd42',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imconjugate-function',
             },
         ],
         functionParameter: {
@@ -436,7 +436,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imcos-%E5%87%BD%E6%95%B0-dad75277-f592-4a6b-ad6c-be93a808a53c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imcos-function',
             },
         ],
         functionParameter: {
@@ -449,7 +449,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imcosh-%E5%87%BD%E6%95%B0-053e4ddb-4122-458b-be9a-457c405e90ff',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imcosh-function',
             },
         ],
         functionParameter: {
@@ -462,7 +462,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imcot-%E5%87%BD%E6%95%B0-dc6a3607-d26a-4d06-8b41-8931da36442c',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imcot-function',
             },
         ],
         functionParameter: {
@@ -470,16 +470,16 @@ const locale: typeof enUS = {
         },
     },
     IMCOTH: {
-        description: '傳回複數的雙曲餘切值',
-        abstract: '傳回複數的雙曲餘切值',
+        description: 'IMCOTH 函式會傳回指定複數的雙曲餘切值。 例如，指定值為複數「x+yi」，就會傳回「coth(x+yi)」。',
+        abstract: 'IMCOTH 函式會傳回指定複數的雙曲餘切值。 例如，指定值為複數「x+yi」，就會傳回「coth(x+yi)」。',
         links: [
             {
                 title: '教学',
-                url: 'https://support.google.com/docs/answer/9366256?hl=zh-Hant&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366256?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得雙曲餘切值的複數。' },
+            inumber: { name: '複數', detail: '要計算雙曲餘切值的複數。 此引數可以是 COMPLEX 函式得出的值，也可以是實數 (視為虛部等於 0 的複數) 或格式為「x+yi」的字串，其中 x 和 y 為數字。' },
         },
     },
     IMCSC: {
@@ -488,7 +488,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imcsc-%E5%87%BD%E6%95%B0-9e158d8f-2ddf-46cd-9b1d-98e29904a323',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imcsc-function',
             },
         ],
         functionParameter: {
@@ -501,7 +501,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imcsch-%E5%87%BD%E6%95%B0-c0ae4f54-5f09-4fef-8da0-dc33ea2c5ca9',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imcsch-function',
             },
         ],
         functionParameter: {
@@ -509,17 +509,17 @@ const locale: typeof enUS = {
         },
     },
     IMDIV: {
-        description: '傳回兩個複數的商數',
-        abstract: '傳回兩個複數的商',
+        description: '傳回文字格式為 x + yi 或 x + yj 的兩個複數的商數。',
+        abstract: '傳回文字格式為 x + yi 或 x + yj 的兩個複數的商數。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imdiv-%E5%87%BD%E6%95%B0-a505aff7-af8a-4451-8142-77ec3d74d83f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imdiv-function',
             },
         ],
         functionParameter: {
-            inumber1: { name: '複數分子', detail: '複數分子或被除數。' },
-            inumber2: { name: '複數分母', detail: '複數分母或除數。' },
+            inumber1: { name: '複數分子', detail: '必須。 這是複數分子或被除數。' },
+            inumber2: { name: '複數分母', detail: '必須。 這是複數分母或除數。' },
         },
     },
     IMEXP: {
@@ -528,7 +528,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imexp-%E5%87%BD%E6%95%B0-c6f8da1f-e024-4c0c-b802-a60e7147a95f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imexp-function',
             },
         ],
         functionParameter: {
@@ -541,7 +541,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imln-%E5%87%BD%E6%95%B0-32b98bcf-8b81-437c-a636-6fb3aad509d8',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imln-function',
             },
         ],
         functionParameter: {
@@ -549,17 +549,17 @@ const locale: typeof enUS = {
         },
     },
     IMLOG: {
-        description: '傳回複數的以特定底數的對數',
-        abstract: '傳回複數的以特定底數的對數',
+        description: 'IMLOG 函式會傳回指定複數的對數 (根據特定底數)。',
+        abstract: 'IMLOG 函式會傳回指定複數的對數 (根據特定底數)。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hant&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得以特定底數的對數的複數。' },
-            base: { name: '底數', detail: '計算對數時所用的底數。' },
+            inumber: { name: '複數', detail: '對數函式的輸入值。 可以輸入 1 這樣的純數字，系統會將此解析為一個實數。 也可以輸入引用文字，同時指定實數和複數係數。' },
+            base: { name: '底數', detail: '計算對數時所用的底數。 必須是正實數。' },
         },
     },
     IMLOG10: {
@@ -568,7 +568,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imlog10-%E5%87%BD%E6%95%B0-58200fca-e2a2-4271-8a98-ccd4360213a5',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imlog10-function',
             },
         ],
         functionParameter: {
@@ -581,7 +581,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imlog2-%E5%87%BD%E6%95%B0-152e13b4-bc79-486c-a243-e6a676878c51',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imlog2-function',
             },
         ],
         functionParameter: {
@@ -594,7 +594,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/impower-%E5%87%BD%E6%95%B0-210fd2f5-f8ff-4c6a-9d60-30e34fbdef39',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/impower-function',
             },
         ],
         functionParameter: {
@@ -608,7 +608,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/improduct-%E5%87%BD%E6%95%B0-2fb8651a-a4f2-444f-975e-8ba7aab3a5ba',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/improduct-function',
             },
         ],
         functionParameter: {
@@ -622,7 +622,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imreal-%E5%87%BD%E6%95%B0-d12bc4c0-25d0-4bb3-a25f-ece1938bf366',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imreal-function',
             },
         ],
         functionParameter: {
@@ -635,7 +635,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsec-%E5%87%BD%E6%95%B0-6df11132-4411-4df4-a3dc-1f17372459e0',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsec-function',
             },
         ],
         functionParameter: {
@@ -648,7 +648,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsech-%E5%87%BD%E6%95%B0-f250304f-788b-4505-954e-eb01fa50903b',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsech-function',
             },
         ],
         functionParameter: {
@@ -661,7 +661,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsin-%E5%87%BD%E6%95%B0-1ab02a39-a721-48de-82ef-f52bf37859f6',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsin-function',
             },
         ],
         functionParameter: {
@@ -674,7 +674,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsinh-%E5%87%BD%E6%95%B0-dfb9ec9e-8783-4985-8c42-b028e9e8da3d',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsinh-function',
             },
         ],
         functionParameter: {
@@ -687,7 +687,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsqrt-%E5%87%BD%E6%95%B0-e1753f80-ba11-4664-a10e-e17368396b70',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsqrt-function',
             },
         ],
         functionParameter: {
@@ -700,7 +700,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsub-%E5%87%BD%E6%95%B0-2e404b4d-4935-4e85-9f52-cb08b9a45054',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsub-function',
             },
         ],
         functionParameter: {
@@ -714,7 +714,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imsum-%E5%87%BD%E6%95%B0-81542999-5f1c-4da6-9ffe-f1d7aaa9457f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imsum-function',
             },
         ],
         functionParameter: {
@@ -728,7 +728,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/imtan-%E5%87%BD%E6%95%B0-8478f45d-610a-43cf-8544-9fc0b553a132',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/imtan-function',
             },
         ],
         functionParameter: {
@@ -736,16 +736,16 @@ const locale: typeof enUS = {
         },
     },
     IMTANH: {
-        description: '傳回複數的雙曲正切值',
-        abstract: '傳回複數的雙曲正切值',
+        description: 'IMTANH 函式會傳回指定複數的雙曲正切值。 例如，指定值為複數「x+yi」，就會傳回「tanh(x+yi)」。',
+        abstract: 'IMTANH 函式會傳回指定複數的雙曲正切值。 例如，指定值為複數「x+yi」，就會傳回「tanh(x+yi)」。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.google.com/docs/answer/9366655?hl=zh-Hant&sjid=1719420110567985051-AP',
+                url: 'https://support.google.com/docs/answer/9366655?hl=zh-Hant',
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得雙曲正切值的複數。' },
+            inumber: { name: '複數', detail: '要計算雙曲正切值的複數。 此引數可以是 COMPLEX 函式得出的數值，也可以是實數 (視為虛部等於 0 的複數) 或格式為「x+yi」的字串，其中 x 和 y 為數字。' },
         },
     },
     OCT2BIN: {
@@ -754,7 +754,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oct2bin-%E5%87%BD%E6%95%B0-55383471-3c56-4d27-9522-1a8ec646c589',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oct2bin-function',
             },
         ],
         functionParameter: {
@@ -768,7 +768,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oct2dec-%E5%87%BD%E6%95%B0-87606014-cb98-44b2-8dbb-e48f8ced1554',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oct2dec-function',
             },
         ],
         functionParameter: {
@@ -781,7 +781,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/oct2hex-%E5%87%BD%E6%95%B0-912175b4-d497-41b4-a029-221f051b858f',
+                url: 'https://support.microsoft.com/zh-tw/excel/functions/oct2hex-function',
             },
         ],
         functionParameter: {

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/cell-function-51bd39a5-f338-4dbe-a33f-955d67c2b2cf',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/cell-function',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/error-type-function',
             },
         ],
         functionParameter: {
@@ -50,12 +50,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/info-function-725f259a-0e4b-49b3-8b52-58815c69acae',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/info-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            typeText: { name: 'Typ textu', detail: 'Text určujúci typ informácie, ktorá sa má vrátiť.' },
         },
     },
     ISBETWEEN: {
@@ -64,7 +63,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/10538337?hl=en&sjid=7730820672019533290-AP',
+                url: 'https://support.google.com/docs/answer/10538337?hl=sk',
             },
         ],
         functionParameter: {
@@ -81,7 +80,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -94,7 +93,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/9061381?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/9061381?hl=sk',
             },
         ],
         functionParameter: {
@@ -107,7 +106,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/3256503?hl=en&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/3256503?hl=sk',
             },
         ],
         functionParameter: {
@@ -120,7 +119,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -133,7 +132,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -141,16 +140,16 @@ const locale: typeof enUS = {
         },
     },
     ISEVEN: {
-        description: 'Vracia TRUE, ak je číslo párne',
-        abstract: 'Vracia TRUE, ak je číslo párne',
+        description: 'Vráti hodnotu TRUE, ak je číslo párne. Vráti hodnotu FALSE, ak je číslo nepárne.',
+        abstract: 'Vráti hodnotu TRUE, ak je číslo párne. Vráti hodnotu FALSE, ak je číslo nepárne.',
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/iseven-function-aa15929a-d77b-4fbb-92f4-2f479af55356',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/iseven-function',
             },
         ],
         functionParameter: {
-            value: { name: 'hodnota', detail: 'Hodnota, ktorú chcete otestovať. Ak číslo nie je celé, skráti sa.' },
+            value: { name: 'hodnota', detail: 'Povinné. Hodnota, ktorá sa má testovať. Ak číslo nie je celým číslom, skráti sa.' },
         },
     },
     ISFORMULA: {
@@ -159,7 +158,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/isformula-function-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/isformula-function',
             },
         ],
         functionParameter: {
@@ -172,7 +171,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -185,7 +184,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -198,7 +197,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -211,7 +210,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -224,7 +223,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/isodd-function-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/isodd-function',
             },
         ],
         functionParameter: {
@@ -237,12 +236,11 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/isomitted-function-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/isomitted-function',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'prvý' },
-            number2: { name: 'number2', detail: 'druhý' },
+            argument: { name: 'Argument', detail: 'Hodnota, pri ktorej sa testuje vynechanie, napríklad parameter funkcie LAMBDA.' },
         },
     },
     ISREF: {
@@ -251,7 +249,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -264,7 +262,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/is-functions',
             },
         ],
         functionParameter: {
@@ -277,7 +275,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.google.com/docs/answer/3256501?hl=en&sjid=7312884847858065932-AP',
+                url: 'https://support.google.com/docs/answer/3256501?hl=sk',
             },
         ],
         functionParameter: {
@@ -290,7 +288,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/n-function-a624cad1-3635-4208-b54a-29733d1278c9',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/n-function',
             },
         ],
         functionParameter: {
@@ -303,7 +301,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/na-function-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/na-function',
             },
         ],
         functionParameter: {},
@@ -314,7 +312,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/sheet-function-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/sheet-function',
             },
         ],
         functionParameter: {
@@ -327,7 +325,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/sheets-function-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/sheets-function',
             },
         ],
         functionParameter: {},
@@ -338,7 +336,7 @@ const locale: typeof enUS = {
         links: [
             {
                 title: 'Inštrukcia',
-                url: 'https://support.microsoft.com/en-us/office/type-function-45b4e688-4bc3-48b3-a105-ffa892995899',
+                url: 'https://support.microsoft.com/sk-sk/excel/functions/type-function',
             },
         ],
         functionParameter: {

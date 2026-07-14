@@ -26,6 +26,7 @@ import { BaseFunction } from '../../base-function';
 export class Countifs extends BaseFunction {
     override minParams = 2;
 
+    // TODO(formula-contract): Restrict the maximum to 254 so range/criteria pairs cannot be truncated at an odd count.
     override maxParams = 255;
 
     override needsReferenceObject = true;

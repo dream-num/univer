@@ -1300,6 +1300,7 @@ describe('DocSelectionRenderService', () => {
         };
         const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        vi.spyOn(TestLayoutService.root, 'getBoundingClientRect').mockReturnValue({ left: 100, top: 200 } as DOMRect);
         const activeRange = {
             isActive: () => true,
             getAnchor: () => ({ left: 12, top: 20, visible: true }),
@@ -1313,6 +1314,19 @@ describe('DocSelectionRenderService', () => {
         expect(container.style.left).toBe('35px');
         expect(container.style.top).toBe('47px');
         expect(container.style.zIndex).toBe('1000');
+    });
+
+    it('converts the hidden editor position for a fixed containing block', () => {
+        const { renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
+        vi.spyOn(container, 'offsetParent', 'get').mockReturnValue(TestLayoutService.root);
+        vi.spyOn(TestLayoutService.root, 'getBoundingClientRect').mockReturnValue({ left: 100, top: 200 } as DOMRect);
+
+        service.activate(35, 47);
+
+        expect(container.style.left).toBe('-65px');
+        expect(container.style.top).toBe('-153px');
     });
 
     it('parks the active selection while scrolling and restores the editor when the selection remains in view', () => {

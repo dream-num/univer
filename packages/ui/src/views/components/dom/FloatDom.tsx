@@ -24,31 +24,27 @@ import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDo
 import { useDependency, useObservable } from '../../../utils/di';
 import { resolveFloatDomLayout } from './float-dom-layout';
 
-function setStyleProperty(style: CSSStyleDeclaration, property: string, value: string): void {
-    if (style.getPropertyValue(property) !== value) {
-        style.setProperty(property, value);
-    }
-}
-
 function applyFloatDomLayout(
     wrapper: HTMLDivElement,
     inner: HTMLDivElement,
     layout: ReturnType<typeof resolveFloatDomLayout>
 ): void {
-    const { wrapper: wrapperStyle, inner: innerStyle } = layout;
-    setStyleProperty(wrapper.style, 'top', `${wrapperStyle.top}px`);
-    setStyleProperty(wrapper.style, 'left', `${wrapperStyle.left}px`);
-    setStyleProperty(wrapper.style, 'width', `${wrapperStyle.width}px`);
-    setStyleProperty(wrapper.style, 'height', `${wrapperStyle.height}px`);
-    setStyleProperty(wrapper.style, 'transform', wrapperStyle.transform);
-    setStyleProperty(wrapper.style, 'opacity', `${wrapperStyle.opacity}`);
+    const { wrapper: wrapperLayout, inner: innerLayout } = layout;
+    const wrapperStyle = wrapper.style;
+    wrapperStyle.top = `${wrapperLayout.top}px`;
+    wrapperStyle.left = `${wrapperLayout.left}px`;
+    wrapperStyle.width = `${wrapperLayout.width}px`;
+    wrapperStyle.height = `${wrapperLayout.height}px`;
+    wrapperStyle.transform = wrapperLayout.transform;
+    wrapperStyle.opacity = `${wrapperLayout.opacity}`;
 
-    setStyleProperty(inner.style, 'width', `${innerStyle.width}px`);
-    setStyleProperty(inner.style, 'height', `${innerStyle.height}px`);
-    setStyleProperty(inner.style, 'left', innerStyle.left === 'auto' ? 'auto' : `${innerStyle.left}px`);
-    setStyleProperty(inner.style, 'top', innerStyle.top === 'auto' ? 'auto' : `${innerStyle.top}px`);
-    setStyleProperty(inner.style, 'right', innerStyle.right === 'auto' ? 'auto' : `${innerStyle.right}px`);
-    setStyleProperty(inner.style, 'bottom', innerStyle.bottom === 'auto' ? 'auto' : `${innerStyle.bottom}px`);
+    const innerStyle = inner.style;
+    innerStyle.width = `${innerLayout.width}px`;
+    innerStyle.height = `${innerLayout.height}px`;
+    innerStyle.left = innerLayout.left === 'auto' ? 'auto' : `${innerLayout.left}px`;
+    innerStyle.top = innerLayout.top === 'auto' ? 'auto' : `${innerLayout.top}px`;
+    innerStyle.right = innerLayout.right === 'auto' ? 'auto' : `${innerLayout.right}px`;
+    innerStyle.bottom = innerLayout.bottom === 'auto' ? 'auto' : `${innerLayout.bottom}px`;
 }
 
 export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
@@ -102,17 +98,13 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
 
     const layout = resolveFloatDomLayout(position, layer.contentBox);
 
-    //domRef univer-float-dom-wrapper
-    //innerDomRef univer-float-dom
     return (
         <div
             ref={domRef}
-            className="univer-z-10"
+            className="univer-absolute univer-z-10 univer-origin-center"
             style={{
-                position: 'absolute',
                 ...layout.wrapper,
                 overflow: floatDomOverflow.outerOverflow,
-                transformOrigin: 'center center',
             }}
             onPointerMove={(e) => {
                 if (shouldForwardFloatDomEvents(layer)) {

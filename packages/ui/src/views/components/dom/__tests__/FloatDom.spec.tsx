@@ -210,29 +210,6 @@ describe('FloatDomSingle', () => {
         expect(inner.style.right).toBe('0px');
         expect(inner.style.bottom).toBe('0px');
     });
-
-    it('does not rewrite layout styles for an equivalent position emission', async () => {
-        const initialPosition = {
-            startX: 10,
-            startY: 20,
-            endX: 110,
-            endY: 120,
-            rotate: 0,
-            width: 100,
-            height: 100,
-            absolute: { left: true, top: true },
-        } satisfies IFloatDomLayout;
-        const position$ = new BehaviorSubject(initialPosition);
-
-        renderWithDependencies(<FloatDomSingle id="dom-1" layer={{ ...createFloatDom(), position$ }} />);
-        await waitFor(() => expect(document.getElementById('dom-1')).not.toBeNull());
-        const setProperty = vi.spyOn(CSSStyleDeclaration.prototype, 'setProperty');
-
-        act(() => position$.next({ ...initialPosition, absolute: { ...initialPosition.absolute } }));
-
-        expect(setProperty).not.toHaveBeenCalled();
-        setProperty.mockRestore();
-    });
 });
 
 describe('FloatDom', () => {

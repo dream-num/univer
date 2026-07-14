@@ -1,6 +1,6 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { IFloatDomContentBoxConfig, IFloatDomLayout } from '@univerjs/ui';
+import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasFloatDomService } from '@univerjs/ui';
@@ -12,7 +12,7 @@ const IS_E2E: boolean = !!process.env.IS_E2E;
 
 interface IFloatDomContentBoxFixture {
     id: string;
-    setContentBox: (contentBox: IFloatDomContentBoxConfig) => void;
+    setContentBox: (contentBox: NonNullable<IFloatDom['contentBox']>) => void;
     setBorder: (border: boolean) => void;
     enableRotateHandle: () => void;
     getTransformerGeometry: () => {

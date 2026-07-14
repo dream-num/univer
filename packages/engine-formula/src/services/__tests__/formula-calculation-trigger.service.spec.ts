@@ -20,6 +20,7 @@ import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
 import { FormulaCalculationTriggerService } from '../formula-calculation-trigger.service';
 import { FormulaExecutedStateType } from '../runtime.service';
@@ -129,6 +130,29 @@ describe('FormulaCalculationTriggerService', () => {
         await vi.advanceTimersByTimeAsync(100);
 
         expect(testBed.executed).toEqual([]);
+        testBed.service.dispose();
+    });
+
+    it('only runs empty dirty data for an explicit trigger', async () => {
+        const testBed = createTestBed();
+        testBed.conversions.set('empty-dirty', {
+            commandId: 'empty-dirty',
+            getDirtyData: () => ({}),
+        });
+        testBed.conversions.set(SetTriggerFormulaCalculationStartMutation.id, {
+            commandId: SetTriggerFormulaCalculationStartMutation.id,
+            getDirtyData: () => ({}),
+        });
+
+        testBed.emit({ id: 'empty-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(100);
+        expect(testBed.executed).toEqual([]);
+
+        testBed.emit({ id: SetTriggerFormulaCalculationStartMutation.id } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(100);
+
+        expect(testBed.executed).toHaveLength(1);
+        expect(testBed.executed[0]).toMatchObject({ id: SetFormulaCalculationStartMutation.id });
         testBed.service.dispose();
     });
 });

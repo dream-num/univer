@@ -23,6 +23,7 @@ import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { IActiveDirtyManagerService } from './active-dirty-manager.service';
 import { FormulaExecutedStateType } from './runtime.service';
@@ -86,10 +87,11 @@ export class FormulaCalculationTriggerService extends Disposable {
     }
 
     private _flush(): void {
-        const dirtyData = this._generateDirty(this._waitingCommandQueue);
+        const commands = this._waitingCommandQueue;
+        const dirtyData = this._generateDirty(commands);
         this._waitingCommandQueue = [];
         this._timer = undefined;
-        if (!hasDirtyData(dirtyData)) {
+        if (!hasDirtyData(dirtyData) && !commands.some(({ id }) => id === SetTriggerFormulaCalculationStartMutation.id)) {
             return;
         }
 

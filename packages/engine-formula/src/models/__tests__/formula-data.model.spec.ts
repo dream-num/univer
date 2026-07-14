@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IFormulaData } from '../../basics/common';
 import {
     BaseDataModel,
@@ -27,7 +27,7 @@ import {
     RANGE_TYPE,
     UniverInstanceType,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -199,9 +199,155 @@ describe('Test formula data model', () => {
         });
 
         describe('updateFormulaData', () => {
+            it('skips formula reconstruction for value updates', () => {
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>('test')
+                    ?.getSheetBySheetId('sheet1');
+                const worksheetCellMatrix = worksheet!.getCellMatrix();
+                worksheetCellMatrix.setValue(10, 10, { v: 1 });
+                const getFormulaData = vi.spyOn(formulaDataModel, 'getFormulaData');
+                const getSheetFormulaData = vi.spyOn(formulaDataModel, 'getSheetFormulaData');
+                const scanWorksheet = vi.spyOn(worksheetCellMatrix, 'forValue');
+
+                expect(formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    10: {
+                        10: { v: 2 },
+                    },
+                })).toEqual({});
+                expect(getFormulaData).not.toHaveBeenCalled();
+                expect(getSheetFormulaData).not.toHaveBeenCalled();
+                expect(scanWorksheet).not.toHaveBeenCalled();
+            });
+
+            it('updates formulas without ids incrementally', () => {
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>('test')
+                    ?.getSheetBySheetId('sheet1');
+                const worksheetCellMatrix = worksheet!.getCellMatrix();
+                worksheetCellMatrix.setValue(10, 11, { f: '=A1' });
+                const getFormulaData = vi.spyOn(formulaDataModel, 'getFormulaData');
+                const getSheetFormulaData = vi.spyOn(formulaDataModel, 'getSheetFormulaData');
+                const scanWorksheet = vi.spyOn(worksheetCellMatrix, 'forValue');
+
+                expect(formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    10: {
+                        10: { f: '=A1' },
+                        11: { f: '=B1' },
+                    },
+                })).toEqual({
+                    10: {
+                        10: { f: '=A1' },
+                        11: { f: '=B1' },
+                    },
+                });
+                expect(getFormulaData).not.toHaveBeenCalled();
+                expect(getSheetFormulaData).not.toHaveBeenCalled();
+                expect(scanWorksheet).not.toHaveBeenCalled();
+            });
+
+            it('deletes formulas without ids incrementally', () => {
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>('test')
+                    ?.getSheetBySheetId('sheet1');
+                worksheet?.getCellMatrix().setValue(10, 10, { f: '=A1' });
+                const getFormulaData = vi.spyOn(formulaDataModel, 'getFormulaData');
+                const getSheetFormulaData = vi.spyOn(formulaDataModel, 'getSheetFormulaData');
+
+                expect(formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    10: {
+                        10: { v: 1, f: null },
+                    },
+                })).toEqual({
+                    10: {
+                        10: null,
+                    },
+                });
+                expect(getFormulaData).not.toHaveBeenCalled();
+                expect(getSheetFormulaData).not.toHaveBeenCalled();
+            });
+
+            it('processes mixed updates containing shared formulas incrementally', () => {
+                const getSheetFormulaData = vi.spyOn(formulaDataModel, 'getSheetFormulaData');
+
+                const result = formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    0: {
+                        0: { f: '=B1' },
+                    },
+                    1: {
+                        3: { v: null, f: null, si: null },
+                    },
+                });
+
+                expect(result[0]?.[0]).toEqual({ f: '=B1' });
+                expect(result[1]?.[3]).toBeNull();
+                expect(result[2]?.[3]).toEqual({ f: '=SUM(A3)', si: 'OSPtzm' });
+                expect(getSheetFormulaData).not.toHaveBeenCalled();
+            });
+
+            it('updates both old and new shared formula groups', () => {
+                expect(formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    1: {
+                        3: { f: '=SUM(B2)', si: 'new-group' },
+                    },
+                })).toEqual({
+                    1: {
+                        3: { f: '=SUM(B2)', si: 'new-group' },
+                    },
+                    2: {
+                        3: { f: '=SUM(A3)', si: 'OSPtzm' },
+                    },
+                    3: {
+                        3: { f: '=SUM(A3)', si: 'OSPtzm', x: 0, y: 1 },
+                    },
+                });
+            });
+
+            it('detaches a shared formula anchor into a normal formula', () => {
+                expect(formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    1: {
+                        3: { f: '=SUM(B2)', si: null },
+                    },
+                })).toEqual({
+                    1: {
+                        3: { f: '=SUM(B2)' },
+                    },
+                    2: {
+                        3: { f: '=SUM(A3)', si: 'OSPtzm' },
+                    },
+                    3: {
+                        3: { f: '=SUM(A3)', si: 'OSPtzm', x: 0, y: 1 },
+                    },
+                });
+            });
+
+            it('creates a shared formula group when a follower precedes its anchor', () => {
+                expect(formulaDataModel.updateFormulaData('test', 'sheet1', {
+                    10: {
+                        3: { si: 'new-group' },
+                    },
+                    11: {
+                        3: { f: '=SUM(A12)', si: 'new-group' },
+                    },
+                })).toEqual({
+                    10: {
+                        3: { f: '=SUM(A12)', si: 'new-group', x: 0, y: -1 },
+                    },
+                    11: {
+                        3: { f: '=SUM(A12)', si: 'new-group' },
+                    },
+                });
+            });
+
             it('delete formula with id', () => {
                 const unitId = 'test';
                 const sheetId = 'sheet1';
+                const getFormulaData = vi.spyOn(formulaDataModel, 'getFormulaData');
+                const getSheetFormulaData = vi.spyOn(formulaDataModel, 'getSheetFormulaData');
+                const worksheetCellMatrix = get(IUniverInstanceService)
+                    .getUnit<Workbook>(unitId)
+                    ?.getSheetBySheetId(sheetId)
+                    ?.getCellMatrix();
+                const scanWorksheet = vi.spyOn(worksheetCellMatrix!, 'forValue');
                 const cellValue = {
                     1: {
                         3: {
@@ -235,6 +381,9 @@ describe('Test formula data model', () => {
 
                 const newFormulaData = formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
                 expect(newFormulaData).toStrictEqual(result);
+                expect(getFormulaData).not.toHaveBeenCalled();
+                expect(getSheetFormulaData).not.toHaveBeenCalled();
+                expect(scanWorksheet).toHaveBeenCalledOnce();
             });
 
             it('delete formulas with ids and formulas with only ids', () => {

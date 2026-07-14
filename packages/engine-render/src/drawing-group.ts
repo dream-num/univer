@@ -42,6 +42,7 @@ export class DrawingGroupObject extends Group {
         width: 0,
         height: 0,
     };
+
     private _outerShadow?: IDrawingGroupShadow;
 
     setOuterShadow(shadow?: IDrawingGroupShadow): void {

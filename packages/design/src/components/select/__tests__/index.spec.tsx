@@ -16,6 +16,8 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { MultipleSelect } from '../MultipleSelect';
 import { Select } from '../Select';
 import '@testing-library/jest-dom/vitest';
@@ -114,9 +116,13 @@ describe('MultipleSelect', () => {
 
     it('should remove badge value when close icon is clicked', () => {
         const handleChange = vi.fn();
-        render(<MultipleSelect value={['1', '2']} options={options} onChange={handleChange} />);
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MultipleSelect value={['1', '2']} options={options} onChange={handleChange} />
+            </ConfigProvider>
+        );
 
-        const closeButtons = screen.getAllByLabelText('Close badge');
+        const closeButtons = screen.getAllByLabelText(enUS.design.Accessibility.closeBadge);
         fireEvent.click(closeButtons[0]);
         expect(handleChange).toHaveBeenCalledWith(['2']);
     });

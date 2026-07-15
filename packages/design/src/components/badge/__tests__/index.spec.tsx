@@ -16,6 +16,8 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Badge } from '../Badge';
 import '@testing-library/jest-dom/vitest';
 
@@ -29,8 +31,12 @@ describe('Badge', () => {
 
     it('renders closable badge', () => {
         const onClose = vi.fn();
-        render(<Badge closable onClose={onClose}>Closable Badge</Badge>);
-        const closeButton = screen.getByLabelText('Close badge');
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <Badge closable onClose={onClose}>Closable Badge</Badge>
+            </ConfigProvider>
+        );
+        const closeButton = screen.getByLabelText(enUS.design.Accessibility.closeBadge);
         expect(closeButton).toBeInTheDocument();
         fireEvent.click(closeButton);
         expect(onClose).toHaveBeenCalled();

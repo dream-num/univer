@@ -16,6 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dialog } from '../Dialog';
 import '@testing-library/jest-dom/vitest';
@@ -54,9 +55,13 @@ describe('Dialog', () => {
     it('should call onOk and onCancel', () => {
         const onOk = vi.fn();
         const onCancel = vi.fn();
-        const { getByText } = render(<Dialog open showOk showCancel onOk={onOk} onCancel={onCancel}>content</Dialog>);
-        getByText(/ok|确定/i).click();
-        getByText(/cancel|取消/i).click();
+        const { getByText } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <Dialog open showOk showCancel onOk={onOk} onCancel={onCancel}>content</Dialog>
+            </ConfigProvider>
+        );
+        getByText(enUS.design.Confirm.confirm).click();
+        getByText(enUS.design.Confirm.cancel).click();
         expect(onOk).toHaveBeenCalled();
         expect(onCancel).toHaveBeenCalled();
     });

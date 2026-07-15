@@ -124,6 +124,7 @@ function createControllerTestBed() {
         });
     });
 
+    injector.get(FormulaCalculationTriggerService).start();
     injector.get(FormulaCalculationSessionController);
     const controller = injector.get(TriggerCalculationController);
 

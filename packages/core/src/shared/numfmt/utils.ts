@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import * as numfmt from 'numfmt';
-import { regexp } from '../common/regexp';
-
-export * as numfmt from 'numfmt';
+import type { ParseData } from './api';
+import { regexp } from '../../common/regexp';
+import { parseDate, parseNumber, parseTime, tokenize, tokenTypes } from './api';
 
 export const DEFAULT_TEXT_FORMAT = '@@@'; // Compatible with old data
 export const DEFAULT_TEXT_FORMAT_EXCEL = '@'; // The default text format in Excel, recommended
@@ -72,37 +71,37 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
     }
 
     const getStringWithoutDecimal = (pattern: string): string => {
-        const tokens = numfmt.tokenize(pattern);
+        const tokens = tokenize(pattern);
         let result = '';
         let isDecimalPart = false;
         let isColorBefore = false;
 
         for (const token of tokens) {
-            if (token.type === numfmt.tokenTypes.POINT) {
+            if (token.type === tokenTypes.POINT) {
                 isDecimalPart = true; // Start ignoring tokens after the decimal point
                 continue;
             }
             // for the excel number
 
             // this if should be before the color token check
-            if (isColorBefore && token.type === numfmt.tokenTypes.MINUS) {
+            if (isColorBefore && token.type === tokenTypes.MINUS) {
                 // ignore the minus token in the decimal part after the color token
                 continue;
             }
 
-            if (token.type === numfmt.tokenTypes.SKIP) {
+            if (token.type === tokenTypes.SKIP) {
                 // Skip tokens that are not relevant to the string representation
                 continue;
             }
 
-            if (token.type === numfmt.tokenTypes.COLOR) {
+            if (token.type === tokenTypes.COLOR) {
                 isColorBefore = true; // If we are in the decimal part, we ignore the color tokens
                 continue;
             } else {
                 isColorBefore = false; // Reset after processing the color part
             }
 
-            if (isDecimalPart && token.type === numfmt.tokenTypes.ZERO) {
+            if (isDecimalPart && token.type === tokenTypes.ZERO) {
                 // If we are in the decimal part, we ignore the number tokens
                 continue;
             } else {
@@ -125,15 +124,49 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 
 const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
-export const currencySymbols = ['Rp', 'zł', 'NT$', 'R$', 'HK$', '$', '£', '¥', '¤', '֏', '؋', '৳', '฿', '៛', '₡', '₦', '₩', '₪', '₫', '€', '₭', '₮', '₱', '₲', '₴', '₸', '₹', '₺', '₼', '₽', '₾', '₿', '﷼'];
+export const currencySymbols = [
+    'Rp',
+    'zł',
+    'NT$',
+    'R$',
+    'HK$',
+    '$',
+    '£',
+    '¥',
+    '¤',
+    '֏',
+    '؋',
+    '৳',
+    '฿',
+    '៛',
+    '₡',
+    '₦',
+    '₩',
+    '₪',
+    '₫',
+    '€',
+    '₭',
+    '₮',
+    '₱',
+    '₲',
+    '₴',
+    '₸',
+    '₹',
+    '₺',
+    '₼',
+    '₽',
+    '₾',
+    '₿',
+    '﷼',
+];
 
 const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${regexp.charset(...Array.from(new Set(currencySymbols.join(''))))}+`);
 
 /**
  * Get the numfmt parse value, and filter out the parse error.
  */
-export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | null => {
-    const parseData = numfmt.parseDate(value) ?? numfmt.parseTime(value) ?? numfmt.parseNumber(value);
+export const getNumfmtParseValueFilter = (value: string): ParseData | null => {
+    const parseData = parseDate(value) ?? parseTime(value) ?? parseNumber(value);
 
     if (!parseData) return null;
 

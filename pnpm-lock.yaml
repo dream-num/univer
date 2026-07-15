@@ -795,9 +795,6 @@ importers:
       lodash-es:
         specifier: ^4.18.1
         version: 4.18.1
-      numfmt:
-        specifier: 3.2.6
-        version: 3.2.6
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -9600,9 +9597,6 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  numfmt@3.2.6:
-    resolution: {integrity: sha512-MXc2KP3j+2usdHTY5/ENUc2S+3BRF/cJqnR6RHeq6LBqKoIZOAQ62DQw974nnaZOencbfkmkTPyTmMnlkCpjzg==}
-
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
@@ -17690,8 +17684,6 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
-
-  numfmt@3.2.6: {}
 
   object-assign@4.1.1: {}
 

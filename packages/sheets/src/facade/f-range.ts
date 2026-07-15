@@ -39,6 +39,7 @@ import type {
     ISetRangeCustomMetadataCommandParams,
     ISetRangeValuesCommandParams,
     ISetSelectionsOperationParams,
+    ISetShrinkToFitCommandParams,
     ISetStyleCommandParams,
     ISetTextRotationCommandParams,
     ISetTextWrapCommandParams,
@@ -87,6 +88,7 @@ import {
     SetRangeCustomMetadataCommand,
     SetRangeValuesCommand,
     SetSelectionsOperation,
+    SetShrinkToFitCommand,
     SetStyleCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
@@ -945,6 +947,12 @@ export class FRange extends FBaseInitialable {
         return this._worksheet.getRange(this._range).getWrap() === BooleanNumber.TRUE;
     }
 
+    /** Gets whether the top-left cell shrinks its font size to fit the cell width. */
+    getShrinkToFit(): boolean {
+        const { startRow, startColumn } = this._range;
+        return this._worksheet.getComposedCellStyle(startRow, startColumn)?.stf === BooleanNumber.TRUE;
+    }
+
     /**
      * Gets whether text wrapping is enabled for cells in the range.
      * @returns {boolean[][]} A two-dimensional array of whether text wrapping is enabled for each cell in the range.
@@ -1445,6 +1453,18 @@ export class FRange extends FBaseInitialable {
             range: this._range,
             value: isWrapEnabled ? WrapStrategy.WRAP : WrapStrategy.UNSPECIFIED,
         } as ISetTextWrapCommandParams);
+
+        return this;
+    }
+
+    /** Sets whether cells shrink their font size to fit the cell width. */
+    setShrinkToFit(enabled: boolean): FRange {
+        this._commandService.syncExecuteCommand(SetShrinkToFitCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            value: enabled ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+        } as ISetShrinkToFitCommandParams);
 
         return this;
     }

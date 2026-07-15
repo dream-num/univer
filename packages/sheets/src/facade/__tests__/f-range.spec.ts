@@ -54,6 +54,7 @@ import {
     SetRangeCustomMetadataCommand,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
+    SetShrinkToFitCommand,
     SetStyleCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
@@ -100,6 +101,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetStyleCommand);
+        commandService.registerCommand(SetShrinkToFitCommand);
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
@@ -683,6 +685,16 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.WRAP);
         await range!.setWrapStrategy(WrapStrategy.CLIP);
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.CLIP);
+    });
+
+    it('gets and sets shrink to fit', () => {
+        const range = univerAPI.getActiveWorkbook()!.getActiveSheet()!.getRange('A1');
+
+        expect(range.getShrinkToFit()).toBe(false);
+        expect(range.setShrinkToFit(true)).toBe(range);
+        expect(range.getShrinkToFit()).toBe(true);
+        expect(range.setShrinkToFit(false)).toBe(range);
+        expect(range.getShrinkToFit()).toBe(false);
     });
 
     // #region Merge cells

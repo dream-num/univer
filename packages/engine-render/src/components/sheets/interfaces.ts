@@ -55,6 +55,7 @@ export interface IFontCacheItem {
     displayText?: string;
     resolvedHorizontalAlign?: HorizontalAlign;
     textFitsCurrentCell?: boolean;
+    shrinkScale?: number;
 }
 
 type colorString = string;

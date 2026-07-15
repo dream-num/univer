@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IDocumentData, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import {
     BooleanNumber,
@@ -41,7 +41,13 @@ import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Viewport } from '../../../viewport';
 import { SHEET_VIEWPORT_KEY } from '../interfaces';
-import { convertTransformToOffsetX, convertTransformToOffsetY, SpreadsheetSkeleton } from '../sheet.render-skeleton';
+import {
+    convertTransformToOffsetX,
+    convertTransformToOffsetY,
+    getShrinkToFitScale,
+    scaleDocumentDataForShrinkToFit,
+    SpreadsheetSkeleton,
+} from '../sheet.render-skeleton';
 import { Spreadsheet } from '../spreadsheet';
 
 const workbookDataFactory = (): IWorkbookData => ({
@@ -69,6 +75,11 @@ const workbookDataFactory = (): IWorkbookData => ({
             ff: 'Arial',
             cl: { rgb: '#111111' },
         },
+        'style-shrink': {
+            stf: BooleanNumber.TRUE,
+            fs: 12,
+            ff: 'Arial',
+        },
     },
     sheets: {
         'sheet-1': {
@@ -94,6 +105,7 @@ const workbookDataFactory = (): IWorkbookData => ({
                     0: { v: 'A1' },
                     1: { v: 'very-long-text-for-overflow-path', s: 'style-bg-border' },
                     2: { v: 'wrapped line text', s: 'style-bg-border' },
+                    3: { v: 'very long text that must shrink to fit', s: 'style-shrink' },
                     4: { s: 'style-bg-border', custom: { key: 'value' } },
                 },
                 1: {
@@ -241,6 +253,46 @@ describe('spreadsheet integration', () => {
         vi.restoreAllMocks();
         disposeFixture(fixture);
         document.body.innerHTML = '';
+    });
+
+    it('calculates a shrink scale with a one-point minimum font size', () => {
+        expect(getShrinkToFitScale(80, 100, 12)).toBe(1);
+        expect(getShrinkToFitScale(200, 100, 12)).toBe(0.5);
+        expect(getShrinkToFitScale(2400, 100, 12)).toBeCloseTo(1 / 12);
+    });
+
+    it('scales cloned rich-text font sizes without mutating the stored document', () => {
+        const document = {
+            id: 'rich-text',
+            body: {
+                dataStream: 'Univer\r\n',
+                textRuns: [{ st: 0, ed: 6, ts: { fs: 20 } }],
+            },
+            documentStyle: { textStyle: { fs: 12 } },
+        } as IDocumentData;
+
+        const scaled = scaleDocumentDataForShrinkToFit(document, 0.5, 10);
+
+        expect(scaled).not.toBe(document);
+        expect(scaled.documentStyle.textStyle?.fs).toBe(6);
+        expect(scaled.body?.textRuns?.[0].ts?.fs).toBe(10);
+        expect(document.documentStyle.textStyle?.fs).toBe(12);
+        expect(document.body?.textRuns?.[0].ts?.fs).toBe(20);
+    });
+
+    it('applies shrink to fit while building the font cache', () => {
+        const { skeleton, workbook } = fixture;
+        const worksheet = workbook.getActiveSheet()!;
+        const cell = worksheet.getCell(0, 3)!;
+        const style = worksheet.getComposedCellStyleByCellData(0, 3, cell)!;
+        vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({ width: 240 } as TextMetrics);
+
+        skeleton._setFontStylesCache(0, 3, cell, style);
+
+        const fontCache = skeleton.getFont(0, 3)!;
+        expect(fontCache.shrinkScale).toBeCloseTo(68 / 240);
+        expect(fontCache.fontString).toContain(`${12 * 68 / 240}pt`);
+        expect(style.fs).toBe(12);
     });
 
     it('builds sheet skeleton cache through visible viewport and style/layout calculations', () => {

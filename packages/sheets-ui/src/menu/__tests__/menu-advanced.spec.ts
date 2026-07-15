@@ -24,6 +24,7 @@ import {
     FontFamilySelectorMenuItemFactory,
     HorizontalAlignMenuItemFactory,
     ItalicMenuItemFactory,
+    ShrinkToFitMenuItemFactory,
     StrikeThroughMenuItemFactory,
     TextColorSelectorMenuItemFactory,
     TextRotateMenuItemFactory,
@@ -104,5 +105,14 @@ describe('advanced menu state streams', () => {
         expect(await firstValueFrom(vertical.value$!.pipe(take(1)))).not.toBeUndefined();
         expect(await firstValueFrom(wrap.value$!.pipe(take(1)))).not.toBeUndefined();
         expect(await firstValueFrom(rotate.value$!.pipe(take(1)))).not.toBeUndefined();
+    });
+
+    it('exposes shrink to fit as an activated ribbon button', async () => {
+        const item = get(Injector).invoke(ShrinkToFitMenuItemFactory);
+
+        expect(item.id).toBe('sheet.command.set-shrink-to-fit');
+        expect(item.icon).toBe('ShrinkToFitIcon');
+        expect(await firstValueFrom(item.activated$!.pipe(take(1)))).toBe(false);
+        expect(await firstValueFrom(item.disabled$!.pipe(take(1)))).toBeTypeOf('boolean');
     });
 });

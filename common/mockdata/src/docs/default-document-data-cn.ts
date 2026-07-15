@@ -1,5 +1,6 @@
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, DashStyleType, DocumentFlavor, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, DashStyleType, DocumentFlavor, DrawingTypeEnum, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { buildDocTransform } from '@univerjs/docs';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
@@ -13,24 +14,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             drawingId: 'shapeTest1',
             title: 'test shape',
             description: 'test shape',
-            docTransform: {
-                size: {
-                    width: 670,
-                    height: 300,
-                },
-                positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 0,
-                },
-                positionV: {
-                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                    posOffset: 10,
-                },
-                angle: 0,
-                // imageProperties: {
-                //     contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
-                // },
-            },
+            docTransform: buildDocTransform(670, 300, { left: 0, top: 10 }),
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,
             wrapText: WrapTextType.BOTH_SIDES,

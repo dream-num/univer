@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IDocDrawingPosition } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IInsertDrawingCommandParams } from './interfaces';
 import {
     BooleanNumber,
@@ -24,13 +24,11 @@ import {
     ICommandService,
     ImageSourceType,
     IUniverInstanceService,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
-import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
+import { buildDocTransform, docDrawingPositionToTransform } from '@univerjs/docs';
 import { InsertDocDrawingCommand } from './insert-doc-drawing.command';
 
 type DocShapeKind = 'rectangle' | 'ellipse';
@@ -47,24 +45,6 @@ function createShapeSvgSource(shape: DocShapeKind, width: number, height: number
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-function createDefaultDocTransform(width: number, height: number): IDocDrawingPosition {
-    return {
-        size: {
-            width,
-            height,
-        },
-        positionH: {
-            relativeFrom: ObjectRelativeFromH.PAGE,
-            posOffset: 0,
-        },
-        positionV: {
-            relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-            posOffset: 0,
-        },
-        angle: 0,
-    };
-}
-
 function createShapeInsertCommand(shape: DocShapeKind, width: number, height: number, id: string): ICommand {
     return {
         id,
@@ -78,7 +58,7 @@ function createShapeInsertCommand(shape: DocShapeKind, width: number, height: nu
                 return false;
             }
 
-            const docTransform = createDefaultDocTransform(width, height);
+            const docTransform = buildDocTransform(width, height);
 
             return commandService.executeCommand(InsertDocDrawingCommand.id, {
                 unitId,

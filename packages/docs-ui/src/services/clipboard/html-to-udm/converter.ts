@@ -28,8 +28,6 @@ import {
     ImageSourceType,
     isSafeUrl,
     NamedStyleType,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     PresetListType,
     skipParseTagNames,
@@ -37,6 +35,7 @@ import {
     TableSizeType,
     Tools,
 } from '@univerjs/core';
+import { buildDocTransform } from '@univerjs/docs';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
@@ -198,18 +197,7 @@ export class HtmlToUDMService {
                         imageSourceType,
                         source,
                         transform: { width, height, left: 0 },
-                        docTransform: {
-                            size: { width: docTransformWidth, height: docTransformHeight },
-                            angle: 0,
-                            positionH: {
-                                relativeFrom: ObjectRelativeFromH.PAGE,
-                                posOffset: 0,
-                            },
-                            positionV: {
-                                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                                posOffset: 0,
-                            },
-                        },
+                        docTransform: buildDocTransform(docTransformWidth, docTransformHeight),
                         layoutType: PositionedObjectLayoutType.INLINE,
                         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                         unitId: doc.id || '',

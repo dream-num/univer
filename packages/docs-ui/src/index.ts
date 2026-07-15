@@ -25,7 +25,6 @@ export {
 } from './basics/custom-decoration-factory';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
-export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 export { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 export type { ITabCommandParams } from './commands/commands/auto-format.command';
 export { BreakLineCommand } from './commands/commands/break-line.command';

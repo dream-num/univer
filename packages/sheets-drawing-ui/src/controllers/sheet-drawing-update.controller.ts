@@ -43,13 +43,11 @@ import {
     Injector,
     IURLImageService,
     LocaleService,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
+import { buildDocTransform, docDrawingPositionToTransform } from '@univerjs/docs';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
     DRAWING_IMAGE_COUNT_LIMIT,
@@ -338,21 +336,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (!imageSize) {
             return false;
         }
-        const docTransform = {
-            size: {
-                width: imageSize.width,
-                height: imageSize.height,
-            },
-            positionH: {
-                relativeFrom: ObjectRelativeFromH.PAGE,
-                posOffset: 0,
-            },
-            positionV: {
-                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                posOffset: 0,
-            },
-            angle: 0,
-        };
+        const docTransform = buildDocTransform(imageSize.width, imageSize.height);
         const docDrawingParam = {
             unitId: docDataModel.getUnitId(),
             subUnitId: docDataModel.getUnitId(),
@@ -403,7 +387,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         return false;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     async insertCellImageByUrl(url: string, location?: ISheetLocationBase) {
         let src = url;
         try {
@@ -434,21 +417,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (!imageSize) {
             return false;
         }
-        const docTransform = {
-            size: {
-                width: imageSize.width,
-                height: imageSize.height,
-            },
-            positionH: {
-                relativeFrom: ObjectRelativeFromH.PAGE,
-                posOffset: 0,
-            },
-            positionV: {
-                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                posOffset: 0,
-            },
-            angle: 0,
-        };
+        const docTransform = buildDocTransform(imageSize.width, imageSize.height);
         const docDrawingParam = {
             unitId: docDataModel.getUnitId(),
             subUnitId: docDataModel.getUnitId(),

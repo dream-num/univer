@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Renvoi à la ligne',
                 right: 'Mode de renvoi à la ligne',
             },
+            shrinkToFit: 'Réduire pour tenir',
             textRotateMode: {
                 main: 'Rotation du texte',
                 right: 'Mode de rotation du texte',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Pivoter vers le bas',
         },
         sheetConfig: {
+            sheetTabs: 'Onglets de feuilles',
+
             delete: 'Supprimer',
             copy: 'Copier',
             rename: 'Renommer',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Modifier l\'objet supplémentaire',
             },
             dialog: {
+                emptyList: 'Liste d’utilisateurs vide',
+
                 allowUserToEdit: 'Autoriser l\'utilisateur à modifier',
                 allowedPermissionType: 'Types de permissions autorisées',
                 setCellValue: 'Définir la valeur de la cellule',

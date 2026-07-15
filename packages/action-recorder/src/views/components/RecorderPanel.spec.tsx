@@ -28,6 +28,8 @@ import {
     ILogService,
     Injector,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     LogLevel,
 } from '@univerjs/core';
 import { ILocalFileService, RediContext } from '@univerjs/ui';
@@ -36,6 +38,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../../commands/operations/operation';
+import enUS from '../../locale/en-US';
 import { ActionRecorderService } from '../../services/action-recorder.service';
 import { RecorderPanel } from './RecorderPanel';
 
@@ -103,7 +106,11 @@ function createRecorderPanelTestBed() {
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([ILocalFileService, { useClass: TestLocalFileService }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([LocaleService]);
     injector.add([ActionRecorderService]);
+
+    injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
 
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 

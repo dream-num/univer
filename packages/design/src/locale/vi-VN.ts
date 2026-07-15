@@ -18,6 +18,16 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     design: {
+        Accessibility: {
+            closeBadge: 'Đóng huy hiệu',
+            imageGallery: 'Thư viện ảnh',
+            image: 'Ảnh {0} trên {1}',
+            zoomIn: 'Phóng to',
+            zoomOut: 'Thu nhỏ',
+            resetZoom: 'Đặt lại thu phóng',
+            increment: 'Tăng',
+            decrement: 'Giảm',
+        },
         Confirm: {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',

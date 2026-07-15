@@ -15,6 +15,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import {
     borderBottomClassName,
@@ -146,7 +147,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                             'univer-opacity-40': activeIndex === 0,
                         })}
                         disabled={activeIndex === 0}
-                        aria-label="Previous"
+                        aria-label={localeService.t<LocaleKey>('ui.navigation.previous')}
                         onClick={() => selectTab(activeIndex - 1)}
                     >
                         <MoreLeftIcon className="univer-rotate-180 univer-text-sm" />
@@ -208,7 +209,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                             'univer-opacity-40': activeIndex >= ribbon.length - 1,
                         })}
                         disabled={activeIndex >= ribbon.length - 1}
-                        aria-label="Next"
+                        aria-label={localeService.t<LocaleKey>('ui.navigation.next')}
                         onClick={() => selectTab(activeIndex + 1)}
                     >
                         <MoreRightIcon className="univer-text-sm" />
@@ -247,7 +248,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                         'univer-opacity-30': !canScrollLeft,
                     })}
                     disabled={!canScrollLeft}
-                    aria-label="Previous"
+                    aria-label={localeService.t<LocaleKey>('ui.navigation.previous')}
                     onClick={() => scrollToolbar('left')}
                 >
                     <MoreLeftIcon className="univer-text-sm" />
@@ -343,7 +344,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                         'univer-opacity-30': !canScrollRight,
                     })}
                     disabled={!canScrollRight}
-                    aria-label="Next"
+                    aria-label={localeService.t<LocaleKey>('ui.navigation.next')}
                     onClick={() => scrollToolbar('right')}
                 >
                     <MoreRightIcon className="univer-text-sm" />

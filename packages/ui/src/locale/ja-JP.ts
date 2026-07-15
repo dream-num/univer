@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': '一般編集ショートカット',
         'toggle-shortcut-panel': 'ショートカットパネルを切り替え',
+        navigation: {
+            back: '戻る',
+            previous: '前へ',
+            next: '次へ',
+        },
+        sidebar: {
+            panel: 'サイドバーパネル',
+            resize: 'サイドバーのサイズを変更',
+            close: 'サイドバーを閉じる',
+        },
+        beforeClose: {
+            title: '一部の変更が保存されていません',
+        },
         clipboard: {
             authentication: {
                 title: '権限が拒否されました',

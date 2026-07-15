@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Ngắt dòng văn bản',
                 right: 'Chọn kiểu ngắt',
             },
+            shrinkToFit: 'Thu nhỏ để vừa',
             textRotateMode: {
                 main: 'Xoay văn bản',
                 right: 'Chọn kiểu xoay',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Xoay xuống',
         },
         sheetConfig: {
+            sheetTabs: 'Thẻ trang tính',
+
             delete: 'Xóa',
             copy: 'Sao chép',
             rename: 'Đổi tên',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Chỉnh sửa đối tượng khác',
             },
             dialog: {
+                emptyList: 'Danh sách người dùng trống',
+
                 allowUserToEdit: 'Cho phép người dùng chỉnh sửa',
                 allowedPermissionType: 'Loại quyền hạn cho phép',
                 setCellValue: 'Thiết lập giá trị ô',

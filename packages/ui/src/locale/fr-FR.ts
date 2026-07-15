@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Raccourcis d\'édition courants',
         'toggle-shortcut-panel': 'Basculer le panneau de raccourcis',
+        navigation: {
+            back: 'Retour',
+            previous: 'Précédent',
+            next: 'Suivant',
+        },
+        sidebar: {
+            panel: 'Panneau latéral',
+            resize: 'Redimensionner le panneau latéral',
+            close: 'Fermer le panneau latéral',
+        },
+        beforeClose: {
+            title: 'Certaines modifications n\'ont pas été enregistrées',
+        },
         clipboard: {
             authentication: {
                 title: 'Permission refusée',

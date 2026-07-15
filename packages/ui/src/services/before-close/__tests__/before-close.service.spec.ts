@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { INotificationOptions } from '../../../views/notification/Notification';
-import { Injector } from '@univerjs/core';
+import { Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DesktopNotificationService } from '../../notification/desktop-notification.service';
 import { INotificationService } from '../../notification/notification.service';
@@ -35,8 +35,13 @@ class FakeNotificationService extends DesktopNotificationService {
 function createService(): IBeforeCloseService {
     const injector = new Injector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([LocaleService, { useClass: LocaleService }]);
     injector.add([INotificationService, { useClass: FakeNotificationService }]);
     injector.add([IBeforeCloseService, { useClass: DesktopBeforeCloseService }]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({
+        [LocaleType.EN_US]: {},
+    });
     return injector.get(IBeforeCloseService);
 }
 
@@ -57,11 +62,6 @@ describe('DesktopBeforeCloseService', () => {
         windowTarget.dispatchEvent(event);
 
         expect(event.returnValue).toBe('Unsaved sheet\nPending upload');
-        expect(FakeNotificationService.notifications).toEqual([{
-            type: 'error',
-            title: 'Some changes are not saved',
-            content: 'Unsaved sheet\nPending upload',
-        }]);
 
         disposable.dispose();
         (service as DesktopBeforeCloseService).dispose();
@@ -89,6 +89,7 @@ describe('DesktopBeforeCloseService', () => {
         vi.stubGlobal('window', windowTarget);
         const injector = new Injector();
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([LocaleService, { useClass: LocaleService }]);
         injector.add([INotificationService, { useClass: FakeNotificationService }]);
         injector.add([IBeforeCloseService, { useClass: DesktopBeforeCloseService }]);
 

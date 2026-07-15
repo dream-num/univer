@@ -96,6 +96,10 @@ const locale = {
             listItem: 'Item',
         },
         doc: {
+            blockMenu: {
+                dragBlock: 'Drag block',
+            },
+
             menu: {
                 paragraphSetting: 'Paragraph Settings',
                 sectionSetting: 'Section Settings',

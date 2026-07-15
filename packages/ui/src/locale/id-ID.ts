@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Pintasan Edit Umum',
         'toggle-shortcut-panel': 'Alihkan Panel Pintasan',
+        navigation: {
+            back: 'Kembali',
+            previous: 'Sebelumnya',
+            next: 'Berikutnya',
+        },
+        sidebar: {
+            panel: 'Panel samping',
+            resize: 'Ubah ukuran panel samping',
+            close: 'Tutup panel samping',
+        },
+        beforeClose: {
+            title: 'Beberapa perubahan belum disimpan',
+        },
         clipboard: {
             authentication: {
                 title: 'Izin Ditolak',

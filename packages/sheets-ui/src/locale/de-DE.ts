@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Text umbrechen',
                 right: 'Textumbruchmodus',
             },
+            shrinkToFit: 'An Zellgröße anpassen',
             textRotateMode: {
                 main: 'Text drehen',
                 right: 'Textdrehmodus',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Nach unten drehen',
         },
         sheetConfig: {
+            sheetTabs: 'Blattregisterkarten',
+
             delete: 'Löschen',
             copy: 'Kopieren',
             rename: 'Umbenennen',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Zusätzliches Objekt bearbeiten',
             },
             dialog: {
+                emptyList: 'Leere Benutzerliste',
+
                 allowUserToEdit: 'Benutzer das Bearbeiten erlauben',
                 allowedPermissionType: 'Erlaubte Berechtigungstypen',
                 setCellValue: 'Zellenwert festlegen',

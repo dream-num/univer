@@ -16,6 +16,16 @@
 
 const locale = {
     design: {
+        Accessibility: {
+            closeBadge: 'Close badge',
+            imageGallery: 'Image gallery',
+            image: 'Image {0} of {1}',
+            zoomIn: 'Zoom in',
+            zoomOut: 'Zoom out',
+            resetZoom: 'Reset zoom',
+            increment: 'increment',
+            decrement: 'decrement',
+        },
         Confirm: {
             cancel: 'cancel',
             confirm: 'ok',

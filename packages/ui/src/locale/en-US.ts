@@ -91,6 +91,19 @@ const locale = {
         },
         'common-edit': 'Common Editing Shortcuts',
         'toggle-shortcut-panel': 'Toggle Shortcut Panel',
+        navigation: {
+            back: 'Back',
+            previous: 'Previous',
+            next: 'Next',
+        },
+        sidebar: {
+            panel: 'Sidebar panel',
+            resize: 'Resize sidebar',
+            close: 'Close sidebar',
+        },
+        beforeClose: {
+            title: 'Some changes are not saved',
+        },
         clipboard: {
             authentication: {
                 title: 'Permission Denied',

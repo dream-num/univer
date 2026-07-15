@@ -18,6 +18,16 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     design: {
+        Accessibility: {
+            closeBadge: 'بستن نشان',
+            imageGallery: 'گالری تصاویر',
+            image: 'تصویر {0} از {1}',
+            zoomIn: 'بزرگ‌نمایی',
+            zoomOut: 'کوچک‌نمایی',
+            resetZoom: 'بازنشانی بزرگ‌نمایی',
+            increment: 'افزایش',
+            decrement: 'کاهش',
+        },
         Confirm: {
             cancel: 'لغو',
             confirm: 'باشه',

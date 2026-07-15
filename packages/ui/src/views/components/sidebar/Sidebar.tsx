@@ -15,7 +15,9 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
+import { LocaleService } from '@univerjs/core';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -43,6 +45,7 @@ const MAX_SIDEBAR_WIDTH = 800;
 const DEFAULT_SIDEBAR_WIDTH = 384;
 
 export function Sidebar() {
+    const localeService = useDependency(LocaleService);
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -188,7 +191,7 @@ export function Sidebar() {
             data-u-comp="sidebar"
             role="complementary"
             aria-expanded={!!options?.visible}
-            aria-label="Sidebar panel"
+            aria-label={localeService.t<LocaleKey>('ui.sidebar.panel')}
             className={clsx(`
               univer-relative univer-h-full univer-flex-shrink-0 univer-bg-white univer-text-gray-900
               dark:!univer-bg-gray-900 dark:!univer-text-white
@@ -210,7 +213,7 @@ export function Sidebar() {
                     onMouseDown={handleResizeMouseDown}
                     role="separator"
                     aria-orientation="vertical"
-                    aria-label="Resize sidebar"
+                    aria-label={localeService.t<LocaleKey>('ui.sidebar.resize')}
                     tabIndex={0}
                     onKeyDown={(e) => {
                         if (!sidebarRef.current) return;
@@ -259,7 +262,7 @@ export function Sidebar() {
                           dark:!univer-text-gray-300
                         `}
                         onClick={handleClose}
-                        aria-label="Close sidebar"
+                        aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
                     >
                         <CloseIcon />
                     </button>

@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Chỉnh sửa thường dùng',
         'toggle-shortcut-panel': 'Mở/Đóng bảng phím tắt',
+        navigation: {
+            back: 'Quay lại',
+            previous: 'Trước',
+            next: 'Tiếp theo',
+        },
+        sidebar: {
+            panel: 'Bảng bên',
+            resize: 'Thay đổi kích thước bảng bên',
+            close: 'Đóng bảng bên',
+        },
+        beforeClose: {
+            title: 'Một số thay đổi chưa được lưu',
+        },
         clipboard: {
             authentication: {
                 title: 'Không thể truy cập vào bảng nhớ tạm',

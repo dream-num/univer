@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: '文本换行',
                 right: '换行方式',
             },
+            shrinkToFit: '缩小字体填充',
             textRotateMode: {
                 main: '文本旋转',
                 right: '旋转方式',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: '向下90°',
         },
         sheetConfig: {
+            sheetTabs: '工作表标签页',
+
             delete: '删除',
             copy: '复制',
             rename: '重命名',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: '编辑其他对象',
             },
             dialog: {
+                emptyList: '用户列表为空',
+
                 allowUserToEdit: '允许用户编辑',
                 allowedPermissionType: '允许权限类型',
                 setCellValue: '设置单元格值',

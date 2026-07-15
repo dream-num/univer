@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': '常用編輯',
         'toggle-shortcut-panel': '開啟收起快速鍵面板',
+        navigation: {
+            back: '返回',
+            previous: '上一個',
+            next: '下一個',
+        },
+        sidebar: {
+            panel: '側邊欄',
+            resize: '調整側邊欄大小',
+            close: '關閉側邊欄',
+        },
+        beforeClose: {
+            title: '部分變更尚未儲存',
+        },
         clipboard: {
             authentication: {
                 title: '無法存取剪貼簿',

@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': '常用编辑',
         'toggle-shortcut-panel': '打开收起快捷键面板',
+        navigation: {
+            back: '返回',
+            previous: '上一个',
+            next: '下一个',
+        },
+        sidebar: {
+            panel: '侧边栏',
+            resize: '调整侧边栏大小',
+            close: '关闭侧边栏',
+        },
+        beforeClose: {
+            title: '部分更改尚未保存',
+        },
         clipboard: {
             authentication: {
                 title: '无法访问剪贴板',

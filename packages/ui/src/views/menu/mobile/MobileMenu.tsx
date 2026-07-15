@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../../locale/types';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -58,6 +59,7 @@ interface IMobileMenuProps extends IBaseMenuProps {
 export function MobileMenu(props: IMobileMenuProps) {
     const { menuType, onOptionSelect, schemas: providedSchemas, menuManagerService: providedMenuManagerService } = props;
     const rootMenuManagerService = useDependency(IMenuManagerService);
+    const localeService = useDependency(LocaleService);
     const menuManagerService = providedMenuManagerService ?? rootMenuManagerService;
     const [viewStack, setViewStack] = useState<MobileMenuView[]>([]);
 
@@ -106,7 +108,7 @@ export function MobileMenu(props: IMobileMenuProps) {
                 >
                     <button
                         type="button"
-                        aria-label="Back"
+                        aria-label={localeService.t<LocaleKey>('ui.navigation.back')}
                         className="
                           univer-flex univer-size-8 univer-appearance-none univer-items-center univer-justify-center
                           univer-rounded-full univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-700

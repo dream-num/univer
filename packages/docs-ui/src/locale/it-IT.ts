@@ -98,6 +98,10 @@ const locale: typeof enUS = {
             listItem: 'Elemento',
         },
         doc: {
+            blockMenu: {
+                dragBlock: 'Trascina blocco',
+            },
+
             menu: {
                 paragraphSetting: 'Impostazioni Paragrafo',
                 sectionSetting: 'Section Settings',

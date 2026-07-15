@@ -421,7 +421,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 </div>
                 <div className="univer-flex-1">
                     <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">
-                        {locale?.GradientColorPicker.transparency ?? 'Transparency'}
+                        {locale?.GradientColorPicker.transparency}
                     </div>
                     <InputNumber
                         value={Math.round((1 - getStopOpacity(draftValue.stops[selectedIndex])) * 100)}

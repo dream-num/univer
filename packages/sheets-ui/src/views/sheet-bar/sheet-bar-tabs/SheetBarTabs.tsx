@@ -649,7 +649,7 @@ export function SheetBarTabs() {
                 <div
                     data-u-comp="slide-tab-bar"
                     role="tablist"
-                    aria-label="Sheet tabs"
+                    aria-label={localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetTabs')}
                     onKeyDown={onTabListKeyDown}
                     className={`
                       univer-flex univer-select-none univer-flex-row univer-items-center univer-overflow-hidden

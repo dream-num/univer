@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Общие команды редактирования',
         'toggle-shortcut-panel': 'Переключить панель сочетания клавиш',
+        navigation: {
+            back: 'Назад',
+            previous: 'Предыдущий',
+            next: 'Следующий',
+        },
+        sidebar: {
+            panel: 'Боковая панель',
+            resize: 'Изменить размер боковой панели',
+            close: 'Закрыть боковую панель',
+        },
+        beforeClose: {
+            title: 'Некоторые изменения не сохранены',
+        },
         clipboard: {
             authentication: {
                 title: 'Доступ запрещен',

@@ -78,7 +78,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.20.0",
+        "@univerjs/icons": "1.21.0",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

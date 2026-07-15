@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Zalomenie textu',
                 right: 'Režim zalomenia textu',
             },
+            shrinkToFit: 'Zmenšiť podľa veľkosti bunky',
             textRotateMode: {
                 main: 'Otočenie textu',
                 right: 'Režim otočenia textu',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Otočiť nadol',
         },
         sheetConfig: {
+            sheetTabs: 'Karty hárkov',
+
             delete: 'Odstrániť',
             copy: 'Kopírovať',
             rename: 'Premenovať',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Upraviť ďalší objekt',
             },
             dialog: {
+                emptyList: 'Prázdny zoznam používateľov',
+
                 allowUserToEdit: 'Povoliť používateľovi upravovať',
                 allowedPermissionType: 'Povolené typy oprávnení',
                 setCellValue: 'Nastaviť hodnotu bunky',

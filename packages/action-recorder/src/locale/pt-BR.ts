@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'action-recorder': {
+        panel: {
+            recording: 'Gravando...',
+            startRecording: 'Iniciar gravação',
+            cancel: 'Cancelar',
+            close: 'Fechar',
+            save: 'Salvar',
+            start: 'Iniciar',
+            startWithId: 'Iniciar (N)',
+        },
         menu: {
             title: 'Gravar Ações',
             record: 'Gravar Ações...',

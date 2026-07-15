@@ -15,7 +15,8 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import { createIdentifier, Disposable, Inject, LocaleService } from '@univerjs/core';
 import { INotificationService } from '../notification/notification.service';
 
 export interface IBeforeCloseService {
@@ -45,7 +46,10 @@ export class DesktopBeforeCloseService extends Disposable implements IBeforeClos
     private readonly _beforeUnloadHandler: (event: BeforeUnloadEvent) => string | undefined;
     private readonly _unloadHandler: () => void;
 
-    constructor(@INotificationService private readonly _notificationService: INotificationService) {
+    constructor(
+        @INotificationService private readonly _notificationService: INotificationService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super();
         this._beforeUnloadHandler = (_event: BeforeUnloadEvent) => {
             let event = _event;
@@ -57,7 +61,7 @@ export class DesktopBeforeCloseService extends Disposable implements IBeforeClos
             if (message) {
                 this._notificationService.show({
                     type: 'error',
-                    title: 'Some changes are not saved',
+                    title: this._localeService.t<LocaleKey>('ui.beforeClose.title'),
                     content: message,
                 });
 

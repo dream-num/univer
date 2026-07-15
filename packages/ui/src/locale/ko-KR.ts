@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': '일반 편집 단축키',
         'toggle-shortcut-panel': '단축키 패널 전환',
+        navigation: {
+            back: '뒤로',
+            previous: '이전',
+            next: '다음',
+        },
+        sidebar: {
+            panel: '사이드바 패널',
+            resize: '사이드바 크기 조정',
+            close: '사이드바 닫기',
+        },
+        beforeClose: {
+            title: '일부 변경 사항이 저장되지 않았습니다',
+        },
         clipboard: {
             authentication: {
                 title: '권한 거절',

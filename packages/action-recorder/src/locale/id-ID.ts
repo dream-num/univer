@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'action-recorder': {
+        panel: {
+            recording: 'Merekam...',
+            startRecording: 'Mulai merekam',
+            cancel: 'Batal',
+            close: 'Tutup',
+            save: 'Simpan',
+            start: 'Mulai',
+            startWithId: 'Mulai (N)',
+        },
         menu: {
             title: 'Rekam Aksi',
             record: 'Rekam Aksi...',

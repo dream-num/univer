@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Atajos de edición comunes',
         'toggle-shortcut-panel': 'Alternar panel de atajos',
+        navigation: {
+            back: 'Atrás',
+            previous: 'Anterior',
+            next: 'Siguiente',
+        },
+        sidebar: {
+            panel: 'Panel lateral',
+            resize: 'Cambiar el tamaño del panel lateral',
+            close: 'Cerrar el panel lateral',
+        },
+        beforeClose: {
+            title: 'Algunos cambios no se han guardado',
+        },
         clipboard: {
             authentication: {
                 title: 'Permiso denegado',

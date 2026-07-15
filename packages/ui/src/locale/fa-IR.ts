@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'کلیدهای میانبر ویرایش عمومی',
         'toggle-shortcut-panel': 'نمایش/مخفی کردن پنل کلیدهای میانبر',
+        navigation: {
+            back: 'بازگشت',
+            previous: 'قبلی',
+            next: 'بعدی',
+        },
+        sidebar: {
+            panel: 'پنل کناری',
+            resize: 'تغییر اندازه پنل کناری',
+            close: 'بستن پنل کناری',
+        },
+        beforeClose: {
+            title: 'برخی تغییرات ذخیره نشده‌اند',
+        },
         clipboard: {
             authentication: {
                 title: 'اجازه دسترسی داده نشده است',

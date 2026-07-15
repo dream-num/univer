@@ -98,6 +98,10 @@ const locale: typeof enUS = {
             listItem: '项目',
         },
         doc: {
+            blockMenu: {
+                dragBlock: '拖动块',
+            },
+
             menu: {
                 paragraphSetting: '段落设置',
                 sectionSetting: '节设置',

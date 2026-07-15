@@ -1252,8 +1252,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                           univer-justify-center univer-border-none univer-bg-transparent univer-p-0
                           active:univer-cursor-grabbing
                         `}
-                        aria-label="Drag block"
-                        title="Drag block"
+                        aria-label={localeService.t('docs-ui.doc.blockMenu.dragBlock')}
+                        title={localeService.t('docs-ui.doc.blockMenu.dragBlock')}
                         onPointerDown={(event) => {
                             const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
                             const moveRange = latestTarget?.moveRange;

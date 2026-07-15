@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Atalhos Comuns de Edição',
         'toggle-shortcut-panel': 'Alternar Painel de Atalhos',
+        navigation: {
+            back: 'Voltar',
+            previous: 'Anterior',
+            next: 'Próximo',
+        },
+        sidebar: {
+            panel: 'Painel lateral',
+            resize: 'Redimensionar o painel lateral',
+            close: 'Fechar o painel lateral',
+        },
+        beforeClose: {
+            title: 'Algumas alterações não foram salvas',
+        },
         clipboard: {
             authentication: {
                 title: 'Permissão Negada',

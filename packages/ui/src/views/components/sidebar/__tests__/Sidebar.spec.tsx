@@ -16,9 +16,10 @@
 
 import type { ReactElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
+import enUS from '../../../../locale/en-US';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
@@ -39,6 +40,8 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([LocaleService]);
+    injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
 

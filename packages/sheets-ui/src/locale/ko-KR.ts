@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: '텍스트 줄바꿈',
                 right: '텍스트 줄바꿈 모드',
             },
+            shrinkToFit: '셀에 맞춤',
             textRotateMode: {
                 main: '텍스트 회전',
                 right: '텍스트 회전 모드',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: '아래로 회전',
         },
         sheetConfig: {
+            sheetTabs: '시트 탭',
+
             delete: '삭제',
             copy: '복사',
             rename: '이름 변경',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: '추가 객체 편집',
             },
             dialog: {
+                emptyList: '빈 사용자 목록',
+
                 allowUserToEdit: '사용자 편집 허용',
                 allowedPermissionType: '허용된 권한 유형',
                 setCellValue: '셀 값 설정',

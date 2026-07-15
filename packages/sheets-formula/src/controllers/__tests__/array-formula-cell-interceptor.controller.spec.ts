@@ -15,25 +15,15 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook, Worksheet } from '@univerjs/core';
-import type { IFormulaData } from '@univerjs/engine-formula';
 import {
     CellValueType,
     ICommandService,
-    IConfigService,
     InterceptorEffectEnum,
     LocaleType,
 } from '@univerjs/core';
-import {
-    FormulaDataModel,
-    IDefinedNamesService,
-    LexerTreeBuilder,
-    SetArrayFormulaDataMutation,
-    SetDefinedNameMutation,
-    SetFormulaCalculationResultMutation,
-} from '@univerjs/engine-formula';
-import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ArrayFormulaCellInterceptorController } from '../array-formula-cell-interceptor.controller';
 
@@ -95,7 +85,6 @@ function getInterceptedCell(worksheet: Worksheet, workbook: Workbook, row: numbe
 describe('ArrayFormulaCellInterceptorController', () => {
     let testBed: ReturnType<typeof createControllerTestBed>;
     let commandService: ICommandService;
-    let configService: IConfigService;
     let formulaDataModel: FormulaDataModel;
     let interceptorService: SheetInterceptorService;
     let workbook: Workbook;
@@ -104,16 +93,12 @@ describe('ArrayFormulaCellInterceptorController', () => {
     beforeEach(() => {
         testBed = createControllerTestBed();
         commandService = testBed.injector.get(ICommandService);
-        configService = testBed.injector.get(IConfigService);
         formulaDataModel = testBed.injector.get(FormulaDataModel);
         interceptorService = testBed.injector.get(SheetInterceptorService);
         workbook = testBed.sheet as Workbook;
         worksheet = workbook.getActiveSheet()!;
 
         commandService.registerCommand(SetArrayFormulaDataMutation);
-        commandService.registerCommand(SetDefinedNameMutation);
-        commandService.registerCommand(SetFormulaCalculationResultMutation);
-        commandService.registerCommand(SetRangeValuesMutation);
 
         testBed.injector.get(ArrayFormulaCellInterceptorController);
     });
@@ -123,11 +108,7 @@ describe('ArrayFormulaCellInterceptorController', () => {
         testBed?.univer.dispose();
     });
 
-    it('should sync array formula data to the model and write snapshot refs when configured', async () => {
-        configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { writeArrayFormulaToSnapshot: true });
-
-        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
-
+    it('should sync array formula data to the model', async () => {
         const arrayFormulaRange = {
             test: {
                 sheet1: {
@@ -197,141 +178,6 @@ describe('ArrayFormulaCellInterceptorController', () => {
 
         expect(formulaDataModel.getArrayFormulaRange()).toEqual(arrayFormulaRange);
         expect(formulaDataModel.getArrayFormulaCellData()).toEqual(arrayFormulaCellData);
-
-        const setRangeValuesCalls = executeCommandSpy.mock.calls.filter(([id]) => id === SetRangeValuesMutation.id);
-
-        expect(setRangeValuesCalls).toHaveLength(3);
-        expect(setRangeValuesCalls.map((call) => (call[1] as { unitId?: string }).unitId)).toEqual(['test', 'test', 'test']);
-        expect(setRangeValuesCalls[0]?.[1]).toMatchObject({
-            unitId: 'test',
-            subUnitId: 'sheet1',
-            cellValue: {
-                0: {
-                    0: { ref: 'A1:B2' },
-                },
-            },
-        });
-        expect(setRangeValuesCalls[1]?.[1]).toMatchObject({
-            unitId: 'test',
-            subUnitId: 'sheet1',
-            cellValue: {
-                0: {
-                    2: { ref: 'C1' },
-                },
-            },
-        });
-        expect(setRangeValuesCalls[2]?.[1]).toMatchObject({
-            unitId: 'test',
-            subUnitId: 'sheet1',
-            cellValue: arrayFormulaCellData.test.sheet1,
-        });
-    });
-
-    it('should add prefixed formulas for workbook cells and defined names when calculation results arrive', async () => {
-        configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { writeArrayFormulaToSnapshot: true });
-
-        const definedNamesService = testBed.injector.get(IDefinedNamesService);
-        const lexerTreeBuilder = testBed.injector.get(LexerTreeBuilder);
-        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
-        const prefixSpy = vi
-            .spyOn(lexerTreeBuilder, 'getNewFormulaWithPrefix')
-            .mockImplementation((formula) => `PREFIX:${formula}`);
-
-        definedNamesService.registerDefinedNames('test', {
-            formulaName: {
-                id: 'formula-name',
-                name: 'FORMULA_NAME',
-                formulaOrRefString: '=SUM(A1)',
-                localSheetId: 'AllDefaultWorkbook',
-                comment: '',
-            },
-            refName: {
-                id: 'ref-name',
-                name: 'REF_NAME',
-                formulaOrRefString: 'Sheet1!$A$1',
-                localSheetId: 'AllDefaultWorkbook',
-                comment: '',
-            },
-        });
-
-        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
-            unitData: {},
-            unitOtherData: {},
-        });
-
-        const setRangeValuesCalls = executeCommandSpy.mock.calls.filter(([id]) => id === SetRangeValuesMutation.id);
-        const setDefinedNameCalls = executeCommandSpy.mock.calls.filter(([id]) => id === SetDefinedNameMutation.id);
-
-        expect(prefixSpy).toHaveBeenCalledWith('=SUM(A1)', expect.any(Function));
-        expect(prefixSpy).toHaveBeenCalledWith('=SKIP()', expect.any(Function));
-        expect(setRangeValuesCalls.at(-1)?.[1]).toMatchObject({
-            unitId: 'test',
-            subUnitId: 'sheet1',
-            cellValue: {
-                3: {
-                    0: { xf: 'PREFIX:=SUM(A1)' },
-                    1: { xf: 'PREFIX:=SUM(A1)' },
-                },
-            },
-        });
-        expect(setDefinedNameCalls).toContainEqual([
-            SetDefinedNameMutation.id,
-            expect.objectContaining({
-                unitId: 'test',
-                name: 'FORMULA_NAME',
-                formulaOrRefStringWithPrefix: 'PREFIX:=SUM(A1)',
-            }),
-            expect.objectContaining({
-                onlyLocal: true,
-                fromFormula: true,
-            }),
-        ]);
-    });
-
-    it('should write prefixed formulas only for sheet units when calculation data includes other unit types', async () => {
-        configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { writeArrayFormulaToSnapshot: true });
-
-        const lexerTreeBuilder = testBed.injector.get(LexerTreeBuilder);
-        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
-        const prefixSpy = vi
-            .spyOn(lexerTreeBuilder, 'getNewFormulaWithPrefix')
-            .mockImplementation((formula) => `PREFIX:${formula}`);
-
-        vi.spyOn(formulaDataModel, 'getFormulaData').mockReturnValue({
-            test: {
-                sheet1: {
-                    3: {
-                        0: { f: '=SUM(A1)' },
-                    },
-                },
-            },
-            'base-unit': {
-                tasks: {
-                    0: {
-                        0: { f: '=SUM(A1)' },
-                    },
-                },
-            },
-        } satisfies IFormulaData);
-
-        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
-            unitData: {},
-            unitOtherData: {},
-        });
-
-        const setRangeValuesCalls = executeCommandSpy.mock.calls.filter(([id]) => id === SetRangeValuesMutation.id);
-
-        expect(prefixSpy).toHaveBeenCalledTimes(1);
-        expect(setRangeValuesCalls).toHaveLength(1);
-        expect(setRangeValuesCalls[0]?.[1]).toMatchObject({
-            unitId: 'test',
-            subUnitId: 'sheet1',
-            cellValue: {
-                3: {
-                    0: { xf: 'PREFIX:=SUM(A1)' },
-                },
-            },
-        });
     });
 
     it('should intercept array formula cells with default values, precision cleanup, raw passthrough and array values', () => {

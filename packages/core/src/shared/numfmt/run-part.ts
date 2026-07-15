@@ -347,7 +347,7 @@ export function runPart(
                 } else if (token.rule === 'den') {
                     if (haveFraction) {
                         output.push(tokenValue.replace(/ /g, questionPadding));
-                    } else if (section.den_min > 0 || section.den_min > 0) {
+                    } else if (section.den_min > 0) {
                         output.push(tokenValue.replace(/./g, questionPadding));
                     }
                 }

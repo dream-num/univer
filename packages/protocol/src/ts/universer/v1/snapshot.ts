@@ -24,26 +24,7 @@ import type { IResource } from '../../univer/resource';
 import type { ISnapshot, ITableInfo } from '../../univer/snapshot';
 import type { ICustomCellTemplate } from '../../univer/unit-template';
 import type { IUnit } from '../../univer/univer-file';
-import type { ISheetBlock, ISheetBlockMeta } from '../../univer/workbook';
-
-interface IGetSnapshotMetaWithPreCalculatedRequest {
-    /** The id of the unit to be computed. */
-    workbookId: string;
-    /**
-     * The revision of the unit to be computed. If not specified or set to 0, the SSC service
-     * will fetch the latest version at the request time.
-     */
-    revision: number;
-}
-
-interface IGetSnapshotMetaWithPreCalculatedResponse {
-    error:
-    | IError
-    | undefined;
-    /** Of which revision the unit is processed on. */
-    revision: number;
-    sscBlock: { [key: string]: ISheetBlockMeta };
-}
+import type { ISheetBlock } from '../../univer/workbook';
 
 interface IGetUnitMetaRequest {
     unitId: string;
@@ -418,11 +399,6 @@ export interface ISnapshotService {
     GetSheetTable(request: IGetSheetTableRequest, metadata?: Metadata): Observable<IGetSheetTableResponse>;
     /** get unit meta */
     GetUnitMeta(request: IGetUnitMetaRequest, metadata?: Metadata): Observable<IGetUnitMetaResponse>;
-    /** Get formula calculation results */
-    GetSnapshotMetaWithPreCalculated(
-        request: IGetSnapshotMetaWithPreCalculatedRequest,
-        metadata?: Metadata,
-    ): Observable<IGetSnapshotMetaWithPreCalculatedResponse>;
     ReportUnitRoutingStats(
         request: IReportUnitRoutingStatsRequest,
         metadata?: Metadata,

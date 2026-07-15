@@ -16,6 +16,8 @@
 
 import type { ReactElement } from 'react';
 import { Injector, LocaleService } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
+import enUS from '@univerjs/design/locale/en-US';
 import { ContextMenuService, IContextMenuService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -60,7 +62,9 @@ function renderWithDependencies(element: ReactElement) {
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector }}>
-                {element}
+                <ConfigProvider locale={enUS.design} mountContainer={container}>
+                    {element}
+                </ConfigProvider>
             </RediContext.Provider>
         );
     });
@@ -91,7 +95,7 @@ function setInputText(input: HTMLInputElement, value: string) {
 }
 
 function clickIncrement(container: HTMLElement) {
-    const incrementButton = container.querySelector('[aria-label="increment"]');
+    const incrementButton = container.querySelector(`[aria-label="${enUS.design.Accessibility.increment}"]`);
     if (!(incrementButton instanceof HTMLElement)) {
         throw new TypeError('Increment button not found');
     }

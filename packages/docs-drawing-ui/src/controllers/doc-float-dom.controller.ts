@@ -36,8 +36,8 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { docDrawingPositionToTransform, SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { docDrawingPositionToTransform, DocSkeletonManagerService } from '@univerjs/docs';
+import { SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';

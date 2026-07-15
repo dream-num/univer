@@ -16,7 +16,23 @@
 
 import type { ICellData, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IImageFormulaInfo, IRuntimeImageFormulaDataType, ISetImageFormulaDataMutationParams, IUnitImageFormulaDataType } from '@univerjs/engine-formula';
-import { BooleanNumber, BuildTextUtils, CellValueType, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject, InterceptorEffectEnum, ObjectMatrix, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    BuildTextUtils,
+    CellValueType,
+    createDocumentModelWithStyle,
+    Disposable,
+    DrawingTypeEnum,
+    generateRandomId,
+    ICommandService,
+    ImageSourceType,
+    Inject,
+    InterceptorEffectEnum,
+    ObjectMatrix,
+    PositionedObjectLayoutType,
+    WrapTextType,
+} from '@univerjs/core';
+import { buildDocTransform } from '@univerjs/docs';
 import { ErrorType, FormulaDataModel, SetImageFormulaDataMutation } from '@univerjs/engine-formula';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -89,7 +105,7 @@ export class ImageFormulaCellInterceptorController extends Disposable {
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: InterceptCellContentPriority.CELL_IMAGE,
                 effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
-                // eslint-disable-next-line max-lines-per-function
+
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
                     const unitImageFormulaData = this._formulaDataModel.getUnitImageFormulaData();
@@ -118,6 +134,10 @@ export class ImageFormulaCellInterceptorController extends Disposable {
                     const finalWidth = width || imageNaturalWidth;
                     const finalHeight = height || imageNaturalHeight;
 
+                    if (!finalWidth || !finalHeight) {
+                        return next(this._errorValueCell);
+                    }
+
                     // TODO: @Wpxp123456 - now not support altText and sizing, need to be implemented in the future.
 
                     const docDataModel = createDocumentModelWithStyle('', {});
@@ -134,21 +154,7 @@ export class ImageFormulaCellInterceptorController extends Disposable {
                             width: finalWidth,
                             height: finalHeight,
                         },
-                        docTransform: {
-                            size: {
-                                width: finalWidth,
-                                height: finalHeight,
-                            },
-                            positionH: {
-                                relativeFrom: ObjectRelativeFromH.PAGE,
-                                posOffset: 0,
-                            },
-                            positionV: {
-                                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                                posOffset: 0,
-                            },
-                            angle: 0,
-                        },
+                        docTransform: buildDocTransform(finalWidth, finalHeight),
                         behindDoc: BooleanNumber.FALSE,
                         title: '',
                         description: '',

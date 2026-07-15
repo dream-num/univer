@@ -33,6 +33,7 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import {
+    buildDocTransform,
     DocContentInsertService,
     DocSelectionManagerService,
     DocSkeletonManagerService,
@@ -719,21 +720,10 @@ describe('docs drawing commands integration', () => {
     it('keeps table cell drawing position when switching from inline to floating layout', async () => {
         const docData = createDrawingDocData();
         docData.drawings!['shape-1'].layoutType = PositionedObjectLayoutType.INLINE;
-        docData.drawings!['shape-1'].docTransform = {
-            size: {
-                width: 40,
-                height: 24,
-            },
-            positionH: {
-                relativeFrom: ObjectRelativeFromH.PAGE,
-                posOffset: 999,
-            },
-            positionV: {
-                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                posOffset: 999,
-            },
-            angle: 0,
-        } as never;
+        docData.drawings!['shape-1'].docTransform = buildDocTransform(40, 24, {
+            left: 999,
+            top: 999,
+        });
         const testBed = setupDrawingTestBed(docData);
         const skeletonManager = testBed.injector.get(DocSkeletonManagerService);
         vi.spyOn(skeletonManager, 'getViewModel').mockReturnValue({

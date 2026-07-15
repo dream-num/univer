@@ -32,15 +32,13 @@ import {
     ImageUploadStatusType,
     Inject,
     LocaleService,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { buildDocTransform, docDrawingPositionToTransform, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
     DRAWING_IMAGE_COUNT_LIMIT,
@@ -241,21 +239,9 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             top: 0,
         };
 
-        return {
-            size: {
-                width: imageWidth,
-                height: imageHeight,
-            },
-            positionH: {
-                relativeFrom: ObjectRelativeFromH.PAGE,
-                posOffset: position.left,
-            },
-            positionV: {
-                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                posOffset: 0,
-            },
-            angle: 0,
-        };
+        return buildDocTransform(imageWidth, imageHeight, {
+            left: position.left,
+        });
     }
 
     private _getCurrentImageInsertPosition(): Nullable<IImageInsertPosition> {

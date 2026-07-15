@@ -457,31 +457,81 @@ export class FormulaDataModel extends Disposable {
 
     updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const cellMatrix = new ObjectMatrix(cellValue);
-
-        const formulaIdMap = this._getSheetFormulaIdMap(unitId, sheetId); // Connect the formula and ID
-
-        const deleteFormulaIdMap = new Map<string, string | IFormulaIdMap>();
-
-        const formulaData = this.getFormulaData();
-
-        if (formulaData[unitId] == null) {
-            formulaData[unitId] = {};
-        }
-
-        const workbookFormulaData = formulaData[unitId]!;
-
-        if (workbookFormulaData[sheetId] == null) {
-            workbookFormulaData[sheetId] = {};
-        }
-
-        const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(workbookFormulaData[sheetId] || {});
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
+        const worksheetCellMatrix = this._univerInstanceService
+            .getUnit<Workbook>(unitId)
+            ?.getSheetBySheetId(sheetId)
+            ?.getCellMatrix();
+        const affectedFormulaIds = new Set<string>();
 
         cellMatrix.forValue((r, c, cell) => {
+            const currentCell = worksheetCellMatrix?.getValue(r, c);
+            const currentFormulaId = currentCell?.si;
+            const formulaId = cell?.si;
+            const hasCurrentFormulaId = isFormulaId(currentFormulaId);
+            const hasFormulaId = isFormulaId(formulaId);
+            const formulaString = cell?.f;
+
+            if (hasCurrentFormulaId) {
+                affectedFormulaIds.add(String(currentFormulaId));
+            }
+            if (hasFormulaId) {
+                affectedFormulaIds.add(String(formulaId));
+            }
+
+            if (!hasCurrentFormulaId && !hasFormulaId) {
+                if (typeof formulaString === 'string' && isFormulaString(formulaString)) {
+                    newSheetFormulaDataMatrix.setValue(r, c, { f: formulaString });
+                } else if (isFormulaString(currentCell?.f)) {
+                    newSheetFormulaDataMatrix.setValue(r, c, null);
+                }
+            }
+        });
+
+        if (affectedFormulaIds.size === 0) {
+            return newSheetFormulaDataMatrix.getMatrix();
+        }
+
+        const formulaIdMap: { [formulaId: string]: IFormulaIdMap } = {};
+        const sharedFormulaCellMatrix = new ObjectMatrix<Nullable<ICellData>>();
+        worksheetCellMatrix?.forValue((r, c, cell) => {
+            const formulaId = cell?.si;
+            if (!isFormulaId(formulaId) || !affectedFormulaIds.has(String(formulaId))) {
+                return;
+            }
+
+            sharedFormulaCellMatrix.setValue(r, c, cell);
+
+            if (typeof cell?.f === 'string' && isFormulaString(cell.f)) {
+                formulaIdMap[String(formulaId)] = { f: cell.f, r, c };
+            }
+        });
+
+        const formulaData: IFormulaData = {};
+        initSheetFormulaData(formulaData, unitId, sheetId, sharedFormulaCellMatrix);
+        const deleteFormulaIdMap = new Map<string, string | IFormulaIdMap>();
+        const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId]?.[sheetId] ?? {});
+
+        cellMatrix.forValue((r, c, cell) => {
+            const currentFormulaId = worksheetCellMatrix?.getValue(r, c)?.si;
+            if (!isFormulaId(currentFormulaId) && !isFormulaId(cell?.si)) {
+                return;
+            }
+
             updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
         });
 
-        // Convert the formula ID to formula string
+        this._rebindSharedFormulaData(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap);
+
+        return newSheetFormulaDataMatrix.getMatrix();
+    }
+
+    private _rebindSharedFormulaData(
+        sheetFormulaDataMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>,
+        newSheetFormulaDataMatrix: ObjectMatrix<IFormulaDataItem | null>,
+        formulaIdMap: { [formulaId: string]: IFormulaIdMap },
+        deleteFormulaIdMap: Map<string, string | IFormulaIdMap>
+    ) {
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
             const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
@@ -515,8 +565,6 @@ export class FormulaDataModel extends Disposable {
                 }
             }
         });
-
-        return newSheetFormulaDataMatrix.getMatrix();
     }
 
     updateArrayFormulaRange(
@@ -727,35 +775,6 @@ export class FormulaDataModel extends Disposable {
         }
 
         return dirtyRanges;
-    }
-
-    private _getSheetFormulaIdMap(unitId: string, sheetId: string) {
-        const formulaIdMap: Nullable<{ [formulaId: string]: IFormulaIdMap }> = {}; // Connect the formula and ID
-
-        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
-        if (workbook == null) {
-            return formulaIdMap;
-        }
-
-        const worksheet = workbook.getSheetBySheetId(sheetId);
-        if (worksheet == null) {
-            return formulaIdMap;
-        }
-
-        const cellMatrix = worksheet.getCellMatrix();
-        cellMatrix.forValue((r, c, cell) => {
-            if (cell == null) {
-                return true;
-            }
-
-            const { f, si } = cell;
-
-            if (isFormulaString(f) && isFormulaId(si)) {
-                formulaIdMap[si as string] = { f: f as string, r, c };
-            }
-        });
-
-        return formulaIdMap;
     }
 
     private _initSheetArrayFormulaData(unitId: string, sheetId: string, cellMatrix: ObjectMatrix<Nullable<ICellData>>) {

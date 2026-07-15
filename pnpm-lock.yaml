@@ -2021,6 +2021,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -2034,9 +2037,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

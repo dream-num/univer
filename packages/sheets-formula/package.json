@@ -85,13 +85,14 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/docs": "workspace:*",
+
         "@univerjs/engine-render": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",

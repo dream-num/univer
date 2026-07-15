@@ -78,6 +78,92 @@ describe('numfmt compatibility regression tests', () => {
         });
     });
 
+    describe('Excel-compatible decimal rounding', () => {
+        it.each([
+            [10.155, '0.00', '10.16'],
+            [1.005, '0.00', '1.01'],
+            [2.155, '0.00', '2.16'],
+            [-10.155, '0.00', '-10.16'],
+            [-1.005, '0.00', '-1.01'],
+            [-2.155, '0.00', '-2.16'],
+            [1.00499999999999, '0.00', '1.00'],
+            [1.00500000000001, '0.00', '1.01'],
+            [9.995, '0.00', '10.00'],
+            [0.10155, '0.00%', '10.16%'],
+            [10155, '0.00,', '10.16'],
+            [-0.004, '0.00', '0.00'],
+            [0.1 + 0.2, '0.000000000000000', '0.300000000000000'],
+            [999999999999999, '0.00', '999999999999999.00'],
+            [450000000000000.44, '0.00', '450000000000000.00'],
+        ])('formats %s with %s as %s', (value, pattern, expected) => {
+            expect(numfmt.format(pattern, value)).toBe(expected);
+        });
+
+        it.each([
+            [2.155, '0.00E+00', '2.16E+00'],
+            [-2.155, '0.00E+00', '-2.16E+00'],
+            [9.995, '0.00E+00', '1.00E+01'],
+            [-9.995, '0.00E+00', '-1.00E+01'],
+            [1.0155e20, '0.00E+00', '1.02E+20'],
+            [1.0155e-20, '0.00E+00', '1.02E-20'],
+            [1e308, '0.00E+00', '1.00E+308'],
+            [1e-308, '0.00E+00', '1.00E-308'],
+        ])('formats scientific value %s', (value, pattern, expected) => {
+            expect(numfmt.format(pattern, value)).toBe(expected);
+        });
+
+        it('rounds through the public decimal API', () => {
+            expect(numfmt.round(10.155, 2)).toBe(10.16);
+            expect(numfmt.round(1.005, 2)).toBe(1.01);
+            expect(numfmt.round(-1.005, 2)).toBe(-1.01);
+            expect(Object.is(numfmt.round(-0.004, 2), -0)).toBe(false);
+        });
+
+        it.each([
+            [Number.MAX_SAFE_INTEGER, undefined, Number.MAX_SAFE_INTEGER],
+            [Number.MIN_SAFE_INTEGER, undefined, Number.MIN_SAFE_INTEGER],
+            [Number.MAX_VALUE, undefined, Number.MAX_VALUE],
+            [1.5, Number.NaN, 2],
+            [1.5, Number.POSITIVE_INFINITY, Number.NaN],
+            [1.5, Number.NEGATIVE_INFINITY, 2],
+            [1.15, 1.9, 1.2],
+            [1.23456789, 1_000_000, 1.23456789],
+            [Number.MAX_VALUE, -308, Number.MAX_VALUE],
+            [1.23, -1_000_000, 0],
+        ])('rounds public boundary %s at %s places', (value, places, expected) => {
+            expect(numfmt.round(value, places)).toBe(expected);
+        });
+
+        it('preserves public round passthrough values', () => {
+            expect(numfmt.round('text')).toBe('text');
+            expect(numfmt.round(Number.NaN, 2)).toBeNaN();
+            expect(numfmt.round(Number.POSITIVE_INFINITY, 2)).toBe(Number.POSITIVE_INFINITY);
+            expect(numfmt.round(Number.NEGATIVE_INFINITY, 2)).toBe(Number.NEGATIVE_INFINITY);
+            expect(Object.is(numfmt.round(-0), -0)).toBe(false);
+        });
+
+        it.each([
+            [1.234565e11, '1.23457E+11'],
+            [-1.234565e11, '-1.23457E+11'],
+            [9.999995e11, '1E+12'],
+            [-9.999995e11, '-1E+12'],
+        ])('formats General decimal tie %s', (value, expected) => {
+            expect(numfmt.format('General', value)).toBe(expected);
+        });
+
+        it('preserves legacy rounding for vulgar fractions', () => {
+            expect(numfmt.format('# ?/11', 0.6818181818181818)).toBe(' 7/11');
+        });
+
+        it('preserves legacy rounding for BigInt scientific fallback', () => {
+            expect(numfmt.format('0.00E+00', 1005000n)).toBe('1.00E+06');
+        });
+
+        it('preserves legacy rounding for BigInt General fallback', () => {
+            expect(numfmt.format('General', 999999500000000n)).toBe('10E+14');
+        });
+    });
+
     describe('numfmt.formatColor', () => {
         it('should return color for colored patterns', () => {
             expect(numfmt.formatColor('[red]0', 42)).toBe('red');

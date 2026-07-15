@@ -41,6 +41,7 @@ import {
     SetRowHeightCommand,
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
+    SetShrinkToFitCommand,
     SetTabColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
@@ -154,6 +155,7 @@ import {
     SetRowHeightMenuItemFactory,
     ShowColMenuItemFactory,
     ShowRowMenuItemFactory,
+    ShrinkToFitMenuItemFactory,
     StrikeThroughMenuItemFactory,
     TextColorSelectorMenuItemFactory,
     TextRotateMenuItemFactory,
@@ -264,12 +266,16 @@ export const menuSchema: MenuSchemaType = {
                 order: 6,
                 menuItemFactory: WrapTextMenuItemFactory,
             },
-            [SetTextRotationCommand.id]: {
+            [SetShrinkToFitCommand.id]: {
                 order: 7,
+                menuItemFactory: ShrinkToFitMenuItemFactory,
+            },
+            [SetTextRotationCommand.id]: {
+                order: 8,
                 menuItemFactory: TextRotateMenuItemFactory,
             },
             [AddWorksheetMergeCommand.id]: {
-                order: 8,
+                order: 9,
                 menuItemFactory: CellMergeMenuItemFactory,
                 [AddWorksheetMergeAllCommand.id]: {
                     order: 0,

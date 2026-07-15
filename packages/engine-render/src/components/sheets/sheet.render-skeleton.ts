@@ -16,7 +16,6 @@
 
 import type {
     BorderStyleTypes,
-    DocumentDataModel,
     IBorderStyleData,
     ICellData,
     ICellDataForSheetInterceptor,
@@ -24,6 +23,7 @@ import type {
     ICellWithCoord,
     IColAutoWidthInfo,
     IColumnRange,
+    IDocumentData,
     IGetRowColByPosOptions,
     IPaddingData,
     IRange,
@@ -46,6 +46,7 @@ import {
     BooleanNumber,
     CellValueType,
     DEFAULT_STYLES,
+    DocumentDataModel,
     extractPureTextFromCell,
     getColorStyle,
     getDisplayValueFromCell,
@@ -113,6 +114,34 @@ export const DEFAULT_PADDING_DATA = {
 };
 
 export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
+
+export function getShrinkToFitScale(contentWidth: number, availableWidth: number, fontSize: number): number {
+    if (contentWidth <= availableWidth || contentWidth <= 0 || availableWidth <= 0 || fontSize <= 0) {
+        return 1;
+    }
+
+    return Math.max(1 / fontSize, availableWidth / contentWidth);
+}
+
+export function scaleDocumentDataForShrinkToFit(documentData: IDocumentData, scale: number, fallbackFontSize: number): IDocumentData {
+    const scaled = Tools.deepClone(documentData);
+    const defaultTextStyle = scaled.documentStyle.textStyle ?? {};
+    const defaultFontSize = defaultTextStyle.fs ?? fallbackFontSize;
+    scaled.documentStyle.textStyle = {
+        ...defaultTextStyle,
+        fs: defaultFontSize * scale,
+    };
+
+    scaled.body?.textRuns?.forEach((textRun) => {
+        const textStyle = textRun.ts ?? {};
+        textRun.ts = {
+            ...textStyle,
+            fs: (textStyle.fs ?? defaultFontSize) * scale,
+        };
+    });
+
+    return scaled;
+}
 
 function getResolvedRenderHorizontalAlign(
     horizontalAlign: HorizontalAlign,
@@ -1554,6 +1583,49 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
+    private _applyShrinkToFit(row: number, col: number, fontCache: IFontCacheItem, style: IStyleData): void {
+        if (style.stf !== BooleanNumber.TRUE) {
+            return;
+        }
+
+        const cellInfo = this.getCellWithCoordByIndex(row, col, false);
+        const startX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.startX : cellInfo.startX;
+        const endX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.endX : cellInfo.endX;
+        const padding = style.pd ?? DEFAULT_PADDING_DATA;
+        const extension = fontCache.cellData?.fontRenderExtension;
+        const availableWidth = endX - startX
+            - (padding.l ?? DEFAULT_PADDING_DATA.l)
+            - (padding.r ?? DEFAULT_PADDING_DATA.r)
+            - (extension?.leftOffset ?? 0)
+            - (extension?.rightOffset ?? 0);
+        const fallbackFontSize = style.fs ?? DEFAULT_STYLES.fs;
+        const contentWidth = fontCache.documentSkeleton
+            ? (getDocsSkeletonPageSize(fontCache.documentSkeleton, fontCache.vertexAngle) ?? { width: 0 }).width
+            : FontCache.getMeasureText(
+                fontCache.displayText ?? getDisplayValueFromCell(fontCache.cellData),
+                fontCache.fontString
+            ).width;
+        const scale = getShrinkToFitScale(contentWidth, availableWidth, fallbackFontSize);
+
+        if (scale >= 1) {
+            return;
+        }
+
+        fontCache.shrinkScale = scale;
+        if (fontCache.documentSkeleton) {
+            const snapshot = fontCache.documentSkeleton.getViewModel().getDataModel().getSnapshot();
+            const documentModel = new DocumentDataModel(scaleDocumentDataForShrinkToFit(snapshot, scale, fallbackFontSize));
+            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService);
+            documentSkeleton.calculate();
+            fontCache.documentSkeleton = documentSkeleton;
+        } else {
+            fontCache.fontString = getFontStyleString({
+                ...style,
+                fs: fallbackFontSize * scale,
+            }).fontCache;
+        }
+    }
+
     _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
         if (isNullCell(cellData)) return;
 
@@ -1620,6 +1692,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
         const fontCacheItem = config as IFontCacheItem;
         setRenderTextCache(fontCacheItem, cellData);
+        this._applyShrinkToFit(row, col, fontCacheItem, style);
         this._calculateOverflowCell(row, col, fontCacheItem, hasMergeData);
         this._stylesCache.fontMatrix.setValue(row, col, fontCacheItem);
     }

@@ -18,6 +18,7 @@ import type { ComponentProps } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { ColorInput } from '../ColorInput';
 import { ColorPicker } from '../ColorPicker';
@@ -76,10 +77,14 @@ describe('ColorPicker', () => {
     });
 
     it('should open dialog when more is clicked', () => {
-        const { container } = render(<ColorPicker />);
+        const { container } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <ColorPicker />
+            </ConfigProvider>
+        );
         const moreLink = Array.from(container.querySelectorAll('a')).find((a) => a.textContent?.includes('更多') || a.textContent?.toLowerCase().includes('more'));
         if (moreLink) {
-            moreLink.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            fireEvent.click(moreLink);
             expect(document.body.innerHTML).toContain('univer-grid univer-w-64 univer-gap-2');
         }
     });

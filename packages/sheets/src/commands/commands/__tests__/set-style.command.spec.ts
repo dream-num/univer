@@ -43,6 +43,7 @@ import {
     SetHorizontalTextAlignCommand,
     SetItalicCommand,
     SetOverlineCommand,
+    SetShrinkToFitCommand,
     SetStrikeThroughCommand,
     SetStyleCommand,
     SetTextColorCommand,
@@ -76,6 +77,7 @@ describe("Test commands used for updating cells' styles", () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+        commandService.registerCommand(SetShrinkToFitCommand);
         commandService.registerCommand(SetTextRotationCommand);
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetRangeValuesMutation);
@@ -685,6 +687,66 @@ describe("Test commands used for updating cells' styles", () => {
                 const result = await commandService.executeCommand(SetTextWrapCommand.id);
                 expect(result).toBeFalsy();
             });
+        });
+    });
+
+    describe('shrink to fit', () => {
+        it('changes shrink to fit with undo and redo', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const getShrinkToFit = () => get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getComposedCellStyle(0, 0)
+                ?.stf;
+
+            expect(await commandService.executeCommand(SetShrinkToFitCommand.id, {
+                value: BooleanNumber.TRUE,
+            })).toBeTruthy();
+            expect(getShrinkToFit()).toBe(BooleanNumber.TRUE);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getShrinkToFit()).toBeUndefined();
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getShrinkToFit()).toBe(BooleanNumber.TRUE);
+        });
+
+        it('toggles shrink to fit when no value is provided', async () => {
+            get(SheetsSelectionsService).addSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        actualRow: 0,
+                        actualColumn: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+
+            const getShrinkToFit = () => get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getComposedCellStyle(0, 0)
+                ?.stf;
+
+            expect(await commandService.executeCommand(SetShrinkToFitCommand.id)).toBeTruthy();
+            expect(getShrinkToFit()).toBe(BooleanNumber.TRUE);
+            expect(await commandService.executeCommand(SetShrinkToFitCommand.id)).toBeTruthy();
+            expect(getShrinkToFit()).toBe(BooleanNumber.FALSE);
         });
     });
 

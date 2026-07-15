@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { ComponentProps, PropsWithChildren } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Gallery } from '../Gallery';
 import '@testing-library/jest-dom/vitest';
 
@@ -24,6 +27,14 @@ const images = [
     'https://example.com/2.jpg',
     'https://example.com/3.jpg',
 ];
+
+function LocaleProvider({ children }: PropsWithChildren) {
+    return <ConfigProvider locale={enUS.design} mountContainer={document.body}>{children}</ConfigProvider>;
+}
+
+function renderGallery(props: ComponentProps<typeof Gallery>) {
+    return render(<Gallery {...props} />, { wrapper: LocaleProvider });
+}
 
 afterEach(() => {
     cleanup();
@@ -34,12 +45,12 @@ describe('Gallery', () => {
         vi.useRealTimers();
     });
     it('does not render when open is false', () => {
-        render(<Gallery images={images} open={false} />);
+        renderGallery({ images, open: false });
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('renders and displays the first image when open', () => {
-        render(<Gallery images={images} open={true} />);
+        renderGallery({ images, open: true });
         const dialog = screen.getByRole('dialog');
         expect(dialog).toBeInTheDocument();
         const img = screen.getByRole('img');
@@ -49,7 +60,7 @@ describe('Gallery', () => {
 
     it('calls onOpenChange(false) when clicking the overlay', () => {
         const onOpenChange = vi.fn();
-        render(<Gallery images={images} open={true} onOpenChange={onOpenChange} />);
+        renderGallery({ images, open: true, onOpenChange });
         // The overlay is the first child of the dialog
         const dialog = screen.getByRole('dialog');
         const overlay = dialog.querySelector('div');
@@ -61,20 +72,20 @@ describe('Gallery', () => {
 
     it('calls onOpenChange(false) when pressing ESC', () => {
         const onOpenChange = vi.fn();
-        render(<Gallery images={images} open={true} onOpenChange={onOpenChange} />);
+        renderGallery({ images, open: true, onOpenChange });
         fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
         expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
     it('toolbar buttons have correct aria-labels', () => {
-        render(<Gallery images={images} open={true} />);
+        renderGallery({ images, open: true });
         expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /reset zoom/i })).toBeInTheDocument();
     });
 
     it('zoom in/out/reset buttons adjust the image scale', () => {
-        render(<Gallery images={images} open={true} />);
+        renderGallery({ images, open: true });
         const img = screen.getByRole('img');
         const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
         const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
@@ -93,7 +104,7 @@ describe('Gallery', () => {
     });
 
     it('can switch images using the pager', () => {
-        render(<Gallery images={images} open={true} />);
+        renderGallery({ images, open: true });
         const nextButton = document.querySelector('[data-u-comp="pager-right-arrow"]') as HTMLButtonElement;
         fireEvent.click(nextButton);
         const img = screen.getByRole('img');
@@ -102,14 +113,14 @@ describe('Gallery', () => {
     });
 
     it('does not render pagination for a single image', () => {
-        render(<Gallery images={[images[0]]} open={true} />);
+        renderGallery({ images: [images[0]], open: true });
 
         expect(document.querySelector('[data-u-comp="pager"]')).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
     });
 
     it('should zoom with wheel event and keep value in range', () => {
-        render(<Gallery images={images} open={true} />);
+        renderGallery({ images, open: true });
         const img = screen.getByRole('img');
         const getScale = () => Number.parseFloat((img.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? '1'));
 
@@ -137,7 +148,7 @@ describe('Gallery', () => {
 
     it('should schedule close animation timer when closing', () => {
         const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
-        const { rerender } = render(<Gallery images={images} open={true} />);
+        const { rerender } = renderGallery({ images, open: true });
         expect(screen.getByRole('dialog')).toBeInTheDocument();
 
         rerender(<Gallery images={images} open={false} />);

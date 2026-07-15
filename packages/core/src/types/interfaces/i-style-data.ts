@@ -276,6 +276,8 @@ export interface IStyleBase {
  * Properties of cell style
  */
 export interface IStyleData extends IStyleBase {
+    /** Whether the font size should shrink to fit the cell width. */
+    stf?: BooleanNumber;
     /**
      * textRotation
      */
@@ -320,6 +322,7 @@ export const STYLE_KEYS = defineExactKeys<IStyleData>()([
     'cl',
     'va',
     'n',
+    'stf',
     'tr',
     'td',
     'ht',

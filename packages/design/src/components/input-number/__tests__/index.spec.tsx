@@ -18,6 +18,8 @@ import type { ComponentProps } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { InputNumber } from '../InputNumber';
 import '@testing-library/jest-dom/vitest';
 
@@ -305,13 +307,15 @@ describe('InputNumber', () => {
     it('should support rtl layout classes and keep increment/decrement behavior', () => {
         const onLocalChange = vi.fn();
         const { container } = render(
-            <div dir="rtl">
-                <InputNumber defaultValue={1} onChange={onLocalChange} />
-            </div>
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <div dir="rtl">
+                    <InputNumber defaultValue={1} onChange={onLocalChange} />
+                </div>
+            </ConfigProvider>
         );
 
-        const incrementButton = container.querySelector('[aria-label="increment"]') as HTMLElement;
-        const decrementButton = container.querySelector('[aria-label="decrement"]') as HTMLElement;
+        const incrementButton = container.querySelector(`[aria-label="${enUS.design.Accessibility.increment}"]`) as HTMLElement;
+        const decrementButton = container.querySelector(`[aria-label="${enUS.design.Accessibility.decrement}"]`) as HTMLElement;
         const controlsWrapper = incrementButton.parentElement as HTMLElement;
 
         expect(controlsWrapper.className).toContain('rtl:univer-left-px');

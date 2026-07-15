@@ -55,6 +55,7 @@ import {
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
     SetSelectionsOperation,
+    SetShrinkToFitCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
@@ -833,6 +834,40 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
+    };
+}
+
+export function ShrinkToFitMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const commandService = accessor.get(ICommandService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+
+    return {
+        id: SetShrinkToFitCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'ShrinkToFitIcon',
+        title: 'sheets-ui.toolbar.shrinkToFit',
+        tooltip: 'sheets-ui.toolbar.shrinkToFit',
+        activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
+            const update = () => {
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
+                subscriber.next(primary != null && worksheet.getComposedCellStyle(primary.startRow, primary.startColumn)?.stf === BooleanNumber.TRUE);
+            };
+            const disposable = commandService.onCommandExecuted((command) => {
+                if ([SetRangeValuesMutation.id, SetSelectionsOperation.id, SetWorksheetActiveOperation.id].includes(command.id)) {
+                    update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        })),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 

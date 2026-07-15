@@ -93,6 +93,15 @@ export {
     type ICreateLatestSnapshotInBackgroundResponse,
 } from './ts/univerpro/v1/helper';
 export type {
+    IComputeRequest,
+    IComputeResponse,
+    IGetPreprocessRangesRequest,
+    IGetPreprocessRangesResponse,
+    IGetValuesRequest,
+    IGetValuesResponse,
+    ITableInfoList,
+} from './ts/univerpro/v1/ssc';
+export type {
     IGetSSRRequest,
     IGetSSRResponse,
 } from './ts/univerpro/v1/ssr';

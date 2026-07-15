@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Skróty do częstej edycji',
         'toggle-shortcut-panel': 'Przełącz panel skrótów',
+        navigation: {
+            back: 'Wstecz',
+            previous: 'Poprzedni',
+            next: 'Następny',
+        },
+        sidebar: {
+            panel: 'Panel boczny',
+            resize: 'Zmień rozmiar panelu bocznego',
+            close: 'Zamknij panel boczny',
+        },
+        beforeClose: {
+            title: 'Niektóre zmiany nie zostały zapisane',
+        },
         clipboard: {
             authentication: {
                 title: 'Brak uprawnień',

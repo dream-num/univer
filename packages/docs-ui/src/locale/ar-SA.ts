@@ -98,6 +98,10 @@ const locale: typeof enUS = {
             listItem: 'عنصر',
         },
         doc: {
+            blockMenu: {
+                dragBlock: 'سحب الكتلة',
+            },
+
             menu: {
                 paragraphSetting: 'إعدادات الفقرة',
                 sectionSetting: 'Section Settings',

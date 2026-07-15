@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Ajuste de texto',
                 right: 'Modo de ajuste de texto',
             },
+            shrinkToFit: 'Reducir hasta ajustar',
             textRotateMode: {
                 main: 'Girar texto',
                 right: 'Modo de giro de texto',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Girar hacia abajo',
         },
         sheetConfig: {
+            sheetTabs: 'Pestañas de hojas',
+
             delete: 'Eliminar',
             copy: 'Copiar',
             rename: 'Cambiar nombre',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Editar objeto extra',
             },
             dialog: {
+                emptyList: 'Lista de usuarios vacía',
+
                 allowUserToEdit: 'Permitir al usuario editar',
                 allowedPermissionType: 'Tipos de permisos permitidos',
                 setCellValue: 'Establecer valor de celda',

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { RecordIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -33,6 +34,7 @@ export function RecorderPanel() {
 
 function RecordPanelImpl() {
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const actionRecorderService = useDependency(ActionRecorderService);
 
     const recording = useObservable(actionRecorderService.recording$);
@@ -56,8 +58,8 @@ function RecordPanelImpl() {
     }, [commandService, recording]);
 
     const titleText = recording
-        ? len === 0 ? 'Recording...' : (`${len}: ${recordedCommands![len - 1].id}`)
-        : 'Start Recording';
+        ? len === 0 ? localeService.t<LocaleKey>('action-recorder.panel.recording') : (`${len}: ${recordedCommands![len - 1].id}`)
+        : localeService.t<LocaleKey>('action-recorder.panel.startRecording');
 
     return (
         <div
@@ -75,16 +77,23 @@ function RecordPanelImpl() {
                     className="univer-w-20"
                     onClick={recording ? stopRecording : closePanel}
                 >
-                    { recording ? 'Cancel' : 'Close' }
+                    {localeService.t<LocaleKey>(recording ? 'action-recorder.panel.cancel' : 'action-recorder.panel.close')}
                 </Button>
                 <Button
                     className="univer-w-20"
                     variant="primary"
                     onClick={recording ? completeRecording : () => startRecording()}
                 >
-                    { recording ? 'Save' : 'Start' }
+                    {localeService.t<LocaleKey>(recording ? 'action-recorder.panel.save' : 'action-recorder.panel.start')}
                 </Button>
-                { !recording && <Button variant="primary" onClick={() => startRecording(true)}>Start(N)</Button>}
+                {!recording && (
+                    <Button
+                        variant="primary"
+                        onClick={() => startRecording(true)}
+                    >
+                        {localeService.t<LocaleKey>('action-recorder.panel.startWithId')}
+                    </Button>
+                )}
             </div>
         </div>
     );

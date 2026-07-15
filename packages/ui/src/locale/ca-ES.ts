@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Dreceres d\'edició comunes',
         'toggle-shortcut-panel': 'Alterna el panell de dreceres',
+        navigation: {
+            back: 'Enrere',
+            previous: 'Anterior',
+            next: 'Següent',
+        },
+        sidebar: {
+            panel: 'Panell lateral',
+            resize: 'Canvia la mida del panell lateral',
+            close: 'Tanca el panell lateral',
+        },
+        beforeClose: {
+            title: 'Alguns canvis no s\'han desat',
+        },
         clipboard: {
             authentication: {
                 title: 'Permís denegat',

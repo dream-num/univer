@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Zawijanie tekstu',
                 right: 'Tryb zawijania tekstu',
             },
+            shrinkToFit: 'Zmniejsz, aby dopasować',
             textRotateMode: {
                 main: 'Obrót tekstu',
                 right: 'Tryb obrotu tekstu',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Obróć w dół',
         },
         sheetConfig: {
+            sheetTabs: 'Karty arkuszy',
+
             delete: 'Usuń',
             copy: 'Kopiuj',
             rename: 'Zmień nazwę',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Edytuj dodatkowy obiekt',
             },
             dialog: {
+                emptyList: 'Pusta lista użytkowników',
+
                 allowUserToEdit: 'Zezwól użytkownikowi na edycję',
                 allowedPermissionType: 'Dozwolone typy uprawnień',
                 setCellValue: 'Ustaw wartość komórki',

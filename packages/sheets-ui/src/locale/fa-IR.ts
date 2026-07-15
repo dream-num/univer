@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'پیچش متن',
                 right: 'حالت پیچش متن',
             },
+            shrinkToFit: 'کوچک کردن برای جا شدن',
             textRotateMode: {
                 main: 'چرخش متن',
                 right: 'حالت چرخش متن',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'چرخش پایین',
         },
         sheetConfig: {
+            sheetTabs: 'زبانه‌های برگه',
+
             delete: 'حذف',
             copy: 'کپی',
             rename: 'تغییر نام',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'ویرایش شیء اضافی',
             },
             dialog: {
+                emptyList: 'فهرست کاربران خالی است',
+
                 allowUserToEdit: 'اجازه ویرایش به کاربر',
                 allowedPermissionType: 'انواع مجوز مجاز',
                 setCellValue: 'تنظیم مقدار سلول',

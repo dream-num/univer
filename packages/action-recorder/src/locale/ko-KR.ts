@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'action-recorder': {
+        panel: {
+            recording: '기록 중...',
+            startRecording: '기록 시작',
+            cancel: '취소',
+            close: '닫기',
+            save: '저장',
+            start: '시작',
+            startWithId: '시작 (N)',
+        },
         menu: {
             title: '동작 기록',
             record: '동작 기록 시작...',

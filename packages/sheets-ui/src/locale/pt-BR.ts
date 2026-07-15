@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Quebra de texto',
                 right: 'Modo de quebra de texto',
             },
+            shrinkToFit: 'Reduzir para caber',
             textRotateMode: {
                 main: 'Rotação de texto',
                 right: 'Modo de rotação de texto',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Rotacionar para baixo',
         },
         sheetConfig: {
+            sheetTabs: 'Abas de planilhas',
+
             delete: 'Excluir',
             copy: 'Copiar',
             rename: 'Renomear',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Editar objeto extra',
             },
             dialog: {
+                emptyList: 'Lista de usuários vazia',
+
                 allowUserToEdit: 'Permitir que o usuário edite',
                 allowedPermissionType: 'Tipos de permissão permitidos',
                 setCellValue: 'Definir valor da célula',

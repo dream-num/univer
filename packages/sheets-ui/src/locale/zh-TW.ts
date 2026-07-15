@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: '自動換行',
                 right: '換行方式',
             },
+            shrinkToFit: '縮小字型填滿',
             textRotateMode: {
                 main: '文字旋轉',
                 right: '旋轉方式',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: '向下90°',
         },
         sheetConfig: {
+            sheetTabs: '工作表分頁',
+
             delete: '刪除',
             copy: '複製',
             rename: '重新命名',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: '編輯其他物件',
             },
             dialog: {
+                emptyList: '使用者清單為空',
+
                 allowUserToEdit: '允許使用者編輯',
                 allowedPermissionType: '允許權限類型',
                 setCellValue: '設定儲存格值',

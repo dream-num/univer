@@ -59,6 +59,7 @@ const locale = {
                 main: 'Text wrap',
                 right: 'Text wrap mode',
             },
+            shrinkToFit: 'Shrink to fit',
             textRotateMode: {
                 main: 'Text rotate',
                 right: 'Text rotate mode',
@@ -136,6 +137,8 @@ const locale = {
             rotationDown: 'Rotate Down',
         },
         sheetConfig: {
+            sheetTabs: 'Sheet tabs',
+
             delete: 'Delete',
             copy: 'Copy',
             rename: 'Rename',
@@ -418,6 +421,8 @@ const locale = {
                 EditExtraObject: 'Edit extra object',
             },
             dialog: {
+                emptyList: 'Empty user list',
+
                 allowUserToEdit: 'Allow user to edit',
                 allowedPermissionType: 'Allowed permission types',
                 setCellValue: 'Set cell value',

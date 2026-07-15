@@ -280,12 +280,12 @@ export function Dialog(props: IDialogProps) {
             <div className="univer-flex univer-justify-end univer-gap-2">
                 {showCancel && (
                     <Button onClick={onCancel}>
-                        {locale?.Confirm?.cancel ?? 'Cancel'}
+                        {locale?.Confirm.cancel}
                     </Button>
                 )}
                 {showOk && (
                     <Button variant="primary" onClick={onOk}>
-                        {locale?.Confirm?.confirm ?? 'OK'}
+                        {locale?.Confirm.confirm}
                     </Button>
                 )}
             </div>

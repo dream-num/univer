@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Bungkus teks',
                 right: 'Mode bungkus teks',
             },
+            shrinkToFit: 'Kecilkan agar pas',
             textRotateMode: {
                 main: 'Putar teks',
                 right: 'Mode putar teks',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Putar ke bawah',
         },
         sheetConfig: {
+            sheetTabs: 'Tab lembar',
+
             delete: 'Hapus',
             copy: 'Salin',
             rename: 'Ganti nama',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Edit objek tambahan',
             },
             dialog: {
+                emptyList: 'Daftar pengguna kosong',
+
                 allowUserToEdit: 'Izinkan pengguna untuk edit',
                 allowedPermissionType: 'Jenis izin yang diizinkan',
                 setCellValue: 'Atur nilai sel',

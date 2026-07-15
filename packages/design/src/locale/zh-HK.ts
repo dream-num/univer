@@ -18,6 +18,16 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     design: {
+        Accessibility: {
+            closeBadge: '關閉徽章',
+            imageGallery: '圖片庫',
+            image: '第 {0} 張圖片，共 {1} 張',
+            zoomIn: '放大',
+            zoomOut: '縮小',
+            resetZoom: '重設縮放',
+            increment: '增加',
+            decrement: '減少',
+        },
         Confirm: {
             cancel: '取消',
             confirm: '確定',

@@ -39,7 +39,7 @@ export function Gallery(props: IGalleryProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [zoomLevel, setZoomLevel] = useState(1);
-    const { direction } = useContext(ConfigContext);
+    const { direction, locale } = useContext(ConfigContext);
 
     const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +111,7 @@ export function Gallery(props: IGalleryProps) {
             dir={direction}
             role="dialog"
             aria-modal="true"
-            aria-label="Image gallery"
+            aria-label={locale?.Accessibility.imageGallery}
             tabIndex={-1}
             ref={dialogRef}
             className={clsx(
@@ -146,7 +146,7 @@ export function Gallery(props: IGalleryProps) {
                             transform: `scale(${zoomLevel})`,
                         }}
                         src={activeImage}
-                        alt={`Image ${activeImageIndex + 1} of ${images.length}`}
+                        alt={locale?.Accessibility.image.replace('{0}', String(activeImageIndex + 1)).replace('{1}', String(images.length))}
                         draggable={false}
                     />
                 )}
@@ -174,7 +174,7 @@ export function Gallery(props: IGalleryProps) {
                 )}
                 <button
                     type="button"
-                    aria-label="Zoom in"
+                    aria-label={locale?.Accessibility.zoomIn}
                     className={buttonClassName}
                     onClick={() => handleToggleZoom(0.25)}
                 >
@@ -182,7 +182,7 @@ export function Gallery(props: IGalleryProps) {
                 </button>
                 <button
                     type="button"
-                    aria-label="Zoom out"
+                    aria-label={locale?.Accessibility.zoomOut}
                     className={buttonClassName}
                     onClick={() => handleToggleZoom(-0.25)}
                 >
@@ -190,7 +190,7 @@ export function Gallery(props: IGalleryProps) {
                 </button>
                 <button
                     type="button"
-                    aria-label="Reset zoom"
+                    aria-label={locale?.Accessibility.resetZoom}
                     className={buttonClassName}
                     onClick={() => handleToggleZoom('reset')}
                 >

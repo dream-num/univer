@@ -16,8 +16,9 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
+import type { LocaleKey } from '../../../locale/types';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderRightClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -49,6 +50,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()!.getSheetId();
@@ -123,7 +125,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                 scrollbarClassName
             )}
             role="tablist"
-            aria-label="Sheet tabs"
+            aria-label={localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetTabs')}
         >
             <div className="univer-flex univer-h-full univer-flex-nowrap univer-items-center">
                 {sheetList.map((sheet) => (

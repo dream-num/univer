@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: '文字の折り返し',
                 right: '折り返しモード',
             },
+            shrinkToFit: '縮小して全体を表示',
             textRotateMode: {
                 main: '文字の回転',
                 right: '回転モード',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: '下へ回転',
         },
         sheetConfig: {
+            sheetTabs: 'シートタブ',
+
             delete: '削除',
             copy: 'コピー',
             rename: '名前を変更',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: '追加オブジェクトを編集',
             },
             dialog: {
+                emptyList: '空のユーザーリスト',
+
                 allowUserToEdit: 'ユーザーによる編集を許可',
                 allowedPermissionType: '許可された権限タイプ',
                 setCellValue: 'セル値を設定',

@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'اختصارات التحرير الشائعة',
         'toggle-shortcut-panel': 'تبديل لوحة الاختصارات',
+        navigation: {
+            back: 'رجوع',
+            previous: 'السابق',
+            next: 'التالي',
+        },
+        sidebar: {
+            panel: 'لوحة جانبية',
+            resize: 'تغيير حجم الشريط الجانبي',
+            close: 'إغلاق الشريط الجانبي',
+        },
+        beforeClose: {
+            title: 'لم يتم حفظ بعض التغييرات',
+        },
         clipboard: {
             authentication: {
                 title: 'تم رفض الإذن',

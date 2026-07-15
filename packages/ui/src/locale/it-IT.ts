@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Scorciatoie di Modifica Comuni',
         'toggle-shortcut-panel': 'Attiva/Disattiva Pannello Scorciatoie',
+        navigation: {
+            back: 'Indietro',
+            previous: 'Precedente',
+            next: 'Successivo',
+        },
+        sidebar: {
+            panel: 'Pannello laterale',
+            resize: 'Ridimensiona il pannello laterale',
+            close: 'Chiudi il pannello laterale',
+        },
+        beforeClose: {
+            title: 'Alcune modifiche non sono state salvate',
+        },
         clipboard: {
             authentication: {
                 title: 'Autorizzazione Negata',

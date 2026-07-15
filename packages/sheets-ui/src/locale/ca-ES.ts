@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Ajustament del text',
                 right: 'Mode d\'ajustament del text',
             },
+            shrinkToFit: 'Redueix per ajustar',
             textRotateMode: {
                 main: 'Girar text',
                 right: 'Mode de gir del text',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Girar cap avall',
         },
         sheetConfig: {
+            sheetTabs: 'Pestanyes de fulls',
+
             delete: 'Suprimir',
             copy: 'Copiar',
             rename: 'Canviar el nom',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Editar objecte extra',
             },
             dialog: {
+                emptyList: 'Llista d’usuaris buida',
+
                 allowUserToEdit: 'Permetre a l\'usuari editar',
                 allowedPermissionType: 'Tipus de permisos permesos',
                 setCellValue: 'Establir el valor de la cel·la',

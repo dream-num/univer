@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'Перенос текста',
                 right: 'Режим переноса текста',
             },
+            shrinkToFit: 'Уменьшить до размера ячейки',
             textRotateMode: {
                 main: 'Поворот текста',
                 right: 'Режим поворота текста',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'Поворот вниз',
         },
         sheetConfig: {
+            sheetTabs: 'Вкладки листов',
+
             delete: 'Удалить',
             copy: 'Копировать',
             rename: 'Переименовать',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'Редактировать дополнительный объект',
             },
             dialog: {
+                emptyList: 'Пустой список пользователей',
+
                 allowUserToEdit: 'Разрешить пользователю редактировать',
                 allowedPermissionType: 'Допустимые типы разрешений',
                 setCellValue: 'Установить значение ячейки',

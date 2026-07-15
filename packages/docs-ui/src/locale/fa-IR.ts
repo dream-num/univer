@@ -98,6 +98,10 @@ const locale: typeof enUS = {
             listItem: 'مورد',
         },
         doc: {
+            blockMenu: {
+                dragBlock: 'کشیدن بلوک',
+            },
+
             menu: {
                 paragraphSetting: 'تنظیمات پاراگراف',
                 sectionSetting: 'Section Settings',

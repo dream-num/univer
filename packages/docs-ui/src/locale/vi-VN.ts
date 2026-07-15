@@ -98,6 +98,10 @@ const locale: typeof enUS = {
             listItem: 'Mục',
         },
         doc: {
+            blockMenu: {
+                dragBlock: 'Kéo khối',
+            },
+
             menu: {
                 paragraphSetting: 'Paragraph Setting',
                 sectionSetting: 'Section Settings',

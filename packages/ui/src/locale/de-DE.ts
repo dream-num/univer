@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Häufige Bearbeitungstastenkürzel',
         'toggle-shortcut-panel': 'Tastenkürzel-Panel ein-/ausblenden',
+        navigation: {
+            back: 'Zurück',
+            previous: 'Vorherige',
+            next: 'Nächste',
+        },
+        sidebar: {
+            panel: 'Seitenleiste',
+            resize: 'Größe der Seitenleiste ändern',
+            close: 'Seitenleiste schließen',
+        },
+        beforeClose: {
+            title: 'Einige Änderungen wurden nicht gespeichert',
+        },
         clipboard: {
             authentication: {
                 title: 'Berechtigung verweigert',

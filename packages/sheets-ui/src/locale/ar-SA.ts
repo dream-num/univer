@@ -61,6 +61,7 @@ const locale: typeof enUS = {
                 main: 'التفاف النص',
                 right: 'وضع التفاف النص',
             },
+            shrinkToFit: 'تقليص لاحتواء الخلية',
             textRotateMode: {
                 main: 'تدوير النص',
                 right: 'وضع تدوير النص',
@@ -138,6 +139,8 @@ const locale: typeof enUS = {
             rotationDown: 'تدوير لأسفل',
         },
         sheetConfig: {
+            sheetTabs: 'علامات تبويب الأوراق',
+
             delete: 'حذف',
             copy: 'نسخ',
             rename: 'إعادة تسمية',
@@ -420,6 +423,8 @@ const locale: typeof enUS = {
                 EditExtraObject: 'تحرير كائن إضافي',
             },
             dialog: {
+                emptyList: 'قائمة المستخدمين فارغة',
+
                 allowUserToEdit: 'السماح للمستخدم بالتحرير',
                 allowedPermissionType: 'أنواع الأذونات المسموح بها',
                 setCellValue: 'تعيين قيمة الخلية',

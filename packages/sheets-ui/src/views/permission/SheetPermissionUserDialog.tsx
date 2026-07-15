@@ -110,7 +110,7 @@ export const SheetPermissionUserDialog = () => {
                             <img
                                 className="univer-w-full"
                                 src={UserEmptyBase64}
-                                alt="empty list"
+                                alt={localeService.t<LocaleKey>('sheets-ui.permission.dialog.emptyList')}
                                 draggable={false}
                             />
                             <p className="univer-text-sm univer-text-gray-400">

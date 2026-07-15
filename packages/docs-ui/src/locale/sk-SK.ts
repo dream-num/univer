@@ -98,6 +98,10 @@ const locale: typeof enUS = {
             listItem: 'Položka',
         },
         doc: {
+            blockMenu: {
+                dragBlock: 'Potiahnuť blok',
+            },
+
             menu: {
                 paragraphSetting: 'Nastavenia odseku',
                 sectionSetting: 'Section Settings',

@@ -92,6 +92,19 @@ const locale: typeof enUS = {
         },
         'common-edit': 'Bežné úpravové skratky',
         'toggle-shortcut-panel': 'Prepnúť panel skratiek',
+        navigation: {
+            back: 'Späť',
+            previous: 'Predchádzajúce',
+            next: 'Ďalšie',
+        },
+        sidebar: {
+            panel: 'Bočný panel',
+            resize: 'Zmeniť veľkosť bočného panela',
+            close: 'Zavrieť bočný panel',
+        },
+        beforeClose: {
+            title: 'Niektoré zmeny neboli uložené',
+        },
         clipboard: {
             authentication: {
                 title: 'Povolenie zamietnuté',

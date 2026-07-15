@@ -16,6 +16,15 @@
 
 const locale = {
     'action-recorder': {
+        panel: {
+            recording: 'Recording...',
+            startRecording: 'Start Recording',
+            cancel: 'Cancel',
+            close: 'Close',
+            save: 'Save',
+            start: 'Start',
+            startWithId: 'Start(N)',
+        },
         menu: {
             title: 'Record Actions',
             record: 'Record Actions...',

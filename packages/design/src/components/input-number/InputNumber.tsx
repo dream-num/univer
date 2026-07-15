@@ -15,9 +15,10 @@
  */
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import { borderLeftClassName, borderLeftRTLClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Input } from '../input/Input';
 
 export interface IInputNumberProps
@@ -67,6 +68,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         },
         ref
     ) => {
+        const { locale } = useContext(ConfigContext);
         const [internalValue, setInternalValue] = useState<number | null>(
             value !== undefined ? value : defaultValue !== undefined ? defaultValue : null
         );
@@ -374,7 +376,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                     incrementDisabled && 'univer-cursor-not-allowed univer-opacity-60'
                                 )}
                                 role="button"
-                                aria-label="increment"
+                                aria-label={locale?.Accessibility.increment}
                                 aria-disabled={incrementDisabled}
                                 tabIndex={-1}
                                 onMouseDown={(e) => e.preventDefault()}
@@ -401,7 +403,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                     decrementDisabled && 'univer-cursor-not-allowed univer-opacity-60'
                                 )}
                                 role="button"
-                                aria-label="decrement"
+                                aria-label={locale?.Accessibility.decrement}
                                 aria-disabled={decrementDisabled}
                                 tabIndex={-1}
                                 onMouseDown={(e) => e.preventDefault()}

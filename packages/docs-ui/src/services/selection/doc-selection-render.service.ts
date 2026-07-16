@@ -568,10 +568,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 return;
             }
 
-            this._moving(moveOffsetX, moveOffsetY);
+            this._tryMoving(moveOffsetX, moveOffsetY);
 
             scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                this._moving(moveOffsetX, moveOffsetY);
+                this._tryMoving(moveOffsetX, moveOffsetY);
             });
 
             preMoveOffsetX = moveOffsetX;
@@ -1026,6 +1026,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         canvasTop += y;
 
         this.activate(canvasLeft, canvasTop, forceFocus);
+    }
+
+    private _tryMoving(moveOffsetX: number, moveOffsetY: number) {
+        try {
+            this._moving(moveOffsetX, moveOffsetY);
+        } catch (error) {
+            this._logService.error('[DocSelectionRenderService] Failed to update moving selection', error);
+        }
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number) {

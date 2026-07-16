@@ -38,17 +38,27 @@ export function convertPositionsToRectRanges(
     const documentOffsetConfig = document.getOffsetConfig();
     const convertor = new NodePositionConvertToRectRange(documentOffsetConfig, docSkeleton);
     const nodePositionGroup = convertor.getNodePositionGroup(anchorNodePosition, focusNodePosition);
+    const ranges: RectRange[] = [];
 
-    return (nodePositionGroup ?? []).map((position) => new RectRange(
-        scene,
-        document,
-        docSkeleton,
-        position.anchor,
-        position.focus,
-        style,
-        segmentId,
-        segmentPage
-    ));
+    try {
+        for (const position of nodePositionGroup ?? []) {
+            ranges.push(new RectRange(
+                scene,
+                document,
+                docSkeleton,
+                position.anchor,
+                position.focus,
+                style,
+                segmentId,
+                segmentPage
+            ));
+        }
+
+        return ranges;
+    } catch (error) {
+        ranges.forEach((range) => range.dispose());
+        throw error;
+    }
 }
 
 export class RectRange implements IDocRange {

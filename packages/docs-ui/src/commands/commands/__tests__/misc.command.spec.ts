@@ -225,6 +225,25 @@ function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
     };
 }
 
+function createColumnGroupDoc(): IDocumentData {
+    const T = DataStreamTreeTokenType;
+    const dataStream = `P${T.PARAGRAPH}${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}B${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}C${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}Z${T.PARAGRAPH}${T.SECTION_BREAK}`;
+    const doc = createBaseDoc(dataStream);
+
+    return {
+        ...doc,
+        body: {
+            ...doc.body!,
+            columnGroups: [{ columnGroupId: 'cg-1', startIndex: 2, endIndex: 13 }],
+            paragraphs: [1, 5, 7, 11, 15].map((startIndex, index) => ({
+                paragraphId: `column-paragraph-${index}`,
+                startIndex,
+            })),
+            sectionBreaks: [{ sectionId: 'column-section', startIndex: 16 }],
+        },
+    };
+}
+
 function useLinearSkeleton(dataStream: string) {
     return {
         findNodeByCharIndex(index: number) {
@@ -905,6 +924,64 @@ describe('misc document commands', () => {
                 }),
             ],
         }));
+
+        subscription.unsubscribe();
+    });
+
+    it('expands select-all from paragraph to column, column group, and document', async () => {
+        ({ univer, get } = createCommandTestBed(createColumnGroupDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocSelectAllCommand);
+        commandService.registerCommand({
+            id: SetTextSelectionsOperation.id,
+            type: CommandType.OPERATION,
+            handler: () => true,
+        });
+        setCollapsedSelection(4);
+
+        const selectionManager = get(DocSelectionManagerService);
+        const refreshEvents: Array<{ docRanges: Array<{ startOffset?: number; endOffset?: number }> }> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => event && refreshEvents.push(event));
+        const selectNextScope = async (expected: Array<{ startOffset: number; endOffset: number }>) => {
+            await commandService.executeCommand(DocSelectAllCommand.id);
+            expect(refreshEvents.at(-1)?.docRanges.map(({ startOffset, endOffset }) => ({ startOffset, endOffset }))).toEqual(expected);
+            selectionManager.__replaceTextRangesWithNoRefresh({
+                isEditing: false,
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                style: null as never,
+                textRanges: expected.map((range, index) => ({
+                    ...range,
+                    collapsed: false,
+                    endOffset: range.endOffset - 1,
+                    isActive: index === 0,
+                    segmentId: '',
+                    style: null as never,
+                })),
+            }, {
+                subUnitId: 'test-doc',
+                unitId: 'test-doc',
+            });
+        };
+
+        await selectNextScope([{ startOffset: 4, endOffset: 5 }]);
+        await selectNextScope([
+            { startOffset: 4, endOffset: 5 },
+            { startOffset: 6, endOffset: 7 },
+        ]);
+        await selectNextScope([
+            { startOffset: 4, endOffset: 5 },
+            { startOffset: 6, endOffset: 7 },
+            { startOffset: 10, endOffset: 11 },
+        ]);
+        await selectNextScope([
+            { startOffset: 0, endOffset: 1 },
+            { startOffset: 4, endOffset: 5 },
+            { startOffset: 6, endOffset: 7 },
+            { startOffset: 10, endOffset: 11 },
+            { startOffset: 14, endOffset: 15 },
+        ]);
 
         subscription.unsubscribe();
     });

@@ -259,16 +259,12 @@ function currentDrawing(testBed: ReturnType<typeof createPanelTestBed>) {
         .drawings![DRAWING_ID];
 }
 
-function inputByLabelText(text: string) {
-    const label = Array.from(document.querySelectorAll('label'))
-        .find((label) => label.textContent === text);
-    return label?.querySelector('input') as HTMLInputElement;
+function getRadioInput(container: HTMLElement, index: number): HTMLInputElement {
+    return container.querySelectorAll<HTMLInputElement>('[data-u-comp="radio"] input')[index];
 }
 
-function inputInField(text: string) {
-    const label = Array.from(document.querySelectorAll('span'))
-        .find((span) => span.textContent === text);
-    return label?.parentElement?.querySelector('input') as HTMLInputElement;
+function getNumberInput(container: HTMLElement, index: number): HTMLInputElement {
+    return container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input')[index];
 }
 
 function setInputValue(input: HTMLInputElement, value: string) {
@@ -301,7 +297,7 @@ describe('DocDrawingTextWrap', () => {
         renderPanel(root, currentTestBed);
 
         await act(async () => {
-            inputByLabelText('Behind text').click();
+            getRadioInput(container!, 3).click();
             await Promise.resolve();
         });
 
@@ -329,7 +325,7 @@ describe('DocDrawingTextWrap', () => {
         renderPanel(root, currentTestBed);
 
         await act(async () => {
-            inputByLabelText('In front of text').click();
+            getRadioInput(container!, 4).click();
             await Promise.resolve();
         });
 
@@ -357,7 +353,7 @@ describe('DocDrawingTextWrap', () => {
         renderPanel(root, currentTestBed);
 
         await act(async () => {
-            inputByLabelText('Top and Bottom').click();
+            getRadioInput(container!, 2).click();
             await Promise.resolve();
         });
 
@@ -388,7 +384,7 @@ describe('DocDrawingTextWrap', () => {
         root = createRoot(container);
         renderPanel(root, currentTestBed);
 
-        const leftDistanceInput = inputInField('Left(px)');
+        const leftDistanceInput = getNumberInput(container, 1);
 
         await act(async () => {
             setInputValue(leftDistanceInput, '12.5');
@@ -411,14 +407,14 @@ describe('DocDrawingTextWrap', () => {
         renderPanel(root, currentTestBed);
 
         await act(async () => {
-            inputByLabelText('Top and Bottom').click();
+            getRadioInput(container!, 2).click();
             await Promise.resolve();
         });
 
-        expect(inputInField('Top(px)').disabled).toBe(false);
-        expect(inputInField('Bottom(px)').disabled).toBe(false);
-        expect(inputInField('Left(px)').disabled).toBe(true);
-        expect(inputInField('Right(px)').disabled).toBe(true);
+        expect(getNumberInput(container, 0).disabled).toBe(false);
+        expect(getNumberInput(container, 2).disabled).toBe(false);
+        expect(getNumberInput(container, 1).disabled).toBe(true);
+        expect(getNumberInput(container, 3).disabled).toBe(true);
     });
 
     it('persists right-only text wrapping on the focused drawing', async () => {
@@ -429,7 +425,7 @@ describe('DocDrawingTextWrap', () => {
         renderPanel(root, currentTestBed);
 
         await act(async () => {
-            inputByLabelText('Right only').click();
+            getRadioInput(container!, 7).click();
             await Promise.resolve();
         });
 

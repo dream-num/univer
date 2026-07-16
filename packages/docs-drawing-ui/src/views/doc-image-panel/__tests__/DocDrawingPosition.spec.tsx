@@ -277,10 +277,12 @@ function currentDrawing(testBed: ReturnType<typeof createPositionTestBed>) {
         .drawings![DRAWING_ID];
 }
 
-function inputByLabelText(text: string) {
-    const label = Array.from(document.querySelectorAll('label'))
-        .find((label) => label.textContent === text);
-    return label?.querySelector('input') as HTMLInputElement;
+function getNumberInput(container: HTMLElement, index: number): HTMLInputElement {
+    return container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input')[index];
+}
+
+function getMoveWithTextInput(container: HTMLElement): HTMLInputElement {
+    return container.querySelector<HTMLInputElement>('[data-u-comp="checkbox"] input')!;
 }
 
 function setInputValue(input: HTMLInputElement, value: string) {
@@ -289,7 +291,7 @@ function setInputValue(input: HTMLInputElement, value: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-async function selectPositionRelativeFrom(container: HTMLDivElement, selectIndex: number, label: string) {
+async function selectPositionRelativeFrom(container: HTMLDivElement, selectIndex: number, optionIndex: number) {
     const select = Array.from(container.querySelectorAll('[data-u-comp="select"]'))[selectIndex] as HTMLElement | undefined;
 
     expect(select).toBeDefined();
@@ -299,8 +301,7 @@ async function selectPositionRelativeFrom(container: HTMLDivElement, selectIndex
         await Promise.resolve();
     });
 
-    const option = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
-        .find((button) => button.textContent === label) as HTMLElement | undefined;
+    const option = document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"]')[optionIndex];
 
     expect(option).toBeDefined();
 
@@ -333,7 +334,7 @@ describe('DocDrawingPosition', () => {
         root = createRoot(container);
         renderPanel(root, currentTestBed);
 
-        const moveWithText = inputByLabelText('Move object with text');
+        const moveWithText = getMoveWithTextInput(container);
         expect(moveWithText.checked).toBe(true);
 
         await act(async () => {
@@ -359,7 +360,7 @@ describe('DocDrawingPosition', () => {
         root = createRoot(container);
         renderPanel(root, currentTestBed);
 
-        const horizontalPositionInput = Array.from(container.querySelectorAll('input'))[0];
+        const horizontalPositionInput = getNumberInput(container, 0);
 
         await act(async () => {
             setInputValue(horizontalPositionInput, '36.5');
@@ -383,7 +384,7 @@ describe('DocDrawingPosition', () => {
         root = createRoot(container);
         renderPanel(root, currentTestBed);
 
-        await selectPositionRelativeFrom(container, 0, 'Margin');
+        await selectPositionRelativeFrom(container, 0, 2);
 
         expect(currentDrawing(currentTestBed)).toMatchObject({
             docTransform: {
@@ -402,7 +403,7 @@ describe('DocDrawingPosition', () => {
         root = createRoot(container);
         renderPanel(root, currentTestBed);
 
-        const verticalPositionInput = Array.from(container.querySelectorAll('input'))[1];
+        const verticalPositionInput = getNumberInput(container, 1);
 
         await act(async () => {
             setInputValue(verticalPositionInput, '18.5');

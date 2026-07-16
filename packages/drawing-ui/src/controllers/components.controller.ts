@@ -15,7 +15,17 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { BottomIcon, GroupIcon, MoveDownIcon, MoveUpIcon, TopmostIcon, UngroupIcon } from '@univerjs/icons';
+import {
+    BottomIcon,
+    CropIcon,
+    DeleteIcon,
+    DocSettingIcon,
+    GroupIcon,
+    MoveDownIcon,
+    MoveUpIcon,
+    TopmostIcon,
+    UngroupIcon,
+} from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
@@ -42,6 +52,9 @@ export class ComponentsController extends Disposable {
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
             BottomIcon,
+            DrawingCropIcon: CropIcon,
+            DrawingDeleteIcon: DeleteIcon,
+            DrawingEditIcon: DocSettingIcon,
             GroupIcon,
             MoveDownIcon,
             MoveUpIcon,

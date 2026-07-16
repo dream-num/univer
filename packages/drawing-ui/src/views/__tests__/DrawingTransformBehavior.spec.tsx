@@ -122,16 +122,12 @@ function renderWithRediContext(injector: ReturnType<Univer['__getInjector']>, dr
     return { container, root };
 }
 
-function inputInField(container: HTMLElement, text: string) {
-    const label = Array.from(container.querySelectorAll('span'))
-        .find((span) => span.textContent === text);
-    return label?.parentElement?.querySelector('input') as HTMLInputElement;
+function getNumberInput(container: HTMLElement, index: number): HTMLInputElement {
+    return container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input')[index];
 }
 
-function checkboxInField(container: HTMLElement, text: string) {
-    const label = Array.from(container.querySelectorAll('span'))
-        .find((span) => span.textContent === text);
-    return label?.parentElement?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+function getLockRatioInput(container: HTMLElement): HTMLInputElement {
+    return container.querySelector<HTMLInputElement>('[data-u-comp="checkbox"] input')!;
 }
 
 function setInputValue(input: HTMLInputElement, value: string) {
@@ -140,8 +136,8 @@ function setInputValue(input: HTMLInputElement, value: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-function inputNumberValue(container: HTMLElement, text: string) {
-    return Number(inputInField(container, text).value);
+function inputNumberValue(container: HTMLElement, index: number) {
+    return Number(getNumberInput(container, index).value);
 }
 
 async function waitForDebouncedInput() {
@@ -186,7 +182,7 @@ describe('DrawingTransform behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        setInputValue(inputInField(container, 'drawing-ui.image-panel.transform.width'), '120');
+        setInputValue(getNumberInput(container, 0), '120');
         await waitForDebouncedInput();
 
         expect(updates).toEqual([[
@@ -215,12 +211,12 @@ describe('DrawingTransform behavior', () => {
         container = rendered.container;
 
         act(() => {
-            checkboxInField(container!, 'drawing-ui.image-panel.transform.lock').click();
+            getLockRatioInput(container!).click();
         });
 
         expect(renderManagerService.transformer.keepRatio).toBe(false);
 
-        setInputValue(inputInField(container, 'drawing-ui.image-panel.transform.width'), '120');
+        setInputValue(getNumberInput(container, 0), '120');
         await waitForDebouncedInput();
 
         expect(updates).toEqual([[
@@ -248,7 +244,7 @@ describe('DrawingTransform behavior', () => {
         container = rendered.container;
 
         act(() => {
-            setInputValue(inputInField(container!, 'drawing-ui.image-panel.transform.rotate'), '45');
+            setInputValue(getNumberInput(container!, 4), '45');
         });
 
         expect(updates).toEqual([[
@@ -276,7 +272,7 @@ describe('DrawingTransform behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(inputInField(container, 'drawing-ui.image-panel.transform.rotate').disabled).toBe(true);
+        expect(getNumberInput(container, 4).disabled).toBe(true);
     });
 
     it('disables rotation input for groups containing chart drawings', () => {
@@ -303,7 +299,7 @@ describe('DrawingTransform behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(inputInField(container, 'drawing-ui.image-panel.transform.rotate').disabled).toBe(true);
+        expect(getNumberInput(container, 4).disabled).toBe(true);
     });
 
     it('clamps negative position inputs to the canvas origin', async () => {
@@ -316,11 +312,11 @@ describe('DrawingTransform behavior', () => {
         container = rendered.container;
 
         act(() => {
-            setInputValue(inputInField(container!, 'drawing-ui.image-panel.transform.x'), '-30');
+            setInputValue(getNumberInput(container!, 2), '-30');
         });
         await waitForDebouncedInput();
         act(() => {
-            setInputValue(inputInField(container!, 'drawing-ui.image-panel.transform.y'), '-40');
+            setInputValue(getNumberInput(container!, 3), '-40');
         });
         await waitForDebouncedInput();
 
@@ -382,10 +378,10 @@ describe('DrawingTransform behavior', () => {
             });
         });
 
-        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.width')).toBe(180);
-        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.height')).toBe(90);
-        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.x')).toBe(44);
-        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.y')).toBe(66);
-        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.rotate')).toBe(15);
+        expect(inputNumberValue(container, 0)).toBe(180);
+        expect(inputNumberValue(container, 1)).toBe(90);
+        expect(inputNumberValue(container, 2)).toBe(44);
+        expect(inputNumberValue(container, 3)).toBe(66);
+        expect(inputNumberValue(container, 4)).toBe(15);
     });
 });

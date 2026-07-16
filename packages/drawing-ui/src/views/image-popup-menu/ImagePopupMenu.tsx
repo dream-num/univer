@@ -26,8 +26,13 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
-import { AutofillDoubleIcon, ChartIcon, CropIcon, DeleteIcon, DocSettingIcon, MoreDownIcon, TextWrapShapeIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import {
+    AutofillDoubleIcon,
+    ChartIcon,
+    MoreDownIcon,
+    TextWrapShapeIcon,
+} from '@univerjs/icons';
+import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
@@ -40,6 +45,7 @@ export interface IImagePopupMenuItem {
     value?: string;
     options?: Array<{ label: unknown; value: string }>;
     commandParamsFactory?: (value: string) => object;
+    hideOnClick?: boolean;
     icon?: string;
 }
 
@@ -300,16 +306,15 @@ function ToolbarDropdownButton<T extends string | number>(props: {
 
 function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
     const commandService = useDependency(ICommandService);
+    const iconManager = useDependency(IconManager);
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(props.unitId, UniverInstanceType.UNIVER_DOC) ?? undefined;
     const [wrappingStyle, setWrappingStyle] = useState(() => getWrappingStyle(documentDataModel, props.drawingId));
     const [hidden, setHidden] = useState(false);
-
-    const getMenuItem = (label: string) => props.menuItems.find((item) => item.label === label);
-    const editItem = getMenuItem('drawing-ui.image-popup.edit');
-    const cropItem = getMenuItem('drawing-ui.image-popup.crop');
-    const deleteItem = getMenuItem('drawing-ui.image-popup.delete');
+    const actionItems = props.menuItems
+        .filter((item) => item.type !== 'select' && item.icon)
+        .sort((a, b) => a.index - b.index);
     const wrappingStyleOptions = [
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inline'),
@@ -341,6 +346,9 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
     const executeMenuItem = (item: IImagePopupMenuItem | undefined) => {
         if (!item || item.disable) {
             return;
+        }
+        if (item.hideOnClick) {
+            setHidden(true);
         }
         commandService.executeCommand(item.commandId, item.commandParams);
     };
@@ -380,46 +388,39 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     onChange={updateWrappingStyle}
                 />
             </ToolbarGroup>
-            <Separator orientation="vertical" />
-            <ToolbarGroup>
-                <ToolbarButton
-                    titleKey={editItem?.label ?? 'drawing-ui.image-popup.edit'}
-                    disabled={!editItem || editItem.disable}
-                    onClick={() => {
-                        setHidden(true);
-                        executeMenuItem(editItem);
-                    }}
-                >
-                    <DocSettingIcon />
-                </ToolbarButton>
-                <ToolbarButton
-                    titleKey={cropItem?.label ?? 'drawing-ui.image-popup.crop'}
-                    disabled={!cropItem || cropItem.disable}
-                    onClick={() => executeMenuItem(cropItem)}
-                >
-                    <CropIcon />
-                </ToolbarButton>
-            </ToolbarGroup>
-            <Separator orientation="vertical" />
-            <ToolbarGroup>
-                <ToolbarButton
-                    titleKey={deleteItem?.label ?? 'drawing-ui.image-popup.delete'}
-                    disabled={!deleteItem || deleteItem.disable}
-                    onClick={() => executeMenuItem(deleteItem)}
-                >
-                    <DeleteIcon />
-                </ToolbarButton>
-            </ToolbarGroup>
+            {actionItems.length > 0 && (
+                <>
+                    <Separator orientation="vertical" />
+                    <ToolbarGroup>
+                        {actionItems.map((item) => {
+                            const Icon = iconManager.get(item.icon!);
+                            return (
+                                <ToolbarButton
+                                    key={`${item.commandId}-${item.index}`}
+                                    titleKey={item.label}
+                                    disabled={item.disable}
+                                    onClick={() => executeMenuItem(item)}
+                                >
+                                    <Icon />
+                                </ToolbarButton>
+                            );
+                        })}
+                    </ToolbarGroup>
+                </>
+            )}
         </div>
     );
 }
 
 function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'menuItems'>) {
     const commandService = useDependency(ICommandService);
+    const iconManager = useDependency(IconManager);
     const localeService = useDependency(LocaleService);
+    const [hidden, setHidden] = useState(false);
     const chartTypeItem = props.menuItems.find((item) => item.type === 'select');
-    const editItem = props.menuItems.find((item) => item.icon === 'edit');
-    const deleteItem = props.menuItems.find((item) => item.icon === 'delete');
+    const actionItems = props.menuItems
+        .filter((item) => item.type !== 'select' && item.icon)
+        .sort((a, b) => a.index - b.index);
     const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => ({
         label: String(option.label),
         value: option.value,
@@ -430,8 +431,15 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
         if (!item || item.disable) {
             return;
         }
+        if (item.hideOnClick) {
+            setHidden(true);
+        }
         commandService.executeCommand(item.commandId, item.commandParams);
     };
+
+    if (hidden) {
+        return null;
+    }
 
     return (
         <div
@@ -460,29 +468,24 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
                             }}
                         />
                     </ToolbarGroup>
-                    {(editItem || deleteItem) && <Separator orientation="vertical" />}
+                    {actionItems.length > 0 && <Separator orientation="vertical" />}
                 </>
             )}
-            {(editItem || deleteItem) && (
+            {actionItems.length > 0 && (
                 <ToolbarGroup>
-                    {editItem && (
-                        <ToolbarButton
-                            titleKey={editItem.label}
-                            disabled={editItem.disable}
-                            onClick={() => executeMenuItem(editItem)}
-                        >
-                            <DocSettingIcon />
-                        </ToolbarButton>
-                    )}
-                    {deleteItem && (
-                        <ToolbarButton
-                            titleKey={deleteItem.label}
-                            disabled={deleteItem.disable}
-                            onClick={() => executeMenuItem(deleteItem)}
-                        >
-                            <DeleteIcon />
-                        </ToolbarButton>
-                    )}
+                    {actionItems.map((item) => {
+                        const Icon = iconManager.get(item.icon!);
+                        return (
+                            <ToolbarButton
+                                key={`${item.commandId}-${item.index}`}
+                                titleKey={item.label}
+                                disabled={item.disable}
+                                onClick={() => executeMenuItem(item)}
+                            >
+                                <Icon />
+                            </ToolbarButton>
+                        );
+                    })}
                 </ToolbarGroup>
             )}
         </div>

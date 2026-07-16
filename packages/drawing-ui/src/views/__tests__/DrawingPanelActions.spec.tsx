@@ -18,7 +18,7 @@ import type { ICommandInfo, IDrawingParam } from '@univerjs/core';
 import type { IDrawingOrderUpdateParam } from '@univerjs/drawing';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
-import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
+import { ArrangeTypeEnum, CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -31,6 +31,7 @@ import {
     CropType,
 } from '../../commands/operations/image-crop.operation';
 import { DrawingImageClipService } from '../../services/drawing-image-clip.service';
+import { ImagePopupMenu } from '../image-popup-menu/ImagePopupMenu';
 import { DrawingArrange } from '../panel/DrawingArrange';
 import { ImageCropper } from '../panel/ImageCropper';
 
@@ -38,6 +39,7 @@ import { ImageCropper } from '../panel/ImageCropper';
 
 const unitId = 'drawing-panel-unit';
 const subUnitId = 'drawing-panel-subunit';
+const chartEditCommandId = 'drawing.command.edit-chart';
 
 function createDrawing(drawingId: string, left: number): IDrawingParam {
     return {
@@ -68,14 +70,22 @@ async function flushPendingCommands(): Promise<void> {
     });
 }
 
-function findActionByText(text: string): HTMLElement {
-    const action = Array.from(document.querySelectorAll<HTMLElement>('button,[role="menuitemradio"]'))
-        .find((item) => item.textContent?.includes(text));
+function getButton(container: HTMLElement, index: number): HTMLButtonElement {
+    const action = container.querySelectorAll<HTMLButtonElement>('[data-u-comp="button"]')[index];
     if (!action) {
-        throw new Error(`Action with text "${text}" was not found.`);
+        throw new Error(`Button at index ${index} was not found.`);
     }
 
     return action;
+}
+
+function getSelectOption(index: number): HTMLElement {
+    const option = document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')[index];
+    if (!option) {
+        throw new Error(`Select option at index ${index} was not found.`);
+    }
+
+    return option;
 }
 
 function renderWithRediContext(injector: ReturnType<Univer['__getInjector']>, element: ReactElement) {
@@ -108,11 +118,17 @@ describe('drawing panel actions', () => {
         injector.add([IconManager]);
         injector.add([ComponentManager]);
         injector.add([DrawingImageClipService]);
+        injector.get(IconManager).register({ DrawingEditIcon: () => <span /> });
 
         commandService = injector.get(ICommandService);
         commandService.registerCommand(SetDrawingArrangeOperation);
         commandService.registerCommand(AutoImageCropOperation);
         commandService.registerCommand(CloseImageCropOperation);
+        commandService.registerCommand({
+            id: chartEditCommandId,
+            type: CommandType.OPERATION,
+            handler: () => true,
+        });
         drawingManagerService = injector.get(IDrawingManagerService);
     });
 
@@ -138,7 +154,7 @@ describe('drawing panel actions', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(findActionByText('drawing-ui.image-panel.arrange.front'));
+        clickElement(getButton(container, 2));
 
         expect(orderUpdates).toEqual([{
             unitId,
@@ -177,7 +193,7 @@ describe('drawing panel actions', () => {
                 drawingId: focusedDrawing.drawingId,
             }]);
         });
-        clickElement(findActionByText('drawing-ui.image-panel.arrange.forward'));
+        clickElement(getButton(container, 0));
 
         expect(orderUpdates).toEqual([{
             unitId,
@@ -198,7 +214,7 @@ describe('drawing panel actions', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(findActionByText('drawing-ui.image-panel.crop.start'));
+        clickElement(getButton(container, 0));
         await flushPendingCommands();
 
         expect(executedCommands).toEqual([{
@@ -221,7 +237,7 @@ describe('drawing panel actions', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(findActionByText('drawing-ui.image-panel.crop.start'));
+        clickElement(getButton(container, 0));
         await flushPendingCommands();
 
         await act(async () => {
@@ -229,7 +245,7 @@ describe('drawing panel actions', () => {
             await Promise.resolve();
         });
 
-        const squareCropOption = findActionByText('1:1');
+        const squareCropOption = getSelectOption(1);
 
         await act(async () => {
             squareCropOption.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -265,7 +281,7 @@ describe('drawing panel actions', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(findActionByText('drawing-ui.image-panel.crop.start'));
+        clickElement(getButton(container, 0));
         await flushPendingCommands();
 
         await act(async () => {
@@ -279,7 +295,7 @@ describe('drawing panel actions', () => {
         });
 
         await act(async () => {
-            findActionByText('16:9').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            getSelectOption(2).dispatchEvent(new MouseEvent('click', { bubbles: true }));
             await Promise.resolve();
         });
 
@@ -292,5 +308,39 @@ describe('drawing panel actions', () => {
                 },
             },
         ]);
+    });
+
+    it('hides the chart toolbar after a hide-on-click action', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-chart-floating-toolbar',
+                        menuItems: [{
+                            label: 'chart.edit',
+                            index: 0,
+                            commandId: chartEditCommandId,
+                            disable: false,
+                            hideOnClick: true,
+                            icon: 'DrawingEditIcon',
+                        }],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const chartToolbarButton = container.querySelector('[data-u-comp="doc-chart-floating-toolbar"] button');
+        expect(chartToolbarButton).not.toBeNull();
+        clickElement(chartToolbarButton!);
+        await flushPendingCommands();
+
+        expect(executedCommands.map((command) => command.id)).toEqual([chartEditCommandId]);
+        expect(container.querySelector('[data-u-comp="doc-chart-floating-toolbar"]')).toBeNull();
     });
 });

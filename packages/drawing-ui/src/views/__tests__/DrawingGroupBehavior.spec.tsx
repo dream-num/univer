@@ -100,26 +100,23 @@ function clickElement(element: Element): void {
     });
 }
 
-function findButtonByText(text: string): HTMLButtonElement {
-    const button = Array.from(document.querySelectorAll<HTMLButtonElement>('button'))
-        .find((item) => item.textContent?.includes(text));
+function getGroupButton(container: HTMLElement, index: number): HTMLButtonElement {
+    const button = container.querySelectorAll<HTMLButtonElement>('[data-u-comp="button"]')[index];
     if (!button) {
-        throw new Error(`Button with text "${text}" was not found.`);
+        throw new Error(`Group button at index ${index} was not found.`);
     }
 
     return button;
 }
 
-function buttonIsAvailable(text: string): boolean {
-    const button = Array.from(document.querySelectorAll<HTMLButtonElement>('button'))
-        .find((item) => item.textContent?.includes(text));
-
+function buttonIsAvailable(container: HTMLElement, index: number): boolean {
+    const button = container.querySelectorAll<HTMLButtonElement>('[data-u-comp="button"]')[index];
     if (!button) {
         return false;
     }
 
     let current: HTMLElement | null = button;
-    while (current && current !== document.body) {
+    while (current && current !== container) {
         if (current.classList.contains('univer-hidden')) {
             return false;
         }
@@ -187,7 +184,7 @@ describe('DrawingGroup behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(findButtonByText('drawing-ui.image-panel.group.group'));
+        clickElement(getGroupButton(container, 0));
 
         expect(groupUpdates).toHaveLength(1);
         const update = groupUpdates[0][0];
@@ -235,7 +232,7 @@ describe('DrawingGroup behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(findButtonByText('drawing-ui.image-panel.group.unGroup'));
+        clickElement(getGroupButton(container, 1));
 
         expect(ungroupUpdates).toHaveLength(1);
         const update = ungroupUpdates[0][0];
@@ -282,7 +279,7 @@ describe('DrawingGroup behavior', () => {
                 });
         });
 
-        expect(buttonIsAvailable('drawing-ui.image-panel.group.group')).toBe(true);
-        expect(buttonIsAvailable('drawing-ui.image-panel.group.unGroup')).toBe(false);
+        expect(buttonIsAvailable(container, 0)).toBe(true);
+        expect(buttonIsAvailable(container, 1)).toBe(false);
     });
 });

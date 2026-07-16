@@ -109,24 +109,17 @@ function renderWithRediContext(injector: ReturnType<Univer['__getInjector']>, dr
     return { container, root };
 }
 
-function textIsAvailable(container: HTMLElement, text: string) {
-    const element = Array.from(container.querySelectorAll<HTMLElement>('button,div,span'))
-        .find((item) => item.textContent === text);
+const PanelIndex = {
+    empty: 0,
+    arrange: 1,
+    transform: 2,
+    align: 3,
+    crop: 4,
+} as const;
 
-    if (!element) {
-        return false;
-    }
-
-    let current: HTMLElement | null = element;
-    while (current && current !== container) {
-        if (current.classList.contains('univer-hidden')) {
-            return false;
-        }
-
-        current = current.parentElement;
-    }
-
-    return true;
+function panelIsAvailable(container: HTMLElement, index: number) {
+    const panel = container.children[index];
+    return Boolean(panel && !panel.classList.contains('univer-hidden'));
 }
 
 describe('DrawingCommonPanel behavior', () => {
@@ -174,10 +167,10 @@ describe('DrawingCommonPanel behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.align)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.arrange)).toBe(true);
     });
 
     it('switches from single-image controls to multi-select controls when drawing focus changes', () => {
@@ -197,19 +190,19 @@ describe('DrawingCommonPanel behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.align)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.arrange)).toBe(true);
 
         act(() => {
             drawingManagerService.focusDrawing(drawings.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })));
         });
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.align)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.arrange)).toBe(true);
     });
 
     it('switches from multi-select controls to single-image controls when the transformer starts editing one drawing', () => {
@@ -229,9 +222,9 @@ describe('DrawingCommonPanel behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.align)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(false);
 
         const oKey = getDrawingShapeKeyByDrawingSearch({
             unitId,
@@ -246,10 +239,10 @@ describe('DrawingCommonPanel behavior', () => {
                 .next({ objects: new Map([[oKey, { oKey }]]) });
         });
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.align)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.arrange)).toBe(true);
     });
 
     it('returns to the empty panel when the active transformer clears its controls', () => {
@@ -268,10 +261,10 @@ describe('DrawingCommonPanel behavior', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.null')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.empty)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.arrange)).toBe(true);
 
         act(() => {
             (univer.__getInjector().get(IRenderManagerService) as unknown as TestRenderManagerService)
@@ -280,9 +273,9 @@ describe('DrawingCommonPanel behavior', () => {
                 .next(true);
         });
 
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.null')).toBe(true);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
-        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.empty)).toBe(true);
+        expect(panelIsAvailable(container, PanelIndex.transform)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.crop)).toBe(false);
+        expect(panelIsAvailable(container, PanelIndex.arrange)).toBe(false);
     });
 });

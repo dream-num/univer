@@ -45,6 +45,14 @@ export interface IDocDrawingPositionProps {
 }
 
 export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const drawingParam = props.drawings[0];
+    const scene = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId)?.scene : undefined;
+
+    return drawingParam && scene ? <DocDrawingPositionContent {...props} /> : null;
+};
+
+function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -55,10 +63,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     const drawingParam = drawings[0] as IDocDrawing;
 
-    if (drawingParam == null) {
-        return;
-    }
-
     const { unitId } = drawingParam;
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -66,10 +70,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const documentFlavor = documentDataModel?.getSnapshot().documentStyle.documentFlavor;
 
     const renderObject = renderManagerService.getRenderById(unitId);
-    const scene = renderObject?.scene;
-    if (scene == null) {
-        return;
-    }
+    const scene = renderObject!.scene!;
     const transformer = scene.getTransformerByCreate();
 
     const HORIZONTAL_RELATIVE_FROM = [{
@@ -487,4 +488,4 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             </div>
         </div>
     );
-};
+}

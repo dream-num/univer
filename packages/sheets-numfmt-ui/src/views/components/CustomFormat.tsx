@@ -47,20 +47,26 @@ export function CustomFormat(props: IBusinessComponentProps) {
     const [options, setOptions] = useState<(string | number)[]>([]);
 
     useEffect(() => {
-        localStorageService.getItem<string[]>(historyPatternKey).then((historyList) => {
+        let cancelled = false;
+
+        void localStorageService.getItem<string[]>(historyPatternKey).then((historyList) => {
             const list = [
                 ...CURRENCYFORMAT.map((item) => item.suffix('$')),
                 ...DATEFMTLISG.map((item) => item.suffix),
                 ...NUMBERFORMAT.map((item) => item.suffix),
+                ...(historyList ?? []),
             ];
-            list.push(...(historyList || []));
-            userHabitController.addHabit(key, []).finally(() => {
-                userHabitController.getHabit(key, list).then((list) => {
-                    setOptions([...new Set(list)]);
-                });
-            });
+            return userHabitController.addHabit(key, []).then(() => userHabitController.getHabit(key, list));
+        }).then((list) => {
+            if (!cancelled) {
+                setOptions([...new Set(list)]);
+            }
         });
-    }, []);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [localStorageService, userHabitController]);
 
     const handleClick = (p: string) => {
         setPattern(p);

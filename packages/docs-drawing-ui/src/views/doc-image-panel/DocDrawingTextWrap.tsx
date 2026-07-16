@@ -53,29 +53,26 @@ interface IDistToText {
 }
 
 export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const drawingParam = props.drawings[0];
+    const scene = drawingParam ? renderManagerService.getRenderUnitById(drawingParam.unitId)?.scene : undefined;
+
+    return drawingParam && scene ? <DocDrawingTextWrapContent {...props} /> : null;
+};
+
+function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
-    const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     const { drawings } = props;
 
     const drawingParam = drawings[0] as IDocDrawing;
 
-    if (drawingParam == null) {
-        return null;
-    }
-
     const { unitId } = drawingParam;
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-
-    const renderObject = renderManagerService.getRenderUnitById(unitId);
-    const scene = renderObject?.scene;
-    if (scene == null) {
-        return null;
-    }
 
     const [disableWrapText, setDisableWrapText] = useState(true);
     const [disableDistTB, setDisableDistTB] = useState(true);
@@ -395,4 +392,4 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             </div>
         </div>
     );
-};
+}

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ComponentType } from 'react';
 import type { IFloatDom, IFloatDomLayout } from '../../../services/dom/canvas-dom-layer.service';
 import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -22,7 +23,21 @@ import { ComponentManager } from '../../../common';
 import { shouldForwardFloatDomEvents } from '../../../services/dom/canvas-dom-layer.service';
 
 export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; position: IFloatDomLayout }) => {
-    const { layer, id, position } = props;
+    const { layer } = props;
+
+    return typeof layer.componentKey === 'string'
+        ? <RegisteredPrintFloatDomSingle {...props} componentKey={layer.componentKey} />
+        : <PrintFloatDomSingleContent {...props} Component={layer.componentKey} />;
+});
+
+function RegisteredPrintFloatDomSingle(props: { layer: IFloatDom; id: string; position: IFloatDomLayout; componentKey: string }) {
+    const componentManager = useDependency(ComponentManager);
+    return <PrintFloatDomSingleContent {...props} Component={componentManager.get(props.componentKey)} />;
+}
+
+function PrintFloatDomSingleContent(props: { layer: IFloatDom; id: string; position: IFloatDomLayout; Component?: ComponentType<any> }) {
+    const { layer, id, position, Component } = props;
+
     const univerInstanceService = useDependency(IUniverInstanceService);
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
@@ -30,7 +45,6 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
     const topRef = useRef<number>(position?.startY ?? 0);
     const leftRef = useRef<number>(position?.startX ?? 0);
 
-    const Component = typeof layer.componentKey === 'string' ? useDependency(ComponentManager).get(layer.componentKey) : layer.componentKey;
     const layerProps: any = useMemo(() => ({
         data: layer.data,
         ...layer.props,
@@ -111,4 +125,4 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
             </div>
         </div>
     );
-});
+}

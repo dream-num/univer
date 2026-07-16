@@ -73,7 +73,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             value !== undefined ? value : defaultValue !== undefined ? defaultValue : null
         );
         const lastValidValueRef = useRef<number | null>(internalValue);
-        const [inputValue, setInputValue] = useState<string>(formatValue(internalValue));
+        const [inputValue, setInputValue] = useState<string>(() => formatValue(internalValue));
         const inputRef = useRef<HTMLInputElement>(null);
         const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
         const longPressIntervalRef = useRef<NodeJS.Timeout | null>(null);

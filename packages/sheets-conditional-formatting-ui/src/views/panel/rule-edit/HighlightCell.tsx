@@ -15,11 +15,12 @@
  */
 
 import type {
-    IConditionalFormattingRuleConfig,
+    IDuplicateValuesHighlightCell,
     IHighlightCell,
     INumberHighlightCell,
     ITextHighlightCell,
     ITimePeriodHighlightCell,
+    IUniqueValuesHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
@@ -40,16 +41,27 @@ import { Preview } from '../../Preview';
 import { WrapperError } from '../../wrapper-error/WrapperError';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: CFTextOperator | CFNumberOperator | CFTimePeriodOperator): { label: LocaleKey; value: string } => ({
+type IEditableHighlightCell = ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell | IDuplicateValuesHighlightCell | IUniqueValuesHighlightCell;
+type IEditableSubType = IEditableHighlightCell['subType'];
+type IEditableOperator = ITextHighlightCell['operator'] | INumberHighlightCell['operator'] | ITimePeriodHighlightCell['operator'];
+
+const textOperators = new Set<string>(Object.values(CFTextOperator));
+const numberOperators = new Set<string>(Object.values(CFNumberOperator));
+const timePeriodOperators = new Set<string>(Object.values(CFTimePeriodOperator));
+
+const isTextOperator = (value: unknown): value is CFTextOperator => typeof value === 'string' && textOperators.has(value);
+const isNumberOperator = (value: unknown): value is CFNumberOperator => typeof value === 'string' && numberOperators.has(value);
+const isTimePeriodOperator = (value: unknown): value is CFTimePeriodOperator => typeof value === 'string' && timePeriodOperators.has(value);
+
+const createOptionItem = <T extends IEditableOperator>(text: T): { label: LocaleKey; value: T } => ({
     label: `sheets-conditional-formatting-ui.operator.${text}`,
     value: text,
 });
 type IValue = number | string | [number, number];
-type IResult = (Pick<ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell, 'operator' | 'subType'>) & { value?: IValue };
 
 function HighlightCellInput(props: {
-    type: IResult['subType'] | CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues;
-    operator?: IResult['operator'];
+    type: IEditableSubType;
+    operator?: IEditableOperator;
     interceptorManager: IStyleEditorProps['interceptorManager'];
     rule?: IHighlightCell;
     value: IValue;
@@ -190,7 +202,7 @@ function HighlightCellInput(props: {
     }
     return null;
 };
-const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues | CFSubRuleType.number | CFSubRuleType.text | CFSubRuleType.timePeriod | CFSubRuleType.formula) => {
+const getOperatorOptions = (type: IEditableSubType) => {
     switch (type) {
         case CFSubRuleType.text: {
             return [
@@ -236,12 +248,12 @@ const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.
             return [];
     }
 };
-export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell>) => {
+export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditableHighlightCell>) => {
     const { interceptorManager, onChange } = props;
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined;
-    const [subType, setSubType] = useState<CFSubRuleType.number | CFSubRuleType.text | CFSubRuleType.timePeriod | CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues>(() => {
+    const [subType, setSubType] = useState<IEditableSubType>(() => {
         const defaultV = CFSubRuleType.text;
         if (!rule) {
             return defaultV;
@@ -249,7 +261,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         return rule.subType || defaultV;
     });
 
-    const typeOptions = [{
+    const typeOptions: Array<{ value: IEditableSubType; label: string }> = [{
         value: CFSubRuleType.text,
         label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.text'),
     }, {
@@ -268,12 +280,12 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const operatorOptions = useMemo(() => getOperatorOptions(subType).map((option) => ({ ...option, label: localeService.t(option.label) })), [localeService, subType]);
 
-    const [operator, setOperator] = useState<IResult['operator'] | undefined>(() => {
-        const defaultV = operatorOptions[0]?.value as IResult['operator'] | undefined;
+    const [operator, setOperator] = useState<IEditableOperator | undefined>(() => {
+        const defaultV = operatorOptions[0]?.value;
         if (!rule) {
             return defaultV;
         }
-        return rule.operator || defaultV;
+        return 'operator' in rule ? rule.operator : defaultV;
     });
 
     const [value, setValue] = useState<IValue>(() => {
@@ -281,62 +293,72 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         if (!rule) {
             return defaultV;
         }
-        const v = (rule as ITextHighlightCell | INumberHighlightCell).value ?? createDefaultValue(rule.subType, rule.operator);
-        return v;
+        if ('value' in rule && rule.value !== undefined) {
+            return rule.value;
+        }
+        return 'operator' in rule ? createDefaultValue(rule.subType, rule.operator) : defaultV;
     });
 
     const [style, setStyle] = useState<IHighlightCell['style']>({});
 
-    const getResult = useMemo(() => (option: { subType?: string; operator?: string; value?: IValue; style?: IHighlightCell['style'] }) => {
-        switch (option.subType || subType) {
-            case CFSubRuleType.duplicateValues:
-            case CFSubRuleType.uniqueValues: {
+    const getResult = useMemo(() => (option: { subType?: IEditableSubType; operator?: IEditableOperator; value?: IValue; style?: IHighlightCell['style'] }): IEditableHighlightCell => {
+        const nextSubType = option.subType ?? subType;
+        const nextOperator = option.operator ?? operator;
+        const nextValue = option.value ?? value;
+        const nextStyle = option.style ?? style;
+
+        switch (nextSubType) {
+            case CFSubRuleType.duplicateValues: {
                 return {
                     type: CFRuleType.highlightCell,
-                    subType: option.subType ?? subType,
-                    style: option.style ?? style,
+                    subType: CFSubRuleType.duplicateValues,
+                    style: nextStyle,
                 };
             }
+            case CFSubRuleType.uniqueValues:
+                return {
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.uniqueValues,
+                    style: nextStyle,
+                };
             case CFSubRuleType.text: {
-                if ([CFTextOperator.beginsWith, CFTextOperator.endsWith, CFTextOperator.containsText, CFTextOperator.notContainsText, CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
-                    return {
-                        type: CFRuleType.highlightCell,
-                        subType: option.subType ?? subType,
-                        operator: option.operator ?? operator,
-                        style: option.style ?? style,
-                        value: option.value ?? value,
-                    };
-                }
-                break;
+                return {
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.text,
+                    operator: isTextOperator(nextOperator) ? nextOperator : CFTextOperator.containsText,
+                    style: nextStyle,
+                    value: typeof nextValue === 'string' ? nextValue : undefined,
+                };
+            }
+            case CFSubRuleType.timePeriod: {
+                return {
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.timePeriod,
+                    operator: isTimePeriodOperator(nextOperator) ? nextOperator : CFTimePeriodOperator.today,
+                    style: nextStyle,
+                };
             }
             case CFSubRuleType.number: {
-                if ([CFNumberOperator.equal, CFNumberOperator.notEqual, CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual, CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual].includes(operator as CFNumberOperator)) {
+                const numberOperator = isNumberOperator(nextOperator) ? nextOperator : CFNumberOperator.equal;
+                if (numberOperator === CFNumberOperator.between || numberOperator === CFNumberOperator.notBetween) {
+                    const range: [number, number] = Array.isArray(nextValue) ? nextValue : [0, 100];
                     return {
                         type: CFRuleType.highlightCell,
-                        subType: option.subType ?? subType,
-                        operator: option.operator ?? operator,
-                        style: option.style ?? style,
-                        value: option.value ?? value,
+                        subType: CFSubRuleType.number,
+                        operator: numberOperator,
+                        style: nextStyle,
+                        value: range,
                     };
                 }
-                if ([CFNumberOperator.between, CFNumberOperator.notBetween].includes(operator as CFNumberOperator)) {
-                    return {
-                        type: CFRuleType.highlightCell,
-                        subType: option.subType ?? subType,
-                        operator: option.operator ?? operator,
-                        style: option.style ?? style,
-                        value: option.value ?? value,
-                    };
-                }
-                break;
+                return {
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.number,
+                    operator: numberOperator,
+                    style: nextStyle,
+                    value: typeof nextValue === 'number' ? nextValue : undefined,
+                };
             }
         }
-        return {
-            type: CFRuleType.highlightCell,
-            subType: option.subType ?? subType,
-            operator: option.operator ?? operator,
-            style: option.style ?? style,
-        };
     }, [subType, operator, value, style]);
 
     useEffect(() => {
@@ -355,9 +377,12 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     }, [typeOptions]);
 
     const onTypeChange = (v: string) => {
-        const _subType = v as typeof subType;
+        const _subType = typeOptions.find((item) => item.value === v)?.value;
+        if (!_subType) {
+            return;
+        }
         const operatorList = getOperatorOptions(_subType).map((option) => ({ ...option, label: localeService.t(option.label) }));
-        const _operator = operatorList[0]?.value as typeof operator;
+        const _operator = operatorList[0]?.value;
         setSubType(_subType);
         setOperator(_operator);
         _operator && setValue(createDefaultValue(_subType, _operator));
@@ -365,7 +390,10 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     };
 
     const onOperatorChange = (v: string) => {
-        const _operator = v as typeof operator;
+        const _operator = operatorOptions.find((item) => item.value === v)?.value;
+        if (!_operator) {
+            return;
+        }
         setOperator(_operator);
         onChange(getResult({ operator: _operator }));
     };
@@ -374,10 +402,6 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         setValue(value);
         onChange(getResult({ value }));
     };
-
-    const inputRenderKey = useMemo(() => {
-        return `${subType}_${operator}_${Math.random()}`;
-    }, [subType, operator]);
 
     return (
         <div>
@@ -406,7 +430,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
                 )}
             </div>
             <HighlightCellInput
-                key={inputRenderKey}
+                key={`${subType}_${operator}`}
                 value={value}
                 interceptorManager={interceptorManager}
                 type={subType}
@@ -415,7 +439,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
                 onChange={onInputChange}
             />
             <div className={previewClassName}>
-                <Preview rule={getResult({}) as IConditionalFormattingRuleConfig} />
+                <Preview rule={getResult({})} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}

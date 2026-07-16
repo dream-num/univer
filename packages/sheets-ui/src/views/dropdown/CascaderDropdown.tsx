@@ -15,7 +15,7 @@
  */
 
 import type { ICascaderOption } from '@univerjs/design';
-import type { IPopup } from '@univerjs/ui';
+import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { IBaseDropdownProps } from './type';
 import { CascaderList } from '@univerjs/design';
 import { useState } from 'react';
@@ -26,10 +26,12 @@ export interface ICascaderDropdownProps {
     onChange: (value: string[]) => void;
 }
 
-export function CascaderDropdown(props: { popup: IPopup<ICascaderDropdownProps & IBaseDropdownProps> }) {
+export function CascaderDropdown(props: {
+    popup: IPopupWithExtraProps<ICascaderDropdownProps & IBaseDropdownProps>;
+}) {
     const { popup } = props;
     const { extraProps } = popup;
-    const { options, defaultValue, onChange } = extraProps!;
+    const { options, defaultValue, onChange } = extraProps;
     const [localValue, setLocalValue] = useState(defaultValue ?? []);
 
     return (

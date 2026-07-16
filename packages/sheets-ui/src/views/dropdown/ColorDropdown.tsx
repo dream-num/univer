@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPopup } from '@univerjs/ui';
+import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { IBaseDropdownProps } from './type';
 import { ColorPicker } from '@univerjs/design';
 
@@ -23,10 +23,12 @@ export interface IColorDropdownProps {
     onChange?: (value: string) => void;
 }
 
-export function ColorDropdown(props: { popup: IPopup<IColorDropdownProps & IBaseDropdownProps> }) {
+export function ColorDropdown(props: {
+    popup: IPopupWithExtraProps<IColorDropdownProps & IBaseDropdownProps>;
+}) {
     const { popup } = props;
     const { extraProps } = popup;
-    const { defaultValue, onChange } = extraProps!;
+    const { defaultValue, onChange } = extraProps;
 
     return (
         <ColorPicker

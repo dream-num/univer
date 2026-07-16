@@ -38,7 +38,7 @@ describe('FormulaCalculationSessionService', () => {
         service.initialize();
         const waitForApplied = service.waitForLatestApplied();
         let resolved = false;
-        void waitForApplied.then(() => {
+        waitForApplied.then(() => {
             resolved = true;
         });
 
@@ -120,7 +120,7 @@ describe('FormulaCalculationSessionService', () => {
 
         const waitForApplied = service.waitForLatestApplied();
         let resolved = false;
-        void waitForApplied.then(() => {
+        waitForApplied.then(() => {
             resolved = true;
         });
 
@@ -244,7 +244,7 @@ describe('FormulaCalculationSessionService', () => {
         const service = createService();
         const waitForApplied = service.waitForLatestApplied();
         let resolved = false;
-        void waitForApplied.then(() => {
+        waitForApplied.then(() => {
             resolved = true;
         });
 
@@ -270,7 +270,7 @@ describe('FormulaCalculationSessionService', () => {
 
         const waitForApplied = service.waitForLatestApplied();
         let settled = false;
-        void waitForApplied.then(() => {
+        waitForApplied.then(() => {
             settled = true;
         });
 

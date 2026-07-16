@@ -112,7 +112,7 @@ export { INotificationService } from './services/notification/notification.servi
 export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts/parts.service';
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-export type { IPopup } from './services/popup/canvas-popup.service';
+export type { IPopup, IPopupWithExtraProps } from './services/popup/canvas-popup.service';
 export { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
 export type { IRibbonOverride } from './services/ribbon/ribbon-override.service';
 export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';

@@ -45,7 +45,7 @@ export function touchSheetsDrawingFloatingHostCapabilityWhenReady(injector: Inje
         return;
     }
 
-    void lifecycleService.onStage(LifecycleStages.Ready).then(() => {
+    lifecycleService.onStage(LifecycleStages.Ready).then(() => {
         touchSheetsDrawingFloatingHostCapability(injector);
     });
 }

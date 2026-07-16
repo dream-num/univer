@@ -70,7 +70,7 @@ export function SlideEditorContainer() {
     };
 
     useEffect(() => {
-        slideEditorManagerService.state$.subscribe((param) => {
+        const subscription = slideEditorManagerService.state$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -106,7 +106,9 @@ export function SlideEditorContainer() {
                 slideEditorManagerService.setRect({ left, top, width, height });
             }
         });
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
+
+        return () => subscription.unsubscribe();
+    }, [editorService, slideEditorManagerService]);
 
     useEffect(() => {
         if (!disableAutoFocus) {

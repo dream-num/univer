@@ -386,9 +386,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         ? Promise.resolve()
         : generate();
 
-    void task
-        .catch((error) => {
-            console.error(error);
-            process.exitCode = 1;
-        });
+    task.catch((error) => {
+        console.error(error);
+        process.exitCode = 1;
+    });
 }

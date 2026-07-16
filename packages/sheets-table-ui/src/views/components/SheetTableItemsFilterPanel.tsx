@@ -51,7 +51,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
     // const allChecked = tableFilter === undefined ? true : checkedItemSet.size === itemsCountMap.size;
     const [allChecked, setAllChecked] = useState<boolean>(tableFilter === undefined ? true : checkedItemSet.size === itemsCountMap.size);
 
-    const [checkedCount, setCheckedCount] = useState<number>(allChecked ? allItemsCount : getCheckedItemCount(itemsCountMap, checkedItemSet));
+    const [checkedCount, setCheckedCount] = useState<number>(() => allChecked ? allItemsCount : getCheckedItemCount(itemsCountMap, checkedItemSet));
 
     const indeterminate = !allChecked && checkedItemSet.size > 0;
     const [searchText, setSearchText] = useState('');

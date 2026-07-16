@@ -353,7 +353,7 @@ function CategoryButton(props: { children: ReactElement; onClick: () => void; se
 }
 
 function writeRecents(localStorageService: ILocalStorageService, storageKey: string, recents: IEmojiItem[]): void {
-    void localStorageService
+    localStorageService
         .setItem(storageKey, recents)
         .catch(() => undefined);
 }

@@ -151,7 +151,7 @@ describe('rpc.service edge cases', () => {
             })
         ).toThrow('[ChannelClient]: unknown response type!');
         callPending.delete(getSeq(unknownCallRequest) as number);
-        void unknownCallPromise.catch(() => undefined);
+        unknownCallPromise.catch(() => undefined);
 
         const values: number[] = [];
         const stream = channel.subscribe<number>('stream$').subscribe((value) => values.push(value));

@@ -36,35 +36,33 @@ export interface IDrawingTransformProps {
 const INPUT_DEBOUNCE_TIME = 300;
 
 export const DrawingTransform = (props: IDrawingTransformProps) => {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const drawingParam = props.drawings[0];
+    const scene = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId)?.scene : undefined;
+    const topScene = scene?.getEngine()?.activeScene as Nullable<Scene>;
+
+    if (!drawingParam?.transform || !scene || !topScene) {
+        return null;
+    }
+
+    return <DrawingTransformContent {...props} />;
+};
+
+function DrawingTransformContent(props: IDrawingTransformProps) {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
 
     const { drawings, transformShow } = props;
 
-    const drawingParam = drawings[0];
-
-    if (drawingParam == null) {
-        return;
-    }
-
-    const transform = drawingParam.transform;
-    if (transform == null) {
-        return;
-    }
+    const drawingParam = drawings[0]!;
+    const transform = drawingParam.transform!;
 
     const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
 
     const renderObject = renderManagerService.getRenderById(unitId);
-    const scene = renderObject?.scene;
-    if (scene == null) {
-        return;
-    }
-
-    const topScene = scene.getEngine()?.activeScene as Nullable<Scene>;
-    if (topScene == null) {
-        return;
-    }
+    const scene = renderObject!.scene!;
+    const topScene = scene.getEngine()!.activeScene as Scene;
 
     const transformer = scene.getTransformerByCreate();
 
@@ -424,4 +422,4 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             </div>
         </div>
     );
-};
+}

@@ -127,9 +127,13 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
     }, [sheetSelectionService]);
 
     useEffect(() => {
-        commandService.onCommandExecuted((commandInfo) => {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const disposable = commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === UndoCommand.id || commandInfo.id === RedoCommand.id) {
-                setTimeout(() => {
+                if (timer !== undefined) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
                     const activeRule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId) as ISheetDataValidationRule;
                     setKey((k) => k + 1);
                     if (activeRule) {
@@ -139,41 +143,14 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
                 }, 20);
             }
         });
+
+        return () => {
+            disposable.dispose();
+            if (timer !== undefined) {
+                clearTimeout(timer);
+            }
+        };
     }, [commandService, dataValidationModel, ruleId, subUnitId, unitId]);
-
-    if (!validator) {
-        return null;
-    }
-
-    const operators = validator.operators;
-    const operatorNames = validator.operatorNames;
-    const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
-
-    const goBackActiveRuleSheet = () => {
-        if (worksheet?.getSheetId() !== subUnitId) {
-            commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
-                unitId,
-                subUnitId,
-            });
-        }
-    };
-
-    const handleOk = () => {
-        if (rangeSelectorInstance.current?.editor?.isFocus()) {
-            handleUpdateRuleRanges(rangeSelectorInstance.current?.getValue());
-        }
-        if (!localRule.ranges.length || isRangeError) {
-            return;
-        }
-
-        if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
-            dataValidationPanelService.setActiveRule(null);
-        } else {
-            setShowError(true);
-        }
-
-        goBackActiveRuleSheet();
-    };
 
     const handleUpdateRuleRanges = useEvent((rangeText: string) => {
         const unitRanges = rangeText.split(',').filter(Boolean).map(deserializeRangeWithSheet).map((unitRange) => {
@@ -210,6 +187,41 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
 
         debounceExecute(UpdateSheetDataValidationRangeCommand.id, params);
     });
+    const rangeStr = useMemo(() => localRanges.map((i) => serializeRange(i.range)).join(','), []);
+
+    if (!validator) {
+        return null;
+    }
+
+    const operators = validator.operators;
+    const operatorNames = validator.operatorNames;
+    const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
+
+    const goBackActiveRuleSheet = () => {
+        if (worksheet?.getSheetId() !== subUnitId) {
+            commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                unitId,
+                subUnitId,
+            });
+        }
+    };
+
+    const handleOk = () => {
+        if (rangeSelectorInstance.current?.editor?.isFocus()) {
+            handleUpdateRuleRanges(rangeSelectorInstance.current?.getValue());
+        }
+        if (!localRule.ranges.length || isRangeError) {
+            return;
+        }
+
+        if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
+            dataValidationPanelService.setActiveRule(null);
+        } else {
+            setShowError(true);
+        }
+
+        goBackActiveRuleSheet();
+    };
 
     const handleUpdateRuleSetting = (setting: IDataValidationRuleBase) => {
         if (shallowEqual(setting, getRuleSetting(localRule))) {
@@ -283,7 +295,6 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput!);
-    const rangeStr = useMemo(() => localRanges.map((i) => serializeRange(i.range)).join(','), []);
 
     const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 

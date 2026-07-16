@@ -206,7 +206,7 @@ function RenderSheetEmbedTabHost(props: { workbook: Workbook; worksheet: Workshe
 function useHasWorkbook(): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    return useMemo(() => !!workbook, [workbook]);
+    return !!workbook;
 }
 
 function useActiveWorkbookIsEmbeddedRender(workbook: Workbook | null): boolean {

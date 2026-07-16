@@ -53,6 +53,13 @@ import { panelListEmptyBase64 } from './panel-list/constant';
 type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 
 export function SheetPermissionPanelList() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    return workbook ? <SheetPermissionPanelListContent /> : null;
+}
+
+function SheetPermissionPanelListContent() {
     const [isCurrentSheet, setIsCurrentSheet] = useState(true);
     const [forceUpdateFlag, setForceUpdateFlag] = useState(false);
     const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
@@ -72,9 +79,7 @@ export function SheetPermissionPanelList() {
     const sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
     const rangeRuleRefresh = useObservable(rangeProtectionRuleModel.ruleRefresh$, '');
 
-    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-
-    if (!workbook) return null;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
     const unitId = workbook.getUnitId();
 
@@ -118,44 +123,60 @@ export function SheetPermissionPanelList() {
         });
 
         return isCurrentSheet ? subUnitRuleList : allPermissionRule;
-    }, []);
+    }, [authzIoService, rangeProtectionRuleModel, workbook, worksheetProtectionModel]);
 
     const [ruleList, setRuleList] = useState<IPermissionPoint[]>([]);
 
     useEffect(() => {
+        let active = true;
         const subscription = merge(
             rangeProtectionRuleModel.ruleChange$,
             worksheetProtectionModel.ruleChange$
-        ).subscribe(async () => {
-            const ruleList = await getRuleList(isCurrentSheet);
-            setRuleList(ruleList);
+        ).subscribe(() => {
+            void getRuleList(isCurrentSheet).then((ruleList) => {
+                if (active) {
+                    setRuleList(ruleList);
+                }
+            });
         });
         return () => {
+            active = false;
             subscription.unsubscribe();
         };
-    }, [isCurrentSheet]);
+    }, [getRuleList, isCurrentSheet, rangeProtectionRuleModel.ruleChange$, worksheetProtectionModel.ruleChange$]);
 
     useEffect(() => {
+        let active = true;
         const subscribe = workbook.activeSheet$.pipe(
             distinctUntilChanged((prevSheet, currSheet) => prevSheet?.getSheetId() === currSheet?.getSheetId())
-        ).subscribe(async () => {
-            const ruleList = await getRuleList(isCurrentSheet);
-            setRuleList(ruleList);
+        ).subscribe(() => {
+            void getRuleList(isCurrentSheet).then((ruleList) => {
+                if (active) {
+                    setRuleList(ruleList);
+                }
+            });
         });
         return () => {
+            active = false;
             subscribe.unsubscribe();
         };
-    }, [isCurrentSheet]);
+    }, [getRuleList, isCurrentSheet, workbook.activeSheet$]);
 
     useEffect(() => {
-        const getRuleListByRefresh = async () => {
-            if (sheetRuleRefresh || rangeRuleRefresh) {
-                const ruleList = await getRuleList(true);
-                setRuleList(ruleList);
-            };
+        let cancelled = false;
+
+        if (sheetRuleRefresh || rangeRuleRefresh) {
+            void getRuleList(true).then((ruleList) => {
+                if (!cancelled) {
+                    setRuleList(ruleList);
+                }
+            });
+        }
+
+        return () => {
+            cancelled = true;
         };
-        getRuleListByRefresh();
-    }, [sheetRuleRefresh, rangeRuleRefresh]);
+    }, [getRuleList, sheetRuleRefresh, rangeRuleRefresh]);
 
     function handleDelete(rule: IRuleItem) {
         const { unitId, subUnitId, unitType } = rule;
@@ -176,7 +197,7 @@ export function SheetPermissionPanelList() {
 
     useEffect(() => {
         sheetPermissionUserManagerService.reset();
-    }, []);
+    }, [sheetPermissionUserManagerService]);
 
     useHighlightRange(currentRuleRanges);
 

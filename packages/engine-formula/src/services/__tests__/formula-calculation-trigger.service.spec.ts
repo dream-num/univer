@@ -63,12 +63,18 @@ describe('FormulaCalculationTriggerService', () => {
         vi.restoreAllMocks();
     });
 
-    it('collects changeset dirty data before start and merges it with the initial trigger', async () => {
+    it('collects all dirty data before start and merges it with the initial trigger', async () => {
         const testBed = createTestBed(false);
-        testBed.conversions.set('sheet-dirty', {
-            commandId: 'sheet-dirty',
+        testBed.conversions.set('server-dirty', {
+            commandId: 'server-dirty',
             getDirtyData: () => ({
                 dirtyRanges: [{ unitId: 'sheet-unit', sheetId: 'sheet-1', range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 } }],
+            }),
+        });
+        testBed.conversions.set('local-dirty', {
+            commandId: 'local-dirty',
+            getDirtyData: () => ({
+                dirtyRanges: [{ unitId: 'sheet-unit', sheetId: 'sheet-1', range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0 } }],
             }),
         });
         testBed.conversions.set(SetTriggerFormulaCalculationStartMutation.id, {
@@ -76,7 +82,8 @@ describe('FormulaCalculationTriggerService', () => {
             getDirtyData: () => ({ forceCalculation: true }),
         });
 
-        testBed.emit({ id: 'sheet-dirty' } as ICommandInfo, { fromChangeset: true });
+        testBed.emit({ id: 'server-dirty' } as ICommandInfo, { fromChangeset: true });
+        testBed.emit({ id: 'local-dirty' } as ICommandInfo);
         await vi.advanceTimersByTimeAsync(100);
         expect(testBed.executed).toEqual([]);
 
@@ -89,7 +96,10 @@ describe('FormulaCalculationTriggerService', () => {
             id: SetFormulaCalculationStartMutation.id,
             params: {
                 forceCalculation: true,
-                dirtyRanges: [{ unitId: 'sheet-unit', sheetId: 'sheet-1' }],
+                dirtyRanges: [
+                    { unitId: 'sheet-unit', sheetId: 'sheet-1', range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 } },
+                    { unitId: 'sheet-unit', sheetId: 'sheet-1', range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0 } },
+                ],
             },
         });
         testBed.service.dispose();

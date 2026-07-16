@@ -33,7 +33,7 @@ export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/comma
 export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export type { IInnerPasteCommandParams } from './commands/commands/clipboard.inner.command';
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
-export { getCustomBlockIdsInSelections, getCutActionsFromDocRanges } from './commands/commands/clipboard.inner.command';
+export { getCutActionsFromDocRanges } from './commands/commands/clipboard.inner.command';
 export { buildMoveDocBlockActions, MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
 export type { IMoveDocBlockCommandParams } from './commands/commands/doc-block-move.command';
 export {

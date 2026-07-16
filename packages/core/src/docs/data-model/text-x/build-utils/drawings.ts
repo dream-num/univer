@@ -15,7 +15,7 @@
  */
 
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
-import type { IDocumentBody } from '../../../../types/interfaces';
+import type { IDocumentBody, IDrawingParam } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { JSONXActions } from '../../json-x/json-x';
 import { createParagraphId } from '../../../paragraph-id';
@@ -29,7 +29,7 @@ import { deleteSelectionTextX } from './text-x-utils';
 export interface IAddDrawingParam {
     selection: ITextRangeParam;
     documentDataModel: DocumentDataModel;
-    drawings: any[];
+    drawings: IDrawingParam[];
 }
 
 export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
@@ -147,7 +147,7 @@ function normalizeDrawingInsertOffset(body: IDocumentBody, offset: number): numb
     return offset === 0 && body.dataStream[0] === DataStreamTreeTokenType.PARAGRAPH ? 1 : offset;
 }
 
-function buildDrawingInsertBody(body: IDocumentBody, drawings: any[], insertOffset: number): IDocumentBody {
+function buildDrawingInsertBody(body: IDocumentBody, drawings: IDrawingParam[], insertOffset: number): IDocumentBody {
     const placeholders = DataStreamTreeTokenType.CUSTOM_BLOCK.repeat(drawings.length);
     const needsTrailingParagraph = body.dataStream[insertOffset] === DataStreamTreeTokenType.SECTION_BREAK || body.dataStream[insertOffset] === undefined;
     const dataStream = needsTrailingParagraph ? `${placeholders}${DataStreamTreeTokenType.PARAGRAPH}` : placeholders;

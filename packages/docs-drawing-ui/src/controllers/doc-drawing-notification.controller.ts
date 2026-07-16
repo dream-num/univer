@@ -18,26 +18,68 @@
 
 import type { DocumentDataModel, ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDocDrawing, IUpdateDocDrawingWrappingStyleParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingMapItemData, IDrawingOrderMapParam } from '@univerjs/drawing';
+import type { IDocumentSkeletonDrawing, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage } from '@univerjs/engine-render';
 import {
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     JSONX,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
     RedoCommand,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import { getDocDrawingRenderOrder, IDocDrawingService } from '@univerjs/docs-drawing';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    getDocDrawingRenderOrder,
+    IDocDrawingService,
+    TextWrappingStyle,
+    UpdateDocDrawingWrappingStyleCommand,
+    UpdateDrawingDocTransformCommand,
+} from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { DocRefreshDrawingsService } from '../services/doc-refresh-drawings.service';
 
 interface IAddOrRemoveDrawing {
     type: 'add' | 'remove';
     drawingId: string;
     drawing?: IDocDrawing;
+}
+
+interface IDrawingAnchorInPage {
+    skeDrawing: IDocumentSkeletonDrawing;
+    pageMarginTop: number;
+    pageMarginLeft: number;
+}
+
+function findDrawingAnchorInPage(
+    page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
+    drawingId: string,
+    pageMarginTop: number,
+    pageMarginLeft: number
+): IDrawingAnchorInPage | null {
+    const skeDrawing = page.skeDrawings.get(drawingId);
+    if (skeDrawing) {
+        return { skeDrawing, pageMarginTop, pageMarginLeft };
+    }
+
+    for (const table of page.skeTables.values()) {
+        for (const row of table.rows) {
+            for (const cell of row.cells) {
+                const cellAnchor = findDrawingAnchorInPage(cell, drawingId, cell.marginTop, cell.marginLeft);
+                if (cellAnchor) {
+                    return cellAnchor;
+                }
+            }
+        }
+    }
+
+    return null;
 }
 
 // Check whether drawings are added or deleted from the mutation and obtain the drawing ID.
@@ -152,7 +194,8 @@ export class DocDrawingAddRemoveController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
     ) {
         super();
 
@@ -163,6 +206,7 @@ export class DocDrawingAddRemoveController extends Disposable {
         this._commandExecutedListener();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
@@ -191,6 +235,16 @@ export class DocDrawingAddRemoveController extends Disposable {
         );
 
         this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== UpdateDocDrawingWrappingStyleCommand.id) {
+                    return;
+                }
+
+                this._preserveWrappingStylePosition(command.params as IUpdateDocDrawingWrappingStyleParams);
+            })
+        );
+
+        this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id !== RichTextEditingMutation.id) {
                     return;
@@ -208,6 +262,27 @@ export class DocDrawingAddRemoveController extends Disposable {
                 if (updatedDrawingIds.length > 0) {
                     this._syncDrawingDataFromSnapshot(unitId, updatedDrawingIds);
                 }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (
+                    command.id !== UpdateDrawingDocTransformCommand.id &&
+                    command.id !== UpdateDocDrawingWrappingStyleCommand.id
+                ) {
+                    return;
+                }
+
+                const { unitId } = command.params as IUpdateDrawingDocTransformCommandParams | IUpdateDocDrawingWrappingStyleParams;
+                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const scene = renderObject?.scene;
+                if (renderObject == null || scene == null) {
+                    return;
+                }
+
+                this._docRefreshDrawingsService.refreshDrawings(renderObject.with(DocSkeletonManagerService).getSkeleton());
+                scene.getTransformerByCreate().refreshControls();
             })
         );
 
@@ -234,6 +309,99 @@ export class DocDrawingAddRemoveController extends Disposable {
                 transformer.refreshControls();
             })
         );
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _preserveWrappingStylePosition(params: IUpdateDocDrawingWrappingStyleParams): void {
+        if (params.wrappingStyle === TextWrappingStyle.INLINE) {
+            return;
+        }
+
+        const { unitId } = params;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+            unitId,
+            UniverInstanceType.UNIVER_DOC
+        );
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const skeletonManager = renderObject?.with(DocSkeletonManagerService);
+        const skeletonData = skeletonManager?.getSkeleton().getSkeletonData();
+        const viewModel = skeletonManager?.getViewModel();
+        if (!documentDataModel || !skeletonData || !viewModel) {
+            return;
+        }
+
+        const editArea = viewModel.getEditArea();
+        const { pages, skeHeaders, skeFooters } = skeletonData;
+        const oldDrawings = documentDataModel.getDrawings() ?? {};
+
+        params.drawings = params.drawings.map((drawing) => {
+            const oldDrawing = oldDrawings[drawing.drawingId] as IDocDrawing | undefined;
+            if (!oldDrawing) {
+                return drawing;
+            }
+
+            let drawingAnchor: IDrawingAnchorInPage | null = null;
+            for (const page of pages) {
+                const { headerId, footerId, marginTop, marginLeft, marginBottom, pageWidth, pageHeight } = page;
+                if (editArea === DocumentEditArea.HEADER) {
+                    const header = skeHeaders.get(headerId)?.get(pageWidth);
+                    if (header) {
+                        drawingAnchor = findDrawingAnchorInPage(header, drawing.drawingId, header.marginTop, marginLeft);
+                    }
+                } else if (editArea === DocumentEditArea.FOOTER) {
+                    const footer = skeFooters.get(footerId)?.get(pageWidth);
+                    if (footer) {
+                        drawingAnchor = findDrawingAnchorInPage(
+                            footer,
+                            drawing.drawingId,
+                            pageHeight - marginBottom + footer.marginTop,
+                            marginLeft
+                        );
+                    }
+                } else {
+                    drawingAnchor = findDrawingAnchorInPage(page, drawing.drawingId, marginTop, marginLeft);
+                }
+
+                if (drawingAnchor) {
+                    break;
+                }
+            }
+
+            if (!drawingAnchor) {
+                return drawing;
+            }
+
+            const { skeDrawing, pageMarginTop, pageMarginLeft } = drawingAnchor;
+            const oldPositionH = oldDrawing.docTransform.positionH;
+            const oldPositionV = oldDrawing.docTransform.positionV;
+            let posOffsetH = skeDrawing.aLeft;
+            let posOffsetV = skeDrawing.aTop;
+
+            if (oldPositionH.relativeFrom === ObjectRelativeFromH.MARGIN) {
+                posOffsetH -= pageMarginLeft;
+            } else if (oldPositionH.relativeFrom === ObjectRelativeFromH.COLUMN) {
+                posOffsetH -= skeDrawing.columnLeft;
+            }
+
+            if (oldPositionV.relativeFrom === ObjectRelativeFromV.PAGE) {
+                posOffsetV += pageMarginTop;
+            } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.LINE) {
+                posOffsetV -= skeDrawing.lineTop;
+            } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
+                posOffsetV -= skeDrawing.blockAnchorTop;
+            }
+
+            return {
+                ...oldDrawing,
+                ...drawing,
+                docTransform: {
+                    ...oldDrawing.docTransform,
+                    ...drawing.docTransform,
+                    positionH: { relativeFrom: oldPositionH.relativeFrom, posOffset: posOffsetH },
+                    positionV: { relativeFrom: oldPositionV.relativeFrom, posOffset: posOffsetV },
+                },
+            };
+        });
     }
 
     private _addDrawings(unitId: string, drawings: IDocDrawing[]) {

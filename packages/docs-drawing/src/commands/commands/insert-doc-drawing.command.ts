@@ -16,10 +16,12 @@
 
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IInsertDrawingCommandParams } from './interfaces';
+import type { IDocDrawing } from '../../services/doc-drawing.service';
 import {
+    BooleanNumber,
     BuildTextUtils,
     CommandType,
+    getCustomBlockIdsInSelections,
     getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
@@ -28,8 +30,13 @@ import {
     TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getCustomBlockIdsInSelections } from '@univerjs/docs-ui';
+import { DocSelectionManagerService, getContentInsertRange, normalizeTextRange, RichTextEditingMutation } from '@univerjs/docs';
+
+export interface IInsertDocDrawingCommandParams {
+    unitId: string;
+    drawings: IDocDrawing[];
+    textRange?: ITextRangeParam;
+}
 
 /**
  * The command to insert new drawings
@@ -40,49 +47,46 @@ export const InsertDocDrawingCommand: ICommand = {
     type: CommandType.COMMAND,
 
     // eslint-disable-next-line max-lines-per-function
-    handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {
-        if (params == null) {
+    handler: (accessor: IAccessor, params?: IInsertDocDrawingCommandParams) => {
+        if (!params) {
             return false;
         }
+
         const commandService = accessor.get(ICommandService);
-        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const activeTextRange = docSelectionManagerService.getActiveTextRange();
-        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (documentDataModel == null) {
+        const { unitId, drawings, textRange } = params;
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!documentDataModel) {
             return false;
         }
 
-        const unitId = documentDataModel.getUnitId();
-        const explicitTextRange = params.textRange == null ? null : normalizeTextRange(params.textRange);
-        const contentInsertRange = explicitTextRange ?? getContentInsertRange(accessor, unitId);
-        const targetTextRange = contentInsertRange
-            ? {
-                ...activeTextRange,
-                startOffset: contentInsertRange.startOffset,
-                endOffset: contentInsertRange.endOffset,
-                collapsed: contentInsertRange.startOffset === contentInsertRange.endOffset,
-                segmentId: contentInsertRange.segmentId ?? activeTextRange?.segmentId ?? '',
-            }
-            : activeTextRange;
+        const targetTextRange = resolveDocDrawingInsertTextRange(accessor, unitId, textRange);
 
-        if (targetTextRange == null) {
+        if (!targetTextRange) {
             return false;
         }
 
-        const { drawings } = params;
         const { collapsed, startOffset, segmentId = '' } = targetTextRange;
         const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
-        if (body == null) {
+        if (!body) {
             return false;
         }
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
-        const drawingOrderLength = documentDataModel.getSnapshot().drawingsOrder?.length ?? 0;
+        const snapshot = documentDataModel.getSnapshot();
+        const isHeaderFooter = !!snapshot.headers?.[segmentId] || !!snapshot.footers?.[segmentId];
+        const targetDrawings = isHeaderFooter
+            ? drawings.map((drawing) => ({
+                ...drawing,
+                isMultiTransform: BooleanNumber.TRUE,
+                transforms: drawing.transforms ?? (drawing.transform ? [drawing.transform] : null),
+            }))
+            : drawings;
+        const drawingOrderLength = snapshot.drawingsOrder?.length ?? 0;
         let removeDrawingLen = 0;
 
         // Step 1: Insert placeholder `\b` in dataStream and add drawing to customBlocks.
@@ -132,13 +136,13 @@ export const InsertDocDrawingCommand: ICommand = {
         textX.push({
             t: TextXActionType.INSERT,
             body: {
-                dataStream: '\b'.repeat(drawings.length),
-                customBlocks: drawings.map((drawing, i) => ({
+                dataStream: '\b'.repeat(targetDrawings.length),
+                customBlocks: targetDrawings.map((drawing, i) => ({
                     startIndex: i,
                     blockId: drawing.drawingId,
                 })),
             },
-            len: drawings.length,
+            len: targetDrawings.length,
         });
 
         const path = getRichTextEditPath(documentDataModel, segmentId);
@@ -147,7 +151,7 @@ export const InsertDocDrawingCommand: ICommand = {
         rawActions.push(placeHolderAction!);
 
         // Step 2: add drawing to drawings and drawingsOrder fields.
-        for (const drawing of drawings) {
+        for (const drawing of targetDrawings) {
             const { drawingId } = drawing;
             const addDrawingAction = jsonX.insertOp(['drawings', drawingId], drawing);
             const addDrawingOrderAction = jsonX.insertOp(['drawingsOrder', drawingOrderLength - removeDrawingLen], drawingId);
@@ -178,31 +182,23 @@ export const InsertDocDrawingCommand: ICommand = {
     },
 };
 
-function getContentInsertRange(accessor: IAccessor, unitId: string): ITextRangeParam | null {
-    try {
-        const range = accessor.get(DocContentInsertService).consumeInsertRange(unitId);
-        if (range == null) {
-            return null;
-        }
-
-        return {
-            startOffset: range.startOffset,
-            endOffset: range.endOffset,
-            collapsed: range.startOffset === range.endOffset,
-            segmentId: range.segmentId,
-        };
-    } catch {
-        return null;
+function resolveDocDrawingInsertTextRange(
+    accessor: IAccessor,
+    unitId: string,
+    textRange?: ITextRangeParam
+): ITextRangeParam | null {
+    const activeTextRange = accessor.get(DocSelectionManagerService).getActiveTextRange();
+    const explicitTextRange = textRange ? normalizeTextRange(textRange) : null;
+    const contentInsertRange = explicitTextRange ?? getContentInsertRange(accessor, unitId);
+    if (!contentInsertRange) {
+        return activeTextRange ?? null;
     }
-}
-
-function normalizeTextRange(textRange: ITextRangeParam): ITextRangeParam {
-    const endOffset = textRange.endOffset ?? textRange.startOffset;
 
     return {
-        ...textRange,
-        endOffset,
-        collapsed: textRange.collapsed ?? textRange.startOffset === endOffset,
-        segmentId: textRange.segmentId ?? '',
+        ...activeTextRange,
+        startOffset: contentInsertRange.startOffset,
+        endOffset: contentInsertRange.endOffset,
+        collapsed: contentInsertRange.startOffset === contentInsertRange.endOffset,
+        segmentId: contentInsertRange.segmentId ?? activeTextRange?.segmentId ?? '',
     };
 }

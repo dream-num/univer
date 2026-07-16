@@ -15,12 +15,11 @@
  */
 
 import type { DocumentDataModel, IDisposable, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
-import type { IDocFloatDom } from '@univerjs/docs-drawing';
+import type { IDocFloatDom, IInsertDocDrawingCommandParams } from '@univerjs/docs-drawing';
 import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs-ui';
 import type { IDocFloatDomDataBase } from '@univerjs/drawing';
 import type { IBoundRectNoAngle, IDocsCustomBlockRenderViewport, IRender, Rect, Scene } from '@univerjs/engine-render';
 import type { IFloatDomLayout } from '@univerjs/ui';
-import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import {
     Disposable,
     DisposableCollection,
@@ -37,13 +36,13 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { docDrawingPositionToTransform, DocSkeletonManagerService } from '@univerjs/docs';
+import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, map, of, switchMap } from 'rxjs';
-import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 
 export function calcDocFloatDomPositionByRect(
     rect: IBoundRectNoAngle,
@@ -444,7 +443,7 @@ export class DocFloatDomController extends Disposable {
             angle: 0,
         };
         const drawingId = opts.drawingId ?? generateRandomId();
-        const params: IInsertDrawingCommandParams = {
+        const params: IInsertDocDrawingCommandParams = {
             unitId: currentDoc.getUnitId(),
             drawings: [
                 {
@@ -461,7 +460,7 @@ export class DocFloatDomController extends Disposable {
                 },
             ],
         };
-        this._commandService.syncExecuteCommand(InsertDocDrawingCommand.id, params);
+        this._commandService.syncExecuteCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, params);
 
         return drawingId;
     }

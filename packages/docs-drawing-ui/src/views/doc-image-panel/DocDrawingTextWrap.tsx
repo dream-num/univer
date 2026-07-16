@@ -28,14 +28,13 @@ import {
 } from '@univerjs/core';
 import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
+import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import {
-    TextWrappingStyle,
     UpdateDocDrawingDistanceCommand,
-    UpdateDocDrawingWrappingStyleCommand,
     UpdateDocDrawingWrapTextCommand,
 } from '../../commands/commands/update-doc-drawing.command';
 

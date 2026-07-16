@@ -15,8 +15,8 @@
  */
 
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { describe, expect, it, vi } from 'vitest';
-import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../insert-shape.command';
 
 function createAccessor() {

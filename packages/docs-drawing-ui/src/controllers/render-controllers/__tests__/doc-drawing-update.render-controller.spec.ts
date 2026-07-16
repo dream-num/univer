@@ -16,11 +16,11 @@
 
 import { BooleanNumber, FOCUSING_COMMON_DRAWINGS } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
+import { SetDocDrawingArrangeCommand } from '@univerjs/docs-drawing';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { GroupDocDrawingCommand } from '../../../commands/commands/group-doc-drawing.command';
-import { SetDocDrawingArrangeCommand } from '../../../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../../../commands/commands/ungroup-doc-drawing.command';
 import { DocDrawingUpdateRenderController } from '../doc-drawing-update.render-controller';
 

@@ -25,9 +25,9 @@ import {
     Tools,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
+import { IDocDrawingService } from '../../services/doc-drawing.service';
 
-export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
+export interface ISetDocDrawingArrangeCommandParams extends IDrawingOrderMapParam {
     arrangeType: ArrangeTypeEnum;
 }
 
@@ -39,7 +39,7 @@ export const SetDocDrawingArrangeCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params?: ISetDrawingArrangeCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetDocDrawingArrangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const docDrawingService = accessor.get(IDocDrawingService);
 

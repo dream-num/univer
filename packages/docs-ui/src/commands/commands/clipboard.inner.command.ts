@@ -20,7 +20,6 @@ import type {
     ICommand,
     ICustomTable,
     IDisposable,
-    IDocumentBody,
     IDocumentData,
     IDrawingParam,
     IMutationInfo,
@@ -30,10 +29,12 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
     CommandType,
     generateRandomId,
+    getCustomBlockIdsInSelections,
     getRichTextEditPath,
     ICommandService,
     IUndoRedoService,
@@ -48,33 +49,9 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
-import type { IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { IDocClipboardPasteAdapterService } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
-
-export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
-    const customBlockIds: string[] = [];
-    const { customBlocks = [] } = body;
-
-    for (const selection of selections) {
-        const { startOffset, endOffset } = selection;
-
-        if (startOffset == null || endOffset == null) {
-            continue;
-        }
-
-        for (const customBlock of customBlocks) {
-            const { startIndex } = customBlock;
-
-            if (startIndex >= startOffset && startIndex < endOffset) {
-                customBlockIds.push(customBlock.blockId);
-            }
-        }
-    }
-
-    return customBlockIds;
-}
 
 function hasRangeInTable(ranges: ITextRangeWithStyle[]): boolean {
     return ranges.some((range) => {

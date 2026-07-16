@@ -89,4 +89,4 @@ export { replaceSelectionFactory } from './utils/replace-selection-factory';
 export { createSectionColumnProperties } from './utils/section-columns';
 export { getTopLevelSectionBreaks } from './utils/sections';
 export { buildDocTransform, docDrawingPositionToTransform, transformToDocDrawingPosition } from './utils/transform-position';
-export { consumeContentInsertRange, isHeaderFooterSelection } from './utils/util';
+export { consumeContentInsertRange, getContentInsertRange, isHeaderFooterSelection, normalizeTextRange } from './utils/util';

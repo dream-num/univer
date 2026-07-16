@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { IInsertDrawingCommandParams } from './interfaces';
+import type { IInsertDocDrawingCommandParams } from '@univerjs/docs-drawing';
 import {
     BooleanNumber,
     CommandType,
@@ -29,7 +29,7 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { buildDocTransform, docDrawingPositionToTransform } from '@univerjs/docs';
-import { InsertDocDrawingCommand } from './insert-doc-drawing.command';
+import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 
 type DocShapeKind = 'rectangle' | 'ellipse';
 
@@ -60,7 +60,7 @@ function createShapeInsertCommand(shape: DocShapeKind, width: number, height: nu
 
             const docTransform = buildDocTransform(width, height);
 
-            return commandService.executeCommand(InsertDocDrawingCommand.id, {
+            return commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
                 unitId,
                 drawings: [{
                     unitId,
@@ -81,7 +81,7 @@ function createShapeInsertCommand(shape: DocShapeKind, width: number, height: nu
                     distR: 0,
                     distT: 0,
                 }],
-            } as IInsertDrawingCommandParams);
+            });
         },
     };
 }

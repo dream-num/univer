@@ -18,14 +18,10 @@ import './global.css';
 
 export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing.command';
 export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.command';
-export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
 export { InsertDocImageCommand } from './commands/commands/insert-image.command';
 export { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from './commands/commands/insert-shape.command';
 export { MoveDocDrawingsCommand } from './commands/commands/move-drawings.command';
-export { RemoveDocDrawingCommand } from './commands/commands/remove-doc-drawing.command';
-export { SetDocDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
 export { UngroupDocDrawingCommand } from './commands/commands/ungroup-doc-drawing.command';
-export { UpdateDrawingDocTransformCommand } from './commands/commands/update-doc-drawing.command';
 export { ClearDocDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.operation';
 export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';

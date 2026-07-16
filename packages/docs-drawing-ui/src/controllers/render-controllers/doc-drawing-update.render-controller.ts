@@ -16,10 +16,8 @@
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDocDrawing, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams } from '@univerjs/docs-drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
-import type { ISetDrawingArrangeCommandParams } from '../../commands/commands/set-drawing-arrange.command';
 import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
@@ -37,7 +35,7 @@ import {
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { buildDocTransform, docDrawingPositionToTransform, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
+import { IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
@@ -53,8 +51,6 @@ import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
-import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
-import { SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
@@ -211,10 +207,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             docDrawingParams.push(docDrawingParam);
         }
 
-        this._commandService.executeCommand(InsertDocDrawingCommand.id, {
+        this._commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
             unitId,
             drawings: docDrawingParams,
-        } as IInsertDrawingCommandParams);
+        });
     }
 
     private _isInsertInHeaderFooter() {
@@ -262,12 +258,12 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
                 const { unitId, subUnitId, drawingIds, arrangeType } = params;
 
-                this._commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+                this._commandService.executeCommand<ISetDocDrawingArrangeCommandParams>(SetDocDrawingArrangeCommand.id, {
                     unitId,
                     subUnitId,
                     drawingIds,
                     arrangeType,
-                } as ISetDrawingArrangeCommandParams);
+                });
             })
         );
     }

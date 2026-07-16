@@ -21,6 +21,10 @@ import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 
+import '@univerjs/docs-drawing/facade';
+
+export type * from '@univerjs/docs-drawing/facade';
+
 export interface IUniverDocsDrawingPresetConfig {
     collaboration?: boolean;
 }

@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, IDrawingSearch, Injector } from '@univerjs/core';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type { IInsertSheetDrawingCommandParams, IRemoveSheetDrawingCommandParams, ISetDrawingCommandParams, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IBeforeFloatDomAddEventParams, IBeforeFloatDomDeleteEventParams, IBeforeFloatDomUpdateEventParams, IFloatDomAddedEventParams, IFloatDomDeletedEventParams, IFloatDomUpdatedEventParams } from './f-event';
 import { CanceledError, DrawingTypeEnum, ICommandService, IURLImageService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
@@ -62,7 +62,7 @@ export class FUniverSheetsDrawingUIMixin extends FUniver implements IFUniverShee
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const params = commandInfo.params as IInsertSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;
@@ -97,7 +97,7 @@ export class FUniverSheetsDrawingUIMixin extends FUniver implements IFUniverShee
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const params = commandInfo.params as IInsertSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;
@@ -208,7 +208,7 @@ export class FUniverSheetsDrawingUIMixin extends FUniver implements IFUniverShee
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const params = commandInfo.params as IRemoveSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;
@@ -247,7 +247,7 @@ export class FUniverSheetsDrawingUIMixin extends FUniver implements IFUniverShee
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const params = commandInfo.params as IRemoveSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;

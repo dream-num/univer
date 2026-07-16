@@ -42,6 +42,8 @@ export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProp
     onActiveChange?: (active: boolean) => void;
 }
 
+export type IPopupWithExtraProps<T> = IPopup<T> & { extraProps: T };
+
 export interface ICanvasPopupService {
     addPopup(item: IPopup): string;
     removePopup(id: string): void;

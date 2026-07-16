@@ -171,8 +171,7 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
         it('should return undefined when iteratee never returns non-undefined', async () => {
             await browserStorage.setItem('a', 1);
 
-            const result = await browserStorage.iterate<number, string>((value) => {
-                void value;
+            const result = await browserStorage.iterate<number, string>(() => {
                 return undefined as unknown as string;
             });
 

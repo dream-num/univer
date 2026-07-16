@@ -623,6 +623,24 @@ describe('DataValidationDetail rule editing', () => {
         currentTestBed = undefined;
     });
 
+    it('disposes command listeners when unmounted', async () => {
+        currentTestBed = createDetailTestBed(createDateRule());
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        const commandListeners = () => (currentTestBed!.commandService as unknown as { _commandExecutedListeners: unknown[] })._commandExecutedListeners.length;
+        const initialListenerCount = commandListeners();
+
+        await renderDetail(root, currentTestBed);
+        expect(commandListeners()).toBeGreaterThan(initialListenerCount);
+
+        act(() => root?.unmount());
+        root = undefined;
+
+        expect(commandListeners()).toBe(initialListenerCount);
+    });
+
     it('persists the allow-blank checkbox into the active rule setting command', async () => {
         currentTestBed = createDetailTestBed(createDateRule('rule-date-allow-blank'));
         container = document.createElement('div');

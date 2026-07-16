@@ -45,7 +45,7 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
         return [];
     };
 
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(getDefinedNameMap());
+    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(() => getDefinedNameMap());
 
     useEffect(() => {
         const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
@@ -59,10 +59,14 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
 
     // When closing the panel, clear the react cache
     useEffect(() => {
+        let timer: ReturnType<typeof setTimeout> | undefined;
         const d = sidebarService.sidebarOptions$.subscribe((info) => {
             if (info.id === DEFINED_NAME_CONTAINER) {
                 if (!info.visible) {
-                    setTimeout(() => {
+                    if (timer !== undefined) {
+                        clearTimeout(timer);
+                    }
+                    timer = setTimeout(() => {
                         sidebarService.sidebarOptions$.next({ visible: false });
                     });
                 }
@@ -70,6 +74,9 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
         });
         return () => {
             d.unsubscribe();
+            if (timer !== undefined) {
+                clearTimeout(timer);
+            }
         };
     }, []);
 

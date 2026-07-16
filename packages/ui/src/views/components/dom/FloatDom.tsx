@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CSSProperties } from 'react';
+import type { ComponentType, CSSProperties } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
@@ -48,12 +48,26 @@ function applyFloatDomLayout(
 }
 
 export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
-    const { layer, id } = props;
+    const { layer } = props;
+
+    return typeof layer.componentKey === 'string'
+        ? <RegisteredFloatDomSingle {...props} componentKey={layer.componentKey} />
+        : <FloatDomSingleContent {...props} Component={layer.componentKey} />;
+});
+
+function RegisteredFloatDomSingle(props: { layer: IFloatDom; id: string; componentKey: string }) {
+    const componentManager = useDependency(ComponentManager);
+    return <FloatDomSingleContent {...props} Component={componentManager.get(props.componentKey)} />;
+}
+
+function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?: ComponentType<any> }) {
+    const { layer, id, Component } = props;
+
     const univerInstanceService = useDependency(IUniverInstanceService);
     const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
-    const Component = typeof layer.componentKey === 'string' ? useDependency(ComponentManager).get(layer.componentKey) : layer.componentKey;
+
     const layerProps: any = useMemo(() => ({
         data: layer.data,
         ...layer.props,
@@ -137,7 +151,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
             </div>
         </div>
     );
-});
+}
 
 export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const instanceService = useDependency(IUniverInstanceService);

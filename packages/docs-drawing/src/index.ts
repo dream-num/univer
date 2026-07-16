@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
+export type { IInsertDocDrawingCommandParams } from './commands/commands/insert-doc-drawing.command';
+export { RemoveDocDrawingCommand } from './commands/commands/remove-doc-drawing.command';
+export type { IRemoveDocDrawingCommandParam, IRemoveDocDrawingCommandParams } from './commands/commands/remove-doc-drawing.command';
+export { SetDocDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
+export type { ISetDocDrawingArrangeCommandParams } from './commands/commands/set-drawing-arrange.command';
+export { UpdateDrawingDocTransformCommand } from './commands/commands/update-doc-drawing-transform.command';
+export type { IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from './commands/commands/update-doc-drawing-transform.command';
+export { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand, WRAPPING_STYLE_TO_LAYOUT_TYPE } from './commands/commands/update-doc-drawing-wrapping-style.command';
+export type { IUpdateDocDrawingWrappingStyleParams } from './commands/commands/update-doc-drawing-wrapping-style.command';
 export type { IUniverDocsDrawingConfig } from './config/config';
 export { DOCS_DRAWING_PLUGIN, getDocDrawingRenderOrder } from './controllers/doc-drawing.controller';
 export type { IDocDrawingModel } from './controllers/doc-drawing.controller';

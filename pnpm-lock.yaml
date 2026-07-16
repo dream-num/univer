@@ -952,6 +952,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
@@ -959,6 +962,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

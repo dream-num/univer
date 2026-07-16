@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IDisposable, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, DrawingTypeEnum, IAccessor, ICommand, IDisposable, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDeleteDrawingCommandParams } from './interfaces';
+import type { IDocDrawing } from '../../services/doc-drawing.service';
 import {
     CommandType,
     getRichTextEditPath,
@@ -31,35 +29,47 @@ import {
     TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionManagerService, getContentInsertRange, normalizeTextRange, RichTextEditingMutation } from '@univerjs/docs';
+import { IDocDrawingAdapterService } from '../../services/doc-drawing-adapter.service';
 
-/**
- * The command to remove new sheet image
- */
+export interface IRemoveDocDrawingCommandParam {
+    unitId: string;
+    subUnitId: string;
+    drawingId: string;
+    drawingType: DrawingTypeEnum;
+}
+
+export interface IRemoveDocDrawingCommandParams {
+    unitId: string;
+    drawings: IRemoveDocDrawingCommandParam[];
+    textRange?: ITextRangeParam;
+}
+
 export const RemoveDocDrawingCommand: ICommand = {
     id: 'doc.command.remove-doc-image',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
-    handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
+    handler: (accessor: IAccessor, params?: IRemoveDocDrawingCommandParams) => {
+        if (!params) {
+            return false;
+        }
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const drawingAdapterService = accessor.get(IDocDrawingAdapterService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const renderManagerService = accessor.get(IRenderManagerService);
-        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
-        if (params == null || documentDataModel == null) {
+        const { unitId, drawings: removeDrawings, textRange } = params;
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!documentDataModel || removeDrawings.length === 0) {
             return false;
         }
 
-        const docSelectionRenderService = renderManagerService.getRenderById(params.unitId)!.with(DocSelectionRenderService)!;
-
-        const { drawings: removeDrawings } = params;
-
-        const segmentId = docSelectionRenderService.getSegment() ?? '';
+        const activeTextRange = docSelectionManagerService.getActiveTextRange();
+        const explicitTextRange = !textRange ? null : normalizeTextRange(textRange);
+        const contentInsertRange = explicitTextRange ?? getContentInsertRange(accessor, unitId);
+        const segmentId = contentInsertRange?.segmentId ?? activeTextRange?.segmentId ?? '';
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -69,8 +79,7 @@ export const RemoveDocDrawingCommand: ICommand = {
             .filter((block) => !!block)
             .sort((a, b) => a!.startIndex > b!.startIndex ? 1 : -1);
 
-        const unitId = removeDrawings[0]?.unitId;
-        if (unitId == null || removeCustomBlocks.length === 0) {
+        if (removeCustomBlocks.length === 0) {
             return false;
         }
 
@@ -125,70 +134,34 @@ export const RemoveDocDrawingCommand: ICommand = {
         }
 
         const memoryCursor = new MemoryCursor();
-
-        memoryCursor.reset();
-
         const cursorIndex = removeCustomBlocks[0]!.startIndex;
-        const textRanges = [
-            {
-                startOffset: cursorIndex,
-                endOffset: cursorIndex,
-            },
-        ] as ITextRangeWithStyle[];
-
+        const textRanges = [{ startOffset: cursorIndex, endOffset: cursorIndex }] as IRichTextEditingMutationParams['textRanges'];
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                actions: [],
-                textRanges,
-            },
+            params: { unitId, actions: [], textRanges },
         };
-
         const rawActions: JSONXActions = [];
 
         for (const block of removeCustomBlocks) {
             const { startIndex } = block!;
-
             if (startIndex > memoryCursor.cursor) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: startIndex - memoryCursor.cursor,
-                });
+                textX.push({ t: TextXActionType.RETAIN, len: startIndex - memoryCursor.cursor });
             }
-
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-            });
-
+            textX.push({ t: TextXActionType.DELETE, len: 1 });
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        const path = getRichTextEditPath(documentDataModel, segmentId);
-        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+        rawActions.push(jsonX.editOp(textX.serialize(), getRichTextEditPath(documentDataModel, segmentId))!);
 
         for (const block of removeCustomBlocks) {
             const { blockId } = block!;
-
-            const drawingOrder = documentDataModel.getDrawingsOrder();
-            const drawingIndex = drawingOrder!.indexOf(blockId);
-
-            const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawings[blockId]);
-            const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
-
-            rawActions.push(removeDrawingAction!);
-            rawActions.push(removeDrawingOrderAction!);
+            const drawingIndex = documentDataModel.getDrawingsOrder()!.indexOf(blockId);
+            rawActions.push(jsonX.removeOp(['drawings', blockId], drawings[blockId])!);
+            rawActions.push(jsonX.removeOp(['drawingsOrder', drawingIndex], blockId)!);
         }
 
-        doMutation.params.actions = rawActions.reduce((acc, cur) => {
-            return JSONX.compose(acc, cur as JSONXActions);
-        }, null as JSONXActions);
-
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        doMutation.params.actions = rawActions.reduce((acc, cur) => JSONX.compose(acc, cur as JSONXActions), null as JSONXActions);
+        const result = commandService.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
 
         if (!result && batchingDisposable != null) {
             batchingDisposable.dispose();
@@ -208,12 +181,10 @@ function executeResourceMutationGroups(
     const executedUndoGroups: IMutationInfo[][] = [];
 
     for (const mutationGroup of mutationGroups) {
-        const result = executeMutations(mutationGroup.redoMutations, commandService);
-        if (!result) {
+        if (!executeMutations(mutationGroup.redoMutations, commandService)) {
             executeMutationGroups([...executedUndoGroups].reverse(), commandService);
             return false;
         }
-
         executedUndoGroups.push(mutationGroup.undoMutations);
     }
 
@@ -221,9 +192,7 @@ function executeResourceMutationGroups(
 }
 
 function executeMutationGroups(mutationGroups: IMutationInfo[][], commandService: ICommandService): void {
-    mutationGroups.forEach((mutations) => {
-        executeMutations(mutations, commandService);
-    });
+    mutationGroups.forEach((mutations) => executeMutations(mutations, commandService));
 }
 
 function executeMutations(mutations: IMutationInfo[], commandService: ICommandService): boolean {

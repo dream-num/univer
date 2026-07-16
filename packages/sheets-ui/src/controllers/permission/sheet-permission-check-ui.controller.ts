@@ -31,6 +31,7 @@ import {
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
+    SHEET_EDITOR_UNITS,
 } from '@univerjs/core';
 import { InsertTextCommand } from '@univerjs/docs';
 import { IMEInputCommand } from '@univerjs/docs-ui';
@@ -128,11 +129,15 @@ export class SheetPermissionCheckUIController extends Disposable {
         switch (id) {
             case InsertTextCommand.id:
             case IMEInputCommand.id:
-                if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true || this._contextService.getContextValue(FOCUSING_COMMENT_EDITOR) === true) {
+                params = commandInfo.params as IInsertTextCommandParams | IIMEInputCommandParams;
+
+                if (!params || !SHEET_EDITOR_UNITS.includes(params.unitId)) {
                     break;
                 }
 
-                params = commandInfo.params as IInsertTextCommandParams | IIMEInputCommandParams;
+                if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true || this._contextService.getContextValue(FOCUSING_COMMENT_EDITOR) === true) {
+                    break;
+                }
 
                 permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
                     workbookTypes: [WorkbookEditablePermission],

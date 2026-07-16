@@ -46,11 +46,7 @@ export function SlideSideBar() {
     // );
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
-    if (!pages || !pageOrder) {
-        return null;
-    }
-
-    const slideList = pageOrder.map((id) => pages[id]);
+    const slideList = useMemo(() => pages && pageOrder ? pageOrder.map((id) => pages[id]) : [], [pageOrder, pages]);
 
     const [activatePageId, setActivatePageId] = useState<string | null>(currentSlide?.getActivePage()?.id ?? null);
 
@@ -88,6 +84,10 @@ export function SlideSideBar() {
     const handleAppendSlide = useCallback(() => {
         commandService.syncExecuteCommand(AppendSlideOperation.id, { unitId: currentSlide?.getUnitId() });
     }, [commandService, currentSlide]);
+
+    if (!pages || !pageOrder) {
+        return null;
+    }
 
     return (
         <aside

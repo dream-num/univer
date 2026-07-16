@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IColorScale, IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IColorScale } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
@@ -194,7 +194,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         minColor: string;
         medianColor: string;
         maxColor: string;
-    }) => {
+    }): IColorScale => {
         const { minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor } = option;
         const list = [];
         list.push({ color: minColor, value: { type: minType, value: minValue } });
@@ -237,7 +237,19 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className={previewClassName}>
-                <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormattingRuleConfig} />
+                <Preview
+                    rule={getResult({
+                        minType,
+                        medianType,
+                        maxType,
+                        minValue,
+                        medianValue,
+                        maxValue,
+                        minColor,
+                        medianColor,
+                        maxColor,
+                    })}
+                />
             </div>
             <div
                 className={`

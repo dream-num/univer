@@ -76,19 +76,9 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const { drawings, hasArrange = true, hasTransform = true, hasAlign = true, hasCropper = true, hasGroup = true } = props;
 
     const drawingParam = drawings[0];
-
-    if (drawingParam == null) {
-        return;
-    }
-
-    const { unitId } = drawingParam;
-
-    const renderObject = renderManagerService.getRenderById(unitId);
+    const renderObject = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId) : undefined;
     const scene = renderObject?.scene;
-    if (scene == null) {
-        return;
-    }
-    const transformer = scene.getTransformerByCreate();
+    const transformer = scene?.getTransformerByCreate();
 
     const initialShowState = getPanelShowState(drawings);
 
@@ -100,6 +90,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     // const [groupShow, setGroupShow] = useState(false);
 
     useEffect(() => {
+        if (!transformer) return;
         const clearControlSub = transformer.clearControl$.subscribe((changeSelf) => {
             if (changeSelf === true) {
                 setArrangeShow(false);
@@ -162,7 +153,11 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             clearControlSub.unsubscribe();
             focusSub.unsubscribe();
         };
-    }, []);
+    }, [drawingManagerService, transformer]);
+
+    if (!drawingParam || !scene || !transformer) {
+        return null;
+    }
 
     return (
         <>

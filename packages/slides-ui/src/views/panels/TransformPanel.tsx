@@ -38,14 +38,8 @@ export default function TransformPanel(props: IProps) {
 
     const page = canvasView.getRenderUnitByPageId(pageId, unitId);
     const scene = page?.scene;
-    if (!scene) return null;
-
-    const transformer = scene.getTransformer();
-    if (!transformer) return null;
-
-    const selectedObjects = transformer.getSelectedObjectMap();
-    const object = selectedObjects.values().next().value as Nullable<Rect | Image | RichText>;
-    if (!object) return null;
+    const transformer = scene?.getTransformer();
+    const object = transformer?.getSelectedObjectMap().values().next().value as Nullable<Rect | Image | RichText>;
 
     const {
         width: originWidth = 0,
@@ -53,7 +47,7 @@ export default function TransformPanel(props: IProps) {
         left: originX = 0,
         top: originY = 0,
         angle: originRotation = 0,
-    } = object;
+    } = object ?? {};
 
     const [width, setWidth] = useState<number>(originWidth);
     const [height, setHeight] = useState(originHeight);
@@ -88,6 +82,7 @@ export default function TransformPanel(props: IProps) {
     };
 
     useEffect(() => {
+        if (!transformer) return;
         const changeStartSub = transformer.changeStart$.subscribe((state) => {
             changeObs(state);
         });
@@ -101,7 +96,9 @@ export default function TransformPanel(props: IProps) {
             changeStartSub.unsubscribe();
             // focusSub.unsubscribe();
         };
-    }, []);
+    }, [transformer]);
+
+    if (!scene || !transformer || !object) return null;
 
     function handleWidthChange(val: number | null) {
         if (!val || !object) return;

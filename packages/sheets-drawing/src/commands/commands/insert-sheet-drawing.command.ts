@@ -28,7 +28,7 @@ import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
-export interface IInsertDrawingCommandParams {
+export interface IInsertSheetDrawingCommandParams {
     unitId: string;
     drawings: ISheetDrawing[];
 }
@@ -36,7 +36,7 @@ export interface IInsertDrawingCommandParams {
 export const InsertSheetDrawingCommand: ICommand = {
     id: 'sheet.command.insert-sheet-image',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {
+    handler: (accessor: IAccessor, params?: IInsertSheetDrawingCommandParams) => {
         if (!params) return false;
 
         const commandService = accessor.get(ICommandService);

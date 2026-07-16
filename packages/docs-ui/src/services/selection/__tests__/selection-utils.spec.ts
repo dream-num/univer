@@ -15,10 +15,11 @@
  */
 
 import type { INodePosition } from '@univerjs/engine-render';
-import { getOffsetRectForDom, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import { DataStreamTreeNodeType } from '@univerjs/core';
+import { DocumentSkeletonPageType, getOffsetRectForDom, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NodePositionConvertToRectRange } from '../convert-rect-range';
-import { RectRange } from '../rect-range';
+import { convertPositionsToRectRanges, RectRange } from '../rect-range';
 import {
     getCanvasOffsetByEngine,
     getParagraphInfoByGlyph,
@@ -406,6 +407,381 @@ describe('selection utils', () => {
         expect(getTextRangeFromCharIndex(1, 2, {} as never, document, skeleton as never, {} as never, '', -1)).toBeUndefined();
         expect(getRectRangeFromCharIndex(1, 2, {} as never, document, skeleton as never, {} as never, '', -1)).toBeUndefined();
         expect(getRangeListFromCharIndex(1, 2, {} as never, document, skeleton as never, {} as never, '', -1)).toBeUndefined();
+    });
+
+    it('disposes rect ranges created before a later range fails', () => {
+        const anchor = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 0]);
+        const focus = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 1, 'cells', 0]);
+        vi.spyOn(NodePositionConvertToRectRange.prototype, 'getNodePositionGroup').mockReturnValue([
+            { anchor, focus: anchor },
+            { anchor: focus, focus },
+        ]);
+        vi.mocked(RectRange.prototype.refresh)
+            .mockReset()
+            .mockImplementationOnce(() => {})
+            .mockImplementationOnce(() => {
+                throw new Error('invalid range');
+            });
+        const dispose = vi.spyOn(RectRange.prototype, 'dispose');
+
+        expect(() => convertPositionsToRectRanges(
+            {} as never,
+            createDocument(),
+            {} as never,
+            anchor,
+            focus
+        )).toThrow('invalid range');
+        expect(dispose).toHaveBeenCalledTimes(1);
+    });
+
+    it('disposes text ranges created before a later range fails', () => {
+        const startNode = createNodePosition(['pages', 0]);
+        const middleNode = createNodePosition(['pages', 0], 1);
+        const endNode = createNodePosition(['pages', 0], 2);
+        const tableStartNode = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 0]);
+        const tableEndNode = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 1]);
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(20),
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(tableStartNode)
+                .mockReturnValueOnce(tableEndNode)
+                .mockReturnValueOnce(startNode)
+                .mockReturnValueOnce(middleNode)
+                .mockReturnValueOnce(middleNode)
+                .mockReturnValueOnce(endNode),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [{
+                            startIndex: 0,
+                            endIndex: 20,
+                            children: [{
+                                nodeType: DataStreamTreeNodeType.TABLE,
+                                startIndex: 5,
+                                endIndex: 15,
+                                children: [],
+                            }],
+                        }],
+                    }],
+                }),
+            }),
+        };
+        vi.spyOn(NodePositionConvertToRectRange.prototype, 'getNodePositionGroup').mockReturnValue([{
+            anchor: tableStartNode,
+            focus: tableEndNode,
+        }]);
+        vi.mocked(TextRange.prototype.refresh)
+            .mockReset()
+            .mockImplementationOnce(() => {})
+            .mockImplementationOnce(() => {
+                throw new Error('invalid range');
+            });
+        const disposeTextRange = vi.spyOn(TextRange.prototype, 'dispose');
+        const disposeRectRange = vi.spyOn(RectRange.prototype, 'dispose');
+
+        expect(() => getRangeListFromSelection(
+            startNode,
+            endNode,
+            {} as never,
+            createDocument(),
+            skeleton as never,
+            {} as never,
+            '',
+            -1
+        )).toThrow('invalid range');
+        expect(disposeTextRange).toHaveBeenCalledTimes(1);
+        expect(disposeRectRange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not treat a column group child as a table', () => {
+        const startNode = createNodePosition(['pages', 0]);
+        const endNode = createNodePosition(['pages', 0], 1);
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(10),
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(startNode)
+                .mockReturnValueOnce(endNode),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [{
+                            nodeType: DataStreamTreeNodeType.COLUMN_GROUP,
+                            startIndex: 0,
+                            endIndex: 20,
+                            children: [{
+                                nodeType: DataStreamTreeNodeType.COLUMN,
+                                startIndex: 1,
+                                endIndex: 19,
+                                children: [],
+                            }],
+                        }],
+                    }],
+                }),
+            }),
+        };
+
+        const result = getRangeListFromSelection(
+            createNodePosition(['pages', 0]),
+            createNodePosition(['pages', 0], 1),
+            {} as never,
+            createDocument(),
+            skeleton as never,
+            {} as never,
+            '',
+            -1
+        );
+
+        expect(result?.textRanges).toHaveLength(1);
+        expect(result?.rectRanges).toHaveLength(0);
+    });
+
+    it('splits a body drag across a column group into one range per render page', () => {
+        const bodyStart = createNodePosition(['pages', 0]);
+        const bodyBeforeColumns = createNodePosition(['pages', 0], 1);
+        const firstColumnStart = {
+            ...createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page']),
+            pageType: DocumentSkeletonPageType.CELL,
+        };
+        const firstColumnEnd = { ...firstColumnStart, glyph: 1 };
+        const secondColumnStart = {
+            ...createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 1, 'page']),
+            pageType: DocumentSkeletonPageType.CELL,
+        };
+        const secondColumnEnd = { ...secondColumnStart, glyph: 1 };
+        const bodyAfterColumns = createNodePosition(['pages', 0], 2);
+        const bodyEnd = createNodePosition(['pages', 0], 3);
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(20),
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(bodyStart)
+                .mockReturnValueOnce(bodyBeforeColumns)
+                .mockReturnValueOnce(firstColumnStart)
+                .mockReturnValueOnce(firstColumnEnd)
+                .mockReturnValueOnce(secondColumnStart)
+                .mockReturnValueOnce(secondColumnEnd)
+                .mockReturnValueOnce(bodyAfterColumns)
+                .mockReturnValueOnce(bodyEnd),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [
+                            { nodeType: DataStreamTreeNodeType.PARAGRAPH, startIndex: 0, endIndex: 2, children: [] },
+                            {
+                                nodeType: DataStreamTreeNodeType.COLUMN_GROUP,
+                                startIndex: 3,
+                                endIndex: 14,
+                                children: [
+                                    { nodeType: DataStreamTreeNodeType.COLUMN, startIndex: 4, endIndex: 8, children: [] },
+                                    { nodeType: DataStreamTreeNodeType.COLUMN, startIndex: 9, endIndex: 13, children: [] },
+                                ],
+                            },
+                            { nodeType: DataStreamTreeNodeType.PARAGRAPH, startIndex: 15, endIndex: 20, children: [] },
+                        ],
+                    }],
+                }),
+            }),
+        };
+
+        const result = getRangeListFromSelection(
+            bodyStart,
+            bodyEnd,
+            {} as never,
+            createDocument(),
+            skeleton as never,
+            {} as never,
+            '',
+            -1
+        );
+
+        expect(result?.textRanges.map((range) => [range.anchorNodePosition, range.focusNodePosition])).toEqual([
+            [bodyStart, bodyBeforeColumns],
+            [firstColumnStart, firstColumnEnd],
+            [secondColumnStart, secondColumnEnd],
+            [bodyAfterColumns, bodyEnd],
+        ]);
+        expect(result?.rectRanges).toHaveLength(0);
+    });
+
+    it('keeps a table inside a selected column as a rect range', () => {
+        const bodyStart = createNodePosition(['pages', 0]);
+        const bodyBeforeColumns = createNodePosition(['pages', 0], 1);
+        const columnStart = {
+            ...createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page']),
+            pageType: DocumentSkeletonPageType.CELL,
+        };
+        const columnBeforeTable = { ...columnStart, glyph: 1 };
+        const tablePosition = {
+            ...createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page', 'skeTables', 'table-1', 'rows', 0, 'cells', 0]),
+            pageType: DocumentSkeletonPageType.CELL,
+        };
+        const columnAfterTable = { ...columnStart, glyph: 2 };
+        const columnEnd = { ...columnStart, glyph: 3 };
+        const bodyAfterColumns = createNodePosition(['pages', 0], 2);
+        const bodyEnd = createNodePosition(['pages', 0], 3);
+        const table = {
+            nodeType: DataStreamTreeNodeType.TABLE,
+            startIndex: 8,
+            endIndex: 15,
+            children: [{ startIndex: 9, endIndex: 14 }],
+        };
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(25),
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(bodyStart)
+                .mockReturnValueOnce(bodyBeforeColumns)
+                .mockReturnValueOnce(columnStart)
+                .mockReturnValueOnce(columnBeforeTable)
+                .mockReturnValueOnce(tablePosition)
+                .mockReturnValueOnce(tablePosition)
+                .mockReturnValueOnce(columnAfterTable)
+                .mockReturnValueOnce(columnEnd)
+                .mockReturnValueOnce(bodyAfterColumns)
+                .mockReturnValueOnce(bodyEnd),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [
+                            { nodeType: DataStreamTreeNodeType.PARAGRAPH, startIndex: 0, endIndex: 2, children: [] },
+                            {
+                                nodeType: DataStreamTreeNodeType.COLUMN_GROUP,
+                                startIndex: 3,
+                                endIndex: 20,
+                                children: [{
+                                    nodeType: DataStreamTreeNodeType.COLUMN,
+                                    startIndex: 4,
+                                    endIndex: 19,
+                                    children: [{
+                                        nodeType: DataStreamTreeNodeType.PARAGRAPH,
+                                        startIndex: 5,
+                                        endIndex: 18,
+                                        children: [table],
+                                    }],
+                                }],
+                            },
+                            { nodeType: DataStreamTreeNodeType.PARAGRAPH, startIndex: 21, endIndex: 25, children: [] },
+                        ],
+                    }],
+                }),
+            }),
+        };
+        vi.spyOn(NodePositionConvertToRectRange.prototype, 'getNodePositionGroup').mockReturnValue([{
+            anchor: tablePosition,
+            focus: tablePosition,
+        }]);
+
+        const result = getRangeListFromSelection(
+            bodyStart,
+            bodyEnd,
+            {} as never,
+            createDocument(),
+            skeleton as never,
+            {} as never,
+            '',
+            -1
+        );
+
+        expect(result?.textRanges).toHaveLength(4);
+        expect(result?.rectRanges).toHaveLength(1);
+        expect(result?.rectRanges[0].anchorNodePosition).toBe(tablePosition);
+    });
+
+    it('does not create one text range across different header pages', () => {
+        const startNode = {
+            ...createNodePosition(['pages', 0]),
+            pageType: DocumentSkeletonPageType.HEADER,
+            segmentPage: 0,
+        };
+        const endNode = {
+            ...createNodePosition(['pages', 1]),
+            pageType: DocumentSkeletonPageType.HEADER,
+            segmentPage: 1,
+        };
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(10),
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(startNode)
+                .mockReturnValueOnce(endNode),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [{ startIndex: 0, endIndex: 10, children: [] }],
+                    }],
+                }),
+            }),
+        };
+
+        const result = getRangeListFromSelection(
+            startNode,
+            endNode,
+            {} as never,
+            createDocument(),
+            skeleton as never,
+            {} as never,
+            '',
+            -1
+        );
+
+        expect(result).toBeUndefined();
+    });
+
+    it('abandons a transient table selection when its end row cannot be resolved', () => {
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(24),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{
+                        children: [{
+                            startIndex: 0,
+                            endIndex: 30,
+                            children: [{
+                                nodeType: DataStreamTreeNodeType.TABLE,
+                                startIndex: 5,
+                                endIndex: 25,
+                                children: [{ startIndex: 6, endIndex: 10 }],
+                            }],
+                        }],
+                    }],
+                }),
+            }),
+        };
+
+        let result: ReturnType<typeof getRangeListFromSelection>;
+        expect(() => {
+            result = getRangeListFromSelection(
+                createNodePosition(['pages', 0]),
+                createNodePosition(['pages', 0], 1),
+                {} as never,
+                createDocument(),
+                skeleton as never,
+                {} as never,
+                '',
+                -1
+            );
+        }).not.toThrow();
+        expect(result).toBeUndefined();
     });
 
     it('resolves collapsed ranges from the backward character boundary', () => {
@@ -1003,6 +1379,7 @@ describe('selection utils', () => {
             startIndex: 0,
             endIndex: 100,
             children: [{
+                nodeType: DataStreamTreeNodeType.TABLE,
                 startIndex: 20,
                 endIndex: 50,
                 children: [

@@ -18,7 +18,7 @@ import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IFormulaInputProps } from './interface';
-import { awaitTime, DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
+import { DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteIcon, GripVerticalIcon, IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
@@ -189,22 +189,29 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const onChange = useEvent(_onChange);
 
     useEffect(() => {
-        (async () => {
-            await awaitTime(100);
-
+        let cancelled = false;
+        const timer = setTimeout(() => {
             const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
             const formula1 = rule?.formula1;
             if (isFormulaString(formula1) && listValidator && rule) {
-                const res = await listValidator.getListAsync(rule, unitId, subUnitId);
-                setRefOptions(res);
+                listValidator.getListAsync(rule, unitId, subUnitId).then((options) => {
+                    if (!cancelled) {
+                        setRefOptions(options);
+                    }
+                });
             }
-        })();
+        }, 100);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
     }, [dataValidationModel, ruleChange, listValidator, ruleId, subUnitId, unitId]);
 
     useEffect(() => {
         if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
             setFormulaStr(formula1);
-            setFormulaStrCopy(formulaStrCopy);
+            setFormulaStrCopy(formula1);
         }
     }, [formulaStrCopy, formula1]);
 

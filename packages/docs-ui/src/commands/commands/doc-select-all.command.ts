@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, ICustomTable, IDocumentBody } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICustomColumnGroup, ICustomTable, IDocumentBody } from '@univerjs/core';
 import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
-import { CommandType, DOC_RANGE_TYPE, getParagraphContentStartOffsets, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, DOC_RANGE_TYPE, getParagraphContentStartOffsets, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 
 interface ISelectAllCommandParams { }
@@ -46,9 +46,9 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
             return true;
         }
 
-        const wholeDocRanges = getWholeDocumentRanges(body);
-        const scopedRange = getScopedSelectAllRange(body, activeRange);
-        const textRanges = scopedRange && !isSameRanges(docRanges, scopedRange) ? scopedRange : wholeDocRanges;
+        const scopes = getSelectAllScopes(body, activeRange);
+        const currentScopeIndex = scopes.findIndex((scope) => isSameRanges(docRanges, scope));
+        const textRanges = scopes[Math.min(currentScopeIndex + 1, scopes.length - 1)];
 
         docSelectionManagerService.replaceDocRanges(textRanges, {
             unitId,
@@ -60,24 +60,64 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
 };
 
 function getWholeDocumentRanges(body: IDocumentBody): ISuccinctDocRangeParam[] {
-    const textRanges: ISuccinctDocRangeParam[] = [];
-    let offset = 0;
+    return getRangesForOffsets(body, 0, body.dataStream.length - 2);
+}
 
-    for (const table of body.tables ?? []) {
-        const { startIndex, endIndex } = table;
-        if (offset !== startIndex) {
-            textRanges.push(...getTextRangesByParagraphs(body, offset, startIndex - 1));
+function getRangesForOffsets(body: IDocumentBody, startOffset: number, endOffset: number): ISuccinctDocRangeParam[] {
+    const columnGroups = [...(body.columnGroups ?? [])].sort((left, right) => left.startIndex - right.startIndex);
+    const ranges: ISuccinctDocRangeParam[] = [];
+    let offset = startOffset;
+
+    for (const columnGroup of columnGroups) {
+        if (columnGroup.endIndex < startOffset || columnGroup.startIndex > endOffset) {
+            continue;
         }
 
-        textRanges.push(getTableRectRange(table));
+        if (offset < columnGroup.startIndex) {
+            ranges.push(...getRangesWithTables(body, offset, Math.min(endOffset, columnGroup.startIndex - 1)));
+        }
+
+        for (const column of getColumnRanges(body, columnGroup)) {
+            const start = Math.max(startOffset, column.startOffset!);
+            const end = Math.min(endOffset, column.endOffset!);
+            if (start <= end) {
+                ranges.push(...getRangesWithTables(body, start, end));
+            }
+        }
+
+        offset = columnGroup.endIndex + 1;
+    }
+
+    if (offset <= endOffset) {
+        ranges.push(...getRangesWithTables(body, offset, endOffset));
+    }
+
+    return ranges;
+}
+
+function getRangesWithTables(body: IDocumentBody, startOffset: number, endOffset: number): ISuccinctDocRangeParam[] {
+    const ranges: ISuccinctDocRangeParam[] = [];
+    let offset = startOffset;
+
+    for (const table of [...(body.tables ?? [])].sort((left, right) => left.startIndex - right.startIndex)) {
+        const { startIndex, endIndex } = table;
+        if (startIndex < startOffset || endIndex > endOffset) {
+            continue;
+        }
+
+        if (offset !== startIndex) {
+            ranges.push(...getTextRangesByParagraphs(body, offset, startIndex - 1));
+        }
+
+        ranges.push(getTableRectRange(table));
         offset = endIndex;
     }
 
-    if (offset !== body.dataStream.length - 2) {
-        textRanges.push(...getTextRangesByParagraphs(body, offset, body.dataStream.length - 2));
+    if (offset <= endOffset) {
+        ranges.push(...getTextRangesByParagraphs(body, offset, endOffset));
     }
 
-    return textRanges;
+    return ranges;
 }
 
 function getTextRangesByParagraphs(body: IDocumentBody, startOffset: number, endOffset: number): ISuccinctDocRangeParam[] {
@@ -117,43 +157,70 @@ function getTextRangesByParagraphs(body: IDocumentBody, startOffset: number, end
     return ranges;
 }
 
-function getScopedSelectAllRange(body: IDocumentBody, activeRange: ISuccinctDocRangeParam): ISuccinctDocRangeParam[] | null {
+function getSelectAllScopes(body: IDocumentBody, activeRange: ISuccinctDocRangeParam): ISuccinctDocRangeParam[][] {
+    const scopes: ISuccinctDocRangeParam[][] = [];
+    const addScope = (scope: ISuccinctDocRangeParam[] | null) => {
+        if (scope?.length && !scopes.some((existing) => isSameRanges(existing, scope))) {
+            scopes.push(scope);
+        }
+    };
     const startOffset = activeRange.startOffset;
     const endOffset = activeRange.endOffset;
     if (startOffset == null || endOffset == null) {
-        return null;
+        return [getWholeDocumentRanges(body)];
     }
 
     const table = (body.tables ?? []).find((item) => isRangeInside(startOffset, endOffset, item.startIndex, item.endIndex));
-    if (table) {
-        return [getTableRectRange(table)];
-    }
-
     const customBlock = (body.customBlocks ?? []).find((item) => item.startIndex >= startOffset && item.startIndex <= endOffset);
-    if (customBlock) {
-        return [{
+    const blockRange = (body.blockRanges ?? []).find((item) => isRangeInside(startOffset, endOffset, item.startIndex, item.endIndex));
+    if (table) {
+        addScope([getTableRectRange(table)]);
+    } else if (customBlock) {
+        addScope([{
             endOffset: customBlock.startIndex,
             rangeType: DOC_RANGE_TYPE.TEXT,
             startOffset: customBlock.startIndex,
-        }];
-    }
-
-    const blockRange = (body.blockRanges ?? []).find((item) => isRangeInside(startOffset, endOffset, item.startIndex, item.endIndex));
-    if (blockRange) {
-        return [{
+        }]);
+    } else if (blockRange) {
+        addScope([{
             endOffset: Math.max(blockRange.startIndex + 1, blockRange.endIndex - 1),
             rangeType: DOC_RANGE_TYPE.TEXT,
             startOffset: blockRange.startIndex + 1,
-        }];
+        }]);
+    } else {
+        const paragraphRange = clampParagraphRangeByTables(getParagraphRangeAtOffset(body, startOffset), body.tables ?? [], startOffset);
+        addScope(paragraphRange ? [{ ...paragraphRange, rangeType: DOC_RANGE_TYPE.TEXT }] : null);
     }
 
-    const paragraphRange = clampParagraphRangeByTables(getParagraphRangeAtOffset(body, startOffset), body.tables ?? [], startOffset);
-    return paragraphRange
-        ? [{
-            ...paragraphRange,
-            rangeType: DOC_RANGE_TYPE.TEXT,
-        }]
-        : null;
+    const columnGroup = (body.columnGroups ?? []).find((item) => isRangeInside(startOffset, endOffset, item.startIndex, item.endIndex));
+    if (columnGroup) {
+        const columns = getColumnRanges(body, columnGroup);
+        const column = columns.find((item) => isRangeInside(startOffset, endOffset, item.startOffset!, item.endOffset!));
+        if (column) {
+            addScope(getRangesForOffsets(body, column.startOffset!, column.endOffset!));
+        }
+        addScope(getRangesForOffsets(body, columnGroup.startIndex, columnGroup.endIndex));
+    }
+
+    addScope(getWholeDocumentRanges(body));
+    return scopes;
+}
+
+function getColumnRanges(body: IDocumentBody, columnGroup: ICustomColumnGroup): ISuccinctDocRangeParam[] {
+    const ranges: ISuccinctDocRangeParam[] = [];
+    let startOffset: number | undefined;
+
+    for (let index = columnGroup.startIndex; index <= columnGroup.endIndex; index++) {
+        const token = body.dataStream[index];
+        if (token === DataStreamTreeTokenType.COLUMN_START) {
+            startOffset = index + 1;
+        } else if (token === DataStreamTreeTokenType.COLUMN_END && startOffset != null) {
+            ranges.push({ startOffset, endOffset: index - 1, rangeType: DOC_RANGE_TYPE.TEXT });
+            startOffset = undefined;
+        }
+    }
+
+    return ranges;
 }
 
 function clampParagraphRangeByTables(
@@ -212,9 +279,15 @@ function isSameRanges(currentRanges: ISuccinctDocRangeParam[], nextRanges: ISucc
 
     return currentRanges.every((currentRange, index) => {
         const nextRange = nextRanges[index];
+        const sameType = getRangeType(currentRange) === getRangeType(nextRange);
+        const sameTextEnd = sameType &&
+            getRangeType(nextRange) === DOC_RANGE_TYPE.TEXT &&
+            !(currentRange as ISuccinctDocRangeParam & { collapsed?: boolean }).collapsed &&
+            currentRange.endOffset! + 1 === nextRange.endOffset;
+
         return currentRange.startOffset === nextRange.startOffset &&
-            currentRange.endOffset === nextRange.endOffset &&
-            getRangeType(currentRange) === getRangeType(nextRange);
+            (currentRange.endOffset === nextRange.endOffset || sameTextEnd) &&
+            sameType;
     });
 }
 

@@ -15,7 +15,6 @@
  */
 
 import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useMemo } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface IPagerProps {
@@ -30,7 +29,7 @@ export interface IPagerProps {
 export function Pager(props: IPagerProps) {
     const { className, value: current = 0, total: count = 0, loop, text: propText, onChange } = props;
 
-    const text = useMemo(() => propText ?? `${current}/${count}`, [current, count, propText]);
+    const text = propText ?? `${current}/${count}`;
     const hasValue = count > 0;
 
     const onClickLeftArrow = () => {

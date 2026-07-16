@@ -17,7 +17,7 @@
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IDiscreteRange } from '@univerjs/sheets';
-import type { IDeleteDrawingCommandParams, ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
+import type { IRemoveSheetDrawingCommandParams, ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -129,12 +129,12 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                     }
 
                     if (copyType === COPY_TYPE.CUT) {
-                        const params: IDeleteDrawingCommandParams = {
+                        const params: IRemoveSheetDrawingCommandParams = {
                             unitId,
                             drawings: [drawing],
                         };
                         // Delete the drawing when it is cut
-                        this._commandService.executeCommand(RemoveSheetDrawingCommand.id, params);
+                        this._commandService.executeCommand<IRemoveSheetDrawingCommandParams>(RemoveSheetDrawingCommand.id, params);
                     }
 
                     setTimeout(() => {

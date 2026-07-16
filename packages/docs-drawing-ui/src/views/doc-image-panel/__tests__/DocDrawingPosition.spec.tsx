@@ -37,7 +37,6 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
-import { UpdateDrawingDocTransformCommand } from '../../../commands/commands/update-doc-drawing.command';
 import locale from '../../../locale/en-US';
 import { DocDrawingPosition } from '../DocDrawingPosition';
 
@@ -239,7 +238,6 @@ function createPositionTestBed() {
 
     const commandService = injector.get(ICommandService);
     [
-        UpdateDrawingDocTransformCommand,
         RichTextEditingMutation as unknown as ICommand,
     ].forEach((command) => commandService.registerCommand(command));
 

@@ -28,7 +28,7 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
+import { IDocDrawingAdapterService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
@@ -39,7 +39,6 @@ import {
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
-import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing-floating-toolbar-adapter.service';

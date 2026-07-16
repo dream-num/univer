@@ -39,8 +39,6 @@ export interface IColorPickerProps {
 }
 
 export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
-    if (!isBrowser) return null;
-
     const { direction, locale } = useContext(ConfigContext);
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
@@ -68,6 +66,8 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
             console.error('Invalid value:', error);
         }
     }, [value, format]);
+
+    if (!isBrowser) return null;
 
     function handleColorChange(h: number, s: number, v: number) {
         setHsv([h, s, v]);

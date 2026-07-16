@@ -15,10 +15,10 @@
  */
 
 import { DrawingTypeEnum } from '@univerjs/core';
+import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { calcDocFloatDomPositionByRect, DocFloatDomController } from '../doc-float-dom.controller';
 
 function createScene() {

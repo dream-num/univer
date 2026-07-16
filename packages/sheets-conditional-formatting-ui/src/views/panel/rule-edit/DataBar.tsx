@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IDataBar, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
@@ -193,7 +193,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         positiveColor: string;
         isShowValue: boolean;
         nativeColor: string;
-    }) => {
+    }): IDataBar => {
         const config: {
             min: IValueConfig;
             max: IValueConfig;
@@ -284,7 +284,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         positiveColor,
                         nativeColor,
                         isShowValue,
-                    }) as IConditionalFormattingRuleConfig}
+                    })}
                 />
             </div>
             <div>

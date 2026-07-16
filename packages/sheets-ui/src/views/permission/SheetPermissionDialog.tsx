@@ -57,14 +57,13 @@ export const SheetPermissionDialog = () => {
     const permissionService = useDependency(IPermissionService);
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
-    if (!worksheet) {
-        throw new Error('No active sheet found');
-    }
+    const unitId = workbook.getUnitId();
+    const subUnitId = worksheet.getSheetId();
 
     const [collaborators, setCollaborators] = useState<ICollaborator[]>([]);
     const commandService = useDependency(ICommandService);
     const [loading, setLoading] = useState(() => {
-        const pointRule = worksheetProtectionPointRuleModel.getRule(workbook.getUnitId(), worksheet.getSheetId());
+        const pointRule = worksheetProtectionPointRuleModel.getRule(unitId, subUnitId);
         return !!pointRule;
     });
 
@@ -79,47 +78,62 @@ export const SheetPermissionDialog = () => {
     });
 
     useEffect(() => {
-        const getUserList = async () => {
-            const unitId = workbook.getUnitId();
-            const collaborators = await authzIoService.listCollaborators({
-                objectID: unitId,
-                unitID: unitId,
-            });
-            setCollaborators(collaborators);
+        let cancelled = false;
+
+        void authzIoService.listCollaborators({
+            objectID: unitId,
+            unitID: unitId,
+        }).then((collaborators) => {
+            if (!cancelled) {
+                setCollaborators(collaborators);
+            }
+        });
+
+        return () => {
+            cancelled = true;
         };
-        getUserList();
-    }, []);
+    }, [authzIoService, unitId]);
 
     useEffect(() => {
-        const getPermissionPoints = async () => {
-            const unitId = workbook.getUnitId();
-            const worksheetPointRule = worksheetProtectionPointRuleModel.getRule(unitId, worksheet.getSheetId());
-            if (!worksheetPointRule) {
-                return;
-            };
+        let cancelled = false;
+        let loadingTimer: ReturnType<typeof setTimeout> | undefined;
+
+        const worksheetPointRule = worksheetProtectionPointRuleModel.getRule(unitId, subUnitId);
+        if (worksheetPointRule) {
             setLoading(true);
-            const result = await authzIoService.list({
-                unitID: workbook.getUnitId(),
+
+            void authzIoService.list({
+                unitID: unitId,
                 objectIDs: [worksheetPointRule.permissionId],
                 actions: defaultWorksheetUnitActionList,
-            });
-            const actions = result[0].strategies.reduce((p, c) => {
-                if (subUnitPermissionTypeMap[c.action]) {
-                    p[c.action] = {
-                        text: localeService.t(`sheets-ui.permission.panel.${subUnitPermissionTypeMap[c.action]}`),
-                        allowed: c.role !== UnitRole.Owner,
-                    };
+            }).then((result) => {
+                if (cancelled) {
+                    return;
                 }
-                return p;
-            }, {} as IPermissionMap);
-            setPermissionMap(actions);
-            setTimeout(() => {
-                setLoading(false);
-            }, 100);
-        };
 
-        getPermissionPoints();
-    }, []);
+                const actions = result[0].strategies.reduce((p, c) => {
+                    if (subUnitPermissionTypeMap[c.action]) {
+                        p[c.action] = {
+                            text: localeService.t(`sheets-ui.permission.panel.${subUnitPermissionTypeMap[c.action]}`),
+                            allowed: c.role !== UnitRole.Owner,
+                        };
+                    }
+                    return p;
+                }, {} as IPermissionMap);
+                setPermissionMap(actions);
+                loadingTimer = setTimeout(() => {
+                    setLoading(false);
+                }, 100);
+            });
+        }
+
+        return () => {
+            cancelled = true;
+            if (loadingTimer !== undefined) {
+                clearTimeout(loadingTimer);
+            }
+        };
+    }, [authzIoService, localeService, subUnitId, unitId, worksheetProtectionPointRuleModel]);
 
     const handleChangeActionPermission = async () => {
         const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

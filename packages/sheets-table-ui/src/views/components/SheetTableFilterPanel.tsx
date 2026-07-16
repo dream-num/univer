@@ -74,7 +74,7 @@ export function SheetTableFilterPanel() {
     const { data } = tableUiService.getTableFilterItems(unitId, subUnitId, tableId, columnIndex);
     const checkedItems = tableUiService.getTableFilterCheckedItems(unitId, tableId, columnIndex);
 
-    const [checkedItemSet, setCheckedItemSet] = useState<Set<string>>(new Set<string>(checkedItems));
+    const [checkedItemSet, setCheckedItemSet] = useState<Set<string>>(() => new Set<string>(checkedItems));
     const [filterBy, setFilterBy] = useState(currentFilterBy || FilterByEnum.Items);
 
     const [conditionInfo, setConditionInfo] = useState<IConditionInfo>(() => {

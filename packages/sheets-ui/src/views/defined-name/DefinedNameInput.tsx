@@ -38,6 +38,13 @@ export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 
 }
 
 export const DefinedNameInput = (props: IDefinedNameInputProps) => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    return workbook ? <DefinedNameInputContent {...props} /> : null;
+};
+
+function DefinedNameInputContent(props: IDefinedNameInputProps) {
     const {
         inputId,
         state = false,
@@ -62,13 +69,8 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const RangeSelector: ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
     const FormulaEditor = useMemo(() => componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY), []);
-    if (workbook == null) {
-        return;
-    }
-
-    const unitId = useMemo(() => workbook.getUnitId(), []);
-
-    const subUnitId = useMemo(() => workbook.getActiveSheet().getSheetId(), []);
+    const unitId = workbook.getUnitId();
+    const subUnitId = workbook.getActiveSheet().getSheetId();
 
     const [nameValue, setNameValue] = useState(name);
 
@@ -295,4 +297,4 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             </div>
         </div>
     );
-};
+}

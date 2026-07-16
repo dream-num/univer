@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type {
+    DataStreamTreeNode,
     Documents,
     DocumentSkeleton,
     Engine,
@@ -27,8 +28,8 @@ import type {
     Scene,
 } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
-import { RANGE_DIRECTION, Tools } from '@univerjs/core';
-import { getDocumentSkeletonColumnPagePathInfo, getOffsetRectForDom } from '@univerjs/engine-render';
+import { DataStreamTreeNodeType, RANGE_DIRECTION, Tools } from '@univerjs/core';
+import { DocumentSkeletonPageType, getDocumentSkeletonColumnPagePathInfo, getOffsetRectForDom } from '@univerjs/engine-render';
 import { isInSameTableCell, isInSameTableCellData, isValidRectRange } from './convert-rect-range';
 import { compareNodePosition } from './convert-text-range';
 import { convertPositionsToRectRanges, RectRange } from './rect-range';
@@ -39,11 +40,55 @@ interface IDocRangeList {
     rectRanges: RectRange[];
 }
 
+function disposeRangeList({ textRanges, rectRanges }: IDocRangeList) {
+    textRanges.forEach((range) => range.dispose());
+    rectRanges.forEach((range) => range.dispose());
+}
+
+function isCompatibleTextRange(start: Nullable<INodePosition>, end: Nullable<INodePosition>) {
+    if (start == null || end == null || start.pageType !== end.pageType) {
+        return false;
+    }
+
+    if (
+        (start.pageType === DocumentSkeletonPageType.HEADER || start.pageType === DocumentSkeletonPageType.FOOTER) &&
+        start.segmentPage !== end.segmentPage
+    ) {
+        return false;
+    }
+
+    const startColumn = getDocumentSkeletonColumnPagePathInfo(start);
+    const endColumn = getDocumentSkeletonColumnPagePathInfo(end);
+
+    if (startColumn == null || endColumn == null) {
+        return startColumn == null && endColumn == null;
+    }
+
+    return startColumn.pageIndex === endColumn.pageIndex &&
+        startColumn.columnGroupId === endColumn.columnGroupId &&
+        startColumn.columnIndex === endColumn.columnIndex;
+}
+
+function getDescendantTables(node: DataStreamTreeNode): DataStreamTreeNode[] {
+    if (node.nodeType === DataStreamTreeNodeType.TABLE) {
+        return [node];
+    }
+
+    return node.children.flatMap(getDescendantTables);
+}
+
 function isInSameColumnPage(anchorPosition: INodePosition, focusPosition: INodePosition): boolean {
     const anchorColumnInfo = getDocumentSkeletonColumnPagePathInfo(anchorPosition);
     const focusColumnInfo = getDocumentSkeletonColumnPagePathInfo(focusPosition);
 
-    return !!anchorColumnInfo && !!focusColumnInfo &&
+    const anchorPageIndex = anchorPosition.path?.indexOf('page') ?? -1;
+    const focusPageIndex = focusPosition.path?.indexOf('page') ?? -1;
+
+    return anchorPageIndex >= 0 &&
+        focusPageIndex >= 0 &&
+        anchorPageIndex === anchorPosition.path!.length - 1 &&
+        focusPageIndex === focusPosition.path!.length - 1 &&
+        !!anchorColumnInfo && !!focusColumnInfo &&
         anchorColumnInfo.pageIndex === focusColumnInfo.pageIndex &&
         anchorColumnInfo.columnGroupId === focusColumnInfo.columnGroupId &&
         anchorColumnInfo.columnIndex === focusColumnInfo.columnIndex;
@@ -183,15 +228,6 @@ export function getRangeListFromSelection(
         };
     }
 
-    if (isInSameColumnPage(anchorPosition, focusPosition)) {
-        textRanges.push(new TextRange(...rangeParams));
-
-        return {
-            textRanges,
-            rectRanges,
-        };
-    }
-
     // TODO: @JOCS handle NEST table.
     // Handle selection in same table cell.
     if (isInSameTableCellData(skeleton, anchorPosition, focusPosition)) {
@@ -231,6 +267,15 @@ export function getRangeListFromSelection(
         };
     }
 
+    if (isInSameColumnPage(anchorPosition, focusPosition)) {
+        textRanges.push(new TextRange(...rangeParams));
+
+        return {
+            textRanges,
+            rectRanges,
+        };
+    }
+
     const viewModel = skeleton.getViewModel().getSelfOrHeaderFooterViewModel(segmentId);
     const anchorOffset = skeleton.findCharIndexByPosition(anchorPosition);
     const focusOffset = skeleton.findCharIndexByPosition(focusPosition);
@@ -253,96 +298,204 @@ export function getRangeListFromSelection(
         skeleton.findNodePositionByCharIndex(charIndex, isBack, segmentId, segmentPage) ??
         (charIndex === endOffset ? originRange.end : undefined);
 
+    const appendTextRange = (rangeStart: number, rangeEnd: number, endIsBack = true) => {
+        if (rangeStart > rangeEnd) {
+            return true;
+        }
+
+        const sp = findStartNodePositionByCharIndex(rangeStart, true);
+        const ep = findEndNodePositionByCharIndex(rangeEnd, endIsBack);
+        const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
+        const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
+        if (!isCompatibleTextRange(ap, fp)) {
+            return false;
+        }
+
+        textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
+        return true;
+    };
+
+    const appendTableRange = (table: DataStreamTreeNode, rangeStart: number, rangeEnd: number) => {
+        const { startIndex: tableStart, endIndex: tableEnd, children: rows } = table;
+        const startRow = rows.find((row) => row.startIndex <= rangeStart && row.endIndex >= rangeStart);
+        const endRow = rows.find((row) => row.startIndex <= rangeEnd && row.endIndex >= rangeEnd);
+        const tableStartOffset = rangeStart > tableStart && rangeStart < tableEnd
+            ? startRow?.startIndex == null ? undefined : startRow.startIndex + 2
+            : tableStart + 3;
+        const tableEndOffset = rangeEnd > tableStart && rangeEnd < tableEnd
+            ? endRow?.endIndex == null ? undefined : endRow.endIndex - 3
+            : tableEnd - 4;
+
+        if (tableStartOffset == null || tableEndOffset == null) {
+            return false;
+        }
+
+        const startPosition = skeleton.findNodePositionByCharIndex(tableStartOffset, true, segmentId, segmentPage);
+        const endPosition = skeleton.findNodePositionByCharIndex(tableEndOffset, true, segmentId, segmentPage);
+        if (startPosition == null || endPosition == null) {
+            return false;
+        }
+
+        const ap = direction === RANGE_DIRECTION.FORWARD ? startPosition : endPosition;
+        const fp = direction === RANGE_DIRECTION.FORWARD ? endPosition : startPosition;
+        rectRanges.push(...convertPositionsToRectRanges(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
+        return true;
+    };
+
+    const appendColumnRanges = (column: DataStreamTreeNode, rangeStart: number, rangeEnd: number) => {
+        let offset = rangeStart;
+        const tables = getDescendantTables(column).sort((left, right) => left.startIndex - right.startIndex);
+
+        for (const table of tables) {
+            if (table.endIndex < rangeStart || table.startIndex > rangeEnd) {
+                continue;
+            }
+
+            if (!appendTextRange(offset, Math.min(rangeEnd, table.startIndex - 1), false) ||
+                !appendTableRange(table, Math.max(rangeStart, table.startIndex), Math.min(rangeEnd, table.endIndex))) {
+                return false;
+            }
+            offset = table.endIndex + 1;
+        }
+
+        return appendTextRange(offset, rangeEnd);
+    };
+
     let start = startOffset;
     let end = endOffset;
 
-    // TODO: @JOCS handle in header and footer.
-    for (const section of viewModel.getChildren()) {
-        for (const paragraph of section.children) {
-            const { startIndex, endIndex, children } = paragraph;
-            const paragraphIndex = section.children.indexOf(paragraph);
-            const nextParagraph = section.children[paragraphIndex + 1];
-            const table = children[0];
+    try {
+        // TODO: @JOCS handle in header and footer.
+        for (const section of viewModel.getChildren()) {
+            for (const paragraph of section.children) {
+                const { startIndex, endIndex, children } = paragraph;
 
-            let endInTable = false;
-
-            if (table) {
-                const { startIndex: tableStart, endIndex: tableEnd, children } = table;
-                let tableStartPosition = null;
-                let tableEndPosition = null;
-
-                const startRow = children.find((row) => row.startIndex <= startOffset && row.endIndex >= startOffset)!;
-                const endRow = children.find((row) => row.startIndex <= endOffset && row.endIndex >= endOffset)!;
-
-                if (startOffset > tableStart && startOffset < tableEnd) {
-                    tableStartPosition = skeleton.findNodePositionByCharIndex(startRow.startIndex + 2, true, segmentId, segmentPage);
-                    tableEndPosition = skeleton.findNodePositionByCharIndex(tableEnd - 4, true, segmentId, segmentPage);
-                    start = tableEnd + 1;
-                } else if (endOffset > tableStart && endOffset < tableEnd) {
-                    tableStartPosition = skeleton.findNodePositionByCharIndex(tableStart + 3, true, segmentId, segmentPage);
-                    tableEndPosition = skeleton.findNodePositionByCharIndex(endRow.endIndex - 3, true, segmentId, segmentPage);
-                    end = tableStart - 1;
-
-                    endInTable = true;
-                } else if (tableStart > startOffset && tableEnd < endOffset) {
-                    tableStartPosition = skeleton.findNodePositionByCharIndex(tableStart + 3, true, segmentId, segmentPage);
-                    tableEndPosition = skeleton.findNodePositionByCharIndex(tableEnd - 4, true, segmentId, segmentPage);
-
-                    if (start <= tableStart - 1) {
-                        const sp = findStartNodePositionByCharIndex(start, true);
-                        const ep = findEndNodePositionByCharIndex(tableStart - 1, false);
-                        const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
-                        const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
-
-                        textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
+                if (paragraph.nodeType === DataStreamTreeNodeType.COLUMN_GROUP && start <= endIndex && end >= startIndex) {
+                    if (start < startIndex && !appendTextRange(start, Math.min(end, startIndex - 1), false)) {
+                        disposeRangeList({ textRanges, rectRanges });
+                        return;
                     }
 
-                    start = tableEnd + 1;
-                }
+                    for (const column of children.filter((child) => child.nodeType === DataStreamTreeNodeType.COLUMN)) {
+                        const columnStart = Math.max(start, column.startIndex + 1);
+                        const columnEnd = Math.min(end, column.endIndex - 1);
+                        if (columnStart <= columnEnd && !appendColumnRanges(column, columnStart, columnEnd)) {
+                            disposeRangeList({ textRanges, rectRanges });
+                            return;
+                        }
+                    }
 
-                if (tableStartPosition && tableEndPosition) {
-                    const ap = direction === RANGE_DIRECTION.FORWARD ? tableStartPosition : tableEndPosition;
-                    const fp = direction === RANGE_DIRECTION.FORWARD ? tableEndPosition : tableStartPosition;
-
-                    rectRanges.push(...convertPositionsToRectRanges(
-                        scene,
-                        document,
-                        skeleton,
-                        ap,
-                        fp,
-                        style,
-                        segmentId,
-                        segmentPage
-                    ));
-                }
-            }
-
-            // TO fix https://github.com/dream-num/univer-pro/issues/3437.
-            if (end === endIndex + 1 && !endInTable && nextParagraph && nextParagraph.children.length) {
-                end = endIndex;
-                endInTable = true;
-            }
-
-            if ((end >= startIndex && end <= endIndex) || endInTable) {
-                const sp = findStartNodePositionByCharIndex(start, true);
-                const ep = findEndNodePositionByCharIndex(end, !endInTable);
-                const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
-                const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
-
-                // Can not create cursor(startOffset === endOffset) and rect range at the same time.
-                if (rectRanges.length && Tools.diffValue(ap, fp)) {
+                    start = endIndex + 1;
                     continue;
                 }
 
-                textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
+                const paragraphIndex = section.children.indexOf(paragraph);
+                const nextParagraph = section.children[paragraphIndex + 1];
+                const table = children.find((child) => child.nodeType === DataStreamTreeNodeType.TABLE);
+                const nextTable = nextParagraph?.children.find((child) => child.nodeType === DataStreamTreeNodeType.TABLE);
+
+                let endInTable = false;
+
+                if (table) {
+                    const { startIndex: tableStart, endIndex: tableEnd, children } = table;
+                    let tableStartPosition = null;
+                    let tableEndPosition = null;
+
+                    if (startOffset > tableStart && startOffset < tableEnd) {
+                        const startRow = children.find((row) => row.startIndex <= startOffset && row.endIndex >= startOffset);
+                        if (startRow == null) {
+                            disposeRangeList({ textRanges, rectRanges });
+                            return;
+                        }
+
+                        tableStartPosition = skeleton.findNodePositionByCharIndex(startRow.startIndex + 2, true, segmentId, segmentPage);
+                        tableEndPosition = skeleton.findNodePositionByCharIndex(tableEnd - 4, true, segmentId, segmentPage);
+                        start = tableEnd + 1;
+                    } else if (endOffset > tableStart && endOffset < tableEnd) {
+                        const endRow = children.find((row) => row.startIndex <= endOffset && row.endIndex >= endOffset);
+                        if (endRow == null) {
+                            disposeRangeList({ textRanges, rectRanges });
+                            return;
+                        }
+
+                        tableStartPosition = skeleton.findNodePositionByCharIndex(tableStart + 3, true, segmentId, segmentPage);
+                        tableEndPosition = skeleton.findNodePositionByCharIndex(endRow.endIndex - 3, true, segmentId, segmentPage);
+                        end = tableStart - 1;
+
+                        endInTable = true;
+                    } else if (tableStart > startOffset && tableEnd < endOffset) {
+                        tableStartPosition = skeleton.findNodePositionByCharIndex(tableStart + 3, true, segmentId, segmentPage);
+                        tableEndPosition = skeleton.findNodePositionByCharIndex(tableEnd - 4, true, segmentId, segmentPage);
+
+                        if (start <= tableStart - 1) {
+                            const sp = findStartNodePositionByCharIndex(start, true);
+                            const ep = findEndNodePositionByCharIndex(tableStart - 1, false);
+                            const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
+                            const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
+
+                            if (!isCompatibleTextRange(ap, fp)) {
+                                disposeRangeList({ textRanges, rectRanges });
+                                return;
+                            }
+
+                            textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
+                        }
+
+                        start = tableEnd + 1;
+                    }
+
+                    if (tableStartPosition && tableEndPosition) {
+                        const ap = direction === RANGE_DIRECTION.FORWARD ? tableStartPosition : tableEndPosition;
+                        const fp = direction === RANGE_DIRECTION.FORWARD ? tableEndPosition : tableStartPosition;
+
+                        rectRanges.push(...convertPositionsToRectRanges(
+                            scene,
+                            document,
+                            skeleton,
+                            ap,
+                            fp,
+                            style,
+                            segmentId,
+                            segmentPage
+                        ));
+                    }
+                }
+
+            // TO fix https://github.com/dream-num/univer-pro/issues/3437.
+                if (end === endIndex + 1 && !endInTable && nextTable) {
+                    end = endIndex;
+                    endInTable = true;
+                }
+
+                if ((end >= startIndex && end <= endIndex) || endInTable) {
+                    const sp = findStartNodePositionByCharIndex(start, true);
+                    const ep = findEndNodePositionByCharIndex(end, !endInTable);
+                    const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
+                    const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
+
+                // Can not create cursor(startOffset === endOffset) and rect range at the same time.
+                    if (rectRanges.length && Tools.diffValue(ap, fp)) {
+                        continue;
+                    }
+
+                    if (!isCompatibleTextRange(ap, fp)) {
+                        disposeRangeList({ textRanges, rectRanges });
+                        return;
+                    }
+
+                    textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
+                }
             }
         }
-    }
 
-    return {
-        textRanges,
-        rectRanges,
-    };
+        return {
+            textRanges,
+            rectRanges,
+        };
+    } catch (error) {
+        disposeRangeList({ textRanges, rectRanges });
+        throw error;
+    }
 }
 
 export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {

@@ -60,7 +60,7 @@ export function executeEditorUndoRedoCommand(options: IExecuteEditorUndoRedoComm
         univerInstanceService.focusUnit(editorUnitId);
     }
 
-    void commandService.executeCommand(commandId).finally(() => {
+    commandService.executeCommand(commandId).finally(() => {
         if (shouldRestoreFocus) {
             univerInstanceService.focusUnit(previousFocusedUnitId);
         }

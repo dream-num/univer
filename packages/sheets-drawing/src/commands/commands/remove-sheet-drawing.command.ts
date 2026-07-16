@@ -27,22 +27,22 @@ import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
-export interface IDeleteDrawingCommandParam {
+export interface IRemoveSheetDrawingCommandParam {
     unitId: string;
     subUnitId: string;
     drawingId: string;
     drawingType: DrawingTypeEnum;
 }
 
-export interface IDeleteDrawingCommandParams {
+export interface IRemoveSheetDrawingCommandParams {
     unitId: string;
-    drawings: IDeleteDrawingCommandParam[];
+    drawings: IRemoveSheetDrawingCommandParam[];
 }
 
 export const RemoveSheetDrawingCommand: ICommand = {
     id: 'sheet.command.remove-sheet-image',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
+    handler: (accessor: IAccessor, params?: IRemoveSheetDrawingCommandParams) => {
         if (!params) return false;
 
         const commandService = accessor.get(ICommandService);

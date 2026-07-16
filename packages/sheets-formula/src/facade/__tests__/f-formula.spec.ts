@@ -158,8 +158,8 @@ describe('sheets-formula facade mixins', () => {
                 resolve();
             });
 
-            void commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
-            void commandService.executeCommand(
+            commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
+            commandService.executeCommand(
                 SetRangeValuesMutation.id,
                 {
                     unitId: 'test',
@@ -200,7 +200,7 @@ describe('sheets-formula facade mixins', () => {
                 resolve();
             });
 
-            void commandService.executeCommand(
+            commandService.executeCommand(
                 SetRangeValuesMutation.id,
                 {
                     unitId: 'unit1',
@@ -211,7 +211,7 @@ describe('sheets-formula facade mixins', () => {
                     applyFormulaCalculationResult: true,
                 }
             );
-            void commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
+            commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
         });
     });
 
@@ -324,7 +324,7 @@ describe('sheets-formula facade mixins', () => {
         const formula = univerAPI.getFormula();
         const waitForResult = formula.onCalculationResultApplied();
         let resolved = false;
-        void waitForResult.then(() => {
+        waitForResult.then(() => {
             resolved = true;
         });
 

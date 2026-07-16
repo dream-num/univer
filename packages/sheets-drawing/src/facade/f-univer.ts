@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingSearch, Injector } from '@univerjs/core';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams, ISheetImage } from '@univerjs/sheets-drawing';
+import type { IInsertSheetDrawingCommandParams, IRemoveSheetDrawingCommandParams, ISetDrawingCommandParams, ISheetImage } from '@univerjs/sheets-drawing';
 import type {
     IBeforeOverGridImageChangeEventParams,
     IBeforeOverGridImageChangeParamObject,
@@ -50,7 +50,7 @@ export class FUniverSheetsDrawingMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const params = commandInfo.params as IInsertSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;
@@ -77,7 +77,7 @@ export class FUniverSheetsDrawingMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const params = commandInfo.params as IRemoveSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;
@@ -186,7 +186,7 @@ export class FUniverSheetsDrawingMixin extends FUniver {
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const params = commandInfo.params as IInsertSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;
@@ -208,7 +208,7 @@ export class FUniverSheetsDrawingMixin extends FUniver {
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const params = commandInfo.params as IRemoveSheetDrawingCommandParams;
                     const workbook = this.getActiveWorkbook();
                     if (workbook == null || params == null) {
                         return;

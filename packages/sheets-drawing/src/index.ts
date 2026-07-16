@@ -20,12 +20,9 @@ export {
     transformToDrawingPosition,
 } from './basics/transform-position';
 export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
-export type { IInsertDrawingCommandParams } from './commands/commands/insert-sheet-drawing.command';
+export type { IInsertSheetDrawingCommandParams } from './commands/commands/insert-sheet-drawing.command';
 export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
-export type {
-    IDeleteDrawingCommandParam,
-    IDeleteDrawingCommandParams,
-} from './commands/commands/remove-sheet-drawing.command';
+export type { IRemoveSheetDrawingCommandParam, IRemoveSheetDrawingCommandParams } from './commands/commands/remove-sheet-drawing.command';
 export { SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
 export type { ISetDrawingArrangeCommandParams } from './commands/commands/set-drawing-arrange.command';
 export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';

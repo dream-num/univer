@@ -43,16 +43,11 @@ export default function ArrangePanel(props: IProps) {
 
     const page = canvasView.getRenderUnitByPageId(pageId, unitId);
     const scene = page?.scene;
-    if (!scene) return null;
+    const transformer = scene?.getTransformer();
+    const object = transformer?.getSelectedObjectMap().values().next().value as Nullable<Rect>;
+    const [color, setColor] = useState<string>(object?.fill?.toString() ?? '');
 
-    const transformer = scene.getTransformer();
-    if (!transformer) return null;
-
-    const selectedObjects = transformer.getSelectedObjectMap();
-    const object = selectedObjects.values().next().value as Nullable<Rect>;
-    if (!object) return null;
-
-    const [color, setColor] = useState<string>(object.fill?.toString() ?? '');
+    if (!scene || !transformer || !object) return null;
 
     /**
      *

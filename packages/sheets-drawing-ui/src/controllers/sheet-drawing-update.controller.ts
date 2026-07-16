@@ -19,7 +19,7 @@ import type { IImageData } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type {
-    IInsertDrawingCommandParams,
+    IInsertSheetDrawingCommandParams,
     ISetDrawingArrangeCommandParams,
     ISetDrawingCommandParams,
     ISheetDrawing,
@@ -269,10 +269,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton) ?? sheetTransform,
         };
 
-        return this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        return this._commandService.executeCommand<IInsertSheetDrawingCommandParams>(InsertSheetDrawingCommand.id, {
             unitId,
             drawings: [sheetDrawingParam],
-        } as IInsertDrawingCommandParams);
+        });
     }
 
     // eslint-disable-next-line max-lines-per-function

@@ -29,6 +29,12 @@ export function InputParams(props: IInputParamsProps) {
     const { functionInfo, onChange } = props;
     if (!functionInfo) return null;
 
+    return <InputParamsInner functionInfo={functionInfo} onChange={onChange} />;
+}
+
+function InputParamsInner(props: IInputParamsProps & { functionInfo: IFunctionInfo }) {
+    const { functionInfo, onChange } = props;
+
     const [params, setParams] = useState<string[]>([]);
     const [functionParameter, setFunctionParameter] = useState<IFunctionParam[]>(functionInfo.functionParameter);
     const [activeIndex, setActiveIndex] = useState(-1);

@@ -40,10 +40,11 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
 import {
     UpdateDocDrawingDistanceCommand,
-    UpdateDocDrawingWrappingStyleCommand,
     UpdateDocDrawingWrapTextCommand,
 } from '../../../commands/commands/update-doc-drawing.command';
+import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-notification.controller';
 import locale from '../../../locale/en-US';
+import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { DocDrawingTextWrap } from '../DocDrawingTextWrap';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -215,12 +216,13 @@ function createPanelTestBed() {
     injector.add([DocDrawingService]);
     injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
     injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
+    injector.add([DocRefreshDrawingsService]);
     injector.add([DocDrawingController]);
+    injector.add([DocDrawingAddRemoveController]);
 
     const commandService = injector.get(ICommandService);
     [
         UpdateDocDrawingDistanceCommand,
-        UpdateDocDrawingWrappingStyleCommand,
         UpdateDocDrawingWrapTextCommand,
         RichTextEditingMutation as unknown as ICommand,
     ].forEach((command) => commandService.registerCommand(command));
@@ -231,6 +233,7 @@ function createPanelTestBed() {
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
 
     injector.get(DocDrawingController).loadDrawingDataForUnit(UNIT_ID);
+    injector.get(DocDrawingAddRemoveController);
     injector.get(IDrawingManagerService).focusDrawing([{
         unitId: UNIT_ID,
         subUnitId: UNIT_ID,

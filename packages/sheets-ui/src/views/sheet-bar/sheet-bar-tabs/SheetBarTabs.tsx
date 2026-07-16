@@ -321,7 +321,7 @@ export function SheetBarTabs() {
             return;
         }
 
-        void commandService.executeCommand(SetWorksheetActiveOperation.id, {
+        commandService.executeCommand(SetWorksheetActiveOperation.id, {
             subUnitId,
             unitId: workbookRef.current.getUnitId(),
         }).then((result) => {
@@ -517,7 +517,7 @@ export function SheetBarTabs() {
             },
             onChangeTab: (_event: MouseEvent, subUnitId: string) => {
                 // Do not use SetWorksheetActivateCommand, otherwise activation timing may be incorrect.
-                void commandService
+                commandService
                     .executeCommand(SetWorksheetActiveOperation.id, {
                         subUnitId,
                         unitId: workbook.getUnitId(),

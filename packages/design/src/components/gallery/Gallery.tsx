@@ -15,7 +15,7 @@
  */
 
 import { OneToOneIcon, ZoomInIcon, ZoomOutIcon } from '@univerjs/icons';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -43,7 +43,7 @@ export function Gallery(props: IGalleryProps) {
 
     const dialogRef = useRef<HTMLDivElement>(null);
 
-    const activeImage = useMemo(() => images[activeImageIndex], [activeImageIndex, images]);
+    const activeImage = images[activeImageIndex];
     const hasPagination = images.length > 1;
 
     // Focus management

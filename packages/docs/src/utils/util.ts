@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ITextRangeParam } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IDocContentInsertRange } from '../services/doc-content-insert.service';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocContentInsertService } from '../services/doc-content-insert.service';
 
-export function consumeContentInsertRange(accessor: IAccessor, unitId: string) {
+export function consumeContentInsertRange(accessor: IAccessor, unitId: string): IDocContentInsertRange | null {
     try {
         return accessor.get(DocContentInsertService).consumeInsertRange(unitId);
     } catch {
@@ -26,6 +28,36 @@ export function consumeContentInsertRange(accessor: IAccessor, unitId: string) {
     }
 }
 
+export function getContentInsertRange(accessor: IAccessor, unitId?: string): (IDocContentInsertRange & {
+    collapsed: boolean;
+}) | null {
+    const _unitId = unitId ?? accessor.get(IUniverInstanceService).getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+    if (!_unitId) {
+        return null;
+    }
+
+    const insertRange = consumeContentInsertRange(accessor, _unitId);
+    if (!insertRange) {
+        return null;
+    }
+
+    return {
+        ...insertRange,
+        collapsed: insertRange?.startOffset === insertRange?.endOffset,
+    };
+}
+
 export function isHeaderFooterSelection(range?: ITextRangeWithStyle): boolean {
     return Boolean(range?.segmentId);
+}
+
+export function normalizeTextRange(textRange: ITextRangeParam): ITextRangeParam {
+    const endOffset = textRange.endOffset ?? textRange.startOffset;
+
+    return {
+        ...textRange,
+        endOffset,
+        collapsed: textRange.collapsed ?? textRange.startOffset === endOffset,
+        segmentId: textRange.segmentId ?? '',
+    };
 }

@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDocDrawing, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -30,12 +30,12 @@ import {
 } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
 
 const MIN_OFFSET = -1000;
 const MAX_OFFSET = 1000;
@@ -45,6 +45,14 @@ export interface IDocDrawingPositionProps {
 }
 
 export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const drawingParam = props.drawings[0];
+    const scene = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId)?.scene : undefined;
+
+    return drawingParam && scene ? <DocDrawingPositionContent {...props} /> : null;
+};
+
+function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -55,10 +63,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     const drawingParam = drawings[0] as IDocDrawing;
 
-    if (drawingParam == null) {
-        return;
-    }
-
     const { unitId } = drawingParam;
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -66,10 +70,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const documentFlavor = documentDataModel?.getSnapshot().documentStyle.documentFlavor;
 
     const renderObject = renderManagerService.getRenderById(unitId);
-    const scene = renderObject?.scene;
-    if (scene == null) {
-        return;
-    }
+    const scene = renderObject!.scene!;
     const transformer = scene.getTransformerByCreate();
 
     const HORIZONTAL_RELATIVE_FROM = [{
@@ -135,7 +136,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             };
         });
 
-        commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
+        commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId: focusDrawings[0].unitId,
             subUnitId: focusDrawings[0].unitId,
             drawings: drawings.map((drawing) => ({
@@ -487,4 +488,4 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             </div>
         </div>
     );
-};
+}

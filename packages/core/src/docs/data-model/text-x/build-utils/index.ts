@@ -81,6 +81,7 @@ export class BuildTextUtils {
 
 export { getSingleDataStreamChange } from './data-stream-change';
 export type { IDataStreamChange } from './data-stream-change';
+export { getCustomBlockIdsInSelections } from './drawings';
 export { getParagraphContentStartOffset, getParagraphContentStartOffsets, getParagraphFollowingBlockOffset } from './paragraph';
 export {
     containsInteriorInsertionOffset,

@@ -42,6 +42,7 @@ export class FormulaCalculationTriggerService extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
     private _executingDirtyData = createEmptyDirtyData();
     private _timer: ReturnType<typeof setTimeout> | undefined;
+    private _started = false;
     private _executionInProgress = false;
     private _restartCalculation = false;
 
@@ -51,6 +52,15 @@ export class FormulaCalculationTriggerService extends Disposable {
     ) {
         super();
         this._initialize();
+    }
+
+    start(): void {
+        if (this._started) {
+            return;
+        }
+
+        this._started = true;
+        this._scheduleFlush();
     }
 
     override dispose(): void {
@@ -81,9 +91,17 @@ export class FormulaCalculationTriggerService extends Disposable {
             }
 
             this._waitingCommandQueue.push(command);
-            clearTimeout(this._timer);
-            this._timer = setTimeout(() => this._flush(), CALCULATION_DEBOUNCE_TIME);
+            this._scheduleFlush();
         }));
+    }
+
+    private _scheduleFlush(): void {
+        if (!this._started || this._waitingCommandQueue.length === 0) {
+            return;
+        }
+
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => this._flush(), CALCULATION_DEBOUNCE_TIME);
     }
 
     private _flush(): void {

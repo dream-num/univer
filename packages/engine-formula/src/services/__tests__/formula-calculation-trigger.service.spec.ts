@@ -25,7 +25,7 @@ import {
 import { FormulaCalculationTriggerService } from '../formula-calculation-trigger.service';
 import { FormulaExecutedStateType } from '../runtime.service';
 
-function createTestBed() {
+function createTestBed(start = true) {
     let listener: ((command: ICommandInfo, options?: IExecutionOptions) => void) | undefined;
     const executed: Array<{ id: string; params: unknown; options: unknown }> = [];
     const conversions = new Map<string, { commandId: string; shouldTrigger?: () => boolean; getDirtyData: (command: ICommandInfo) => object }>();
@@ -44,6 +44,9 @@ function createTestBed() {
         get: (id: string) => conversions.get(id),
     };
     const service = new FormulaCalculationTriggerService(commandService, activeDirtyManagerService as never);
+    if (start) {
+        service.start();
+    }
 
     return {
         service,
@@ -58,6 +61,38 @@ describe('FormulaCalculationTriggerService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+    });
+
+    it('collects changeset dirty data before start and merges it with the initial trigger', async () => {
+        const testBed = createTestBed(false);
+        testBed.conversions.set('sheet-dirty', {
+            commandId: 'sheet-dirty',
+            getDirtyData: () => ({
+                dirtyRanges: [{ unitId: 'sheet-unit', sheetId: 'sheet-1', range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 } }],
+            }),
+        });
+        testBed.conversions.set(SetTriggerFormulaCalculationStartMutation.id, {
+            commandId: SetTriggerFormulaCalculationStartMutation.id,
+            getDirtyData: () => ({ forceCalculation: true }),
+        });
+
+        testBed.emit({ id: 'sheet-dirty' } as ICommandInfo, { fromChangeset: true });
+        await vi.advanceTimersByTimeAsync(100);
+        expect(testBed.executed).toEqual([]);
+
+        testBed.service.start();
+        testBed.emit({ id: SetTriggerFormulaCalculationStartMutation.id } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(100);
+
+        expect(testBed.executed).toHaveLength(1);
+        expect(testBed.executed[0]).toMatchObject({
+            id: SetFormulaCalculationStartMutation.id,
+            params: {
+                forceCalculation: true,
+                dirtyRanges: [{ unitId: 'sheet-unit', sheetId: 'sheet-1' }],
+            },
+        });
+        testBed.service.dispose();
     });
 
     it('merges dirty data from different unit types into one calculation', async () => {

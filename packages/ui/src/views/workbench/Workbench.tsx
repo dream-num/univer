@@ -122,8 +122,8 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         }
     }, [onRendered]);
 
-    const [locale, setLocale] = useState(localeService.getLocales());
-    const [direction, setDirection] = useState(localeService.getDirection());
+    const [locale, setLocale] = useState(() => localeService.getLocales());
+    const [direction, setDirection] = useState(() => localeService.getDirection());
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);

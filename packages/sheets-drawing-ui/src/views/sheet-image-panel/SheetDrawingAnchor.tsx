@@ -38,24 +38,14 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
     const { drawings } = props;
 
-    const drawingParam = drawings[0] as ISheetDrawing;
-
-    if (drawingParam == null) {
-        return;
-    }
-
-    const { unitId } = drawingParam;
-
-    const renderObject = renderManagerService.getRenderById(unitId);
+    const drawingParam = drawings[0] as ISheetDrawing | undefined;
+    const renderObject = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId) : undefined;
     const scene = renderObject?.scene;
-    if (scene == null) {
-        return;
-    }
-    const transformer = scene.getTransformerByCreate();
+    const transformer = scene?.getTransformerByCreate();
 
     const [anchorShow, setAnchorShow] = useState(true);
 
-    const type = drawingParam.anchorType ?? SheetDrawingAnchorType.Position;
+    const type = drawingParam?.anchorType ?? SheetDrawingAnchorType.Position;
     const [value, setValue] = useState(type);
 
     function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<ISheetDrawing>[] {
@@ -87,6 +77,10 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
     }
 
     useEffect(() => {
+        if (!transformer) {
+            return;
+        }
+
         const onClearControlObserver = transformer.clearControl$.subscribe((changeSelf) => {
             if (changeSelf === true) {
                 setAnchorShow(false);
@@ -110,7 +104,11 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             onChangeStartObserver.unsubscribe();
             onClearControlObserver.unsubscribe();
         };
-    }, []);
+    }, [drawingManagerService, transformer]);
+
+    if (!drawingParam || !transformer) {
+        return null;
+    }
 
     function handleChange(value: string | number | boolean) {
         setValue((value as SheetDrawingAnchorType));

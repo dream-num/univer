@@ -34,19 +34,22 @@ type INotePopupLocation = ISheetLocationBase & {
 };
 
 export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation }> }) => {
-    const { popup } = props;
+    const activePopup = props.popup.extraProps?.location;
 
+    if (!activePopup) {
+        console.error('Popup extraProps or location is undefined.');
+        return null;
+    }
+
+    return <SheetsNoteContent activePopup={activePopup} />;
+};
+
+function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation }) {
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const notePopupService = useDependency(SheetsNotePopupService);
     const config = useConfigValue<IUniverSheetsNoteUIConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
-
-    const activePopup = popup.extraProps?.location;
-    if (!activePopup) {
-        console.error('Popup extraProps or location is undefined.');
-        return null; // Or handle this case appropriately
-    }
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const initialWidthRef = useRef<number | null>(null);
@@ -168,4 +171,4 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
             }}
         />
     );
-};
+}

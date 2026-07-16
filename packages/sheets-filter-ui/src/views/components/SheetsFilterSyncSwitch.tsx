@@ -24,11 +24,11 @@ import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 export function FilterSyncSwitch() {
     const sheetsFilterSyncController = useDependency(SheetsFilterSyncController);
     const visible = useObservable(sheetsFilterSyncController.visible$, undefined, true);
-    if (!visible) return null;
-
     const localeService = useDependency(LocaleService);
     const messageService = useDependency(IMessageService);
     const enabled = useObservable(sheetsFilterSyncController.enabled$, undefined, true);
+
+    if (!visible) return null;
 
     return (
         <div

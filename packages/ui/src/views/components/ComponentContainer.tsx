@@ -46,7 +46,8 @@ export function ComponentContainer(props: IComponentContainerProps): ReactNode {
  */
 
 export function useComponentsOfPart(part: string, injector?: Injector): Set<ComponentRenderer> {
-    const uiPartsService = injector?.get(IUIPartsService) ?? useDependency(IUIPartsService);
+    const injectedUIPartsService = useDependency(IUIPartsService);
+    const uiPartsService = injector?.get(IUIPartsService) ?? injectedUIPartsService;
     const uiVisibleChange$ = useMemo(() => uiPartsService.uiVisibleChange$.pipe(filter((ui) => ui.ui === part)), [part, uiPartsService]);
     const changeInfo = useObservable(uiVisibleChange$);
 

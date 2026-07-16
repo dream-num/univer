@@ -67,6 +67,10 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const { popup } = props;
 
     const menuItems = popup?.extraProps?.menuItems;
+    const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
+    const [visible, setVisible] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     if (!menuItems) return null;
 
@@ -90,18 +94,12 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
         return <DocChartFloatingToolbar menuItems={menuItems} />;
     }
 
-    const commandService = useDependency(ICommandService);
-    const localeService = useDependency(LocaleService);
-
-    const [visible, setVisible] = useState(false);
-    const [isHovered, setHovered] = useState(false);
-
     const handleMouseEnter = () => {
-        setHovered(true);
+        setIsHovered(true);
     };
 
     const handleMouseLeave = () => {
-        setHovered(false);
+        setIsHovered(false);
     };
 
     const onVisibleChange = (visible: boolean) => {

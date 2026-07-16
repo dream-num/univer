@@ -15,15 +15,15 @@
  */
 
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import type { IPopup } from '@univerjs/ui';
+import type { IPopupWithExtraProps } from '@univerjs/ui';
 import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { filter } from 'rxjs';
 import { CellPopupManagerService } from '../services/cell-popup-manager.service';
 
-export const CellPopup = (props: { popup: IPopup<ISheetLocationBase & { direction: 'horizontal' | 'vertical' }> }) => {
+export const CellPopup = (props: { popup: IPopupWithExtraProps<ISheetLocationBase & { direction: 'horizontal' | 'vertical' }> }) => {
     const { popup } = props;
-    const location = popup.extraProps!;
+    const location = popup.extraProps;
     const { row, col, direction, unitId, subUnitId } = location;
     const cellPopupManagerService = useDependency(CellPopupManagerService);
     useObservable(

@@ -116,7 +116,7 @@ export class FormulaCalculationTriggerService extends Disposable {
         this._executingDirtyData = mergeDirtyData(this._executingDirtyData, dirtyData);
         if (this._executionInProgress) {
             this._restartCalculation = true;
-            void this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {}, LOCAL_ONLY);
+            this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {}, LOCAL_ONLY);
             return;
         }
 
@@ -125,7 +125,7 @@ export class FormulaCalculationTriggerService extends Disposable {
 
     private _startCalculation(): void {
         this._executionInProgress = true;
-        void this._commandService.executeCommand(
+        this._commandService.executeCommand(
             SetFormulaCalculationStartMutation.id,
             { ...this._executingDirtyData },
             LOCAL_ONLY

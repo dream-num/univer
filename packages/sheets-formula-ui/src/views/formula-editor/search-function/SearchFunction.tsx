@@ -43,7 +43,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
-    const visible = useMemo(() => !!searchList.length, [searchList]);
+    const visible = searchList.length > 0;
     const ulRef = useRef<HTMLUListElement>(undefined);
     const [active, setActive] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);

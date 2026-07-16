@@ -15,7 +15,7 @@
  */
 
 import type { DateKit } from '@univerjs/core';
-import type { IPopup } from '@univerjs/ui';
+import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
 import { dateKit, LocaleService } from '@univerjs/core';
@@ -30,10 +30,12 @@ export interface IDateDropdownProps {
     showTime?: boolean;
 }
 
-export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDropdownProps> }) {
+export function DateDropdown(props: {
+    popup: IPopupWithExtraProps<IDateDropdownProps & IBaseDropdownProps>;
+}) {
     const { popup } = props;
     const { extraProps } = popup;
-    const { hideFn, patternType, defaultValue, onChange, showTime } = extraProps!;
+    const { hideFn, patternType, defaultValue, onChange, showTime } = extraProps;
     const [localDate, setLocalDate] = useState<DateKit | undefined>(defaultValue);
     const defaultDate = useMemo(() => patternType !== 'time' ? dateKit() : dateKit('1900-01-01 00:00:00'), []);
     const date = localDate && localDate.isValid() ? localDate : defaultDate;
@@ -76,7 +78,12 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
             <footer
                 className={clsx('univer-mt-2 univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
             >
-                <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
+                <Button
+                    size="small"
+                    variant="primary"
+                    onClick={handleSave}
+                    disabled={!date || !date.isValid()}
+                >
                     {localeService.t<LocaleKey>('sheets-ui.data-validation.alert.ok')}
                 </Button>
             </footer>

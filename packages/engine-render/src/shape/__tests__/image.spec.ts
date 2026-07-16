@@ -40,6 +40,22 @@ function createCtxMock() {
 }
 
 describe('image extra', () => {
+    it('preserves the request mode of an already-loaded native image', () => {
+        const native = createNativeImage();
+        native.crossOrigin = 'use-credentials';
+
+        const image = new Image('decoded-image', {
+            image: native,
+            left: 0,
+            top: 0,
+            width: 120,
+            height: 80,
+        });
+
+        expect(image.getNative()).toBe(native);
+        expect(native.crossOrigin).toBe('use-credentials');
+    });
+
     it('handles srcRect transform and render branches', () => {
         const image = new Image('img1', {
             image: createNativeImage(100, 60),

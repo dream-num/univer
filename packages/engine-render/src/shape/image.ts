@@ -91,7 +91,6 @@ export class Image extends Shape<IImageProps> {
 
         if (config.image) {
             this._native = config.image;
-            this._native.crossOrigin = 'anonymous';
             this.makeDirty(true);
         } else if (config.url) {
             this._native = document.createElement('img');

@@ -177,7 +177,7 @@ export class ImageUpdateController extends Disposable {
                     filter((items) => items.length > 0)
                 )
                 .subscribe((uniqueParams) => {
-                    void this._insertImages(uniqueParams);
+                    this._insertImages(uniqueParams);
                 })
         );
     }

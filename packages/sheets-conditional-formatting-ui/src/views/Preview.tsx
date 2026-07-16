@@ -18,16 +18,22 @@ import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditio
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { SlashDoubleIcon } from '@univerjs/icons';
-import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor, defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
+import {
+    CFRuleType,
+    DEFAULT_BG_COLOR,
+    DEFAULT_FONT_COLOR,
+    defaultDataBarNativeColor,
+    defaultDataBarPositiveColor,
+    getColorScaleFromValue,
+    iconMap,
+} from '@univerjs/sheets-conditional-formatting';
 import { useMemo } from 'react';
 
-export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
-    const rule = props.rule;
-
-    if (!rule) return null;
+export function Preview(props: { rule?: IConditionalFormattingRuleConfig }) {
+    const { rule } = props;
 
     const colorList = useMemo(() => {
-        if (rule.type === CFRuleType.colorScale) {
+        if (rule?.type === CFRuleType.colorScale) {
             const config = rule.config.map((c, index) => ({ color: new ColorKit(c.color), value: index }));
             const maxValue = config.length - 1;
             const valueList = new Array(5).fill('').map((_v, index, arr) => index * maxValue / (arr.length - 1));
@@ -37,13 +43,15 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
     }, [rule]);
 
     const iconSet = useMemo(() => {
-        if (rule.type === CFRuleType.iconSet) {
+        if (rule?.type === CFRuleType.iconSet) {
             return rule.config.map((item) => {
                 const iconList = iconMap[item.iconType];
                 return iconList && iconList[Number(item.iconId)];
             });
         }
     }, [rule]);
+
+    if (!rule) return null;
 
     const previewClassName = 'univer-pointer-events-none univer-flex univer-h-5 univer-min-w-[72px] univer-items-center univer-justify-center univer-text-xs';
 
@@ -124,4 +132,4 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             );
         }
     }
-};
+}

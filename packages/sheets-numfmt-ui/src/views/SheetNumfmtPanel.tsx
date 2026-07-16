@@ -63,7 +63,7 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
     const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
     const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
 
-    const BusinessComponent = useMemo(() => typeOptions.find((item) => item.label === type)?.component, [type]);
+    const BusinessComponent = typeOptions.find((item) => item.label === type)?.component;
 
     function findDefaultType() {
         const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];

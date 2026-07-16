@@ -117,50 +117,36 @@ export const StatusBar = () => {
         };
     }, [isSingle]);
 
-    const useStatisticLayout = (
+    const getStatisticLayout = (
         showList: IStatisticItem[],
         rowCountThreshold: number,
         CopyableStatisticItem: ComponentType<IStatisticItem>
     ) => {
         if (!showStatistic) return null;
-        const renderContent = useMemo(() => {
-            if (showList.length > rowCountThreshold) {
-                const doubleLineList = showList.reduce<IStatisticItem[][]>((acc, _, index) => {
-                    if (index % 2 === 0) {
-                        acc.push(showList.slice(index, index + 2));
-                    }
-                    return acc;
-                }, []);
+        if (showList.length > rowCountThreshold) {
+            const doubleLineList = showList.reduce<IStatisticItem[][]>((acc, _, index) => {
+                if (index % 2 === 0) {
+                    acc.push(showList.slice(index, index + 2));
+                }
+                return acc;
+            }, []);
 
-                return doubleLineList.map((item, index) => (
-                    <div key={`stat-col-${index}`} className="univer-grid univer-h-full univer-items-center">
-                        {item[0] && (
-                            <CopyableStatisticItem
-                                key={item[0].name}
-                                {...item[0]}
-                            />
-                        )}
-                        {item[1] && (
-                            <CopyableStatisticItem
-                                key={item[1].name}
-                                {...item[1]}
-                            />
-                        )}
-                    </div>
-                ));
-            }
-
-            return showList.map((item) => (
-                <div key={item.name} className="univer-grid univer-h-full univer-items-center">
-                    <CopyableStatisticItem {...item} />
+            return doubleLineList.map((item, index) => (
+                <div key={`stat-col-${index}`} className="univer-grid univer-h-full univer-items-center">
+                    {item[0] && <CopyableStatisticItem key={item[0].name} {...item[0]} />}
+                    {item[1] && <CopyableStatisticItem key={item[1].name} {...item[1]} />}
                 </div>
             ));
-        }, [showList, rowCountThreshold, CopyableStatisticItem]);
+        }
 
-        return renderContent;
+        return showList.map((item) => (
+            <div key={item.name} className="univer-grid univer-h-full univer-items-center">
+                <CopyableStatisticItem {...item} />
+            </div>
+        ));
     };
 
-    const renderContent = useStatisticLayout(showList, ROW_COUNT_THRESHOLD, CopyableStatisticItem);
+    const renderContent = getStatisticLayout(showList, ROW_COUNT_THRESHOLD, CopyableStatisticItem);
 
     return (
         show && (

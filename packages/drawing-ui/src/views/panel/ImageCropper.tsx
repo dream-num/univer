@@ -43,13 +43,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
     const { drawings, cropperShow } = props;
 
     const drawingParam = drawings[0];
-
-    if (drawingParam == null) {
-        return;
-    }
-
     const [cropValue, setCropValue] = useState<string>(CropType.FREE as string);
-
     const cropStateRef = useRef(false);
 
     const cropOptions = [
@@ -109,6 +103,10 @@ export const ImageCropper = (props: IImageCropperProps) => {
             onChangeStartObserver?.dispose();
         };
     }, []);
+
+    if (drawingParam == null) {
+        return null;
+    }
 
     function handleCropChange(value: string | number | boolean) {
         setCropValue((value as string));

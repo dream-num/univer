@@ -27,9 +27,12 @@ import {
 import { Avatar, borderClassName, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
+import { IDialogService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect } from 'react';
-import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
+import {
+    UNIVER_SHEET_PERMISSION_USER_DIALOG,
+    UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
+} from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from '../user-dialog/constant';
 
@@ -49,14 +52,15 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
     const userManagerService = useDependency(UserManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
+    const selectUserList = useObservable(
+        sheetPermissionUserManagerService.selectUserList$,
+        sheetPermissionUserManagerService.selectUserList
+    );
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
-    if (!workbook || !worksheet) {
-        return null;
-    }
-    const unitId = workbook.getUnitId();
+    const unitId = workbook?.getUnitId() ?? '';
+    const handleEditStateChange = useEvent(onEditStateChange);
 
     const handleAddPerson = async () => {
         const userList = await authzIoService.listCollaborators({
@@ -79,27 +83,43 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
     };
 
     useEffect(() => {
-        const getSelectUserList = async () => {
-            const collaborators = await authzIoService.listCollaborators({
-                objectID: permissionId!,
+        let cancelled = false;
+
+        if (permissionId && unitId) {
+            void authzIoService.listCollaborators({
+                objectID: permissionId,
                 unitID: unitId,
+            }).then((collaborators) => {
+                if (cancelled) {
+                    return;
+                }
+
+                const editors: ICollaborator[] = collaborators.filter((user) => user.role === UnitRole.Editor);
+                if (editors.length > 0) {
+                    handleEditStateChange(EditStateEnum.DesignedUserCanEdit);
+                }
+                sheetPermissionUserManagerService.setSelectUserList(editors);
+                sheetPermissionUserManagerService.setOldCollaboratorList(editors);
             });
-            const selectUserList: ICollaborator[] = collaborators.filter((user) => {
-                return user.role === UnitRole.Editor;
-            });
-            if (selectUserList.length > 0) {
-                onEditStateChange(EditStateEnum.DesignedUserCanEdit);
-            }
-            sheetPermissionUserManagerService.setSelectUserList(selectUserList);
-            sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList);
-        };
-        if (permissionId) {
-            getSelectUserList();
         } else {
             sheetPermissionUserManagerService.setSelectUserList([]);
             sheetPermissionUserManagerService.setOldCollaboratorList([]);
         }
-    }, []);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [
+        authzIoService,
+        handleEditStateChange,
+        permissionId,
+        sheetPermissionUserManagerService,
+        unitId,
+    ]);
+
+    if (!workbook || !worksheet) {
+        return null;
+    }
 
     return (
         <>

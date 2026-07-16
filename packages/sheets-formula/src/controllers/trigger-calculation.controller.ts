@@ -41,7 +41,6 @@ import {
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
-    FormulaCalculationTriggerService,
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -98,7 +97,12 @@ export class TriggerCalculationController extends Disposable {
 
     private _calculateProgress(label: string): void {
         if (this._executionInProgressParams) {
-            const { totalFormulasToCalculate, completedFormulasCount, totalArrayFormulasToCalculate, completedArrayFormulasCount } = this._executionInProgressParams;
+            const {
+                totalFormulasToCalculate,
+                completedFormulasCount,
+                totalArrayFormulasToCalculate,
+                completedArrayFormulasCount,
+            } = this._executionInProgressParams;
             this._doneCalculationTaskCount = completedFormulasCount + completedArrayFormulasCount;
             this._totalCalculationTaskCount = totalFormulasToCalculate + totalArrayFormulasToCalculate;
 
@@ -126,7 +130,6 @@ export class TriggerCalculationController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(FormulaCalculationTriggerService) formulaCalculationTriggerService: FormulaCalculationTriggerService,
         @ILogService private readonly _logService: ILogService,
         @IConfigService private readonly _configService: IConfigService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
@@ -134,8 +137,6 @@ export class TriggerCalculationController extends Disposable {
         @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
     ) {
         super();
-
-        void formulaCalculationTriggerService;
 
         this._commandExecutedListener();
         this._initialExecuteFormulaProcessListener();

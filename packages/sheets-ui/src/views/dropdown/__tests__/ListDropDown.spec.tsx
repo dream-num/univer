@@ -15,7 +15,7 @@
  */
 
 import type { ISheetLocation } from '@univerjs/sheets';
-import type { IPopup } from '@univerjs/ui';
+import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { ReactElement } from 'react';
 import type { IListDropdownProps } from '../ListDropDown';
 import type { IBaseDropdownProps } from '../type';
@@ -102,7 +102,7 @@ function createLocation(): ISheetLocation {
     } as ISheetLocation;
 }
 
-function createPopup(extraProps: Partial<IListPopupProps> = {}): IPopup<IListPopupProps> {
+function createPopup(extraProps: Partial<IListPopupProps> = {}): IPopupWithExtraProps<IListPopupProps> {
     return {
         componentKey: ListDropDown.componentKey,
         unitId: UNIT_ID,
@@ -120,7 +120,7 @@ function createPopup(extraProps: Partial<IListPopupProps> = {}): IPopup<IListPop
             ],
             ...extraProps,
         },
-    } as IPopup<IListPopupProps>;
+    } as IPopupWithExtraProps<IListPopupProps>;
 }
 
 function renderWithDependencies(element: ReactElement) {

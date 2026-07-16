@@ -16,10 +16,8 @@
 
 import type { Workbook } from '@univerjs/core';
 import type {
-    IAverageHighlightCell,
-    IConditionalFormattingRuleConfig,
+    IFormulaHighlightCell,
     IHighlightCell,
-    IRankHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
@@ -43,7 +41,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
 
-    const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
+    const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined;
 
     const divEleRef = useRef<HTMLDivElement>(null);
     const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
@@ -60,7 +58,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const getResult = (config: {
         style: IHighlightCell['style'];
         formula: string;
-    }) => {
+    }): IFormulaHighlightCell => {
         return {
             style: config.style,
             value: formula,
@@ -155,7 +153,12 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             </div>
 
             <div className={previewClassName}>
-                <Preview rule={getResult({ style, formula }) as IConditionalFormattingRuleConfig} />
+                <Preview
+                    rule={getResult({
+                        style,
+                        formula,
+                    })}
+                />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}

@@ -121,7 +121,7 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
     }
 };
 
-export const RuleList = (props: IRuleListProps) => {
+export function RuleList(props: IRuleListProps) {
     const { onClick } = props;
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -132,12 +132,14 @@ export const RuleList = (props: IRuleListProps) => {
 
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
+    const workbook = useObservable(
+        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
+        undefined,
+        undefined,
+        []
+    )!;
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
-    if (!worksheet) {
-        throw new Error('No active sheet found');
-    }
 
     const subUnitId = worksheet.getSheetId();
 
@@ -422,4 +424,4 @@ export const RuleList = (props: IRuleListProps) => {
             </div>
         </div>
     );
-};
+}

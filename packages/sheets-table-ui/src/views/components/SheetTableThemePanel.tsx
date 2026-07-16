@@ -68,7 +68,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
 
     const errorService = useDependency(ErrorService);
 
-    const [, setRefresh] = useState(Math.random());
+    const [, setRefresh] = useState(Math.random);
 
     const themeConfig = useObservable(tableManager.tableThemeChanged$, {
         theme: table?.getTableStyleId(),

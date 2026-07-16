@@ -44,13 +44,21 @@ export const MentionEditPopup = () => {
     const search = editPopup ? documentDataModel?.getBody()?.dataStream.slice(editPopup.anchor, textSelection?.textRanges[0].startOffset) : '';
 
     useEffect(() => {
-        (async () => {
-            if (editPopup) {
-                const res = await mentionIOService.list({ unitId: editPopup.unitId, search });
-                setMentions(res.list);
-            }
-        })();
+        let cancelled = false;
+
+        if (editPopup) {
+            mentionIOService.list({ unitId: editPopup.unitId, search }).then(({ list }) => {
+                if (!cancelled) {
+                    setMentions(list);
+                }
+            });
+        }
+
+        return () => {
+            cancelled = true;
+        };
     }, [mentionIOService, editPopup, search]);
+
     if (!editPopup) {
         return null;
     }

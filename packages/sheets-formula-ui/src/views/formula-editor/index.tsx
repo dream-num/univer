@@ -198,7 +198,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const [isFocus, setIsFocus] = useState(_isFocus);
     const formulaEditorContainerRef = useRef<HTMLDivElement>(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
-    const isError = useMemo(() => errorText !== undefined, [errorText]);
+    const isError = errorText !== undefined;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const document = univerInstanceService.getUnit<DocumentDataModel>(editorId);
     useObservable(document?.change$);
@@ -216,8 +216,8 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
-    const refSelections = useRef([] as IRefSelection[]);
-    const getRefSelections = useEvent(() => refSelections.current);
+    const refSelectionsRef = useRef([] as IRefSelection[]);
+    const getRefSelections = useEvent(() => refSelectionsRef.current);
     const getRefSelectionCount = useEvent(() => getRefSelections().length);
     const selectingMode = isSelecting;
 
@@ -270,7 +270,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             newSelections,
             formulaStr
         );
-        refSelections.current = ranges;
+        refSelectionsRef.current = ranges;
 
         if (isEnd) {
             const currentDocSelections = newSelections ?? editor?.getSelectionRanges();

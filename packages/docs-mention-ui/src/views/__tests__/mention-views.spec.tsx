@@ -95,9 +95,15 @@ class TestMentionState {
 
 class TestMentionIOService {
     readonly requests: IListMentionParam[] = [];
+    readonly pending: Array<(response: IListMentionResponse) => void> = [];
+    deferResponses = false;
 
     async list(params: IListMentionParam): Promise<IListMentionResponse> {
         this.requests.push(params);
+
+        if (this.deferResponses) {
+            return new Promise((resolve) => this.pending.push(resolve));
+        }
 
         return {
             list: peopleMentions,
@@ -351,6 +357,57 @@ describe('mention views', () => {
         });
         expect(testBed.popupService.editPopup).toBeNull();
         expect(testBed.editorService.focusedUnitIds).toEqual([unitId, unitId]);
+    });
+
+    it('keeps the latest mention response when an older request resolves last', async () => {
+        const testBed = createViewsTestBed();
+        univer = testBed.univer;
+        testBed.mentionIOService.deferResponses = true;
+        testBed.popupService.showEditPopup(unitId, 6);
+        const rendered = renderIntoDocument(<MentionEditPopup />, testBed.injector);
+        disposable = disposeRender(rendered.root, rendered.container);
+
+        await act(async () => {
+            testBed.selectionManager.__replaceTextRangesWithNoRefresh({
+                textRanges: [{
+                    startOffset: 9,
+                    endOffset: 9,
+                    collapsed: true,
+                    isActive: true,
+                    segmentId: '',
+                    style: null as never,
+                }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: true,
+                style: null as never,
+            }, {
+                unitId,
+                subUnitId: unitId,
+            });
+            await Promise.resolve();
+        });
+
+        const response = (label: string): IListMentionResponse => ({
+            list: [{
+                ...peopleMentions[0],
+                mentions: [{ ...peopleMentions[0].mentions[0], label }],
+            }],
+            total: 1,
+        });
+
+        await act(async () => {
+            testBed.mentionIOService.pending[1](response('Latest'));
+            await Promise.resolve();
+        });
+        await act(async () => {
+            testBed.mentionIOService.pending[0](response('Stale'));
+            await Promise.resolve();
+        });
+
+        expect(rendered.container.textContent).toContain('Latest');
+        expect(rendered.container.textContent).not.toContain('Stale');
     });
 
     it('dismisses the edit popup from the empty list area without inserting a mention', async () => {

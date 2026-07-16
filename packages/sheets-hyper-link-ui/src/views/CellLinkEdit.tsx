@@ -321,6 +321,21 @@ export const CellLinkEdit = () => {
         ...sidePanelOptions,
     ];
 
+    const handleRangeChange = useEvent((rangeText: string) => {
+        const newPayload = resolveRangePayload(rangeText, workbook?.getActiveSheet()?.getName() || '');
+        if (!newPayload) {
+            setPayload('');
+            return;
+        }
+
+        setPayload(newPayload);
+
+        if (getIsDisplaySyncedWithPayload() || !display) {
+            setDisplay(newPayload);
+            setDisplaySyncedWithPayload(true);
+        }
+    });
+
     if (!workbook) {
         return;
     }
@@ -347,21 +362,6 @@ export const CellLinkEdit = () => {
 
         return `#${type}=${payload}`;
     };
-
-    const handleRangeChange = useEvent((rangeText: string) => {
-        const newPayload = resolveRangePayload(rangeText, workbook.getActiveSheet()?.getName() || '');
-        if (!newPayload) {
-            setPayload('');
-            return;
-        }
-
-        setPayload(newPayload);
-
-        if (newPayload && (getIsDisplaySyncedWithPayload() || !display)) {
-            setDisplay(newPayload);
-            setDisplaySyncedWithPayload(true);
-        }
-    });
 
     const handleSubmit = async () => {
         if ((showLabel && isBlankInput(display)) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {

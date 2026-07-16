@@ -15,7 +15,7 @@
  */
 
 import type { ISheetLocation } from '@univerjs/sheets';
-import type { IPopup } from '@univerjs/ui';
+import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
@@ -231,14 +231,14 @@ export interface IListDropdownProps {
     showSearch?: boolean;
 }
 
-export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDropdownProps> }) {
+export function ListDropDown(props: { popup: IPopupWithExtraProps<IListDropdownProps & IBaseDropdownProps> }) {
     const { popup: { extraProps, anchorRect } } = props;
-    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple, showSearch, showEdit } = extraProps!;
+    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple, showSearch, showEdit } = extraProps;
 
     const { worksheet } = location;
-    if (!worksheet) return null;
-
     const [localValue, setLocalValue] = useState(defaultValue);
+
+    if (!worksheet) return null;
     const cellWidth = (anchorRect?.right ?? 0) - (anchorRect?.left ?? 0);
 
     return (

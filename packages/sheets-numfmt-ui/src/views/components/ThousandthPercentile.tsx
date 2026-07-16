@@ -44,7 +44,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
 
     const pattern = useMemo(() => setPatternDecimal(suffix, Number(decimal || 0)), [suffix, decimal]);
 
-    const isInputDisable = useMemo(() => !isPatternHasDecimal(suffix), [suffix]);
+    const isInputDisable = !isPatternHasDecimal(suffix);
 
     const handleDecimalChange = (decimal: number | null) => {
         setDecimal(decimal || 0);

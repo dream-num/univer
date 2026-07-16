@@ -15,11 +15,11 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import type { IPopup } from '../../../../services/popup/canvas-popup.service';
+import type { IPopup, IPopupWithExtraProps } from '../../../../services/popup/canvas-popup.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ConfigService, IConfigService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, expectTypeOf, it } from 'vitest';
 import { ComponentManager } from '../../../../common';
 import { CanvasPopupService, ICanvasPopupService } from '../../../../services/popup/canvas-popup.service';
 import { connectInjector } from '../../../../utils/di';
@@ -35,8 +35,8 @@ class TestResizeObserver {
 let previousResizeObserver: typeof ResizeObserver | undefined;
 let previousAnimationFrame: typeof requestAnimationFrame | undefined;
 
-function TestPopup({ popup }: { popup: IPopup<{ label: string }> }) {
-    return <button type="button">{popup.extraProps?.label}</button>;
+function TestPopup({ popup }: { popup: IPopupWithExtraProps<{ label: string }> }) {
+    return <button type="button">{popup.extraProps.label}</button>;
 }
 
 function renderWithDependencies(element: ReactElement) {
@@ -71,6 +71,11 @@ function createCanvasElement(rect: DOMRect): HTMLCanvasElement {
 }
 
 describe('CanvasPopup', () => {
+    it('requires extraProps only for popups that declare them', () => {
+        expectTypeOf<IPopup['extraProps']>().toEqualTypeOf<Record<string, unknown> | undefined>();
+        expectTypeOf<IPopupWithExtraProps<{ label: string }>['extraProps']>().toEqualTypeOf<{ label: string }>();
+    });
+
     beforeEach(() => {
         previousResizeObserver = globalThis.ResizeObserver;
         previousAnimationFrame = globalThis.requestAnimationFrame;

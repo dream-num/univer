@@ -16,7 +16,6 @@
 
 import type {
     IAverageHighlightCell,
-    IConditionalFormattingRuleConfig,
     IHighlightCell,
     IRankHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
@@ -31,14 +30,16 @@ import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
 import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
+type IRankRuleType = 'isNotBottom' | 'isBottom' | 'greaterThanAverage' | 'lessThanAverage';
+
 export const RankStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 
-    const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
-    const options = [{ label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.isBottom'), value: 'isBottom' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.lessThanAverage'), value: 'lessThanAverage' }];
+    const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined;
+    const options: Array<{ label: string; value: IRankRuleType }> = [{ label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.isBottom'), value: 'isBottom' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.lessThanAverage'), value: 'lessThanAverage' }];
 
-    const [type, setType] = useState(() => {
+    const [type, setType] = useState<IRankRuleType>(() => {
         const defaultV = options[0].value;
         const type = rule?.type;
         if (!rule) {
@@ -109,25 +110,25 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     const [style, setStyle] = useState<IHighlightCell['style']>({});
 
     const getResult = (config: {
-        type: string;
+        type: IRankRuleType;
         isPercent: boolean;
         value: number;
         style: IHighlightCell['style'];
-    }) => {
+    }): IRankHighlightCell | IAverageHighlightCell => {
         const { type, isPercent, value, style } = config;
-        if (type === 'isNotBottom') {
-            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isPercent, isBottom: false, value, style };
-        }
-        if (type === 'isBottom') {
-            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isPercent, isBottom: true, value, style };
-        }
-        if (type === 'greaterThanAverage') {
-            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.average, operator: CFNumberOperator.greaterThan, style };
-        }
-        if (type === 'lessThanAverage') {
-            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.average, operator: CFNumberOperator.lessThan, style };
+
+        switch (type) {
+            case 'isNotBottom':
+                return { type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isPercent, isBottom: false, value, style };
+            case 'isBottom':
+                return { type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isPercent, isBottom: true, value, style };
+            case 'greaterThanAverage':
+                return { type: CFRuleType.highlightCell, subType: CFSubRuleType.average, operator: CFNumberOperator.greaterThan, style };
+            case 'lessThanAverage':
+                return { type: CFRuleType.highlightCell, subType: CFSubRuleType.average, operator: CFNumberOperator.lessThan, style };
         }
     };
+
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {
             handler() {
@@ -138,7 +139,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     }, [type, isPercent, value, style, interceptorManager]);
 
     const _onChange = (config: {
-        type: string;
+        type: IRankRuleType;
         isPercent: boolean;
         value: number;
         style: IHighlightCell['style'];
@@ -160,8 +161,11 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 value={type}
                 options={options}
                 onChange={(v) => {
-                    setType(v);
-                    _onChange({ type: v, isPercent, value, style });
+                    const nextType = options.find((option) => option.value === v)?.value;
+                    if (nextType) {
+                        setType(nextType);
+                        _onChange({ type: nextType, isPercent, value, style });
+                    }
                 }}
             />
             {['isNotBottom', 'isBottom'].includes(type) && (
@@ -192,7 +196,14 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 </div>
             )}
             <div className={previewClassName}>
-                <Preview rule={getResult({ type, isPercent, value, style }) as IConditionalFormattingRuleConfig} />
+                <Preview
+                    rule={getResult({
+                        type,
+                        isPercent,
+                        value,
+                        style,
+                    })}
+                />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}

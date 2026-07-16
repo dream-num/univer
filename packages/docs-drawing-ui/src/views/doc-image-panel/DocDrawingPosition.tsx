@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDocDrawing, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -30,12 +30,12 @@ import {
 } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
 
 const MIN_OFFSET = -1000;
 const MAX_OFFSET = 1000;
@@ -135,7 +135,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             };
         });
 
-        commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
+        commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId: focusDrawings[0].unitId,
             subUnitId: focusDrawings[0].unitId,
             drawings: drawings.map((drawing) => ({

@@ -42,7 +42,7 @@ import type {
 } from '@univerjs/sheets';
 import type {
     IFloatDomData,
-    IInsertDrawingCommandParams,
+    IInsertSheetDrawingCommandParams,
     ISetDrawingCommandParams,
     ISheetDrawing,
     ISheetDrawingPosition,
@@ -1809,10 +1809,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         // mutation
         // ---> this._drawingManagerService.add$.subscribe
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        this._commandService.executeCommand<IInsertSheetDrawingCommandParams>(InsertSheetDrawingCommand.id, {
             unitId,
             drawings: [sheetDrawingParam],
-        } as IInsertDrawingCommandParams);
+        });
 
         this._add$.next({ unitId, subUnitId, id });
 

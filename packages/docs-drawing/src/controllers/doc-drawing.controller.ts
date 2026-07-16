@@ -17,8 +17,13 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
 import type { IDocDrawing } from '../services/doc-drawing.service';
-import { BooleanNumber, Disposable, IResourceManagerService, IUniverInstanceService, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
+import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
+import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing-transform.command';
+import { UpdateDocDrawingWrappingStyleCommand } from '../commands/commands/update-doc-drawing-wrapping-style.command';
 import { IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
@@ -52,7 +57,8 @@ export class DocDrawingController extends Disposable {
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -61,6 +67,7 @@ export class DocDrawingController extends Disposable {
 
     private _init(): void {
         this._initSnapshot();
+        this._initCommands();
     }
 
     private _initSnapshot() {
@@ -150,5 +157,15 @@ export class DocDrawingController extends Disposable {
         this._docDrawingService.registerDrawingData(unitId, subDrawings);
         this._drawingManagerService.registerDrawingData(unitId, renderSubDrawings);
         return true;
+    }
+
+    private _initCommands() {
+        [
+            InsertDocDrawingCommand,
+            RemoveDocDrawingCommand,
+            UpdateDrawingDocTransformCommand,
+            UpdateDocDrawingWrappingStyleCommand,
+            SetDocDrawingArrangeCommand,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

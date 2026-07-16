@@ -15,12 +15,12 @@
  */
 
 import { ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
-    UpdateDrawingDocTransformCommand,
 } from '../../commands/commands/update-doc-drawing.command';
 import { DocDrawingTransformerController, getDocsTableCellAnchorContext } from '../doc-drawing-transformer-update.controller';
 

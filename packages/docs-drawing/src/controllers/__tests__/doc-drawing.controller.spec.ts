@@ -53,7 +53,8 @@ describe('DocDrawingController', () => {
             { registerDrawingData } as any,
             { registerDrawingData: registerDrawingDataForManager } as any,
             resourceManagerService as any,
-            univerInstanceService as any
+            univerInstanceService as any,
+            { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as any
         );
 
         expect(resourceManagerService.registerPluginResource).toHaveBeenCalledTimes(1);

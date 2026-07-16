@@ -15,6 +15,7 @@
  */
 
 import type { Dependency, DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
+import type { IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import {
     ArrangeTypeEnum,
     awaitTime,
@@ -45,6 +46,12 @@ import {
     DocDrawingService,
     IDocDrawingAdapterService,
     IDocDrawingService,
+    InsertDocDrawingCommand,
+    RemoveDocDrawingCommand,
+    SetDocDrawingArrangeCommand,
+    TextWrappingStyle,
+    UpdateDocDrawingWrappingStyleCommand,
+    UpdateDrawingDocTransformCommand,
 } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
@@ -58,20 +65,14 @@ import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawing
 import { ClearDocDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../group-doc-drawing.command';
-import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { InsertDocImageCommand } from '../insert-image.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
-import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
-import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../ungroup-doc-drawing.command';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
-    TextWrappingStyle,
     UpdateDocDrawingDistanceCommand,
-    UpdateDocDrawingWrappingStyleCommand,
     UpdateDocDrawingWrapTextCommand,
-    UpdateDrawingDocTransformCommand,
 } from '../update-doc-drawing.command';
 
 function createBaseDocData(): IDocumentData {
@@ -131,6 +132,35 @@ function createDrawingDocData(): IDocumentData {
             marginLeft: 90,
         },
     };
+}
+
+function createHeaderDrawingDocData(): IDocumentData {
+    const docData = createBaseDocData();
+    docData.headers = {
+        'header-1': {
+            headerId: 'header-1',
+            body: {
+                dataStream: '\b\r\n',
+                customBlocks: [{ startIndex: 0, blockId: 'header-shape-1' }],
+            },
+        },
+    };
+    docData.drawings = {
+        'header-shape-1': {
+            drawingId: 'header-shape-1',
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            docTransform: {
+                positionH: { posOffset: 1 },
+                positionV: { posOffset: 2 },
+            },
+        } as never,
+    };
+    docData.drawingsOrder = ['header-shape-1'];
+
+    return docData;
 }
 
 function createChartDrawingDocData(): IDocumentData {
@@ -336,21 +366,16 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
 
     const commandService = get(ICommandService);
     [
-        InsertDocDrawingCommand,
-        RemoveDocDrawingCommand,
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
         GroupDocDrawingCommand,
         UngroupDocDrawingCommand,
-        SetDocDrawingArrangeCommand,
         ClearDocDrawingTransformerOperation,
         InsertDocImageCommand,
         IMoveInlineDrawingCommand,
         ITransformNonInlineDrawingCommand,
         UpdateDocDrawingDistanceCommand,
-        UpdateDocDrawingWrappingStyleCommand,
         UpdateDocDrawingWrapTextCommand,
-        UpdateDrawingDocTransformCommand,
         RichTextEditingMutation as unknown as ICommand,
     ].forEach((command) => commandService.registerCommand(command));
 
@@ -393,16 +418,19 @@ describe('docs drawing commands integration', () => {
             style: null as never,
         }]);
 
-        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
+            unitId: 'test-doc',
             drawings: [{
                 drawingId: 'shape-1',
                 unitId: 'test-doc',
                 subUnitId: 'test-doc',
-                drawingType: 'image',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
                 docTransform: {
-                    positionH: { posOffset: 1 },
-                    positionV: { posOffset: 2 },
+                    size: { width: 1, height: 1 },
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 1 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 2 },
+                    angle: 0,
                 },
             }],
         })).toBe(true);
@@ -441,16 +469,19 @@ describe('docs drawing commands integration', () => {
             endOffset: insertOffset,
         });
 
-        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
+            unitId: 'test-doc',
             drawings: [{
                 drawingId: 'shape-1',
                 unitId: 'test-doc',
                 subUnitId: 'test-doc',
-                drawingType: 'image',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
                 docTransform: {
-                    positionH: { posOffset: 1 },
-                    positionV: { posOffset: 2 },
+                    size: { width: 1, height: 1 },
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 1 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 2 },
+                    angle: 0,
                 },
             }],
         })).toBe(true);
@@ -478,7 +509,8 @@ describe('docs drawing commands integration', () => {
             style: null as never,
         }]);
 
-        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
+            unitId: 'test-doc',
             textRange: {
                 startOffset: insertOffset,
                 endOffset: insertOffset,
@@ -489,11 +521,13 @@ describe('docs drawing commands integration', () => {
                 drawingId: 'shape-1',
                 unitId: 'test-doc',
                 subUnitId: 'test-doc',
-                drawingType: 'image',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
                 docTransform: {
-                    positionH: { posOffset: 1 },
-                    positionV: { posOffset: 2 },
+                    size: { width: 1, height: 1 },
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 1 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 2 },
+                    angle: 0,
                 },
             }],
         })).toBe(true);
@@ -504,6 +538,44 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getBody()?.dataStream).toBe('Hel\blo\r\n');
         expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: insertOffset, blockId: 'shape-1' }]);
+
+        testBed.univer.dispose();
+    });
+
+    it('inserts into the document specified by the command params', async () => {
+        const testBed = setupDrawingTestBed(createBaseDocData());
+        const targetData = createBaseDocData();
+        targetData.id = 'target-doc';
+        const targetDoc = testBed.univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, targetData);
+
+        testBed.injector.get(CoreDocDrawingController).loadDrawingDataForUnit('target-doc');
+        testBed.get(IUniverInstanceService).setCurrentUnitForType('test-doc');
+
+        expect(await testBed.commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
+            unitId: 'target-doc',
+            textRange: {
+                startOffset: 5,
+                endOffset: 5,
+                collapsed: true,
+                segmentId: '',
+            },
+            drawings: [{
+                drawingId: 'target-shape-1',
+                unitId: 'target-doc',
+                subUnitId: 'target-doc',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    size: { width: 1, height: 1 },
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 1 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 2 },
+                    angle: 0,
+                },
+            }],
+        })).toBe(true);
+
+        expect(targetDoc.getBody()?.customBlocks).toEqual([{ startIndex: 5, blockId: 'target-shape-1' }]);
+        expect(testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)?.getBody()?.customBlocks).toEqual([]);
 
         testBed.univer.dispose();
     });
@@ -520,16 +592,19 @@ describe('docs drawing commands integration', () => {
             style: null as never,
         }]);
 
-        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
+            unitId: 'test-doc',
             drawings: [{
                 drawingId: 'shape-2',
                 unitId: 'test-doc',
                 subUnitId: 'test-doc',
-                drawingType: 'image',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
                 docTransform: {
-                    positionH: { posOffset: 10 },
-                    positionV: { posOffset: 20 },
+                    size: { width: 1, height: 1 },
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 10 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 20 },
+                    angle: 0,
                 },
             }],
         })).toBe(true);
@@ -564,6 +639,62 @@ describe('docs drawing commands integration', () => {
         expect(doc.getSnapshot().drawingsOrder).toEqual([]);
         expect(testBed.docDrawingService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
         expect(testBed.drawingManagerService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
+
+        testBed.univer.dispose();
+    });
+
+    it('deletes from the explicit text range segment instead of the active selection segment', async () => {
+        const testBed = setupDrawingTestBed(createHeaderDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(RemoveDocDrawingCommand.id, {
+            unitId: 'test-doc',
+            drawings: [{
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingId: 'header-shape-1',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            }],
+            textRange: {
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+                segmentId: 'header-1',
+            },
+        } as never)).toBe(true);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customBlocks).toEqual([]);
+        expect(doc.getSnapshot().drawings?.['header-shape-1']).toBeUndefined();
+
+        testBed.univer.dispose();
+    });
+
+    it('deletes from the document specified by the command params', async () => {
+        const testBed = setupDrawingTestBed(createBaseDocData());
+        const targetData = createDrawingDocData();
+        targetData.id = 'target-doc';
+        targetData.drawings!['shape-1'].unitId = 'target-doc';
+        targetData.drawings!['shape-1'].subUnitId = 'target-doc';
+        const targetDoc = testBed.univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, targetData);
+
+        testBed.injector.get(CoreDocDrawingController).loadDrawingDataForUnit('target-doc');
+        testBed.get(IUniverInstanceService).setCurrentUnitForType('test-doc');
+
+        expect(await testBed.commandService.executeCommand(RemoveDocDrawingCommand.id, {
+            unitId: 'target-doc',
+            drawings: [{
+                unitId: 'target-doc',
+                subUnitId: 'target-doc',
+                drawingId: 'shape-1',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            }],
+        })).toBe(true);
+
+        expect(targetDoc.getBody()?.customBlocks).toEqual([]);
+        expect(targetDoc.getSnapshot().drawings).toEqual({});
+        expect(testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)?.getBody()?.customBlocks).toEqual([]);
 
         testBed.univer.dispose();
     });
@@ -877,13 +1008,14 @@ describe('docs drawing commands integration', () => {
         vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue(skeleton);
         const refreshDrawings = vi.spyOn(testBed.get(DocRefreshDrawingsService), 'refreshDrawings');
 
-        expect(await testBed.commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
+        expect(await testBed.commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId: 'test-doc',
             subUnitId: 'test-doc',
             drawings: [{
                 drawingId: 'shape-1',
                 key: 'positionV',
                 value: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
                     posOffset: 18,
                 },
             }],
@@ -893,7 +1025,10 @@ describe('docs drawing commands integration', () => {
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
 
-        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionV).toEqual({ posOffset: 18 });
+        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionV).toEqual({
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: 18,
+        });
         expect(testBed.refreshControls).toHaveBeenCalled();
         expect(refreshDrawings).toHaveBeenCalledWith(skeleton);
 
@@ -1039,7 +1174,7 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-a', 'drawing-b', 'drawing-c']);
 
-        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+        expect(await testBed.commandService.executeCommand<ISetDocDrawingArrangeCommandParams>(SetDocDrawingArrangeCommand.id, {
             unitId: 'test-doc',
             subUnitId: 'test-doc',
             drawingIds: ['drawing-a'],
@@ -1048,7 +1183,7 @@ describe('docs drawing commands integration', () => {
         await awaitTime(0);
         expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-b', 'drawing-c', 'drawing-a']);
 
-        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+        expect(await testBed.commandService.executeCommand<ISetDocDrawingArrangeCommandParams>(SetDocDrawingArrangeCommand.id, {
             unitId: 'test-doc',
             subUnitId: 'test-doc',
             drawingIds: ['drawing-a'],
@@ -1057,7 +1192,7 @@ describe('docs drawing commands integration', () => {
         await awaitTime(0);
         expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-b', 'drawing-a', 'drawing-c']);
 
-        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+        expect(await testBed.commandService.executeCommand<ISetDocDrawingArrangeCommandParams>(SetDocDrawingArrangeCommand.id, {
             unitId: 'test-doc',
             subUnitId: 'test-doc',
             drawingIds: ['drawing-b'],
@@ -1066,7 +1201,7 @@ describe('docs drawing commands integration', () => {
         await awaitTime(0);
         expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-a', 'drawing-b', 'drawing-c']);
 
-        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+        expect(await testBed.commandService.executeCommand<ISetDocDrawingArrangeCommandParams>(SetDocDrawingArrangeCommand.id, {
             unitId: 'test-doc',
             subUnitId: 'test-doc',
             drawingIds: ['drawing-c'],

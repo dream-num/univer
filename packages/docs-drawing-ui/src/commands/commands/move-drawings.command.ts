@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IDrawingDocTransform, IUpdateDrawingDocTransformParams } from './update-doc-drawing.command';
+import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV } from '@univerjs/core';
+import type { IDocDrawing, IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import {
     CommandType,
     Direction,
@@ -25,9 +24,8 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
+import { IDocDrawingService, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UpdateDrawingDocTransformCommand } from './update-doc-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -74,8 +72,8 @@ export const MoveDocDrawingsCommand: ICommand = {
 
             const { positionH, positionV } = drawingData.docTransform;
 
-            const newPositionH = { ...positionH };
-            const newPositionV = { ...positionV };
+            const newPositionH: IObjectPositionH = { ...positionH };
+            const newPositionV: IObjectPositionV = { ...positionV };
 
             if (direction === Direction.UP) {
                 newPositionV.posOffset = (newPositionV.posOffset ?? 0) - 2;
@@ -91,14 +89,14 @@ export const MoveDocDrawingsCommand: ICommand = {
                 drawingId,
                 key: direction === Direction.UP || direction === Direction.DOWN ? 'positionV' : 'positionH',
                 value: direction === Direction.UP || direction === Direction.DOWN ? newPositionV : newPositionH,
-            } as IDrawingDocTransform;
+            };
         }).filter((drawing) => drawing != null) as IDrawingDocTransform[];
 
         if (newDrawings.length === 0) {
             return false;
         }
 
-        const result = commandService.syncExecuteCommand<IUpdateDrawingDocTransformParams>(UpdateDrawingDocTransformCommand.id, {
+        const result = commandService.syncExecuteCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId,
             subUnitId: unitId,
             drawings: newDrawings,

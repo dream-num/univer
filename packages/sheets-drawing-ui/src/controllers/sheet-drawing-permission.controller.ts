@@ -16,8 +16,8 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type {
-    IDeleteDrawingCommandParams,
-    IInsertDrawingCommandParams,
+    IInsertSheetDrawingCommandParams,
+    IRemoveSheetDrawingCommandParams,
     ISetDrawingArrangeCommandParams,
     ISetDrawingCommandParams,
 } from '@univerjs/sheets-drawing';
@@ -438,7 +438,7 @@ export class SheetDrawingPermissionController extends Disposable {
                 let subUnitId: string | undefined;
 
                 if (command.id === InsertSheetDrawingCommand.id || command.id === RemoveSheetDrawingCommand.id || command.id === SetSheetDrawingCommand.id) {
-                    const params = command.params as IInsertDrawingCommandParams | IDeleteDrawingCommandParams | ISetDrawingCommandParams;
+                    const params = command.params as IInsertSheetDrawingCommandParams | IRemoveSheetDrawingCommandParams | ISetDrawingCommandParams;
                     const { drawings } = params;
                     unitId = drawings?.[0]?.unitId;
                     subUnitId = drawings?.[0]?.subUnitId;

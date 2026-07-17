@@ -25,7 +25,6 @@ import {
     Inject,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager } from '@univerjs/ui';
 import { dropdownMap } from '../views/dropdown';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 
@@ -49,14 +48,9 @@ export const ISheetCellDropdownManagerService = createIdentifier<ISheetCellDropd
 export class SheetCellDropdownManagerService extends Disposable implements ISheetCellDropdownManagerService {
     constructor(
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-
-        Object.values(dropdownMap).forEach((component) => {
-            this.disposeWithMe(this._componentManager.register(component.componentKey, component));
-        });
     }
 
     showDropdown(param: IDropdownParam): IDisposable {

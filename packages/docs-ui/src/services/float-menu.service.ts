@@ -28,12 +28,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { ComponentManager } from '@univerjs/ui';
-import { FloatToolbar } from '../views/float-toolbar/FloatToolbar';
+import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
-
-const FLOAT_MENU_COMPONENT_KEY = 'univer.doc.float-menu';
 
 function isInSameLine(startNodePosition: Nullable<INodePosition>, endNodePosition: Nullable<INodePosition>) {
     if (startNodePosition == null || endNodePosition == null) {
@@ -57,7 +54,6 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService
     ) {
@@ -66,7 +62,6 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         if (isInternalEditorID(this._context.unitId)) {
             return;
         }
-        this._registerFloatMenu();
         this._initSelectionChange();
 
         this.disposeWithMe(() => {
@@ -80,10 +75,6 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
     hideFloatMenu(): void {
         this._hideFloatMenu();
-    }
-
-    private _registerFloatMenu() {
-        this.disposeWithMe(this._componentManager.register(FLOAT_MENU_COMPONENT_KEY, FloatToolbar));
     }
 
     private _initSelectionChange() {

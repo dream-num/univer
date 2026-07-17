@@ -15,7 +15,19 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { FunctionIcon } from '@univerjs/icons';
+import {
+    DatabaseFunctionIcon,
+    DateFunctionIcon,
+    EngineeringFunctionIcon,
+    FinancialFunctionIcon,
+    FunctionIcon,
+    InformationFunctionIcon,
+    LogicalFunctionIcon,
+    LookupFunctionIcon,
+    MathFunctionIcon,
+    StatisticalFunctionIcon,
+    TextFunctionIcon,
+} from '@univerjs/icons';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { FormulaEditor } from '../views/formula-editor/index';
@@ -36,7 +48,17 @@ export class ComponentsController extends Disposable {
 
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
+            DatabaseFunctionIcon,
+            DateFunctionIcon,
+            EngineeringFunctionIcon,
+            FinancialFunctionIcon,
             FunctionIcon,
+            InformationFunctionIcon,
+            LogicalFunctionIcon,
+            LookupFunctionIcon,
+            MathFunctionIcon,
+            StatisticalFunctionIcon,
+            TextFunctionIcon,
         }));
     }
 

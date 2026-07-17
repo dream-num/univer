@@ -2,20 +2,13 @@ import type { IUniverDebuggerConfig } from '../config/config';
 import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
 import {
     BuiltInUIPart,
-    ComponentManager,
     connectInjector,
     IMenuManagerService,
     IUIPartsService,
     // MenuItemType,
     // RibbonStartGroup,
 } from '@univerjs/ui';
-import { AIButton, FloatButton } from '../components/FloatButton';
-import { ImageDemo } from '../components/Image';
-import { RangeLoading } from '../components/RangeLoading';
 import { DEBUGGER_PLUGIN_CONFIG_KEY } from '../config/config';
-// @ts-ignore
-// import VueComponent from '../components/VueComponent.vue';
-// import { CounterComponent } from '../components/WebComponent';
 import { Fab } from '../views/Fab';
 import { RecordController } from './local-save/record.controller';
 
@@ -24,8 +17,7 @@ export class DebuggerController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
 
@@ -59,25 +51,6 @@ export class DebuggerController extends Disposable {
     }
 
     private _initCustomComponents(): void {
-        ([
-            ['ImageDemo', ImageDemo],
-            ['RangeLoading', RangeLoading],
-            ['FloatButton', FloatButton],
-            ['AIButton', AIButton],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
-
-        // this.disposeWithMe(this._componentManager.register('VueComponent', VueComponent, {
-        //     framework: 'vue3',
-        // }));
-
-        // this.disposeWithMe(this._componentManager.register('counter-component', CounterComponent, {
-        //     framework: 'web-component',
-        // }));
-
         const configs = this._configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
 
         if (configs?.fab) {

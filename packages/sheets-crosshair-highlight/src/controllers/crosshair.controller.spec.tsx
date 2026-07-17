@@ -25,18 +25,15 @@ import {
 import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT } from '../menu/crosshair.menu';
 import { menuSchema } from '../menu/schema';
 import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
+import { ComponentsController } from './components.controller';
 import { SheetsCrosshairHighlightController } from './crosshair.controller';
 
 describe('SheetsCrosshairHighlightController', () => {
-    it('should register commands, merge menu, register components and register icons', () => {
+    it('should register commands and merge menu', () => {
         const registerCommand = vi.fn();
         const mergeMenu = vi.fn();
-        const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
-        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
 
         const controller = new SheetsCrosshairHighlightController(
-            { register: registerComponent } as never,
-            { register: registerIcon } as never,
             { mergeMenu } as never,
             { registerCommand } as never
         );
@@ -47,9 +44,22 @@ describe('SheetsCrosshairHighlightController', () => {
         expect(registerCommand).toHaveBeenCalledWith(DisableCrosshairHighlightOperation);
 
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
+        expect(Object.keys(menuSchema).length).toBeGreaterThan(0);
+
+        controller.dispose();
+    });
+
+    it('should register components and icons', () => {
+        const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
+
+        const controller = new ComponentsController(
+            { register: registerComponent } as never,
+            { register: registerIcon } as never
+        );
+
         expect(registerComponent).toHaveBeenCalledWith(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay);
         expect(registerIcon).toHaveBeenCalledWith({ CrossHighlightingIcon });
-        expect(Object.keys(menuSchema).length).toBeGreaterThan(0);
 
         controller.dispose();
     });

@@ -3,10 +3,10 @@ import type { IUniverDebuggerConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import pkg from '../package.json';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
-import { UniverWatermarkMenuController } from './menu/watermark.menu.controller';
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'UNIVER_DEBUGGER_PLUGIN';
@@ -37,8 +37,8 @@ export class UniverDebuggerPlugin extends Plugin {
     override onStarting(): void {
         const dependencies: Dependency[] = [
             [DebuggerController],
+            [ComponentsController],
             [E2EController],
-            [UniverWatermarkMenuController],
         ];
 
         if (this._config.performanceMonitor?.enabled !== false) {
@@ -54,6 +54,7 @@ export class UniverDebuggerPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
+            [ComponentsController],
             [DebuggerController],
         ]);
     }
@@ -61,7 +62,6 @@ export class UniverDebuggerPlugin extends Plugin {
     override onRendered(): void {
         touchDependencies(this._injector, [
             [PerformanceMonitorController],
-            [UniverWatermarkMenuController],
         ]);
     }
 

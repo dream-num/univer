@@ -24,7 +24,7 @@ import {
     LocaleService,
     toDisposable,
 } from '@univerjs/core';
-import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
+import { IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
@@ -75,7 +75,6 @@ const interceptKeys = [KeyCode.ARROW_UP, KeyCode.ARROW_DOWN, KeyCode.ENTER];
 export const QuickInsertPopup = () => {
     const localeService = useDependency(LocaleService);
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
-    const componentManager = useDependency(ComponentManager);
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
 
@@ -223,7 +222,7 @@ export const QuickInsertPopup = () => {
 
     const hasMenus = filteredMenus.length > 0;
 
-    const Placeholder = currentPopup?.popup.Placeholder || componentManager.get(QuickInsertPlaceholder.componentKey);
+    const Placeholder = currentPopup?.popup.Placeholder || QuickInsertPlaceholder;
 
     return (
         <div className="univer-mt-2">

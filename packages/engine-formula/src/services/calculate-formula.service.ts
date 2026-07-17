@@ -157,12 +157,12 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
             for (let i = 0; i < cycleReferenceCount; i++) {
                 this._runtimeService.setFormulaCycleIndex(i);
-                await this._executeStep();
+                const executed = await this._executeStep();
 
                 FORMULA_REF_TO_ARRAY_CACHE.clear();
 
                 const isCycleDependency = this._runtimeService.isCycleDependency();
-                if (!isCycleDependency) {
+                if (!executed || !isCycleDependency) {
                     break;
                 }
             }
@@ -343,7 +343,6 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 if (this._runtimeService.isStopExecution() || (nodeData == null && getDirtyData == null)) {
                     this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
                     this._runtimeService.markedAsStopFunctionsExecuted();
-                    this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
                     return;
                 }
             }

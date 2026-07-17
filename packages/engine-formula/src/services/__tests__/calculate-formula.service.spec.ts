@@ -25,7 +25,7 @@ import { Interpreter } from '../../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../../engine/reference-object/base-reference-object';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
-import { FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
+import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
 
 function createService() {
     const configService = {
@@ -483,7 +483,38 @@ describe('CalculateFormulaService', () => {
 
         expect(mocks.runtimeService.setFormulaExecuteStage).toHaveBeenCalledWith(FormulaExecuteStageType.IDLE);
         expect(mocks.runtimeService.markedAsStopFunctionsExecuted).toHaveBeenCalledTimes(1);
-        expect(completed.length).toBe(1);
+        expect(completed).toEqual([]);
+    });
+
+    it('should emit one terminal notification when execution stops', async () => {
+        const { service, mocks } = createService();
+        mocks.formulaDependencyGenerator.generate.mockResolvedValueOnce([
+            {
+                row: 1,
+                column: 1,
+                rowCount: 10,
+                columnCount: 10,
+                subUnitId: 's',
+                unitId: 'u',
+                nodeData: null,
+                getDirtyData: null,
+                featureId: null,
+                formulaId: null,
+                refOffsetX: 0,
+                refOffsetY: 0,
+            },
+        ] as never);
+        mocks.runtimeService.isStopExecution.mockReturnValue(true);
+        mocks.runtimeService.getAllRuntimeData.mockReturnValue({
+            functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION,
+        } as never);
+        const completed: unknown[] = [];
+        service.executionCompleteListener$.subscribe((item) => completed.push(item));
+
+        await service.execute({ maxIteration: 3 } as never);
+        await vi.waitFor(() => expect(mocks.runtimeService.reset).toHaveBeenCalledTimes(2));
+
+        expect(completed).toHaveLength(1);
     });
 
     it('should mark no-functions-executed when tree list is empty', async () => {

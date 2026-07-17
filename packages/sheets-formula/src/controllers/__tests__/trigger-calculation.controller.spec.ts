@@ -256,6 +256,7 @@ describe('TriggerCalculationController', () => {
         testBed.activeDirtyManagerService.register('formula.test-dirty-restart', {
             commandId: 'formula.test-dirty-restart',
             getDirtyData: () => ({
+                forceCalculation: true,
                 dirtyRanges: [{ unitId: 'test', sheetId: 'sheet1', range: { startRow: 4, startColumn: 0, endRow: 4, endColumn: 1 } }],
             }),
         });
@@ -282,7 +283,7 @@ describe('TriggerCalculationController', () => {
             functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION,
         });
 
-        await Promise.resolve();
+        await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executedCommands.findLast((command) => command.id === SetFormulaCalculationStartMutation.id)).toMatchObject({
             options: { onlyLocal: true },

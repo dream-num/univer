@@ -77,12 +77,12 @@ describe('FormulaCalculationTriggerService', () => {
         });
 
         testBed.emit({ id: 'sheet-dirty' } as ICommandInfo, { fromChangeset: true });
-        await vi.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(10);
         expect(testBed.executed).toEqual([]);
 
         testBed.service.start();
         testBed.emit({ id: SetTriggerFormulaCalculationStartMutation.id } as ICommandInfo);
-        await vi.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executed).toHaveLength(1);
         expect(testBed.executed[0]).toMatchObject({
@@ -112,7 +112,7 @@ describe('FormulaCalculationTriggerService', () => {
 
         testBed.emit({ id: 'sheet-dirty' } as ICommandInfo);
         testBed.emit({ id: 'base-dirty' } as ICommandInfo);
-        await vi.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executed).toHaveLength(1);
         expect(testBed.executed[0]).toMatchObject({
@@ -128,27 +128,89 @@ describe('FormulaCalculationTriggerService', () => {
         testBed.service.dispose();
     });
 
-    it('keeps all pending dirty data when an active calculation is stopped and restarted', async () => {
+    it('stops once and requeues running dirty data when ranges intersect', async () => {
         const testBed = createTestBed();
-        testBed.conversions.set('base-dirty', {
-            commandId: 'base-dirty',
-            getDirtyData: () => ({ dirtySuperTableMap: { 'base-unit': { Pricing: '1' } } }),
+        testBed.conversions.set('initial-dirty', {
+            commandId: 'initial-dirty',
+            getDirtyData: () => ({
+                dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 } }],
+            }),
+        });
+        testBed.conversions.set('overlapping-dirty', {
+            commandId: 'overlapping-dirty',
+            getDirtyData: () => ({
+                dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 } }],
+            }),
         });
 
-        testBed.emit({ id: SetFormulaCalculationStartMutation.id, params: {} } as ICommandInfo);
-        testBed.emit({ id: 'base-dirty' } as ICommandInfo);
-        await vi.advanceTimersByTimeAsync(100);
+        testBed.emit({ id: 'initial-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
+        testBed.executed.length = 0;
+
+        testBed.emit({ id: 'overlapping-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executed[0]).toMatchObject({ id: SetFormulaCalculationStopMutation.id });
+
+        testBed.emit({ id: 'overlapping-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
+        expect(testBed.executed).toHaveLength(1);
 
         testBed.emit({
             id: SetFormulaCalculationNotificationMutation.id,
             params: { functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION },
         } as ICommandInfo);
 
+        expect(testBed.executed).toHaveLength(1);
+        await vi.advanceTimersByTimeAsync(10);
         expect(testBed.executed[1]).toMatchObject({
             id: SetFormulaCalculationStartMutation.id,
-            params: { dirtySuperTableMap: { 'base-unit': { Pricing: '1' } } },
+            params: {
+                dirtyRanges: [
+                    { unitId: 'unit', sheetId: 'sheet', range: { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 } },
+                    { unitId: 'unit', sheetId: 'sheet', range: { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 } },
+                ],
+            },
+        });
+        testBed.service.dispose();
+    });
+
+    it('waits for success when dirty data does not intersect and only starts pending data', async () => {
+        const testBed = createTestBed();
+        testBed.conversions.set('initial-dirty', {
+            commandId: 'initial-dirty',
+            getDirtyData: () => ({
+                dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 } }],
+            }),
+        });
+        testBed.conversions.set('non-overlapping-dirty', {
+            commandId: 'non-overlapping-dirty',
+            getDirtyData: () => ({
+                dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: { startRow: 10, startColumn: 10, endRow: 10, endColumn: 10 } }],
+            }),
+        });
+
+        testBed.emit({ id: 'initial-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
+        testBed.executed.length = 0;
+
+        testBed.emit({ id: 'non-overlapping-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
+
+        expect(testBed.executed).toEqual([]);
+
+        testBed.emit({
+            id: SetFormulaCalculationNotificationMutation.id,
+            params: { functionsExecutedState: FormulaExecutedStateType.SUCCESS },
+        } as ICommandInfo);
+
+        expect(testBed.executed).toEqual([]);
+        await vi.advanceTimersByTimeAsync(10);
+        expect(testBed.executed[0]).toMatchObject({
+            id: SetFormulaCalculationStartMutation.id,
+            params: {
+                dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: { startRow: 10, startColumn: 10, endRow: 10, endColumn: 10 } }],
+            },
         });
         testBed.service.dispose();
     });
@@ -162,7 +224,7 @@ describe('FormulaCalculationTriggerService', () => {
         });
 
         testBed.emit({ id: 'local-result' } as ICommandInfo);
-        await vi.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executed).toEqual([]);
         testBed.service.dispose();
@@ -180,11 +242,11 @@ describe('FormulaCalculationTriggerService', () => {
         });
 
         testBed.emit({ id: 'empty-dirty' } as ICommandInfo);
-        await vi.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(10);
         expect(testBed.executed).toEqual([]);
 
         testBed.emit({ id: SetTriggerFormulaCalculationStartMutation.id } as ICommandInfo);
-        await vi.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executed).toHaveLength(1);
         expect(testBed.executed[0]).toMatchObject({ id: SetFormulaCalculationStartMutation.id });

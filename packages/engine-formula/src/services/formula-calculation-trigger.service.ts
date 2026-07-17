@@ -18,7 +18,7 @@ import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -29,7 +29,7 @@ import { IActiveDirtyManagerService } from './active-dirty-manager.service';
 import { FormulaExecutedStateType } from './runtime.service';
 
 const LOCAL_ONLY = { onlyLocal: true };
-const CALCULATION_DEBOUNCE_TIME = 100;
+const CALCULATION_DEBOUNCE_TIME = 10;
 
 type IDirtyUnitStringMap = Record<string, Nullable<Record<string, string>>>;
 
@@ -40,11 +40,13 @@ type IDirtyUnitStringMap = Record<string, Nullable<Record<string, string>>>;
  */
 export class FormulaCalculationTriggerService extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
-    private _executingDirtyData = createEmptyDirtyData();
+    private _pendingDirtyData = createEmptyDirtyData();
+    private _runningDirtyData = createEmptyDirtyData();
     private _timer: ReturnType<typeof setTimeout> | undefined;
     private _started = false;
     private _executionInProgress = false;
-    private _restartCalculation = false;
+    private _hasPendingCalculation = false;
+    private _stopRequested = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -66,7 +68,8 @@ export class FormulaCalculationTriggerService extends Disposable {
     override dispose(): void {
         clearTimeout(this._timer);
         this._waitingCommandQueue = [];
-        this._executingDirtyData = createEmptyDirtyData();
+        this._pendingDirtyData = createEmptyDirtyData();
+        this._runningDirtyData = createEmptyDirtyData();
         super.dispose();
     }
 
@@ -96,7 +99,7 @@ export class FormulaCalculationTriggerService extends Disposable {
     }
 
     private _scheduleFlush(): void {
-        if (!this._started || this._waitingCommandQueue.length === 0) {
+        if (!this._started || (this._waitingCommandQueue.length === 0 && !this._hasPendingCalculation)) {
             return;
         }
 
@@ -109,14 +112,20 @@ export class FormulaCalculationTriggerService extends Disposable {
         const dirtyData = this._generateDirty(commands);
         this._waitingCommandQueue = [];
         this._timer = undefined;
-        if (!hasDirtyData(dirtyData) && !commands.some(({ id }) => id === SetTriggerFormulaCalculationStartMutation.id)) {
+        if (hasDirtyData(dirtyData) || commands.some(({ id }) => id === SetTriggerFormulaCalculationStartMutation.id)) {
+            this._pendingDirtyData = mergeDirtyData(this._pendingDirtyData, dirtyData);
+            this._hasPendingCalculation = true;
+        }
+
+        if (!this._hasPendingCalculation) {
             return;
         }
 
-        this._executingDirtyData = mergeDirtyData(this._executingDirtyData, dirtyData);
         if (this._executionInProgress) {
-            this._restartCalculation = true;
-            this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {}, LOCAL_ONLY);
+            if (!this._stopRequested && dirtyDataIntersects(this._runningDirtyData, this._pendingDirtyData)) {
+                this._stopRequested = true;
+                this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {}, LOCAL_ONLY);
+            }
             return;
         }
 
@@ -124,10 +133,14 @@ export class FormulaCalculationTriggerService extends Disposable {
     }
 
     private _startCalculation(): void {
+        this._runningDirtyData = this._pendingDirtyData;
+        this._pendingDirtyData = createEmptyDirtyData();
+        this._hasPendingCalculation = false;
         this._executionInProgress = true;
+        this._stopRequested = false;
         this._commandService.executeCommand(
             SetFormulaCalculationStartMutation.id,
-            { ...this._executingDirtyData },
+            { ...this._runningDirtyData },
             LOCAL_ONLY
         );
     }
@@ -143,15 +156,23 @@ export class FormulaCalculationTriggerService extends Disposable {
             return;
         }
 
-        this._executionInProgress = false;
-        if (state === FormulaExecutedStateType.STOP_EXECUTION && this._restartCalculation) {
-            this._restartCalculation = false;
-            this._startCalculation();
+        const calculationCompleted = state === FormulaExecutedStateType.STOP_EXECUTION ||
+            state === FormulaExecutedStateType.SUCCESS ||
+            state === FormulaExecutedStateType.NOT_EXECUTED;
+        if (!calculationCompleted || !this._executionInProgress) {
             return;
         }
 
-        this._restartCalculation = false;
-        this._executingDirtyData = createEmptyDirtyData();
+        this._executionInProgress = false;
+        this._stopRequested = false;
+        if (state === FormulaExecutedStateType.STOP_EXECUTION) {
+            this._pendingDirtyData = mergeDirtyData(this._runningDirtyData, this._pendingDirtyData);
+        }
+        this._runningDirtyData = createEmptyDirtyData();
+
+        if (this._hasPendingCalculation || this._waitingCommandQueue.length > 0) {
+            this._scheduleFlush();
+        }
     }
 
     private _generateDirty(commands: ICommandInfo[]): IFormulaDirtyData {
@@ -191,19 +212,18 @@ function mergeDirtyData(left: IFormulaDirtyData, right: Partial<IFormulaDirtyDat
 }
 
 function mergeDirtyRanges(target: IUnitRange[], source: IUnitRange[]): void {
+    const keys = new Set(target.map(getDirtyRangeKey));
     source.forEach((range) => {
-        const duplicate = target.some((item) =>
-            item.unitId === range.unitId &&
-            item.sheetId === range.sheetId &&
-            item.range.startRow === range.range.startRow &&
-            item.range.startColumn === range.range.startColumn &&
-            item.range.endRow === range.range.endRow &&
-            item.range.endColumn === range.range.endColumn
-        );
-        if (!duplicate) {
+        const key = getDirtyRangeKey(range);
+        if (!keys.has(key)) {
+            keys.add(key);
             target.push(range);
         }
     });
+}
+
+function getDirtyRangeKey({ unitId, sheetId, range }: IUnitRange): string {
+    return JSON.stringify([unitId, sheetId, range.startRow, range.startColumn, range.endRow, range.endColumn, range.rangeType]);
 }
 
 function mergeDirtyUnitStringMap(left: IDirtyUnitStringMap, right?: IDirtyUnitStringMap): IDirtyUnitStringMap {
@@ -245,4 +265,50 @@ function hasNestedValue(value: unknown): boolean {
         return true;
     }
     return Object.values(value as Record<string, unknown>).some(hasNestedValue);
+}
+
+function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData): boolean {
+    if (left.forceCalculation || right.forceCalculation) {
+        return true;
+    }
+
+    const rangesIntersect = left.dirtyRanges.some((leftRange) => right.dirtyRanges.some((rightRange) =>
+        leftRange.unitId === rightRange.unitId &&
+        leftRange.sheetId === rightRange.sheetId &&
+        Rectangle.intersects(leftRange.range, rightRange.range)
+    ));
+    if (rangesIntersect || clearedSheetIntersects(left, right) || clearedSheetIntersects(right, left)) {
+        return true;
+    }
+
+    return [
+        [left.dirtyNameMap, right.dirtyNameMap],
+        [left.dirtyDefinedNameMap, right.dirtyDefinedNameMap],
+        [left.dirtySuperTableMap, right.dirtySuperTableMap],
+        [left.dirtyUnitFeatureMap, right.dirtyUnitFeatureMap],
+        [left.dirtyUnitOtherFormulaMap, right.dirtyUnitOtherFormulaMap],
+        [left.clearDependencyTreeCache, right.clearDependencyTreeCache],
+    ].some(([leftMap, rightMap]) => hasSameNestedKey(leftMap, rightMap));
+}
+
+function clearedSheetIntersects(cleared: IFormulaDirtyData, dirty: IFormulaDirtyData): boolean {
+    return Object.entries(cleared.clearDependencyTreeCache).some(([unitId, sheets]) =>
+        Object.keys(sheets ?? {}).some((sheetId) =>
+            dirty.dirtyRanges.some((range) => range.unitId === unitId && range.sheetId === sheetId) ||
+            dirty.dirtyNameMap[unitId]?.[sheetId] != null ||
+            dirty.dirtyUnitFeatureMap[unitId]?.[sheetId] != null ||
+            dirty.dirtyUnitOtherFormulaMap[unitId]?.[sheetId] != null
+        )
+    );
+}
+
+function hasSameNestedKey(left: unknown, right: unknown): boolean {
+    if (left == null || right == null || typeof left !== 'object' || typeof right !== 'object') {
+        return left != null && right != null;
+    }
+
+    const rightRecord = right as Record<string, unknown>;
+    return Object.entries(left as Record<string, unknown>).some(([key, value]) =>
+        Object.prototype.hasOwnProperty.call(rightRecord, key) && hasSameNestedKey(value, rightRecord[key])
+    );
 }

@@ -22,5 +22,6 @@ export enum UniverType {
     UNIVER_PROJECT = 4,
     UNIVER_BASE = 5,
     UNIVER_BOARD = 6,
+    UNIVER_PDF = 7,
     UNRECOGNIZED = -1,
 }

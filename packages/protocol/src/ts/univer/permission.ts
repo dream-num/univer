@@ -107,6 +107,7 @@ export enum UnitObject {
     Slide = 5,
     Base = 6,
     Board = 7,
+    Pdf = 8,
     UNRECOGNIZED = -1,
 }
 

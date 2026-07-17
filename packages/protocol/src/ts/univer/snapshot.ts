@@ -17,6 +17,7 @@
 import type { IBoardMeta } from './board';
 import type { UniverType } from './constants/univer';
 import type { IDocumentMeta } from './doc';
+import type { IPdfMeta } from './pdf';
 import type { ISlideMeta } from './slide';
 import type { IWorkbookMeta } from './workbook';
 
@@ -29,6 +30,7 @@ export interface ISnapshot {
     doc: IDocumentMeta | undefined;
     slide: ISlideMeta | undefined;
     board: IBoardMeta | undefined;
+    pdf?: IPdfMeta | undefined;
 }
 
 export interface ITableInfo {

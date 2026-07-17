@@ -47,6 +47,7 @@ export { UniverType } from './ts/univer/constants/univer';
 export type { IDocumentMeta } from './ts/univer/doc';
 export { CellType } from './ts/univer/initial-sheet';
 export type { IInitialSheet, IRow, IRowCell } from './ts/univer/initial-sheet';
+export type { IPdfAssetRef, IPdfMeta } from './ts/univer/pdf';
 export type { IUnitRoleKV } from './ts/univer/permission';
 export {
     ObjectScope,
@@ -60,6 +61,7 @@ export type {
     ISnapshot,
     ITableInfo,
 } from './ts/univer/snapshot';
+export type { IUnit } from './ts/univer/univer-file';
 export { CellValueType } from './ts/univer/workbook';
 export type { ICellData, ISheetBlock, ISheetBlockMeta, IWorkbookMeta, IWorksheetMeta } from './ts/univer/workbook';
 export type {

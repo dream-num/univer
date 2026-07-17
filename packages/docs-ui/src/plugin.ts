@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, DocumentDataModel } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
     IConfigService,
-    ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -178,7 +177,6 @@ export class UniverDocsUIPlugin extends Plugin {
         @Inject(Injector) override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ICommandService private _commandService: ICommandService,
-        @ILogService private _logService: ILogService,
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();
@@ -201,7 +199,7 @@ export class UniverDocsUIPlugin extends Plugin {
 
     override onReady(): void {
         this._initRenderBasics();
-        this._markDocAsFocused();
+        this._initAutoFocus();
 
         touchDependencies(this._injector, [
             [DocsRenderService],
@@ -392,25 +390,19 @@ export class UniverDocsUIPlugin extends Plugin {
         dependencies.forEach((d) => injector.add(d));
     }
 
-    private _markDocAsFocused() {
+    private _initAutoFocus() {
         const currentService = this._injector.get(IUniverInstanceService);
         const editorService = this._injector.get(IEditorService);
-        try {
-            const doc = currentService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
-            if (!doc) return;
-
-            const id = doc.getUnitId();
-            const createOptions = currentService.getUnitCreateOptions(id);
-            if (createOptions?.makeCurrent === false) {
+        this.disposeWithMe(currentService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+            if (!doc) {
                 return;
             }
 
+            const id = doc.getUnitId();
             if (!editorService.isEditor(id)) {
-                currentService.focusUnit(doc.getUnitId());
+                currentService.focusUnit(id);
             }
-        } catch (err) {
-            this._logService.warn(err);
-        }
+        }));
     }
 
     private _initRenderBasics(): void {

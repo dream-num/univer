@@ -57,12 +57,12 @@ describe('test "HTTPMergeInterceptor"', () => {
 
     it('two requests were created, but only one was a real request', async () => {
         const path = 'http://example.com';
-        interface Request { ids: string[] };
-        interface Response { list: number[] };
-        const response: Response = { list: [1, 2] };
+        interface IRequest { ids: string[] };
+        interface IResponse { list: number[] };
+        const response: IResponse = { list: [1, 2] };
         httpService.registerHTTPInterceptor({
             priority: 999,
-            interceptor: MergeInterceptorFactory<Request, Response>({
+            interceptor: MergeInterceptorFactory<IRequest, IResponse>({
                 isMatch(config) {
                     return config.url === path;
                 },
@@ -86,8 +86,8 @@ describe('test "HTTPMergeInterceptor"', () => {
             }),
         });
 
-        const request1 = httpService.post<Response>(path, { body: { ids: [1] } });
-        const request2 = httpService.post<Response>(path, { body: { ids: [2] } });
+        const request1 = httpService.post<IResponse>(path, { body: { ids: [1] } });
+        const request2 = httpService.post<IResponse>(path, { body: { ids: [2] } });
 
         request1.then((e) => {
             expect(e.body.list).toEqual(response.list);

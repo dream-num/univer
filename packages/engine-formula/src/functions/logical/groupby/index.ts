@@ -26,13 +26,13 @@ import { FUNCTION_NAMES_LOGICAL } from '../function-names';
 
 type GroupByAggregatorName = 'SUM' | 'COUNT' | 'COUNTA' | 'PERCENTOF' | 'MIN' | 'MAX' | 'ARRAYTOTEXT';
 
-interface ArrayInput {
+interface IArrayInput {
     rowCount: number;
     columnCount: number;
     valueAt: (row: number, column: number) => BaseValueObject;
 }
 
-interface GroupByGroup {
+interface IGroupByGroup {
     key: BaseValueObject[];
     values: BaseValueObject[][];
 }
@@ -80,7 +80,7 @@ export class Groupby extends BaseFunction {
         const groupColumnCount = rowFields.columnCount;
         const valueColumnCount = values.columnCount;
         const outputValueColumnCount = this._outputValueColumnCount(valueColumnCount, aggregators.length);
-        const groups: GroupByGroup[] = [];
+        const groups: IGroupByGroup[] = [];
         const allValues = Array.from({ length: valueColumnCount }, () => [] as BaseValueObject[]);
 
         for (let row = 0; row < rowFields.rowCount; row++) {
@@ -161,7 +161,7 @@ export class Groupby extends BaseFunction {
         });
     }
 
-    private _arrayInput(variant: FunctionVariantType | null): ArrayInput | ErrorValueObject {
+    private _arrayInput(variant: FunctionVariantType | null): IArrayInput | ErrorValueObject {
         if (variant == null) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -332,7 +332,7 @@ export class Groupby extends BaseFunction {
         return `${typeof value.getValue()}:${String(value.getValue())}`;
     }
 
-    private _sortGroups(groups: GroupByGroup[], sortColumn?: number): void {
+    private _sortGroups(groups: IGroupByGroup[], sortColumn?: number): void {
         const descending = sortColumn != null && sortColumn < 0;
         const sortIndex = sortColumn == null ? undefined : Math.abs(sortColumn) - 1;
         groups.sort((left, right) => {

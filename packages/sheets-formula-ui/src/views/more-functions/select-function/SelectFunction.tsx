@@ -20,14 +20,13 @@ import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import { IConfigService, LocaleService } from '@univerjs/core';
-import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
+import { borderClassName, clsx, divideYClassName, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { IDescriptionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
-import { FunctionParams } from '../function-params/FunctionParams';
 
 export interface ISelectFunctionProps {
     onChange: (functionInfo: IFunctionInfo | null) => void;
@@ -209,29 +208,131 @@ export function SelectFunction(props: ISelectFunctionProps) {
             )}
 
             {functionInfo && (
-                <div className={clsx('univer-mx-0 univer-my-2 univer-overflow-y-auto', scrollbarClassName)}>
-                    <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
+                <div
+                    data-u-comp="formula-function-details"
+                    className={clsx('univer-mx-0 univer-my-3 univer-overflow-y-auto', scrollbarClassName)}
+                >
+                    <div
+                        className="
+                          univer-rounded-lg univer-bg-gray-50 univer-p-3
+                          dark:!univer-bg-gray-800
+                        "
+                    >
+                        <div
+                            className="
+                              univer-text-sm univer-font-semibold univer-text-gray-900
+                              dark:!univer-text-white
+                            "
+                        >
+                            {functionInfo.functionName}
+                        </div>
+                        <div
+                            className="
+                              univer-mt-1 univer-text-xs univer-leading-5 univer-text-gray-600
+                              dark:!univer-text-gray-300
+                            "
+                        >
+                            {functionInfo.description}
+                        </div>
+                    </div>
 
-                    <FunctionParams
-                        title={localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.syntax')}
-                        value={<FunctionHelp prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
-                    />
+                    <div className="univer-mt-4 univer-flex univer-flex-col univer-gap-3">
+                        <div>
+                            <div
+                                className="
+                                  univer-text-xs univer-font-medium univer-text-gray-500
+                                  dark:!univer-text-gray-300
+                                "
+                            >
+                                {localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.syntax')}
+                            </div>
+                            <div
+                                data-u-comp="formula-function-syntax"
+                                className={clsx(`
+                                  univer-mt-1.5 univer-break-words univer-rounded-md univer-bg-gray-50 univer-px-3
+                                  univer-py-2 univer-font-mono univer-text-xs univer-leading-5 univer-text-gray-900
+                                  dark:!univer-bg-gray-800 dark:!univer-text-white
+                                `, borderClassName)}
+                            >
+                                <FunctionHelp
+                                    prefix={functionInfo.functionName}
+                                    value={functionInfo.functionParameter}
+                                />
+                            </div>
+                        </div>
 
-                    <FunctionParams
-                        title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
-                        value={`${functionInfo.functionName}(${functionInfo.functionParameter
-                            .map((item) => item.example)
-                            .join(',')})`}
-                    />
+                        <div>
+                            <div
+                                className="
+                                  univer-text-xs univer-font-medium univer-text-gray-500
+                                  dark:!univer-text-gray-300
+                                "
+                            >
+                                {localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
+                            </div>
+                            <div
+                                data-u-comp="formula-function-example"
+                                className={clsx(`
+                                  univer-mt-1.5 univer-break-words univer-rounded-md univer-bg-gray-50 univer-px-3
+                                  univer-py-2 univer-font-mono univer-text-xs univer-leading-5 univer-text-gray-900
+                                  dark:!univer-bg-gray-800 dark:!univer-text-white
+                                `, borderClassName)}
+                            >
+                                {`${functionInfo.functionName}(${functionInfo.functionParameter
+                                    .map((item) => item.example)
+                                    .join(',')})`}
+                            </div>
+                        </div>
+                    </div>
 
-                    {functionInfo.functionParameter &&
-                        functionInfo.functionParameter.map((item: IFunctionParam) => (
-                            <FunctionParams
-                                key={item.name}
-                                title={item.name}
-                                value={`${item.require ? required : optional} ${item.detail}`}
-                            />
-                        ))}
+                    {functionInfo.functionParameter.length > 0 && (
+                        <div
+                            className={clsx('univer-mt-4 univer-rounded-lg univer-px-3', borderClassName, divideYClassName)}
+                        >
+                            {functionInfo.functionParameter.map((item: IFunctionParam) => (
+                                <div
+                                    key={item.name}
+                                    data-u-comp="formula-function-parameter"
+                                    className="univer-py-3"
+                                >
+                                    <div className="univer-flex univer-items-center univer-gap-2">
+                                        <span
+                                            className={`
+                                              univer-text-xs univer-font-medium univer-text-gray-900
+                                              dark:!univer-text-white
+                                            `}
+                                        >
+                                            {item.name}
+                                        </span>
+                                        <span
+                                            className={clsx(`
+                                              univer-rounded-full univer-px-2 univer-py-0.5 univer-text-xs
+                                              univer-leading-4
+                                            `, item.require
+                                                ? `
+                                                  univer-bg-primary-50 univer-text-primary-600
+                                                  dark:!univer-bg-primary-900 dark:!univer-text-primary-200
+                                                `
+                                                : `
+                                                  univer-bg-gray-100 univer-text-gray-600
+                                                  dark:!univer-bg-gray-700 dark:!univer-text-gray-200
+                                                `)}
+                                        >
+                                            {item.require ? required : optional}
+                                        </span>
+                                    </div>
+                                    <div
+                                        className={`
+                                          univer-mt-1 univer-text-xs univer-leading-5 univer-text-gray-600
+                                          dark:!univer-text-gray-300
+                                        `}
+                                    >
+                                        {item.detail}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

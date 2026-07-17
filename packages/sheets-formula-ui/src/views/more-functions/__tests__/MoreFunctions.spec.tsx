@@ -77,8 +77,16 @@ const averageInfo: IFunctionInfo = {
     ],
 };
 
+const piInfo: IFunctionInfo = {
+    functionName: 'PI',
+    functionType: FunctionType.Math,
+    description: 'Returns pi.',
+    abstract: 'Pi.',
+    functionParameter: [],
+};
+
 class TestDescriptionService {
-    private readonly _items = [sumInfo, averageInfo];
+    private readonly _items = [sumInfo, averageInfo, piInfo];
 
     getDescriptions() {
         return new Map(this._items.map((item) => [item.functionName, item]));
@@ -391,6 +399,59 @@ describe('formula function picker views', () => {
             root.unmount();
         });
         container.remove();
+    });
+
+    it('renders selected function details as structured sections', async () => {
+        const { injector } = createFormulaViewTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SelectFunction onChange={(value) => SelectionState.values.push(value)} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const details = container.querySelector('[data-u-comp="formula-function-details"]');
+        expect(details).not.toBeNull();
+        expect(details?.querySelector('[data-u-comp="formula-function-syntax"]')?.textContent).toBe('SUM(number1,...)');
+        expect(details?.querySelector('[data-u-comp="formula-function-example"]')?.textContent).toBe('SUM(A1)');
+
+        const parameters = details?.querySelectorAll('[data-u-comp="formula-function-parameter"]');
+        expect(parameters).toHaveLength(1);
+        expect(parameters?.[0].textContent).toContain('number1Required.First value.');
+    });
+
+    it('omits the parameter list when the selected function has no parameters', async () => {
+        const { injector } = createFormulaViewTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SelectFunction onChange={(value) => SelectionState.values.push(value)} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const input = container.querySelector('input') as HTMLInputElement;
+        await act(async () => {
+            writeInput(input, 'PI');
+            await Promise.resolve();
+        });
+
+        const item = Array.from(container.querySelectorAll('li'))
+            .find((node) => node.textContent === 'PI') as HTMLElement | undefined;
+        expect(item).toBeDefined();
+
+        await act(async () => {
+            item!.click();
+            await Promise.resolve();
+        });
+
+        const details = container.querySelector('[data-u-comp="formula-function-details"]');
+        expect(details?.children).toHaveLength(2);
     });
 
     it('filters functions by typed text and reports the selected function info', async () => {

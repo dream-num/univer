@@ -21,6 +21,13 @@ import type { UniverRenderingContext } from './context';
 import { RENDER_CLASS_TYPE, Transform } from './basics';
 import { Group } from './group';
 
+export interface IDrawingGroupShadow {
+    shadowColor: string;
+    shadowBlur: number;
+    shadowOffsetX: number;
+    shadowOffsetY: number;
+}
+
 export class DrawingGroupObject extends Group {
     protected override _selfSizeMode: boolean = true;
     /**
@@ -35,6 +42,13 @@ export class DrawingGroupObject extends Group {
         width: 0,
         height: 0,
     };
+
+    private _outerShadow?: IDrawingGroupShadow;
+
+    setOuterShadow(shadow?: IDrawingGroupShadow): void {
+        this._outerShadow = shadow;
+        this.makeDirty(true);
+    }
 
     /**
      * Set the baseBound (chOff/chExt in OOXML) for this group.
@@ -89,6 +103,12 @@ export class DrawingGroupObject extends Group {
         const centerX = realLeft + realWidth / 2;
         const centerY = realTop + realHeight / 2;
         ctx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
+        if (this._outerShadow) {
+            ctx.shadowColor = this._outerShadow.shadowColor;
+            ctx.shadowBlur = this._outerShadow.shadowBlur;
+            ctx.shadowOffsetX = this._outerShadow.shadowOffsetX;
+            ctx.shadowOffsetY = this._outerShadow.shadowOffsetY;
+        }
         const objects = this.getObjectsByOrder();
 
         // ctx.rect(0, 0, this.width, this.height);

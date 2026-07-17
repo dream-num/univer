@@ -428,6 +428,200 @@ describe('RichTextBuilder', () => {
         });
     });
 
+    describe('editable text runs', () => {
+        it('replaces runs in forward order and rebases all later document offsets', () => {
+            const titleStyle = { ff: 'Arial', fs: 24, bl: BooleanNumber.TRUE };
+            const bodyStyle = { ff: 'Arial', fs: 14, cl: { rgb: '#334155' } };
+            const builder = RichTextBuilder.create({
+                id: 'translated-slide-text',
+                documentStyle: { textStyle: { ff: 'Arial' } },
+                body: {
+                    dataStream: '标题\r正文内容\r\n',
+                    textRuns: [
+                        { st: 0, ed: 2, ts: titleStyle },
+                        { st: 3, ed: 7, ts: bodyStyle },
+                    ],
+                    paragraphs: [
+                        {
+                            startIndex: 2,
+                            paragraphId: 'title-paragraph',
+                            paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
+                        },
+                        {
+                            startIndex: 7,
+                            paragraphId: 'body-paragraph',
+                            paragraphStyle: { spaceAbove: { v: 6 } },
+                        },
+                    ],
+                    customRanges: [{
+                        startIndex: 3,
+                        endIndex: 6,
+                        rangeId: 'body-link',
+                        rangeType: CustomRangeType.HYPERLINK,
+                        properties: { url: 'https://example.com/report' },
+                    }],
+                    sectionBreaks: [{ startIndex: 8, sectionId: 'section-1' }],
+                },
+            });
+
+            const paragraphs = builder.getParagraphs();
+            const titleRun = paragraphs[0].getTextRuns()[0];
+            const bodyRun = paragraphs[1].getTextRuns()[0];
+
+            expect(paragraphs.map((paragraph) => paragraph.getText())).toEqual(['标题', '正文内容']);
+            titleRun.setText('Quarterly Review');
+            bodyRun.setText('Revenue increased by 18%.');
+
+            const body = builder.getData().body!;
+            const titleEnd = 'Quarterly Review'.length;
+            const bodyStart = titleEnd + 1;
+            const bodyEnd = bodyStart + 'Revenue increased by 18%.'.length;
+
+            expect(body.dataStream).toBe('Quarterly Review\rRevenue increased by 18%.\r\n');
+            expect(titleRun.getRange()).toEqual({ startOffset: 0, endOffset: titleEnd });
+            expect(bodyRun.getRange()).toEqual({ startOffset: bodyStart, endOffset: bodyEnd });
+            expect(body.textRuns).toEqual([
+                { st: 0, ed: titleEnd, ts: titleStyle },
+                { st: bodyStart, ed: bodyEnd, ts: bodyStyle },
+            ]);
+            expect(body.paragraphs).toEqual([
+                {
+                    startIndex: titleEnd,
+                    paragraphId: 'title-paragraph',
+                    paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
+                },
+                {
+                    startIndex: bodyEnd,
+                    paragraphId: 'body-paragraph',
+                    paragraphStyle: { spaceAbove: { v: 6 } },
+                },
+            ]);
+            expect(body.customRanges).toEqual([{
+                startIndex: bodyStart,
+                endIndex: bodyEnd - 1,
+                rangeId: 'body-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: { url: 'https://example.com/report' },
+            }]);
+            expect(body.sectionBreaks).toEqual([{ startIndex: bodyEnd + 1, sectionId: 'section-1' }]);
+        });
+
+        it('includes unstyled gaps while preserving explicit styles', () => {
+            const builder = RichTextBuilder.create({
+                id: 'mixed-style-text',
+                documentStyle: {},
+                body: {
+                    dataStream: '状态：就绪\r\n',
+                    textRuns: [{
+                        st: 3,
+                        ed: 5,
+                        ts: { bl: BooleanNumber.TRUE, cl: { rgb: '#16a34a' } },
+                    }],
+                    paragraphs: [{ startIndex: 5, paragraphId: 'status-paragraph' }],
+                    sectionBreaks: [{ startIndex: 6, sectionId: 'section-1' }],
+                },
+            });
+
+            const runs = builder.getParagraphs()[0].getTextRuns();
+            expect(runs.map((run) => run.getText())).toEqual(['状态：', '就绪']);
+            expect(runs[0].hasTextStyle()).toBe(false);
+            expect(runs[0].getTextStyle()).toBeNull();
+            expect(runs[1].getTextStyle()?.getValue()).toEqual({
+                bl: BooleanNumber.TRUE,
+                cl: { rgb: '#16a34a' },
+            });
+
+            runs[0].setText('Status: ');
+            runs[1].setText('Ready');
+
+            expect(builder.toPlainText()).toBe('Status: Ready');
+            expect(builder.getData().body?.textRuns).toEqual([{
+                st: 8,
+                ed: 13,
+                ts: { bl: BooleanNumber.TRUE, cl: { rgb: '#16a34a' } },
+            }]);
+        });
+
+        it('rebases later handles when an earlier run becomes shorter', () => {
+            const builder = RichTextBuilder.create({
+                id: 'shorter-text',
+                documentStyle: {},
+                body: {
+                    dataStream: 'LongTitleBody\r\n',
+                    textRuns: [
+                        { st: 0, ed: 9, ts: { bl: BooleanNumber.TRUE } },
+                        { st: 9, ed: 13, ts: { it: BooleanNumber.TRUE } },
+                    ],
+                    paragraphs: [{ startIndex: 13, paragraphId: 'paragraph-1' }],
+                    sectionBreaks: [{ startIndex: 14, sectionId: 'section-1' }],
+                },
+            });
+
+            const [title, body] = builder.getTextRuns();
+            title.setText('T');
+            expect(body.getRange()).toEqual({ startOffset: 1, endOffset: 5 });
+            body.setText('Content');
+
+            expect(builder.getData().body).toMatchObject({
+                dataStream: 'TContent\r\n',
+                textRuns: [
+                    { st: 0, ed: 1, ts: { bl: BooleanNumber.TRUE } },
+                    { st: 1, ed: 8, ts: { it: BooleanNumber.TRUE } },
+                ],
+                paragraphs: [{ startIndex: 8, paragraphId: 'paragraph-1' }],
+                sectionBreaks: [{ startIndex: 9, sectionId: 'section-1' }],
+            });
+        });
+
+        it('keeps one hyperlink when its text crosses multiple style runs', () => {
+            const builder = RichTextBuilder.create({
+                id: 'linked-mixed-style-text',
+                documentStyle: {},
+                body: {
+                    dataStream: '查看报告\r\n',
+                    textRuns: [
+                        { st: 0, ed: 2, ts: { cl: { rgb: '#2563eb' } } },
+                        { st: 2, ed: 4, ts: { cl: { rgb: '#2563eb' }, bl: BooleanNumber.TRUE } },
+                    ],
+                    paragraphs: [{ startIndex: 4, paragraphId: 'paragraph-1' }],
+                    customRanges: [{
+                        startIndex: 0,
+                        endIndex: 3,
+                        rangeId: 'report-link',
+                        rangeType: CustomRangeType.HYPERLINK,
+                        properties: { url: 'https://example.com/report' },
+                    }],
+                    sectionBreaks: [{ startIndex: 5, sectionId: 'section-1' }],
+                },
+            });
+
+            const paragraph = builder.getParagraphs()[0];
+            const [prefix, emphasis] = paragraph.getTextRuns();
+            prefix.setText('View ');
+            emphasis.setText('report');
+
+            expect(builder.toPlainText()).toBe('View report');
+            expect(builder.getLinks()).toEqual([{
+                startIndex: 0,
+                endIndex: 10,
+                rangeId: 'report-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: { url: 'https://example.com/report' },
+            }]);
+            expect(paragraph.getLinks()).toEqual(builder.getLinks());
+        });
+
+        it('rejects paragraph changes through a text-run handle', () => {
+            const run = RichTextBuilder.create()
+                .text('Original')
+                .getParagraphs()[0]
+                .getTextRuns()[0];
+
+            expect(() => run.setText('First\nSecond')).toThrow(RangeError);
+            expect(run.getText()).toBe('Original');
+        });
+    });
+
     describe('rich text insertion', () => {
         it('should insert rich text value', () => {
             const richText = RichTextValue.createByBody({

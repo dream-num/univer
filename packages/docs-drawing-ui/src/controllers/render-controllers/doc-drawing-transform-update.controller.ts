@@ -523,13 +523,13 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 clipOffsetTop: clipOffset?.top,
                 page: clipPage,
             });
-            const pageRelativeAnchorPage = drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE
-                ? undefined
-                : getDocsPageRelativeDrawingAnchorPage({
+            const pageRelativeAnchorPage = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE
+                ? getDocsPageRelativeDrawingAnchorPage({
                     page,
                     clipPage,
                     hostPage,
-                });
+                })
+                : undefined;
             const pageRelativeLeft = pageRelativeAnchorPage != null
                 ? getDocsPageRelativeDrawingLeft({
                     hostPage: pageRelativeAnchorPage,

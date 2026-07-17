@@ -760,11 +760,39 @@ describe('documents render', () => {
             set strokeStyle(_value: string) {},
         } as any;
 
-        (documents as any)._drawBorderBottom(ctx, page, line);
+        (documents as any)._drawBorderBottom(ctx, page, line, 72);
 
         expect(ctx.setLineWidthByPrecision).toHaveBeenCalledWith(2.5);
         expect(ctx.setLineDash).toHaveBeenCalledWith([6]);
+        expect(ctx.lineToByPrecision).toHaveBeenCalledWith(82, 33);
         expect(ctx.stroke).toHaveBeenCalledTimes(1);
+
+        documents.dispose();
+    });
+
+    it('limits paragraph backgrounds to the current column width', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-paragraph-background', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const line = page.sections[0].columns[0].lines[1];
+        line.backgroundColor = { rgb: '#ffeecc' };
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRect: vi.fn(),
+            getScale: () => ({ scaleX: 1, scaleY: 1 }),
+            set fillStyle(_value: string) {},
+        } as any;
+
+        (documents as any)._drawLineBackground(ctx, page, line, 72);
+
+        expect(ctx.fillRect).toHaveBeenCalledWith(10, 9, 72, 20);
 
         documents.dispose();
     });
@@ -1696,6 +1724,47 @@ describe('documents render', () => {
             y: 332,
             width: 120,
             height: 60,
+        }]);
+
+        documents.dispose();
+    });
+
+    it('restores the section offset before advancing to the next page', () => {
+        const firstPage = createPage(DocumentSkeletonPageType.BODY, 'first');
+        const secondPage = createPage(DocumentSkeletonPageType.BODY, 'second');
+        firstPage.sections.push({
+            columns: [],
+            height: 80,
+            top: 90,
+        } as any);
+        secondPage.pageNumber = 2;
+        attachTable(secondPage);
+
+        const skeletonData = {
+            pages: [firstPage, secondPage],
+            skeFooters: new Map(),
+            skeHeaders: new Map(),
+        };
+        const documents = new Documents('docs-section-page-offset', { getSkeletonData: () => skeletonData } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 8,
+        });
+        const tableOrigins: Array<{ x: number; y: number }> = [];
+
+        vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([]);
+        vi.spyOn(documents as any, '_drawTable').mockImplementation(() => {
+            tableOrigins.push({
+                x: (documents as any)._drawLiquid.x,
+                y: (documents as any)._drawLiquid.y,
+            });
+        });
+
+        documents.draw(canvas.getContext());
+
+        expect(tableOrigins).toEqual([{
+            x: 0,
+            y: firstPage.pageHeight + 8,
         }]);
 
         documents.dispose();

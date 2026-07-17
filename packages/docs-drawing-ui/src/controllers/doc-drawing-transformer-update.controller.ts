@@ -505,7 +505,7 @@ export class DocDrawingTransformerController extends Disposable {
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         let segmentId = '';
         let segmentPage = -1;
-        const isBack = false;
+        const isBack = true;
         const docTransform = {
             ...drawing.docTransform,
             size: {

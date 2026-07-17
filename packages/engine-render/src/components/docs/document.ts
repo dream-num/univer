@@ -262,6 +262,7 @@ export class Documents extends DocComponent {
             for (const section of sections) {
                 const { columns } = section;
 
+                this._drawLiquid.translateSave();
                 this._drawLiquid.translateSection(section);
 
                 for (const column of columns) {
@@ -371,7 +372,7 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateLine(line, true, true);
 
                             rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
-                            this._drawLineBackground(ctx, page, line);
+                            this._drawLineBackground(ctx, page, line, column.width);
 
                             const divideLength = divides.length;
 
@@ -447,7 +448,7 @@ export class Documents extends DocComponent {
                             }
 
                             if (line.borderBottom) {
-                                this._drawBorderBottom(ctx, page, line);
+                                this._drawBorderBottom(ctx, page, line, column.width);
                             }
                             this._drawLiquid.translateRestore();
                         }
@@ -455,6 +456,8 @@ export class Documents extends DocComponent {
 
                     this._drawLiquid.translateRestore();
                 }
+
+                this._drawLiquid.translateRestore();
             }
 
             if (skeColumnGroups.size > 0) {
@@ -766,6 +769,7 @@ export class Documents extends DocComponent {
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
         line: IDocumentSkeletonLine,
+        width = page.pageWidth - page.marginLeft - page.marginRight,
         left = 0,
         top = 0
     ) {
@@ -775,7 +779,7 @@ export class Documents extends DocComponent {
         }
 
         let { x, y } = this._drawLiquid;
-        const { pageWidth, marginLeft, marginRight, marginTop } = page;
+        const { marginLeft, marginTop } = page;
 
         x += marginLeft + (left ?? 0);
         y -= line.marginTop;
@@ -788,7 +792,7 @@ export class Documents extends DocComponent {
             ctx,
             x,
             y,
-            pageWidth - marginLeft - marginRight,
+            width,
             line.lineHeight
         );
         ctx.restore();
@@ -798,6 +802,7 @@ export class Documents extends DocComponent {
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
         line: IDocumentSkeletonLine,
+        width = page.pageWidth - page.marginLeft - page.marginRight,
         left = 0,
         top = 0
     ) {
@@ -805,7 +810,7 @@ export class Documents extends DocComponent {
             return;
         }
         let { x, y } = this._drawLiquid;
-        const { pageWidth, marginLeft, marginRight, marginTop } = page;
+        const { marginLeft, marginTop } = page;
 
         x += marginLeft + (left ?? 0);
         y -= line.marginTop;
@@ -820,7 +825,7 @@ export class Documents extends DocComponent {
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,
-            endX: x + pageWidth - marginLeft - marginRight,
+            endX: x + width,
             endY: y,
         });
         ctx.restore();
@@ -999,7 +1004,7 @@ export class Documents extends DocComponent {
                     } else {
                         this._drawLiquid.translateSave();
                         this._drawLiquid.translateLine(line, true, true);
-                        this._drawLineBackground(ctx, nestedPage, line);
+                        this._drawLineBackground(ctx, nestedPage, line, column.width);
 
                         const divideLength = divides.length;
 
@@ -1073,7 +1078,7 @@ export class Documents extends DocComponent {
                         }
 
                         if (line.borderBottom) {
-                            this._drawBorderBottom(ctx, nestedPage, line, parentPage.marginLeft, parentPage.marginTop);
+                            this._drawBorderBottom(ctx, nestedPage, line, column.width, parentPage.marginLeft, parentPage.marginTop);
                         }
 
                         this._drawLiquid.translateRestore();
@@ -1293,7 +1298,7 @@ export class Documents extends DocComponent {
                                 continue;
                             }
                         }
-                        this._drawLineBackground(ctx, page, line, parentPage.marginLeft);
+                        this._drawLineBackground(ctx, page, line, column.width, parentPage.marginLeft);
 
                         const divideLength = divides.length;
 
@@ -1367,7 +1372,7 @@ export class Documents extends DocComponent {
                         }
 
                         if (line.borderBottom) {
-                            this._drawBorderBottom(ctx, page, line, parentPage.marginLeft);
+                            this._drawBorderBottom(ctx, page, line, column.width, parentPage.marginLeft);
                         }
 
                         this._drawLiquid.translateRestore();

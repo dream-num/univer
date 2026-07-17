@@ -172,6 +172,36 @@ describe('DocDrawingTransformUpdateController', () => {
                 docTransform: defaultDocTransform,
             },
         };
+        const pageRelativeDrawing = {
+            ...normalDrawing,
+            drawingId: 'page-relative-drawing',
+            drawingOrigin: {
+                ...normalDrawing.drawingOrigin,
+                docTransform: {
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 99 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 88 },
+                },
+            },
+        };
+        const squareDrawing = {
+            ...normalDrawing,
+            drawingId: 'square-drawing',
+            drawingOrigin: {
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                behindDoc: BooleanNumber.FALSE,
+                docTransform: pageRelativeDrawing.drawingOrigin.docTransform,
+            },
+        };
+        const topBottomDrawing = {
+            ...squareDrawing,
+            aLeft: 12,
+            aTop: 22,
+            drawingId: 'top-bottom-drawing',
+            drawingOrigin: {
+                ...squareDrawing.drawingOrigin,
+                layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+            },
+        };
         const headerDrawing = {
             aLeft: 3,
             aTop: 4,
@@ -256,6 +286,9 @@ describe('DocDrawingTransformUpdateController', () => {
             marginBottom: 17,
             skeDrawings: new Map([
                 ['normal-drawing', normalDrawing],
+                ['page-relative-drawing', pageRelativeDrawing],
+                ['square-drawing', squareDrawing],
+                ['top-bottom-drawing', topBottomDrawing],
                 ['inline-drawing', inlineDrawing],
                 ['multi-drawing', multiDrawingOnPage],
             ]),
@@ -288,6 +321,19 @@ describe('DocDrawingTransformUpdateController', () => {
                 drawingId: 'normal-drawing',
                 behindText: true,
                 transform: expect.objectContaining({ left: 26, top: 40, width: 30, height: 40, angle: 5 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'page-relative-drawing',
+                behindText: true,
+                transform: expect.objectContaining({ left: 104, top: 95, width: 30, height: 40, angle: 5 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'square-drawing',
+                transform: expect.objectContaining({ left: 26, top: 40, width: 30, height: 40, angle: 5 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'top-bottom-drawing',
+                transform: expect.objectContaining({ left: 28, top: 42, width: 30, height: 40, angle: 5 }),
             }),
             expect.objectContaining({
                 drawingId: 'inline-drawing',

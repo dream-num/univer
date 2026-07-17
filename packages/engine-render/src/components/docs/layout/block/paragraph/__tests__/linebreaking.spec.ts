@@ -164,6 +164,53 @@ describe('linebreaking', () => {
         expect(drawing?.height).toBe(120);
     });
 
+    it.each([
+        PositionedObjectLayoutType.WRAP_SQUARE,
+        PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+    ])('starts flow text after a positioned-only anchor line for layout %s', (layoutType) => {
+        const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}Hello world`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 0, blockId: 'b1' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'b1',
+                    layoutType,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        size: { width: 100, height: 120 },
+                    },
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = result.flatMap((page) => page.sections)
+            .flatMap((section) => section.columns)
+            .flatMap((column) => column.lines);
+        const anchorLine = lines.find((line) => line.divides.some((divide) =>
+            divide.glyphGroup.some((glyph) => glyph.drawingId === 'b1')
+        ));
+        const textLine = lines.find((line) => line.divides
+            .flatMap((divide) => divide.glyphGroup)
+            .map((glyph) => glyph.content)
+            .join('')
+            .includes('Hello'));
+
+        expect(anchorLine).toBeDefined();
+        expect(textLine).toBeDefined();
+        expect(textLine).not.toBe(anchorLine);
+        expect(textLine!.contentHeight).toBeGreaterThan(0.01);
+    });
+
     it('uses measured custom block viewport height to push following paragraphs', () => {
         setDocsCustomBlockRenderViewportProvider(() => ({
             contentHeight: 240,

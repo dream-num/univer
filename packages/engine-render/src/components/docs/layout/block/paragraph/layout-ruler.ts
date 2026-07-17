@@ -409,7 +409,7 @@ function _divideOperator(
 
             if (
                 currentLine &&
-                __isZeroWidthNonFlowFloatingAnchorLine(__getGlyphGroupByLine(currentLine), paragraphConfig.paragraphNonInlineSkeDrawings) &&
+                __isPositionedCustomBlockOnlyLine(__getGlyphGroupByLine(currentLine), paragraphConfig.paragraphNonInlineSkeDrawings) &&
                 __hasFlowGlyph(glyphGroup)
             ) {
                 for (const lineDivide of currentLine.divides) {
@@ -1180,6 +1180,32 @@ function __isZeroWidthNonFlowFloatingAnchorLine(
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
 ) {
     return __getZeroWidthNonFlowFloatingAnchorDrawings(glyphGroup, paragraphNonInlineSkeDrawings).length > 0;
+}
+
+function __isPositionedCustomBlockOnlyLine(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
+) {
+    let hasPositionedCustomBlock = false;
+
+    for (const glyph of glyphGroup) {
+        if (__isStructuralTerminatorGlyph(glyph) || __isIgnorableZeroSizeGlyph(glyph)) {
+            continue;
+        }
+
+        if (glyph.streamType !== DataStreamTreeTokenType.CUSTOM_BLOCK || glyph.drawingId == null) {
+            return false;
+        }
+
+        const drawingOrigin = paragraphNonInlineSkeDrawings?.get(glyph.drawingId)?.drawingOrigin;
+        if (drawingOrigin == null || drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+            return false;
+        }
+
+        hasPositionedCustomBlock = true;
+    }
+
+    return hasPositionedCustomBlock;
 }
 
 function __getZeroWidthNonFlowFloatingAnchorDrawings(

@@ -459,7 +459,7 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
 
         const renderObject = renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
-        if (scene == null || docSelectionRenderService == null) {
+        if (renderObject == null || scene == null || docSelectionRenderService == null) {
             return false;
         }
 
@@ -546,6 +546,8 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        const skeleton = renderObject.with(DocSkeletonManagerService).getSkeleton();
+        accessor.get(DocRefreshDrawingsService).refreshDrawings(skeleton);
         transformer.refreshControls();
 
         return Boolean(result);

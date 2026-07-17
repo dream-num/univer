@@ -78,12 +78,12 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.21.0",
+        "@univerjs/icons": "1.22.0",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "postcss": "^8.5.16",
+        "postcss": "^8.5.19",
         "react": "18.3.1",
         "rxjs": "^7.8.2",
         "tailwindcss": "3.4.18",

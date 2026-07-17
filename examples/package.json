@@ -36,7 +36,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "1.21.0",
+        "@univerjs/icons": "1.22.0",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/preset-docs-core": "workspace:*",
@@ -110,7 +110,7 @@
         "esbuild-plugin-vue3": "^0.5.1",
         "esbuild-style-plugin": "^1.6.3",
         "minimist": "^1.2.8",
-        "postcss": "^8.5.16",
+        "postcss": "^8.5.19",
         "tailwindcss": "3.4.18",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^6.0.3"

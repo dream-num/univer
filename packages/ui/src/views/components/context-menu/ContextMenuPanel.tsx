@@ -1387,7 +1387,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         <div
                             ref={submenuElementRef}
                             dir={direction}
-                            {...{ [CONTEXT_MENU_SUBMENU_PORTAL_ATTR]: 'true' }}
+                            data-u-context-menu-submenu="true"
                             className="univer-z-[1080] univer-w-max univer-max-w-[calc(100vw-16px)]"
                             style={{
                                 position: 'fixed',

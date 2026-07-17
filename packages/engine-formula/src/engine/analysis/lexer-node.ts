@@ -19,9 +19,9 @@ import type { Nullable } from '@univerjs/core';
 import type { LambdaPrivacyVarType } from '../ast-node/base-ast-node';
 import { DEFAULT_TOKEN_TYPE_ROOT } from '../../basics/token-type';
 
-interface LexerNodeJson {
+interface ILexerNodeJson {
     token: string;
-    children: Array<LexerNodeJson | string>;
+    children: Array<ILexerNodeJson | string>;
 }
 
 export class LexerNode {
@@ -173,7 +173,7 @@ export class LexerNode {
         const token = this.getToken();
         const children = this.getChildren();
 
-        const childrenSerialization: Array<LexerNodeJson | string> = [];
+        const childrenSerialization: Array<ILexerNodeJson | string> = [];
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];

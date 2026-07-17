@@ -357,7 +357,7 @@ const IconSetRuleEdit = (props: {
                                 >
                                     {icon
                                         ? <img src={icon} className="univer-size-4" draggable={false} />
-                                        : <SlashDoubleIcon className="univer-size-4" />}
+                                        : <SlashDoubleIcon />}
                                     <MoreDownIcon />
                                 </div>
                             </Dropdown>

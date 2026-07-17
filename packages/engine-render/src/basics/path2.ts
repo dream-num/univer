@@ -19,7 +19,7 @@ import { Vector2 } from './vector2';
 
 export const INITIAL_Path2: Vector2[] = [new Vector2(0, 0), new Vector2(1, 1)];
 
-interface Line {
+interface ILine {
     from: Vector2;
     to: Vector2;
 }
@@ -63,7 +63,7 @@ export class Path2 {
         return crossPoint;
     }
 
-    private _intersection(line1: Line, line2: Line): Vector2 | false {
+    private _intersection(line1: ILine, line2: ILine): Vector2 | false {
         const a = line1.from;
         const b = line1.to;
         const c = line2.from;

@@ -1186,6 +1186,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _recoverySizeBoundary(selectedObjects: BaseObject[], ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
         for (let i = 0; i < selectedObjects.length; i++) {
             const moveObject = selectedObjects[i];
+            if (this._getConfig(moveObject).moveBoundaryEnabled === false) {
+                continue;
+            }
             const { left, top, width, height } = moveObject;
 
             const newTransform: ITransformState = {};

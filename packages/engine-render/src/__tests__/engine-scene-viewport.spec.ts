@@ -532,6 +532,9 @@ describe('engine scene viewport extra', () => {
         };
         (transformer as any)._recoverySizeBoundary([recoveryTarget], 0, 0, 100, 80);
         expect(recoveryTarget.transformByState).toHaveBeenCalled();
+        recoveryTarget.transformByState.mockClear();
+        (freeMoveTransformer as any)._recoverySizeBoundary([recoveryTarget], 0, 0, 100, 80);
+        expect(recoveryTarget.transformByState).not.toHaveBeenCalled();
 
         expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerResizeLM__')).toBe(CURSOR_TYPE.WEST_RESIZE);
         expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerResizeCB__')).toBe(CURSOR_TYPE.SOUTH_RESIZE);

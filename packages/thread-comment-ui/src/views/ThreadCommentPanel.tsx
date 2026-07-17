@@ -163,6 +163,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     const renderComment = (section: ThreadCommentPanelSection) => (comment: IThreadComment, index: number) => (
         <ThreadCommentTree
+            full
             location={location}
             getSubUnitName={getSubUnitName}
             key={getThreadCommentPanelItemKey(comment, index, section)}

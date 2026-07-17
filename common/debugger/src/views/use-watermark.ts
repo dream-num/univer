@@ -1,5 +1,5 @@
 import { ISidebarService, useDependency } from '@univerjs/ui';
-import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../menu/watermark.menu.controller';
+import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../controllers/components.controller';
 
 export function useWatermark() {
     const sidebarService = useDependency(ISidebarService);

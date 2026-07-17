@@ -15,13 +15,10 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { DataValidationIcon } from '@univerjs/icons';
+import { CrossHighlightingIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
-import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
-import { DataValidationPanel } from '../views/components';
-import { DateShowTimeOption } from '../views/components/DateShowTimeOption';
-import { FORMULA_INPUTS } from '../views/components/formula-input';
-import { ListRenderModeInput } from '../views/components/ListRenderModeInput';
+import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT } from '../menu/crosshair.menu';
+import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -30,24 +27,17 @@ export class ComponentsController extends Disposable {
     ) {
         super();
 
-        this._registerIcons();
         this._registerComponents();
+        this._registerIcons();
+    }
+
+    private _registerComponents(): void {
+        this.disposeWithMe(this._componentManager.register(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay));
     }
 
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
-            DataValidationIcon,
+            CrossHighlightingIcon,
         }));
-    }
-
-    private _registerComponents(): void {
-        ([
-            [DATA_VALIDATION_PANEL, DataValidationPanel],
-            [ListRenderModeInput.componentKey, ListRenderModeInput],
-            [DateShowTimeOption.componentKey, DateShowTimeOption],
-            ...FORMULA_INPUTS,
-        ] as const).forEach(([key, component]) => {
-            this.disposeWithMe(this._componentManager.register(key, component));
-        });
     }
 }

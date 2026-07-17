@@ -113,11 +113,13 @@ function createInsertFunctionCategoryMenuItemFactory(
             selections = [];
         }
 
+        const localeKey = `sheets-formula-ui.functionType.${categoryKey}` as FunctionCategoryLocaleKey;
+
         return {
             id: `${InsertFunctionOperation.id}.${categoryKey}`,
             commandId: InsertFunctionOperation.id,
-            title: `sheets-formula-ui.functionType.${categoryKey}` as FunctionCategoryLocaleKey,
-            tooltip: 'sheets-formula-ui.insert.tooltip',
+            title: localeKey,
+            tooltip: localeKey,
             icon,
             type: MenuItemType.SELECTOR,
             selections,
@@ -126,16 +128,16 @@ function createInsertFunctionCategoryMenuItemFactory(
     };
 }
 
-export const InsertFinancialFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Financial, 'financial');
-export const InsertLogicalFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Logical, 'logical');
-export const InsertTextFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Text, 'text');
-export const InsertDateFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Date, 'date');
-export const InsertLookupFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Lookup, 'lookup');
-export const InsertMathFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Math, 'math');
-export const InsertStatisticalFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Statistical, 'statistical');
-export const InsertEngineeringFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Engineering, 'engineering');
-export const InsertInformationFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Information, 'information');
-export const InsertDatabaseFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Database, 'database');
+export const InsertFinancialFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Financial, 'financial', 'FinancialFunctionIcon');
+export const InsertLogicalFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Logical, 'logical', 'LogicalFunctionIcon');
+export const InsertTextFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Text, 'text', 'TextFunctionIcon');
+export const InsertDateFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Date, 'date', 'DateFunctionIcon');
+export const InsertLookupFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Lookup, 'lookup', 'LookupFunctionIcon');
+export const InsertMathFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Math, 'math', 'MathFunctionIcon');
+export const InsertStatisticalFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Statistical, 'statistical', 'StatisticalFunctionIcon');
+export const InsertEngineeringFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Engineering, 'engineering', 'EngineeringFunctionIcon');
+export const InsertInformationFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Information, 'information', 'InformationFunctionIcon');
+export const InsertDatabaseFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Database, 'database', 'DatabaseFunctionIcon');
 
 // All Functions entry displayed at the bottom of category dropdowns.
 export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {

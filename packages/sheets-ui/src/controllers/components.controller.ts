@@ -117,6 +117,7 @@ import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { CellPopup } from '../views/CellPopup';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
+import { dropdownMap } from '../views/dropdown';
 import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../views/menu-item-frozen/index';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../views/menu-item-input/index';
 import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../views/permission';
@@ -175,6 +176,9 @@ export class ComponentsController extends Disposable {
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+        Object.values(dropdownMap).forEach((component) => {
+            this.disposeWithMe(componentManager.register(component.componentKey, component));
+        });
     }
 
     // eslint-disable-next-line max-lines-per-function

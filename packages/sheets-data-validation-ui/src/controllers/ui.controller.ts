@@ -18,12 +18,6 @@ import type { Ctor } from '@univerjs/core';
 import type { BaseSheetDataValidatorView } from '../views/validator-views/sheet-validator-view';
 import { Inject, Injector, RxDisposable } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { ComponentManager } from '@univerjs/ui';
-import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
-import { DataValidationPanel } from '../views/components';
-import { DateShowTimeOption } from '../views/components/DateShowTimeOption';
-import { FORMULA_INPUTS } from '../views/components/formula-input';
-import { ListRenderModeInput } from '../views/components/ListRenderModeInput';
 import { CheckboxValidatorView } from '../views/validator-views/checkbox-validator-view';
 import { CustomFormulaValidatorView } from '../views/validator-views/custom-validator-view';
 import { DateValidatorView } from '../views/validator-views/date-validator-view';
@@ -36,27 +30,11 @@ import { WholeValidatorView } from '../views/validator-views/whole-validator-vie
 export class SheetsDataValidationUIController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService
     ) {
         super();
 
-        this._initComponents();
         this._registerValidatorViews();
-    }
-
-    private _initComponents() {
-        ([
-            [DATA_VALIDATION_PANEL, DataValidationPanel],
-            [ListRenderModeInput.componentKey, ListRenderModeInput],
-            [DateShowTimeOption.componentKey, DateShowTimeOption],
-            ...FORMULA_INPUTS,
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(this._componentManger.register(
-                key,
-                comp
-            ));
-        });
     }
 
     private _registerValidatorViews(): void {

@@ -20,7 +20,6 @@ import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager } from '../../common';
 import { menuSchema } from '../../menu/schema';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
@@ -41,8 +40,7 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
         @ILayoutService layoutService: ILayoutService,
         @IUniverInstanceService instanceService: IUniverInstanceService,
         @IMenuManagerService menuManagerService: IMenuManagerService,
-        @IUIPartsService uiPartsService: IUIPartsService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @IUIPartsService uiPartsService: IUIPartsService
     ) {
         super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
 
@@ -53,7 +51,6 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
 
     override dispose(): void {
         super.dispose();
-        this._componentManager.dispose();
     }
 
     override bootstrap(callback: (contentElement: HTMLElement, containerElement: HTMLElement) => void): IDisposable {

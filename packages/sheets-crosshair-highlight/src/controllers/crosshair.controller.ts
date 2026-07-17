@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { CrossHighlightingIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
 import {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
     SetCrosshairHighlightColorOperation,
     ToggleCrosshairHighlightOperation,
 } from '../commands/operations/operation';
-import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT } from '../menu/crosshair.menu';
 import { menuSchema } from '../menu/schema';
-import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
 
 export class SheetsCrosshairHighlightController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private readonly _componentMgr: ComponentManager,
-        @Inject(IconManager) private readonly _iconMgr: IconManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _cmdSrv: ICommandService
     ) {
@@ -38,8 +33,6 @@ export class SheetsCrosshairHighlightController extends Disposable {
 
         this._initCommands();
         this._initMenus();
-        this._initComponents();
-        this._registerIcons();
     }
 
     private _initCommands(): void {
@@ -53,15 +46,5 @@ export class SheetsCrosshairHighlightController extends Disposable {
 
     private _initMenus(): void {
         this._menuManagerService.mergeMenu(menuSchema);
-    }
-
-    private _initComponents(): void {
-        this._componentMgr.register(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay);
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconMgr.register({
-            CrossHighlightingIcon,
-        }));
     }
 }

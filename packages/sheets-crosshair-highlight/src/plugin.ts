@@ -20,6 +20,7 @@ import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } f
 import { IRenderManagerService } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsCrosshairHighlightController } from './controllers/crosshair.controller';
 import { SheetsCrosshairHighlightService } from './services/crosshair.service';
 import { SheetCrosshairHighlightRenderController } from './views/widgets/crosshair-highlight.render-controller';
@@ -49,6 +50,7 @@ export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
 
     override onStarting(): void {
         ([
+            [ComponentsController],
             [SheetsCrosshairHighlightService],
             [SheetsCrosshairHighlightController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
@@ -58,6 +60,7 @@ export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
         ([
             [SheetCrosshairHighlightRenderController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
+        this._injector.get(ComponentsController);
         this._injector.get(SheetsCrosshairHighlightController);
         this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetCrosshairHighlightRenderController] as Dependency);
     }

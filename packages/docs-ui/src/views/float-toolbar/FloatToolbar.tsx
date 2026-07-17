@@ -35,6 +35,8 @@ interface IFloatToolbarProps {
     avaliableMenus?: string[];
 }
 
+export const FLOAT_MENU_COMPONENT_KEY = 'univer.doc.float-menu';
+
 const DEFAULT_AVALIABLE_MENUS: string[] = [
     FLOAT_TEXT_STYLE_MENU_ID,
     SetInlineFormatFontSizeCommand.id,

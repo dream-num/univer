@@ -83,10 +83,6 @@ describe('DesktopUIController', () => {
         const uiPartsService = {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
         };
-        const componentManager = {
-            dispose: vi.fn(),
-        };
-
         const controller = new DesktopUIController(
             { container: 'existing-container' } as any,
             deps.injector as any,
@@ -95,8 +91,7 @@ describe('DesktopUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -107,7 +102,6 @@ describe('DesktopUIController', () => {
 
         controller.dispose();
         expect(unmount).toHaveBeenCalledWith(container);
-        expect(componentManager.dispose).toHaveBeenCalledTimes(1);
     });
 
     it('should create container when id is missing and when no container is provided', () => {
@@ -118,8 +112,6 @@ describe('DesktopUIController', () => {
         const deps = createCommonDeps();
         const menuManagerService = { mergeMenu: vi.fn() };
         const uiPartsService = { registerComponent: vi.fn(() => ({ dispose: vi.fn() })) };
-        const componentManager = { dispose: vi.fn() };
-
         const withMissingId = new DesktopUIController(
             { container: 'missing-container' } as any,
             deps.injector as any,
@@ -128,8 +120,7 @@ describe('DesktopUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         const withDefault = new DesktopUIController(
@@ -140,8 +131,7 @@ describe('DesktopUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -165,8 +155,6 @@ describe('DesktopUIController', () => {
         const mountContainer = document.createElement('div');
         const menuManagerService = { mergeMenu: vi.fn() };
         const uiPartsService = { registerComponent: vi.fn(() => ({ dispose: vi.fn() })) };
-        const componentManager = { dispose: vi.fn() };
-
         const controller = new DesktopUIController(
             { container: mountContainer } as any,
             deps.injector as any,
@@ -175,8 +163,7 @@ describe('DesktopUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -205,10 +192,6 @@ describe('MobileUIController', () => {
         const uiPartsService = {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
         };
-        const componentManager = {
-            dispose: vi.fn(),
-        };
-
         const controller = new MobileUIController(
             { container: 'missing-mobile' } as any,
             deps.injector as any,
@@ -217,8 +200,7 @@ describe('MobileUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -229,7 +211,6 @@ describe('MobileUIController', () => {
 
         controller.dispose();
         expect(unmount).toHaveBeenCalled();
-        expect(componentManager.dispose).toHaveBeenCalledTimes(1);
     });
 
     it('should support existing id, html container and default container', () => {
@@ -249,10 +230,6 @@ describe('MobileUIController', () => {
         const uiPartsService = {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
         };
-        const componentManager = {
-            dispose: vi.fn(),
-        };
-
         const byExistingId = new MobileUIController(
             { container: 'mobile-existing' } as any,
             deps.injector as any,
@@ -261,8 +238,7 @@ describe('MobileUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         const byElement = new MobileUIController(
@@ -273,8 +249,7 @@ describe('MobileUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         const byDefault = new MobileUIController(
@@ -285,8 +260,7 @@ describe('MobileUIController', () => {
             deps.layoutService as any,
             deps.instanceService as any,
             menuManagerService as any,
-            uiPartsService as any,
-            componentManager as any
+            uiPartsService as any
         );
 
         vi.advanceTimersByTime(3300);

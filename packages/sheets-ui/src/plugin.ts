@@ -39,7 +39,6 @@ import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/confi
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
-import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
@@ -58,12 +57,17 @@ import { MarkSelectionRenderController } from './controllers/mark-selection.cont
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 import { SheetPermissionInitUIController } from './controllers/permission/sheet-permission-init-ui.controller';
-import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
-import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
-import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
+import {
+    SheetPermissionInterceptorCanvasRenderController,
+} from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
+import {
+    SheetPermissionInterceptorClipboardController,
+} from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
+import {
+    SheetPermissionInterceptorFormulaRenderController,
+} from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import {
     SheetPermissionRenderController,
-    SheetPermissionRenderManagerController,
     WorksheetProtectionRenderController,
 } from './controllers/permission/sheet-permission-render.controller';
 import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
@@ -85,7 +89,10 @@ import { SheetUIController } from './controllers/ui.controller';
 import { AutoHeightService } from './services/auto-height.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
-import { ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
+import {
+    ISheetCellDropdownManagerService,
+    SheetCellDropdownManagerService,
+} from './services/cell-dropdown-manager.service';
 import { CellPopupManagerService } from './services/cell-popup-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
@@ -194,7 +201,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionRenderManagerService],
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionCheckUIController],
-            [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override));
     }
 
@@ -221,7 +227,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         this._registerRenderModules();
 
         touchDependencies(this._injector, [
-            [SheetPermissionRenderManagerController],
             [SheetPermissionPanelModel],
             [SheetClipboardController],
             [FormulaEditorController],
@@ -271,7 +276,6 @@ export class UniverSheetsUIPlugin extends Plugin {
 
             [FormatPainterRenderController],
             [ClipboardRenderController],
-            [CellAlertRenderController],
             [CellPopupEditorController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { ComponentManager, IconManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
-import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import {
+    CloseHyperLinkPopupOperation,
+    InsertHyperLinkOperation,
+    InsertHyperLinkToolbarOperation,
+    OpenHyperLinkEditPanelOperation,
+} from '../commands/operations/popup.operations';
 import { InsertLinkShortcut } from '../menu/menu';
 import { menuSchema } from '../menu/schema';
 
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IconManager) private _iconManager: IconManager,
         @ICommandService private _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Inject(Injector) private _injector: Injector,
         @Inject(IShortcutService) private _shortcutService: IShortcutService
     ) {
         super();

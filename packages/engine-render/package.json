@@ -68,7 +68,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@floating-ui/dom": "^1.7.6",
+        "@floating-ui/dom": "^1.8.0",
         "@floating-ui/utils": "^0.2.11",
         "@univerjs/core": "workspace:*",
         "franc-min": "^6.2.0",

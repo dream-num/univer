@@ -17,24 +17,15 @@
 import type { IDialogProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions } from './interface';
 import { Dialog } from '@univerjs/design';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { IDialogService } from '../../../services/dialog/dialog.service';
-import { useDependency } from '../../../utils/di';
+import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
 export function DialogPart() {
     const dialogService = useDependency(IDialogService);
 
-    const [dialogOptions, setDialogOptions] = useState<IDialogPartMethodOptions[]>([]);
-
-    useEffect(() => {
-        const dialog$ = dialogService.getDialogs$();
-        const subscription = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
-            setDialogOptions(options);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
+    const dialogOptions = useObservable(dialogService.getDialogs$(), []);
 
     const attrs = useMemo(() => dialogOptions.map((options) => {
         const { children, title, footer, ...restProps } = options;

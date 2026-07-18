@@ -22,7 +22,7 @@ import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/d
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { debounceTime, filter, Observable } from 'rxjs';
+import { debounceTime, filter, map, Observable } from 'rxjs';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
@@ -41,7 +41,12 @@ export const DocThreadCommentPanel = () => {
         () => docSelectionManagerService.textSelection$.pipe(debounceTime(16)),
         [docSelectionManagerService.textSelection$]
     );
-    useObservable(selectionChange$);
+    const disableAdd = useObservable(
+        () => selectionChange$.pipe(map(() => shouldDisableAddComment(injector))),
+        shouldDisableAddComment(injector),
+        false,
+        [injector, selectionChange$]
+    );
     const commandService = useDependency(ICommandService);
     const docCommentService = useDependency(DocThreadCommentService);
     const tempComment = useObservable(docCommentService.addingComment$);
@@ -76,8 +81,6 @@ export const DocThreadCommentPanel = () => {
         return null;
     }
 
-    const isInValidSelection = shouldDisableAddComment(injector);
-
     const unitId = doc.getUnitId();
 
     return (
@@ -89,7 +92,7 @@ export const DocThreadCommentPanel = () => {
                 commandService.executeCommand(StartAddCommentOperation.id);
             }}
             getSubUnitName={() => ''}
-            disableAdd={isInValidSelection}
+            disableAdd={disableAdd}
             tempComment={tempComment}
             onAddComment={(comment) => {
                 // attach an comment to an custom-range

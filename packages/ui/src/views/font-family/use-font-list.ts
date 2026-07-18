@@ -15,23 +15,12 @@
  */
 
 import type { IFontConfig } from '../../services/font.service';
-import { useEffect, useState } from 'react';
 import { IFontService } from '../../services/font.service';
-import { useDependency } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
 
 export function useFontList() {
     const fontService = useDependency(IFontService);
-    const [fonts, setFonts] = useState<IFontConfig[]>(() => fontService.getFonts());
-
-    useEffect(() => {
-        const subscription = fontService.fonts$.subscribe((fonts) => {
-            setFonts(fonts);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [fontService]);
+    const fonts = useObservable<IFontConfig[]>(fontService.fonts$, fontService.getFonts());
 
     return { fonts, fontService };
 }

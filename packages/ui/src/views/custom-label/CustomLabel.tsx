@@ -18,10 +18,10 @@ import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ColorKit, LocaleService } from '@univerjs/core';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { isObservable } from 'rxjs';
 import { ComponentManager, IconManager } from '../../common';
-import { useDependency } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
 
 export type ICustomLabelProps<T = undefined> = {
     className?: string;
@@ -44,42 +44,17 @@ export function CustomLabel(props: ICustomLabelProps) {
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
     const iconManager = useDependency(IconManager);
-    const [subscribedValue, setSubscribedValue] = useState(value);
-    const [realIcon, setRealIcon] = useState('');
+    const subscribedValue = useObservable(value$ ?? null, value);
+    const observableIcon = isObservable(icon) ? icon : null;
+    const subscribedIcon = useObservable(observableIcon, '');
+    const realIcon = isObservable(icon) ? subscribedIcon : icon ?? '';
 
     const nodes = [];
     let index = 0;
 
-    useEffect(() => {
-        if (value$) {
-            const subscription = value$.subscribe((v) => {
-                setSubscribedValue(v);
-            });
-
-            return () => {
-                subscription.unsubscribe();
-            };
-        }
-    }, [value$]);
-
     const realValue = useMemo(() => {
         return value ?? subscribedValue;
     }, [subscribedValue, value]);
-
-    useEffect(() => {
-        let subscription = null;
-        if (isObservable(icon)) {
-            subscription = icon.subscribe((v) => {
-                setRealIcon(v);
-            });
-        } else {
-            setRealIcon(icon ?? '');
-        }
-
-        return () => {
-            subscription?.unsubscribe();
-        };
-    }, [icon]);
 
     // if value is not valid, use primary color
     const isValid = useMemo(() => {

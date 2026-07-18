@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
-import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { DocDrawingPosition } from './DocDrawingPosition';
 import { DocDrawingTextWrap } from './DocDrawingTextWrap';
 
 export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
-    const focusDrawings = drawingManagerService.getFocusDrawings();
-
-    const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
-
-    useEffect(() => {
-        const focusDispose = drawingManagerService.focus$.subscribe((drawings) => {
-            setDrawings(drawings);
-        });
-
-        return () => {
-            focusDispose.unsubscribe();
-        };
-    }, []);
+    const drawings = useObservable(
+        () => drawingManagerService.focus$,
+        drawingManagerService.getFocusDrawings(),
+        false,
+        [drawingManagerService]
+    );
 
     return !!drawings?.length && (
         <div className="univer-text-sm">

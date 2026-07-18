@@ -41,6 +41,7 @@ import {
     useSidebarClick,
 } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import { map, startWith } from 'rxjs';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
@@ -215,7 +216,6 @@ export function EditorContainer() {
     const rootRef = useRef<HTMLDivElement>(null);
     const pointerRefocusTimerRef = useRef<number | undefined>(undefined);
     const visible = useObservable(editorBridgeService.visible$);
-    const [runtimeFocusRevision, setRuntimeFocusRevision] = useState(0);
     const commandService = useDependency(ICommandService);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
@@ -226,9 +226,29 @@ export function EditorContainer() {
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const editState = useObservable(editorBridgeService.currentEditCellState$);
     const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
+    const focusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)
+        ? injector.get(ISheetEmbedRuntimeFocusCoordinator)
+        : undefined;
+    const resolveRuntimeFocusState = () => ({
+        activeSessionScope: focusCoordinator?.resolveActiveChildSessionRuntimeScope(),
+        editUnitScope: focusCoordinator?.resolveRuntimeScopeByChildUnitId(editState?.unitId),
+        visibleUnitScope: focusCoordinator?.resolveRuntimeScopeByChildUnitId(visible?.unitId),
+        focusedUnitScope: focusCoordinator?.resolveRuntimeScopeByChildUnitId(instanceService.getFocusedUnit()?.getUnitId()),
+    });
+    const runtimeFocusState = useObservable(
+        focusCoordinator
+            ? () => focusCoordinator.runtimeSessionChanged$.pipe(
+                map(resolveRuntimeFocusState),
+                startWith(resolveRuntimeFocusState())
+            )
+            : null,
+        resolveRuntimeFocusState(),
+        false,
+        [editState?.unitId, focusCoordinator, instanceService, visible?.unitId]
+    );
 
     useEffect(() => {
-        const sub = cellEditorManagerService.state$.subscribe((param) => {
+        const subscription = cellEditorManagerService.state$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -254,20 +274,17 @@ export function EditorContainer() {
                 });
 
                 const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-
                 if (editor == null) {
                     return;
                 }
 
                 const { left, top, width, height } = editor.getBoundingClientRect();
-
                 cellEditorManagerService.setRect({ left, top, width, height });
             }
         });
-        return () => {
-            sub.unsubscribe();
-        };
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
+
+        return () => subscription.unsubscribe();
+    }, [cellEditorManagerService, editorService]);
 
     useEffect(() => {
         if (!injector.has(ISheetEmbedFloatingGeometryService)) {
@@ -281,18 +298,6 @@ export function EditorContainer() {
 
         return () => subscription.unsubscribe();
     }, [cellEditorResizeService, injector]);
-
-    useEffect(() => {
-        if (!injector.has(ISheetEmbedRuntimeFocusCoordinator)) {
-            return undefined;
-        }
-
-        const subscription = injector.get(ISheetEmbedRuntimeFocusCoordinator).runtimeSessionChanged$.subscribe(() => {
-            setRuntimeFocusRevision((revision) => revision + 1);
-        });
-
-        return () => subscription.unsubscribe();
-    }, [injector]);
 
     useEffect(() => {
         if (!disableAutoFocus) {
@@ -373,21 +378,22 @@ export function EditorContainer() {
     }, [cellEditorResizeService, editorService, visible?.visible]);
 
     useEffect(() => {
-        if (!visible?.visible || !rootRef.current || !injector.has(ISheetEmbedRuntimeFocusCoordinator)) {
+        if (!visible?.visible || !rootRef.current || !focusCoordinator) {
             return undefined;
         }
 
-        const focusCoordinator = injector.get(ISheetEmbedRuntimeFocusCoordinator);
-        const focusedUnitId = instanceService.getFocusedUnit()?.getUnitId();
         const rootRuntimeScope = resolveSheetEmbedRuntimeDomScope(rootRef.current);
-        const unitRuntimeScope = [editState?.unitId, visible.unitId, focusedUnitId]
-            .map((unitId) => focusCoordinator.resolveRuntimeScopeByChildUnitId(unitId))
+        const unitRuntimeScope = [
+            runtimeFocusState.editUnitScope,
+            runtimeFocusState.visibleUnitScope,
+            runtimeFocusState.focusedUnitScope,
+        ]
             .find((resolvedScope) => resolvedScope != null);
         if (rootRuntimeScope && unitRuntimeScope && rootRuntimeScope.embedId !== unitRuntimeScope.embedId) {
             return undefined;
         }
 
-        const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
+        const activeSessionScope = runtimeFocusState.activeSessionScope;
         const explicitRuntimeScope = unitRuntimeScope ?? rootRuntimeScope;
         if (activeSessionScope && rootRuntimeScope && !unitRuntimeScope && rootRuntimeScope.embedId !== activeSessionScope.embedId) {
             return undefined;
@@ -464,15 +470,14 @@ export function EditorContainer() {
         }
 
         return () => collection.dispose();
-    }, [contextService, editState?.unitId, editorService, injector, instanceService, runtimeFocusRevision, visible?.unitId, visible?.visible]);
+    }, [contextService, editorService, focusCoordinator, injector, runtimeFocusState, visible?.visible]);
 
     useEffect(() => {
-        if (visible?.visible || !injector.has(ISheetEmbedRuntimeFocusCoordinator)) {
+        if (visible?.visible || !focusCoordinator) {
             return undefined;
         }
 
-        const focusCoordinator = injector.get(ISheetEmbedRuntimeFocusCoordinator);
-        const activeSessionScope = focusCoordinator.resolveActiveChildSessionRuntimeScope();
+        const activeSessionScope = runtimeFocusState.activeSessionScope;
         const childUnitId = activeSessionScope?.childUnitId;
         if (
             !activeSessionScope ||
@@ -558,7 +563,7 @@ export function EditorContainer() {
             ownerDocument.removeEventListener('click', refocusHiddenEditorAfterRuntimePointer, true);
             portalRegistration.dispose();
         };
-    }, [editorService, injector, instanceService, runtimeFocusRevision, visible?.visible]);
+    }, [editorService, focusCoordinator, injector, instanceService, runtimeFocusState, visible?.visible]);
 
     useEffect(() => {
         return () => {

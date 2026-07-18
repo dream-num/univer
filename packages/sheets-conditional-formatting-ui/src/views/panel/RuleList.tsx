@@ -52,8 +52,8 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { useHighlightRange } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
-import { debounceTime, Observable } from 'rxjs';
+import { useMemo, useState } from 'react';
+import { debounceTime, filter, map, merge, Observable, share, startWith } from 'rxjs';
 import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
 import { Preview } from '../Preview';
 
@@ -145,7 +145,6 @@ export function RuleList(props: IRuleListProps) {
 
     const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
     const [selectValue, setSelectValue] = useState('2');
-    const [fetchRuleListId, setFetchRuleListId] = useState(0);
     const [draggingId, setDraggingId] = useState<string>('');
 
     const selectOption = [
@@ -174,52 +173,48 @@ export function RuleList(props: IRuleListProps) {
         return [];
     };
 
-    const [ruleList, setRuleList] = useState(getRuleList);
-
-    useHighlightRange(currentRuleRanges);
-
-    useEffect(() => {
-        const disposable = commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetWorksheetActiveOperation.id) {
-                setFetchRuleListId(Math.random());
-            }
-        });
-        return () => disposable.dispose();
-    });
-
-    useEffect(() => {
-        setRuleList(getRuleList);
-    }, [selectValue, fetchRuleListId, unitId, subUnitId]);
-
-    useEffect(() => {
-        if (selectValue === '2') {
-            return;
-        }
-        const subscription =
-            new Observable<null>((commandSubscribe) => {
-                const commandList = [SetSelectionsOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
+    const ruleList = useObservable(
+        () => {
+            const commandEvent$ = new Observable<'immediate' | 'debounced'>((subscriber) => {
+                const commandList = [
+                    SetSelectionsOperation.id,
+                    AddConditionalRuleMutation.id,
+                    SetConditionalRuleMutation.id,
+                    DeleteConditionalRuleMutation.id,
+                    MoveConditionalRuleMutation.id,
+                ];
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
-                    const { id, params } = commandInfo;
-                    const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-                    if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
-                        commandSubscribe.next(null);
+                    if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                        subscriber.next('immediate');
+                        return;
+                    }
+
+                    const commandUnitId = (commandInfo.params as { unitId?: string } | undefined)?.unitId;
+                    if (selectValue === '1' && commandList.includes(commandInfo.id) && commandUnitId === unitId) {
+                        subscriber.next('debounced');
                     }
                 });
                 return () => disposable.dispose();
-            }).pipe(debounceTime(16)).subscribe(() => {
-                setRuleList(getRuleList);
-            });
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [univerInstanceService, selectValue, unitId, subUnitId]);
+            }).pipe(share());
 
-    useEffect(() => {
-        const dispose = conditionalFormattingRuleModel.$ruleChange.subscribe(() => {
-            setFetchRuleListId(Math.random());
-        });
-        return () => dispose.unsubscribe();
-    }, [conditionalFormattingRuleModel]);
+            return merge(
+                conditionalFormattingRuleModel.$ruleChange,
+                commandEvent$.pipe(filter((event) => event === 'immediate')),
+                commandEvent$.pipe(
+                    filter((event) => event === 'debounced'),
+                    debounceTime(16)
+                )
+            ).pipe(
+                map(getRuleList),
+                startWith(getRuleList())
+            );
+        },
+        [],
+        false,
+        [commandService, conditionalFormattingRuleModel, selectValue, subUnitId, unitId]
+    );
+
+    useHighlightRange(currentRuleRanges);
 
     const handleDelete = (rule: IConditionFormattingRule) => {
         const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();

@@ -16,7 +16,6 @@
 
 import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
-import type { Subscription } from 'rxjs';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
@@ -25,15 +24,14 @@ import {
     forwardRef,
     useCallback,
     useContext,
-    useEffect,
     useImperativeHandle,
     useMemo,
     useRef,
     useState,
 } from 'react';
-import { combineLatest, of } from 'rxjs';
+import { combineLatest, map, merge, of, scan, startWith } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import { useDependency } from '../../../utils/di';
+import { useDependency, useObservable } from '../../../utils/di';
 import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
@@ -212,20 +210,30 @@ export function DropdownMenuWrapper({
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
 
     const menuManagerService = useDependency(IMenuManagerService);
-    const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
-    const [_, setMenuVersion] = useState(0);
-
-    useEffect(() => {
-        const subscription = menuManagerService.menuChanged$.subscribe(() => {
-            setMenuVersion((version) => version + 1);
+    const resolveMenuItems = () => menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];
+    const menuItems = useObservable(
+        () => menuManagerService.menuChanged$.pipe(map(resolveMenuItems), startWith(resolveMenuItems())),
+        resolveMenuItems(),
+        false,
+        [menuId, menuManagerService]
+    );
+    const hiddenStates$ = useMemo(() => {
+        const itemStates = menuItems.map((item) => {
+            const hidden$ = item.children
+                ? combineLatest(item.children.map((subItem) => subItem.item?.hidden$ ?? of(false))).pipe(
+                    map((hiddenValues) => hiddenValues.every(Boolean))
+                )
+                : item.item?.hidden$ ?? of(false);
+            return hidden$.pipe(map((hidden) => [String(item.key), hidden] as const));
         });
-
-        return () => subscription.unsubscribe();
-    }, [menuManagerService]);
-
-    const menuItems = useMemo(() => {
-        return menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];
-    }, [menuId, menuManagerService]);
+        return itemStates.length
+            ? merge(...itemStates).pipe(
+                scan((states, [key, hidden]) => ({ ...states, [key]: hidden }), {} as Record<string, boolean>),
+                startWith({})
+            )
+            : of({});
+    }, [menuItems]);
+    const hiddenStates = useObservable<Record<string, boolean>>(hiddenStates$, {});
 
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
@@ -250,41 +258,6 @@ export function DropdownMenuWrapper({
         onOptionSelect(option);
         setDropdownVisible(false);
     }
-
-    useEffect(() => {
-        const subscriptions: Subscription[] = [];
-
-        menuItems.forEach((item) => {
-            if (!item.children) {
-                if (item.item?.hidden$) {
-                    const sub = item.item.hidden$.subscribe((hidden) => {
-                        setHiddenStates((prev) => ({
-                            ...prev,
-                            [item.key]: hidden,
-                        }));
-                    });
-                    subscriptions.push(sub);
-                }
-            } else {
-                const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$ ?? of(false));
-
-                const sub = combineLatest(hiddenObservables).subscribe((hiddenValues) => {
-                    const isAllHidden = hiddenValues.every((hidden) => hidden === true);
-                    setHiddenStates((prev) => ({
-                        ...prev,
-                        [item.key]: isAllHidden,
-                    }));
-                });
-
-                subscriptions.push(sub);
-            }
-        });
-
-        return () => {
-            subscriptions.forEach((sub) => sub?.unsubscribe());
-            setHiddenStates({});
-        };
-    }, [menuItems]);
 
     if (slot) {
         return (

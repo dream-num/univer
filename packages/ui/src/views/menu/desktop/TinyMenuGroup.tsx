@@ -17,10 +17,10 @@
 import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
-import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { cva } from '@univerjs/design';
-import { useEffect, useMemo, useState } from 'react';
-import { combineLatest, of } from 'rxjs';
+import { useMemo } from 'react';
+import { combineLatest, map, of, startWith } from 'rxjs';
 import { IconManager } from '../../../common';
 import { useDependency, useObservable } from '../../../utils/di';
 import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
@@ -43,6 +43,7 @@ interface IUIQuickTileMenuItemProps {
 }
 
 const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
+const EMPTY_TINY_MENU_CHILDREN: IMenuSchema[] = [];
 
 type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
     value?: MenuItemDefaultValueType;
@@ -151,56 +152,21 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, hoverSuppressed, columns, sizeVariant = 'default', layoutVariant = 'default', onOptionSelect } = props;
-    const [activeItems, setActiveItems] = useState<string[]>([]);
-    const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const iconManager = useDependency(IconManager);
     const localeService = useDependency(LocaleService);
-
-    useEffect(() => {
-        const { children } = item;
-        if (!children) return;
-
-        const observables = children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
-        const subscription = combineLatest(observables).subscribe((activedArr) => {
-            const activeItems: string[] = [];
-            for (let index = 0; index < activedArr.length; index++) {
-                if (activedArr[index]) {
-                    activeItems.push(getTinyMenuChildStateKey(children[index]));
-                }
-            }
-            setActiveItems(activeItems);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-            observables.forEach((observable) => {
-                observable.complete();
-            });
-        };
-    }, [item]);
-
-    useEffect(() => {
-        const { children } = item;
-        if (!children) return;
-
-        const observables = children.map((child) => convertObservableToBehaviorSubject(child.item?.hidden$ ?? of(false), false));
-        const subscription = combineLatest(observables).subscribe((hiddenArr) => {
-            const hiddenItems: string[] = [];
-            for (let index = 0; index < hiddenArr.length; index++) {
-                if (hiddenArr[index]) {
-                    hiddenItems.push(getTinyMenuChildStateKey(children[index]));
-                }
-            }
-            setHiddenItems(hiddenItems);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-            observables.forEach((observable) => {
-                observable.complete();
-            });
-        };
-    }, [item]);
+    const children = item.children ?? EMPTY_TINY_MENU_CHILDREN;
+    const activeItems$ = useMemo(() => children.length
+        ? combineLatest(children.map((child) => (child.item?.activated$ ?? of(false)).pipe(startWith(false)))).pipe(
+            map((states) => children.flatMap((child, index) => states[index] ? [getTinyMenuChildStateKey(child)] : []))
+        )
+        : of([] as string[]), [children]);
+    const hiddenItems$ = useMemo(() => children.length
+        ? combineLatest(children.map((child) => (child.item?.hidden$ ?? of(false)).pipe(startWith(false)))).pipe(
+            map((states) => children.flatMap((child, index) => states[index] ? [getTinyMenuChildStateKey(child)] : []))
+        )
+        : of([] as string[]), [children]);
+    const activeItems = useObservable(activeItems$, []);
+    const hiddenItems = useObservable(hiddenItems$, []);
 
     const visibleChildren = useMemo(
         () => getVisibleTinyMenuChildren(item.children ?? [], [...hiddenItems, ...hiddenItemIds]),

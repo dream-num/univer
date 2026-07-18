@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
@@ -29,7 +29,6 @@ interface ISingleCanvasPopupProps {
 }
 
 export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
-    const [hidden, setHidden] = useState(false);
     const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(
         throttleTime(0, animationFrameScheduler),
         map((anchorRect) => {
@@ -48,35 +47,31 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
     const excludeRectsRef = useObservableRef(excludeRects$, popup.excludeRects);
     const { canvasElement, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
 
-    useEffect(() => {
-        if (!hideOnInvisible) {
-            return;
-        }
+    const hidden = useObservable(
+        hideOnInvisible
+            ? () => combineLatest([anchorRect$, hiddenRects$]).pipe(map(([rectWithOffset, hiddenRects]) => {
+                const rect = canvasElement.getBoundingClientRect();
+                const { top, left, bottom, right } = rect;
+                const rectHeight = rectWithOffset.bottom - rectWithOffset.top;
+                const rectWidth = rectWithOffset.right - rectWithOffset.left;
 
-        const anchorRectSub = combineLatest([anchorRect$, hiddenRects$]).subscribe(([rectWithOffset, hiddenRects]) => {
-            const rect = canvasElement.getBoundingClientRect();
-            const { top, left, bottom, right } = rect;
-            const rectHeight = rectWithOffset.bottom - rectWithOffset.top;
-            const rectWidth = rectWithOffset.right - rectWithOffset.left;
+                const isInHiddenRect = hiddenRects.some((hiddenRect) => {
+                    const bufferY = Math.min(0.5 * rectHeight, 10);
+                    const bufferX = Math.min(0.5 * rectWidth, 10);
+                    return rectWithOffset.top >= (hiddenRect.top - bufferY) &&
+                        rectWithOffset.bottom <= (hiddenRect.bottom + bufferY) &&
+                        rectWithOffset.left >= (hiddenRect.left - bufferX) &&
+                        rectWithOffset.right <= (hiddenRect.right + bufferX);
+                });
 
-            const isInHiddenRect = hiddenRects.some((hiddenRect) => {
-                const bufferY = Math.min(0.5 * rectHeight, 10);
-                const bufferX = Math.min(0.5 * rectWidth, 10);
-                return rectWithOffset.top >= (hiddenRect.top - bufferY) &&
-                    rectWithOffset.bottom <= (hiddenRect.bottom + bufferY) &&
-                    rectWithOffset.left >= (hiddenRect.left - bufferX) &&
-                    rectWithOffset.right <= (hiddenRect.right + bufferX);
-            });
-
-            if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right || isInHiddenRect) {
-                setHidden(true);
-            } else {
-                setHidden(false);
-            }
-        });
-
-        return () => anchorRectSub.unsubscribe();
-    }, [canvasElement, hideOnInvisible, anchorRect$, hiddenRects$]);
+                return rectWithOffset.bottom < top || rectWithOffset.top > bottom ||
+                    rectWithOffset.right < left || rectWithOffset.left > right || isInHiddenRect;
+            }))
+            : null,
+        false,
+        false,
+        [anchorRect$, canvasElement, hiddenRects$, hideOnInvisible]
+    );
 
     if ((hidden && hiddenType === 'destroy')) {
         return null;

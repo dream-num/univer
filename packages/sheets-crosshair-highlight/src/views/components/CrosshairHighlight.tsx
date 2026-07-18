@@ -18,6 +18,7 @@ import { ThemeService } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
+import { map } from 'rxjs';
 import {
     CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS,
     resolveCrosshairHighlightColors,
@@ -35,9 +36,12 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
     const themeService = useDependency(ThemeService);
 
     const currentColor = useObservable(crosshairSrv.color$);
-    useObservable(themeService.currentTheme$);
-
-    const colors = resolveCrosshairHighlightColors(themeService);
+    const colors = useObservable(
+        () => themeService.currentTheme$.pipe(map(() => resolveCrosshairHighlightColors(themeService))),
+        resolveCrosshairHighlightColors(themeService),
+        false,
+        [themeService]
+    );
 
     const handleColorPicked = useCallback((tokenPath: string) => {
         onChange?.(tokenPath);

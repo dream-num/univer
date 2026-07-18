@@ -70,7 +70,9 @@ export function createSkeletonLine(
     paragraphConfig: IParagraphConfig,
     page: IDocumentSkeletonPage,
     headerPage: Nullable<IDocumentSkeletonPage>,
-    footerPage: Nullable<IDocumentSkeletonPage>
+    footerPage: Nullable<IDocumentSkeletonPage>,
+    columnLeft: number = 0,
+    sectionTop: number = 0
 ): IDocumentSkeletonLine {
     const {
         lineHeight = 15.6,
@@ -118,7 +120,8 @@ export function createSkeletonLine(
         ? [__getDivideSKe(0, columnWidth)]
         : _calculateDividesByDrawings(
             lineHeight,
-            lineTop,
+            sectionTop + lineTop,
+            columnLeft,
             columnWidth,
             paddingLeft,
             paddingRight,
@@ -145,9 +148,11 @@ export function calculateLineTopByDrawings(
     headerPage: Nullable<IDocumentSkeletonPage>,
     footerPage: Nullable<IDocumentSkeletonPage>,
     columnLeft: number = 0,
-    columnWidth: number = 0
+    columnWidth: number = 0,
+    sectionTop: number = 0
 ) {
-    let maxTop = lineTop;
+    const absoluteLineTop = sectionTop + lineTop;
+    let maxTop = absoluteLineTop;
     const pageSkeDrawings = page.skeDrawings;
     const skeNonWrapTables = new Map(Array.from(page.skeTables).filter(([_, table]) => table.tableSource.textWrap === TableTextWrapType.NONE));
     const headersDrawings = headerPage?.skeDrawings;
@@ -156,7 +161,7 @@ export function calculateLineTopByDrawings(
     if (headerPage && headersDrawings) {
         headersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, absoluteLineTop);
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -166,7 +171,7 @@ export function calculateLineTopByDrawings(
     if (footerPage && footersDrawings) {
         footersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, absoluteLineTop);
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -174,24 +179,24 @@ export function calculateLineTopByDrawings(
     }
 
     pageSkeDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
+        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, absoluteLineTop);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
-        const blockingWrapTop = _getLineTopWithFullColumnWrap(drawing, lineHeight, lineTop, columnLeft, columnWidth);
+        const blockingWrapTop = _getLineTopWithFullColumnWrap(drawing, lineHeight, absoluteLineTop, columnLeft, columnWidth);
         if (blockingWrapTop) {
             maxTop = Math.max(maxTop, blockingWrapTop);
         }
     });
 
     skeNonWrapTables?.forEach((table) => {
-        const top = _getLineTopWidthWrapNone(table, lineHeight, lineTop);
+        const top = _getLineTopWidthWrapNone(table, lineHeight, absoluteLineTop);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
     });
 
-    return maxTop;
+    return maxTop - sectionTop;
 }
 
 function _getLineTopWithFullColumnWrap(
@@ -311,6 +316,7 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
 function _calculateDividesByDrawings(
     lineHeight: number,
     lineTop: number,
+    columnLeft: number,
     columnWidth: number,
     paddingLeft: number,
     paddingRight: number,
@@ -338,7 +344,7 @@ function _calculateDividesByDrawings(
     if (headerPage && headersDrawings) {
         headersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
-            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnLeft, columnWidth);
 
             if (split) {
                 drawingsMix.push(split);
@@ -349,7 +355,7 @@ function _calculateDividesByDrawings(
     if (footerPage && footersDrawings) {
         footersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
-            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnLeft, columnWidth);
 
             if (split) {
                 drawingsMix.push(split);
@@ -358,7 +364,7 @@ function _calculateDividesByDrawings(
     }
 
     paragraphNonInlineSkeDrawings?.forEach((drawing) => {
-        const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
+        const split = _calculateSplit(drawing, lineHeight, lineTop, columnLeft, columnWidth);
 
         if (split) {
             drawingsMix.push(split);
@@ -369,7 +375,7 @@ function _calculateDividesByDrawings(
         wrapTypeTables.forEach((table) => {
             const { left, top, width, height, tableSource } = table;
             const { dist } = tableSource;
-            const split = __getSplitWidthNoAngle(top, height, left, width, lineTop, lineHeight, columnWidth, dist);
+            const split = __getSplitWidthNoAngle(top, height, left - columnLeft, width, lineTop, lineHeight, columnWidth, dist);
 
             if (split) {
                 drawingsMix.push(split);
@@ -414,6 +420,7 @@ function _calculateSplit(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
     lineTop: number,
+    columnLeft: number,
     columnWidth: number
 ): Nullable<IDrawingsSplit> {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
@@ -439,6 +446,10 @@ function _calculateSplit(
             points.push(new Vector2(point[0], point[1]));
         }
 
+        points.forEach((point) => {
+            point.x -= columnLeft;
+        });
+
         if (angle !== 0) {
             const transform = new Transform().rotate(angle); // Create a rotated transform class
             for (let i = 0; i < points.length; i++) {
@@ -455,11 +466,11 @@ function _calculateSplit(
 
     if (angle === 0) {
         // No rotation case, wrapSquare | wrapThrough | wrapTight
-        return __getSplitWidthNoAngle(aTop, height, aLeft, width, lineTop, lineHeight, columnWidth, dist, layoutType, wrapText);
+        return __getSplitWidthNoAngle(aTop, height, aLeft - columnLeft, width, lineTop, lineHeight, columnWidth, dist, layoutType, wrapText);
     }
 
     // In rotation case, consider the maximum area obtained by the first/last position of the line and the rotated drawing
-    const boundingBox = getBoundingBox(angle, aLeft, width, aTop, height);
+    const boundingBox = getBoundingBox(angle, aLeft - columnLeft, width, aTop, height);
 
     if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
         // In WRAP_SQUARE case, the rotated shape will have a new rect, use this new rect to determine split

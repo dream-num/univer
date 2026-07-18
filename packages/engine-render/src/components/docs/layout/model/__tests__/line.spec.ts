@@ -236,6 +236,94 @@ describe('line model', () => {
         expect(line.divides[0].width).toBe(20);
     });
 
+    it('maps a drawing that crosses columns into each column coordinate system', () => {
+        const page = {
+            skeDrawings: new Map([
+                ['cross-column', {
+                    aTop: 0,
+                    aLeft: 80,
+                    width: 40,
+                    height: 20,
+                    angle: 0,
+                    drawingOrigin: {
+                        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                        distL: 0,
+                        distR: 0,
+                        distT: 0,
+                        distB: 0,
+                        wrapText: WrapTextType.BOTH_SIDES,
+                    },
+                }],
+            ]),
+            skeTables: new Map(),
+        } as any;
+        const createLineForColumn = (columnLeft: number) => createSkeletonLine(
+            1,
+            LineType.PARAGRAPH,
+            { lineHeight: 20, lineTop: 0, contentHeight: 14 },
+            100,
+            0,
+            true,
+            {} as any,
+            page,
+            null,
+            null,
+            columnLeft
+        );
+
+        const firstColumnLine = createLineForColumn(0);
+        const secondColumnLine = createLineForColumn(100);
+
+        expect(firstColumnLine.divides).toHaveLength(1);
+        expect(firstColumnLine.divides[0]).toMatchObject({ left: 0, width: 80 });
+        expect(secondColumnLine.divides).toHaveLength(1);
+        expect(secondColumnLine.divides[0]).toMatchObject({ left: 20, width: 80 });
+    });
+
+    it('matches page-relative drawings against section-relative line tops', () => {
+        const page = {
+            skeDrawings: new Map([
+                ['section-drawing', {
+                    aTop: 80,
+                    aLeft: 20,
+                    width: 40,
+                    height: 20,
+                    angle: 0,
+                    drawingOrigin: {
+                        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                        distL: 0,
+                        distR: 0,
+                        distT: 0,
+                        distB: 0,
+                        wrapText: WrapTextType.BOTH_SIDES,
+                    },
+                }],
+            ]),
+            skeTables: new Map(),
+        } as any;
+
+        const line = createSkeletonLine(
+            1,
+            LineType.PARAGRAPH,
+            { lineHeight: 10, lineTop: 10, contentHeight: 10 },
+            100,
+            0,
+            true,
+            {} as any,
+            page,
+            null,
+            null,
+            0,
+            70
+        );
+
+        expect(line.top).toBe(10);
+        expect(line.divides).toMatchObject([
+            { left: 0, width: 20 },
+            { left: 60, width: 40 },
+        ]);
+    });
+
     it('does not split line divides for behind-doc wrap-none drawings', () => {
         const page = {
             skeDrawings: new Map([

@@ -190,6 +190,13 @@ function horizontalAlignHandler(
     for (let i = 0; i < divides.length; i++) {
         const divide = divides[i];
         const { width } = divide;
+
+        if (divide.glyphGroup.length === 0) {
+            divide.glyphGroupWidth = 0;
+            divide.paddingLeft = 0;
+            continue;
+        }
+
         let glyphGroupWidth = getGlyphGroupWidth(divide);
 
         divide.glyphGroupWidth = glyphGroupWidth;

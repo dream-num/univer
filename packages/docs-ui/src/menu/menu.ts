@@ -54,7 +54,7 @@ import {
     HEADING_LIST,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Observable, shareReplay } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import {
@@ -87,8 +87,8 @@ import { CreateDocTableCommand } from '../commands/commands/table/doc-table-crea
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
-import { DocMenuStyleService } from '../services/doc-menu-style.service';
 import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
+import { DocMenuStyleService } from '../services/doc-menu-style.service';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
 
 export function shouldSuppressDocMenuStateRefresh(accessor: IAccessor): boolean {
@@ -1237,7 +1237,10 @@ export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<Loc
 
         calc();
         return disposable.dispose;
-    });
+    }).pipe(
+        distinctUntilChanged(),
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
 
     return {
         id: AlignOperationCommand.id,

@@ -658,14 +658,14 @@ describe('layout-ruler', () => {
     it('moves non-wrap tables into the usable area beside flow-affecting drawings', () => {
         const table = {
             top: 120,
-            left: 0,
+            left: 261,
             width: 280,
             height: 80,
         } as any;
         const page = {
             skeDrawings: new Map([['left-wrap', {
                 aTop: 40,
-                aLeft: 10,
+                aLeft: 271,
                 width: 90,
                 height: 220,
                 drawingOrigin: {
@@ -675,12 +675,13 @@ describe('layout-ruler', () => {
             }]]),
         } as any;
         const column = {
+            left: 261,
             width: 420,
         } as any;
 
         __testing.avoidFlowAffectingDrawingsForTable(table, page, column);
 
-        expect(table.left).toBe(108);
+        expect(table.left).toBe(369);
     });
 
     it('stores custom block render viewport on inline skeleton drawings', () => {

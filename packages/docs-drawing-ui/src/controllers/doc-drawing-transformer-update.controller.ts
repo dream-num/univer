@@ -546,6 +546,7 @@ export class DocDrawingTransformerController extends Disposable {
 
         const line = glyphAnchor.parent?.parent;
         const column = line?.parent;
+        const sectionTop = column?.parent?.top ?? 0;
         const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart) ?? column?.lines[0];
         const page = column?.parent?.parent;
 
@@ -650,11 +651,11 @@ export class DocDrawingTransformerController extends Disposable {
                 break;
             }
             case ObjectRelativeFromV.LINE: {
-                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - line.top;
+                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - sectionTop - line.top;
                 break;
             }
             case ObjectRelativeFromV.PARAGRAPH: {
-                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - paragraphStartLine.top;
+                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - sectionTop - paragraphStartLine.top;
                 break;
             }
         }

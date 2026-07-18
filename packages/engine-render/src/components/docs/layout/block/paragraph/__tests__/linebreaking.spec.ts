@@ -21,6 +21,7 @@ import {
     DataStreamTreeTokenType,
     DocumentBlockRangeType,
     DocumentFlavor,
+    HorizontalAlign,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -162,6 +163,37 @@ describe('linebreaking', () => {
 
         const drawing = curPage.skeDrawings.get('b1');
         expect(drawing?.height).toBe(120);
+    });
+
+    it('does not multiply an inline drawing height when it follows text', () => {
+        const content = `Before${DataStreamTreeTokenType.CUSTOM_BLOCK}after`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 6, blockId: 'inline-shape' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+            },
+            drawings: {
+                'inline-shape': {
+                    drawingId: 'inline-shape',
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        angle: 0,
+                        positionH: {},
+                        positionV: {},
+                        size: { width: 100, height: 96 },
+                    },
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        const line = curPage.sections[0].columns[0].lines[0];
+        expect(line.contentHeight).toBeCloseTo(96);
+        expect(line.lineHeight).toBeCloseTo(96);
     });
 
     it.each([
@@ -785,6 +817,66 @@ describe('linebreaking', () => {
         expect(firstColumnText).toContain('FIRST');
         expect(firstColumnText).not.toContain('SECOND');
         expect(secondColumnText).toContain('SECOND');
+    });
+
+    it('wraps second-column text around a drawing anchored below a preceding section', () => {
+        const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}FIRST${DataStreamTreeTokenType.COLUMN_BREAK}ments without duplicating content in the body`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+            },
+            body: {
+                customBlocks: [{ startIndex: 0, blockId: 'cross-column' }],
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'cross-column-wrap-paragraph',
+                    paragraphStyle: { horizontalAlign: HorizontalAlign.JUSTIFIED },
+                }],
+                customRanges: [{
+                    startIndex: 6,
+                    endIndex: 6,
+                    rangeId: 'cross-column-break',
+                    rangeType: 5,
+                    wholeEntity: true,
+                    properties: { docxBreakType: 'column' },
+                }],
+                sectionBreaks: [{
+                    sectionId: 'section_fixture_cross_column_wrap',
+                    startIndex: content.length + 1,
+                    columnProperties: [
+                        { width: 170, paddingEnd: 20 },
+                        { width: 170, paddingEnd: 0 },
+                    ],
+                }],
+            },
+            drawings: {
+                'cross-column': {
+                    drawingId: 'cross-column',
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 8 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        size: { width: 100, height: 96 },
+                    },
+                },
+            },
+        });
+        curPage.sections[0].top = 70;
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+        const secondColumn = result[0].sections[0].columns[1];
+        const textDivides = secondColumn.lines
+            .flatMap((line) => line.divides)
+            .filter((divide) => divide.glyphGroup.some((glyph) => glyph.content && glyph.content !== DataStreamTreeTokenType.PARAGRAPH));
+
+        expect(result[0].skeDrawings.get('cross-column')).toMatchObject({ aLeft: 198, aTop: 70, width: 100 });
+        expect(textDivides.length).toBeGreaterThan(0);
+        expect(textDivides.every((divide) => divide.width > 8)).toBe(true);
+        expect(textDivides.map((divide) => divide.glyphGroup.map((glyph) => glyph.content).join('')).join(''))
+            .toContain('ments without duplicating content in the body');
     });
 
     it('starts normal text on a new flow line after a zero-width wrap-none floating anchor', () => {

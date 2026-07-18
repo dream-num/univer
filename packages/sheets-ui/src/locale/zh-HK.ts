@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: '更多',
             toggleGridlines: '切換網格線',
-            textToNumber: '文字轉數字',
         },
         align: {
             left: '靠左對齊',

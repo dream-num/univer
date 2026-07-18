@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: 'Plus',
             toggleGridlines: 'Activer/désactiver le quadrillage',
-            textToNumber: 'Texte en nombre',
         },
         align: {
             left: 'gauche',

@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: 'その他',
             toggleGridlines: 'グリッド線の表示/非表示',
-            textToNumber: 'テキストを数値に変換',
         },
         align: {
             left: '左寄せ',

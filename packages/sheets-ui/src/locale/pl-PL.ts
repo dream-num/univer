@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: 'Więcej',
             toggleGridlines: 'Przełącz linie siatki',
-            textToNumber: 'Tekst na liczbę',
         },
         align: {
             left: 'lewo',

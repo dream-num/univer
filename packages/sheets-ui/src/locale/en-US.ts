@@ -66,7 +66,6 @@ const locale = {
             },
             more: 'More',
             toggleGridlines: 'Toggle Gridlines',
-            textToNumber: 'Text to Number',
         },
         align: {
             left: 'left',

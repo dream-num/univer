@@ -35,6 +35,7 @@ export enum FormulaReferenceMoveType {
     InsertMoveDown, // range
     InsertMoveRight, // range
     SetName,
+    SetUnitName,
     RemoveSheet,
     SetDefinedName, // update defined name
     RemoveDefinedName, // remove defined name
@@ -54,6 +55,8 @@ export interface IFormulaReferenceMoveParam {
     from?: IRange;
     to?: IRange;
     sheetName?: string;
+    oldUnitName?: string;
+    unitName?: string;
     /**
      * defined name id
      */
@@ -73,6 +76,7 @@ export interface IFormulaReferenceMoveParam {
 
 const formulaReferenceSheetList = [
     FormulaReferenceMoveType.SetName,
+    FormulaReferenceMoveType.SetUnitName,
     FormulaReferenceMoveType.RemoveSheet,
     FormulaReferenceMoveType.SetDefinedName,
     FormulaReferenceMoveType.RemoveDefinedName,

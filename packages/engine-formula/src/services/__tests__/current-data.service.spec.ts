@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector, IUniverInstanceService, LocaleService, ObjectMatrix } from '@univerjs/core';
+import { Injector, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
@@ -43,6 +43,7 @@ function createService() {
     const formulaDataModel = {
         getCalculateData: vi.fn(() => ({
             allUnitData: {},
+            unitNameMap: {},
             unitSheetNameMap: {},
             unitStylesData: {},
         })),
@@ -114,6 +115,12 @@ describe('FormulaCurrentConfigService', () => {
                     SheetA: 'sheetA',
                 },
             } as never,
+            unitNameMap: {
+                unitA: {
+                    name: 'Sales.xlsx',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                },
+            },
             formulaData: { unitA: { sheetA: {} } } as never,
             arrayFormulaCellData: {},
             arrayFormulaRange: {},
@@ -132,6 +139,12 @@ describe('FormulaCurrentConfigService', () => {
         expect(service.getUnitData().unitA.sheetB.rowData).toEqual({ 0: { h: 20 } });
         expect(service.getSheetName('unitA', 'sheetA')).toBe('SheetA');
         expect(service.getSheetName('unitA', 'sheetB')).toBe('SheetB');
+        expect(service.getUnitNameMap()).toEqual({
+            unitA: {
+                name: 'Sales.xlsx',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            },
+        });
         expect(service.getClearDependencyTreeCache()).toEqual({ unitA: { sheetA: 'SheetA' } });
         expect(service.getDirtyData()).toEqual(expect.objectContaining({
             forceCalculation: true,
@@ -156,6 +169,12 @@ describe('FormulaCurrentConfigService', () => {
                 },
             },
             unitStylesData: { 'unit-current': {} },
+            unitNameMap: {
+                'unit-current': {
+                    name: 'Current.xlsx',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                },
+            },
             unitSheetNameMap: { 'unit-current': { Main: 'sheet-current' } },
         });
 
@@ -175,6 +194,7 @@ describe('FormulaCurrentConfigService', () => {
 
         expect(service.getExecuteUnitId()).toBe('unit-current');
         expect(service.getExecuteSubUnitId()).toBe('sheet-current');
+        expect(service.getUnitNameMap()['unit-current']?.name).toBe('Current.xlsx');
         expect(service.getSheetsInfo()).toEqual({
             sheetOrder: ['sheet-current'],
             sheetNameMap: { 'sheet-current': 'Main' },
@@ -204,6 +224,7 @@ describe('FormulaCurrentConfigService', () => {
         formulaDataModel.getCalculateData.mockReturnValue({
             allUnitData: {},
             unitStylesData: {},
+            unitNameMap: {},
             unitSheetNameMap: {},
         });
         formulaDataModel.getFormulaData.mockReturnValue({ unitLite: { sheetLite: { 1: { 1: { f: '=A1' } } } } });
@@ -221,6 +242,12 @@ describe('FormulaCurrentConfigService', () => {
         service.registerUnitData({ unit: { sheet: { cellData: new ObjectMatrix({}), rowCount: 1, columnCount: 1, rowData: {}, columnData: {} } } } as never);
         service.registerFormulaData({ unit: { sheet: { 1: { 1: { f: '=1' } } } } } as never);
         service.registerSheetNameMap({ unit: { Sheet: 'sheet' } } as never);
+        service.registerUnitNameMap({
+            unit: {
+                name: 'Book.xlsx',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            },
+        });
         service.loadDirtyRangesAndExcludedCell(
             [{ unitId: 'unit', sheetId: 'sheet', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } }],
             { unit: { sheet: { 0: { 0: true } } } } as never
@@ -235,6 +262,7 @@ describe('FormulaCurrentConfigService', () => {
         expect(service.getUnitData()).toEqual({});
         expect(service.getFormulaData()).toEqual({});
         expect(service.getSheetNameMap()).toEqual({});
+        expect(service.getUnitNameMap()).toEqual({});
         expect(service.getExcludedRange()).toEqual({});
     });
 });

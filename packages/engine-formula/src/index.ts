@@ -15,6 +15,7 @@
  */
 
 export type {
+    FormulaUnitType,
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -29,6 +30,8 @@ export type {
     IFormulaDatasetConfig,
     IFormulaExecuteResultMap,
     IFormulaStringMap,
+    IFormulaUnitNameMap,
+    IFormulaUnitNameMapItem,
     IRuntimeImageFormulaDataType,
     IRuntimeUnitDataType,
     ISheetData,
@@ -200,6 +203,7 @@ export { handleRefStringInfo } from './engine/utils/reference';
 export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';
 export { generateStringWithSequence, sequenceNodeType } from './engine/utils/sequence';
 export type { ISequenceNode } from './engine/utils/sequence';
+export { refactorFormulaUnitQualifier } from './engine/utils/unit-qualifier';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
 export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
@@ -296,3 +300,13 @@ export type { IAllRuntimeData, IExecutionInProgressParams } from './services/run
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';
+export {
+    FormulaUnitReferenceResolver,
+    IFormulaUnitReferenceResolver,
+    normalizeFormulaUnitName,
+} from './services/unit-reference-resolver.service';
+export type {
+    FormulaUnitReferenceKind,
+    IFormulaUnitReferenceResolution,
+    IFormulaUnitReferenceResolveInput,
+} from './services/unit-reference-resolver.service';

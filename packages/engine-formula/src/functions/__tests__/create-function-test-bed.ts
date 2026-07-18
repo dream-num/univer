@@ -56,6 +56,7 @@ import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../s
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
+import { FormulaUnitReferenceResolver, IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -176,6 +177,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);

@@ -21,6 +21,7 @@ import type {
     IFormulaData,
     IFormulaDataItem,
     IFormulaIdMap,
+    IFormulaUnitNameMap,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
@@ -356,8 +357,15 @@ export class FormulaDataModel extends Disposable {
 
         const unitSheetNameMap: IUnitSheetNameMap = {};
 
+        const unitNameMap: IFormulaUnitNameMap = {};
+
         for (const workbook of unitAllSheet) {
             const unitId = workbook.getUnitId();
+
+            unitNameMap[unitId] = {
+                name: workbook.name,
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            };
 
             const sheets = workbook.getSheets();
 
@@ -392,6 +400,10 @@ export class FormulaDataModel extends Disposable {
         for (const base of unitAllBases) {
             const snapshot = base.getSnapshot();
             const unitId = base.getUnitId();
+            unitNameMap[unitId] = {
+                name: snapshot.name,
+                unitType: UniverInstanceType.UNIVER_BASE,
+            };
             const baseData: ISheetData = {};
             const tableNameMap: { [tableName: string]: string } = {};
 
@@ -415,6 +427,7 @@ export class FormulaDataModel extends Disposable {
             allUnitData,
             unitStylesData,
             unitSheetNameMap,
+            unitNameMap,
         };
     }
 
@@ -926,6 +939,7 @@ export function initSheetFormulaData(
 const BASE_LEGACY_FIELD_REF_PATTERN = /\{([^}]+)\}/g;
 const BASE_TABLE_FIELD_REF_PATTERN = /\b([A-Z_]\w*)\[([^\]]+)\]/gi;
 const BASE_BRACKET_FIELD_REF_PATTERN = /(^|[^A-Za-z0-9_\]\[])\[([^\]]+)\]/g;
+const BASE_EXTERNAL_A1_REF_PATTERN = /(?:'\[[^\]]+\](?:[^']|'')+'|\[[^\]]+\][^\s'!]+)!\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?/gi;
 
 function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): string {
     const refs: string[] = [];
@@ -934,6 +948,7 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
         return `__BASE_FORMULA_REF_${index}__`;
     };
     const normalized = formula
+        .replace(BASE_EXTERNAL_A1_REF_PATTERN, (reference) => hold(reference))
         .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
         .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
             const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);

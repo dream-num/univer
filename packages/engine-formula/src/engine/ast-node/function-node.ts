@@ -37,6 +37,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
 import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -51,7 +52,8 @@ export class FunctionNode extends BaseAstNode {
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
         private _definedNamesService: IDefinedNamesService,
-        private _formulaDataModel: FormulaDataModel
+        private _formulaDataModel: FormulaDataModel,
+        private _unitReferenceResolver: IFormulaUnitReferenceResolver
     ) {
         super(token);
 
@@ -73,6 +75,10 @@ export class FunctionNode extends BaseAstNode {
 
         if (this._functionExecutor.needsFormulaDataModel) {
             this._functionExecutor.setFormulaDataModel(this._formulaDataModel);
+        }
+
+        if (this._functionExecutor.needsUnitReferenceResolver) {
+            this._functionExecutor.setUnitReferenceResolver(this._unitReferenceResolver);
         }
     }
 
@@ -464,7 +470,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @IFormulaUnitReferenceResolver private readonly _unitReferenceResolver: IFormulaUnitReferenceResolver
     ) {
         super();
     }
@@ -486,7 +493,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             this._currentConfigService,
             this._runtimeService,
             this._definedNamesService,
-            this._formulaDataModel
+            this._formulaDataModel,
+            this._unitReferenceResolver
         );
     }
 

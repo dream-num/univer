@@ -24,7 +24,7 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { FormulaReferenceMoveType, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
@@ -78,6 +78,12 @@ export class UpdateDefinedNameController extends Disposable {
                         };
                     }
 
+                    if (result.type === FormulaReferenceMoveType.SetUnitName) {
+                        result.oldUnitName = this._univerInstanceService
+                            .getUnit<Workbook>(result.unitId, UniverInstanceType.UNIVER_SHEET)
+                            ?.getName();
+                    }
+
                     return this._getUpdateDefinedNameMutations(workbook, result);
                 },
             })
@@ -102,6 +108,15 @@ export class UpdateDefinedNameController extends Disposable {
         // eslint-disable-next-line max-lines-per-function
         Object.values(definedNames).forEach((item) => {
             const { formulaOrRefString } = item;
+            if (type === FormulaReferenceMoveType.SetUnitName) {
+                const { oldUnitName, unitName } = moveParams;
+                if (!oldUnitName || !unitName) return true;
+                const nextFormula = refactorFormulaUnitQualifier(formulaOrRefString, oldUnitName, unitName);
+                if (nextFormula === formulaOrRefString) return true;
+                redoMutations.push({ id: SetDefinedNameMutation.id, params: { unitId, ...item, formulaOrRefString: nextFormula } });
+                undoMutations.push({ id: SetDefinedNameMutation.id, params: { unitId, ...item } });
+                return true;
+            }
             const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaOrRefString);
             if (sequenceNodes == null) {
                 return true;

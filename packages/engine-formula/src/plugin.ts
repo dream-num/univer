@@ -65,6 +65,7 @@ import { RegisterOtherFormulaService } from './services/register-other-formula.s
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
+import { FormulaUnitReferenceResolver, IFormulaUnitReferenceResolver } from './services/unit-reference-resolver.service';
 
 export class UniverFormulaEnginePlugin extends Plugin {
     static override pluginName = 'UNIVER_ENGINE_FORMULA_PLUGIN';
@@ -184,6 +185,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [ICalculateFormulaService, { useClass: CalculateFormulaService }],
                 [IDependencyManagerService, { useClass: DependencyManagerService }],
                 [IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }],
+                [IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }],
             ];
 
             dependencies.forEach((dependency) => this._injector.add(dependency));

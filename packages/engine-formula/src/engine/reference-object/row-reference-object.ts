@@ -28,6 +28,7 @@ export class RowReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
         const grid = deserializeRangeWithSheetWithCache(token);
+        this.setUnitQualifier(grid.unitId);
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {

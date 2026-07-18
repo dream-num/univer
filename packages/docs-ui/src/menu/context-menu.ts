@@ -301,7 +301,7 @@ export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.deleteTable',
-        icon: 'GridIcon',
+        icon: 'DeleteTableDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };

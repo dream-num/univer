@@ -81,7 +81,7 @@ export function Text2NumberContextMenuItemFactory(accessor: IAccessor): IMenuBut
         commandId: TextToNumberCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-ui.rightClick.textToNumber',
-        icon: 'PipingIcon',
+        icon: 'ConvertToNumberIcon',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],

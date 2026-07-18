@@ -33,7 +33,7 @@ import {
 } from '@univerjs/thread-comment';
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { debounceTime, map } from 'rxjs';
+import { debounceTime, map, of, startWith } from 'rxjs';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { transformDocument2TextNodes, transformTextNodes2Document } from './thread-comment-editor/util';
 import { getThreadCommentEditorId } from './thread-comment-tree/util';
@@ -326,10 +326,13 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const [editingId, setEditingId] = useState('');
     const updte$ = useMemo(() => threadCommentModel.commentUpdate$.pipe(debounceTime(16)), [threadCommentModel]);
     const comments = useObservable(
-        id
-            ? () => updte$.pipe(map(() => threadCommentModel.getCommentWithChildren(unitId, subUnitId, id)))
-            : null,
-        id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null,
+        () => id
+            ? updte$.pipe(
+                map(() => threadCommentModel.getCommentWithChildren(unitId, subUnitId, id)),
+                startWith(threadCommentModel.getCommentWithChildren(unitId, subUnitId, id))
+            )
+            : of(null),
+        null,
         false,
         [id, subUnitId, threadCommentModel, unitId, updte$]
     );

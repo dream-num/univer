@@ -239,8 +239,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 commandId = option.id;
             }
 
-            const commandParams = typeof option.params === 'function' ? option.params(option.value) : option.params ?? { value: option.value };
-            executeCommand(commandId, commandParams);
+            const commandParams = typeof option.params === 'function' ? option.params(option.value) : option.params;
+            executeCommand(commandId, commandParams ?? { value: option.value });
         }
 
         function handleSelectionsValueChange(value: string | number) {
@@ -252,7 +252,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             if (disabled) return;
 
             if (menuType === MenuItemType.BUTTON_SELECTOR) {
-                executeCommand(bId, params ?? { value });
+                const commandParams = typeof params === 'function' ? params() : params;
+                executeCommand(bId, commandParams ?? { value });
             }
         }
 
@@ -328,8 +329,6 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
-        const commandValue = params ?? (typeof value === 'undefined' ? undefined : { value });
-
         return (
             <ToolbarButton
                 data-u-command={id}
@@ -337,7 +336,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 noIcon={!icon}
                 active={activated}
                 disabled={disabled}
-                onClick={() => executeCommand(props.commandId ?? props.id, commandValue)}
+                onClick={() => {
+                    const commandParams = typeof params === 'function' ? params() : params;
+                    executeCommand(props.commandId ?? props.id, commandParams ?? (typeof value === 'undefined' ? undefined : { value }));
+                }}
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {isCustomComponent

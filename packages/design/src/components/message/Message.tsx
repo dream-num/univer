@@ -33,10 +33,6 @@ export interface IMessageProps {
     duration?: number;
     type?: MessageType;
     onClose?: () => void;
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
 }
 
 export type IMessagerProps = Omit<ComponentProps<typeof Toaster>, 'id' | 'position' | 'visibleToasts' | 'toastOptions'>;
@@ -132,18 +128,13 @@ export const Messager = ({ className, ...props }: IMessagerProps) => (
                 warning: typeClassMap[MessageType.Warning],
                 error: typeClassMap[MessageType.Error],
                 loading: typeClassMap[MessageType.Loading],
-                actionButton: `
-                  univer-h-7 univer-rounded-md univer-border-0 univer-bg-primary-600 univer-px-2.5
-                  univer-font-sans univer-text-xs univer-font-medium univer-text-white
-                  hover:univer-bg-primary-500 active:univer-bg-primary-700
-                `,
             },
         }}
         {...props}
     />
 );
 
-export const message = ({ action, content, duration, id, onClose, type = MessageType.Info }: IMessageProps) => {
+export const message = ({ content, duration, id, onClose, type = MessageType.Info }: IMessageProps) => {
     const messageId = id ?? createMessageId();
     const method = resolveToastMethod(type);
     let closed = false;
@@ -161,7 +152,6 @@ export const message = ({ action, content, duration, id, onClose, type = Message
         toasterId: MESSAGE_TOASTER_ID,
         duration: duration ?? DEFAULT_MESSAGE_DURATION,
         icon: type === MessageType.Loading ? undefined : iconMap[type],
-        action,
         onDismiss: handleClose,
         onAutoClose: handleClose,
     });

@@ -95,11 +95,14 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 [RibbonInsertGroup.EDIT]: {
                     order: 0,
                 },
-                [RibbonInsertGroup.MEDIA]: {
+                [RibbonInsertGroup.CELL]: {
                     order: 1,
                 },
-                [RibbonInsertGroup.OTHERS]: {
+                [RibbonInsertGroup.MEDIA]: {
                     order: 2,
+                },
+                [RibbonInsertGroup.OTHERS]: {
+                    order: 3,
                 },
             },
             [RibbonPosition.FORMULAS]: {

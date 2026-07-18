@@ -605,6 +605,7 @@ export interface IClearRangeDataValidationCommandParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
+    types?: DataValidationType[];
 }
 
 export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidationCommandParams> = {
@@ -614,7 +615,7 @@ export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidation
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, ranges } = params;
+        const { unitId, subUnitId, ranges, types } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
@@ -624,7 +625,15 @@ export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidation
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const matrix = sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
-        matrix.removeRange(ranges);
+        const ruleIds = types
+            ? new Set(
+                sheetDataValidationModel
+                    .getRules(unitId, subUnitId)
+                    .filter((rule) => types.includes(rule.type as DataValidationType))
+                    .map((rule) => rule.uid)
+            )
+            : undefined;
+        matrix.removeRange(ranges, ruleIds);
 
         const diffs = matrix.diff(sheetDataValidationModel.getRules(unitId, subUnitId));
         const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, accessor);

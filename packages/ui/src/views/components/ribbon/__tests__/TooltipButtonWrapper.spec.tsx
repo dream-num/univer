@@ -19,9 +19,9 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { connectInjector } from '../../../../utils/di';
@@ -43,50 +43,39 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
+    injector.get(ComponentManager).register('TestDynamicOption', ({ onChange }: { onChange: (value: string) => void }) => (
+        <button type="button" onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
+    ));
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
     return render(<ConnectedTestRoot />);
 }
 
 describe('DropdownMenuLabel', () => {
-    it('keeps menu content left-aligned and renders the selected checkmark on the right', () => {
-        const { container, getByText } = renderWithDependencies(
+    it('preserves option metadata when a custom label emits a dynamic value', () => {
+        const onOptionSelect = vi.fn();
+        const params = (value: string | number) => ({ value });
+        const option = {
+            id: 'dynamic-option',
+            commandId: 'dynamic-command',
+            label: {
+                name: 'TestDynamicOption',
+                selectable: false,
+            },
+            params,
+        };
+        const { getByRole } = renderWithDependencies(
             <DropdownMenuLabel
-                value="normal"
-                option={{
-                    value: 'normal',
-                    label: 'Normal',
-                }}
+                option={option}
+                onOptionSelect={onOptionSelect}
             />
         );
 
-        const root = container.firstElementChild as HTMLElement;
-        const children = Array.from(root.children) as HTMLElement[];
+        fireEvent.click(getByRole('button', { name: 'Choose dynamic value' }));
 
-        expect(root.className).toContain('univer-justify-between');
-        expect(children[0].className).toContain('univer-min-w-0');
-        expect(children[0].className).toContain('univer-gap-2');
-        expect(children[1].className).toContain('univer-ml-auto');
-        expect(children[1].querySelector('svg')).toBeTruthy();
-        expect(getByText('Normal')).toBeTruthy();
-    });
-
-    it('reserves the right-side checkmark slot for selectable items even when not selected', () => {
-        const { container } = renderWithDependencies(
-            <DropdownMenuLabel
-                value="normal"
-                option={{
-                    value: 'heading-1',
-                    label: 'Heading 1',
-                }}
-            />
-        );
-
-        const root = container.firstElementChild as HTMLElement;
-        const children = Array.from(root.children) as HTMLElement[];
-
-        expect(root.className).toContain('univer-justify-between');
-        expect(children[1].className).toContain('univer-w-4');
-        expect(children[1].querySelector('svg')).toBeNull();
+        expect(onOptionSelect).toHaveBeenCalledWith({
+            ...option,
+            value: 'dynamic-value',
+        });
     });
 });

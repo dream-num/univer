@@ -37,6 +37,7 @@ export enum RibbonStartGroup {
 
 export enum RibbonInsertGroup {
     EDIT = 'ribbon.insert.edit',
+    CELL = 'ribbon.insert.cell',
     MEDIA = 'ribbon.insert.media',
     OTHERS = 'ribbon.insert.others',
 }

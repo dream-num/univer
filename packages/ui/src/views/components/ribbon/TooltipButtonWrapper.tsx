@@ -157,7 +157,7 @@ export function DropdownMenuLabel({ icon, value, option, onOptionSelect }: {
     onOptionSelect?: (option: IValueOption) => void;
 }) {
     const onChange = (v: string | number) => {
-        onOptionSelect?.({ value: v, label: option?.label, commandId: option?.commandId });
+        onOptionSelect?.({ ...option, value: v });
     };
 
     const hasCheckMark = typeof option.label === 'string' || (typeof option.label === 'object' && option.label?.selectable !== false);

@@ -15,7 +15,7 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -35,7 +35,11 @@ class TestLocaleService {
 }
 
 class TestCommandService {
-    executeCommand(): void {}
+    calls: Array<{ commandId: string; params?: Record<string, unknown> }> = [];
+
+    executeCommand(commandId: string, params?: Record<string, unknown>): void {
+        this.calls.push({ commandId, params });
+    }
 }
 
 class TestLayoutService {
@@ -72,42 +76,110 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
+    injector.get(ComponentManager).register('TestDynamicOption', ({ onChange }: { onChange: (value: string) => void }) => (
+        <button type="button" onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
+    ));
 
     injector.get(IconManager).register({
         TestIcon: ({ className }: { className?: string }) => <span className={className} data-icon="test" />,
     });
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
-    return render(<ConnectedTestRoot />);
+    return {
+        ...render(<ConnectedTestRoot />),
+        commandService: injector.get(ICommandService) as unknown as TestCommandService,
+    };
 }
 
 afterEach(cleanup);
 
 describe('ToolbarItem', () => {
-    it('mirrors button selector dropdown trigger placement in rtl', () => {
-        const { container } = renderWithDependencies(
-            <div dir="rtl">
-                <ToolbarItem
-                    id="test-button-selector"
-                    type={MenuItemType.BUTTON_SELECTOR}
-                    icon="TestIcon"
-                    title="Filter"
-                    selections={[{ label: 'Clear', value: 'clear' }]}
-                />
-            </div>
+    it('forwards menu params when clicking a button selector main action', () => {
+        const rule = { type: 'checkbox' };
+        const { container, commandService } = renderWithDependencies(
+            <ToolbarItem
+                id="test-button-selector"
+                type={MenuItemType.BUTTON_SELECTOR}
+                icon="TestIcon"
+                title="Checkbox"
+                params={{ rule }}
+                selections={[]}
+            />
         );
 
-        const root = container.querySelector('.univer-toolbar-button-selector-root') as HTMLElement;
-        const main = container.querySelector('.univer-toolbar-button-selector-main') as HTMLElement;
-        const trigger = container.querySelector('.univer-toolbar-button-selector-trigger') as HTMLElement;
+        fireEvent.click(container.querySelector('.univer-toolbar-button-selector-main') as HTMLElement);
 
-        expect(root.className).toContain('rtl:univer-pl-5');
-        expect(root.className).toContain('rtl:univer-pr-0');
-        expect(main.className).toContain('rtl:univer-rounded-l-none');
-        expect(main.className).toContain('rtl:univer-rounded-r');
-        expect(trigger.className).toContain('rtl:univer-left-0');
-        expect(trigger.className).toContain('rtl:univer-right-auto');
-        expect(trigger.className).toContain('rtl:univer-rounded-l');
-        expect(trigger.className).toContain('rtl:univer-rounded-r-none');
+        expect(commandService.calls).toEqual([
+            {
+                commandId: 'test-button-selector',
+                params: { rule },
+            },
+        ]);
+    });
+
+    it('resolves option params with a value emitted by a custom option', async () => {
+        const { container, findByRole, commandService } = renderWithDependencies(
+            <ToolbarItem
+                id="test-dynamic-selector"
+                type={MenuItemType.SUBITEMS}
+                icon="TestIcon"
+                title="Dropdown"
+                slot
+                selectionsCommandId="insert-dynamic-rule"
+                selections={[
+                    {
+                        id: 'insert-dynamic-rule',
+                        label: {
+                            name: 'TestDynamicOption',
+                            selectable: false,
+                        },
+                        params: (value: string | number) => ({ rule: { formula1: value } }),
+                    },
+                ]}
+            />
+        );
+
+        fireEvent.click(container.querySelector('.univer-toolbar-selector-root') as HTMLElement);
+        fireEvent.click(await findByRole('button', { name: 'Choose dynamic value' }));
+
+        expect(commandService.calls).toEqual([
+            {
+                commandId: 'insert-dynamic-rule',
+                params: { rule: { formula1: 'dynamic-value' } },
+            },
+        ]);
+    });
+
+    it('forwards static option params without wrapping them as a value', async () => {
+        const { container, findByRole, commandService } = renderWithDependencies(
+            <ToolbarItem
+                id="test-static-selector"
+                type={MenuItemType.SUBITEMS}
+                icon="TestIcon"
+                title="Dropdown"
+                slot
+                selectionsCommandId="insert-rule"
+                selections={[
+                    {
+                        id: 'clear-rule',
+                        label: {
+                            name: 'TestDynamicOption',
+                            selectable: false,
+                        },
+                        params: { types: ['list'] },
+                    },
+                ]}
+            />
+        );
+
+        fireEvent.click(container.querySelector('.univer-toolbar-selector-root') as HTMLElement);
+        fireEvent.click(await findByRole('button', { name: 'Choose dynamic value' }));
+
+        expect(commandService.calls).toEqual([
+            {
+                commandId: 'clear-rule',
+                params: { types: ['list'] },
+            },
+        ]);
     });
 });

@@ -239,7 +239,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 commandId = option.id;
             }
 
-            executeCommand(commandId, { value: option.value });
+            const commandParams = typeof option.params === 'function' ? option.params(option.value) : option.params ?? { value: option.value };
+            executeCommand(commandId, commandParams);
         }
 
         function handleSelectionsValueChange(value: string | number) {
@@ -251,7 +252,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             if (disabled) return;
 
             if (menuType === MenuItemType.BUTTON_SELECTOR) {
-                executeCommand(bId, { value });
+                executeCommand(bId, params ?? { value });
             }
         }
 

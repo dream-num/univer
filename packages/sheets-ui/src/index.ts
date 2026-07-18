@@ -270,6 +270,7 @@ export { ISheetEmbedRuntimeService } from './services/sheet-embed-runtime.servic
 export type { ISheetEmbedTabMountParams } from './services/sheet-embed-runtime.service';
 export { ISheetHostChromeOverrideService } from './services/sheet-host-chrome-override.service';
 export type { ISheetHostChromeOverride } from './services/sheet-host-chrome-override.service';
+export { ISheetLoadingRenderService } from './services/sheet-loading-render.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { IStatusBarService, StatusBarService } from './services/status-bar.service';

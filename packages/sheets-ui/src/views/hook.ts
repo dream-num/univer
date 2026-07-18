@@ -18,14 +18,28 @@ import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { map, merge, of, startWith } from 'rxjs';
+import { ISheetLoadingRenderService } from '../services/sheet-loading-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+
+export const SheetLoadingWorkbookContext = createContext<Workbook | null>(null);
 
 export function useActiveWorkbook(): Workbook | null {
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const loadingWorkbook = useContext(SheetLoadingWorkbookContext);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
-    return workbook ?? null;
+    return workbook ?? loadingWorkbook ?? null;
+}
+
+export function useSheetLoadingWorkbook(): Workbook | null {
+    const loadingRenderService = useDependency(ISheetLoadingRenderService);
+    return useObservable(loadingRenderService.workbook$) ?? null;
+}
+
+export function useSheetLoading(): boolean {
+    const loadingRenderService = useDependency(ISheetLoadingRenderService);
+    return useObservable(loadingRenderService.loading$) ?? false;
 }
 
 export function useActiveWorksheet(workbook?: Workbook | null) {

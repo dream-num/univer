@@ -241,7 +241,6 @@ function createFormulaBarTestBed() {
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
-
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
     injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {});

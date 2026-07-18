@@ -56,8 +56,8 @@ function createDropdownRuleInput(formula1: string): IQuickDataValidationRuleInpu
     };
 }
 
-function createDropdownCommandParams(value: string | number) {
-    return { rule: createDropdownRuleInput(String(value)) };
+function createDropdownCommandParams(value?: string | number) {
+    return typeof value === 'undefined' ? {} : { rule: createDropdownRuleInput(String(value)) };
 }
 
 function getQuickDataValidationMenuState(accessor: IAccessor) {

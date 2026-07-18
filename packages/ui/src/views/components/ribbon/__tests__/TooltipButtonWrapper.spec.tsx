@@ -54,7 +54,7 @@ function renderWithDependencies(element: ReactElement) {
 describe('DropdownMenuLabel', () => {
     it('preserves option metadata when a custom label emits a dynamic value', () => {
         const onOptionSelect = vi.fn();
-        const params = (value: string | number) => ({ value });
+        const params = (value?: string | number) => ({ value });
         const option = {
             id: 'dynamic-option',
             commandId: 'dynamic-command',

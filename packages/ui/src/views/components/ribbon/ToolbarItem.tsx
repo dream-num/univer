@@ -328,7 +328,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
-        const commandValue = value ?? typeof params === 'function' ? params() : params;
+        const commandValue = params ?? (typeof value === 'undefined' ? undefined : { value });
 
         return (
             <ToolbarButton

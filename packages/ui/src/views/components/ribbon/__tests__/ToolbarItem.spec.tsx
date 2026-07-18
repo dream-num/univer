@@ -133,7 +133,7 @@ describe('ToolbarItem', () => {
                             name: 'TestDynamicOption',
                             selectable: false,
                         },
-                        params: (value: string | number) => ({ rule: { formula1: value } }),
+                        params: (value?: string | number) => ({ rule: { formula1: value } }),
                     },
                 ]}
             />

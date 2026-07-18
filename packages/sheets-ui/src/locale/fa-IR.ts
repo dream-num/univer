@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: 'بیشتر',
             toggleGridlines: 'تغییر وضعیت خطوط شبکه',
-            textToNumber: 'متن به عدد',
         },
         align: {
             left: 'چپ',

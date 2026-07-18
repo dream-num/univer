@@ -74,22 +74,6 @@ const getMenuHiddenByCurrentSelectionChangedObservable$ = (accessor: IAccessor):
     });
 };
 
-export const TEXT_TO_NUMBER_TOOLBAR_MENU_ID = 'sheet.toolbar.text-to-number';
-export function Text2NumberToolbarMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    return {
-        id: TEXT_TO_NUMBER_TOOLBAR_MENU_ID,
-        commandId: TextToNumberCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'sheets-ui.toolbar.textToNumber',
-        disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
 export const TEXT_TO_NUMBER_CONTEXT_MENU_ID = 'sheet.contextMenu.text-to-number';
 export function Text2NumberContextMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {

@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: '더 보기',
             toggleGridlines: '눈금선 표시/숨기기',
-            textToNumber: '텍스트를 숫자로 변환',
         },
         align: {
             left: '왼쪽',

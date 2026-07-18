@@ -50,7 +50,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
-import { ContextMenuGroup, ContextMenuPosition, RibbonDataGroup, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -185,7 +185,7 @@ import {
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
 } from './sheet.menu';
-import { Text2NumberContextMenuItemFactory, Text2NumberToolbarMenuItemFactory, TEXT_TO_NUMBER_CONTEXT_MENU_ID, TEXT_TO_NUMBER_TOOLBAR_MENU_ID } from './text-to-number.menu';
+import { Text2NumberContextMenuItemFactory, TEXT_TO_NUMBER_CONTEXT_MENU_ID } from './text-to-number.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonPosition.START]: {
@@ -299,14 +299,6 @@ export const menuSchema: MenuSchemaType = {
             [AddRangeProtectionFromToolbarCommand.id]: {
                 order: 0,
                 menuItemFactory: sheetPermissionToolbarMenuFactory,
-            },
-        },
-    },
-    [RibbonPosition.DATA]: {
-        [RibbonDataGroup.OTHERS]: {
-            [TEXT_TO_NUMBER_TOOLBAR_MENU_ID]: {
-                order: 0,
-                menuItemFactory: Text2NumberToolbarMenuItemFactory,
             },
         },
     },

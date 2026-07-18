@@ -68,7 +68,6 @@ const locale: typeof enUS = {
             },
             more: 'Больше',
             toggleGridlines: 'Переключить сетку',
-            textToNumber: 'Преобразовать текст в число',
         },
         align: {
             left: 'Лево',

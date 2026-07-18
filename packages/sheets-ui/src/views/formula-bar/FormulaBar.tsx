@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -23,8 +22,6 @@ import {
     ICommandService,
     IContextService,
     IPermissionService,
-    IUniverInstanceService,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
@@ -59,6 +56,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import { useKeyEventConfig } from '../editor-container/hooks';
+import { useActiveWorkbook } from '../hook';
 
 enum ArrowDirection {
     Down,
@@ -83,7 +81,6 @@ export function FormulaBar(props: IProps) {
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
     const rangeProtectionCache = useDependency(RangeProtectionCache);
@@ -97,7 +94,7 @@ export function FormulaBar(props: IProps) {
         [editorBridgeService]
     );
     const componentManager = useDependency(ComponentManager);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
+    const workbook = useActiveWorkbook();
     const editState = useObservable(editorBridgeService.currentEditCellState$);
     const keyCodeConfig = useKeyEventConfig(editState?.unitId);
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
@@ -120,56 +117,62 @@ export function FormulaBar(props: IProps) {
     const disableEdit = config?.disableEdit;
 
     const disableInfo = useObservable(
-        () => workbook.activeSheet$.pipe(
-            switchMap((worksheet) => {
-                if (!worksheet) {
-                    return EMPTY;
-                }
-                return merge(
-                    worksheetProtectionRuleModel.ruleChange$,
-                    rangeProtectionRuleModel.ruleChange$,
-                    selectionManager.selectionMoveEnd$,
-                    selectionManager.selectionSet$
-                ).pipe(
-                    switchMap(() => {
-                        const unitId = workbook.getUnitId();
-                        const subUnitId = worksheet.getSheetId();
-                        const range = selectionManager.getCurrentLastSelection()?.range;
-                        if (!range) return EMPTY;
-                        const primary = selectionManager.getCurrentLastSelection()?.primary;
-                        if (!primary) {
-                            return of(null);
-                        }
+        () => {
+            if (!workbook) {
+                return EMPTY;
+            }
 
-                        return of({
-                            unitId,
-                            subUnitId,
-                            primary,
-                        });
-                    })
-                );
-            }),
-            map((cellInfo) => {
-                if (cellInfo) {
-                    const { unitId, subUnitId, primary } = cellInfo;
-                    if (worksheetProtectionRuleModel.getRule(unitId, subUnitId)) {
-                        const editDisable = !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
-                        const viewDisable = !(permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? true);
+            return workbook.activeSheet$.pipe(
+                switchMap((worksheet) => {
+                    if (!worksheet) {
+                        return EMPTY;
+                    }
+                    return merge(
+                        worksheetProtectionRuleModel.ruleChange$,
+                        rangeProtectionRuleModel.ruleChange$,
+                        selectionManager.selectionMoveEnd$,
+                        selectionManager.selectionSet$
+                    ).pipe(
+                        switchMap(() => {
+                            const unitId = workbook.getUnitId();
+                            const subUnitId = worksheet.getSheetId();
+                            const range = selectionManager.getCurrentLastSelection()?.range;
+                            if (!range) return EMPTY;
+                            const primary = selectionManager.getCurrentLastSelection()?.primary;
+                            if (!primary) {
+                                return of(null);
+                            }
+
+                            return of({
+                                unitId,
+                                subUnitId,
+                                primary,
+                            });
+                        })
+                    );
+                }),
+                map((cellInfo) => {
+                    if (cellInfo) {
+                        const { unitId, subUnitId, primary } = cellInfo;
+                        if (worksheetProtectionRuleModel.getRule(unitId, subUnitId)) {
+                            const editDisable = !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
+                            const viewDisable = !(permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? true);
+                            return {
+                                viewDisable,
+                                editDisable,
+                            };
+                        }
+                        const { actualRow, actualColumn } = primary;
+                        const cellInfoWithPermission = rangeProtectionCache.getCellInfo(unitId, subUnitId, actualRow, actualColumn);
                         return {
-                            viewDisable,
-                            editDisable,
+                            editDisable: !(cellInfoWithPermission?.[UnitAction.Edit] ?? true),
+                            viewDisable: !(cellInfoWithPermission?.[UnitAction.View] ?? true),
                         };
                     }
-                    const { actualRow, actualColumn } = primary;
-                    const cellInfoWithPermission = rangeProtectionCache.getCellInfo(unitId, subUnitId, actualRow, actualColumn);
-                    return {
-                        editDisable: !(cellInfoWithPermission?.[UnitAction.Edit] ?? true),
-                        viewDisable: !(cellInfoWithPermission?.[UnitAction.View] ?? true),
-                    };
-                }
-                return { viewDisable: false, editDisable: false };
-            })
-        ),
+                    return { viewDisable: false, editDisable: false };
+                })
+            );
+        },
         { editDisable: false, viewDisable: false },
         false,
         [

@@ -53,13 +53,14 @@ import {
 import { ComponentManager, ILayoutService, IUIPartsService, KeyCode, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
+import { ISheetLoadingRenderService } from '../../../services/sheet-loading-render.service';
 import { FormulaBar } from '../FormulaBar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -241,6 +242,14 @@ function createFormulaBarTestBed() {
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
+    injector.add([ISheetLoadingRenderService, {
+        useValue: {
+            workbook$: of<Workbook | null>(null),
+            loading$: of(false),
+            show() { },
+            hide() { },
+        },
+    }]);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);

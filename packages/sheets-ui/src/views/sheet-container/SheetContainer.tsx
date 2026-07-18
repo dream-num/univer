@@ -17,6 +17,7 @@
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import { Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -25,7 +26,7 @@ import { ISheetEmbedRuntimeService } from '../../services/sheet-embed-runtime.se
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
-import { useActiveWorkbook, useActiveWorksheet } from '../hook';
+import { useActiveWorkbook, useActiveWorksheet, useSheetLoading } from '../hook';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { SheetZoomSlider } from '../sheet-slider/CountBar';
 import { StatusBar } from '../status-bar/StatusBar';
@@ -37,6 +38,7 @@ export function RenderSheetFooter() {
     const menuManagerService = useDependency(IMenuManagerService);
     const showFooter = config?.footer ?? true;
     const workbook = useActiveWorkbook();
+    const isLoading = useSheetLoading();
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
     const focusedUnitType = useFocusedUnitType();
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
@@ -58,15 +60,16 @@ export function RenderSheetFooter() {
 
     return (
         <section
-            className={`
+            className={clsx(`
               univer-box-border univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-[1fr,auto,auto,auto]
               univer-items-center univer-justify-between univer-bg-white univer-px-5 univer-text-gray-900
               dark:!univer-bg-gray-900 dark:!univer-text-gray-200
-            `}
+            `, { 'univer-pointer-events-none': isLoading })}
+            data-range-selector
+            aria-disabled={isLoading}
             style={{
                 height: SHEET_FOOTER_BAR_HEIGHT,
             }}
-            data-range-selector
         >
             {sheetBar && <SheetBar />}
             {showStatisticBar && <StatusBar />}
@@ -90,6 +93,7 @@ export function RenderSheetFooter() {
 export function RenderSheetHeader() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const workbook = useActiveWorkbook();
+    const isLoading = useSheetLoading();
     const hasWorkbook = !!workbook;
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
     const focusedUnitType = useFocusedUnitType();
@@ -110,7 +114,11 @@ export function RenderSheetHeader() {
         );
     }
     if (config?.formulaBar !== false) {
-        return <FormulaBar />;
+        return (
+            <div aria-disabled={isLoading} className={clsx({ 'univer-pointer-events-none': isLoading })}>
+                <FormulaBar />
+            </div>
+        );
     }
 
     return null;
@@ -121,7 +129,7 @@ export function RenderSheetHeader() {
  */
 export function RenderSheetContent() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-    const hasWorkbook = useHasWorkbook();
+    const isLoading = useSheetLoading();
     const componentManager = useDependency(ComponentManager);
     const workbook = useActiveWorkbook();
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
@@ -132,7 +140,7 @@ export function RenderSheetContent() {
     const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
 
     useEffect(() => {
-        if (!workbook || activeEmbedTab || activeWorkbookEmbeddedRender) {
+        if (!workbook || isLoading || activeEmbedTab || activeWorkbookEmbeddedRender) {
             return;
         }
 
@@ -140,9 +148,9 @@ export function RenderSheetContent() {
         instanceService.setCurrentUnitForType(workbook.getUnitId());
         instanceService.focusUnit(workbook.getUnitId());
         tryGetSheetEmbedRuntimeService(injector)?.clearTab();
-    }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, workbook]);
+    }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, isLoading, workbook]);
 
-    if (!hasWorkbook) return null;
+    if (!workbook || isLoading) return null;
     if (activeWorkbookEmbeddedRender) return null;
     if (activeEmbedTab && workbook) {
         return <RenderSheetEmbedTabHost workbook={workbook} worksheet={activeEmbedTab.worksheet} />;
@@ -201,12 +209,6 @@ function RenderSheetEmbedTabHost(props: { workbook: Workbook; worksheet: Workshe
             "
         />
     );
-}
-
-function useHasWorkbook(): boolean {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    return !!workbook;
 }
 
 function useActiveWorkbookIsEmbeddedRender(workbook: Workbook | null): boolean {

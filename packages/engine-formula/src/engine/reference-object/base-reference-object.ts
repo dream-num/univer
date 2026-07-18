@@ -64,6 +64,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _forcedUnitId: string = '';
 
+    private _unitQualifier: string = '';
+
     private _runtimeData: IRuntimeUnitDataType = {};
 
     private _arrayFormulaCellData: IRuntimeUnitDataType = {};
@@ -251,6 +253,14 @@ export class BaseReferenceObject extends ObjectClassType {
         if (unitId.length > 0) {
             this._forcedUnitId = unitId;
         }
+    }
+
+    setUnitQualifier(unitQualifier: string) {
+        this._unitQualifier = unitQualifier;
+    }
+
+    getUnitQualifier() {
+        return this._unitQualifier;
     }
 
     getForcedUnitId() {

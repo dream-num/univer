@@ -47,6 +47,8 @@ export class Indirect extends BaseFunction {
 
     override maxParams = 2;
 
+    override needsUnitReferenceResolver = true;
+
     override isAddress() {
         return true;
     }
@@ -106,6 +108,7 @@ export class Indirect extends BaseFunction {
 
             const rangeReferenceObject = new RangeReferenceObject(range);
 
+            rangeReferenceObject.setUnitQualifier(unitId);
             rangeReferenceObject.setForcedUnitIdDirect(unitId);
             rangeReferenceObject.setForcedSheetName(sheetName);
 
@@ -133,6 +136,7 @@ export class Indirect extends BaseFunction {
 
         const rangeReferenceObject = new RangeReferenceObject(range);
 
+        rangeReferenceObject.setUnitQualifier(unitId);
         rangeReferenceObject.setForcedUnitIdDirect(unitId);
         rangeReferenceObject.setForcedSheetName(sheetName);
 
@@ -142,6 +146,18 @@ export class Indirect extends BaseFunction {
     private _setDefault(object: BaseReferenceObject) {
         if (this.unitId == null || this.subUnitId == null) {
             return ErrorValueObject.create(ErrorType.REF);
+        }
+        const unitQualifier = object.getUnitQualifier();
+        if (unitQualifier && this._unitReferenceResolver) {
+            const resolution = this._unitReferenceResolver.resolve({
+                hostUnitId: this.unitId,
+                qualifier: unitQualifier,
+                referenceKind: 'a1',
+            });
+            if (typeof resolution === 'string') {
+                return ErrorValueObject.create(resolution);
+            }
+            object.setForcedUnitIdDirect(resolution.unitId);
         }
         object.setDefaultUnitId(this.unitId);
         object.setDefaultSheetId(this.subUnitId);

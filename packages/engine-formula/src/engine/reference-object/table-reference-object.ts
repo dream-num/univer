@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { ICellData, Nullable } from '@univerjs/core';
 import type { ISuperTable, IUnitSheetNameMap } from '../../basics/common';
 import { TableOptionType } from '../../basics/common';
+import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 
@@ -60,6 +62,7 @@ export class TableReferenceObject extends BaseReferenceObject {
 
         const tableStartRow = range.startRow;
         const tableEndRow = range.endRow;
+        const dataStartRow = tableStartRow + (this._tableData.showHeader === false ? 0 : 1);
 
         let startRow = -1;
         let endRow = -1;
@@ -70,11 +73,15 @@ export class TableReferenceObject extends BaseReferenceObject {
                 endRow = tableEndRow;
                 break;
             case TableOptionType.DATA:
-                // Default: First row is header, data area = [startRow+1, endRow]
-                startRow = tableStartRow + 1;
+                startRow = dataStartRow;
                 endRow = tableEndRow;
                 break;
             case TableOptionType.HEADERS:
+                if (this._tableData.showHeader === false) {
+                    startRow = -1;
+                    endRow = -1;
+                    break;
+                }
                 startRow = tableStartRow;
                 endRow = tableStartRow;
                 break;
@@ -89,8 +96,7 @@ export class TableReferenceObject extends BaseReferenceObject {
                 break;
             }
             default:
-                // Defensive: Unknown type defaults to DATA
-                startRow = tableStartRow + 1;
+                startRow = dataStartRow;
                 endRow = tableEndRow;
                 break;
         }
@@ -116,6 +122,16 @@ export class TableReferenceObject extends BaseReferenceObject {
             };
         }
         return rangeData;
+    }
+
+    override getCellData(row: number, column: number): Nullable<ICellData> {
+        if (this._isCurrentRowForRange) {
+            const { startRow, endRow } = this._tableData.range;
+            if (row < startRow || row > endRow) {
+                return { v: ErrorType.NA };
+            }
+        }
+        return super.getCellData(row, column);
     }
 
     override getRefOffset() {

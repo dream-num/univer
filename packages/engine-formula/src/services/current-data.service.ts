@@ -24,6 +24,7 @@ import type {
     IDirtyUnitSuperTableMap,
     IFormulaData,
     IFormulaDatasetConfig,
+    IFormulaUnitNameMap,
     IRuntimeUnitDataType,
     IUnitData,
     IUnitExcludedCell,
@@ -73,6 +74,8 @@ export interface IFormulaCurrentConfigService {
 
     getSheetNameMap(): IUnitSheetNameMap;
 
+    getUnitNameMap(): IFormulaUnitNameMap;
+
     isForceCalculate(): boolean;
 
     getDirtyRanges(): IUnitRange[];
@@ -90,6 +93,8 @@ export interface IFormulaCurrentConfigService {
     registerFormulaData(formulaData: IFormulaData): void;
 
     registerSheetNameMap(sheetNameMap: IUnitSheetNameMap): void;
+
+    registerUnitNameMap(unitNameMap: IFormulaUnitNameMap): void;
 
     getExcludedRange(): Nullable<IUnitExcludedCell>;
 
@@ -142,6 +147,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _sheetNameMap: IUnitSheetNameMap = {};
 
+    private _unitNameMap: IFormulaUnitNameMap = {};
+
     private _forceCalculate: boolean = false;
 
     private _clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
@@ -182,6 +189,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._arrayFormulaRange = {};
         this._formulaData = {};
         this._sheetNameMap = {};
+        this._unitNameMap = {};
         this._clearDependencyTreeCache = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
@@ -235,6 +243,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getSheetNameMap() {
         return this._sheetNameMap;
+    }
+
+    getUnitNameMap() {
+        return this._unitNameMap;
     }
 
     isForceCalculate() {
@@ -326,14 +338,17 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
             this._unitData = config.allUnitData;
             this._unitStylesData = config.unitStylesData;
             this._sheetNameMap = config.unitSheetNameMap;
+            this._unitNameMap = config.unitNameMap || {};
         } else {
-            const { allUnitData, unitSheetNameMap, unitStylesData } = this._loadSheetData();
+            const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 
             this._unitData = allUnitData;
 
             this._unitStylesData = unitStylesData;
 
             this._sheetNameMap = unitSheetNameMap;
+
+            this._unitNameMap = unitNameMap;
         }
 
         // apply row data, including rows hidden by filters
@@ -369,13 +384,15 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     loadDataLite(rowData?: IUnitRowData) {
-        const { allUnitData, unitSheetNameMap, unitStylesData } = this._loadSheetData();
+        const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 
         this._unitData = allUnitData;
 
         this._unitStylesData = unitStylesData;
 
         this._sheetNameMap = unitSheetNameMap;
+
+        this._unitNameMap = unitNameMap;
 
         this._formulaData = this._formulaDataModel.getFormulaData();
         this._arrayFormulaCellData = convertUnitDataToRuntime(this._formulaDataModel.getArrayFormulaCellData());
@@ -419,6 +436,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     registerSheetNameMap(sheetNameMap: IUnitSheetNameMap) {
         this._sheetNameMap = sheetNameMap;
+    }
+
+    registerUnitNameMap(unitNameMap: IFormulaUnitNameMap) {
+        this._unitNameMap = unitNameMap;
     }
 
     // private _loadOtherFormulaData() {

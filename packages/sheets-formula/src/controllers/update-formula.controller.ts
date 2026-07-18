@@ -44,7 +44,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -320,7 +320,10 @@ export class UpdateFormulaController extends Disposable {
         const result = getReferenceMoveParams(workbook, command);
 
         if (result) {
-            const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
+            const { unitNameMap, unitSheetNameMap } = this._formulaDataModel.getCalculateData();
+            if (result.type === FormulaReferenceMoveType.SetUnitName) {
+                result.oldUnitName = unitNameMap?.[result.unitId]?.name;
+            }
             const oldFormulaData = this._formulaDataModel.getFormulaData();
 
             // change formula reference
@@ -389,6 +392,14 @@ export class UpdateFormulaController extends Disposable {
                     if (!formulaDataItem) return true;
 
                     const { f: formulaString, x, y, si } = formulaDataItem;
+
+                    if (type === FormulaReferenceMoveType.SetUnitName) {
+                        const { oldUnitName, unitName } = formulaReferenceMoveParam;
+                        if (!oldUnitName || !unitName) return true;
+                        const nextFormula = refactorFormulaUnitQualifier(formulaString, oldUnitName, unitName);
+                        if (nextFormula !== formulaString) newFormulaDataItem.setValue(row, column, { f: nextFormula });
+                        return true;
+                    }
 
                     const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
 

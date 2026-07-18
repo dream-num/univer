@@ -68,6 +68,14 @@ describe('Test ref regex', () => {
         expect(new RegExp(REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX).test('Table1[[#Title],[#Data],[Column1]:[Column10]]')).toBe(true);
     });
 
+    it('distinguishes A1 workbook qualifiers from Table qualifiers', () => {
+        expect(regexTestSingeRange('[Book]Sheet1!A1')).toBe(true);
+        expect(regexTestSingeRange('[1]Sheet1!A1')).toBe(true);
+        expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('[Book]Sheet1!A1')).toBe(false);
+        expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('[1]!SalesTable[Amount]')).toBe(true);
+        expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('Sales.xlsx!SalesTable[Amount]')).toBe(true);
+    });
+
     it('isReferenceString', () => {
         expect(isReferenceString('A1')).toBeTruthy();
         expect(isReferenceString('Sheet1!A1')).toBeTruthy();
@@ -424,10 +432,13 @@ describe('Test ref regex', () => {
             expect(TITLE_ONLY.test('Table1[#This Row]')).toBe(true);
         });
 
-        // Should allow sheet/unit prefix if UNIT_NAME_REGEX supports it
-        it('rejects unit prefix', () => {
+        it('accepts external Unit qualifiers', () => {
             TITLE_ONLY.lastIndex = 0;
-            expect(TITLE_ONLY.test('Sheet1!TableA[#Data]')).toBe(false);
+            expect(TITLE_ONLY.test('Book.xlsx!TableA[#Data]')).toBe(true);
+            TITLE_ONLY.lastIndex = 0;
+            expect(TITLE_ONLY.test("'Customer Base'!TableA[#Data]")).toBe(true);
+            TITLE_ONLY.lastIndex = 0;
+            expect(TITLE_ONLY.test('[1]!TableA[#Data]')).toBe(true);
         });
 
         // Should reject non-hash titles

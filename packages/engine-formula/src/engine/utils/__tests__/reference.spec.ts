@@ -26,9 +26,38 @@ import {
     needsQuoting,
     serializeRange,
     serializeRangeToRefString,
+    splitTableStructuredRef,
 } from '../reference';
 
 describe('Test Reference', () => {
+    it('splits local, display, OOXML and legacy Table qualifiers', () => {
+        expect(splitTableStructuredRef('SalesTable[Amount]')).toEqual({
+            unitQualifier: '',
+            tableName: 'SalesTable',
+            columnStruct: '[Amount]',
+        });
+        expect(splitTableStructuredRef('Sales.xlsx!SalesTable[Amount]')).toEqual({
+            unitQualifier: 'Sales.xlsx',
+            tableName: 'SalesTable',
+            columnStruct: '[Amount]',
+        });
+        expect(splitTableStructuredRef("'Customer Base'!Orders[[#Data],[Total]]")).toEqual({
+            unitQualifier: 'Customer Base',
+            tableName: 'Orders',
+            columnStruct: '[[#Data],[Total]]',
+        });
+        expect(splitTableStructuredRef('[1]!SalesTable[Amount]')).toEqual({
+            unitQualifier: '1',
+            tableName: 'SalesTable',
+            columnStruct: '[Amount]',
+        });
+        expect(splitTableStructuredRef('[runtime-id]SalesTable[Amount]')).toEqual({
+            unitQualifier: 'runtime-id',
+            tableName: 'SalesTable',
+            columnStruct: '[Amount]',
+        });
+    });
+
     it('getAbsoluteRefTypeWithSingleString', () => {
         expect(getAbsoluteRefTypeWithSingleString('A4')).toEqual(AbsoluteRefType.NONE);
 
@@ -330,29 +359,34 @@ describe('Test Reference', () => {
         expect(handleRefStringInfo('A1:A2')).toStrictEqual({
             refBody: 'A1:A2',
             sheetName: '',
+            unitQualifier: '',
             unitId: '',
         });
 
         expect(handleRefStringInfo('sheet1!A1')).toStrictEqual({
             refBody: 'A1',
             sheetName: 'sheet1',
+            unitQualifier: '',
             unitId: '',
         });
 
         expect(handleRefStringInfo('[Book1]Sheet1!A1')).toStrictEqual({
             refBody: 'A1',
             sheetName: 'Sheet1',
+            unitQualifier: 'Book1',
             unitId: 'Book1',
         });
         expect(handleRefStringInfo("'[Book1]Sheet1'!R2C3")).toStrictEqual({
             refBody: 'R2C3',
             sheetName: 'Sheet1',
+            unitQualifier: 'Book1',
             unitId: 'Book1',
         });
 
         expect(handleRefStringInfo("'sheet-1'!A1")).toStrictEqual({
             refBody: 'A1',
             sheetName: 'sheet-1',
+            unitQualifier: '',
             unitId: '',
         });
 
@@ -360,6 +394,7 @@ describe('Test Reference', () => {
         expect(handleRefStringInfo("'sheet''1'!A1")).toStrictEqual({
             refBody: 'A1',
             sheetName: "sheet'1",
+            unitQualifier: '',
             unitId: '',
         });
 
@@ -367,12 +402,14 @@ describe('Test Reference', () => {
         expect(handleRefStringInfo("'sheet''''1'!A1")).toStrictEqual({
             refBody: 'A1',
             sheetName: "sheet''1",
+            unitQualifier: '',
             unitId: '',
         });
 
         expect(handleRefStringInfo("'[Book-1.xlsx]Sheet1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'Sheet1',
+            unitQualifier: 'Book-1.xlsx',
             unitId: 'Book-1.xlsx',
         });
 
@@ -380,6 +417,7 @@ describe('Test Reference', () => {
         expect(handleRefStringInfo("'[Book''1.xlsx]Sheet1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'Sheet1',
+            unitQualifier: "Book'1.xlsx",
             unitId: "Book'1.xlsx",
         });
 
@@ -387,12 +425,14 @@ describe('Test Reference', () => {
         expect(handleRefStringInfo("'[Book''''1.xlsx]Sheet1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'Sheet1',
+            unitQualifier: "Book''1.xlsx",
             unitId: "Book''1.xlsx",
         });
 
         expect(handleRefStringInfo("'[Book-1.xlsx]sheet-1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'sheet-1',
+            unitQualifier: 'Book-1.xlsx',
             unitId: 'Book-1.xlsx',
         });
     });

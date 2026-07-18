@@ -19,6 +19,7 @@ import type { BaseAstNode } from '../../ast-node/base-ast-node';
 import type { ArrayValueObject } from '../../value-object/array-value-object';
 import type { BaseValueObject } from '../../value-object/base-value-object';
 import type { LexerNode } from '../lexer-node';
+import { ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
@@ -27,6 +28,8 @@ import { If } from '../../../functions/logical/if';
 import { Percentof } from '../../../functions/logical/percentof';
 import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
 import { Hstack } from '../../../functions/lookup/hstack';
+import { Indirect } from '../../../functions/lookup/indirect';
+import { Offset } from '../../../functions/lookup/offset';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { Pi } from '../../../functions/math/pi';
 import { Subtotal } from '../../../functions/math/subtotal';
@@ -46,6 +49,7 @@ import { IFormulaCurrentConfigService } from '../../../services/current-data.ser
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { ISuperTableService } from '../../../services/super-table.service';
+import { IFormulaDependencyGenerator } from '../../dependency/formula-dependency';
 import { Interpreter } from '../../interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
 import { Lexer } from '../lexer';
@@ -86,9 +90,52 @@ describe('Test indirect', () => {
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
             excludedCell: {},
-            allUnitData: {
-                [testBed.unitId]: testBed.sheetData,
+        });
+        formulaCurrentConfigService.registerUnitData({
+            [testBed.unitId]: testBed.sheetData,
+            'sales-source': {
+                'source-sheet': {
+                    cellData: new ObjectMatrix({
+                        0: { 0: { v: 42 }, 1: { v: 'Other' } },
+                        1: { 0: { v: 10 }, 1: { v: 20 } },
+                    }),
+                    rowCount: 2,
+                    columnCount: 2,
+                    rowData: {},
+                    columnData: {},
+                },
             },
+            'base-source': {
+                'base-table-sheet': {
+                    cellData: new ObjectMatrix({
+                        0: { 0: { v: 'Value' } },
+                        1: { 0: { v: 7 } },
+                    }),
+                    rowCount: 2,
+                    columnCount: 1,
+                    rowData: {},
+                    columnData: {},
+                },
+            },
+        });
+        formulaCurrentConfigService.registerUnitNameMap({
+            [testBed.unitId]: {
+                name: 'Host.xlsx',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            },
+            'sales-source': {
+                name: 'Sales',
+                unitType: UniverInstanceType.UNIVER_SHEET,
+            },
+            'base-source': {
+                name: 'BaseData',
+                unitType: UniverInstanceType.UNIVER_BASE,
+            },
+        });
+        formulaCurrentConfigService.registerSheetNameMap({
+            [testBed.unitId]: { Sheet1: testBed.sheetId },
+            'sales-source': { Data: 'source-sheet' },
+            'base-source': { Records: 'base-table-sheet' },
         });
         const sheetItem = testBed.sheetData[testBed.sheetId];
 
@@ -114,6 +161,8 @@ describe('Test indirect', () => {
             new StdevP(FUNCTION_NAMES_STATISTICAL.STDEV_P),
             new Regexmatch(FUNCTION_NAMES_TEXT.REGEXMATCH),
             new Hstack(FUNCTION_NAMES_LOOKUP.HSTACK),
+            new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT),
+            new Offset(FUNCTION_NAMES_LOOKUP.OFFSET),
             new Groupby(FUNCTION_NAMES_LOGICAL.GROUPBY),
             new If(FUNCTION_NAMES_LOGICAL.IF),
             new Percentof(FUNCTION_NAMES_LOGICAL.PERCENTOF)
@@ -136,11 +185,33 @@ describe('Test indirect', () => {
                 endColumn: 4,
             },
         });
+        superTableService.registerTable('sales-source', 'SalesTable', {
+            sheetId: 'source-sheet',
+            titleMap: new Map([['Amount', 0]]),
+            range: {
+                startRow: 0,
+                endRow: 1,
+                startColumn: 0,
+                endColumn: 1,
+            },
+        });
+        superTableService.registerTable('base-source', 'BaseTable', {
+            sheetId: 'base-table-sheet',
+            titleMap: new Map([['Value', 0]]),
+            range: {
+                startRow: 0,
+                endRow: 1,
+                startColumn: 0,
+                endColumn: 0,
+            },
+        });
     });
 
     describe('normal', () => {
         it('preserves xleta aggregator tokens inside GROUPBY', () => {
-            const lexerNode = lexer.treeBuilder('=_xlfn.GROUPBY(A1:A3,A1:A3,_xlfn.HSTACK(_xleta.COUNTA,_xleta.PERCENTOF),0)');
+            const lexerNode = lexer.treeBuilder(
+                '=_xlfn.GROUPBY(A1:A3,A1:A3,_xlfn.HSTACK(_xleta.COUNTA,_xleta.PERCENTOF),0)'
+            );
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode) as BaseAstNode;
             const groupbyNode = astNode.getChildren()[0];
             const hstackNode = groupbyNode.getChildren()[2];
@@ -158,6 +229,247 @@ describe('Test indirect', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.REF);
+        });
+
+        it('resolves a cross-workbook A1 qualifier by display name', () => {
+            const lexerNode = lexer.treeBuilder("=SUM('[sales.XLSX]Data'!A1)");
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as BaseValueObject).getValue()).toBe(42);
+        });
+
+        it('stores the resolved source unit id in dependency ranges', async () => {
+            get(IFormulaCurrentConfigService).registerFormulaData({
+                test: {
+                    sheet1: {
+                        0: {
+                            0: { f: "='[Sales.xlsx]Data'!A1" },
+                        },
+                    },
+                },
+            });
+
+            const dependencyGenerator = get(IFormulaDependencyGenerator);
+            await dependencyGenerator.generate();
+            const trees = await dependencyGenerator.getAllDependencyJson();
+
+            expect(trees[0]?.rangeList).toContainEqual({
+                unitId: 'sales-source',
+                sheetId: 'source-sheet',
+                range: expect.objectContaining({
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 0,
+                }),
+            });
+        });
+
+        it('resolves display-name and legacy-id external Table references', () => {
+            for (const formula of [
+                '=SUM(Sales.xlsx!SalesTable[Amount])',
+                '=SUM(Sales.xlsx!SalesTable[[#Data],[Amount]])',
+                "=SUM('Sales.xlsx'!SalesTable[Amount])",
+                '=SUM([sales-source]SalesTable[Amount])',
+            ]) {
+                const lexerNode = lexer.treeBuilder(formula);
+                const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+                const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+                expect((result as BaseValueObject).getValue()).toBe(10);
+            }
+
+            const sectionLexerNode = lexer.treeBuilder('=SUM(Sales.xlsx!SalesTable[#Data])');
+            const sectionAstNode = astTreeBuilder.parse(sectionLexerNode as LexerNode);
+            const sectionResult = interpreter.execute(generateExecuteAstNodeData(sectionAstNode as BaseAstNode));
+            expect((sectionResult as BaseValueObject).getValue()).toBe(30);
+        });
+
+        it('stores the resolved source Unit in external Table dependency ranges', async () => {
+            get(IFormulaCurrentConfigService).registerFormulaData({
+                test: {
+                    sheet1: {
+                        0: {
+                            0: { f: '=SUM(Sales.xlsx!SalesTable[Amount])' },
+                        },
+                    },
+                },
+            });
+
+            const dependencyGenerator = get(IFormulaDependencyGenerator);
+            await dependencyGenerator.generate();
+            const trees = await dependencyGenerator.getAllDependencyJson();
+
+            expect(trees[0]?.rangeList).toContainEqual({
+                unitId: 'sales-source',
+                sheetId: 'source-sheet',
+                range: expect.objectContaining({
+                    startRow: 1,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 0,
+                }),
+            });
+        });
+
+        it('reads current target Table metadata when the AST executes', () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Sales.xlsx!SalesTable[Amount])');
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            get(ISuperTableService).registerTable('sales-source', 'SalesTable', {
+                sheetId: 'source-sheet',
+                titleMap: new Map([['Amount', 1]]),
+                range: {
+                    startRow: 0,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 1,
+                },
+            });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as BaseValueObject).getValue()).toBe(20);
+        });
+
+        it('uses one structured-reference path for Base and Sheet host/source combinations', () => {
+            const currentConfig = get(IFormulaCurrentConfigService);
+            const tableService = get(ISuperTableService);
+            currentConfig.registerUnitNameMap({
+                test: { name: 'Host Base', unitType: UniverInstanceType.UNIVER_BASE },
+                'sales-source': { name: 'Sales.xlsx', unitType: UniverInstanceType.UNIVER_SHEET },
+                'base-source': { name: 'BaseData', unitType: UniverInstanceType.UNIVER_BASE },
+            });
+
+            for (const formula of ['=SUM(BaseData!BaseTable[Value])', '=SUM(Sales.xlsx!SalesTable[Amount])']) {
+                const result = interpreter.execute(
+                    generateExecuteAstNodeData(
+                        astTreeBuilder.parse(lexer.treeBuilder(formula) as LexerNode) as BaseAstNode
+                    )
+                );
+                expect((result as BaseValueObject).getValue()).toBe(formula.includes('BaseTable') ? 7 : 10);
+            }
+
+            for (const formula of ["=SUM('[Sales]Data'!A1:A2)", '=SUM([Sales]Data!A1:A2)']) {
+                const baseToSheetA1 = interpreter.execute(
+                    generateExecuteAstNodeData(
+                        astTreeBuilder.parse(lexer.treeBuilder(formula) as LexerNode) as BaseAstNode
+                    )
+                );
+                expect((baseToSheetA1 as BaseValueObject).getValue()).toBe(52);
+            }
+
+            currentConfig.registerUnitNameMap({
+                test: { name: 'Host Sheet', unitType: UniverInstanceType.UNIVER_SHEET },
+                'sales-source': { name: 'Sales.xlsx', unitType: UniverInstanceType.UNIVER_SHEET },
+                'base-source': { name: 'BaseData', unitType: UniverInstanceType.UNIVER_BASE },
+            });
+            const sheetToBase = interpreter.execute(
+                generateExecuteAstNodeData(
+                    astTreeBuilder.parse(
+                        lexer.treeBuilder('=SUM(BaseData!BaseTable[Value])') as LexerNode
+                    ) as BaseAstNode
+                )
+            );
+            expect((sheetToBase as BaseValueObject).getValue()).toBe(7);
+
+            const oldAst = astTreeBuilder.parse(
+                lexer.treeBuilder('=SUM(BaseData!BaseTable[Value])') as LexerNode
+            ) as BaseAstNode;
+            tableService.remove('base-source', 'BaseTable');
+            tableService.registerTable('base-source', 'RenamedTable', {
+                sheetId: 'base-table-sheet',
+                titleMap: new Map([['RenamedValue', 0]]),
+                range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
+            });
+            expect((interpreter.execute(generateExecuteAstNodeData(oldAst)) as BaseValueObject).getValue()).toBe(
+                ErrorType.REF
+            );
+            const renamed = interpreter.execute(
+                generateExecuteAstNodeData(
+                    astTreeBuilder.parse(
+                        lexer.treeBuilder('=SUM(BaseData!RenamedTable[RenamedValue])') as LexerNode
+                    ) as BaseAstNode
+                )
+            );
+            expect((renamed as BaseValueObject).getValue()).toBe(7);
+        });
+
+        it('does not parse an external Table-looking string literal as a reference', () => {
+            const lexerNode = lexer.treeBuilder('="Sales.xlsx!SalesTable[Amount]"');
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as BaseValueObject).getValue()).toBe('Sales.xlsx!SalesTable[Amount]');
+        });
+
+        it('uses the shared qualifier resolver for INDIRECT and preserves the target through OFFSET', () => {
+            for (const formula of [
+                '=SUM(INDIRECT("\'[Sales.xlsx]Data\'!A2"))',
+                '=SUM(OFFSET(INDIRECT("\'[Sales.xlsx]Data\'!A1"),1,0))',
+                "=SUM(OFFSET('[Sales.xlsx]Data'!A1,1,0))",
+            ]) {
+                const lexerNode = lexer.treeBuilder(formula);
+                const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+                const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+                expect((result as BaseValueObject).getValue()).toBe(10);
+            }
+        });
+
+        it('second-schedules a dynamic INDIRECT formula when the resolved source range is dirty', async () => {
+            const currentConfigService = get(IFormulaCurrentConfigService);
+            currentConfigService.registerFormulaData({
+                test: {
+                    sheet1: {
+                        0: {
+                            0: { f: '=INDIRECT("\'[Sales.xlsx]Data\'!A2")' },
+                        },
+                    },
+                },
+            });
+            currentConfigService.loadDirtyRangesAndExcludedCell(
+                [
+                    {
+                        unitId: 'sales-source',
+                        sheetId: 'source-sheet',
+                        range: {
+                            startRow: 1,
+                            endRow: 1,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                ],
+                {}
+            );
+
+            const trees = await get(IFormulaDependencyGenerator).generate();
+
+            expect(trees).toHaveLength(1);
+            expect(trees[0]).toMatchObject({
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                formula: '=INDIRECT("\'[Sales.xlsx]Data\'!A2")',
+            });
+        });
+
+        it('returns REF for missing or ambiguous cross-workbook qualifiers', () => {
+            const missingLexerNode = lexer.treeBuilder("='[Missing.xlsx]Data'!A1");
+            const missingAstNode = astTreeBuilder.parse(missingLexerNode as LexerNode);
+            const missingResult = interpreter.execute(generateExecuteAstNodeData(missingAstNode as BaseAstNode));
+
+            expect((missingResult as BaseValueObject).getValue()).toBe(ErrorType.REF);
+
+            get(IFormulaCurrentConfigService).registerUnitNameMap({
+                first: { name: 'Duplicate.xlsx', unitType: UniverInstanceType.UNIVER_SHEET },
+                second: { name: 'DUPLICATE.XLSX', unitType: UniverInstanceType.UNIVER_SHEET },
+            });
+            const duplicateLexerNode = lexer.treeBuilder("='[Duplicate.xlsx]Data'!A1");
+            const duplicateAstNode = astTreeBuilder.parse(duplicateLexerNode as LexerNode);
+            const duplicateResult = interpreter.execute(generateExecuteAstNodeData(duplicateAstNode as BaseAstNode));
+
+            expect((duplicateResult as BaseValueObject).getValue()).toBe(ErrorType.REF);
         });
 
         it('Name error', async () => {
@@ -516,7 +828,9 @@ describe('Test indirect', () => {
         });
 
         it('supports totals row arithmetic with line-break column names', async () => {
-            const lexerNode = lexer.treeBuilder('=Table1[[#Totals],[CASH\r\nIN]]-Table1[[#Totals],[CASH\r\nOUT]]+A1') as LexerNode;
+            const lexerNode = lexer.treeBuilder(
+                '=Table1[[#Totals],[CASH\r\nIN]]-Table1[[#Totals],[CASH\r\nOUT]]+A1'
+            ) as LexerNode;
             const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
             const result = interpreter.execute(generateExecuteAstNodeData(astNode));
             expect((result as BaseValueObject).getValue()).toStrictEqual(101);

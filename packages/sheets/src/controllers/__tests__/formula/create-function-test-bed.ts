@@ -45,6 +45,7 @@ import {
     FormulaDataModel,
     FormulaDependencyGenerator,
     FormulaRuntimeService,
+    FormulaUnitReferenceResolver,
     FunctionNodeFactory,
     FunctionService,
     GlobalComputingStatusService,
@@ -56,6 +57,7 @@ import {
     IFormulaCurrentConfigService,
     IFormulaDependencyGenerator,
     IFormulaRuntimeService,
+    IFormulaUnitReferenceResolver,
     IFunctionService,
     IHyperlinkEngineFormulaService,
     Interpreter,
@@ -199,6 +201,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
             injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);

@@ -19,6 +19,22 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Overenie údajov',
+        ribbon: {
+            setCheckbox: 'Nastaviť začiarkavacie políčko',
+            clearCheckbox: 'Vymazať začiarkavacie políčko',
+            dropdownPresetTitle: 'Použiť predvoľbu:',
+            editDropdown: 'Upraviť možnosti',
+            clearDropdown: 'Vymazať rozbaľovací zoznam',
+            presets: {
+                yes: 'Áno',
+                no: 'Nie',
+                notStarted: 'Nezačaté',
+                inProgress: 'Prebieha',
+                completed: 'Dokončené',
+                option1: 'Možnosť 1',
+                option2: 'Možnosť 2',
+            },
+        },
         operators: {
             legal: 'je platný typ',
         },

@@ -19,6 +19,22 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Validasi data',
+        ribbon: {
+            setCheckbox: 'Atur Kotak Centang',
+            clearCheckbox: 'Hapus Kotak Centang',
+            dropdownPresetTitle: 'Terapkan preset:',
+            editDropdown: 'Edit opsi',
+            clearDropdown: 'Hapus Dropdown',
+            presets: {
+                yes: 'Ya',
+                no: 'Tidak',
+                notStarted: 'Belum Dimulai',
+                inProgress: 'Sedang Berlangsung',
+                completed: 'Selesai',
+                option1: 'Opsi 1',
+                option2: 'Opsi 2',
+            },
+        },
         operators: {
             legal: 'tipe yang sah',
         },

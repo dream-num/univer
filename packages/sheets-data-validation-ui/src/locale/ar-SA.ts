@@ -19,6 +19,22 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'التحقق من صحة البيانات',
+        ribbon: {
+            setCheckbox: 'تعيين خانة اختيار',
+            clearCheckbox: 'مسح خانة الاختيار',
+            dropdownPresetTitle: 'تطبيق إعداد مسبق:',
+            editDropdown: 'تحرير الخيارات',
+            clearDropdown: 'مسح القائمة المنسدلة',
+            presets: {
+                yes: 'نعم',
+                no: 'لا',
+                notStarted: 'لم يبدأ',
+                inProgress: 'قيد التنفيذ',
+                completed: 'مكتمل',
+                option1: 'الخيار 1',
+                option2: 'الخيار 2',
+            },
+        },
         operators: {
             legal: 'نوع قانوني',
         },

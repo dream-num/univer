@@ -213,6 +213,30 @@ describe('sheet data validation commands', () => {
         expect(rules[0].ranges).toEqual([{ unitId, sheetId: subUnitId, startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 }]);
     });
 
+    it('clears only requested validation types from a range', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const checkbox = univerAPI.newDataValidation().requireCheckbox().build();
+        const dropdown = univerAPI.newDataValidation().requireValueInList(['A', 'B']).build();
+
+        activeSheet.getRange(0, 0, 1, 1).setDataValidation(checkbox);
+        activeSheet.getRange(0, 1, 1, 1).setDataValidation(dropdown);
+
+        const result = await commandService.executeCommand(ClearRangeDataValidationCommand.id, {
+            unitId,
+            subUnitId,
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 }],
+            types: [DataValidationType.CHECKBOX],
+        });
+        const rules = model.getRules(unitId, subUnitId);
+
+        expect(result).toBe(true);
+        expect(rules).toHaveLength(1);
+        expect(rules[0].type).toBe(DataValidationType.LIST);
+        expect(rules[0].ranges).toEqual([
+            { unitId, sheetId: subUnitId, startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 },
+        ]);
+    });
+
     it('removes one rule or all rules from the sheet', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
         const firstRule = univerAPI.newDataValidation().requireCheckbox().build();

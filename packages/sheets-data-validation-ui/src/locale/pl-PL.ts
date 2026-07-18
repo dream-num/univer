@@ -19,6 +19,22 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Sprawdzanie poprawności danych',
+        ribbon: {
+            setCheckbox: 'Ustaw pole wyboru',
+            clearCheckbox: 'Wyczyść pole wyboru',
+            dropdownPresetTitle: 'Zastosuj ustawienie wstępne:',
+            editDropdown: 'Edytuj opcje',
+            clearDropdown: 'Wyczyść listę rozwijaną',
+            presets: {
+                yes: 'Tak',
+                no: 'Nie',
+                notStarted: 'Nierozpoczęte',
+                inProgress: 'W toku',
+                completed: 'Ukończone',
+                option1: 'Opcja 1',
+                option2: 'Opcja 2',
+            },
+        },
         operators: {
             legal: 'jest prawidłowym typem',
         },

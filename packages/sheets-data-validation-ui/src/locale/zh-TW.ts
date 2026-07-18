@@ -19,6 +19,22 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: '資料驗證',
+        ribbon: {
+            setCheckbox: '設定核取方塊',
+            clearCheckbox: '清除核取方塊',
+            dropdownPresetTitle: '套用預設：',
+            editDropdown: '編輯選項',
+            clearDropdown: '清除下拉式選單',
+            presets: {
+                yes: '是',
+                no: '否',
+                notStarted: '尚未開始',
+                inProgress: '進行中',
+                completed: '已完成',
+                option1: '選項 1',
+                option2: '選項 2',
+            },
+        },
         operators: {
             legal: '是合法類型',
         },

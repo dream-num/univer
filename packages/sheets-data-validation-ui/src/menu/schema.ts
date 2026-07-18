@@ -15,17 +15,33 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonDataGroup } from '@univerjs/ui';
-import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation-ui.command';
+import { RibbonDataGroup, RibbonInsertGroup } from '@univerjs/ui';
+import {
+    AddSheetDataValidationAndOpenCommand,
+    InsertQuickSheetDataValidationCommand,
+} from '../commands/commands/data-validation-ui.command';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import {
     addDataValidationMenuFactory,
     DATA_VALIDATION_MENU_ID,
     dataValidationMenuFactory,
     openDataValidationMenuFactory,
+    QUICK_DROPDOWN_MENU_ID,
+    quickCheckboxMenuFactory,
+    quickDropdownMenuFactory,
 } from './dv.menu';
 
 export const menuSchema: MenuSchemaType = {
+    [RibbonInsertGroup.CELL]: {
+        [InsertQuickSheetDataValidationCommand.id]: {
+            order: 0,
+            menuItemFactory: quickCheckboxMenuFactory,
+        },
+        [QUICK_DROPDOWN_MENU_ID]: {
+            order: 1,
+            menuItemFactory: quickDropdownMenuFactory,
+        },
+    },
     [RibbonDataGroup.RULES]: {
         [DATA_VALIDATION_MENU_ID]: {
             order: 0,

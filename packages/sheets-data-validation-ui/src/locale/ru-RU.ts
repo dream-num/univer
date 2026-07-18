@@ -19,6 +19,22 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Проверка данных',
+        ribbon: {
+            setCheckbox: 'Установить флажок',
+            clearCheckbox: 'Очистить флажок',
+            dropdownPresetTitle: 'Применить шаблон:',
+            editDropdown: 'Изменить варианты',
+            clearDropdown: 'Очистить раскрывающийся список',
+            presets: {
+                yes: 'Да',
+                no: 'Нет',
+                notStarted: 'Не начато',
+                inProgress: 'В процессе',
+                completed: 'Завершено',
+                option1: 'Вариант 1',
+                option2: 'Вариант 2',
+            },
+        },
         operators: {
             legal: 'является допустимым типом',
         },

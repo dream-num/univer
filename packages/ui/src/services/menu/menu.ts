@@ -63,7 +63,7 @@ interface IMenuItemBase<TLocaleKey extends string, TValue> {
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-    params?: IMenuCommandParams;
+    params?: IMenuCommandParams | (() => IMenuCommandParams | undefined);
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<TValue>;
 }
@@ -78,7 +78,7 @@ export interface IValueOption<TLocaleKey extends string = string, TValue = undef
     id?: string;
     value?: string | number;
     value$?: Observable<TValue>;
-    params?: IMenuCommandParams | ((value?: string | number) => IMenuCommandParams);
+    params?: IMenuCommandParams | ((value?: string | number) => IMenuCommandParams | undefined);
     slot?: boolean;
     label?: MenuLabel; // custom component, send to CustomLabel label property
     icon?: string;

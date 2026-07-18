@@ -94,6 +94,26 @@ function renderWithDependencies(element: ReactElement) {
 afterEach(cleanup);
 
 describe('ToolbarItem', () => {
+    it('resolves menu params when clicking a button', () => {
+        const { getByRole, commandService } = renderWithDependencies(
+            <ToolbarItem
+                id="test-button"
+                type={MenuItemType.BUTTON}
+                title="Dynamic params"
+                params={() => ({ unitId: 'unit-1' })}
+            />
+        );
+
+        fireEvent.click(getByRole('button', { name: 'Dynamic params' }));
+
+        expect(commandService.calls).toEqual([
+            {
+                commandId: 'test-button',
+                params: { unitId: 'unit-1' },
+            },
+        ]);
+    });
+
     it('forwards menu params when clicking a button selector main action', () => {
         const rule = { type: 'checkbox' };
         const { container, commandService } = renderWithDependencies(

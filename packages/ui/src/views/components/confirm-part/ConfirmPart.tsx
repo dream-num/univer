@@ -18,8 +18,8 @@ import type { IConfirmProps } from '@univerjs/design';
 import type { IConfirmChildrenProps, IConfirmPartMethodOptions, IContextConfirmProps } from './interface';
 import { IConfirmService } from '@univerjs/core';
 import { Confirm } from '@univerjs/design';
-import { cloneElement, useEffect, useState } from 'react';
-import { useDependency } from '../../../utils/di';
+import { cloneElement, useState } from 'react';
+import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const ContextConfirm = (props: IContextConfirmProps) => {
@@ -67,17 +67,7 @@ const ContextConfirm = (props: IContextConfirmProps) => {
 export function ConfirmPart() {
     const confirmService = useDependency(IConfirmService) as IConfirmService<IConfirmPartMethodOptions>;
 
-    const [confirmOptions, setConfirmOptions] = useState<IConfirmPartMethodOptions[]>([]);
-
-    useEffect(() => {
-        const subscription = confirmService.confirmOptions$.subscribe((options: IConfirmPartMethodOptions[]) => {
-            setConfirmOptions(options);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
+    const confirmOptions = useObservable(confirmService.confirmOptions$, []);
 
     const props = confirmOptions.map((options) => {
         const { children, title, ...restProps } = options;

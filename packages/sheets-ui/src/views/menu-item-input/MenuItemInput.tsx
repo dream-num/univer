@@ -18,7 +18,7 @@ import type { KeyboardEvent } from 'react';
 import type { IMenuItemInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
-import { IContextMenuService, useDependency } from '@univerjs/ui';
+import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
@@ -34,7 +34,7 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
 
     const localeService = useDependency(LocaleService);
     const contextMenuService = useDependency(IContextMenuService);
-    const [disabled, setDisabled] = useState<boolean>(false);
+    const disabled = useObservable(disabled$ ?? null, false);
     const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
 
     const handleChange = (value: number | null) => {
@@ -47,18 +47,6 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
         setInputValue(inputValue);
         onChange(inputValue);
     };
-
-    useEffect(() => {
-        if (!disabled$) {
-            return;
-        }
-        const subscription = disabled$.subscribe((value) => {
-            setDisabled(value);
-        });
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
 
     useEffect(() => {
         if (!contextMenuService.visible) {

@@ -19,10 +19,11 @@ import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { map } from 'rxjs';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
-import { connectInjector, useDependency } from '../../utils/di';
+import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
@@ -77,16 +78,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
     const toolbarComponents = useComponentsOfPart(BuiltInUIPart.TOOLBAR);
 
-    const [darkMode, setDarkMode] = useState<boolean>(false);
-    useEffect(() => {
-        const sub = themeService.darkMode$.subscribe((darkMode) => {
-            setDarkMode(darkMode);
-        });
-
-        return () => {
-            sub.unsubscribe();
-        };
-    }, []);
+    const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
 
     useEffect(() => {
         if (contentRef.current) {
@@ -94,8 +86,13 @@ export function MobileWorkbench(props: IUniverAppProps) {
         }
     }, [onRendered]);
 
-    const [locale, setLocale] = useState(() => localeService.getLocales());
-    const [direction, setDirection] = useState(() => localeService.getDirection());
+    const locale = useObservable(
+        () => localeService.localeChanged$.pipe(map(() => localeService.getLocales())),
+        localeService.getLocales(),
+        false,
+        [localeService]
+    );
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -113,23 +110,10 @@ export function MobileWorkbench(props: IUniverAppProps) {
     useEffect(() => {
         document.body.appendChild(portalContainer);
 
-        const subscriptions = [
-            localeService.localeChanged$.subscribe(() => {
-                setLocale(localeService.getLocales());
-            }),
-            localeService.direction$.subscribe(() => {
-                setDirection(localeService.getDirection());
-            }),
-        ];
-
         return () => {
-            // batch unsubscribe
-            subscriptions.forEach((subscription) => subscription.unsubscribe());
-
-            // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, mountContainer, portalContainer]);
+    }, [mountContainer, portalContainer]);
 
     useEffect(() => {
         portalContainer.dir = direction;

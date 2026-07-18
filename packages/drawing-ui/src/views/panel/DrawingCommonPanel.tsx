@@ -20,8 +20,8 @@ import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { filter, map, merge } from 'rxjs';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { DrawingAlign } from './DrawingAlign';
 import { DrawingArrange } from './DrawingArrange';
@@ -80,80 +80,28 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const scene = renderObject?.scene;
     const transformer = scene?.getTransformerByCreate();
 
-    const initialShowState = getPanelShowState(drawings);
-
-    const [arrangeShow, setArrangeShow] = useState(initialShowState.arrangeShow);
-    const [transformShow, setTransformShow] = useState(initialShowState.transformShow);
-    const [alignShow, setAlignShow] = useState(initialShowState.alignShow);
-    const [cropperShow, setCropperShow] = useState(initialShowState.cropperShow);
-    const [nullShow, setNullShow] = useState(initialShowState.nullShow);
-    // const [groupShow, setGroupShow] = useState(false);
-
-    useEffect(() => {
-        if (!transformer) return;
-        const clearControlSub = transformer.clearControl$.subscribe((changeSelf) => {
-            if (changeSelf === true) {
-                setArrangeShow(false);
-                setTransformShow(false);
-                setAlignShow(false);
-                setCropperShow(false);
-                setNullShow(true);
-            }
-        });
-
-        const changeStartSub = transformer.changeStart$.subscribe((state) => {
-            const { objects } = state;
-            const params = getUpdateParams(objects, drawingManagerService);
-
-            if (params.length === 0) {
-                setArrangeShow(false);
-                setTransformShow(false);
-                setAlignShow(false);
-                setCropperShow(false);
-                setNullShow(true);
-            } else if (params.length === 1) {
-                setArrangeShow(true);
-                setTransformShow(true);
-                setAlignShow(false);
-                setCropperShow(true);
-                setNullShow(false);
-            } else {
-                setArrangeShow(true);
-                setTransformShow(false);
-                setAlignShow(true);
-                setCropperShow(false);
-                setNullShow(false);
-            }
-        });
-
-        const focusSub = drawingManagerService.focus$.subscribe((drawings) => {
-            if (drawings.length === 0) {
-                setArrangeShow(false);
-                setTransformShow(false);
-                setAlignShow(false);
-                setCropperShow(false);
-                setNullShow(true);
-            } else if (drawings.length === 1) {
-                setArrangeShow(true);
-                setTransformShow(true);
-                setAlignShow(false);
-                setCropperShow(true);
-                setNullShow(false);
-            } else {
-                setArrangeShow(true);
-                setTransformShow(false);
-                setAlignShow(true);
-                setCropperShow(false);
-                setNullShow(false);
-            }
-        });
-
-        return () => {
-            changeStartSub.unsubscribe();
-            clearControlSub.unsubscribe();
-            focusSub.unsubscribe();
-        };
-    }, [drawingManagerService, transformer]);
+    const panelState = useObservable(
+        () => merge(
+            drawingManagerService.focus$.pipe(map(getPanelShowState)),
+            ...(transformer
+                ? [
+                    transformer.clearControl$.pipe(
+                        filter((changeSelf) => changeSelf === true),
+                        map(() => getPanelShowState([]))
+                    ),
+                    transformer.changeStart$.pipe(
+                        map((state) => getPanelShowState(
+                            getUpdateParams(state.objects, drawingManagerService) as IDrawingParam[]
+                        ))
+                    ),
+                ]
+                : [])
+        ),
+        getPanelShowState(drawings),
+        false,
+        [drawingManagerService, transformer]
+    );
+    const { arrangeShow, transformShow, alignShow, cropperShow, nullShow } = panelState;
 
     if (!drawingParam || !scene || !transformer) {
         return null;

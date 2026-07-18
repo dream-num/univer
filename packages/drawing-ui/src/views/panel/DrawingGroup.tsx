@@ -20,8 +20,8 @@ import { DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core'
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IconManager, useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { IconManager, useDependency, useObservable } from '@univerjs/ui';
+import { filter, map, merge } from 'rxjs';
 import {
     CancelDrawingGroupOperation,
     SetDrawingGroupOperation,
@@ -44,9 +44,34 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const GroupIcon = iconManager.get('GroupIcon');
     const UngroupIcon = iconManager.get('UngroupIcon');
 
-    const [groupShow, setGroupShow] = useState(false);
-    const [groupBtnShow, setGroupBtnShow] = useState(true);
-    const [ungroupBtnShow, setUngroupBtnShow] = useState(true);
+    const drawingParam = drawings[0];
+    const transformer = drawingParam
+        ? renderManagerService.getRenderById(drawingParam.unitId)?.scene?.getTransformerByCreate()
+        : undefined;
+    const groupState = useObservable(
+        transformer
+            ? () => merge(
+                transformer.clearControl$.pipe(
+                    filter((changeSelf) => changeSelf === true),
+                    map(() => ({ groupShow: false, groupBtnShow: false, ungroupBtnShow: false }))
+                ),
+                transformer.changeStart$.pipe(map((state) => {
+                    const params = getUpdateParams(state.objects, drawingManagerService);
+                    const groupBtnShow = params.length > 1;
+                    const ungroupBtnShow = params.some((item) => item?.drawingType === DrawingTypeEnum.DRAWING_GROUP);
+                    return {
+                        groupShow: groupBtnShow || ungroupBtnShow,
+                        groupBtnShow,
+                        ungroupBtnShow,
+                    };
+                }))
+            )
+            : null,
+        { groupShow: false, groupBtnShow: true, ungroupBtnShow: true },
+        false,
+        [drawingManagerService, transformer]
+    );
+    const { groupShow, groupBtnShow, ungroupBtnShow } = groupState;
 
     const onGroupBtnClick = () => {
         commandService.syncExecuteCommand(SetDrawingGroupOperation.id, { drawings });
@@ -55,57 +80,6 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const onUngroupBtnClick = () => {
         commandService.syncExecuteCommand(CancelDrawingGroupOperation.id, { drawings });
     };
-
-    useEffect(() => {
-        const drawingParam = drawings[0];
-
-        if (drawingParam == null) {
-            return;
-        }
-
-        const { unitId } = drawingParam;
-
-        const renderObject = renderManagerService.getRenderById(unitId);
-        const scene = renderObject?.scene;
-        if (scene == null) {
-            return;
-        }
-        const transformer = scene.getTransformerByCreate();
-
-        const onClearControlObserver = transformer.clearControl$.subscribe((changeSelf) => {
-            if (changeSelf === true) {
-                setGroupShow(false);
-            }
-        });
-
-        const onChangeStartObserver = transformer.changeStart$.subscribe((state) => {
-            const { objects } = state;
-            const params = getUpdateParams(objects, drawingManagerService);
-            const groupParams = params.filter((o) => o?.drawingType === DrawingTypeEnum.DRAWING_GROUP) as IDrawingParam[];
-
-            let groupBtnShow = false;
-            let ungroupBtnShow = false;
-
-            if (params.length > 1) {
-                groupBtnShow = true;
-            }
-
-            if (groupParams.length > 0) {
-                ungroupBtnShow = true;
-            }
-
-            const groupShow = groupBtnShow || ungroupBtnShow;
-
-            setGroupShow(groupShow);
-            setGroupBtnShow(groupBtnShow);
-            setUngroupBtnShow(ungroupBtnShow);
-        });
-
-        return () => {
-            onChangeStartObserver.unsubscribe();
-            onClearControlObserver.unsubscribe();
-        };
-    }, []);
 
     return (
         <div

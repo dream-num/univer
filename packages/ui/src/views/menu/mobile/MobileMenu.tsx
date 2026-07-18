@@ -29,7 +29,7 @@ import { LocaleService } from '@univerjs/core';
 import { borderBottomClassName, clsx } from '@univerjs/design';
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
-import { combineLatest, isObservable, of } from 'rxjs';
+import { combineLatest, isObservable, map, merge, of } from 'rxjs';
 import { scan, startWith } from 'rxjs/operators';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -492,35 +492,25 @@ function getMenuSchemaTitle(schema: IMenuSchema, localeService: LocaleService) {
 }
 
 function useContextGroupHiddenStates(menuSchemas: IMenuSchema[]) {
-    const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
-
-    useEffect(() => {
-        const subscriptions = menuSchemas.map((menuSchema) => {
-            if (!menuSchema.children?.length) {
-                return null;
-            }
-
-            const hiddenObservables = getLeafItemSchemas(menuSchema.children).map((childSchema) => childSchema.item?.hidden$ ?? of(false));
-            if (!hiddenObservables.length) {
-                return null;
-            }
-
-            return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
-                const isAllHidden = hiddenValues.every((hidden) => hidden === true);
-                setHiddenStates((state) => ({
-                    ...state,
-                    [menuSchema.key]: isAllHidden,
-                }));
-            });
+    const hiddenStates$ = useMemo(() => {
+        const groupStates = menuSchemas.flatMap((menuSchema) => {
+            const hiddenObservables = menuSchema.children?.length
+                ? getLeafItemSchemas(menuSchema.children).map((childSchema) => childSchema.item?.hidden$ ?? of(false))
+                : [];
+            return hiddenObservables.length
+                ? [combineLatest(hiddenObservables).pipe(map((values) => [menuSchema.key, values.every(Boolean)] as const))]
+                : [];
         });
 
-        return () => {
-            subscriptions.forEach((subscription) => subscription?.unsubscribe());
-            setHiddenStates({});
-        };
+        return groupStates.length
+            ? merge(...groupStates).pipe(
+                scan((states, [key, hidden]) => ({ ...states, [key]: hidden }), {} as Record<string, boolean>),
+                startWith({})
+            )
+            : of({});
     }, [menuSchemas]);
 
-    return hiddenStates;
+    return useObservable<Record<string, boolean>>(hiddenStates$, {});
 }
 
 function getLeafItemSchemas(schemas: IMenuSchema[]): IMenuSchema[] {

@@ -44,7 +44,7 @@ import {
 } from '@univerjs/sheets';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { distinctUntilChanged, merge } from 'rxjs';
+import { distinctUntilChanged, from, merge, startWith, switchMap } from 'rxjs';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { useHighlightRange } from '../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
@@ -61,7 +61,6 @@ export function SheetPermissionPanelList() {
 
 function SheetPermissionPanelListContent() {
     const [isCurrentSheet, setIsCurrentSheet] = useState(true);
-    const [forceUpdateFlag, setForceUpdateFlag] = useState(false);
     const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
 
     const localeService = useDependency(LocaleService);
@@ -75,9 +74,6 @@ function SheetPermissionPanelListContent() {
     const usesManagerService = useDependency(UserManagerService);
     const currentUser = usesManagerService.getCurrentUser();
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
-
-    const sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
-    const rangeRuleRefresh = useObservable(rangeProtectionRuleModel.ruleRefresh$, '');
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
@@ -125,58 +121,23 @@ function SheetPermissionPanelListContent() {
         return isCurrentSheet ? subUnitRuleList : allPermissionRule;
     }, [authzIoService, rangeProtectionRuleModel, workbook, worksheetProtectionModel]);
 
-    const [ruleList, setRuleList] = useState<IPermissionPoint[]>([]);
-
-    useEffect(() => {
-        let active = true;
-        const subscription = merge(
+    const ruleList = useObservable<IPermissionPoint[]>(
+        () => merge(
             rangeProtectionRuleModel.ruleChange$,
-            worksheetProtectionModel.ruleChange$
-        ).subscribe(() => {
-            void getRuleList(isCurrentSheet).then((ruleList) => {
-                if (active) {
-                    setRuleList(ruleList);
-                }
-            });
-        });
-        return () => {
-            active = false;
-            subscription.unsubscribe();
-        };
-    }, [getRuleList, isCurrentSheet, rangeProtectionRuleModel.ruleChange$, worksheetProtectionModel.ruleChange$]);
-
-    useEffect(() => {
-        let active = true;
-        const subscribe = workbook.activeSheet$.pipe(
-            distinctUntilChanged((prevSheet, currSheet) => prevSheet?.getSheetId() === currSheet?.getSheetId())
-        ).subscribe(() => {
-            void getRuleList(isCurrentSheet).then((ruleList) => {
-                if (active) {
-                    setRuleList(ruleList);
-                }
-            });
-        });
-        return () => {
-            active = false;
-            subscribe.unsubscribe();
-        };
-    }, [getRuleList, isCurrentSheet, workbook.activeSheet$]);
-
-    useEffect(() => {
-        let cancelled = false;
-
-        if (sheetRuleRefresh || rangeRuleRefresh) {
-            void getRuleList(true).then((ruleList) => {
-                if (!cancelled) {
-                    setRuleList(ruleList);
-                }
-            });
-        }
-
-        return () => {
-            cancelled = true;
-        };
-    }, [getRuleList, sheetRuleRefresh, rangeRuleRefresh]);
+            worksheetProtectionModel.ruleChange$,
+            rangeProtectionRuleModel.ruleRefresh$,
+            worksheetProtectionModel.ruleRefresh$,
+            workbook.activeSheet$.pipe(
+                distinctUntilChanged((prevSheet, currSheet) => prevSheet?.getSheetId() === currSheet?.getSheetId())
+            )
+        ).pipe(
+            startWith(undefined),
+            switchMap(() => from(getRuleList(isCurrentSheet)))
+        ),
+        [],
+        false,
+        [getRuleList, isCurrentSheet, rangeProtectionRuleModel, workbook, worksheetProtectionModel]
+    );
 
     function handleDelete(rule: IRuleItem) {
         const { unitId, subUnitId, unitType } = rule;
@@ -188,7 +149,6 @@ function SheetPermissionPanelListContent() {
         }
 
         if (res) {
-            setForceUpdateFlag(!forceUpdateFlag);
             if ((rule as IRangeProtectionRule).ranges === currentRuleRanges) {
                 setCurrentRuleRanges([]);
             }

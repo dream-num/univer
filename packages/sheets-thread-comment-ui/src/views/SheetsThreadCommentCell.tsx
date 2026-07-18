@@ -19,6 +19,7 @@ import { IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/cor
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ThreadCommentTree, ThreadCommentTreeLocation } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
+import { map, startWith } from 'rxjs';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
 export const SheetsThreadCommentCell = () => {
@@ -26,12 +27,21 @@ export const SheetsThreadCommentCell = () => {
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
     const activePopup = useObservable(sheetsThreadCommentPopupService.activePopup$);
     const sheetThreadCommentModel = useDependency(SheetsThreadCommentModel);
-    useObservable(sheetThreadCommentModel.commentUpdate$);
+    const rootId = useObservable(
+        activePopup
+            ? () => sheetThreadCommentModel.commentUpdate$.pipe(
+                map(() => sheetThreadCommentModel.getByLocation(activePopup.unitId, activePopup.subUnitId, activePopup.row, activePopup.col)),
+                startWith(sheetThreadCommentModel.getByLocation(activePopup.unitId, activePopup.subUnitId, activePopup.row, activePopup.col))
+            )
+            : null,
+        undefined,
+        false,
+        [activePopup, sheetThreadCommentModel]
+    );
     if (!activePopup) {
         return null;
     }
     const { row, col, unitId, subUnitId, trigger } = activePopup;
-    const rootId = sheetThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
     const ref = `${Tools.chatAtABC(col)}${row + 1}`;
     const onClose = () => {
         sheetsThreadCommentPopupService.hidePopup();

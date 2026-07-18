@@ -19,8 +19,7 @@ import type { LocaleKey } from '../../locale/types';
 import { ArrangeTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { IconManager, useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { IconManager, useDependency, useObservable } from '@univerjs/ui';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
 export interface IDrawingArrangeProps {
@@ -41,17 +40,12 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
     const TopmostIcon = iconManager.get('TopmostIcon');
     const BottomIcon = iconManager.get('BottomIcon');
 
-    const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
-
-    useEffect(() => {
-        const focusDispose = drawingManagerService.focus$.subscribe((drawings) => {
-            setDrawings(drawings);
-        });
-
-        return () => {
-            focusDispose.unsubscribe();
-        };
-    }, []);
+    const drawings = useObservable(
+        () => drawingManagerService.focus$,
+        focusDrawings,
+        false,
+        [drawingManagerService]
+    );
 
     const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {
         commandService.syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType, drawings });

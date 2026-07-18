@@ -15,25 +15,21 @@
  */
 
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IUniverDocsUIConfig } from '../config/config';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { ISideMenuItem } from './SideMenu';
 import {
-    debounce,
     fromEventSubject,
     getPlainText,
-    ICommandService,
     isInternalEditorID,
     IUniverInstanceService,
     NamedStyleType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { of, throttleTime } from 'rxjs';
+import { debounceTime, map, startWith, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
@@ -98,23 +94,47 @@ export function DocSideMenu() {
 }
 
 function DocSideMenuContent() {
-    const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const currentDoc = useObservable(useMemo(() => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), []));
     const renderManagerService = useDependency(IRenderManagerService);
-    const fullDataStream = currentDoc?.getBody()?.dataStream ?? '';
-    const [_updateKey, setUpdateKey] = useState(0);
+    const documentData = useObservable(
+        currentDoc
+            ? () => currentDoc.change$.pipe(
+                debounceTime(100),
+                map(() => currentDoc.getSnapshot())
+            )
+            : null,
+        currentDoc?.getSnapshot(),
+        false,
+        [currentDoc]
+    );
+    const fullDataStream = documentData?.body?.dataStream ?? '';
     const [activeId, setActiveId] = useState<string | undefined>(undefined);
     const unitId = currentDoc?.getUnitId() ?? '';
     const renderer = renderManagerService.getRenderById(unitId);
-    const title = currentDoc?.getTitle();
+    const title = documentData?.title;
     const docEventManagerService = renderer?.with(DocEventManagerService);
     const paragraphBounds = docEventManagerService?.paragraphBounds;
-    const left = renderer?.mainComponent?.left ?? 0;
-    const canvasHeight = renderer?.engine.height ?? 0;
-    const scaleY = renderer?.scene.scaleY ?? 1;
+    const readLayout = () => ({
+        left: renderer?.mainComponent?.left ?? 0,
+        canvasHeight: renderer?.engine.height ?? 0,
+        scaleY: renderer?.scene.scaleY ?? 1,
+    });
+    const layout = useObservable(
+        renderer?.engine.onTransformChange$
+            ? () => fromEventSubject(renderer.engine.onTransformChange$).pipe(
+                throttleTime(33),
+                map(readLayout),
+                startWith(readLayout())
+            )
+            : null,
+        readLayout(),
+        false,
+        [renderer]
+    );
+    const { left, canvasHeight, scaleY } = layout;
 
-    const paragraphs = currentDoc?.getBody()?.paragraphs ?? [];
+    const paragraphs = documentData?.body?.paragraphs ?? [];
     const paragraphMap = useMemo(() => {
         const map = new Map<number, IParagraph>();
         paragraphs.forEach((p) => {
@@ -122,7 +142,6 @@ function DocSideMenuContent() {
         });
         return map;
     }, [paragraphs]);
-    useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$).pipe(throttleTime(33)) : of(null)), [renderer?.engine.onTransformChange$]));
     const mode = left < 180 ? 'float' : 'side-bar';
     let minLevel = Infinity;
 
@@ -172,22 +191,6 @@ function DocSideMenuContent() {
         ].filter(Boolean) as ISideMenuItem[];
 
     const [open, setOpen] = useState(true);
-
-    useEffect(() => {
-        const debounceUpdater = debounce(setUpdateKey, 100);
-
-        const sub = commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === RichTextEditingMutation.id) {
-                const params = commandInfo.params as IRichTextEditingMutationParams;
-                if (params.unitId === currentDoc?.getUnitId()) {
-                    debounceUpdater((prev) => prev + 1);
-                }
-            }
-        });
-        return () => {
-            sub.dispose();
-        };
-    }, [commandService, currentDoc]);
 
     useEffect(() => {
         const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);

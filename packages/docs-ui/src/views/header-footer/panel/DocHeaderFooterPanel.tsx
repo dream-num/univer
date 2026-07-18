@@ -19,8 +19,8 @@ import type { LocaleKey } from '../../../locale/types';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { filter, map } from 'rxjs';
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';
 
 export const DocHeaderFooterPanel = () => {
@@ -32,23 +32,15 @@ export const DocHeaderFooterPanel = () => {
     const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
 
     const viewModel = docSkeletonManagerService!.getViewModel();
-    const [isEditHeaderFooter, setIsEditHeaderFooter] = useState(true);
-
-    useEffect(() => {
-        const editArea = viewModel.getEditArea();
-        setIsEditHeaderFooter(editArea !== DocumentEditArea.BODY);
-
-        const subscription = viewModel.editAreaChange$.subscribe((editArea) => {
-            if (editArea == null) {
-                return;
-            }
-            setIsEditHeaderFooter(editArea !== DocumentEditArea.BODY);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
+    const isEditHeaderFooter = useObservable(
+        () => viewModel.editAreaChange$.pipe(
+            filter((editArea) => editArea != null),
+            map((editArea) => editArea !== DocumentEditArea.BODY)
+        ),
+        viewModel.getEditArea() !== DocumentEditArea.BODY,
+        false,
+        [viewModel]
+    );
 
     return (
         <div className="univer-text-sm">

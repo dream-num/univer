@@ -17,6 +17,7 @@
 import type { IconType, IIconProps } from '@univerjs/ui';
 import { ThemeService } from '@univerjs/core';
 import { useDependency, useObservable } from '@univerjs/ui';
+import { map } from 'rxjs';
 import { getHighlightBackgroundColor } from './paragraph-menu/theme-color';
 
 type ColorSwatchIconProps = IIconProps & {
@@ -175,8 +176,12 @@ function createTextColorSwatchIcon(color: string): IconType {
 function createBackgroundColorSwatchIcon(index: number): IconType {
     return function DocParagraphBackgroundColorSwatchIcon(props: IIconProps) {
         const themeService = useDependency(ThemeService);
-        useObservable(themeService.currentTheme$);
-        const color = getHighlightBackgroundColor(themeService, index);
+        const color = useObservable(
+            () => themeService.currentTheme$.pipe(map(() => getHighlightBackgroundColor(themeService, index))),
+            getHighlightBackgroundColor(themeService, index),
+            false,
+            [index, themeService]
+        );
 
         return <BackgroundColorSwatchIcon {...props} color={color} />;
     };

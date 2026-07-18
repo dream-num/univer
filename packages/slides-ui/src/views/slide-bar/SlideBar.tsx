@@ -19,8 +19,9 @@ import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useDependency } from '@univerjs/ui';
-import { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { createRef, useCallback, useEffect, useMemo, useRef } from 'react';
+import { scan } from 'rxjs';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../../commands/operations/append-slide.operation';
 import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
@@ -36,33 +37,29 @@ export function SlideSideBar() {
     const localeService = useDependency(LocaleService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
-    const currentSlide = univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-
-    // const currentSlide = useObservable(
-    //     () => univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE),
-    //     undefined,
-    //     undefined,
-    //     []
-    // );
+    const currentSlide = useObservable(
+        () => univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE),
+        undefined,
+        false,
+        [univerInstanceService]
+    );
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
     const slideList = useMemo(() => pages && pageOrder ? pageOrder.map((id) => pages[id]) : [], [pageOrder, pages]);
 
-    const [activatePageId, setActivatePageId] = useState<string | null>(currentSlide?.getActivePage()?.id ?? null);
+    const initialActivePageId = currentSlide?.getActivePage()?.id ?? null;
+    const activatePageId = useObservable(
+        currentSlide
+            ? () => currentSlide.activePage$.pipe(
+                scan((previousId, page) => page?.id ?? previousId, initialActivePageId)
+            )
+            : null,
+        initialActivePageId,
+        false,
+        [currentSlide, initialActivePageId]
+    );
 
     const divRefs = useMemo(() => slideList.map(() => createRef<HTMLDivElement>()), [slideList]);
-
-    useEffect(() => {
-        const subscriber = currentSlide?.activePage$.subscribe((page) => {
-            const id = page?.id ?? null;
-
-            id && setActivatePageId(id);
-        });
-
-        return () => {
-            subscriber?.unsubscribe();
-        };
-    }, []);
 
     useEffect(() => {
         divRefs.forEach((ref, index) => {

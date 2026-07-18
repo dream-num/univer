@@ -32,6 +32,7 @@ import {
 } from '@univerjs/docs';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
+import { combineLatest, map, startWith } from 'rxjs';
 
 const DEFAULT_SECTION_COLUMN_GAP = 18;
 
@@ -106,12 +107,20 @@ export function useSectionSetting() {
         () => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
         [instanceService]
     ));
-    useObservable(selectionManager.textSelection$);
-    useObservable(documentDataModel?.change$);
-    const ranges = selectionManager.getDocRanges();
-    const sections = documentDataModel?.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL
-        ? getSelectedSections(documentDataModel, ranges)
+    const resolveSections = () => documentDataModel?.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL
+        ? getSelectedSections(documentDataModel, selectionManager.getDocRanges())
         : [];
+    const sections = useObservable(
+        documentDataModel
+            ? () => combineLatest([
+                selectionManager.textSelection$.pipe(startWith(undefined)),
+                documentDataModel.change$.pipe(startWith(undefined)),
+            ]).pipe(map(resolveSections))
+            : null,
+        resolveSections(),
+        false,
+        [documentDataModel, selectionManager]
+    );
     const values = getSectionSettingValues(sections);
 
     const update = (updates: IDocumentSectionUpdate[]) => {

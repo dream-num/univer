@@ -26,7 +26,13 @@ import { ISheetEmbedRuntimeService } from '../../services/sheet-embed-runtime.se
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
-import { useActiveWorkbook, useActiveWorksheet, useSheetLoading } from '../hook';
+import {
+    SheetLoadingWorkbookContext,
+    useActiveWorkbook,
+    useActiveWorksheet,
+    useSheetLoading,
+    useSheetLoadingWorkbook,
+} from '../hook';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { SheetZoomSlider } from '../sheet-slider/CountBar';
 import { StatusBar } from '../status-bar/StatusBar';
@@ -37,7 +43,9 @@ export function RenderSheetFooter() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const menuManagerService = useDependency(IMenuManagerService);
     const showFooter = config?.footer ?? true;
-    const workbook = useActiveWorkbook();
+    const activeWorkbook = useActiveWorkbook();
+    const loadingWorkbook = useSheetLoadingWorkbook();
+    const workbook = activeWorkbook ?? loadingWorkbook;
     const isLoading = useSheetLoading();
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
     const focusedUnitType = useFocusedUnitType();
@@ -59,40 +67,44 @@ export function RenderSheetFooter() {
     if (!sheetBar && !showStatisticBar && !showMenus && !showZoomSlider) return null;
 
     return (
-        <section
-            className={clsx(`
-              univer-box-border univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-[1fr,auto,auto,auto]
-              univer-items-center univer-justify-between univer-bg-white univer-px-5 univer-text-gray-900
-              dark:!univer-bg-gray-900 dark:!univer-text-gray-200
-            `, { 'univer-pointer-events-none': isLoading })}
-            data-range-selector
-            aria-disabled={isLoading}
-            style={{
-                height: SHEET_FOOTER_BAR_HEIGHT,
-            }}
-        >
-            {sheetBar && <SheetBar />}
-            {showStatisticBar && <StatusBar />}
-            {showMenus && footerMenus.length > 0 && (
-                <div className="univer-box-border univer-flex univer-gap-2 univer-px-2">
-                    {footerMenus.map((item) => item.children?.map((child) => (
-                        child?.item && (
-                            <ToolbarItem
-                                key={child.key}
-                                {...child.item}
-                            />
-                        )
-                    )))}
-                </div>
-            )}
-            {showZoomSlider && <SheetZoomSlider />}
-        </section>
+        <SheetLoadingWorkbookContext.Provider value={workbook}>
+            <section
+                className={clsx(`
+                  univer-box-border univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-[1fr,auto,auto,auto]
+                  univer-items-center univer-justify-between univer-bg-white univer-px-5 univer-text-gray-900
+                  dark:!univer-bg-gray-900 dark:!univer-text-gray-200
+                `, { 'univer-pointer-events-none': isLoading })}
+                data-range-selector
+                aria-disabled={isLoading}
+                style={{
+                    height: SHEET_FOOTER_BAR_HEIGHT,
+                }}
+            >
+                {sheetBar && <SheetBar />}
+                {showStatisticBar && <StatusBar />}
+                {showMenus && footerMenus.length > 0 && (
+                    <div className="univer-box-border univer-flex univer-gap-2 univer-px-2">
+                        {footerMenus.map((item) => item.children?.map((child) => (
+                            child?.item && (
+                                <ToolbarItem
+                                    key={child.key}
+                                    {...child.item}
+                                />
+                            )
+                        )))}
+                    </div>
+                )}
+                {showZoomSlider && <SheetZoomSlider />}
+            </section>
+        </SheetLoadingWorkbookContext.Provider>
     );
 }
 
 export function RenderSheetHeader() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-    const workbook = useActiveWorkbook();
+    const activeWorkbook = useActiveWorkbook();
+    const loadingWorkbook = useSheetLoadingWorkbook();
+    const workbook = activeWorkbook ?? loadingWorkbook;
     const isLoading = useSheetLoading();
     const hasWorkbook = !!workbook;
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
@@ -115,9 +127,11 @@ export function RenderSheetHeader() {
     }
     if (config?.formulaBar !== false) {
         return (
-            <div aria-disabled={isLoading} className={clsx({ 'univer-pointer-events-none': isLoading })}>
-                <FormulaBar />
-            </div>
+            <SheetLoadingWorkbookContext.Provider value={workbook}>
+                <div aria-disabled={isLoading} className={clsx({ 'univer-pointer-events-none': isLoading })}>
+                    <FormulaBar />
+                </div>
+            </SheetLoadingWorkbookContext.Provider>
         );
     }
 

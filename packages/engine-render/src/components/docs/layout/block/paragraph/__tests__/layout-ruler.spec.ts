@@ -600,6 +600,19 @@ describe('layout-ruler', () => {
         expect(ctx.paragraphsOpenNewPage.has(9)).toBe(true);
     });
 
+    it('does not treat the first paragraph of a continuous section as a page break', () => {
+        const page: any = { sections: [{}] };
+        const section: any = { columns: [], parent: page };
+        const column: any = { lines: [], parent: section };
+        section.columns.push(column);
+        page.sections.push(section);
+
+        expect(__testing.checkPageBreak(column)).toBe(false);
+
+        page.sections = [section];
+        expect(__testing.checkPageBreak(column)).toBe(true);
+    });
+
     it('does not dirty relayout for behind-doc floating objects', () => {
         const page: any = {
             segmentId: '',

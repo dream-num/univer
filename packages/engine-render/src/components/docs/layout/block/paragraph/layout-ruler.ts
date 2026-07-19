@@ -1446,6 +1446,7 @@ export const __testing = {
     reLayoutCheck: _reLayoutCheck,
     avoidFlowAffectingDrawingsForTable: __avoidFlowAffectingDrawingsForTable,
     isGlyphGroupBeyondDivideWidth,
+    checkPageBreak: __checkPageBreak,
 };
 
 function _columnOperator(
@@ -1949,6 +1950,12 @@ function __checkPageBreak(column: IDocumentSkeletonColumn) {
     if (!section) {
         return false;
     }
+
+    const pageSections = section.parent?.sections;
+    if (pageSections && pageSections[0] !== section) {
+        return false;
+    }
+
     const columns = section?.columns;
 
     if (!columns) {

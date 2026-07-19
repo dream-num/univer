@@ -529,6 +529,14 @@ export interface IGridCellSelection {
     viewId: ViewId;
     recordId: RecordId;
     fieldId: FieldId;
+    mode?: 'cell' | 'row' | 'column';
+    anchorRecordId?: RecordId;
+    focusRecordId?: RecordId;
+    anchorFieldId?: FieldId;
+    focusFieldId?: FieldId;
+    selectedRecordIds?: RecordId[];
+    showBorder?: boolean;
+    virtual?: boolean;
 }
 
 export interface IGridGroupSelection {

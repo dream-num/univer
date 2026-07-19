@@ -16,7 +16,12 @@
 
 import { FunctionType, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
-import { getFormulaHighlightDataStream, getFormulaReplaceResult } from '../formula-editor-helpers';
+import {
+    findFormulaStructuredReferences,
+    getFormulaHighlightDataStream,
+    getFormulaReplaceResult,
+    resolveFormulaReferenceEditingContext,
+} from '../formula-editor-helpers';
 
 describe('formula editor helpers', () => {
     it('replaces a partial function and appends its opening bracket', () => {
@@ -42,5 +47,64 @@ describe('formula editor helpers', () => {
         }];
 
         expect(getFormulaHighlightDataStream('=', nodes)).toBe('=[Book]Sheet1!A1\r\n');
+    });
+
+    it('uses the same cursor rules for adding and replacing references', () => {
+        const reference = {
+            token: 'A1:B2',
+            nodeType: sequenceNodeType.REFERENCE,
+            startIndex: 4,
+            endIndex: 8,
+        };
+        const sequenceNodes = ['SUM(', reference, '+'];
+
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'SUM(A1:B2+',
+            sequenceNodes,
+            offset: 4,
+        })).toMatchObject({ mode: 'add', referenceIndex: -1 });
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'SUM(A1:B2+',
+            sequenceNodes,
+            offset: 9,
+        })).toMatchObject({ mode: 'replace', referenceIndex: 0 });
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'SUM(A1:B2+',
+            sequenceNodes,
+            offset: 10,
+        })).toMatchObject({ mode: 'add', referenceIndex: -1 });
+    });
+
+    it('does not draw a reference in plain formula text', () => {
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'SUM',
+            sequenceNodes: ['SUM'],
+            offset: 3,
+        })).toMatchObject({ mode: 'none', referenceIndex: -1 });
+    });
+
+    it('edits structured table references as selectable references', () => {
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'SUM(SalesTable[Amount])',
+            sequenceNodes: [
+                'SUM(',
+                {
+                    token: 'SalesTable[Amount]',
+                    nodeType: sequenceNodeType.TABLE,
+                    startIndex: 4,
+                    endIndex: 21,
+                },
+                ')',
+            ],
+            offset: 10,
+        })).toMatchObject({ mode: 'replace', referenceIndex: 0 });
+    });
+
+    it('finds cross-unit structured references that are not resolved by the local table map', () => {
+        expect(findFormulaStructuredReferences('SUM([Sales Base]!Orders[Amount])')).toEqual([{
+            token: '[Sales Base]!Orders[Amount]',
+            startIndex: 4,
+            endIndex: 30,
+        }]);
     });
 });

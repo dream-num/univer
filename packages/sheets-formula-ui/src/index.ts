@@ -25,6 +25,7 @@ export { InsertFunctionOperation } from './commands/operations/insert-function.o
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
+export { genFormulaRefSelectionStyle } from './common/selection';
 export type { IUniverSheetsFormulaUIConfig } from './config/config';
 export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { menuSchema as SheetsFormulaUIMenuSchema } from './menu/schema';

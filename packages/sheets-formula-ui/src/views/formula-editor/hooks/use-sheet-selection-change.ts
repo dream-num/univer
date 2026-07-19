@@ -37,16 +37,18 @@ import { IEditorService } from '@univerjs/docs-ui';
 import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
-    isFormulaLexerToken,
     LexerTreeBuilder,
-    matchRefDrawToken,
-    matchToken,
     sequenceNodeType,
     serializeRange,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    getFormulaSequenceCharacterAtOffset,
+    isFormulaReferenceAddingContext,
+    isFormulaReferenceAddingTextContext,
+} from '@univerjs/formula-ui';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -89,30 +91,8 @@ export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTree
     };
 };
 
-export function getSequenceNodeCharAtOffset(sequenceNodes: (string | { token: string })[], offset: number): string | undefined {
-    let currentOffset = 0;
-    for (const node of sequenceNodes) {
-        const text = typeof node === 'string' ? node : node.token;
-        const nextOffset = currentOffset + text.length;
-        if (offset > currentOffset && offset <= nextOffset) {
-            return text[offset - currentOffset - 1];
-        }
-        currentOffset = nextOffset;
-    }
-
-    return undefined;
-}
-
-export function isFormulaReferenceAddingContext(sequenceNodes: (string | { token: string })[], offset: number): boolean {
-    const char = getSequenceNodeCharAtOffset(sequenceNodes, offset);
-    return Boolean(char && matchRefDrawToken(char));
-}
-
-export function isFormulaReferenceAddingTextContext(formulaText: string, offset: number): boolean {
-    const char = formulaText[offset - 1];
-    const nextChar = formulaText[offset];
-    return Boolean(char && matchRefDrawToken(char) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET)));
-}
+export const getSequenceNodeCharAtOffset = getFormulaSequenceCharacterAtOffset;
+export { isFormulaReferenceAddingContext, isFormulaReferenceAddingTextContext };
 
 export function insertFormulaReferenceText(formulaText: string, refText: string, offset: number): string {
     return `${formulaText.slice(0, offset)}${refText}${formulaText.slice(offset)}`;

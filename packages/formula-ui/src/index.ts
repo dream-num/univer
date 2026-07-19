@@ -16,12 +16,22 @@
 
 export {
     buildFormulaTextRuns,
+    findFormulaStructuredReferences,
     getFormulaHighlightDataStream,
+    getFormulaReferenceIndex,
     getFormulaReplaceResult,
+    getFormulaSequenceCharacterAtOffset,
+    getFormulaSequenceNodeIndex,
+    isFormulaReferenceAddingContext,
+    isFormulaReferenceAddingTextContext,
+    resolveFormulaReferenceEditingContext,
     searchFormulaFunctions,
 } from './formula-editor-helpers';
 export type {
+    FormulaReferenceEditingMode,
     FormulaSequenceNode,
     IFormulaHighlightColors,
+    IFormulaReferenceEditingContext,
     IFormulaRefSelection,
+    IFormulaStructuredReferenceRange,
 } from './formula-editor-helpers';

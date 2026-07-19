@@ -66,7 +66,9 @@ export function dealWithSection(
 
         if (paragraphNode.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
             // Paragraph
-            if (ctx.paragraphsOpenNewPage.has(paragraphNode.endIndex)) {
+            // Opening the anchor paragraph on a new page is a one-shot relayout instruction.
+            // Keeping it would advance the paragraph by one more page on every dirty-layout retry.
+            if (ctx.paragraphsOpenNewPage.delete(paragraphNode.endIndex)) {
                 currentPageCache = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,

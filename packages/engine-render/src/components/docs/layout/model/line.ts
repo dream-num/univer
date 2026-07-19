@@ -161,7 +161,13 @@ export function calculateLineTopByDrawings(
     if (headerPage && headersDrawings) {
         headersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, absoluteLineTop);
+            const top = _getLineTopWidthWrapTopBottom(
+                transformedDrawing,
+                lineHeight,
+                absoluteLineTop,
+                columnLeft,
+                columnWidth
+            );
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -171,7 +177,13 @@ export function calculateLineTopByDrawings(
     if (footerPage && footersDrawings) {
         footersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, absoluteLineTop);
+            const top = _getLineTopWidthWrapTopBottom(
+                transformedDrawing,
+                lineHeight,
+                absoluteLineTop,
+                columnLeft,
+                columnWidth
+            );
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -179,7 +191,7 @@ export function calculateLineTopByDrawings(
     }
 
     pageSkeDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, absoluteLineTop);
+        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, absoluteLineTop, columnLeft, columnWidth);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
@@ -277,12 +289,27 @@ function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: num
     return top + height;
 }
 
-function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {
+function _getLineTopWidthWrapTopBottom(
+    drawing: IDocumentSkeletonDrawing,
+    lineHeight: number,
+    lineTop: number,
+    columnLeft: number,
+    columnWidth: number
+) {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
     const { layoutType, distT = 0, distB = 0 } = drawingOrigin;
 
     if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
         return;
+    }
+
+    if (columnWidth > 0) {
+        const bounds = angle === 0 ? { left: aLeft, width } : getBoundingBox(angle, aLeft, width, aTop, height);
+        const drawingLeft = bounds.left ?? aLeft;
+        const drawingRight = drawingLeft + (bounds.width ?? width);
+        if (drawingRight <= columnLeft || drawingLeft >= columnLeft + columnWidth) {
+            return;
+        }
     }
 
     // if (elementIndex && showElementIndex < elementIndex) {

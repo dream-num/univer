@@ -692,6 +692,51 @@ describe('doc skeleton', () => {
         expect(noNode).toBeUndefined();
     });
 
+    it('restores a truncated continuous section in place for incremental layout', () => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        body.page.pageHeight = 300;
+        body.section.top = 80;
+        body.section.height = 60;
+        body.section.colCount = 2;
+        const retainedColumn = body.section.columns[0];
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 200, height: 300 },
+                },
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+
+        (skeleton as any)._restoreContinuousSection(
+            body.page,
+            [
+                { width: 80, paddingEnd: 10 },
+                { width: 80, paddingEnd: 0 },
+            ],
+            ColumnSeparatorType.BETWEEN_EACH_COLUMN
+        );
+
+        expect(body.page.sections).toHaveLength(1);
+        expect(body.section.top).toBe(80);
+        expect(body.section.height).toBe(200);
+        expect(body.section.columns).toHaveLength(2);
+        expect(body.section.columns[0]).toBe(retainedColumn);
+        expect(body.section.columns[1].left).toBe(90);
+        expect(body.section.columns[1].parent).toBe(body.section);
+
+        (skeleton as any)._restoreContinuousSection(
+            body.page,
+            [
+                { width: 80, paddingEnd: 10 },
+                { width: 80, paddingEnd: 0 },
+            ],
+            ColumnSeparatorType.BETWEEN_EACH_COLUMN
+        );
+        expect(body.section.columns).toHaveLength(2);
+    });
+
     it('calculates real skeleton layout from document view model', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);

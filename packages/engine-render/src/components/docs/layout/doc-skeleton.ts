@@ -1365,7 +1365,11 @@ export class DocumentSkeleton extends Skeleton {
 
             if (sectionType === SectionType.CONTINUOUS && curSkeletonPage != null) {
                 updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
-                this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
+                if (layoutAnchor == null) {
+                    this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
+                } else {
+                    this._restoreContinuousSection(curSkeletonPage, columnProperties!, columnSeparatorType!);
+                }
                 isContinuous = true;
             } else if (layoutAnchor == null || curSkeletonPage == null) {
                 curSkeletonPage = createSkeletonPage(
@@ -1464,6 +1468,35 @@ export class DocumentSkeleton extends Skeleton {
         );
         newSection.parent = curSkeletonPage;
         sections.push(newSection);
+    }
+
+    private _restoreContinuousSection(
+        curSkeletonPage: IDocumentSkeletonPage,
+        columnProperties: ISectionColumnProperties[],
+        columnSeparatorType: ColumnSeparatorType
+    ) {
+        const section = curSkeletonPage.sections[curSkeletonPage.sections.length - 1];
+        if (section == null) {
+            return;
+        }
+
+        const pageContentWidth = curSkeletonPage.pageWidth - curSkeletonPage.marginLeft - curSkeletonPage.marginRight;
+        const pageContentHeight = curSkeletonPage.pageHeight - curSkeletonPage.marginTop - curSkeletonPage.marginBottom;
+        const restoredSection = createSkeletonSection(
+            columnProperties,
+            columnSeparatorType,
+            section.top,
+            0,
+            pageContentWidth,
+            pageContentHeight - section.top
+        );
+
+        for (const column of restoredSection.columns.slice(section.columns.length)) {
+            column.parent = section;
+            section.columns.push(column);
+        }
+        section.colCount = restoredSection.colCount;
+        section.height = restoredSection.height;
     }
 
     private _findNodeByIndex(charIndex: number, segmentId = '', segmentPageIndex = -1) {

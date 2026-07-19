@@ -121,6 +121,19 @@ describe('section', () => {
             expect(ctx.paragraphsOpenNewPage.has(paragraphEndIndex)).toBe(false);
         });
 
+        it('reuses an empty rollback page when opening the anchor paragraph', () => {
+            const { ctx, viewModel, sectionNode, curPage, sectionBreakConfig } =
+                createSectionLayoutTestBed(['Hello']);
+            const paragraphEndIndex = sectionNode.children[0].endIndex;
+            ctx.paragraphsOpenNewPage.add(paragraphEndIndex);
+
+            const result = dealWithSection(ctx, viewModel, sectionNode, curPage, sectionBreakConfig, null);
+
+            expect(result.pages).toHaveLength(1);
+            expect(result.pages[0].pageNumber).toBe(curPage.pageNumber);
+            expect(ctx.paragraphsOpenNewPage.has(paragraphEndIndex)).toBe(false);
+        });
+
         it('lays out column group blocks into page skeleton columns', () => {
             const dataStream = [
                 DataStreamTreeTokenType.COLUMN_GROUP_START,

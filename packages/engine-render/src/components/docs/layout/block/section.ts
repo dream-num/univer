@@ -68,7 +68,10 @@ export function dealWithSection(
             // Paragraph
             // Opening the anchor paragraph on a new page is a one-shot relayout instruction.
             // Keeping it would advance the paragraph by one more page on every dirty-layout retry.
-            if (ctx.paragraphsOpenNewPage.delete(paragraphNode.endIndex)) {
+            if (
+                ctx.paragraphsOpenNewPage.delete(paragraphNode.endIndex) &&
+                currentPageCache.sections.some((section) => section.columns.some((column) => column.lines.length > 0))
+            ) {
                 currentPageCache = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,

@@ -879,6 +879,52 @@ describe('linebreaking', () => {
             .toContain('ments without duplicating content in the body');
     });
 
+    it('relayouts an earlier column covered by a top-bottom drawing anchored in a later column', () => {
+        const content = `LEFT${DataStreamTreeTokenType.COLUMN_BREAK}${DataStreamTreeTokenType.CUSTOM_BLOCK}`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+            },
+            body: {
+                customBlocks: [{ startIndex: 5, blockId: 'cross-column-top-bottom' }],
+                customRanges: [{
+                    startIndex: 4,
+                    endIndex: 4,
+                    rangeId: 'cross-column-top-bottom-break',
+                    rangeType: 5,
+                    wholeEntity: true,
+                    properties: { docxBreakType: 'column' },
+                }],
+                sectionBreaks: [{
+                    sectionId: 'section_fixture_cross_column_top_bottom',
+                    startIndex: content.length + 1,
+                    columnProperties: [
+                        { width: 170, paddingEnd: 20 },
+                        { width: 170, paddingEnd: 0 },
+                    ],
+                }],
+            },
+            drawings: {
+                'cross-column-top-bottom': {
+                    drawingId: 'cross-column-top-bottom',
+                    layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 20 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        size: { width: 100, height: 96 },
+                    },
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        expect(ctx.isDirty).toBe(true);
+        expect(ctx.layoutStartPointer['']).toBe(paragraphNode.endIndex);
+    });
+
     it('starts normal text on a new flow line after a zero-width wrap-none floating anchor', () => {
         const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}Hello`;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {

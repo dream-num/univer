@@ -862,7 +862,7 @@ function _lineOperator(
     const blockAnchorTop = deferredTopBottomAnchorDrawings.length > 0 ? newLineTop : lineTop;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, blockAnchorTop, pDrawingAnchor);
     if (deferredTopBottomAnchorDrawings.length > 0) {
-        __updateAndPositionDrawings(ctx, newLineTop, lineHeight, column, deferredTopBottomAnchorDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, blockAnchorTop, paragraphAnchorLeft, true, true);
+        __updateAndPositionDrawings(ctx, newLineTop, lineHeight, column, deferredTopBottomAnchorDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, blockAnchorTop, paragraphAnchorLeft, false, true);
         __updateTopBottomCustomBlockFlowBottom(paragraphConfig, deferredTopBottomAnchorDrawings, section.top);
     }
 

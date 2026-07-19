@@ -547,6 +547,59 @@ describe('layout-ruler', () => {
         expect(ctx.paragraphsOpenNewPage.has(9)).toBe(false);
     });
 
+    it('does not mistake another continuous-section fragment for a new page', () => {
+        const cachedLine: any = { paragraphIndex: 1, top: 0, lineHeight: 20 };
+        const cachedColumn: any = { width: 100, left: 0, lines: [cachedLine] };
+        const cachedPage: any = {
+            pageNumber: 1,
+            segmentId: '',
+            skeDrawings: new Map([['floating', {}]]),
+            sections: [{ top: 20, columns: [cachedColumn] }],
+        };
+        cachedLine.parent = cachedColumn;
+        cachedColumn.parent = { top: 20, parent: cachedPage };
+        const page: any = {
+            pageNumber: 1,
+            segmentId: '',
+            sections: [{ columns: [] }],
+        };
+        const column: any = {
+            width: 100,
+            left: 0,
+            lines: [{ paragraphIndex: 2, top: 0, lineHeight: 20 }],
+            parent: { top: 20, parent: page },
+        };
+        page.sections[0].columns = [column];
+        const floatObject: any = {
+            id: 'floating',
+            top: 20,
+            left: 0,
+            width: 50,
+            height: 50,
+            angle: 0,
+            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+        };
+        const ctx: any = {
+            floatObjectsCache: new Map([['floating', { count: 1, floatObject, page: cachedPage }]]),
+            isDirty: false,
+            layoutStartPointer: { '': null },
+            paragraphsOpenNewPage: new Set(),
+        };
+
+        __testing.reLayoutCheck(ctx, [floatObject], column, 9);
+
+        expect(ctx.isDirty).toBe(false);
+        expect(ctx.floatObjectsCache.has('floating')).toBe(true);
+        expect(ctx.paragraphsOpenNewPage.has(9)).toBe(false);
+
+        page.pageNumber = 2;
+        __testing.reLayoutCheck(ctx, [floatObject], column, 9);
+
+        expect(ctx.isDirty).toBe(true);
+        expect(ctx.floatObjectsCache.has('floating')).toBe(false);
+        expect(ctx.paragraphsOpenNewPage.has(9)).toBe(true);
+    });
+
     it('does not dirty relayout for behind-doc floating objects', () => {
         const page: any = {
             segmentId: '',

@@ -1337,11 +1337,7 @@ function _reLayoutCheck(
         if (floatObjectCache.count >= FLOAT_OBJECT_RELAYOUT_LIMIT) {
             continue;
         }
-        // TODO: How to determine if drawing is on the same page???
-        const cachePageStartParagraphIndex = floatObjectCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
-        const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
-
-        if (floatObjectCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
+        if (floatObjectCache.page.pageNumber !== page.pageNumber) {
             floatObjectCache.page.skeDrawings.delete(floatObject.id);
             ctx.floatObjectsCache.delete(floatObject.id);
 

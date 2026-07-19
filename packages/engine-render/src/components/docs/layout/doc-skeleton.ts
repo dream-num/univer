@@ -1365,10 +1365,10 @@ export class DocumentSkeleton extends Skeleton {
 
             if (sectionType === SectionType.CONTINUOUS && curSkeletonPage != null) {
                 updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
-                if (layoutAnchor == null) {
-                    this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
-                } else {
+                if (layoutAnchor != null && layoutAnchor >= sectionNode.startIndex && layoutAnchor <= sectionNode.endIndex) {
                     this._restoreContinuousSection(curSkeletonPage, columnProperties!, columnSeparatorType!);
+                } else {
+                    this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 }
                 isContinuous = true;
             } else if (layoutAnchor == null || curSkeletonPage == null) {

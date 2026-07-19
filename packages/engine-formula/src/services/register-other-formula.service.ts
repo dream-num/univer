@@ -37,6 +37,7 @@ export enum OtherFormulaBizType {
     CONDITIONAL_FORMATTING = 'cf',
     DOC = 'doc',
     SLIDE = 'slide',
+    SHAPE = 'shape',
 }
 
 export class RegisterOtherFormulaService extends Disposable {

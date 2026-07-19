@@ -16,21 +16,21 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/vi-VN';
-import compatibility from './function-list/compatibility/vi-VN';
-import cube from './function-list/cube/vi-VN';
-import database from './function-list/database/vi-VN';
-import date from './function-list/date/vi-VN';
-import engineering from './function-list/engineering/vi-VN';
-import financial from './function-list/financial/vi-VN';
-import information from './function-list/information/vi-VN';
-import logical from './function-list/logical/vi-VN';
-import lookup from './function-list/lookup/vi-VN';
-import math from './function-list/math/vi-VN';
-import statistical from './function-list/statistical/vi-VN';
-import text from './function-list/text/vi-VN';
-import univer from './function-list/univer/vi-VN';
-import web from './function-list/web/vi-VN';
+import array from '@univerjs/formula/locale/function-list/array/vi-VN';
+import compatibility from '@univerjs/formula/locale/function-list/compatibility/vi-VN';
+import cube from '@univerjs/formula/locale/function-list/cube/vi-VN';
+import database from '@univerjs/formula/locale/function-list/database/vi-VN';
+import date from '@univerjs/formula/locale/function-list/date/vi-VN';
+import engineering from '@univerjs/formula/locale/function-list/engineering/vi-VN';
+import financial from '@univerjs/formula/locale/function-list/financial/vi-VN';
+import information from '@univerjs/formula/locale/function-list/information/vi-VN';
+import logical from '@univerjs/formula/locale/function-list/logical/vi-VN';
+import lookup from '@univerjs/formula/locale/function-list/lookup/vi-VN';
+import math from '@univerjs/formula/locale/function-list/math/vi-VN';
+import statistical from '@univerjs/formula/locale/function-list/statistical/vi-VN';
+import text from '@univerjs/formula/locale/function-list/text/vi-VN';
+import univer from '@univerjs/formula/locale/function-list/univer/vi-VN';
+import web from '@univerjs/formula/locale/function-list/web/vi-VN';
 
 const locale: typeof enUS = {
     'sheets-formula': {

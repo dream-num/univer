@@ -27,21 +27,21 @@ export { collectUnitQualifierFormulaPatches, UnitQualifierRenameController } fro
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 export { UpdateFormulaController } from './controllers/update-formula.controller';
 export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
-export { DescriptionService, IDescriptionService } from './services/description.service';
-export type { ISearchItem, ISearchItemWithType } from './services/description.service';
 export { FormulaCalculationSessionService } from './services/formula-calculation-session.service';
 export type { IFormulaCalculationSessionState } from './services/formula-calculation-session.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
-export type {
-    IRegisterAsyncFunction,
-    IRegisterFunction,
-    ISingleFunctionRegisterParams,
-} from './services/register-function.service';
-export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
-export { RegisterFunctionService } from './services/register-function.service';
-export { IRegisterFunctionService } from './services/register-function.service';
 export {
     IRemoteRegisterFunctionService,
     RemoteRegisterFunctionService,
 } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';
+export { DescriptionService, IDescriptionService } from '@univerjs/formula';
+export type { ISearchItem, ISearchItemWithType } from '@univerjs/formula';
+export type {
+    IRegisterAsyncFunction,
+    IRegisterFunction,
+    IRegisterFunctionParams,
+    ISingleFunctionRegisterParams,
+    IUnregisterFunctionParams,
+} from '@univerjs/formula';
+export { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/formula';

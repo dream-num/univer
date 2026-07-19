@@ -21,8 +21,12 @@ import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/she
 import type { INode } from './use-formula-token';
 import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    buildFormulaTextRuns,
+    getFormulaHighlightDataStream as getSharedFormulaHighlightDataStream,
+} from '@univerjs/formula-ui';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -300,14 +304,7 @@ export function createFormulaHighlightBody(dataStream: string, textRuns: ITextRu
 }
 
 export function getFormulaHighlightDataStream(leadingCharacter: string, sequenceNodes: Array<ISequenceNode | string>, sourceText?: string): string {
-    const text = sourceText ?? sequenceNodes.reduce((pre, cur) => {
-        if (typeof cur === 'string') {
-            return `${pre}${cur}`;
-        }
-        return `${pre}${cur.token}`;
-    }, '');
-
-    return `${leadingCharacter}${text}\r\n`;
+    return getSharedFormulaHighlightDataStream(leadingCharacter, sequenceNodes, sourceText);
 }
 
 interface IColorMap {
@@ -343,97 +340,6 @@ export function useColor(): IColorMap {
     return result;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function buildTextRuns(descriptionService: IDescriptionService, colorMap: IColorMap, sequenceNodes: Array<ISequenceNode | string>) {
-    const { formulaRefColors, numberColor, stringColor, plainTextColor } = colorMap;
-    const textRuns: ITextRun[] = [];
-    const refSelections: IRefSelection[] = [];
-    const themeColorMap = new Map<string, string>();
-    let refColorIndex = 0;
-
-    for (let i = 0, len = sequenceNodes.length; i < len; i++) {
-        const node = sequenceNodes[i];
-        if (typeof node === 'string') {
-            const theLastItem = textRuns[textRuns.length - 1];
-            const start = theLastItem ? (theLastItem.ed) : 0;
-            const end = start + node.length;
-            textRuns.push({
-                st: start,
-                ed: end,
-                ts: {
-                    cl: {
-                        rgb: plainTextColor,
-                    },
-                    fs: 11,
-                },
-            });
-            continue;
-        }
-        if (descriptionService.hasDefinedNameDescription(node.token.trim())) {
-            textRuns.push({
-                st: node.startIndex,
-                ed: node.endIndex + 1,
-                ts: {
-                    cl: {
-                        rgb: plainTextColor,
-                    },
-                    fs: 11,
-                },
-            });
-            continue;
-        }
-        const { startIndex, endIndex, nodeType, token } = node;
-        let themeColor = '';
-        if (nodeType === sequenceNodeType.REFERENCE) {
-            if (themeColorMap.has(token)) {
-                themeColor = themeColorMap.get(token)!;
-            } else {
-                const colorIndex = refColorIndex % formulaRefColors.length;
-                themeColor = formulaRefColors[colorIndex];
-                themeColorMap.set(token, themeColor);
-                refColorIndex++;
-            }
-
-            refSelections.push({
-                refIndex: i,
-                themeColor,
-                token,
-                startIndex: node.startIndex,
-                endIndex: node.endIndex,
-                index: refSelections.length,
-            });
-        } else if (nodeType === sequenceNodeType.NUMBER) {
-            themeColor = numberColor;
-        } else if (nodeType === sequenceNodeType.STRING) {
-            themeColor = stringColor;
-        } else if (nodeType === sequenceNodeType.ARRAY) {
-            themeColor = stringColor;
-        }
-
-        if (themeColor && themeColor.length > 0) {
-            textRuns.push({
-                st: startIndex,
-                ed: endIndex + 1,
-                ts: {
-                    cl: {
-                        rgb: themeColor,
-                    },
-                    fs: 11,
-                },
-            });
-        } else {
-            textRuns.push({
-                st: startIndex,
-                ed: endIndex + 1,
-                ts: {
-                    cl: {
-                        rgb: plainTextColor,
-                    },
-                    fs: 11,
-                },
-            });
-        }
-    }
-
-    return { textRuns, refSelections };
+    return buildFormulaTextRuns(descriptionService, colorMap, sequenceNodes);
 };

@@ -1080,7 +1080,7 @@ function _updateAndPositionTable(
     const { tableId, table } = firstUnPositionedTable;
     const { tableSource } = table;
 
-    if (firstUnPositionedTable.isSlideTable === false) {
+    if (firstUnPositionedTable.isSlideTable === false || tableSource.textWrap === TableTextWrapType.NONE) {
         switch (tableSource.textWrap) {
             case TableTextWrapType.NONE: {
                 table.top = section.top + lineTop;
@@ -1447,6 +1447,7 @@ export const __testing = {
     avoidFlowAffectingDrawingsForTable: __avoidFlowAffectingDrawingsForTable,
     isGlyphGroupBeyondDivideWidth,
     checkPageBreak: __checkPageBreak,
+    updateAndPositionTable: _updateAndPositionTable,
 };
 
 function _columnOperator(

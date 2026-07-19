@@ -239,8 +239,8 @@ export class SheetCellEditorResizeService extends Disposable {
         if (editorObject == null) {
             return;
         }
-        function pxToNum(width: string): number {
-            return Number.parseInt(width.replace('px', ''));
+        function pxToNum(size: string | undefined): number {
+            return Number.parseFloat(size?.replace('px', '') ?? '');
         }
 
         const engine = this.engine;
@@ -250,15 +250,23 @@ export class SheetCellEditorResizeService extends Disposable {
 
         // We should take the scale into account when canvas is scaled by CSS.
         const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+        const heightOfCanvas = pxToNum(canvasElement.style.height); // declared height
         const { width, height } = canvasClientRect; // real width affected by scale
-        const scaleAdjust = width / widthOfCanvas;
+        const contentElement = this._getEditorContentElement();
+        const contentBoundingRect = contentElement.getBoundingClientRect();
+        const contentScaleX = resolveElementScale(contentBoundingRect.width, contentElement.offsetWidth);
+        const contentScaleY = resolveElementScale(contentBoundingRect.height, contentElement.offsetHeight, contentScaleX);
+        const scaleAdjustX = width / widthOfCanvas / contentScaleX;
+        const scaleAdjustY = Number.isFinite(heightOfCanvas) && heightOfCanvas > 0
+            ? height / heightOfCanvas / contentScaleY
+            : scaleAdjustX;
         const { startX, startY, endX } = position;
         const enginWidth = engine.width;
 
-        const maxHeight = height - startY - EDITOR_BORDER_SIZE * 2;
+        const maxHeight = height / contentScaleY - startY - EDITOR_BORDER_SIZE * 2;
 
         const cellWidth = endX - startX;
-        let maxWidth = width - startX;
+        let maxWidth = width / contentScaleX - startX;
         if (horizontalAlign === HorizontalAlign.CENTER) {
             const rightGap = enginWidth - endX;
             const leftGap = startX;
@@ -272,7 +280,10 @@ export class SheetCellEditorResizeService extends Disposable {
         return {
             height: maxHeight,
             width: maxWidth,
-            scaleAdjust,
+            contentScaleX,
+            contentScaleY,
+            scaleAdjustX,
+            scaleAdjustY,
         };
     }
 
@@ -310,7 +321,7 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign)!;
 
-        const { height: clientHeight, width: clientWidth, scaleAdjust } = info;
+        const { height: clientHeight, width: clientWidth, contentScaleX, contentScaleY, scaleAdjustX, scaleAdjustY } = info;
 
         let physicHeight = editorHeight;
 
@@ -343,13 +354,13 @@ export class SheetCellEditorResizeService extends Disposable {
         const { scaleX: precisionScaleX, scaleY: precisionScaleY } = editorScene.getPrecisionScale();
 
         editorScene.transformByState({
-            width: editorWidth * scaleAdjust / scaleX,
-            height: editorHeight * scaleAdjust / scaleY,
-            scaleX: scaleX * scaleAdjust,
-            scaleY: scaleY * scaleAdjust,
+            width: editorWidth * scaleAdjustX / scaleX,
+            height: editorHeight * scaleAdjustY / scaleY,
+            scaleX: scaleX * scaleAdjustX,
+            scaleY: scaleY * scaleAdjustY,
         });
 
-        documentComponent.resize(editorWidth * scaleAdjust / scaleX, editorHeight * scaleAdjust / scaleY);
+        documentComponent.resize(editorWidth * scaleAdjustX / scaleX, editorHeight * scaleAdjustY / scaleY);
 
         /**
          * sometimes requestIdleCallback is invalid, so use setTimeout to ensure the successful execution of the resizeBySize method.
@@ -367,22 +378,22 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const contentBoundingRect = this._getEditorContentElement().getBoundingClientRect();
         const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
-        startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
+        startX = startX * scaleAdjustX + (canvasBoundingRect.left - contentBoundingRect.left) / contentScaleX;
+        startY = startY * scaleAdjustY + (canvasBoundingRect.top - contentBoundingRect.top) / contentScaleY;
 
         const cellWidth = actualRangeWithCoord.endX - actualRangeWithCoord.startX;
         if (horizontalAlign === HorizontalAlign.RIGHT) {
-            startX += (cellWidth - editorWidth) * scaleAdjust;
+            startX += (cellWidth - editorWidth) * scaleAdjustX;
         } else if (horizontalAlign === HorizontalAlign.CENTER) {
-            startX += (cellWidth - editorWidth * scaleAdjust) / 2;
+            startX += (cellWidth - editorWidth * scaleAdjustX) / 2;
         }
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
             startX,
             startY,
-            endX: editorWidth * scaleAdjust + startX,
-            endY: physicHeight * scaleAdjust + startY,
+            endX: editorWidth * scaleAdjustX + startX,
+            endY: physicHeight * scaleAdjustY + startY,
             show: true,
         });
     }
@@ -445,11 +456,11 @@ export class SheetCellEditorResizeService extends Disposable {
         const { horizontalAlign } = documentLayoutObject;
         const maxSize = this._getEditorMaxSize(position, canvasOffset, horizontalAlign);
         if (!maxSize) return;
-        const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
+        const { height: clientHeight, width: clientWidth, scaleAdjustX, scaleAdjustY } = maxSize;
 
         const cell = skeleton.getCellWithCoordByIndex(row, column);
-        const height = Math.min((cell.mergeInfo.endY - cell.mergeInfo.startY) * scaleY, clientHeight) * scaleAdjust;
-        const width = Math.min((cell.mergeInfo.endX - cell.mergeInfo.startX) * scaleX, clientWidth) * scaleAdjust;
+        const height = Math.min((cell.mergeInfo.endY - cell.mergeInfo.startY) * scaleY, clientHeight) * scaleAdjustY;
+        const width = Math.min((cell.mergeInfo.endX - cell.mergeInfo.startX) * scaleX, clientWidth) * scaleAdjustX;
         const currentHeight = state.endY! - state.startY!;
         const currentWidth = state.endX! - state.startX!;
 
@@ -471,4 +482,12 @@ export class SheetCellEditorResizeService extends Disposable {
     private _getEditorSkeleton() {
         return this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
     }
+}
+
+function resolveElementScale(renderedSize: number, layoutSize: number, fallback = 1): number {
+    if (!Number.isFinite(renderedSize) || !Number.isFinite(layoutSize) || renderedSize <= 0 || layoutSize <= 0) {
+        return fallback;
+    }
+
+    return renderedSize / layoutSize;
 }

@@ -204,6 +204,10 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionCheckUIController],
         ] as Dependency[], this._config.override));
+
+        // A sheet renderer can be created before Ready when another sheet-type plugin
+        // eagerly resolves SheetsRenderService during Starting.
+        this._registerRenderBasics();
     }
 
     override onReady(): void {
@@ -214,8 +218,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         registerDependencies(this._injector, [
             [SheetClipboardController],
         ]);
-
-        this._registerRenderBasics();
 
         touchDependencies(this._injector, [
             [SheetUIController],

@@ -1,0 +1,60 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { ICommand, IRange } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, IIconSet } from '@univerjs/sheets-conditional-formatting';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddConditionalRuleMutation, CFRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
+
+interface IAddIconSetConditionalRuleParams {
+    ranges?: IRange[];
+    stopIfTrue?: boolean;
+    config: IIconSet['config'];
+    isShowValue: IIconSet['isShowValue'];
+}
+
+export const AddIconSetConditionalRuleCommand: ICommand<IAddIconSetConditionalRuleParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.add-icon-set-conditional-rule',
+    handler(accessor, params) {
+        if (!params) return false;
+
+        const ranges = params.ranges ?? accessor.get(SheetsSelectionsService).getCurrentSelections().map((selection) => selection.range);
+        if (!ranges.length) return false;
+
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
+        const rule: IConditionFormattingRule = {
+            ranges,
+            cfId: accessor.get(ConditionalFormattingRuleModel).createCfId(unitId, subUnitId),
+            stopIfTrue: !!params.stopIfTrue,
+            rule: {
+                type: CFRuleType.iconSet,
+                config: params.config,
+                isShowValue: params.isShowValue,
+            },
+        };
+
+        return accessor.get(ICommandService).executeCommand(AddConditionalRuleMutation.id, {
+            unitId,
+            subUnitId,
+            rule,
+        } as IAddConditionalRuleMutationParams);
+    },
+};

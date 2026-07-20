@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Aplicar un preajuste:',
             editDropdown: 'Editar opciones',
             clearDropdown: 'Borrar lista desplegable',
+            dateTime: 'Fecha y hora',
             presets: {
                 yes: 'Sí',
                 no: 'No',

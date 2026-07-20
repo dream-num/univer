@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Vorlage anwenden:',
             editDropdown: 'Optionen bearbeiten',
             clearDropdown: 'Dropdown löschen',
+            dateTime: 'Datum und Uhrzeit',
             presets: {
                 yes: 'Ja',
                 no: 'Nein',

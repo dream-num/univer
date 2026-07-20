@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'اعمال یک پیش‌تنظیم:',
             editDropdown: 'ویرایش گزینه‌ها',
             clearDropdown: 'پاک کردن فهرست کشویی',
+            dateTime: 'تاریخ و زمان',
             presets: {
                 yes: 'بله',
                 no: 'خیر',

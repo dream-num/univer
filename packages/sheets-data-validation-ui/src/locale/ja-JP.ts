@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'プリセットを適用:',
             editDropdown: 'オプションを編集',
             clearDropdown: 'プルダウンをクリア',
+            dateTime: '日付と時刻',
             presets: {
                 yes: 'はい',
                 no: 'いいえ',

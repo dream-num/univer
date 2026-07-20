@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Terapkan preset:',
             editDropdown: 'Edit opsi',
             clearDropdown: 'Hapus Dropdown',
+            dateTime: 'Tanggal dan waktu',
             presets: {
                 yes: 'Ya',
                 no: 'Tidak',

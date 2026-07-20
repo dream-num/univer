@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Применить шаблон:',
             editDropdown: 'Изменить варианты',
             clearDropdown: 'Очистить раскрывающийся список',
+            dateTime: 'Дата и время',
             presets: {
                 yes: 'Да',
                 no: 'Нет',

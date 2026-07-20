@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'تطبيق إعداد مسبق:',
             editDropdown: 'تحرير الخيارات',
             clearDropdown: 'مسح القائمة المنسدلة',
+            dateTime: 'التاريخ والوقت',
             presets: {
                 yes: 'نعم',
                 no: 'لا',

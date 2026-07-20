@@ -21,8 +21,9 @@ import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceT
 import { borderBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
-import { ISidebarService, useDependency, useVirtualList } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ISidebarService, useDependency, useObservable, useVirtualList } from '@univerjs/ui';
+import { useEffect, useMemo, useRef } from 'react';
+import { map, startWith } from 'rxjs';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
 
@@ -45,17 +46,12 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
         return [];
     };
 
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(() => getDefinedNameMap());
-
-    useEffect(() => {
-        const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
-            setDefinedNames(getDefinedNameMap());
-        });
-
-        return () => {
-            definedNamesSubscription.unsubscribe();
-        };
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
+    const definedNames = useObservable(
+        () => definedNamesService.update$.pipe(map(getDefinedNameMap), startWith(getDefinedNameMap())),
+        getDefinedNameMap(),
+        false,
+        [definedNamesService, unitId]
+    );
 
     // When closing the panel, clear the react cache
     useEffect(() => {

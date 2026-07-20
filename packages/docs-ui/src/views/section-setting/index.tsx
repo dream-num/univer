@@ -15,16 +15,14 @@
  */
 
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
+import { generateRandomId, ICommandService } from '@univerjs/core';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { SectionSetting } from './Setting';
 
 export function SectionSettingIndex() {
     const commandService = useDependency(ICommandService);
-    const localeService = useDependency(LocaleService);
-    useObservable(localeService.currentLocale$);
     const [key, setKey] = useState(() => generateRandomId(4));
 
     useEffect(() => {

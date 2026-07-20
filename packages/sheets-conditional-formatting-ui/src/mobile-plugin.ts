@@ -31,6 +31,7 @@ import { AddAverageCfCommand } from './commands/commands/add-average-cf.command'
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
 import { AddDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
+import { AddIconSetConditionalRuleCommand } from './commands/commands/add-icon-set-cf.command';
 import { AddNumberCfCommand } from './commands/commands/add-number-cf.command';
 import { AddRankCfCommand } from './commands/commands/add-rank-cf.command';
 import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
@@ -84,6 +85,7 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
             AddAverageCfCommand,
             AddColorScaleConditionalRuleCommand,
             AddDataBarConditionalRuleCommand,
+            AddIconSetConditionalRuleCommand,
             AddDuplicateValuesCfCommand,
             AddNumberCfCommand,
             AddRankCfCommand,

@@ -17,6 +17,23 @@
 const locale = {
     'sheets-data-validation-ui': {
         title: 'Data validation',
+        ribbon: {
+            setCheckbox: 'Set Checkbox',
+            clearCheckbox: 'Clear Checkbox',
+            dropdownPresetTitle: 'Apply a preset:',
+            editDropdown: 'Edit options',
+            clearDropdown: 'Clear Dropdown',
+            dateTime: 'Date & Time',
+            presets: {
+                yes: 'Yes',
+                no: 'No',
+                notStarted: 'Not Started',
+                inProgress: 'In Progress',
+                completed: 'Completed',
+                option1: 'Option 1',
+                option2: 'Option 2',
+            },
+        },
         operators: {
             legal: 'is legal type',
         },

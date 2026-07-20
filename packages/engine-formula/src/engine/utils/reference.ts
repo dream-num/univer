@@ -198,11 +198,11 @@ export function singleReferenceToGrid(refBody: string) {
 
 export function handleRefStringInfo(refString: string) {
     const unitIdMatch = UNIT_NAME_REGEX_PRECOMPILING.exec(refString);
-    let unitId = '';
+    let unitQualifier = '';
 
     if (unitIdMatch != null) {
-        unitId = unitIdMatch[0].trim();
-        unitId = unquoteSheetName(unitId.slice(1, unitId.length - 1));
+        unitQualifier = unitIdMatch[0].trim();
+        unitQualifier = unquoteSheetName(unitQualifier.slice(1, unitQualifier.length - 1));
         refString = refString.replace(UNIT_NAME_REGEX_PRECOMPILING, '');
     }
 
@@ -224,12 +224,14 @@ export function handleRefStringInfo(refString: string) {
     return {
         refBody,
         sheetName,
-        unitId,
+        unitQualifier,
+        /** @deprecated Use unitQualifier. Kept for reference-grid compatibility. */
+        unitId: unitQualifier,
     };
 }
 
 export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
-    const { refBody, sheetName, unitId } = handleRefStringInfo(refString);
+    const { refBody, sheetName, unitQualifier } = handleRefStringInfo(refString);
 
     const colonIndex = refBody.indexOf(':');
 
@@ -248,7 +250,7 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
         };
 
         return {
-            unitId,
+            unitId: unitQualifier,
             sheetName,
             range,
         };
@@ -275,7 +277,7 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
     }
 
     return {
-        unitId,
+        unitId: unitQualifier,
         sheetName,
         range: {
             startRow,
@@ -477,12 +479,55 @@ function startsWithNonAlphabetic(name: string) {
 }
 
 export function splitTableStructuredRef(ref: string) {
-    const idx = ref.indexOf('[');
+    let unitQualifier = '';
+    let tableRef = ref.trim();
+    let quoteOpen = false;
+    let bracketDepth = 0;
+    let qualifierEnd = -1;
+
+    for (let i = 0; i < tableRef.length; i++) {
+        const char = tableRef[i];
+        if (char === "'") {
+            if (quoteOpen && tableRef[i + 1] === "'") {
+                i++;
+                continue;
+            }
+            quoteOpen = !quoteOpen;
+        } else if (!quoteOpen && char === '[') {
+            bracketDepth++;
+        } else if (!quoteOpen && char === ']') {
+            bracketDepth--;
+        } else if (!quoteOpen && bracketDepth === 0 && char === '!') {
+            qualifierEnd = i;
+            break;
+        }
+    }
+
+    if (qualifierEnd >= 0) {
+        unitQualifier = tableRef.slice(0, qualifierEnd).trim();
+        tableRef = tableRef.slice(qualifierEnd + 1);
+        if (unitQualifier.startsWith("'") && unitQualifier.endsWith("'")) {
+            unitQualifier = unitQualifier.slice(1, -1);
+        }
+        if (unitQualifier.startsWith('[') && unitQualifier.endsWith(']')) {
+            unitQualifier = unitQualifier.slice(1, -1);
+        }
+        unitQualifier = unquoteSheetName(unitQualifier);
+    } else if (tableRef.startsWith('[')) {
+        const legacyQualifierEnd = tableRef.indexOf(']');
+        if (legacyQualifierEnd > 0) {
+            unitQualifier = unquoteSheetName(tableRef.slice(1, legacyQualifierEnd));
+            tableRef = tableRef.slice(legacyQualifierEnd + 1);
+        }
+    }
+
+    const idx = tableRef.indexOf('[');
     if (idx === -1) {
-        return { tableName: ref, struct: '' };
+        return { unitQualifier, tableName: tableRef, columnStruct: '' };
     }
     return {
-        tableName: ref.slice(0, idx),
-        columnStruct: ref.slice(idx), // include [[...]]
+        unitQualifier,
+        tableName: tableRef.slice(0, idx),
+        columnStruct: tableRef.slice(idx), // include [[...]]
     };
 }

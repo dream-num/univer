@@ -21,4 +21,4 @@ export * from './HeadingItem';
 
 export { useScrollYOverContainer } from './hooks/layout';
 
-export { type ISliderProps, Slider } from './slider/index';
+export { type ISliderProps, type IZoomInputProps, Slider, ZoomInput } from './slider/index';

@@ -20,12 +20,13 @@ import type { IUniverUIConfig } from '../../config/config';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render } from '@univerjs/design';
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { map } from 'rxjs';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
-import { connectInjector, useDependency } from '../../utils/di';
+import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
@@ -99,22 +100,14 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         };
     }, []);
 
-    const [darkMode, setDarkMode] = useState<boolean>(false);
+    const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
     useLayoutEffect(() => {
-        const sub = themeService.darkMode$.subscribe((darkMode) => {
-            setDarkMode(darkMode);
-
-            if (darkMode) {
-                document.documentElement.classList.add('univer-dark');
-            } else {
-                document.documentElement.classList.remove('univer-dark');
-            }
-        });
-
-        return () => {
-            sub.unsubscribe();
-        };
-    }, []);
+        if (darkMode) {
+            document.documentElement.classList.add('univer-dark');
+        } else {
+            document.documentElement.classList.remove('univer-dark');
+        }
+    }, [darkMode]);
 
     useEffect(() => {
         if (contentRef.current) {
@@ -122,8 +115,13 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         }
     }, [onRendered]);
 
-    const [locale, setLocale] = useState(() => localeService.getLocales());
-    const [direction, setDirection] = useState(() => localeService.getDirection());
+    const locale = useObservable(
+        () => localeService.localeChanged$.pipe(map(() => localeService.getLocales())),
+        localeService.getLocales(),
+        false,
+        [localeService]
+    );
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -131,23 +129,10 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     useEffect(() => {
         document.body.appendChild(portalContainer);
 
-        const subscriptions = [
-            localeService.localeChanged$.subscribe(() => {
-                setLocale(localeService.getLocales());
-            }),
-            localeService.direction$.subscribe(() => {
-                setDirection(localeService.getDirection());
-            }),
-        ];
-
         return () => {
-            // batch unsubscribe
-            subscriptions.forEach((subscription) => subscription.unsubscribe());
-
-            // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, mountContainer, portalContainer]);
+    }, [mountContainer, portalContainer]);
 
     useEffect(() => {
         portalContainer.dir = direction;

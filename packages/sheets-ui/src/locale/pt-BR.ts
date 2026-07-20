@@ -68,7 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Mais',
             toggleGridlines: 'Mostrar/Ocultar linhas de grade',
-            textToNumber: 'Texto para número',
+            fullscreen: 'Tela cheia',
         },
         align: {
             left: 'esquerda',

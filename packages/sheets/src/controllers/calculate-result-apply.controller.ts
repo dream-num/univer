@@ -48,6 +48,10 @@ export class CalculateResultApplyController extends Disposable {
 
                 for (let i = 0; i < unitIds.length; i++) {
                     const unitId = unitIds[i];
+                    const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+                    if (!workbook) {
+                        continue;
+                    }
                     const sheetData = unitData[unitId];
 
                     if (sheetData == null) {
@@ -61,6 +65,10 @@ export class CalculateResultApplyController extends Disposable {
                         const cellData = sheetData[sheetId];
 
                         if (cellData == null) {
+                            continue;
+                        }
+
+                        if (!workbook.getSheetBySheetId(sheetId)) {
                             continue;
                         }
 

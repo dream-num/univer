@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Validació de dades',
+        ribbon: {
+            setCheckbox: 'Defineix la casella de selecció',
+            clearCheckbox: 'Esborra la casella de selecció',
+            dropdownPresetTitle: 'Aplica una predefinició:',
+            editDropdown: 'Edita les opcions',
+            clearDropdown: 'Esborra el menú desplegable',
+            dateTime: 'Data i hora',
+            presets: {
+                yes: 'Sí',
+                no: 'No',
+                notStarted: 'No iniciat',
+                inProgress: 'En curs',
+                completed: 'Completat',
+                option1: 'Opció 1',
+                option2: 'Opció 2',
+            },
+        },
         operators: {
             legal: 'és tipus legal',
         },

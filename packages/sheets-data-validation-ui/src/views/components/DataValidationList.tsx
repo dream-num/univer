@@ -27,7 +27,7 @@ import {
     SheetDataValidationModel,
 } from '@univerjs/sheets-data-validation';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { filter, map, startWith } from 'rxjs';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import { DataValidationItem } from './DataValidationItem';
 
@@ -38,26 +38,21 @@ export function DataValidationList(props: { workbook: Workbook }) {
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const localeService = useDependency(LocaleService);
-    const [rules, setRules] = useState<ISheetDataValidationRule[]>([]);
-
     const { workbook } = props;
     const worksheet = useObservable(workbook.activeSheet$, undefined, true)!;
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet?.getSheetId();
 
-    useEffect(() => {
-        setRules(sheetDataValidationModel.getRules(unitId, subUnitId));
-
-        const subscription = sheetDataValidationModel.ruleChange$.subscribe((change) => {
-            if (change.unitId === unitId && change.subUnitId === subUnitId) {
-                setRules(sheetDataValidationModel.getRules(unitId, subUnitId));
-            }
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [unitId, subUnitId, sheetDataValidationModel]);
+    const rules = useObservable(
+        () => sheetDataValidationModel.ruleChange$.pipe(
+            filter((change) => change.unitId === unitId && change.subUnitId === subUnitId),
+            map(() => sheetDataValidationModel.getRules(unitId, subUnitId)),
+            startWith(sheetDataValidationModel.getRules(unitId, subUnitId))
+        ),
+        [],
+        false,
+        [sheetDataValidationModel, subUnitId, unitId]
+    );
 
     const handleAddRule = async () => {
         const rule = createDefaultNewRule(injector);

@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: '数据验证',
+        ribbon: {
+            setCheckbox: '设置复选框',
+            clearCheckbox: '清除复选框',
+            dropdownPresetTitle: '应用预设：',
+            editDropdown: '编辑选项',
+            clearDropdown: '清除下拉菜单',
+            dateTime: '日期时间',
+            presets: {
+                yes: '是',
+                no: '否',
+                notStarted: '未开始',
+                inProgress: '进行中',
+                completed: '已完成',
+                option1: '选项 1',
+                option2: '选项 2',
+            },
+        },
         operators: {
             legal: '是合法类型',
         },

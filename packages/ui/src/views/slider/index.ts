@@ -15,3 +15,4 @@
  */
 
 export { type ISliderProps, Slider } from './Slider';
+export { type IZoomInputProps, ZoomInput } from './ZoomInput';

@@ -68,7 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Lainnya',
             toggleGridlines: 'Alihkan garis kisi',
-            textToNumber: 'Teks ke angka',
+            fullscreen: 'Layar penuh',
         },
         align: {
             left: 'kiri',

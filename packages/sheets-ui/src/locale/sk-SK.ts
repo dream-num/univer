@@ -68,7 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Viac',
             toggleGridlines: 'Prepnúť mriežku',
-            textToNumber: 'Text na číslo',
+            fullscreen: 'Celá obrazovka',
         },
         align: {
             left: 'vľavo',

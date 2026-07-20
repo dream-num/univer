@@ -37,6 +37,7 @@ import { FormulaController } from './controllers/formula.controller';
 import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import { SuperTableController } from './controllers/super-table.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
+import { UnitQualifierRenameController } from './controllers/unit-qualifier-rename.controller';
 import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
@@ -118,6 +119,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateDefinedNameController],
             [SuperTableController],
             [FormulaAutoFillController],
+            [UnitQualifierRenameController],
         ];
 
         // If the plugin do not execute formula, it should delegate a remote proxy.
@@ -141,6 +143,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [UpdateDefinedNameController],
             [FormulaAutoFillController],
+            [UnitQualifierRenameController],
         ]);
 
         // There is no rendering in the nodejs environment, so initialize it here

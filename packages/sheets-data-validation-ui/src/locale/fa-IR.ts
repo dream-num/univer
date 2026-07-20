@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'اعتبارسنجی داده',
+        ribbon: {
+            setCheckbox: 'تنظیم کادر انتخاب',
+            clearCheckbox: 'پاک کردن کادر انتخاب',
+            dropdownPresetTitle: 'اعمال یک پیش‌تنظیم:',
+            editDropdown: 'ویرایش گزینه‌ها',
+            clearDropdown: 'پاک کردن فهرست کشویی',
+            dateTime: 'تاریخ و زمان',
+            presets: {
+                yes: 'بله',
+                no: 'خیر',
+                notStarted: 'شروع نشده',
+                inProgress: 'در حال انجام',
+                completed: 'تکمیل‌شده',
+                option1: 'گزینه ۱',
+                option2: 'گزینه ۲',
+            },
+        },
         operators: {
             legal: 'نوع قانونی است',
         },

@@ -34,6 +34,7 @@ import {
     CheckMarkIcon,
     ClearFormatDoubleIcon,
     CodeIcon,
+    ConvertToNumberIcon,
     CopyDoubleIcon,
     CutIcon,
     DeleteCellShiftLeftDoubleIcon,
@@ -51,7 +52,7 @@ import {
     FreezeRowIcon,
     FreezeToSelectedIcon,
     HideDoubleIcon,
-    HideGridlinesDoubleIcon,
+    HideGridlinesIcon,
     HorizontalBorderDoubleIcon,
     HorizontallyIcon,
     HorizontalMergeIcon,
@@ -78,7 +79,6 @@ import {
     OverflowIcon,
     PaintBucketDoubleIcon,
     PasteSpecialDoubleIcon,
-    PipingIcon,
     ProtectIcon,
     ReduceDoubleIcon,
     RightBorderDoubleIcon,
@@ -123,6 +123,7 @@ import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../views/menu-item-inp
 import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../views/permission';
 import { AlertDialog } from '../views/permission/AlertDialog';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../views/permission/error-msg-dialog/interface';
+import { SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput } from '../views/sheet-slider/SheetZoomInput';
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -173,6 +174,7 @@ export class ComponentsController extends Disposable {
         // init custom components
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
         this.disposeWithMe(componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
+        this.disposeWithMe(componentManager.register(SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
@@ -208,6 +210,7 @@ export class ComponentsController extends Disposable {
             CancelMergeIcon,
             ClearFormatDoubleIcon,
             CodeIcon,
+            ConvertToNumberIcon,
             CopyDoubleIcon,
             CutIcon,
             DeleteCellShiftLeftDoubleIcon,
@@ -224,7 +227,7 @@ export class ComponentsController extends Disposable {
             FreezeRowIcon,
             FreezeToSelectedIcon,
             HideDoubleIcon,
-            HideGridlinesDoubleIcon,
+            HideGridlinesIcon,
             HorizontalBorderDoubleIcon,
             HorizontalMergeIcon,
             HorizontallyIcon,
@@ -251,7 +254,6 @@ export class ComponentsController extends Disposable {
             OverflowIcon,
             PaintBucketDoubleIcon,
             PasteSpecialDoubleIcon,
-            PipingIcon,
             ProtectIcon,
             ReduceDoubleIcon,
             RightBorderDoubleIcon,
@@ -260,8 +262,8 @@ export class ComponentsController extends Disposable {
             RightJustifyingIcon,
             RightRotationFortyFiveDegreesIcon,
             RightRotationNinetyDegreesIcon,
-            SlashDoubleIcon,
             ShrinkToFitIcon,
+            SlashDoubleIcon,
             StrikethroughIcon,
             SubscriptIcon,
             SuperscriptIcon,

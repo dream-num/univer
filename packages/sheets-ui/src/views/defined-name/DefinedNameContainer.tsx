@@ -32,8 +32,9 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { useDependency, useVirtualList } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useDependency, useObservable, useVirtualList } from '@univerjs/ui';
+import { useRef, useState } from 'react';
+import { map, startWith } from 'rxjs';
 import { DefinedNameInput } from './DefinedNameInput';
 
 export const DefinedNameContainer = () => {
@@ -59,10 +60,14 @@ export const DefinedNameContainer = () => {
     };
 
     const [editState, setEditState] = useState(false);
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>([]);
+    const definedNames = useObservable(
+        () => definedNamesService.update$.pipe(map(getDefinedNameMap), startWith(getDefinedNameMap())),
+        getDefinedNameMap(),
+        false,
+        [definedNamesService, unitId]
+    );
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
     const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
-    const [permissionCheckVersion, setPermissionCheckVersion] = useState(0);
 
     const listContainerRef = useRef<HTMLDivElement>(undefined!);
     const [virtualDefinedNames, virtualActions] = useVirtualList(definedNames, {
@@ -76,54 +81,49 @@ export const DefinedNameContainer = () => {
         overscan: 6,
     });
 
-    useEffect(() => {
-        setDefinedNames(getDefinedNameMap());
+    const resolvePermissionState = () => {
+        if (!unitId) {
+            return { workbook: false, worksheets: new Map<string, boolean>() };
+        }
 
-        const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
-            setDefinedNames(getDefinedNameMap());
-        });
-
-        return () => {
-            definedNamesSubscription.unsubscribe();
+        return {
+            workbook: sheetPermissionCheckController.permissionCheckWithoutRange(
+                { workbookTypes: [WorkbookEditablePermission] },
+                unitId
+            ),
+            worksheets: new Map(definedNames.map((definedName) => [
+                definedName.id,
+                !definedName.localSheetId || definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME
+                    ? sheetPermissionCheckController.permissionCheckWithoutRange(
+                        { workbookTypes: [WorkbookEditablePermission] },
+                        unitId
+                    )
+                    : sheetPermissionCheckController.permissionCheckWithoutRange(
+                        { worksheetTypes: [WorksheetEditPermission] },
+                        unitId,
+                        definedName.localSheetId
+                    ),
+            ])),
         };
-    }, []);
-
-    // permission point update may cause the permission check result to change, so we need to update the component when permission point update happens
-    useEffect(() => {
-        const permissionSubscription = permissionService.permissionPointUpdate$.subscribe(() => {
-            setPermissionCheckVersion((v) => v + 1);
-        });
-
-        return () => {
-            permissionSubscription.unsubscribe();
-        };
-    }, [permissionService]);
+    };
+    const permissionState = useObservable(
+        () => permissionService.permissionPointUpdate$.pipe(
+            map(resolvePermissionState),
+            startWith(resolvePermissionState())
+        ),
+        resolvePermissionState(),
+        false,
+        [definedNames, permissionService, sheetPermissionCheckController, unitId]
+    );
 
     if (!workbook || !unitId) {
         return;
     }
 
     // check defined name permission
-    const checkWorkbookPermission = sheetPermissionCheckController.permissionCheckWithoutRange(
-        {
-            workbookTypes: [WorkbookEditablePermission],
-        },
-        unitId
-    );
+    const checkWorkbookPermission = permissionState.workbook;
     const checkDefinedNamePermission = (definedName: IDefinedNamesServiceParam): boolean => {
-        const { localSheetId } = definedName;
-
-        if (!localSheetId || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME) {
-            return checkWorkbookPermission;
-        }
-
-        return sheetPermissionCheckController.permissionCheckWithoutRange(
-            {
-                worksheetTypes: [WorksheetEditPermission],
-            },
-            unitId,
-            localSheetId
-        );
+        return permissionState.worksheets.get(definedName.id) ?? checkWorkbookPermission;
     };
 
     const insertConfirm = (param: IDefinedNamesServiceParam) => {

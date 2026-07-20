@@ -29,7 +29,7 @@ import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName }
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
+import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -1565,29 +1565,21 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 }
 
 function useContextGroupHiddenStates(menuSchemas: IMenuSchema[]) {
-    const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
-
-    useEffect(() => {
-        const subscriptions = menuSchemas.map((menuSchema) => {
-            if (!menuSchema.children?.length) {
-                return null;
-            }
-
-            const hiddenObservables = menuSchema.children.map((childSchema) => childSchema.item?.hidden$ ?? of(false));
-            return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
-                const isAllHidden = hiddenValues.every((hidden) => hidden === true);
-                setHiddenStates((state) => ({
-                    ...state,
-                    [menuSchema.key]: isAllHidden,
-                }));
-            });
+    const hiddenStates$ = useMemo(() => {
+        const groupStates = menuSchemas.flatMap((menuSchema) => {
+            const hiddenObservables = menuSchema.children?.map((childSchema) => childSchema.item?.hidden$ ?? of(false)) ?? [];
+            return hiddenObservables.length
+                ? [combineLatest(hiddenObservables).pipe(map((values) => [menuSchema.key, values.every(Boolean)] as const))]
+                : [];
         });
 
-        return () => {
-            subscriptions.forEach((subscription) => subscription?.unsubscribe());
-            setHiddenStates({});
-        };
+        return groupStates.length
+            ? merge(...groupStates).pipe(
+                scan((states, [key, hidden]) => ({ ...states, [key]: hidden }), {} as Record<string, boolean>),
+                startWith({})
+            )
+            : of({});
     }, [menuSchemas]);
 
-    return hiddenStates;
+    return useObservable<Record<string, boolean>>(hiddenStates$, {});
 }

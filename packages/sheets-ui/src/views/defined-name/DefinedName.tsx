@@ -45,8 +45,9 @@ import {
     SheetsSelectionsService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
-import { ILayoutService, useDependency } from '@univerjs/ui';
+import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import { map, startWith } from 'rxjs';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
 import { genNormalSelectionStyle } from '../../services/selection/const';
 import {
@@ -122,17 +123,12 @@ export function DefinedName({ disable }: { disable: boolean }) {
         });
     };
 
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(() => getDefinedNameMap());
-
-    useEffect(() => {
-        const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
-            setDefinedNames(getDefinedNameMap());
-        });
-
-        return () => {
-            definedNamesSubscription.unsubscribe();
-        };
-    }, []);
+    const definedNames = useObservable(
+        () => definedNamesService.update$.pipe(map(getDefinedNameMap), startWith(getDefinedNameMap())),
+        getDefinedNameMap(),
+        false,
+        [definedNamesService, unitId]
+    );
 
     useEffect(() => {
         const subscription = definedNamesService.currentRange$.subscribe(() => {

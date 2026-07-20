@@ -43,7 +43,7 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
         id: ToggleGridlinesCommand.id,
         type: MenuItemType.BUTTON,
         tooltip: 'sheets-ui.toolbar.toggleGridlines',
-        icon: 'HideGridlinesDoubleIcon',
+        icon: 'HideGridlinesIcon',
         activated$: new Observable<boolean>((observer) => {
             const getValue = () => {
                 const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);

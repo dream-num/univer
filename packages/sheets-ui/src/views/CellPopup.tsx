@@ -18,7 +18,7 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopupWithExtraProps } from '@univerjs/ui';
 import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
-import { filter } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { CellPopupManagerService } from '../services/cell-popup-manager.service';
 
 export const CellPopup = (props: { popup: IPopupWithExtraProps<ISheetLocationBase & { direction: 'horizontal' | 'vertical' }> }) => {
@@ -26,12 +26,13 @@ export const CellPopup = (props: { popup: IPopupWithExtraProps<ISheetLocationBas
     const location = popup.extraProps;
     const { row, col, direction, unitId, subUnitId } = location;
     const cellPopupManagerService = useDependency(CellPopupManagerService);
-    useObservable(
+    const popups = useObservable(
         useMemo(() => cellPopupManagerService.change$.pipe(
-            filter((change) => change.row === row && change.col === col && change.direction === direction)
-        ), [cellPopupManagerService, row, col, direction])
+            filter((change) => change.row === row && change.col === col && change.direction === direction),
+            map(() => cellPopupManagerService.getPopups(unitId, subUnitId, row, col, direction))
+        ), [cellPopupManagerService, col, direction, row, subUnitId, unitId]),
+        cellPopupManagerService.getPopups(unitId, subUnitId, row, col, direction)
     );
-    const popups = cellPopupManagerService.getPopups(unitId, subUnitId, row, col, direction);
     const componentManager = useDependency(ComponentManager);
 
     return (

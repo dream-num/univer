@@ -25,6 +25,7 @@ import type {
     Nullable,
     ObjectMatrix,
     Styles,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { sequenceNodeType } from '../engine/utils/sequence';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
@@ -90,6 +91,18 @@ export interface IRuntimeOtherUnitDataType {
 
 export interface IUnitSheetNameMap {
     [unitId: string]: Nullable<{ [sheetName: string]: string }>;
+}
+
+export type FormulaUnitType = UniverInstanceType.UNIVER_SHEET | UniverInstanceType.UNIVER_BASE;
+
+export interface IFormulaUnitNameMapItem {
+    name: string;
+    unitType: FormulaUnitType;
+}
+
+/** Runtime Unit metadata keyed by stable unitId. */
+export interface IFormulaUnitNameMap {
+    [unitId: string]: IFormulaUnitNameMapItem;
 }
 
 export interface IUnitSheetIdToNameMap {
@@ -194,6 +207,11 @@ export interface ISuperTable {
     sheetId: string;
     titleMap: Map<string, number>;
     range: IRange;
+    /**
+     * Whether the projected range contains a physical header row.
+     * Sheet tables default to true; Base virtual tables store records from row 0.
+     */
+    showHeader?: boolean;
 }
 
 export enum TableOptionType {
@@ -228,6 +246,7 @@ export interface IFormulaDatasetConfig {
     allUnitData?: IUnitData;
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
+    unitNameMap?: IFormulaUnitNameMap;
     maxIteration?: number;
     isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters

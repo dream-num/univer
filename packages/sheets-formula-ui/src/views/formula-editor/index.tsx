@@ -51,6 +51,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { map } from 'rxjs';
 import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import {
@@ -201,9 +202,15 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const isError = errorText !== undefined;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const document = univerInstanceService.getUnit<DocumentDataModel>(editorId);
-    useObservable(document?.change$);
     const getFormulaToken = useFormulaToken();
-    const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
+    const formulaText = useObservable(
+        document
+            ? () => document.change$.pipe(map(() => BuildTextUtils.transform.getPlainText(document.getBody()?.dataStream ?? '')))
+            : null,
+        BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? ''),
+        false,
+        [document]
+    );
     const formulaTextRef = useStateRef(formulaText);
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);

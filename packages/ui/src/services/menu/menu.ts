@@ -37,6 +37,8 @@ type MenuLabel = string | {
     props?: Record<string, any>;
 };
 
+export type IMenuCommandParams = Record<string, unknown>;
+
 interface IMenuItemBase<TLocaleKey extends string, TValue> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
@@ -61,7 +63,7 @@ interface IMenuItemBase<TLocaleKey extends string, TValue> {
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-    params?: any | Function;
+    params?: IMenuCommandParams | (() => IMenuCommandParams | undefined);
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<TValue>;
 }
@@ -76,7 +78,7 @@ export interface IValueOption<TLocaleKey extends string = string, TValue = undef
     id?: string;
     value?: string | number;
     value$?: Observable<TValue>;
-    params?: any;
+    params?: IMenuCommandParams | ((value?: string | number) => IMenuCommandParams | undefined);
     slot?: boolean;
     label?: MenuLabel; // custom component, send to CustomLabel label property
     icon?: string;

@@ -21,7 +21,12 @@
 import { DocumentFlavor, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS } from '../../config/config';
-import { calcDocFitToWidthScale, DocViewScaleService, resolveDocFitBaseWidth, resolveDocViewScale } from '../doc-view-scale';
+import {
+    calcDocFitToWidthScale,
+    DocViewScaleService,
+    resolveDocFitBaseWidth,
+    resolveDocViewScale,
+} from '../doc-view-scale';
 
 describe('doc view scale helpers', () => {
     afterEach(() => {

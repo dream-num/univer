@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Xác thực dữ liệu',
+        ribbon: {
+            setCheckbox: 'Đặt hộp kiểm',
+            clearCheckbox: 'Xóa hộp kiểm',
+            dropdownPresetTitle: 'Áp dụng mẫu:',
+            editDropdown: 'Chỉnh sửa tùy chọn',
+            clearDropdown: 'Xóa danh sách thả xuống',
+            dateTime: 'Ngày giờ',
+            presets: {
+                yes: 'Có',
+                no: 'Không',
+                notStarted: 'Chưa bắt đầu',
+                inProgress: 'Đang thực hiện',
+                completed: 'Hoàn thành',
+                option1: 'Tùy chọn 1',
+                option2: 'Tùy chọn 2',
+            },
+        },
         operators: {
             legal: 'là kiểu hợp lệ',
         },

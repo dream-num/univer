@@ -16,7 +16,6 @@
 
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
-import type { IHyperLinkPopup } from '../services/popup.service';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderIcon, CopyIcon, LinkIcon, SheetsMultiIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
@@ -27,8 +26,7 @@ import {
     SheetsHyperLinkParserService,
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IMessageService, useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
@@ -200,18 +198,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
 
 export const CellLinkPopup = () => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
-    const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
+    const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
     const univerInstanceService = useDependency(IUniverInstanceService);
-
-    useEffect(() => {
-        setCurrentPopup(popupService.currentPopup);
-        const ob = popupService.currentPopup$.subscribe((popup) => {
-            setCurrentPopup(popup);
-        });
-        return () => {
-            ob.unsubscribe();
-        };
-    }, [popupService.currentPopup, popupService.currentPopup$]);
 
     if (!currentPopup) {
         return null;

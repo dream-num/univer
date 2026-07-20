@@ -25,9 +25,9 @@ const progress = [
 ];
 
 const star = [
-    ['starEmpty', '@univerjs/icons-svg/double/star-empty-double-icon.svg', { black: '#FFBD37', '#E5E5E5': '#fff' }],
-    ['starIncomplete', '@univerjs/icons-svg/double/star-incomplete-double-icon.svg', { black: '#FFBD37', '#E5E5E5': '#fff' }],
-    ['starFull', '@univerjs/icons-svg/double/star-full-double-icon.svg', { black: '#FFBD37', '#E5E5E5': '#fff' }],
+    ['starEmpty', '@univerjs/icons-svg/double/star-empty-double-icon.svg', { black: '#FFBD37' }],
+    ['starIncomplete', '@univerjs/icons-svg/double/star-incomplete-double-icon.svg', { black: '#FFBD37' }],
+    ['starFull', '@univerjs/icons-svg/double/star-full-double-icon.svg', { black: '#FFBD37' }],
 ];
 
 const feeling = [

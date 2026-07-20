@@ -33,7 +33,7 @@ import {
 } from '@univerjs/thread-comment';
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { debounceTime } from 'rxjs';
+import { debounceTime, map, of, startWith } from 'rxjs';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { transformDocument2TextNodes, transformTextNodes2Document } from './thread-comment-editor/util';
 import { getThreadCommentEditorId } from './thread-comment-tree/util';
@@ -325,8 +325,17 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const [isHover, setIsHover] = useState(false);
     const [editingId, setEditingId] = useState('');
     const updte$ = useMemo(() => threadCommentModel.commentUpdate$.pipe(debounceTime(16)), [threadCommentModel]);
-    useObservable(updte$);
-    const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
+    const comments = useObservable(
+        () => id
+            ? updte$.pipe(
+                map(() => threadCommentModel.getCommentWithChildren(unitId, subUnitId, id)),
+                startWith(threadCommentModel.getCommentWithChildren(unitId, subUnitId, id))
+            )
+            : of(null),
+        null,
+        false,
+        [id, subUnitId, threadCommentModel, unitId, updte$]
+    );
     const commandService = useDependency(ICommandService);
     const userManagerService = useDependency(UserManagerService);
     const resolved = comments?.root.resolved;

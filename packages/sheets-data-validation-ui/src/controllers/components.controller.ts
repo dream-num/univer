@@ -15,11 +15,12 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { DataValidationIcon } from '@univerjs/icons';
+import { CheckboxIcon, DataValidationIcon, DatePickerIcon, DropdownListIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { DataValidationPanel } from '../views/components';
 import { DateShowTimeOption } from '../views/components/DateShowTimeOption';
+import { DROPDOWN_PRESETS_COMPONENT, DropdownPresets } from '../views/components/DropdownPresets';
 import { FORMULA_INPUTS } from '../views/components/formula-input';
 import { ListRenderModeInput } from '../views/components/ListRenderModeInput';
 
@@ -36,7 +37,10 @@ export class ComponentsController extends Disposable {
 
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
+            CheckboxIcon,
             DataValidationIcon,
+            DatePickerIcon,
+            DropdownListIcon,
         }));
     }
 
@@ -45,6 +49,7 @@ export class ComponentsController extends Disposable {
             [DATA_VALIDATION_PANEL, DataValidationPanel],
             [ListRenderModeInput.componentKey, ListRenderModeInput],
             [DateShowTimeOption.componentKey, DateShowTimeOption],
+            [DROPDOWN_PRESETS_COMPONENT, DropdownPresets],
             ...FORMULA_INPUTS,
         ] as const).forEach(([key, component]) => {
             this.disposeWithMe(this._componentManager.register(key, component));

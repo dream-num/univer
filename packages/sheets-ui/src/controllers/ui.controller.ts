@@ -79,6 +79,7 @@ import {
     SelectAllCommand,
 } from '../commands/commands/set-selection.command';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
+import { SetZoomRatioFromToolbarCommand } from '../commands/commands/set-zoom-ratio-from-toolbar.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../commands/commands/worksheet-protection.command';
@@ -228,6 +229,7 @@ export class SheetUIController extends Disposable {
             SetFirstColumnFrozenCommand,
             ScrollToRangeOperation,
             SetUnderlineCommand,
+            SetZoomRatioFromToolbarCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,
             ShowMenuListCommand,

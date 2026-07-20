@@ -68,7 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Więcej',
             toggleGridlines: 'Przełącz linie siatki',
-            textToNumber: 'Tekst na liczbę',
+            fullscreen: 'Pełny ekran',
         },
         align: {
             left: 'lewo',

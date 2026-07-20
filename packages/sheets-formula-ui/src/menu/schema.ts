@@ -50,82 +50,42 @@ export const menuSchema: MenuSchemaType = {
         [`${InsertFunctionOperation.id}.financial`]: {
             order: 1,
             menuItemFactory: InsertFinancialFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.logical`]: {
             order: 2,
             menuItemFactory: InsertLogicalFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.text`]: {
             order: 3,
             menuItemFactory: InsertTextFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.date`]: {
             order: 4,
             menuItemFactory: InsertDateFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.lookup`]: {
             order: 5,
             menuItemFactory: InsertLookupFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.math`]: {
             order: 6,
             menuItemFactory: InsertMathFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.statistical`]: {
             order: 7,
             menuItemFactory: InsertStatisticalFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.engineering`]: {
             order: 8,
             menuItemFactory: InsertEngineeringFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.information`]: {
             order: 9,
             menuItemFactory: InsertInformationFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
         [`${InsertFunctionOperation.id}.database`]: {
             order: 10,
             menuItemFactory: InsertDatabaseFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 0,
-                menuItemFactory: AllFunctionsMenuItemFactory,
-            },
         },
     },
     [COPY_SPECIAL_MENU_ID]: {

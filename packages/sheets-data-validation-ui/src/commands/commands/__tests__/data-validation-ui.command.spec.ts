@@ -27,6 +27,7 @@ import type { ISidebarMethodOptions } from '@univerjs/ui';
 import {
     CommandType,
     DataValidationOperator,
+    DataValidationRenderMode,
     DataValidationType,
     ICommandService,
     Inject,
@@ -39,14 +40,42 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { SheetsSelectionsService } from '@univerjs/sheets';
-import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
+import { serializeListOptions, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { ISidebarService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DATA_VALIDATION_PANEL, OpenValidationPanelOperation } from '../../operations/data-validation.operation';
-import { AddSheetDataValidationAndOpenCommand } from '../data-validation-ui.command';
+import {
+    AddSheetDataValidationAndOpenCommand,
+    ClearQuickSheetDataValidationCommand,
+    InsertQuickSheetDataValidationCommand,
+} from '../data-validation-ui.command';
+
+const SELECTION_RANGE = {
+    startRow: 1,
+    endRow: 2,
+    startColumn: 3,
+    endColumn: 4,
+};
+
+const CHECKBOX_RULE = {
+    type: DataValidationType.CHECKBOX,
+    operator: undefined,
+    formula1: undefined,
+    formula2: undefined,
+};
+
+function createDropdownRule(formula1: string) {
+    return {
+        type: DataValidationType.LIST,
+        operator: undefined,
+        formula1,
+        formula2: '',
+        renderMode: DataValidationRenderMode.CUSTOM,
+    };
+}
 
 interface ITestBed {
     univer: Univer;
@@ -139,6 +168,8 @@ function createTestBed(createWorkbook = true): ITestBed {
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(AddSheetDataValidationAndOpenCommand);
+    commandService.registerCommand(InsertQuickSheetDataValidationCommand);
+    commandService.registerCommand(ClearQuickSheetDataValidationCommand);
     commandService.registerCommand(OpenValidationPanelOperation);
     commandService.registerCommand({
         id: AddSheetDataValidationCommand.id,
@@ -156,12 +187,24 @@ function createTestBed(createWorkbook = true): ITestBed {
             return true;
         },
     } as ICommand);
+    commandService.registerCommand({
+        id: ClearRangeDataValidationCommand.id,
+        type: CommandType.COMMAND,
+        handler: (_accessor, params) => {
+            executedCommands.push({ id: ClearRangeDataValidationCommand.id, params });
+            return true;
+        },
+    } as ICommand);
 
     const workbook = createWorkbook
         ? univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData())
         : undefined;
     if (workbook) {
         injector.get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+        injector.get(SheetsSelectionsService).setSelections(workbook.getUnitId(), 'sheet-1', [{
+            range: SELECTION_RANGE,
+            primary: null,
+        }] as never);
     }
 
     return {
@@ -207,6 +250,135 @@ describe('AddSheetDataValidationAndOpenCommand', () => {
             header: { title: 'sheets-data-validation-ui.panel.addTitle' },
             width: 312,
         });
+    });
+
+    it('inserts the supplied checkbox rule into the current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(InsertQuickSheetDataValidationCommand.id, { rule: CHECKBOX_RULE })).toBe(true);
+
+        const addParams = testBed.executedCommands[0].params as { rule: IDataValidationRule };
+        expect(addParams.rule).toMatchObject({
+            type: DataValidationType.CHECKBOX,
+            ranges: [SELECTION_RANGE],
+        });
+        expect(addParams.rule.operator).toBeUndefined();
+        expect(addParams.rule.formula1).toBeUndefined();
+        expect(addParams.rule.formula2).toBeUndefined();
+    });
+
+    it('inserts a custom dropdown rule into the current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const formula1 = serializeListOptions(['Yes', 'No']);
+
+        expect(commandService.syncExecuteCommand(InsertQuickSheetDataValidationCommand.id, { rule: createDropdownRule(formula1) })).toBe(true);
+
+        const addParams = testBed.executedCommands[0].params as { rule: IDataValidationRule };
+        expect(addParams.rule).toMatchObject({
+            type: DataValidationType.LIST,
+            formula1,
+            formula2: '',
+            renderMode: DataValidationRenderMode.CUSTOM,
+            ranges: [SELECTION_RANGE],
+        });
+        expect(addParams.rule.operator).toBeUndefined();
+    });
+
+    it('inserts a date-time picker rule into the current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(InsertQuickSheetDataValidationCommand.id, {
+            rule: {
+                type: DataValidationType.DATE,
+                operator: undefined,
+                formula1: undefined,
+                formula2: undefined,
+                bizInfo: { showTime: true },
+            },
+        })).toBe(true);
+
+        const addParams = testBed.executedCommands[0].params as { rule: IDataValidationRule };
+        expect(addParams.rule).toMatchObject({
+            type: DataValidationType.DATE,
+            ranges: [SELECTION_RANGE],
+            bizInfo: { showTime: true },
+        });
+    });
+
+    it('adds a dropdown rule and opens the existing panel to edit it', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const panelService = testBed.get(DataValidationPanelService);
+        const formula1 = serializeListOptions(['Option 1', 'Option 2']);
+
+        expect(commandService.syncExecuteCommand(AddSheetDataValidationAndOpenCommand.id, { rule: createDropdownRule(formula1) })).toBe(true);
+
+        const addParams = testBed.executedCommands[0].params as { rule: IDataValidationRule };
+        expect(addParams.rule).toMatchObject({
+            type: DataValidationType.LIST,
+            formula1,
+            formula2: '',
+            renderMode: DataValidationRenderMode.CUSTOM,
+            ranges: [SELECTION_RANGE],
+        });
+        expect(panelService.activeRule?.rule.uid).toBe(addParams.rule.uid);
+        expect(panelService.isOpen).toBe(true);
+    });
+
+    it('clears only dropdown validation types from the current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(ClearQuickSheetDataValidationCommand.id, {
+            types: [DataValidationType.LIST, DataValidationType.LIST_MULTIPLE],
+        })).toBe(true);
+
+        expect(testBed.executedCommands).toEqual([{
+            id: ClearRangeDataValidationCommand.id,
+            params: {
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                ranges: [SELECTION_RANGE],
+                types: [DataValidationType.LIST, DataValidationType.LIST_MULTIPLE],
+            },
+        }]);
+    });
+
+    it('clears only checkbox validation from the current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(ClearQuickSheetDataValidationCommand.id, {
+            types: [DataValidationType.CHECKBOX],
+        })).toBe(true);
+
+        expect(testBed.executedCommands[0]).toEqual({
+            id: ClearRangeDataValidationCommand.id,
+            params: {
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                ranges: [SELECTION_RANGE],
+                types: [DataValidationType.CHECKBOX],
+            },
+        });
+    });
+
+    it('does not insert, edit, or clear without a current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        testBed.get(SheetsSelectionsService).clearCurrentSelections();
+
+        expect(commandService.syncExecuteCommand(InsertQuickSheetDataValidationCommand.id, { rule: CHECKBOX_RULE })).toBe(false);
+        expect(commandService.syncExecuteCommand(AddSheetDataValidationAndOpenCommand.id, {
+            rule: createDropdownRule(serializeListOptions(['Option 1', 'Option 2'])),
+        })).toBe(false);
+        expect(commandService.syncExecuteCommand(ClearQuickSheetDataValidationCommand.id, {
+            types: [DataValidationType.LIST, DataValidationType.LIST_MULTIPLE],
+        })).toBe(false);
+        expect(testBed.executedCommands).toEqual([]);
     });
 
     it('does not add or open when there is no active sheet target', () => {

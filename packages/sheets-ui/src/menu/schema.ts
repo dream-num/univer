@@ -50,7 +50,14 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
-import { ContextMenuGroup, ContextMenuPosition, RibbonDataGroup, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
+import {
+    ContextMenuGroup,
+    ContextMenuPosition,
+    RibbonPosition,
+    RibbonStartGroup,
+    RibbonViewGroup,
+    ToggleFullscreenOperation,
+} from '@univerjs/ui';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -88,7 +95,13 @@ import {
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
-import { SetColumnFrozenCommand, SetFirstColumnFrozenCommand, SetFirstRowFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import {
+    SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from '../commands/commands/set-frozen.command';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
@@ -97,9 +110,27 @@ import {
 } from '../commands/commands/worksheet-protection.command';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { CellBorderSelectorMenuItemFactory } from './border.menu';
-import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionAllToolbarMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './clear.menu';
-import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './delete.menu';
-import { FontSizeDecreaseMenuItemFactory, FontSizeIncreaseMenuItemFactory, FontSizeSelectorMenuItemFactory } from './font.menu';
+import {
+    CLEAR_SELECTION_MENU_ID,
+    ClearSelectionAllMenuItemFactory,
+    ClearSelectionAllToolbarMenuItemFactory,
+    ClearSelectionContentMenuItemFactory,
+    ClearSelectionFormatMenuItemFactory,
+    ClearSelectionMenuItemFactory,
+} from './clear.menu';
+import {
+    DELETE_RANGE_MENU_ID,
+    DeleteRangeMenuItemFactory,
+    DeleteRangeMoveLeftMenuItemFactory,
+    DeleteRangeMoveUpMenuItemFactory,
+    RemoveColMenuItemFactory,
+    RemoveRowMenuItemFactory,
+} from './delete.menu';
+import {
+    FontSizeDecreaseMenuItemFactory,
+    FontSizeIncreaseMenuItemFactory,
+    FontSizeSelectorMenuItemFactory,
+} from './font.menu';
 import {
     CancelFrozenMenuItemFactory,
     FrozenColMenuItemFactory,
@@ -110,10 +141,13 @@ import {
     SHEET_FROZEN_COLUMN_HEADER_MENU_ID,
     SHEET_FROZEN_MENU_ID,
     SHEET_FROZEN_ROW_HEADER_MENU_ID,
+    SHEET_FROZEN_TOOLBAR_MENU_ID,
     SheetFrozenColumnHeaderMenuItemFactory,
     SheetFrozenMenuItemFactory,
     SheetFrozenRowHeaderMenuItemFactory,
+    SheetFrozenToolbarMenuItemFactory,
 } from './frozen.menu';
+import { FullscreenMenuItemFactory } from './fullscreen.menu';
 import { ToggleGridlinesMenuFactory } from './gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
@@ -163,7 +197,13 @@ import {
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
 } from './menu';
-import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from './merge.menu';
+import {
+    CellMergeAllMenuItemFactory,
+    CellMergeCancelMenuItemFactory,
+    CellMergeHorizontalMenuItemFactory,
+    CellMergeMenuItemFactory,
+    CellMergeVerticalMenuItemFactory,
+} from './merge.menu';
 import {
     SHEET_PERMISSION_CONTEXT_MENU_ID,
     sheetPermissionAddProtectContextMenuFactory,
@@ -185,7 +225,8 @@ import {
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
 } from './sheet.menu';
-import { Text2NumberContextMenuItemFactory, Text2NumberToolbarMenuItemFactory, TEXT_TO_NUMBER_CONTEXT_MENU_ID, TEXT_TO_NUMBER_TOOLBAR_MENU_ID } from './text-to-number.menu';
+import { Text2NumberContextMenuItemFactory, TEXT_TO_NUMBER_CONTEXT_MENU_ID } from './text-to-number.menu';
+import { ZOOM_RATIO_MENU_ID, ZoomRatioMenuItemFactory } from './zoom.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonPosition.START]: {
@@ -302,11 +343,25 @@ export const menuSchema: MenuSchemaType = {
             },
         },
     },
-    [RibbonPosition.DATA]: {
-        [RibbonDataGroup.OTHERS]: {
-            [TEXT_TO_NUMBER_TOOLBAR_MENU_ID]: {
+    [RibbonPosition.VIEW]: {
+        [RibbonViewGroup.DISPLAY]: {
+            [SHEET_FROZEN_TOOLBAR_MENU_ID]: {
                 order: 0,
-                menuItemFactory: Text2NumberToolbarMenuItemFactory,
+                menuItemFactory: SheetFrozenToolbarMenuItemFactory,
+            },
+            [ZOOM_RATIO_MENU_ID]: {
+                order: 1,
+                menuItemFactory: ZoomRatioMenuItemFactory,
+            },
+            [ToggleFullscreenOperation.id]: {
+                order: 2,
+                menuItemFactory: FullscreenMenuItemFactory,
+            },
+        },
+        [RibbonViewGroup.VISIBILITY]: {
+            [ToggleGridlinesCommand.id]: {
+                order: 0,
+                menuItemFactory: ToggleGridlinesMenuFactory,
             },
         },
     },

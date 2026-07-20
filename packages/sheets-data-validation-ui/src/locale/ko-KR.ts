@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: '데이터 유효성 검사',
+        ribbon: {
+            setCheckbox: '체크박스 설정',
+            clearCheckbox: '체크박스 지우기',
+            dropdownPresetTitle: '프리셋 적용:',
+            editDropdown: '옵션 편집',
+            clearDropdown: '드롭다운 지우기',
+            dateTime: '날짜 및 시간',
+            presets: {
+                yes: '예',
+                no: '아니요',
+                notStarted: '시작 전',
+                inProgress: '진행 중',
+                completed: '완료',
+                option1: '옵션 1',
+                option2: '옵션 2',
+            },
+        },
         operators: {
             legal: '유효한 형식',
         },

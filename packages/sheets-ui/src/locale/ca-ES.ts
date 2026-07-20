@@ -68,7 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Més',
             toggleGridlines: 'Alternar línies de quadrícula',
-            textToNumber: 'Text a número',
+            fullscreen: 'Pantalla completa',
         },
         align: {
             left: 'esquerra',

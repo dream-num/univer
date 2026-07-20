@@ -20,8 +20,9 @@ import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { map } from 'rxjs';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
@@ -51,10 +52,33 @@ export function AutoFillPopupMenu() {
     const renderManagerService = useDependency(IRenderManagerService);
     const autoFillService = useDependency(IAutoFillService);
     const localeService = useDependency(LocaleService);
-    const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
+    const menu = useObservable(
+        () => autoFillService.menu$.pipe(map((items) => items.map((item) => ({
+            ...item,
+            index: items.indexOf(item),
+        })))),
+        [],
+        false,
+        [autoFillService]
+    );
     const [visible, setVisible] = useState(false);
-    const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
-    const [selected, setSelected] = useState<AUTO_FILL_APPLY_TYPE>(AUTO_FILL_APPLY_TYPE.SERIES);
+    const anchor = useObservable(
+        () => autoFillService.showMenu$.pipe(map((show) => {
+            const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
+            if (!show || !source || !target) {
+                return { row: -1, col: -1 };
+            }
+
+            return {
+                row: Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]),
+                col: Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]),
+            };
+        })),
+        { row: -1, col: -1 },
+        false,
+        [autoFillService]
+    );
+    const selected = useObservable(autoFillService.applyType$, AUTO_FILL_APPLY_TYPE.SERIES);
     const [isHovered, setHovered] = useState(false);
     const workbook = useActiveWorkbook();
     const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
@@ -97,40 +121,6 @@ export function AutoFillPopupMenu() {
         );
         return disposable?.dispose;
     }, [sheetSkeletonManagerService, forceUpdate]);
-
-    useEffect(() => {
-        const disposable = toDisposable(
-            autoFillService.menu$.subscribe((menu) => {
-                setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
-            })
-        );
-        return disposable.dispose;
-    }, [autoFillService]);
-
-    useEffect(() => {
-        const disposable = toDisposable(
-            autoFillService.showMenu$.subscribe((show) => {
-                const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
-                if (show && source && target) {
-                    const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
-                    const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
-                    setAnchor({ row: lastRow, col: lastCol });
-                } else {
-                    setAnchor({ row: -1, col: -1 });
-                }
-            })
-        );
-        return disposable.dispose;
-    }, [autoFillService]);
-
-    useEffect(() => {
-        const disposable = toDisposable(
-            autoFillService.applyType$.subscribe((type) => {
-                setSelected(type);
-            })
-        );
-        return disposable.dispose;
-    }, [autoFillService]);
 
     useEffect(() => {
         function handleClose() {

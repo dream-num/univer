@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'データの入力規則',
+        ribbon: {
+            setCheckbox: 'チェックボックスを設定',
+            clearCheckbox: 'チェックボックスをクリア',
+            dropdownPresetTitle: 'プリセットを適用:',
+            editDropdown: 'オプションを編集',
+            clearDropdown: 'プルダウンをクリア',
+            dateTime: '日付と時刻',
+            presets: {
+                yes: 'はい',
+                no: 'いいえ',
+                notStarted: '未着手',
+                inProgress: '進行中',
+                completed: '完了',
+                option1: 'オプション 1',
+                option2: 'オプション 2',
+            },
+        },
         operators: {
             legal: '有効な形式',
         },

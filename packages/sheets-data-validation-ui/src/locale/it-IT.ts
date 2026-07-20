@@ -19,6 +19,23 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Convalida dati',
+        ribbon: {
+            setCheckbox: 'Imposta casella di controllo',
+            clearCheckbox: 'Cancella casella di controllo',
+            dropdownPresetTitle: 'Applica una preimpostazione:',
+            editDropdown: 'Modifica opzioni',
+            clearDropdown: 'Cancella elenco a discesa',
+            dateTime: 'Data e ora',
+            presets: {
+                yes: 'Sì',
+                no: 'No',
+                notStarted: 'Non iniziato',
+                inProgress: 'In corso',
+                completed: 'Completato',
+                option1: 'Opzione 1',
+                option2: 'Opzione 2',
+            },
+        },
         operators: {
             legal: 'è un tipo valido',
         },

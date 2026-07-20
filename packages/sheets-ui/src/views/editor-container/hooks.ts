@@ -19,6 +19,7 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
+import { map, merge } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -55,8 +56,15 @@ export function useKeyEventConfig(unitId?: string) {
 export function useIsFocusing(editorId: string) {
     const renderManagerService = useDependency(IRenderManagerService);
     const docSelectionRenderService = renderManagerService.getRenderById(editorId)?.with(DocSelectionRenderService);
-    useObservable(docSelectionRenderService?.onBlur$);
-    useObservable(docSelectionRenderService?.onFocus$);
-
-    return docSelectionRenderService?.isFocusing;
+    return useObservable(
+        docSelectionRenderService
+            ? () => merge(
+                docSelectionRenderService.onBlur$.pipe(map(() => false)),
+                docSelectionRenderService.onFocus$.pipe(map(() => true))
+            )
+            : null,
+        docSelectionRenderService?.isFocusing,
+        false,
+        [docSelectionRenderService]
+    );
 }

@@ -1027,6 +1027,10 @@ describe('Test formula data model', () => {
                 const calculateData = formulaDataModel.getCalculateData();
                 expect(calculateData.allUnitData.test?.sheet1.rowCount).toBeGreaterThan(0);
                 expect(calculateData.unitSheetNameMap.test?.Sheet1).toBe('sheet1');
+                expect(calculateData.unitNameMap.test).toEqual({
+                    name: '',
+                    unitType: UniverInstanceType.UNIVER_SHEET,
+                });
 
                 const sheetFormulaData = formulaDataModel.getSheetFormulaData('test', 'sheet1');
                 expect(sheetFormulaData?.[0]?.[0]?.f).toBe('=A1');
@@ -1060,6 +1064,10 @@ describe('Test formula data model', () => {
                 const calculateData = formulaDataModel.getCalculateData();
                 const tableData = calculateData.allUnitData['base-test']?.['table-main'];
 
+                expect(calculateData.unitNameMap['base-test']).toEqual({
+                    name: 'Base',
+                    unitType: UniverInstanceType.UNIVER_BASE,
+                });
                 expect(calculateData.unitSheetNameMap['base-test']?.Sales).toBe('tableOther');
                 expect(tableData?.rowCount).toBe(1);
                 expect(tableData?.columnCount).toBe(7);
@@ -1068,6 +1076,21 @@ describe('Test formula data model', () => {
                 expect(tableData?.cellData.getValue(0, 3)).toEqual({ v: 'paid, online', t: CellValueType.STRING });
                 expect(tableData?.cellData.getValue(0, 4)).toEqual({ v: 'Invoice', t: CellValueType.STRING });
                 expect(tableData?.cellData.getValue(0, 5)).toEqual({ v: '', t: CellValueType.STRING });
+            });
+
+            it('should preserve workbook-qualified A1 references in Base formulas', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-external-a1';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=SUM([Host.xlsx]Sheet1!$A$1:$B$10)',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-external-a1']?.['table-main']?.[0]?.[6]?.f).toBe(
+                    '=SUM([Host.xlsx]Sheet1!$A$1:$B$10)'
+                );
             });
         });
     });

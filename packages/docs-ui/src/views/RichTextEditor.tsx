@@ -24,7 +24,9 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { map, merge, startWith } from 'rxjs';
 import { IEditorService } from '../services/editor/editor-manager.service';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { createEditorUndoRedoKeyboardConfig, useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './rich-text-editor/hooks';
 import { useEditor } from './rich-text-editor/hooks/use-editor';
 import { useLeftAndRightArrow } from './rich-text-editor/hooks/use-left-and-right-arrow';
@@ -89,9 +91,33 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     });
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
-    const isFocusing = useIsFocusing(editorId);
+    const selectionIsFocusing = useIsFocusing(editorId);
+    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
+    const editorFocused = useObservable(
+        editor
+            ? () => merge(
+                editor.focus$,
+                editor.blur$
+            ).pipe(
+                map(() => docSelectionRenderService?.isFocusing ?? false),
+                startWith(docSelectionRenderService?.isFocusing ?? false)
+            )
+            : null,
+        docSelectionRenderService?.isFocusing ?? false,
+        false,
+        [docSelectionRenderService, editor]
+    );
+    const isFocusing = selectionIsFocusing && editorFocused;
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
-    const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
+    const resolveShowPlaceholder = () => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? '');
+    const showPlaceholder = useObservable(
+        editor
+            ? () => editor.selectionChange$.pipe(map(resolveShowPlaceholder), startWith(resolveShowPlaceholder()))
+            : null,
+        resolveShowPlaceholder(),
+        false,
+        [editor]
+    );
     const { checkScrollBar } = useResize(editor, isSingle, true, true);
 
     useLayoutEffect(() => {
@@ -113,19 +139,6 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         _onChange?.(data, getPlainText(data.body?.dataStream ?? ''));
         checkScrollBar();
     });
-
-    useEffect(() => {
-        setShowPlaceholder(!BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
-
-        const sub = editor?.selectionChange$.subscribe(() => {
-            setShowPlaceholder(!BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
-        });
-
-        return () => sub?.unsubscribe();
-    }, [editor]);
-
-    useObservable(editor?.blur$);
-    useObservable(editor?.focus$);
 
     useEffect(() => {
         const data = editor?.getDocumentData();

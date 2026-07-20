@@ -20,7 +20,11 @@ import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import pkg from '../package.json';
-import { AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation-ui.command';
+import {
+    AddSheetDataValidationAndOpenCommand,
+    ClearQuickSheetDataValidationCommand,
+    InsertQuickSheetDataValidationCommand,
+} from './commands/commands/data-validation-ui.command';
 import {
     CloseValidationPanelOperation,
     HideDataValidationDropdown,
@@ -87,6 +91,8 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
 
         [
             AddSheetDataValidationAndOpenCommand,
+            InsertQuickSheetDataValidationCommand,
+            ClearQuickSheetDataValidationCommand,
             ShowDataValidationDropdown,
             HideDataValidationDropdown,
             CloseValidationPanelOperation,

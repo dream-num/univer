@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Observable, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
-import { useEffect, useMemo, useState } from 'react';
-import { map, of, startWith } from 'rxjs';
+import { useMemo } from 'react';
+import { EMPTY, map, merge, of, startWith } from 'rxjs';
 import { isMenuButtonSelectorItem } from '../../../services/menu/menu';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -31,8 +31,6 @@ export interface IToolbarItemStatus {
     // eslint-disable-next-line ts/no-explicit-any
     selectionsValue: any;
 }
-
-// TODO@wzhudev: maybe we should use `useObservable` here.
 
 /**
  * Subscribe to a menu item's status change and return the latest status.
@@ -53,29 +51,15 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
         }
     }
 
-    // eslint-disable-next-line ts/no-explicit-any
-    const [value, setValue] = useState<any>();
-    const [disabled, setDisabled] = useState(false);
-    const [activated, setActivated] = useState(false);
-    const [hidden, setHidden] = useState(false);
-    // eslint-disable-next-line ts/no-explicit-any
-    const [selectionsValue, setSelectionsValue] = useState<any>();
-
-    useEffect(() => {
-        const subscriptions: Subscription[] = [];
-        disabled$ && subscriptions.push(disabled$.subscribe((disabled) => setDisabled(disabled)));
-        hidden$ && subscriptions.push(hidden$.subscribe((hidden) => setHidden(hidden)));
-        activated$ && subscriptions.push(activated$.subscribe((activated) => setActivated(activated)));
-        value$ && subscriptions.push(value$.subscribe((value) => {
-            setValue(value);
-        }));
-        selectionsValue$ && subscriptions.push(selectionsValue$.subscribe((value) => {
-            setSelectionsValue(value);
-            setValue(value);
-        }));
-
-        return () => subscriptions.forEach((subscription) => subscription.unsubscribe());
-    }, [activated$, disabled$, hidden$, value$, selectionsValue$]);
+    const disabled = useObservable(disabled$ ?? null, false);
+    const activated = useObservable(activated$ ?? null, false);
+    const hidden = useObservable(hidden$ ?? null, false);
+    const valueObservable = useMemo(
+        () => merge(value$ ?? EMPTY, selectionsValue$ ?? EMPTY),
+        [selectionsValue$, value$]
+    );
+    const value = useObservable(valueObservable);
+    const selectionsValue = useObservable(selectionsValue$ ?? null);
 
     return { disabled, value, activated, hidden, selectionsValue };
 }

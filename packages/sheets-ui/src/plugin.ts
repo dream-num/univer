@@ -117,6 +117,7 @@ import { SelectAllService } from './services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
+import { ISheetLoadingRenderService, SheetLoadingRenderService } from './services/sheet-loading-render.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from './services/sheets-render.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -178,6 +179,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SelectAllService],
             [ISheetCellDropdownManagerService, { useClass: SheetCellDropdownManagerService }],
             [SheetCellEditorResizeService],
+            [ISheetLoadingRenderService, { useClass: SheetLoadingRenderService }],
 
             // controllers
             [AutoHeightController],
@@ -202,6 +204,10 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionCheckUIController],
         ] as Dependency[], this._config.override));
+
+        // A sheet renderer can be created before Ready when another sheet-type plugin
+        // eagerly resolves SheetsRenderService during Starting.
+        this._registerRenderBasics();
     }
 
     override onReady(): void {
@@ -212,8 +218,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         registerDependencies(this._injector, [
             [SheetClipboardController],
         ]);
-
-        this._registerRenderBasics();
 
         touchDependencies(this._injector, [
             [SheetUIController],

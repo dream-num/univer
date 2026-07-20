@@ -68,7 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'المزيد',
             toggleGridlines: 'تبديل خطوط الشبكة',
-            textToNumber: 'نص إلى رقم',
+            fullscreen: 'ملء الشاشة',
         },
         align: {
             left: 'يسار',

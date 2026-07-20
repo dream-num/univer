@@ -18,8 +18,8 @@ import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ColumnSeparatorType, LocaleService, SectionType } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
-import { useDependency } from '@univerjs/ui';
-import { useEffect } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useMemo } from 'react';
 import { DocSectionSettingController } from '../../controllers/doc-section-setting.controller';
 import { useSectionSetting } from './use-section-setting';
 
@@ -43,6 +43,21 @@ export function SectionSetting() {
     const localeService = useDependency(LocaleService);
     const controller = useDependency(DocSectionSettingController);
     const setting = useSectionSetting();
+    const locale = useObservable(localeService.currentLocale$);
+    const labels = useMemo(() => ({
+        selectedSections: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.selectedSections', String(setting.selectedCount)),
+        columnCount: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount'),
+        columnGap: `${localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')}(px)`,
+        columnSeparator: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnSeparator'),
+        none: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.none'),
+        betweenColumns: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.betweenColumns'),
+        sectionStart: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.sectionStart'),
+        unspecified: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.unspecified'),
+        continuous: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.continuous'),
+        nextPage: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.nextPage'),
+        evenPage: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.evenPage'),
+        oddPage: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.oddPage'),
+    }), [locale, localeService, setting.selectedCount]);
 
     useEffect(() => {
         if (!setting.valid) {
@@ -63,37 +78,37 @@ export function SectionSetting() {
                       dark:!univer-text-gray-300
                     "
                 >
-                    {localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.selectedSections', String(setting.selectedCount))}
+                    {labels.selectedSections}
                 </div>
             )}
             <div className="univer-grid univer-gap-3">
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount')}>
+                <SettingRow label={labels.columnCount}>
                     <InputNumber className="univer-w-full" min={1} max={12} step={1} precision={0} value={setting.columnCount} onChange={(value) => value != null && setting.setColumnCount(value)} />
                 </SettingRow>
-                <SettingRow label={`${localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')}(px)`}>
+                <SettingRow label={labels.columnGap}>
                     <InputNumber className="univer-w-full" min={0} max={1000} step={1} precision={1} value={setting.columnGap} onChange={(value) => value != null && setting.setColumnGap(value)} />
                 </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnSeparator')}>
+                <SettingRow label={labels.columnSeparator}>
                     <Select
                         className="univer-w-full"
                         value={setting.separatorType == null ? '' : String(setting.separatorType)}
                         options={[
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.none'), value: String(ColumnSeparatorType.NONE) },
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.betweenColumns'), value: String(ColumnSeparatorType.BETWEEN_EACH_COLUMN) },
+                            { label: labels.none, value: String(ColumnSeparatorType.NONE) },
+                            { label: labels.betweenColumns, value: String(ColumnSeparatorType.BETWEEN_EACH_COLUMN) },
                         ]}
                         onChange={(value) => setting.setSeparatorType(Number(value))}
                     />
                 </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.sectionStart')}>
+                <SettingRow label={labels.sectionStart}>
                     <Select
                         className="univer-w-full"
                         value={setting.sectionType == null ? '' : String(setting.sectionType)}
                         options={[
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.unspecified'), value: String(SectionType.SECTION_TYPE_UNSPECIFIED) },
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.continuous'), value: String(SectionType.CONTINUOUS) },
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.nextPage'), value: String(SectionType.NEXT_PAGE) },
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.evenPage'), value: String(SectionType.EVEN_PAGE) },
-                            { label: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.oddPage'), value: String(SectionType.ODD_PAGE) },
+                            { label: labels.unspecified, value: String(SectionType.SECTION_TYPE_UNSPECIFIED) },
+                            { label: labels.continuous, value: String(SectionType.CONTINUOUS) },
+                            { label: labels.nextPage, value: String(SectionType.NEXT_PAGE) },
+                            { label: labels.evenPage, value: String(SectionType.EVEN_PAGE) },
+                            { label: labels.oddPage, value: String(SectionType.ODD_PAGE) },
                         ]}
                         onChange={(value) => setting.setSectionType(Number(value))}
                     />

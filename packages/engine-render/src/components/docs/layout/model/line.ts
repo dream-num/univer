@@ -202,7 +202,7 @@ export function calculateLineTopByDrawings(
     });
 
     skeNonWrapTables?.forEach((table) => {
-        const top = _getLineTopWidthWrapNone(table, lineHeight, absoluteLineTop);
+        const top = _getLineTopWidthWrapNone(table, lineHeight, absoluteLineTop, columnLeft, columnWidth);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
@@ -278,8 +278,18 @@ function _getLineTopWithFullColumnWrap(
     return bottom;
 }
 
-function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: number, lineTop: number) {
-    const { top, height } = table;
+function _getLineTopWidthWrapNone(
+    table: IDocumentSkeletonTable,
+    lineHeight: number,
+    lineTop: number,
+    columnLeft: number,
+    columnWidth: number
+) {
+    const { top, height, left, width } = table;
+
+    if (columnWidth > 0 && (left + width <= columnLeft || left >= columnLeft + columnWidth)) {
+        return;
+    }
 
     // No need to consider the dist.
     if (top + height < lineTop || top > lineHeight + lineTop) {

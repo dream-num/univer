@@ -512,6 +512,24 @@ describe('line model', () => {
         expect(calculateLineTopByDrawings(15, 10, page, null, null, 110, 100)).toBe(10);
     });
 
+    it('only applies no-wrap tables to intersecting columns', () => {
+        const page = {
+            skeDrawings: new Map(),
+            skeTables: new Map([
+                ['left-column', {
+                    top: 10,
+                    left: 0,
+                    width: 100,
+                    height: 42,
+                    tableSource: { textWrap: TableTextWrapType.NONE },
+                }],
+            ]),
+        } as any;
+
+        expect(calculateLineTopByDrawings(15, 10, page, null, null, 0, 100)).toBe(52);
+        expect(calculateLineTopByDrawings(15, 10, page, null, null, 110, 100)).toBe(10);
+    });
+
     it('pushes line top below wrap drawings that block the whole column', () => {
         const page = {
             skeDrawings: new Map([

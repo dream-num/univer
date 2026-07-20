@@ -1440,7 +1440,9 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                     }
 
                                     if (commandService && commandId) {
-                                        commandService.executeCommand(commandId, commandParams);
+                                        commandService.executeCommand(commandId, commandId === DocTableDeleteTableCommand.id
+                                            ? { ...commandParams, targetRange: tableRange }
+                                            : commandParams);
                                     }
 
                                     finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);

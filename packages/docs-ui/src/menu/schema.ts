@@ -271,6 +271,10 @@ export const menuSchema: MenuSchemaType = {
             order: 8,
             menuItemFactory: BulletListMenuItemFactory,
         },
+        [CheckListCommand.id]: {
+            order: 9,
+            menuItemFactory: CheckListMenuItemFactory,
+        },
         [OpenHeaderFooterPanelCommand.id]: {
             order: 10,
             menuItemFactory: HeaderFooterMenuItemFactory,
@@ -296,10 +300,6 @@ export const menuSchema: MenuSchemaType = {
         [HorizontalLineCommand.id]: {
             order: 3,
             menuItemFactory: HorizontalLineFactory,
-        },
-        [CheckListCommand.id]: {
-            order: 4,
-            menuItemFactory: CheckListMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

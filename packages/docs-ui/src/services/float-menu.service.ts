@@ -51,6 +51,7 @@ const SKIP_SYMBOLS: string[] = [
 
 export class DocFloatMenuService extends Disposable implements IRenderModule {
     private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number }> = null;
+    private _suppressed = false;
 
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
@@ -80,6 +81,17 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         this._hideFloatMenu();
     }
 
+    setSuppressed(suppressed: boolean): void {
+        if (this._suppressed === suppressed) {
+            return;
+        }
+
+        this._suppressed = suppressed;
+        if (suppressed) {
+            this._hideFloatMenu();
+        }
+    }
+
     private _initSelectionChange() {
         this.disposeWithMe(this._docSelectionRenderService.onSelectionStart$.subscribe(() => {
             this._hideFloatMenu();
@@ -91,7 +103,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                 return;
             }
 
-            if (this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
+            if (this._suppressed || this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
                 this._hideFloatMenu();
                 return;
             }

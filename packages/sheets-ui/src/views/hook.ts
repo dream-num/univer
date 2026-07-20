@@ -29,7 +29,7 @@ export function useActiveWorkbook(): Workbook | null {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const loadingWorkbook = useContext(SheetLoadingWorkbookContext);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
-    return workbook ?? loadingWorkbook ?? null;
+    return loadingWorkbook ?? workbook ?? null;
 }
 
 export function useSheetLoadingWorkbook(): Workbook | null {
@@ -40,6 +40,11 @@ export function useSheetLoadingWorkbook(): Workbook | null {
 export function useSheetLoading(): boolean {
     const loadingRenderService = useDependency(ISheetLoadingRenderService);
     return useObservable(loadingRenderService.loading$) ?? false;
+}
+
+export function useSheetLoadingPreviewReady(): boolean {
+    const loadingRenderService = useDependency(ISheetLoadingRenderService);
+    return useObservable(loadingRenderService.previewReady$) ?? false;
 }
 
 export function useActiveWorksheet(workbook?: Workbook | null) {

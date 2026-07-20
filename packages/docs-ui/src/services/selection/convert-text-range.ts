@@ -29,7 +29,7 @@ import type {
     INodePosition,
     IPoint,
 } from '@univerjs/engine-render';
-import { DataStreamTreeTokenType } from '@univerjs/core';
+import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from '@univerjs/docs';
 import {
     compareDocumentSkeletonNestedPagePathOrder,
@@ -317,9 +317,9 @@ export class NodePositionConvertToCursor {
             const rawAnchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
             const anchorGlyph = this._getCaretGlyph(rawAnchorGlyph, glyphGroup, start_sp);
             const selectedGlyphs = glyphGroup.slice(start_sp, end_sp + 1);
-            const isSelectionOnlyNonInlineEmbedBlock = !collapsed &&
+            const isSelectionOnlyNonInlineDrawing = !collapsed &&
                 selectedGlyphs.length > 0 &&
-                selectedGlyphs.every((glyph) => this._isNonInlineEmbedCustomBlockGlyph(glyph));
+                selectedGlyphs.every((glyph) => this._isNonInlineDrawingGlyph(glyph));
             const borderBoxStartY = startY;
             const borderBoxEndY = contentHeight == null
                 ? startY + lineHeight - marginTop - marginBottom
@@ -360,10 +360,10 @@ export class NodePositionConvertToCursor {
             const clippedBorderBoxPosition = clipPositionToHorizontalRange(borderBoxPosition, this._horizontalClip);
             const clippedContentBoxPosition = clipPositionToHorizontalRange(contentBoxPosition, this._horizontalClip);
 
-            if (clippedBorderBoxPosition && !isSelectionOnlyNonInlineEmbedBlock) {
+            if (clippedBorderBoxPosition && !isSelectionOnlyNonInlineDrawing) {
                 borderBoxPointGroup.push(pushToPoints(clippedBorderBoxPosition));
             }
-            if (clippedContentBoxPosition && !isSelectionOnlyNonInlineEmbedBlock) {
+            if (clippedContentBoxPosition && !isSelectionOnlyNonInlineDrawing) {
                 contentBoxPointGroup.push(pushToPoints(clippedContentBoxPosition));
             }
 
@@ -386,7 +386,7 @@ export class NodePositionConvertToCursor {
         glyphGroup: IDocumentSkeletonGlyph[],
         glyphIndex: number
     ): IDocumentSkeletonGlyph {
-        if (!glyph || !this._isNonInlineEmbedCustomBlockGlyph(glyph)) {
+        if (!glyph || !this._isNonInlineDrawingGlyph(glyph)) {
             return glyph!;
         }
 
@@ -402,7 +402,7 @@ export class NodePositionConvertToCursor {
     private _findTextLikeGlyph(glyphGroup: IDocumentSkeletonGlyph[], startIndex: number, step: 1 | -1): IDocumentSkeletonGlyph | undefined {
         for (let index = startIndex; index >= 0 && index < glyphGroup.length; index += step) {
             const glyph = glyphGroup[index];
-            if (!this._isNonInlineEmbedCustomBlockGlyph(glyph)) {
+            if (!this._isNonInlineDrawingGlyph(glyph)) {
                 return glyph;
             }
         }
@@ -410,13 +410,15 @@ export class NodePositionConvertToCursor {
         return undefined;
     }
 
-    private _isNonInlineEmbedCustomBlockGlyph(glyph: IDocumentSkeletonGlyph | undefined): boolean {
+    private _isNonInlineDrawingGlyph(glyph: IDocumentSkeletonGlyph | undefined): boolean {
         if (!glyph?.drawingId || glyph.streamType !== DataStreamTreeTokenType.CUSTOM_BLOCK) {
             return false;
         }
 
         const drawing = this._docSkeleton.getViewModel?.().getDataModel?.().getSnapshot?.().drawings?.[glyph.drawingId];
-        return !shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing);
+        return drawing?.layoutType == null
+            ? !shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing)
+            : drawing.layoutType !== PositionedObjectLayoutType.INLINE;
     }
 
     private _isValidPosition(startOrigin: INodePosition, endOrigin: INodePosition) {

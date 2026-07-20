@@ -24,6 +24,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
     DocumentDataModel,
+    FOCUSING_COMMON_DRAWINGS,
     ICommandService,
     IConfigService,
     IContextService,
@@ -309,6 +310,35 @@ describe('DocFloatMenuService', () => {
             textRanges: [{
                 startOffset: 0,
                 endOffset: 6,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toEqual([]);
+    });
+
+    it('does not show the text toolbar while a drawing is focused', () => {
+        const unitId = 'doc-drawing-menu';
+        const { injector, popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Drawing anchor\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_float_menu_drawing', startIndex: 14 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+        injector.get(IContextService).setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 0,
+                endOffset: 1,
                 collapsed: false,
             }],
             rectRanges: [],

@@ -21,6 +21,8 @@ import {
     deepCompare,
     Disposable,
     DocumentBlockRangeType,
+    FOCUSING_COMMON_DRAWINGS,
+    IContextService,
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
@@ -55,7 +57,8 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -85,6 +88,11 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe((selection) => {
             const { unitId, textRanges } = selection;
             if (unitId !== this._context.unitId) {
+                return;
+            }
+
+            if (this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
+                this._hideFloatMenu();
                 return;
             }
 

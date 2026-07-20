@@ -33,14 +33,7 @@ import univer from './function-list/univer/sk-SK';
 import web from './function-list/web/sk-SK';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'Analyzujú sa vzorce...',
-            calculating: 'Počítajú sa vzorce...',
-            'array-analysis': 'Analyzujú sa maticové vzorce...',
-            'array-calculation': 'Počítajú sa maticové vzorce...',
-            done: 'Hotovo',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from '@univerjs/formula/locale/function-list/array/it-IT';
-import compatibility from '@univerjs/formula/locale/function-list/compatibility/it-IT';
-import cube from '@univerjs/formula/locale/function-list/cube/it-IT';
-import database from '@univerjs/formula/locale/function-list/database/it-IT';
-import date from '@univerjs/formula/locale/function-list/date/it-IT';
-import engineering from '@univerjs/formula/locale/function-list/engineering/it-IT';
-import financial from '@univerjs/formula/locale/function-list/financial/it-IT';
-import information from '@univerjs/formula/locale/function-list/information/it-IT';
-import logical from '@univerjs/formula/locale/function-list/logical/it-IT';
-import lookup from '@univerjs/formula/locale/function-list/lookup/it-IT';
-import math from '@univerjs/formula/locale/function-list/math/it-IT';
-import statistical from '@univerjs/formula/locale/function-list/statistical/it-IT';
-import text from '@univerjs/formula/locale/function-list/text/it-IT';
-import univer from '@univerjs/formula/locale/function-list/univer/it-IT';
-import web from '@univerjs/formula/locale/function-list/web/it-IT';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Analisi delle formule matrice...',
             'array-calculation': 'Calcolo delle formule matrice...',
             done: 'Completato',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

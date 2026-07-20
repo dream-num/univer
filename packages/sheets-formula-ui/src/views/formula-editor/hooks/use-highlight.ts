@@ -23,12 +23,12 @@ import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceTy
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IDescriptionService } from '@univerjs/formula';
 import {
     buildFormulaTextRuns,
     getFormulaHighlightDataStream as getSharedFormulaHighlightDataStream,
 } from '@univerjs/formula-ui';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
-import { IDescriptionService } from '@univerjs/sheets-formula';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
@@ -303,7 +303,7 @@ export function createFormulaHighlightBody(dataStream: string, textRuns: ITextRu
     return { dataStream, textRuns };
 }
 
-export function getFormulaHighlightDataStream(leadingCharacter: string, sequenceNodes: Array<ISequenceNode | string>, sourceText?: string): string {
+function getFormulaHighlightDataStream(leadingCharacter: string, sequenceNodes: Array<ISequenceNode | string>, sourceText?: string): string {
     return getSharedFormulaHighlightDataStream(leadingCharacter, sequenceNodes, sourceText);
 }
 
@@ -340,6 +340,6 @@ export function useColor(): IColorMap {
     return result;
 }
 
-export function buildTextRuns(descriptionService: IDescriptionService, colorMap: IColorMap, sequenceNodes: Array<ISequenceNode | string>) {
+function buildTextRuns(descriptionService: IDescriptionService, colorMap: IColorMap, sequenceNodes: Array<ISequenceNode | string>) {
     return buildFormulaTextRuns(descriptionService, colorMap, sequenceNodes);
 };

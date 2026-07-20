@@ -31,14 +31,7 @@ import univer from './function-list/univer/en-US';
 import web from './function-list/web/en-US';
 
 const locale = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'Analyzing formulas...',
-            calculating: 'Calculating formulas...',
-            'array-analysis': 'Analyzing array formulas...',
-            'array-calculation': 'Calculating array formulas...',
-            done: 'Done',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

@@ -33,14 +33,7 @@ import univer from './function-list/univer/ar-SA';
 import web from './function-list/web/ar-SA';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'جارٍ تحليل الصيغ...',
-            calculating: 'جارٍ حساب الصيغ...',
-            'array-analysis': 'جارٍ تحليل صيغ الصفائف...',
-            'array-calculation': 'جارٍ حساب صيغ الصفائف...',
-            done: 'تم',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

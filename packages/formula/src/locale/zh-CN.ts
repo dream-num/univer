@@ -33,14 +33,7 @@ import univer from './function-list/univer/zh-CN';
 import web from './function-list/web/zh-CN';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: '正在分析公式...',
-            calculating: '正在计算公式...',
-            'array-analysis': '正在分析数组公式...',
-            'array-calculation': '正在计算数组公式...',
-            done: '完成',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

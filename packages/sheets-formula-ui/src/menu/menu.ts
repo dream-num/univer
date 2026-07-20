@@ -19,6 +19,7 @@ import type { IMenuItem, IValueOption } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { FunctionType } from '@univerjs/engine-formula';
+import { IDescriptionService } from '@univerjs/formula';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -28,7 +29,6 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
-import { IDescriptionService } from '@univerjs/sheets-formula';
 import { getCurrentRangeDisable$, menuClipboardDisabledObservable } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map } from 'rxjs';

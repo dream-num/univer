@@ -21,12 +21,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ABS,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ABS.description',
-        abstract: 'sheets-formula.functionList.ABS.abstract',
+        description: 'formula.functionList.ABS.description',
+        abstract: 'formula.functionList.ABS.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ABS.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ABS.functionParameter.number.detail',
+                name: 'formula.functionList.ABS.functionParameter.number.name',
+                detail: 'formula.functionList.ABS.functionParameter.number.detail',
                 example: '-2',
                 require: 1,
                 repeat: 0,
@@ -36,12 +36,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ACOS,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ACOS.description',
-        abstract: 'sheets-formula.functionList.ACOS.abstract',
+        description: 'formula.functionList.ACOS.description',
+        abstract: 'formula.functionList.ACOS.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ACOS.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ACOS.functionParameter.number.detail',
+                name: 'formula.functionList.ACOS.functionParameter.number.name',
+                detail: 'formula.functionList.ACOS.functionParameter.number.detail',
                 example: '0',
                 require: 1,
                 repeat: 0,
@@ -51,12 +51,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ACOSH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ACOSH.description',
-        abstract: 'sheets-formula.functionList.ACOSH.abstract',
+        description: 'formula.functionList.ACOSH.description',
+        abstract: 'formula.functionList.ACOSH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ACOSH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ACOSH.functionParameter.number.detail',
+                name: 'formula.functionList.ACOSH.functionParameter.number.name',
+                detail: 'formula.functionList.ACOSH.functionParameter.number.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -66,12 +66,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ACOT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ACOT.description',
-        abstract: 'sheets-formula.functionList.ACOT.abstract',
+        description: 'formula.functionList.ACOT.description',
+        abstract: 'formula.functionList.ACOT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ACOT.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ACOT.functionParameter.number.detail',
+                name: 'formula.functionList.ACOT.functionParameter.number.name',
+                detail: 'formula.functionList.ACOT.functionParameter.number.detail',
                 example: '0',
                 require: 1,
                 repeat: 0,
@@ -81,12 +81,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ACOTH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ACOTH.description',
-        abstract: 'sheets-formula.functionList.ACOTH.abstract',
+        description: 'formula.functionList.ACOTH.description',
+        abstract: 'formula.functionList.ACOTH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ACOTH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ACOTH.functionParameter.number.detail',
+                name: 'formula.functionList.ACOTH.functionParameter.number.name',
+                detail: 'formula.functionList.ACOTH.functionParameter.number.detail',
                 example: '6',
                 require: 1,
                 repeat: 0,
@@ -96,33 +96,33 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.AGGREGATE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.AGGREGATE.description',
-        abstract: 'sheets-formula.functionList.AGGREGATE.abstract',
+        description: 'formula.functionList.AGGREGATE.description',
+        abstract: 'formula.functionList.AGGREGATE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.AGGREGATE.functionParameter.functionNum.name',
-                detail: 'sheets-formula.functionList.AGGREGATE.functionParameter.functionNum.detail',
+                name: 'formula.functionList.AGGREGATE.functionParameter.functionNum.name',
+                detail: 'formula.functionList.AGGREGATE.functionParameter.functionNum.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.AGGREGATE.functionParameter.options.name',
-                detail: 'sheets-formula.functionList.AGGREGATE.functionParameter.options.detail',
+                name: 'formula.functionList.AGGREGATE.functionParameter.options.name',
+                detail: 'formula.functionList.AGGREGATE.functionParameter.options.detail',
                 example: '6',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.AGGREGATE.functionParameter.ref1.name',
-                detail: 'sheets-formula.functionList.AGGREGATE.functionParameter.ref1.detail',
+                name: 'formula.functionList.AGGREGATE.functionParameter.ref1.name',
+                detail: 'formula.functionList.AGGREGATE.functionParameter.ref1.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.AGGREGATE.functionParameter.ref2.name',
-                detail: 'sheets-formula.functionList.AGGREGATE.functionParameter.ref2.detail',
+                name: 'formula.functionList.AGGREGATE.functionParameter.ref2.name',
+                detail: 'formula.functionList.AGGREGATE.functionParameter.ref2.detail',
                 example: 'B1:B20',
                 require: 0,
                 repeat: 1,
@@ -132,12 +132,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ARABIC,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ARABIC.description',
-        abstract: 'sheets-formula.functionList.ARABIC.abstract',
+        description: 'formula.functionList.ARABIC.description',
+        abstract: 'formula.functionList.ARABIC.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ARABIC.functionParameter.text.name',
-                detail: 'sheets-formula.functionList.ARABIC.functionParameter.text.detail',
+                name: 'formula.functionList.ARABIC.functionParameter.text.name',
+                detail: 'formula.functionList.ARABIC.functionParameter.text.detail',
                 example: '"LVII"',
                 require: 1,
                 repeat: 0,
@@ -147,12 +147,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ASIN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ASIN.description',
-        abstract: 'sheets-formula.functionList.ASIN.abstract',
+        description: 'formula.functionList.ASIN.description',
+        abstract: 'formula.functionList.ASIN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ASIN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ASIN.functionParameter.number.detail',
+                name: 'formula.functionList.ASIN.functionParameter.number.name',
+                detail: 'formula.functionList.ASIN.functionParameter.number.detail',
                 example: '0',
                 require: 1,
                 repeat: 0,
@@ -162,12 +162,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ASINH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ASINH.description',
-        abstract: 'sheets-formula.functionList.ASINH.abstract',
+        description: 'formula.functionList.ASINH.description',
+        abstract: 'formula.functionList.ASINH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ASINH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ASINH.functionParameter.number.detail',
+                name: 'formula.functionList.ASINH.functionParameter.number.name',
+                detail: 'formula.functionList.ASINH.functionParameter.number.detail',
                 example: '10',
                 require: 1,
                 repeat: 0,
@@ -177,12 +177,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ATAN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ATAN.description',
-        abstract: 'sheets-formula.functionList.ATAN.abstract',
+        description: 'formula.functionList.ATAN.description',
+        abstract: 'formula.functionList.ATAN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ATAN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ATAN.functionParameter.number.detail',
+                name: 'formula.functionList.ATAN.functionParameter.number.name',
+                detail: 'formula.functionList.ATAN.functionParameter.number.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -192,19 +192,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ATAN2,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ATAN2.description',
-        abstract: 'sheets-formula.functionList.ATAN2.abstract',
+        description: 'formula.functionList.ATAN2.description',
+        abstract: 'formula.functionList.ATAN2.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ATAN2.functionParameter.xNum.name',
-                detail: 'sheets-formula.functionList.ATAN2.functionParameter.xNum.detail',
+                name: 'formula.functionList.ATAN2.functionParameter.xNum.name',
+                detail: 'formula.functionList.ATAN2.functionParameter.xNum.detail',
                 example: '4',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ATAN2.functionParameter.yNum.name',
-                detail: 'sheets-formula.functionList.ATAN2.functionParameter.yNum.detail',
+                name: 'formula.functionList.ATAN2.functionParameter.yNum.name',
+                detail: 'formula.functionList.ATAN2.functionParameter.yNum.detail',
                 example: '3',
                 require: 1,
                 repeat: 0,
@@ -214,12 +214,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ATANH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ATANH.description',
-        abstract: 'sheets-formula.functionList.ATANH.abstract',
+        description: 'formula.functionList.ATANH.description',
+        abstract: 'formula.functionList.ATANH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ATANH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ATANH.functionParameter.number.detail',
+                name: 'formula.functionList.ATANH.functionParameter.number.name',
+                detail: 'formula.functionList.ATANH.functionParameter.number.detail',
                 example: '0.1',
                 require: 1,
                 repeat: 0,
@@ -229,26 +229,26 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.BASE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.BASE.description',
-        abstract: 'sheets-formula.functionList.BASE.abstract',
+        description: 'formula.functionList.BASE.description',
+        abstract: 'formula.functionList.BASE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.BASE.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.BASE.functionParameter.number.detail',
+                name: 'formula.functionList.BASE.functionParameter.number.name',
+                detail: 'formula.functionList.BASE.functionParameter.number.detail',
                 example: '15',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.BASE.functionParameter.radix.name',
-                detail: 'sheets-formula.functionList.BASE.functionParameter.radix.detail',
+                name: 'formula.functionList.BASE.functionParameter.radix.name',
+                detail: 'formula.functionList.BASE.functionParameter.radix.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.BASE.functionParameter.minLength.name',
-                detail: 'sheets-formula.functionList.BASE.functionParameter.minLength.detail',
+                name: 'formula.functionList.BASE.functionParameter.minLength.name',
+                detail: 'formula.functionList.BASE.functionParameter.minLength.detail',
                 example: '10',
                 require: 0,
                 repeat: 0,
@@ -258,19 +258,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.CEILING,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.CEILING.description',
-        abstract: 'sheets-formula.functionList.CEILING.abstract',
+        description: 'formula.functionList.CEILING.description',
+        abstract: 'formula.functionList.CEILING.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.CEILING.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.CEILING.functionParameter.number.detail',
+                name: 'formula.functionList.CEILING.functionParameter.number.name',
+                detail: 'formula.functionList.CEILING.functionParameter.number.detail',
                 example: '2.5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.CEILING.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.CEILING.functionParameter.significance.detail',
+                name: 'formula.functionList.CEILING.functionParameter.significance.name',
+                detail: 'formula.functionList.CEILING.functionParameter.significance.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -280,26 +280,26 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.CEILING_MATH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.CEILING_MATH.description',
-        abstract: 'sheets-formula.functionList.CEILING_MATH.abstract',
+        description: 'formula.functionList.CEILING_MATH.description',
+        abstract: 'formula.functionList.CEILING_MATH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.CEILING_MATH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.CEILING_MATH.functionParameter.number.detail',
+                name: 'formula.functionList.CEILING_MATH.functionParameter.number.name',
+                detail: 'formula.functionList.CEILING_MATH.functionParameter.number.detail',
                 example: '-5.5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.CEILING_MATH.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.CEILING_MATH.functionParameter.significance.detail',
+                name: 'formula.functionList.CEILING_MATH.functionParameter.significance.name',
+                detail: 'formula.functionList.CEILING_MATH.functionParameter.significance.detail',
                 example: '2',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.CEILING_MATH.functionParameter.mode.name',
-                detail: 'sheets-formula.functionList.CEILING_MATH.functionParameter.mode.detail',
+                name: 'formula.functionList.CEILING_MATH.functionParameter.mode.name',
+                detail: 'formula.functionList.CEILING_MATH.functionParameter.mode.detail',
                 example: '-1',
                 require: 0,
                 repeat: 0,
@@ -309,19 +309,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.CEILING_PRECISE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.CEILING_PRECISE.description',
-        abstract: 'sheets-formula.functionList.CEILING_PRECISE.abstract',
+        description: 'formula.functionList.CEILING_PRECISE.description',
+        abstract: 'formula.functionList.CEILING_PRECISE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.CEILING_PRECISE.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.CEILING_PRECISE.functionParameter.number.detail',
+                name: 'formula.functionList.CEILING_PRECISE.functionParameter.number.name',
+                detail: 'formula.functionList.CEILING_PRECISE.functionParameter.number.detail',
                 example: '4.3',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.CEILING_PRECISE.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.CEILING_PRECISE.functionParameter.significance.detail',
+                name: 'formula.functionList.CEILING_PRECISE.functionParameter.significance.name',
+                detail: 'formula.functionList.CEILING_PRECISE.functionParameter.significance.detail',
                 example: '2',
                 require: 0,
                 repeat: 0,
@@ -331,19 +331,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.COMBIN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.COMBIN.description',
-        abstract: 'sheets-formula.functionList.COMBIN.abstract',
+        description: 'formula.functionList.COMBIN.description',
+        abstract: 'formula.functionList.COMBIN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.COMBIN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.COMBIN.functionParameter.number.detail',
+                name: 'formula.functionList.COMBIN.functionParameter.number.name',
+                detail: 'formula.functionList.COMBIN.functionParameter.number.detail',
                 example: '8',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.COMBIN.functionParameter.numberChosen.name',
-                detail: 'sheets-formula.functionList.COMBIN.functionParameter.numberChosen.detail',
+                name: 'formula.functionList.COMBIN.functionParameter.numberChosen.name',
+                detail: 'formula.functionList.COMBIN.functionParameter.numberChosen.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -353,19 +353,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.COMBINA,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.COMBINA.description',
-        abstract: 'sheets-formula.functionList.COMBINA.abstract',
+        description: 'formula.functionList.COMBINA.description',
+        abstract: 'formula.functionList.COMBINA.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.COMBINA.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.COMBINA.functionParameter.number.detail',
+                name: 'formula.functionList.COMBINA.functionParameter.number.name',
+                detail: 'formula.functionList.COMBINA.functionParameter.number.detail',
                 example: '8',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.COMBINA.functionParameter.numberChosen.name',
-                detail: 'sheets-formula.functionList.COMBINA.functionParameter.numberChosen.detail',
+                name: 'formula.functionList.COMBINA.functionParameter.numberChosen.name',
+                detail: 'formula.functionList.COMBINA.functionParameter.numberChosen.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -375,12 +375,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.COS,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.COS.description',
-        abstract: 'sheets-formula.functionList.COS.abstract',
+        description: 'formula.functionList.COS.description',
+        abstract: 'formula.functionList.COS.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.COS.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.COS.functionParameter.number.detail',
+                name: 'formula.functionList.COS.functionParameter.number.name',
+                detail: 'formula.functionList.COS.functionParameter.number.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -390,12 +390,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.COSH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.COSH.description',
-        abstract: 'sheets-formula.functionList.COSH.abstract',
+        description: 'formula.functionList.COSH.description',
+        abstract: 'formula.functionList.COSH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.COSH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.COSH.functionParameter.number.detail',
+                name: 'formula.functionList.COSH.functionParameter.number.name',
+                detail: 'formula.functionList.COSH.functionParameter.number.detail',
                 example: '4',
                 require: 1,
                 repeat: 0,
@@ -405,12 +405,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.COT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.COT.description',
-        abstract: 'sheets-formula.functionList.COT.abstract',
+        description: 'formula.functionList.COT.description',
+        abstract: 'formula.functionList.COT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.COT.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.COT.functionParameter.number.detail',
+                name: 'formula.functionList.COT.functionParameter.number.name',
+                detail: 'formula.functionList.COT.functionParameter.number.detail',
                 example: '30',
                 require: 1,
                 repeat: 0,
@@ -420,12 +420,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.COTH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.COTH.description',
-        abstract: 'sheets-formula.functionList.COTH.abstract',
+        description: 'formula.functionList.COTH.description',
+        abstract: 'formula.functionList.COTH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.COTH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.COTH.functionParameter.number.detail',
+                name: 'formula.functionList.COTH.functionParameter.number.name',
+                detail: 'formula.functionList.COTH.functionParameter.number.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -435,12 +435,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.CSC,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.CSC.description',
-        abstract: 'sheets-formula.functionList.CSC.abstract',
+        description: 'formula.functionList.CSC.description',
+        abstract: 'formula.functionList.CSC.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.CSC.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.CSC.functionParameter.number.detail',
+                name: 'formula.functionList.CSC.functionParameter.number.name',
+                detail: 'formula.functionList.CSC.functionParameter.number.detail',
                 example: '15',
                 require: 1,
                 repeat: 0,
@@ -450,12 +450,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.CSCH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.CSCH.description',
-        abstract: 'sheets-formula.functionList.CSCH.abstract',
+        description: 'formula.functionList.CSCH.description',
+        abstract: 'formula.functionList.CSCH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.CSCH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.CSCH.functionParameter.number.detail',
+                name: 'formula.functionList.CSCH.functionParameter.number.name',
+                detail: 'formula.functionList.CSCH.functionParameter.number.detail',
                 example: '1.5',
                 require: 1,
                 repeat: 0,
@@ -465,19 +465,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.DECIMAL,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.DECIMAL.description',
-        abstract: 'sheets-formula.functionList.DECIMAL.abstract',
+        description: 'formula.functionList.DECIMAL.description',
+        abstract: 'formula.functionList.DECIMAL.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.DECIMAL.functionParameter.text.name',
-                detail: 'sheets-formula.functionList.DECIMAL.functionParameter.text.detail',
+                name: 'formula.functionList.DECIMAL.functionParameter.text.name',
+                detail: 'formula.functionList.DECIMAL.functionParameter.text.detail',
                 example: '"FF"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.DECIMAL.functionParameter.radix.name',
-                detail: 'sheets-formula.functionList.DECIMAL.functionParameter.radix.detail',
+                name: 'formula.functionList.DECIMAL.functionParameter.radix.name',
+                detail: 'formula.functionList.DECIMAL.functionParameter.radix.detail',
                 example: '16',
                 require: 1,
                 repeat: 0,
@@ -487,12 +487,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.DEGREES,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.DEGREES.description',
-        abstract: 'sheets-formula.functionList.DEGREES.abstract',
+        description: 'formula.functionList.DEGREES.description',
+        abstract: 'formula.functionList.DEGREES.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.DEGREES.functionParameter.angle.name',
-                detail: 'sheets-formula.functionList.DEGREES.functionParameter.angle.detail',
+                name: 'formula.functionList.DEGREES.functionParameter.angle.name',
+                detail: 'formula.functionList.DEGREES.functionParameter.angle.detail',
                 example: 'PI()',
                 require: 1,
                 repeat: 0,
@@ -502,12 +502,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.EVEN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.EVEN.description',
-        abstract: 'sheets-formula.functionList.EVEN.abstract',
+        description: 'formula.functionList.EVEN.description',
+        abstract: 'formula.functionList.EVEN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.EVEN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.EVEN.functionParameter.number.detail',
+                name: 'formula.functionList.EVEN.functionParameter.number.name',
+                detail: 'formula.functionList.EVEN.functionParameter.number.detail',
                 example: '1.5',
                 require: 1,
                 repeat: 0,
@@ -517,12 +517,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.EXP,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.EXP.description',
-        abstract: 'sheets-formula.functionList.EXP.abstract',
+        description: 'formula.functionList.EXP.description',
+        abstract: 'formula.functionList.EXP.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.EXP.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.EXP.functionParameter.number.detail',
+                name: 'formula.functionList.EXP.functionParameter.number.name',
+                detail: 'formula.functionList.EXP.functionParameter.number.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -532,12 +532,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.FACT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.FACT.description',
-        abstract: 'sheets-formula.functionList.FACT.abstract',
+        description: 'formula.functionList.FACT.description',
+        abstract: 'formula.functionList.FACT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.FACT.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.FACT.functionParameter.number.detail',
+                name: 'formula.functionList.FACT.functionParameter.number.name',
+                detail: 'formula.functionList.FACT.functionParameter.number.detail',
                 example: '5',
                 require: 1,
                 repeat: 0,
@@ -547,12 +547,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.FACTDOUBLE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.FACTDOUBLE.description',
-        abstract: 'sheets-formula.functionList.FACTDOUBLE.abstract',
+        description: 'formula.functionList.FACTDOUBLE.description',
+        abstract: 'formula.functionList.FACTDOUBLE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.FACTDOUBLE.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.FACTDOUBLE.functionParameter.number.detail',
+                name: 'formula.functionList.FACTDOUBLE.functionParameter.number.name',
+                detail: 'formula.functionList.FACTDOUBLE.functionParameter.number.detail',
                 example: '6',
                 require: 1,
                 repeat: 0,
@@ -562,19 +562,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.FLOOR,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.FLOOR.description',
-        abstract: 'sheets-formula.functionList.FLOOR.abstract',
+        description: 'formula.functionList.FLOOR.description',
+        abstract: 'formula.functionList.FLOOR.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.FLOOR.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.FLOOR.functionParameter.number.detail',
+                name: 'formula.functionList.FLOOR.functionParameter.number.name',
+                detail: 'formula.functionList.FLOOR.functionParameter.number.detail',
                 example: '3.7',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.FLOOR.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.FLOOR.functionParameter.significance.detail',
+                name: 'formula.functionList.FLOOR.functionParameter.significance.name',
+                detail: 'formula.functionList.FLOOR.functionParameter.significance.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -584,26 +584,26 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.FLOOR_MATH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.FLOOR_MATH.description',
-        abstract: 'sheets-formula.functionList.FLOOR_MATH.abstract',
+        description: 'formula.functionList.FLOOR_MATH.description',
+        abstract: 'formula.functionList.FLOOR_MATH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.FLOOR_MATH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.FLOOR_MATH.functionParameter.number.detail',
+                name: 'formula.functionList.FLOOR_MATH.functionParameter.number.name',
+                detail: 'formula.functionList.FLOOR_MATH.functionParameter.number.detail',
                 example: '-5.5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.FLOOR_MATH.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.FLOOR_MATH.functionParameter.significance.detail',
+                name: 'formula.functionList.FLOOR_MATH.functionParameter.significance.name',
+                detail: 'formula.functionList.FLOOR_MATH.functionParameter.significance.detail',
                 example: '2',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.FLOOR_MATH.functionParameter.mode.name',
-                detail: 'sheets-formula.functionList.FLOOR_MATH.functionParameter.mode.detail',
+                name: 'formula.functionList.FLOOR_MATH.functionParameter.mode.name',
+                detail: 'formula.functionList.FLOOR_MATH.functionParameter.mode.detail',
                 example: '-1',
                 require: 0,
                 repeat: 0,
@@ -613,19 +613,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.FLOOR_PRECISE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.FLOOR_PRECISE.description',
-        abstract: 'sheets-formula.functionList.FLOOR_PRECISE.abstract',
+        description: 'formula.functionList.FLOOR_PRECISE.description',
+        abstract: 'formula.functionList.FLOOR_PRECISE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.FLOOR_PRECISE.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.FLOOR_PRECISE.functionParameter.number.detail',
+                name: 'formula.functionList.FLOOR_PRECISE.functionParameter.number.name',
+                detail: 'formula.functionList.FLOOR_PRECISE.functionParameter.number.detail',
                 example: '-3.2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.FLOOR_PRECISE.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.FLOOR_PRECISE.functionParameter.significance.detail',
+                name: 'formula.functionList.FLOOR_PRECISE.functionParameter.significance.name',
+                detail: 'formula.functionList.FLOOR_PRECISE.functionParameter.significance.detail',
                 example: '-1',
                 require: 0,
                 repeat: 0,
@@ -635,19 +635,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.GCD,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.GCD.description',
-        abstract: 'sheets-formula.functionList.GCD.abstract',
+        description: 'formula.functionList.GCD.description',
+        abstract: 'formula.functionList.GCD.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.GCD.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.GCD.functionParameter.number1.detail',
+                name: 'formula.functionList.GCD.functionParameter.number1.name',
+                detail: 'formula.functionList.GCD.functionParameter.number1.detail',
                 example: '5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.GCD.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.GCD.functionParameter.number2.detail',
+                name: 'formula.functionList.GCD.functionParameter.number2.name',
+                detail: 'formula.functionList.GCD.functionParameter.number2.detail',
                 example: '2',
                 require: 0,
                 repeat: 1,
@@ -657,12 +657,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.INT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.INT.description',
-        abstract: 'sheets-formula.functionList.INT.abstract',
+        description: 'formula.functionList.INT.description',
+        abstract: 'formula.functionList.INT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.INT.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.INT.functionParameter.number.detail',
+                name: 'formula.functionList.INT.functionParameter.number.name',
+                detail: 'formula.functionList.INT.functionParameter.number.detail',
                 example: '8.9',
                 require: 1,
                 repeat: 0,
@@ -672,19 +672,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ISO_CEILING,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ISO_CEILING.description',
-        abstract: 'sheets-formula.functionList.ISO_CEILING.abstract',
+        description: 'formula.functionList.ISO_CEILING.description',
+        abstract: 'formula.functionList.ISO_CEILING.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ISO_CEILING.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ISO_CEILING.functionParameter.number.detail',
+                name: 'formula.functionList.ISO_CEILING.functionParameter.number.name',
+                detail: 'formula.functionList.ISO_CEILING.functionParameter.number.detail',
                 example: '-4.3',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ISO_CEILING.functionParameter.significance.name',
-                detail: 'sheets-formula.functionList.ISO_CEILING.functionParameter.significance.detail',
+                name: 'formula.functionList.ISO_CEILING.functionParameter.significance.name',
+                detail: 'formula.functionList.ISO_CEILING.functionParameter.significance.detail',
                 example: '2',
                 require: 0,
                 repeat: 0,
@@ -694,19 +694,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.LCM,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.LCM.description',
-        abstract: 'sheets-formula.functionList.LCM.abstract',
+        description: 'formula.functionList.LCM.description',
+        abstract: 'formula.functionList.LCM.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.LCM.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.LCM.functionParameter.number1.detail',
+                name: 'formula.functionList.LCM.functionParameter.number1.name',
+                detail: 'formula.functionList.LCM.functionParameter.number1.detail',
                 example: '5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.LCM.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.LCM.functionParameter.number2.detail',
+                name: 'formula.functionList.LCM.functionParameter.number2.name',
+                detail: 'formula.functionList.LCM.functionParameter.number2.detail',
                 example: '2',
                 require: 0,
                 repeat: 1,
@@ -716,12 +716,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.LN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.LN.description',
-        abstract: 'sheets-formula.functionList.LN.abstract',
+        description: 'formula.functionList.LN.description',
+        abstract: 'formula.functionList.LN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.LN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.LN.functionParameter.number.detail',
+                name: 'formula.functionList.LN.functionParameter.number.name',
+                detail: 'formula.functionList.LN.functionParameter.number.detail',
                 example: 'EXP(3)',
                 require: 1,
                 repeat: 0,
@@ -731,19 +731,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.LOG,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.LOG.description',
-        abstract: 'sheets-formula.functionList.LOG.abstract',
+        description: 'formula.functionList.LOG.description',
+        abstract: 'formula.functionList.LOG.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.LOG.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.LOG.functionParameter.number.detail',
+                name: 'formula.functionList.LOG.functionParameter.number.name',
+                detail: 'formula.functionList.LOG.functionParameter.number.detail',
                 example: '8',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.LOG.functionParameter.base.name',
-                detail: 'sheets-formula.functionList.LOG.functionParameter.base.detail',
+                name: 'formula.functionList.LOG.functionParameter.base.name',
+                detail: 'formula.functionList.LOG.functionParameter.base.detail',
                 example: '2',
                 require: 0,
                 repeat: 0,
@@ -753,12 +753,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.LOG10,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.LOG10.description',
-        abstract: 'sheets-formula.functionList.LOG10.abstract',
+        description: 'formula.functionList.LOG10.description',
+        abstract: 'formula.functionList.LOG10.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.LOG10.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.LOG10.functionParameter.number.detail',
+                name: 'formula.functionList.LOG10.functionParameter.number.name',
+                detail: 'formula.functionList.LOG10.functionParameter.number.detail',
                 example: '100000',
                 require: 1,
                 repeat: 0,
@@ -768,12 +768,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MDETERM,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MDETERM.description',
-        abstract: 'sheets-formula.functionList.MDETERM.abstract',
+        description: 'formula.functionList.MDETERM.description',
+        abstract: 'formula.functionList.MDETERM.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MDETERM.functionParameter.array.name',
-                detail: 'sheets-formula.functionList.MDETERM.functionParameter.array.detail',
+                name: 'formula.functionList.MDETERM.functionParameter.array.name',
+                detail: 'formula.functionList.MDETERM.functionParameter.array.detail',
                 example: 'A1:C3',
                 require: 1,
                 repeat: 0,
@@ -783,12 +783,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MINVERSE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MINVERSE.description',
-        abstract: 'sheets-formula.functionList.MINVERSE.abstract',
+        description: 'formula.functionList.MINVERSE.description',
+        abstract: 'formula.functionList.MINVERSE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MINVERSE.functionParameter.array.name',
-                detail: 'sheets-formula.functionList.MINVERSE.functionParameter.array.detail',
+                name: 'formula.functionList.MINVERSE.functionParameter.array.name',
+                detail: 'formula.functionList.MINVERSE.functionParameter.array.detail',
                 example: 'A1:C3',
                 require: 1,
                 repeat: 0,
@@ -798,19 +798,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MMULT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MMULT.description',
-        abstract: 'sheets-formula.functionList.MMULT.abstract',
+        description: 'formula.functionList.MMULT.description',
+        abstract: 'formula.functionList.MMULT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MMULT.functionParameter.array1.name',
-                detail: 'sheets-formula.functionList.MMULT.functionParameter.array1.detail',
+                name: 'formula.functionList.MMULT.functionParameter.array1.name',
+                detail: 'formula.functionList.MMULT.functionParameter.array1.detail',
                 example: 'A2:B3',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.MMULT.functionParameter.array2.name',
-                detail: 'sheets-formula.functionList.MMULT.functionParameter.array2.detail',
+                name: 'formula.functionList.MMULT.functionParameter.array2.name',
+                detail: 'formula.functionList.MMULT.functionParameter.array2.detail',
                 example: 'A5:B6',
                 require: 1,
                 repeat: 0,
@@ -820,19 +820,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MOD,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MOD.description',
-        abstract: 'sheets-formula.functionList.MOD.abstract',
+        description: 'formula.functionList.MOD.description',
+        abstract: 'formula.functionList.MOD.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MOD.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.MOD.functionParameter.number.detail',
+                name: 'formula.functionList.MOD.functionParameter.number.name',
+                detail: 'formula.functionList.MOD.functionParameter.number.detail',
                 example: '3',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.MOD.functionParameter.divisor.name',
-                detail: 'sheets-formula.functionList.MOD.functionParameter.divisor.detail',
+                name: 'formula.functionList.MOD.functionParameter.divisor.name',
+                detail: 'formula.functionList.MOD.functionParameter.divisor.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -842,19 +842,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MROUND,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MROUND.description',
-        abstract: 'sheets-formula.functionList.MROUND.abstract',
+        description: 'formula.functionList.MROUND.description',
+        abstract: 'formula.functionList.MROUND.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MROUND.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.MROUND.functionParameter.number.detail',
+                name: 'formula.functionList.MROUND.functionParameter.number.name',
+                detail: 'formula.functionList.MROUND.functionParameter.number.detail',
                 example: '10',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.MROUND.functionParameter.multiple.name',
-                detail: 'sheets-formula.functionList.MROUND.functionParameter.multiple.detail',
+                name: 'formula.functionList.MROUND.functionParameter.multiple.name',
+                detail: 'formula.functionList.MROUND.functionParameter.multiple.detail',
                 example: '3',
                 require: 1,
                 repeat: 0,
@@ -864,19 +864,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MULTINOMIAL,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MULTINOMIAL.description',
-        abstract: 'sheets-formula.functionList.MULTINOMIAL.abstract',
+        description: 'formula.functionList.MULTINOMIAL.description',
+        abstract: 'formula.functionList.MULTINOMIAL.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MULTINOMIAL.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.MULTINOMIAL.functionParameter.number1.detail',
+                name: 'formula.functionList.MULTINOMIAL.functionParameter.number1.name',
+                detail: 'formula.functionList.MULTINOMIAL.functionParameter.number1.detail',
                 example: '5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.MULTINOMIAL.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.MULTINOMIAL.functionParameter.number2.detail',
+                name: 'formula.functionList.MULTINOMIAL.functionParameter.number2.name',
+                detail: 'formula.functionList.MULTINOMIAL.functionParameter.number2.detail',
                 example: '2',
                 require: 0,
                 repeat: 1,
@@ -886,12 +886,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.MUNIT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.MUNIT.description',
-        abstract: 'sheets-formula.functionList.MUNIT.abstract',
+        description: 'formula.functionList.MUNIT.description',
+        abstract: 'formula.functionList.MUNIT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.MUNIT.functionParameter.dimension.name',
-                detail: 'sheets-formula.functionList.MUNIT.functionParameter.dimension.detail',
+                name: 'formula.functionList.MUNIT.functionParameter.dimension.name',
+                detail: 'formula.functionList.MUNIT.functionParameter.dimension.detail',
                 example: '3',
                 require: 1,
                 repeat: 0,
@@ -901,12 +901,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ODD,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ODD.description',
-        abstract: 'sheets-formula.functionList.ODD.abstract',
+        description: 'formula.functionList.ODD.description',
+        abstract: 'formula.functionList.ODD.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ODD.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ODD.functionParameter.number.detail',
+                name: 'formula.functionList.ODD.functionParameter.number.name',
+                detail: 'formula.functionList.ODD.functionParameter.number.detail',
                 example: '1.5',
                 require: 1,
                 repeat: 0,
@@ -916,27 +916,27 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.PI,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.PI.description',
-        abstract: 'sheets-formula.functionList.PI.abstract',
+        description: 'formula.functionList.PI.description',
+        abstract: 'formula.functionList.PI.abstract',
         functionParameter: [
         ],
     },
     {
         functionName: FUNCTION_NAMES_MATH.POWER,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.POWER.description',
-        abstract: 'sheets-formula.functionList.POWER.abstract',
+        description: 'formula.functionList.POWER.description',
+        abstract: 'formula.functionList.POWER.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.POWER.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.POWER.functionParameter.number.detail',
+                name: 'formula.functionList.POWER.functionParameter.number.name',
+                detail: 'formula.functionList.POWER.functionParameter.number.detail',
                 example: '5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.POWER.functionParameter.power.name',
-                detail: 'sheets-formula.functionList.POWER.functionParameter.power.detail',
+                name: 'formula.functionList.POWER.functionParameter.power.name',
+                detail: 'formula.functionList.POWER.functionParameter.power.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -946,19 +946,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.PRODUCT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.PRODUCT.description',
-        abstract: 'sheets-formula.functionList.PRODUCT.abstract',
+        description: 'formula.functionList.PRODUCT.description',
+        abstract: 'formula.functionList.PRODUCT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.PRODUCT.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.PRODUCT.functionParameter.number1.detail',
+                name: 'formula.functionList.PRODUCT.functionParameter.number1.name',
+                detail: 'formula.functionList.PRODUCT.functionParameter.number1.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.PRODUCT.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.PRODUCT.functionParameter.number2.detail',
+                name: 'formula.functionList.PRODUCT.functionParameter.number2.name',
+                detail: 'formula.functionList.PRODUCT.functionParameter.number2.detail',
                 example: 'A2',
                 require: 0,
                 repeat: 1,
@@ -968,19 +968,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.QUOTIENT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.QUOTIENT.description',
-        abstract: 'sheets-formula.functionList.QUOTIENT.abstract',
+        description: 'formula.functionList.QUOTIENT.description',
+        abstract: 'formula.functionList.QUOTIENT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.QUOTIENT.functionParameter.numerator.name',
-                detail: 'sheets-formula.functionList.QUOTIENT.functionParameter.numerator.detail',
+                name: 'formula.functionList.QUOTIENT.functionParameter.numerator.name',
+                detail: 'formula.functionList.QUOTIENT.functionParameter.numerator.detail',
                 example: '5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.QUOTIENT.functionParameter.denominator.name',
-                detail: 'sheets-formula.functionList.QUOTIENT.functionParameter.denominator.detail',
+                name: 'formula.functionList.QUOTIENT.functionParameter.denominator.name',
+                detail: 'formula.functionList.QUOTIENT.functionParameter.denominator.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -990,12 +990,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.RADIANS,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.RADIANS.description',
-        abstract: 'sheets-formula.functionList.RADIANS.abstract',
+        description: 'formula.functionList.RADIANS.description',
+        abstract: 'formula.functionList.RADIANS.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.RADIANS.functionParameter.angle.name',
-                detail: 'sheets-formula.functionList.RADIANS.functionParameter.angle.detail',
+                name: 'formula.functionList.RADIANS.functionParameter.angle.name',
+                detail: 'formula.functionList.RADIANS.functionParameter.angle.detail',
                 example: '270',
                 require: 1,
                 repeat: 0,
@@ -1005,48 +1005,48 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.RAND,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.RAND.description',
-        abstract: 'sheets-formula.functionList.RAND.abstract',
+        description: 'formula.functionList.RAND.description',
+        abstract: 'formula.functionList.RAND.abstract',
         functionParameter: [
         ],
     },
     {
         functionName: FUNCTION_NAMES_MATH.RANDARRAY,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.RANDARRAY.description',
-        abstract: 'sheets-formula.functionList.RANDARRAY.abstract',
+        description: 'formula.functionList.RANDARRAY.description',
+        abstract: 'formula.functionList.RANDARRAY.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.RANDARRAY.functionParameter.rows.name',
-                detail: 'sheets-formula.functionList.RANDARRAY.functionParameter.rows.detail',
+                name: 'formula.functionList.RANDARRAY.functionParameter.rows.name',
+                detail: 'formula.functionList.RANDARRAY.functionParameter.rows.detail',
                 example: '5',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.RANDARRAY.functionParameter.columns.name',
-                detail: 'sheets-formula.functionList.RANDARRAY.functionParameter.columns.detail',
+                name: 'formula.functionList.RANDARRAY.functionParameter.columns.name',
+                detail: 'formula.functionList.RANDARRAY.functionParameter.columns.detail',
                 example: '3',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.RANDARRAY.functionParameter.min.name',
-                detail: 'sheets-formula.functionList.RANDARRAY.functionParameter.min.detail',
+                name: 'formula.functionList.RANDARRAY.functionParameter.min.name',
+                detail: 'formula.functionList.RANDARRAY.functionParameter.min.detail',
                 example: '1',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.RANDARRAY.functionParameter.max.name',
-                detail: 'sheets-formula.functionList.RANDARRAY.functionParameter.max.detail',
+                name: 'formula.functionList.RANDARRAY.functionParameter.max.name',
+                detail: 'formula.functionList.RANDARRAY.functionParameter.max.detail',
                 example: '100',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.RANDARRAY.functionParameter.wholeNumber.name',
-                detail: 'sheets-formula.functionList.RANDARRAY.functionParameter.wholeNumber.detail',
+                name: 'formula.functionList.RANDARRAY.functionParameter.wholeNumber.name',
+                detail: 'formula.functionList.RANDARRAY.functionParameter.wholeNumber.detail',
                 example: 'TRUE',
                 require: 0,
                 repeat: 0,
@@ -1056,19 +1056,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.RANDBETWEEN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.RANDBETWEEN.description',
-        abstract: 'sheets-formula.functionList.RANDBETWEEN.abstract',
+        description: 'formula.functionList.RANDBETWEEN.description',
+        abstract: 'formula.functionList.RANDBETWEEN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.RANDBETWEEN.functionParameter.bottom.name',
-                detail: 'sheets-formula.functionList.RANDBETWEEN.functionParameter.bottom.detail',
+                name: 'formula.functionList.RANDBETWEEN.functionParameter.bottom.name',
+                detail: 'formula.functionList.RANDBETWEEN.functionParameter.bottom.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.RANDBETWEEN.functionParameter.top.name',
-                detail: 'sheets-formula.functionList.RANDBETWEEN.functionParameter.top.detail',
+                name: 'formula.functionList.RANDBETWEEN.functionParameter.top.name',
+                detail: 'formula.functionList.RANDBETWEEN.functionParameter.top.detail',
                 example: '100',
                 require: 1,
                 repeat: 0,
@@ -1078,19 +1078,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ROMAN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ROMAN.description',
-        abstract: 'sheets-formula.functionList.ROMAN.abstract',
+        description: 'formula.functionList.ROMAN.description',
+        abstract: 'formula.functionList.ROMAN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ROMAN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ROMAN.functionParameter.number.detail',
+                name: 'formula.functionList.ROMAN.functionParameter.number.name',
+                detail: 'formula.functionList.ROMAN.functionParameter.number.detail',
                 example: '499',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ROMAN.functionParameter.form.name',
-                detail: 'sheets-formula.functionList.ROMAN.functionParameter.form.detail',
+                name: 'formula.functionList.ROMAN.functionParameter.form.name',
+                detail: 'formula.functionList.ROMAN.functionParameter.form.detail',
                 example: '0',
                 require: 0,
                 repeat: 0,
@@ -1100,19 +1100,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ROUND,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ROUND.description',
-        abstract: 'sheets-formula.functionList.ROUND.abstract',
+        description: 'formula.functionList.ROUND.description',
+        abstract: 'formula.functionList.ROUND.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ROUND.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ROUND.functionParameter.number.detail',
+                name: 'formula.functionList.ROUND.functionParameter.number.name',
+                detail: 'formula.functionList.ROUND.functionParameter.number.detail',
                 example: '2.15',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ROUND.functionParameter.numDigits.name',
-                detail: 'sheets-formula.functionList.ROUND.functionParameter.numDigits.detail',
+                name: 'formula.functionList.ROUND.functionParameter.numDigits.name',
+                detail: 'formula.functionList.ROUND.functionParameter.numDigits.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -1122,19 +1122,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ROUNDBANK,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ROUNDBANK.description',
-        abstract: 'sheets-formula.functionList.ROUNDBANK.abstract',
+        description: 'formula.functionList.ROUNDBANK.description',
+        abstract: 'formula.functionList.ROUNDBANK.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ROUNDBANK.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ROUNDBANK.functionParameter.number.detail',
+                name: 'formula.functionList.ROUNDBANK.functionParameter.number.name',
+                detail: 'formula.functionList.ROUNDBANK.functionParameter.number.detail',
                 example: '2.345',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ROUNDBANK.functionParameter.numDigits.name',
-                detail: 'sheets-formula.functionList.ROUNDBANK.functionParameter.numDigits.detail',
+                name: 'formula.functionList.ROUNDBANK.functionParameter.numDigits.name',
+                detail: 'formula.functionList.ROUNDBANK.functionParameter.numDigits.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
@@ -1144,19 +1144,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ROUNDDOWN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ROUNDDOWN.description',
-        abstract: 'sheets-formula.functionList.ROUNDDOWN.abstract',
+        description: 'formula.functionList.ROUNDDOWN.description',
+        abstract: 'formula.functionList.ROUNDDOWN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ROUNDDOWN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ROUNDDOWN.functionParameter.number.detail',
+                name: 'formula.functionList.ROUNDDOWN.functionParameter.number.name',
+                detail: 'formula.functionList.ROUNDDOWN.functionParameter.number.detail',
                 example: '3.2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ROUNDDOWN.functionParameter.numDigits.name',
-                detail: 'sheets-formula.functionList.ROUNDDOWN.functionParameter.numDigits.detail',
+                name: 'formula.functionList.ROUNDDOWN.functionParameter.numDigits.name',
+                detail: 'formula.functionList.ROUNDDOWN.functionParameter.numDigits.detail',
                 example: '0',
                 require: 1,
                 repeat: 0,
@@ -1166,19 +1166,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.ROUNDUP,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.ROUNDUP.description',
-        abstract: 'sheets-formula.functionList.ROUNDUP.abstract',
+        description: 'formula.functionList.ROUNDUP.description',
+        abstract: 'formula.functionList.ROUNDUP.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.ROUNDUP.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.ROUNDUP.functionParameter.number.detail',
+                name: 'formula.functionList.ROUNDUP.functionParameter.number.name',
+                detail: 'formula.functionList.ROUNDUP.functionParameter.number.detail',
                 example: '3.2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.ROUNDUP.functionParameter.numDigits.name',
-                detail: 'sheets-formula.functionList.ROUNDUP.functionParameter.numDigits.detail',
+                name: 'formula.functionList.ROUNDUP.functionParameter.numDigits.name',
+                detail: 'formula.functionList.ROUNDUP.functionParameter.numDigits.detail',
                 example: '0',
                 require: 1,
                 repeat: 0,
@@ -1188,12 +1188,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SEC,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SEC.description',
-        abstract: 'sheets-formula.functionList.SEC.abstract',
+        description: 'formula.functionList.SEC.description',
+        abstract: 'formula.functionList.SEC.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SEC.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SEC.functionParameter.number.detail',
+                name: 'formula.functionList.SEC.functionParameter.number.name',
+                detail: 'formula.functionList.SEC.functionParameter.number.detail',
                 example: '30',
                 require: 1,
                 repeat: 0,
@@ -1203,12 +1203,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SECH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SECH.description',
-        abstract: 'sheets-formula.functionList.SECH.abstract',
+        description: 'formula.functionList.SECH.description',
+        abstract: 'formula.functionList.SECH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SECH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SECH.functionParameter.number.detail',
+                name: 'formula.functionList.SECH.functionParameter.number.name',
+                detail: 'formula.functionList.SECH.functionParameter.number.detail',
                 example: '30',
                 require: 1,
                 repeat: 0,
@@ -1218,33 +1218,33 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SERIESSUM,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SERIESSUM.description',
-        abstract: 'sheets-formula.functionList.SERIESSUM.abstract',
+        description: 'formula.functionList.SERIESSUM.description',
+        abstract: 'formula.functionList.SERIESSUM.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SERIESSUM.functionParameter.x.name',
-                detail: 'sheets-formula.functionList.SERIESSUM.functionParameter.x.detail',
+                name: 'formula.functionList.SERIESSUM.functionParameter.x.name',
+                detail: 'formula.functionList.SERIESSUM.functionParameter.x.detail',
                 example: '0.785398163',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SERIESSUM.functionParameter.n.name',
-                detail: 'sheets-formula.functionList.SERIESSUM.functionParameter.n.detail',
+                name: 'formula.functionList.SERIESSUM.functionParameter.n.name',
+                detail: 'formula.functionList.SERIESSUM.functionParameter.n.detail',
                 example: '0',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SERIESSUM.functionParameter.m.name',
-                detail: 'sheets-formula.functionList.SERIESSUM.functionParameter.m.detail',
+                name: 'formula.functionList.SERIESSUM.functionParameter.m.name',
+                detail: 'formula.functionList.SERIESSUM.functionParameter.m.detail',
                 example: '2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SERIESSUM.functionParameter.coefficients.name',
-                detail: 'sheets-formula.functionList.SERIESSUM.functionParameter.coefficients.detail',
+                name: 'formula.functionList.SERIESSUM.functionParameter.coefficients.name',
+                detail: 'formula.functionList.SERIESSUM.functionParameter.coefficients.detail',
                 example: 'A1:A4',
                 require: 1,
                 repeat: 0,
@@ -1254,33 +1254,33 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SEQUENCE,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SEQUENCE.description',
-        abstract: 'sheets-formula.functionList.SEQUENCE.abstract',
+        description: 'formula.functionList.SEQUENCE.description',
+        abstract: 'formula.functionList.SEQUENCE.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SEQUENCE.functionParameter.rows.name',
-                detail: 'sheets-formula.functionList.SEQUENCE.functionParameter.rows.detail',
+                name: 'formula.functionList.SEQUENCE.functionParameter.rows.name',
+                detail: 'formula.functionList.SEQUENCE.functionParameter.rows.detail',
                 example: '4',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SEQUENCE.functionParameter.columns.name',
-                detail: 'sheets-formula.functionList.SEQUENCE.functionParameter.columns.detail',
+                name: 'formula.functionList.SEQUENCE.functionParameter.columns.name',
+                detail: 'formula.functionList.SEQUENCE.functionParameter.columns.detail',
                 example: '5',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SEQUENCE.functionParameter.start.name',
-                detail: 'sheets-formula.functionList.SEQUENCE.functionParameter.start.detail',
+                name: 'formula.functionList.SEQUENCE.functionParameter.start.name',
+                detail: 'formula.functionList.SEQUENCE.functionParameter.start.detail',
                 example: '1',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SEQUENCE.functionParameter.step.name',
-                detail: 'sheets-formula.functionList.SEQUENCE.functionParameter.step.detail',
+                name: 'formula.functionList.SEQUENCE.functionParameter.step.name',
+                detail: 'formula.functionList.SEQUENCE.functionParameter.step.detail',
                 example: '1',
                 require: 0,
                 repeat: 0,
@@ -1290,12 +1290,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SIGN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SIGN.description',
-        abstract: 'sheets-formula.functionList.SIGN.abstract',
+        description: 'formula.functionList.SIGN.description',
+        abstract: 'formula.functionList.SIGN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SIGN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SIGN.functionParameter.number.detail',
+                name: 'formula.functionList.SIGN.functionParameter.number.name',
+                detail: 'formula.functionList.SIGN.functionParameter.number.detail',
                 example: '10',
                 require: 1,
                 repeat: 0,
@@ -1305,12 +1305,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SIN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SIN.description',
-        abstract: 'sheets-formula.functionList.SIN.abstract',
+        description: 'formula.functionList.SIN.description',
+        abstract: 'formula.functionList.SIN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SIN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SIN.functionParameter.number.detail',
+                name: 'formula.functionList.SIN.functionParameter.number.name',
+                detail: 'formula.functionList.SIN.functionParameter.number.detail',
                 example: '30*PI()/180',
                 require: 1,
                 repeat: 0,
@@ -1320,12 +1320,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SINH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SINH.description',
-        abstract: 'sheets-formula.functionList.SINH.abstract',
+        description: 'formula.functionList.SINH.description',
+        abstract: 'formula.functionList.SINH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SINH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SINH.functionParameter.number.detail',
+                name: 'formula.functionList.SINH.functionParameter.number.name',
+                detail: 'formula.functionList.SINH.functionParameter.number.detail',
                 example: '0.0342*1.03',
                 require: 1,
                 repeat: 0,
@@ -1335,12 +1335,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SQRT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SQRT.description',
-        abstract: 'sheets-formula.functionList.SQRT.abstract',
+        description: 'formula.functionList.SQRT.description',
+        abstract: 'formula.functionList.SQRT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SQRT.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SQRT.functionParameter.number.detail',
+                name: 'formula.functionList.SQRT.functionParameter.number.name',
+                detail: 'formula.functionList.SQRT.functionParameter.number.detail',
                 example: '16',
                 require: 1,
                 repeat: 0,
@@ -1350,12 +1350,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SQRTPI,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SQRTPI.description',
-        abstract: 'sheets-formula.functionList.SQRTPI.abstract',
+        description: 'formula.functionList.SQRTPI.description',
+        abstract: 'formula.functionList.SQRTPI.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SQRTPI.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.SQRTPI.functionParameter.number.detail',
+                name: 'formula.functionList.SQRTPI.functionParameter.number.name',
+                detail: 'formula.functionList.SQRTPI.functionParameter.number.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -1365,26 +1365,26 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUBTOTAL,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUBTOTAL.description',
-        abstract: 'sheets-formula.functionList.SUBTOTAL.abstract',
+        description: 'formula.functionList.SUBTOTAL.description',
+        abstract: 'formula.functionList.SUBTOTAL.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUBTOTAL.functionParameter.functionNum.name',
-                detail: 'sheets-formula.functionList.SUBTOTAL.functionParameter.functionNum.detail',
+                name: 'formula.functionList.SUBTOTAL.functionParameter.functionNum.name',
+                detail: 'formula.functionList.SUBTOTAL.functionParameter.functionNum.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUBTOTAL.functionParameter.ref1.name',
-                detail: 'sheets-formula.functionList.SUBTOTAL.functionParameter.ref1.detail',
+                name: 'formula.functionList.SUBTOTAL.functionParameter.ref1.name',
+                detail: 'formula.functionList.SUBTOTAL.functionParameter.ref1.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUBTOTAL.functionParameter.ref2.name',
-                detail: 'sheets-formula.functionList.SUBTOTAL.functionParameter.ref2.detail',
+                name: 'formula.functionList.SUBTOTAL.functionParameter.ref2.name',
+                detail: 'formula.functionList.SUBTOTAL.functionParameter.ref2.detail',
                 example: 'B1:B20',
                 require: 0,
                 repeat: 1,
@@ -1393,21 +1393,21 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_MATH.SUM,
-        aliasFunctionName: 'sheets-formula.functionList.SUM.aliasFunctionName',
+        aliasFunctionName: 'formula.functionList.SUM.aliasFunctionName',
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUM.description',
-        abstract: 'sheets-formula.functionList.SUM.abstract',
+        description: 'formula.functionList.SUM.description',
+        abstract: 'formula.functionList.SUM.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUM.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.SUM.functionParameter.number1.detail',
+                name: 'formula.functionList.SUM.functionParameter.number1.name',
+                detail: 'formula.functionList.SUM.functionParameter.number1.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUM.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.SUM.functionParameter.number2.detail',
+                name: 'formula.functionList.SUM.functionParameter.number2.name',
+                detail: 'formula.functionList.SUM.functionParameter.number2.detail',
                 example: 'B2:B10',
                 require: 0,
                 repeat: 1,
@@ -1416,28 +1416,28 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_MATH.SUMIF,
-        aliasFunctionName: 'sheets-formula.functionList.SUMIF.aliasFunctionName',
+        aliasFunctionName: 'formula.functionList.SUMIF.aliasFunctionName',
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMIF.description',
-        abstract: 'sheets-formula.functionList.SUMIF.abstract',
+        description: 'formula.functionList.SUMIF.description',
+        abstract: 'formula.functionList.SUMIF.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMIF.functionParameter.range.name',
-                detail: 'sheets-formula.functionList.SUMIF.functionParameter.range.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.range.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.range.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMIF.functionParameter.criteria.name',
-                detail: 'sheets-formula.functionList.SUMIF.functionParameter.criteria.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.criteria.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.criteria.detail',
                 example: '">5"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMIF.functionParameter.sumRange.name',
-                detail: 'sheets-formula.functionList.SUMIF.functionParameter.sumRange.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.sumRange.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.sumRange.detail',
                 example: 'B1:B20',
                 require: 0,
                 repeat: 0,
@@ -1447,40 +1447,40 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUMIFS,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMIFS.description',
-        abstract: 'sheets-formula.functionList.SUMIFS.abstract',
+        description: 'formula.functionList.SUMIFS.description',
+        abstract: 'formula.functionList.SUMIFS.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMIFS.functionParameter.sumRange.name',
-                detail: 'sheets-formula.functionList.SUMIFS.functionParameter.sumRange.detail',
+                name: 'formula.functionList.SUMIFS.functionParameter.sumRange.name',
+                detail: 'formula.functionList.SUMIFS.functionParameter.sumRange.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMIFS.functionParameter.criteriaRange1.name',
-                detail: 'sheets-formula.functionList.SUMIFS.functionParameter.criteriaRange1.detail',
+                name: 'formula.functionList.SUMIFS.functionParameter.criteriaRange1.name',
+                detail: 'formula.functionList.SUMIFS.functionParameter.criteriaRange1.detail',
                 example: 'B1:B20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMIFS.functionParameter.criteria1.name',
-                detail: 'sheets-formula.functionList.SUMIFS.functionParameter.criteria1.detail',
+                name: 'formula.functionList.SUMIFS.functionParameter.criteria1.name',
+                detail: 'formula.functionList.SUMIFS.functionParameter.criteria1.detail',
                 example: '">10"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMIFS.functionParameter.criteriaRange2.name',
-                detail: 'sheets-formula.functionList.SUMIFS.functionParameter.criteriaRange2.detail',
+                name: 'formula.functionList.SUMIFS.functionParameter.criteriaRange2.name',
+                detail: 'formula.functionList.SUMIFS.functionParameter.criteriaRange2.detail',
                 example: 'C1:C20',
                 require: 0,
                 repeat: 1,
             },
             {
-                name: 'sheets-formula.functionList.SUMIFS.functionParameter.criteria2.name',
-                detail: 'sheets-formula.functionList.SUMIFS.functionParameter.criteria2.detail',
+                name: 'formula.functionList.SUMIFS.functionParameter.criteria2.name',
+                detail: 'formula.functionList.SUMIFS.functionParameter.criteria2.detail',
                 example: '"<20"',
                 require: 0,
                 repeat: 1,
@@ -1490,19 +1490,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUMPRODUCT,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMPRODUCT.description',
-        abstract: 'sheets-formula.functionList.SUMPRODUCT.abstract',
+        description: 'formula.functionList.SUMPRODUCT.description',
+        abstract: 'formula.functionList.SUMPRODUCT.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMPRODUCT.functionParameter.array1.name',
-                detail: 'sheets-formula.functionList.SUMPRODUCT.functionParameter.array1.detail',
+                name: 'formula.functionList.SUMPRODUCT.functionParameter.array1.name',
+                detail: 'formula.functionList.SUMPRODUCT.functionParameter.array1.detail',
                 example: 'C2:C5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMPRODUCT.functionParameter.array2.name',
-                detail: 'sheets-formula.functionList.SUMPRODUCT.functionParameter.array2.detail',
+                name: 'formula.functionList.SUMPRODUCT.functionParameter.array2.name',
+                detail: 'formula.functionList.SUMPRODUCT.functionParameter.array2.detail',
                 example: 'D2:D5',
                 require: 0,
                 repeat: 1,
@@ -1512,19 +1512,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUMSQ,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMSQ.description',
-        abstract: 'sheets-formula.functionList.SUMSQ.abstract',
+        description: 'formula.functionList.SUMSQ.description',
+        abstract: 'formula.functionList.SUMSQ.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMSQ.functionParameter.number1.name',
-                detail: 'sheets-formula.functionList.SUMSQ.functionParameter.number1.detail',
+                name: 'formula.functionList.SUMSQ.functionParameter.number1.name',
+                detail: 'formula.functionList.SUMSQ.functionParameter.number1.detail',
                 example: '3',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMSQ.functionParameter.number2.name',
-                detail: 'sheets-formula.functionList.SUMSQ.functionParameter.number2.detail',
+                name: 'formula.functionList.SUMSQ.functionParameter.number2.name',
+                detail: 'formula.functionList.SUMSQ.functionParameter.number2.detail',
                 example: '4',
                 require: 0,
                 repeat: 1,
@@ -1534,19 +1534,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUMX2MY2,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMX2MY2.description',
-        abstract: 'sheets-formula.functionList.SUMX2MY2.abstract',
+        description: 'formula.functionList.SUMX2MY2.description',
+        abstract: 'formula.functionList.SUMX2MY2.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMX2MY2.functionParameter.arrayX.name',
-                detail: 'sheets-formula.functionList.SUMX2MY2.functionParameter.arrayX.detail',
+                name: 'formula.functionList.SUMX2MY2.functionParameter.arrayX.name',
+                detail: 'formula.functionList.SUMX2MY2.functionParameter.arrayX.detail',
                 example: 'A2:A8',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMX2MY2.functionParameter.arrayY.name',
-                detail: 'sheets-formula.functionList.SUMX2MY2.functionParameter.arrayY.detail',
+                name: 'formula.functionList.SUMX2MY2.functionParameter.arrayY.name',
+                detail: 'formula.functionList.SUMX2MY2.functionParameter.arrayY.detail',
                 example: 'B2:B8',
                 require: 1,
                 repeat: 0,
@@ -1556,19 +1556,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUMX2PY2,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMX2PY2.description',
-        abstract: 'sheets-formula.functionList.SUMX2PY2.abstract',
+        description: 'formula.functionList.SUMX2PY2.description',
+        abstract: 'formula.functionList.SUMX2PY2.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMX2PY2.functionParameter.arrayX.name',
-                detail: 'sheets-formula.functionList.SUMX2PY2.functionParameter.arrayX.detail',
+                name: 'formula.functionList.SUMX2PY2.functionParameter.arrayX.name',
+                detail: 'formula.functionList.SUMX2PY2.functionParameter.arrayX.detail',
                 example: 'A2:A8',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMX2PY2.functionParameter.arrayY.name',
-                detail: 'sheets-formula.functionList.SUMX2PY2.functionParameter.arrayY.detail',
+                name: 'formula.functionList.SUMX2PY2.functionParameter.arrayY.name',
+                detail: 'formula.functionList.SUMX2PY2.functionParameter.arrayY.detail',
                 example: 'B2:B8',
                 require: 1,
                 repeat: 0,
@@ -1578,19 +1578,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.SUMXMY2,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.SUMXMY2.description',
-        abstract: 'sheets-formula.functionList.SUMXMY2.abstract',
+        description: 'formula.functionList.SUMXMY2.description',
+        abstract: 'formula.functionList.SUMXMY2.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.SUMXMY2.functionParameter.arrayX.name',
-                detail: 'sheets-formula.functionList.SUMXMY2.functionParameter.arrayX.detail',
+                name: 'formula.functionList.SUMXMY2.functionParameter.arrayX.name',
+                detail: 'formula.functionList.SUMXMY2.functionParameter.arrayX.detail',
                 example: 'A2:A8',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.SUMXMY2.functionParameter.arrayY.name',
-                detail: 'sheets-formula.functionList.SUMXMY2.functionParameter.arrayY.detail',
+                name: 'formula.functionList.SUMXMY2.functionParameter.arrayY.name',
+                detail: 'formula.functionList.SUMXMY2.functionParameter.arrayY.detail',
                 example: 'B2:B8',
                 require: 1,
                 repeat: 0,
@@ -1600,12 +1600,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.TAN,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.TAN.description',
-        abstract: 'sheets-formula.functionList.TAN.abstract',
+        description: 'formula.functionList.TAN.description',
+        abstract: 'formula.functionList.TAN.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.TAN.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.TAN.functionParameter.number.detail',
+                name: 'formula.functionList.TAN.functionParameter.number.name',
+                detail: 'formula.functionList.TAN.functionParameter.number.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -1615,12 +1615,12 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.TANH,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.TANH.description',
-        abstract: 'sheets-formula.functionList.TANH.abstract',
+        description: 'formula.functionList.TANH.description',
+        abstract: 'formula.functionList.TANH.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.TANH.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.TANH.functionParameter.number.detail',
+                name: 'formula.functionList.TANH.functionParameter.number.name',
+                detail: 'formula.functionList.TANH.functionParameter.number.detail',
                 example: '1',
                 require: 1,
                 repeat: 0,
@@ -1630,19 +1630,19 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_MATH.TRUNC,
         functionType: FunctionType.Math,
-        description: 'sheets-formula.functionList.TRUNC.description',
-        abstract: 'sheets-formula.functionList.TRUNC.abstract',
+        description: 'formula.functionList.TRUNC.description',
+        abstract: 'formula.functionList.TRUNC.abstract',
         functionParameter: [
             {
-                name: 'sheets-formula.functionList.TRUNC.functionParameter.number.name',
-                detail: 'sheets-formula.functionList.TRUNC.functionParameter.number.detail',
+                name: 'formula.functionList.TRUNC.functionParameter.number.name',
+                detail: 'formula.functionList.TRUNC.functionParameter.number.detail',
                 example: '0.45',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'sheets-formula.functionList.TRUNC.functionParameter.numDigits.name',
-                detail: 'sheets-formula.functionList.TRUNC.functionParameter.numDigits.detail',
+                name: 'formula.functionList.TRUNC.functionParameter.numDigits.name',
+                detail: 'formula.functionList.TRUNC.functionParameter.numDigits.detail',
                 example: '1',
                 require: 0,
                 repeat: 0,

@@ -33,14 +33,7 @@ import univer from './function-list/univer/ca-ES';
 import web from './function-list/web/ca-ES';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'Analitzant fórmules...',
-            calculating: 'Calculant fórmules...',
-            'array-analysis': 'Analitzant fórmules de matriu...',
-            'array-calculation': 'Calculant fórmules de matriu...',
-            done: 'Fet',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

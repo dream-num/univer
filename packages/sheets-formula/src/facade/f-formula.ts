@@ -16,11 +16,13 @@
 
 import type { IDisposable, ILocales } from '@univerjs/core';
 import type { IFunctionInfo, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
+import type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from '@univerjs/formula';
+import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
-import { FormulaCalculationSessionService, IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { IRegisterFunctionService } from '@univerjs/formula';
+import { FormulaCalculationSessionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 
 /**
  * @ignore
@@ -382,12 +384,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         func: IRegisterFunction,
         options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
     ): IDisposable {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
-
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
+        const registerFunctionService = this._injector.get(IRegisterFunctionService);
 
         const params: ISingleFunctionRegisterParams = {
             name,
@@ -408,12 +405,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         func: IRegisterAsyncFunction,
         options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
     ): IDisposable {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
-
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
+        const registerFunctionService = this._injector.get(IRegisterFunctionService);
 
         const params: ISingleFunctionRegisterParams = {
             name,

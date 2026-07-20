@@ -16,7 +16,7 @@
 
 import type { Direction, IDisposable } from '@univerjs/core';
 import type { IFunctionInfo, ISequenceNode } from '@univerjs/engine-formula';
-import type { ISearchItem } from '@univerjs/sheets-formula';
+import type { ISearchItem } from '@univerjs/formula';
 import type { Observable } from 'rxjs';
 import { createIdentifier, IContextService } from '@univerjs/core';
 import { sequenceNodeType } from '@univerjs/engine-formula';

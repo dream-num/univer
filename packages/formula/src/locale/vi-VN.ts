@@ -33,14 +33,7 @@ import univer from './function-list/univer/vi-VN';
 import web from './function-list/web/vi-VN';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'Đang phân tích công thức...',
-            calculating: 'Đang tính toán công thức...',
-            'array-analysis': 'Đang phân tích công thức mảng...',
-            'array-calculation': 'Đang tính toán công thức mảng...',
-            done: 'Hoàn tất',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

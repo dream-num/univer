@@ -35,13 +35,3 @@ export {
     RemoteRegisterFunctionService,
 } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';
-export { DescriptionService, IDescriptionService } from '@univerjs/formula';
-export type { ISearchItem, ISearchItemWithType } from '@univerjs/formula';
-export type {
-    IRegisterAsyncFunction,
-    IRegisterFunction,
-    IRegisterFunctionParams,
-    ISingleFunctionRegisterParams,
-    IUnregisterFunctionParams,
-} from '@univerjs/formula';
-export { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/formula';

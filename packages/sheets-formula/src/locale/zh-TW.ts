@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from '@univerjs/formula/locale/function-list/array/zh-TW';
-import compatibility from '@univerjs/formula/locale/function-list/compatibility/zh-TW';
-import cube from '@univerjs/formula/locale/function-list/cube/zh-TW';
-import database from '@univerjs/formula/locale/function-list/database/zh-TW';
-import date from '@univerjs/formula/locale/function-list/date/zh-TW';
-import engineering from '@univerjs/formula/locale/function-list/engineering/zh-TW';
-import financial from '@univerjs/formula/locale/function-list/financial/zh-TW';
-import information from '@univerjs/formula/locale/function-list/information/zh-TW';
-import logical from '@univerjs/formula/locale/function-list/logical/zh-TW';
-import lookup from '@univerjs/formula/locale/function-list/lookup/zh-TW';
-import math from '@univerjs/formula/locale/function-list/math/zh-TW';
-import statistical from '@univerjs/formula/locale/function-list/statistical/zh-TW';
-import text from '@univerjs/formula/locale/function-list/text/zh-TW';
-import univer from '@univerjs/formula/locale/function-list/univer/zh-TW';
-import web from '@univerjs/formula/locale/function-list/web/zh-TW';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': '正在分析陣列公式...',
             'array-calculation': '正在計算陣列公式...',
             done: '完成',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

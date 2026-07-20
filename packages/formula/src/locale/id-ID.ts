@@ -33,14 +33,7 @@ import univer from './function-list/univer/id-ID';
 import web from './function-list/web/id-ID';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'Menganalisis rumus...',
-            calculating: 'Menghitung rumus...',
-            'array-analysis': 'Menganalisis rumus array...',
-            'array-calculation': 'Menghitung rumus array...',
-            done: 'Selesai',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

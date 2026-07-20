@@ -47,6 +47,12 @@ import {
     SuperTableService,
 } from '@univerjs/engine-formula';
 import {
+    DescriptionService,
+    IDescriptionService,
+    IRegisterFunctionService,
+    RegisterFunctionService,
+} from '@univerjs/formula';
+import {
     RefRangeService,
     SheetInterceptorService,
     SheetSkeletonService,
@@ -61,12 +67,8 @@ import {
     SheetsDataValidationValidatorService,
 } from '@univerjs/sheets-data-validation';
 import {
-    DescriptionService,
     FormulaCalculationSessionController,
     FormulaCalculationSessionService,
-    IDescriptionService,
-    IRegisterFunctionService,
-    RegisterFunctionService,
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';

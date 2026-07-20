@@ -27,7 +27,7 @@ import { debounceTime } from 'rxjs';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { useStateRef } from './use-state-ref';
 
-export function getFormulaReplaceResult(nodes: INode[], index: number, formulaName: string, functionType: FunctionType) {
+function getFormulaReplaceResult(nodes: INode[], index: number, formulaName: string, functionType: FunctionType) {
     return getSharedFormulaReplaceResult(nodes, index, formulaName, functionType);
 }
 

@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from '@univerjs/formula/locale/function-list/array/de-DE';
-import compatibility from '@univerjs/formula/locale/function-list/compatibility/de-DE';
-import cube from '@univerjs/formula/locale/function-list/cube/de-DE';
-import database from '@univerjs/formula/locale/function-list/database/de-DE';
-import date from '@univerjs/formula/locale/function-list/date/de-DE';
-import engineering from '@univerjs/formula/locale/function-list/engineering/de-DE';
-import financial from '@univerjs/formula/locale/function-list/financial/de-DE';
-import information from '@univerjs/formula/locale/function-list/information/de-DE';
-import logical from '@univerjs/formula/locale/function-list/logical/de-DE';
-import lookup from '@univerjs/formula/locale/function-list/lookup/de-DE';
-import math from '@univerjs/formula/locale/function-list/math/de-DE';
-import statistical from '@univerjs/formula/locale/function-list/statistical/de-DE';
-import text from '@univerjs/formula/locale/function-list/text/de-DE';
-import univer from '@univerjs/formula/locale/function-list/univer/de-DE';
-import web from '@univerjs/formula/locale/function-list/web/de-DE';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Matrixformeln werden analysiert...',
             'array-calculation': 'Matrixformeln werden berechnet...',
             done: 'Fertig',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

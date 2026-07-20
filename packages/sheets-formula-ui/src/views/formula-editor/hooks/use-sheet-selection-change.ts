@@ -45,7 +45,6 @@ import {
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    getFormulaSequenceCharacterAtOffset,
     isFormulaReferenceAddingContext,
     isFormulaReferenceAddingTextContext,
 } from '@univerjs/formula-ui';
@@ -90,9 +89,6 @@ export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTree
         offset,
     };
 };
-
-export const getSequenceNodeCharAtOffset = getFormulaSequenceCharacterAtOffset;
-export { isFormulaReferenceAddingContext, isFormulaReferenceAddingTextContext };
 
 export function insertFormulaReferenceText(formulaText: string, refText: string, offset: number): string {
     return `${formulaText.slice(0, offset)}${refText}${formulaText.slice(offset)}`;

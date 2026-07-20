@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from '@univerjs/formula/locale/function-list/array/ru-RU';
-import compatibility from '@univerjs/formula/locale/function-list/compatibility/ru-RU';
-import cube from '@univerjs/formula/locale/function-list/cube/ru-RU';
-import database from '@univerjs/formula/locale/function-list/database/ru-RU';
-import date from '@univerjs/formula/locale/function-list/date/ru-RU';
-import engineering from '@univerjs/formula/locale/function-list/engineering/ru-RU';
-import financial from '@univerjs/formula/locale/function-list/financial/ru-RU';
-import information from '@univerjs/formula/locale/function-list/information/ru-RU';
-import logical from '@univerjs/formula/locale/function-list/logical/ru-RU';
-import lookup from '@univerjs/formula/locale/function-list/lookup/ru-RU';
-import math from '@univerjs/formula/locale/function-list/math/ru-RU';
-import statistical from '@univerjs/formula/locale/function-list/statistical/ru-RU';
-import text from '@univerjs/formula/locale/function-list/text/ru-RU';
-import univer from '@univerjs/formula/locale/function-list/univer/ru-RU';
-import web from '@univerjs/formula/locale/function-list/web/ru-RU';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Анализ формул массива...',
             'array-calculation': 'Вычисление формул массива...',
             done: 'Готово',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

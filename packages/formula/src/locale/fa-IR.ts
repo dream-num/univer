@@ -33,14 +33,7 @@ import univer from './function-list/univer/en-US';
 import web from './function-list/web/en-US';
 
 const locale: typeof enUS = {
-    'sheets-formula': {
-        progress: {
-            analyzing: 'در حال تحلیل فرمول‌ها...',
-            calculating: 'در حال محاسبه فرمول‌ها...',
-            'array-analysis': 'در حال تحلیل فرمول‌های آرایه‌ای...',
-            'array-calculation': 'در حال محاسبه فرمول‌های آرایه‌ای...',
-            done: 'انجام شد',
-        },
+    formula: {
         functionList: {
             ...array,
             ...compatibility,

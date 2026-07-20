@@ -15,10 +15,10 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { IConfigService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
+import formulaEnUS from '../../locale/en-US';
 import { DescriptionService, IDescriptionService } from '../description.service';
 
 function createFunctionInfo(overrides: Partial<IFunctionInfo> = {}): IFunctionInfo {
@@ -53,6 +53,7 @@ describe('DescriptionService', () => {
         localeService.load({
             [LocaleType.ZH_CN]: {},
             [LocaleType.EN_US]: {
+                ...formulaEnUS,
                 custom: {
                     alias: 'CUSTOM_ALIAS',
                     desc: 'Localized description',
@@ -65,7 +66,6 @@ describe('DescriptionService', () => {
             },
         });
 
-        injector.get(IConfigService).setConfig(PLUGIN_CONFIG_KEY_BASE, { description: [] });
         injector.add([IFunctionService, { useClass: FunctionService }]);
         injector.add([IDescriptionService, { useClass: DescriptionService }]);
 
@@ -109,6 +109,15 @@ describe('DescriptionService', () => {
 
         expect(descriptionService.hasDescription('CUSTOMFUNC')).toBe(false);
         expect(descriptionService.getFunctionInfo('CUSTOMFUNC')).toBeUndefined();
+    });
+
+    it('resolves built-in descriptions from the formula-owned locale namespace', () => {
+        localeService.setLocale(LocaleType.EN_US);
+
+        expect(descriptionService.getFunctionInfo('SUM')).toMatchObject({
+            abstract: 'Adds its arguments',
+            description: 'You can add individual values, cell references or ranges or a mix of all three.',
+        });
     });
 
     it('handles defined-name descriptions according to current implementation semantics', () => {

@@ -28,16 +28,18 @@ import {
     SetTriggerFormulaCalculationStartMutation,
     SuperTableService,
 } from '@univerjs/engine-formula';
+import {
+    DescriptionService,
+    IDescriptionService,
+    IRegisterFunctionService,
+    RegisterFunctionService,
+} from '@univerjs/formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormulaCalculationSessionController } from '../../controllers/formula-calculation-session.controller';
 import {
     CalculationMode,
-    DescriptionService,
-    IDescriptionService,
-    IRegisterFunctionService,
     PLUGIN_CONFIG_KEY_BASE,
-    RegisterFunctionService,
 } from '../../index';
 import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
 import { createFacadeTestBed } from './create-test-bed';

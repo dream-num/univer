@@ -71,9 +71,11 @@ describe('shared shortcut items', () => {
 describe('SharedController', () => {
     it('should register clipboard commands and shared shortcuts on initialize', () => {
         const registerMultipleCommand = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerCommand = vi.fn(() => ({ dispose: vi.fn() }));
         const registerShortcut = vi.fn(() => ({ dispose: vi.fn() }));
 
         const commandService = {
+            registerCommand,
             registerMultipleCommand,
         };
         const shortcutService = {
@@ -83,6 +85,9 @@ describe('SharedController', () => {
         const controller = new SharedController(shortcutService as any, commandService as any);
 
         expect(registerMultipleCommand).toHaveBeenCalledTimes(3);
+        expect(registerCommand).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'base-ui.operation.toggle-fullscreen',
+        }));
         expect(registerShortcut).toHaveBeenCalledTimes(5);
 
         controller.dispose();

@@ -16,6 +16,7 @@
 
 import './global.css';
 
+export { ToggleFullscreenOperation } from './commands/operations/toggle-fullscreen.operation';
 export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';

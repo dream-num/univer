@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: '더 보기',
             toggleGridlines: '눈금선 표시/숨기기',
+            fullscreen: '전체 화면',
         },
         align: {
             left: '왼쪽',

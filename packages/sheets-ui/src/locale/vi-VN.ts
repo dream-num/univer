@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Thêm',
             toggleGridlines: 'Chuyển đổi đường lưới',
+            fullscreen: 'Toàn màn hình',
         },
         align: {
             left: 'Căn trái',

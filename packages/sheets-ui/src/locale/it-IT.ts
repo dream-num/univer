@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Altro',
             toggleGridlines: 'Mostra/Nascondi griglia',
+            fullscreen: 'Schermo intero',
         },
         align: {
             left: 'sinistra',

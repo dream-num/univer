@@ -71,6 +71,61 @@ const getMenuHiddenByCurrentSelectionChangedObservable$ = (accessor: IAccessor, 
 };
 
 export const SHEET_FROZEN_MENU_ID = 'sheet.menu.sheet-frozen';
+export const SHEET_FROZEN_TOOLBAR_MENU_ID = 'sheet.toolbar.sheet-frozen';
+
+export function SheetFrozenToolbarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    return {
+        id: SHEET_FROZEN_TOOLBAR_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        tooltip: 'sheets-ui.rightClick.freeze',
+        icon: 'FreezeToSelectedIcon',
+        selections: [
+            {
+                id: SetSelectionFrozenCommand.id,
+                value: SetSelectionFrozenCommand.id,
+                params: {},
+                icon: 'FreezeToSelectedIcon',
+                label: { name: MENU_ITEM_FROZEN_COMPONENT, selectable: false, props: { type: 'all' } },
+            },
+            {
+                id: SetRowFrozenCommand.id,
+                value: SetRowFrozenCommand.id,
+                params: {},
+                icon: 'FreezeRowIcon',
+                label: { name: MENU_ITEM_FROZEN_COMPONENT, selectable: false, props: { type: 'row' } },
+            },
+            {
+                id: SetColumnFrozenCommand.id,
+                value: SetColumnFrozenCommand.id,
+                params: {},
+                icon: 'FreezeColumnIcon',
+                label: { name: MENU_ITEM_FROZEN_COMPONENT, selectable: false, props: { type: 'col' } },
+            },
+            {
+                id: SetFirstRowFrozenCommand.id,
+                value: SetFirstRowFrozenCommand.id,
+                params: {},
+                icon: 'FreezeRowIcon',
+                label: { name: 'sheets-ui.rightClick.freezeFirstRow', selectable: false },
+            },
+            {
+                id: SetFirstColumnFrozenCommand.id,
+                value: SetFirstColumnFrozenCommand.id,
+                params: {},
+                icon: 'FreezeColumnIcon',
+                label: { name: 'sheets-ui.rightClick.freezeFirstCol', selectable: false },
+            },
+            {
+                id: CancelFrozenCommand.id,
+                value: CancelFrozenCommand.id,
+                params: {},
+                icon: 'CancelFreezeIcon',
+                label: { name: 'sheets-ui.rightClick.cancelFreeze', selectable: false },
+            },
+        ],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
 
 export function SheetFrozenMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {

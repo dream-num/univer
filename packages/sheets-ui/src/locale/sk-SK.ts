@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Viac',
             toggleGridlines: 'Prepnúť mriežku',
+            fullscreen: 'Celá obrazovka',
         },
         align: {
             left: 'vľavo',

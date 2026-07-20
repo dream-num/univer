@@ -361,15 +361,13 @@ function getPageSizeInModernMode(page: IDocumentSkeletonPage) {
         pageHeight = page.height + marginTop + marginBottom;
     }
 
+    // Keep the modern page horizontally anchored to its configured width.
+    // Overflow drawings and tables may extend its height, but must not recenter the document.
     for (const drawing of skeDrawings.values()) {
-        pageWidth = Math.max(pageWidth, drawing.aLeft + drawing.width + marginLeft + marginRight);
         pageHeight = Math.max(pageHeight, drawing.aTop + drawing.height + marginTop + marginBottom);
     }
 
     for (const table of skeTables.values()) {
-        // Keep the modern document page anchored to its configured width. Tables
-        // may render beyond the text column, but they should not widen the whole
-        // document and recenter the page during column resize.
         pageHeight = Math.max(pageHeight, table.top + table.height + marginTop + marginBottom);
     }
 

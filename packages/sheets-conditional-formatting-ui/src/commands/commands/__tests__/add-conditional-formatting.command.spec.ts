@@ -21,6 +21,9 @@ import {
     CFSubRuleType,
     CFTextOperator,
     CFTimePeriodOperator,
+    CFValueType,
+    ClearRangeCfCommand,
+    IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../../__tests__/create-cf-ui-test-bed';
@@ -28,6 +31,7 @@ import { AddAverageCfCommand } from '../add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from '../add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from '../add-data-bar-cf.command';
 import { AddDuplicateValuesCfCommand } from '../add-duplicate-values-cf.command';
+import { AddIconSetConditionalRuleCommand } from '../add-icon-set-cf.command';
 import { AddNumberCfCommand } from '../add-number-cf.command';
 import { AddRankCfCommand } from '../add-rank-cf.command';
 import { AddTextCfCommand } from '../add-text-cf.command';
@@ -155,6 +159,104 @@ describe('conditional formatting add commands', () => {
                 },
             },
         });
+
+        testBed.univer.dispose();
+    });
+
+    it('adds a data bar to the current selection when ranges are omitted', async () => {
+        const testBed = createCfUiTestBed();
+        testBed.commandService.registerCommand(AddDataBarConditionalRuleCommand);
+        testBed.setSelection(range);
+
+        expect(await testBed.commandService.executeCommand(AddDataBarConditionalRuleCommand.id, {
+            min: { type: CFValueType.min },
+            max: { type: CFValueType.max },
+            nativeColor: '#ddd',
+            positiveColor: '#0f0',
+            isGradient: false,
+            isShowValue: true,
+        })).toBe(true);
+
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)?.[0].ranges).toMatchObject([range]);
+
+        testBed.univer.dispose();
+    });
+
+    it('adds an icon set to the current selection', async () => {
+        const testBed = createCfUiTestBed();
+        testBed.commandService.registerCommand(AddIconSetConditionalRuleCommand);
+        testBed.setSelection(range);
+
+        const config = [
+            {
+                iconType: IIconSetType.threeStars,
+                iconId: '0',
+                operator: CFNumberOperator.greaterThanOrEqual,
+                value: { type: CFValueType.percent, value: 67 },
+            },
+            {
+                iconType: IIconSetType.threeStars,
+                iconId: '1',
+                operator: CFNumberOperator.greaterThanOrEqual,
+                value: { type: CFValueType.percent, value: 33 },
+            },
+            {
+                iconType: IIconSetType.threeStars,
+                iconId: '2',
+                operator: CFNumberOperator.lessThan,
+                value: { type: CFValueType.percent, value: Number.MAX_SAFE_INTEGER },
+            },
+        ];
+
+        expect(await testBed.commandService.executeCommand(AddIconSetConditionalRuleCommand.id, {
+            config,
+            isShowValue: true,
+        })).toBe(true);
+
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)?.[0]).toMatchObject({
+            ranges: [range],
+            rule: {
+                type: CFRuleType.iconSet,
+                config,
+                isShowValue: true,
+            },
+        });
+
+        testBed.univer.dispose();
+    });
+
+    it('clears only the requested conditional formatting type', async () => {
+        const testBed = createCfUiTestBed();
+        testBed.commandService.registerCommand(AddDataBarConditionalRuleCommand);
+        testBed.commandService.registerCommand(AddIconSetConditionalRuleCommand);
+
+        await testBed.commandService.executeCommand(AddDataBarConditionalRuleCommand.id, {
+            ranges: [range],
+            min: { type: CFValueType.min },
+            max: { type: CFValueType.max },
+            nativeColor: '#ddd',
+            positiveColor: '#0f0',
+            isGradient: false,
+            isShowValue: true,
+        });
+        await testBed.commandService.executeCommand(AddIconSetConditionalRuleCommand.id, {
+            ranges: [range],
+            config: [{
+                iconType: IIconSetType.threeStars,
+                iconId: '0',
+                operator: CFNumberOperator.greaterThanOrEqual,
+                value: { type: CFValueType.num, value: 0 },
+            }],
+            isShowValue: true,
+        });
+
+        expect(testBed.commandService.syncExecuteCommand(ClearRangeCfCommand.id, {
+            ranges: [range],
+            types: [CFRuleType.dataBar],
+        })).toBe(true);
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)).toMatchObject([{
+            rule: { type: CFRuleType.iconSet },
+        }]);
 
         testBed.univer.dispose();
     });

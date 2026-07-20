@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Больше',
             toggleGridlines: 'Переключить сетку',
+            fullscreen: 'Полноэкранный режим',
         },
         align: {
             left: 'Лево',

@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Applica una preimpostazione:',
             editDropdown: 'Modifica opzioni',
             clearDropdown: 'Cancella elenco a discesa',
+            dateTime: 'Data e ora',
             presets: {
                 yes: 'Sì',
                 no: 'No',

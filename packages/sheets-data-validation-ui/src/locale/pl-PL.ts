@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Zastosuj ustawienie wstępne:',
             editDropdown: 'Edytuj opcje',
             clearDropdown: 'Wyczyść listę rozwijaną',
+            dateTime: 'Data i czas',
             presets: {
                 yes: 'Tak',
                 no: 'Nie',

@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { CheckboxIcon, DataValidationIcon, DropdownListIcon } from '@univerjs/icons';
+import { CheckboxIcon, DataValidationIcon, DatePickerIcon, DropdownListIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { DataValidationPanel } from '../views/components';
@@ -39,6 +39,7 @@ export class ComponentsController extends Disposable {
         this.disposeWithMe(this._iconManager.register({
             CheckboxIcon,
             DataValidationIcon,
+            DatePickerIcon,
             DropdownListIcon,
         }));
     }

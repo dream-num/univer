@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Použiť predvoľbu:',
             editDropdown: 'Upraviť možnosti',
             clearDropdown: 'Vymazať rozbaľovací zoznam',
+            dateTime: 'Dátum a čas',
             presets: {
                 yes: 'Áno',
                 no: 'Nie',

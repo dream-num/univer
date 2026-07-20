@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'بیشتر',
             toggleGridlines: 'تغییر وضعیت خطوط شبکه',
+            fullscreen: 'تمام‌صفحه',
         },
         align: {
             left: 'چپ',

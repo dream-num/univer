@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Áp dụng mẫu:',
             editDropdown: 'Chỉnh sửa tùy chọn',
             clearDropdown: 'Xóa danh sách thả xuống',
+            dateTime: 'Ngày giờ',
             presets: {
                 yes: 'Có',
                 no: 'Không',

@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'المزيد',
             toggleGridlines: 'تبديل خطوط الشبكة',
+            fullscreen: 'ملء الشاشة',
         },
         align: {
             left: 'يسار',

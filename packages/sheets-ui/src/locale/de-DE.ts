@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Mehr',
             toggleGridlines: 'Gitterlinien ein-/ausblenden',
+            fullscreen: 'Vollbild',
         },
         align: {
             left: 'links',

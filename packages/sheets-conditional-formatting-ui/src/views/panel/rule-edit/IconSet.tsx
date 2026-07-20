@@ -35,8 +35,8 @@ import {
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { ILayoutService, useDependency, useObservable, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useObservable, useSidebarClick } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const getIcon = (iconType: IIconSetType, iconId: string | number) => {
     const arr = iconMap[iconType] || [];
@@ -114,50 +114,72 @@ interface IIconGroupListProps {
     onClick: (iconType: IIconSetType) => void;
     iconType?: IIconSetType;
 };
-const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, ref) => {
-    const { onClick } = props;
+const IconGroupList = (props: IIconGroupListProps) => {
+    const { iconType, onClick } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    const handleClick = (iconType: IIconSetType) => {
-        onClick(iconType);
-    };
     return (
-        <div ref={ref} dir={direction} className="univer-w-80">
-            {iconGroup.map((group, index) => {
+        <div dir={direction} className="univer-w-80">
+            {iconGroup.map((group) => {
                 return (
-                    <div key={index} className="univer-mb-3">
-                        <div className="univer-mb-1 univer-text-sm">
+                    <div
+                        key={group.title}
+                        className="
+                          univer-mb-4
+                          last:univer-mb-0
+                        "
+                    >
+                        <div
+                            className="
+                              univer-mb-2 univer-px-1 univer-text-xs univer-font-medium univer-text-gray-500
+                              dark:!univer-text-gray-400
+                            "
+                        >
                             {localeService.t(group.title)}
                         </div>
-                        <div className="univer-flex univer-flex-wrap">
-                            {group.group.map((groupItem) => {
+                        <div className="univer-grid univer-grid-cols-2 univer-gap-1">
+                            {group.group.map((groupItem, groupItemIndex) => {
+                                const selected = groupItem.name === iconType;
                                 return (
-                                    <div
+                                    <button
                                         key={groupItem.name}
-                                        className="
-                                          univer-mb-1 univer-flex univer-w-1/2 univer-items-center
-                                          rtl:univer-flex-row-reverse rtl:univer-justify-end
-                                        "
-                                        onClick={() => { handleClick(groupItem.name); }}
+                                        type="button"
+                                        aria-label={`${localeService.t(group.title)} ${groupItemIndex + 1}`}
+                                        aria-pressed={selected}
+                                        className={clsx(
+                                            `
+                                              univer-flex univer-h-8 univer-w-full univer-cursor-pointer
+                                              univer-items-center univer-rounded-md univer-border-0
+                                              univer-bg-transparent univer-px-2 univer-outline-none
+                                              univer-transition-colors
+                                              focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
+                                              rtl:univer-flex-row-reverse
+                                            `,
+                                            selected
+                                                ? `
+                                                  univer-bg-primary-50 univer-ring-1 univer-ring-primary-600
+                                                  dark:!univer-bg-primary-900
+                                                `
+                                                : `
+                                                  hover:univer-bg-gray-100
+                                                  dark:hover:!univer-bg-gray-700
+                                                `
+                                        )}
+                                        onClick={() => { onClick(groupItem.name); }}
                                     >
-                                        <a
-                                            className={`
-                                              univer-flex univer-cursor-pointer univer-rounded
-                                              hover:univer-bg-gray-100
-                                              dark:hover:!univer-bg-gray-700
-                                            `}
-                                        >
+                                        <span className="univer-flex univer-items-center univer-gap-0.5">
                                             {groupItem.list.map((base64, index) => (
                                                 <img
                                                     key={index}
+                                                    alt=""
                                                     className="univer-size-5"
                                                     src={base64}
                                                     draggable={false}
                                                 />
                                             ))}
-                                        </a>
-                                    </div>
+                                        </span>
+                                    </button>
                                 );
                             })}
                         </div>
@@ -166,7 +188,7 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
             })}
         </div>
     );
-});
+};
 
 const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string) => void; iconType?: IIconSetType; iconId: string }) => {
     const { onClick } = props;
@@ -591,11 +613,6 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         });
         setConfigList([...configList]);
     };
-    const layoutService = useDependency(ILayoutService);
-    const [iconGroupListEl, setIconGroupListEl] = useState<HTMLDivElement>();
-
-    useScrollYOverContainer(iconGroupListEl, layoutService.rootContainerElement);
-
     return (
         <div data-u-comp="cf-icon-set-editor" dir={direction}>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
@@ -604,11 +621,8 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             <div className="univer-mt-3">
                 <Dropdown
                     overlay={(
-                        <div dir={direction} className="univer-rounded-lg univer-p-4">
+                        <div dir={direction} className="univer-rounded-lg univer-p-3">
                             <IconGroupList
-                                ref={(el) => {
-                                    !iconGroupListEl && el && setIconGroupListEl(el);
-                                }}
                                 iconType={currentIconType}
                                 onClick={handleClickIconList}
                             />

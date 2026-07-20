@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Aplica una predefinició:',
             editDropdown: 'Edita les opcions',
             clearDropdown: 'Esborra el menú desplegable',
+            dateTime: 'Data i hora',
             presets: {
                 yes: 'Sí',
                 no: 'No',

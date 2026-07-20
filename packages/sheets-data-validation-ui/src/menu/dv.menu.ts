@@ -38,12 +38,25 @@ import { DROPDOWN_PRESETS_COMPONENT } from '../views/components/DropdownPresets'
 
 export const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
 export const QUICK_DROPDOWN_MENU_ID = 'sheet.menu.quick-dropdown';
+export const QUICK_DATE_MENU_ID = 'sheet.menu.quick-date';
 
 const CHECKBOX_RULE_INPUT: IQuickDataValidationRuleInput = {
     type: DataValidationType.CHECKBOX,
     operator: undefined,
     formula1: undefined,
     formula2: undefined,
+};
+
+const DATE_RULE_INPUT: IQuickDataValidationRuleInput = {
+    type: DataValidationType.DATE,
+    operator: undefined,
+    formula1: undefined,
+    formula2: undefined,
+};
+
+const DATE_TIME_RULE_INPUT: IQuickDataValidationRuleInput = {
+    ...DATE_RULE_INPUT,
+    bizInfo: { showTime: true },
 };
 
 function createDropdownRuleInput(formula1: string): IQuickDataValidationRuleInput {
@@ -144,6 +157,43 @@ export function quickDropdownMenuFactory(accessor: IAccessor): IMenuSelectorItem
                 label: 'sheets-data-validation-ui.ribbon.clearDropdown',
                 value: DataValidationType.LIST,
                 params: { types: [DataValidationType.LIST, DataValidationType.LIST_MULTIPLE] },
+            },
+        ],
+        ...getQuickDataValidationMenuState(accessor),
+    };
+}
+
+export function quickDateMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    return {
+        id: QUICK_DATE_MENU_ID,
+        commandId: InsertQuickSheetDataValidationCommand.id,
+        type: MenuItemType.BUTTON_SELECTOR,
+        icon: 'DatePickerIcon',
+        tooltip: 'sheets-data-validation-ui.date.title',
+        params: { rule: DATE_RULE_INPUT },
+        selectionsCommandId: InsertQuickSheetDataValidationCommand.id,
+        selections: [
+            {
+                label: 'sheets-data-validation-ui.date.title',
+                value: DataValidationType.DATE,
+                params: { rule: DATE_RULE_INPUT },
+            },
+            {
+                label: 'sheets-data-validation-ui.ribbon.dateTime',
+                value: DataValidationType.DATE,
+                params: { rule: DATE_TIME_RULE_INPUT },
+            },
+            {
+                id: AddSheetDataValidationAndOpenCommand.id,
+                label: 'sheets-data-validation-ui.list.edit',
+                value: DataValidationType.DATE,
+                params: { rule: DATE_RULE_INPUT },
+            },
+            {
+                id: ClearQuickSheetDataValidationCommand.id,
+                label: 'sheets-data-validation-ui.panel.removeRule',
+                value: DataValidationType.DATE,
+                params: { types: [DataValidationType.DATE] },
             },
         ],
         ...getQuickDataValidationMenuState(accessor),

@@ -19,7 +19,7 @@ import type { LocaleKey } from '../../locale/types';
 import type { IMenuItemFrozenProps } from './interface';
 import { LocaleService, Tools } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { IContextMenuService, useDependency } from '@univerjs/ui';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
 const defaultValue = {
@@ -27,38 +27,34 @@ const defaultValue = {
     col: 'A',
 };
 
+function getFrozenValue(selection?: ISelectionWithStyle | null) {
+    if (!selection) return defaultValue;
+
+    const { primary, range } = selection;
+    const row = primary?.startRow ?? range.startRow;
+    const col = primary?.startColumn ?? range.startColumn;
+
+    return {
+        row: row === 0 ? '1' : String(row),
+        col: col === 0 ? 'A' : Tools.chatAtABC(col - 1),
+    };
+}
+
 export const MenuItemFrozen = (props: IMenuItemFrozenProps) => {
     const { type } = props;
 
     const localeService = useDependency(LocaleService);
-    const contextMenuService = useDependency(IContextMenuService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
 
-    const [value, setValue] = useState<{
-        row: string;
-        col: string;
-    }>(defaultValue);
-
-    const updateValue = (selection: ISelectionWithStyle) => {
-        if (!selection) {
-            return;
-        }
-
-        const { primary, range } = selection;
-        const row = primary?.startRow ?? range.startRow;
-        const col = primary?.startColumn ?? range.startColumn;
-
-        setValue({
-            row: row === 0 ? '1' : String(row),
-            col: col === 0 ? 'A' : Tools.chatAtABC(col - 1),
-        });
-    };
+    const [value, setValue] = useState(() => getFrozenValue(selectionManagerService.getCurrentLastSelection() as ISelectionWithStyle));
 
     useEffect(() => {
-        if (contextMenuService.visible) {
-            updateValue(selectionManagerService.getCurrentLastSelection() as ISelectionWithStyle);
-        }
-    }, [contextMenuService.visible]);
+        const subscription = selectionManagerService.selectionChanged$.subscribe((selections) => {
+            setValue(getFrozenValue(selections?.[selections.length - 1]));
+        });
+
+        return () => subscription.unsubscribe();
+    }, [selectionManagerService]);
 
     return (
         <>

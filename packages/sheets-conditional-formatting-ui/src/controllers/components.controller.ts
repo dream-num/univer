@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { ConditionsDoubleIcon } from '@univerjs/icons';
+import { ConditionsDoubleIcon, DataBarIcon, RatingIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { ConditionFormattingPanel } from '../views/ConditionFormattingPanel';
 
@@ -41,6 +41,8 @@ export class ComponentsController extends Disposable {
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
             ConditionsDoubleIcon,
+            DataBarIcon,
+            RatingIcon,
         }));
     }
 }

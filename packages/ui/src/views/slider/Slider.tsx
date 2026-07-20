@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDropdownMenuProps } from '@univerjs/design';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { LocaleService } from '@univerjs/core';
-import { borderClassName, Button, clsx, DropdownMenu, Input } from '@univerjs/design';
+import { borderClassName, Button, clsx } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
 import { IconManager } from '../../common';
 import { useDependency, useObservable } from '../../utils/di';
+import { ZoomInput } from './ZoomInput';
 
 export interface ISliderProps {
     /** The value of slider. When range is false, use number, otherwise, use [number, number] */
@@ -72,21 +72,12 @@ export function Slider(props: ISliderProps) {
     const isRtl = direction === 'rtl';
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
-    const isEditingZoomRef = useRef(false);
     const dragValueRef = useRef(value);
     const pendingDragValueRef = useRef<number | null>(null);
     const lastCommittedDragValueRef = useRef(value);
     const dragCommitTimerRef = useRef<number | null>(null);
-    const [zoomListVisible, setZoomListVisible] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [dragValue, setDragValue] = useState(value);
-    const [zoomInputValue, setZoomInputValue] = useState(() => `${value}%`);
-
-    useEffect(() => {
-        if (!isEditingZoomRef.current) {
-            setZoomInputValue(`${value}%`);
-        }
-    }, [value]);
 
     useEffect(() => () => {
         clearDragCommitTimer();
@@ -243,79 +234,12 @@ export function Slider(props: ISliderProps) {
         window.addEventListener('pointerout', onPointerOut);
     }
 
-    function handleSelectZoomLevel(value: number) {
-        if (disabled) return;
-
-        setZoomListVisible(false);
-        onChange && onChange(value);
-    }
-
-    function parseExactZoomInput(rawValue: string) {
-        const normalizedValue = rawValue.trim().replace(/%$/, '').trim();
-        if (normalizedValue === '') {
-            return null;
-        }
-
-        const parsedValue = Number(normalizedValue);
-        if (!Number.isFinite(parsedValue)) {
-            return null;
-        }
-
-        return Math.round(clampValue(parsedValue));
-    }
-
-    function handleExactZoomFocus() {
-        if (disabled) return;
-
-        isEditingZoomRef.current = true;
-        setZoomInputValue(String(value));
-    }
-
-    function commitExactZoomInput() {
-        if (disabled) return;
-        if (!isEditingZoomRef.current) return;
-
-        const parsedValue = parseExactZoomInput(zoomInputValue);
-        isEditingZoomRef.current = false;
-
-        if (parsedValue == null) {
-            setZoomInputValue(`${value}%`);
-            return;
-        }
-
-        setZoomInputValue(`${parsedValue}%`);
-        if (parsedValue !== value) {
-            onChange && onChange(parsedValue);
-        }
-    }
-
-    function handleExactZoomChange(value: string) {
-        setZoomInputValue(value);
-    }
-
-    function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        e.stopPropagation();
-
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            commitExactZoomInput();
-            e.currentTarget.blur();
-        }
-    }
-
-    const items: IDropdownMenuProps['items'] = [{
-        type: 'radio',
-        value: value.toString(),
-        options: shortcuts.map((item) => ({ value: item.toString(), label: `${item}%` })),
-        onSelect: (value: string) => handleSelectZoomLevel(+value),
-    }];
     const visualValue = isDragging ? dragValue : value;
     const sliderOffset = Math.min(Math.max(getSliderOffset(visualValue) ?? 0, 0), 100);
     const handleOffset = isRtl ? 100 - sliderOffset : sliderOffset;
 
     const ReduceIcon = iconManager.get('ReduceIcon');
     const IncreaseIcon = iconManager.get('IncreaseIcon');
-    const MoreDownIcon = iconManager.get('MoreDownIcon');
 
     return (
         <div
@@ -417,56 +341,14 @@ export function Slider(props: ISliderProps) {
                 <IncreaseIcon className="univer-text-gray-500" />
             </Button>
 
-            <div
-                className={clsx(`
-                  univer-flex univer-h-6 univer-w-[68px] univer-flex-shrink-0 univer-items-center univer-overflow-hidden
-                  univer-rounded-md univer-border univer-border-gray-200 univer-bg-white
-                  dark:!univer-border-gray-600 dark:!univer-bg-gray-800
-                `, {
-                    'univer-opacity-60': disabled,
-                })}
-            >
-                <Input
-                    className={`
-                      univer-box-border univer-h-6 univer-w-[52px] univer-border-none univer-bg-transparent
-                      [&_input:focus]:!univer-ring-0
-                      [&_input]:univer-h-6 [&_input]:univer-w-[52px] [&_input]:univer-border-none
-                      [&_input]:!univer-bg-transparent [&_input]:univer-px-1 [&_input]:univer-text-center
-                      [&_input]:univer-text-xs [&_input]:univer-tabular-nums
-                    `}
-                    inputClass="univer-w-[52px]"
-                    size="mini"
-                    value={zoomInputValue}
-                    disabled={disabled}
-                    type="text"
-                    onChange={handleExactZoomChange}
-                    onFocus={handleExactZoomFocus}
-                    onBlur={commitExactZoomInput}
-                    onKeyDown={handleInputKeyDown}
-                />
-
-                <DropdownMenu
-                    align="end"
-                    items={items}
-                    open={zoomListVisible}
-                    disabled={disabled}
-                    onOpenChange={setZoomListVisible}
-                >
-                    <Button
-                        className="univer-h-6 univer-w-4 univer-rounded-none univer-p-0"
-                        size="small"
-                        variant="text"
-                        disabled={disabled}
-                    >
-                        <MoreDownIcon
-                            className="
-                              univer-size-3 univer-text-gray-500
-                              dark:!univer-text-gray-300
-                            "
-                        />
-                    </Button>
-                </DropdownMenu>
-            </div>
+            <ZoomInput
+                value={value}
+                min={min}
+                max={max}
+                shortcuts={shortcuts}
+                disabled={disabled}
+                onChange={onChange}
+            />
         </div>
     );
 }

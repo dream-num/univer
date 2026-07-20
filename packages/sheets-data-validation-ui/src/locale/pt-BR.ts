@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: 'Aplicar predefinição:',
             editDropdown: 'Editar opções',
             clearDropdown: 'Limpar lista suspensa',
+            dateTime: 'Data e hora',
             presets: {
                 yes: 'Sim',
                 no: 'Não',

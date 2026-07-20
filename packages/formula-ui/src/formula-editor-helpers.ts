@@ -117,6 +117,10 @@ export function getFormulaSequenceNodeIndex(
 }
 
 export function getFormulaReferenceIndex(sequenceNodes: FormulaSequenceNode[], nodeIndex: number): number {
+    if (nodeIndex < 0 || nodeIndex >= sequenceNodes.length) {
+        return -1;
+    }
+
     const node = sequenceNodes[nodeIndex];
     if (typeof node === 'string' || !isFormulaReferenceNode(node)) {
         return -1;

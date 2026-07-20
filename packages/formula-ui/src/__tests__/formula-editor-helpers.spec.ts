@@ -83,6 +83,27 @@ describe('formula editor helpers', () => {
         })).toMatchObject({ mode: 'none', referenceIndex: -1 });
     });
 
+    it('allows adding a reference when the cursor is before the first sequence node', () => {
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'SUM(A1)',
+            sequenceNodes: [
+                'SUM(',
+                {
+                    token: 'A1',
+                    nodeType: sequenceNodeType.REFERENCE,
+                    startIndex: 4,
+                    endIndex: 5,
+                },
+                ')',
+            ],
+            offset: 0,
+        })).toMatchObject({
+            mode: 'add',
+            nodeIndex: -1,
+            referenceIndex: -1,
+        });
+    });
+
     it('edits structured table references as selectable references', () => {
         expect(resolveFormulaReferenceEditingContext({
             formulaText: 'SUM(SalesTable[Amount])',

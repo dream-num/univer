@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Més',
             toggleGridlines: 'Alternar línies de quadrícula',
+            fullscreen: 'Pantalla completa',
         },
         align: {
             left: 'esquerra',

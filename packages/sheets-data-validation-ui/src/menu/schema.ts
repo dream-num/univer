@@ -26,8 +26,10 @@ import {
     DATA_VALIDATION_MENU_ID,
     dataValidationMenuFactory,
     openDataValidationMenuFactory,
+    QUICK_DATE_MENU_ID,
     QUICK_DROPDOWN_MENU_ID,
     quickCheckboxMenuFactory,
+    quickDateMenuFactory,
     quickDropdownMenuFactory,
 } from './dv.menu';
 
@@ -40,6 +42,10 @@ export const menuSchema: MenuSchemaType = {
         [QUICK_DROPDOWN_MENU_ID]: {
             order: 1,
             menuItemFactory: quickDropdownMenuFactory,
+        },
+        [QUICK_DATE_MENU_ID]: {
+            order: 2,
+            menuItemFactory: quickDateMenuFactory,
         },
     },
     [RibbonDataGroup.RULES]: {

@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Mais',
             toggleGridlines: 'Mostrar/Ocultar linhas de grade',
+            fullscreen: 'Tela cheia',
         },
         align: {
             left: 'esquerda',

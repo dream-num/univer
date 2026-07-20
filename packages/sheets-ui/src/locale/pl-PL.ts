@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Więcej',
             toggleGridlines: 'Przełącz linie siatki',
+            fullscreen: 'Pełny ekran',
         },
         align: {
             left: 'lewo',

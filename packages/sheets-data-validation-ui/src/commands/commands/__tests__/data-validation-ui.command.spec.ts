@@ -286,6 +286,28 @@ describe('AddSheetDataValidationAndOpenCommand', () => {
         expect(addParams.rule.operator).toBeUndefined();
     });
 
+    it('inserts a date-time picker rule into the current selection', () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(InsertQuickSheetDataValidationCommand.id, {
+            rule: {
+                type: DataValidationType.DATE,
+                operator: undefined,
+                formula1: undefined,
+                formula2: undefined,
+                bizInfo: { showTime: true },
+            },
+        })).toBe(true);
+
+        const addParams = testBed.executedCommands[0].params as { rule: IDataValidationRule };
+        expect(addParams.rule).toMatchObject({
+            type: DataValidationType.DATE,
+            ranges: [SELECTION_RANGE],
+            bizInfo: { showTime: true },
+        });
+    });
+
     it('adds a dropdown rule and opens the existing panel to edit it', () => {
         testBed = createTestBed();
         const commandService = testBed.get(ICommandService);

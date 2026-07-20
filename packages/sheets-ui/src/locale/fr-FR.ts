@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Plus',
             toggleGridlines: 'Activer/désactiver le quadrillage',
+            fullscreen: 'Plein écran',
         },
         align: {
             left: 'gauche',

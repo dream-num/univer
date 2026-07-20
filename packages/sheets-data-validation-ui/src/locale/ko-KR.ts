@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: '프리셋 적용:',
             editDropdown: '옵션 편집',
             clearDropdown: '드롭다운 지우기',
+            dateTime: '날짜 및 시간',
             presets: {
                 yes: '예',
                 no: '아니요',

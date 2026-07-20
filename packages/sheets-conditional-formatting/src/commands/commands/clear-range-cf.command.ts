@@ -15,6 +15,7 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { CFRuleType } from '../../base/const';
 import type { IConditionFormattingRule } from '../../models/type';
 import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
@@ -35,6 +36,7 @@ export interface IClearRangeCfParams {
     ranges?: IRange[];
     unitId?: string;
     subUnitId?: string;
+    types?: CFRuleType[];
 }
 export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
     type: CommandType.COMMAND,
@@ -55,7 +57,9 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
 
         const { unitId, subUnitId } = target;
         const ranges = params.ranges ?? selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) ?? [];
-        const allRuleList = conditionalFormattingRangeIndexModel.getRulesByRanges(unitId, subUnitId, ranges);
+        const allRuleList = conditionalFormattingRangeIndexModel
+            .getRulesByRanges(unitId, subUnitId, ranges)
+            .filter((rule) => !params.types?.length || params.types.includes(rule.rule.type as CFRuleType));
         if (!allRuleList?.length || !ranges.length) {
             return false;
         }

@@ -30,7 +30,12 @@ import {
     UniverInstanceService,
 } from '@univerjs/core';
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import {
+    DocumentEditArea,
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
 import { DocMenuStyleService } from '../doc-menu-style.service';
 

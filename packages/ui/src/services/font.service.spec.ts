@@ -58,6 +58,27 @@ describe('FontService', () => {
         expect(service.getFontByValue('Inter')).toBeUndefined();
     });
 
+    it('uses the filtered reference catalog as the default font list', () => {
+        const values = createService().getFonts().map((font) => font.value);
+
+        expect(values).toHaveLength(197);
+        expect(values.slice(0, 8)).toEqual([
+            '宋体',
+            'Arial',
+            'Baskerville',
+            'Comic Sans MS',
+            'Courier New',
+            'Helvetica',
+            'Times New Roman',
+            'Verdana',
+        ]);
+        expect(values).toContain('Zapfino');
+        expect(values).not.toContain('Microsoft YaHei');
+        expect(values).not.toContain('正文字体');
+        expect(values.some((value) => value.startsWith('MiSans'))).toBe(false);
+        expect(values.some((value) => value.toUpperCase().includes('WPS'))).toBe(false);
+    });
+
     it('rejects duplicate font values to keep font selection stable', () => {
         const service = createService();
         const arial = service.getFontByValue('Arial')!;

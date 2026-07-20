@@ -25,6 +25,7 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
+import { ToggleFullscreenOperation } from '../commands/operations/toggle-fullscreen.operation';
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
@@ -121,6 +122,7 @@ export class SharedController extends Disposable {
     }
 
     private _registerCommands(): void {
+        this.disposeWithMe(this._commandService.registerCommand(ToggleFullscreenOperation));
         [CutCommand, CopyCommand, PasteCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerMultipleCommand(command))
         );

@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             dropdownPresetTitle: '应用预设：',
             editDropdown: '编辑选项',
             clearDropdown: '清除下拉菜单',
+            dateTime: '日期时间',
             presets: {
                 yes: '是',
                 no: '否',

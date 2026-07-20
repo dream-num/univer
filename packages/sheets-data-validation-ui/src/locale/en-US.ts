@@ -23,6 +23,7 @@ const locale = {
             dropdownPresetTitle: 'Apply a preset:',
             editDropdown: 'Edit options',
             clearDropdown: 'Clear Dropdown',
+            dateTime: 'Date & Time',
             presets: {
                 yes: 'Yes',
                 no: 'No',

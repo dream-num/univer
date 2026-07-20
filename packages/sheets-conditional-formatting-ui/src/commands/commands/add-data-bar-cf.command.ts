@@ -21,11 +21,11 @@ import {
     ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 
 interface IAddUniqueValuesConditionalRuleParams {
-    ranges: IRange[];
+    ranges?: IRange[];
     stopIfTrue?: boolean;
     min: IDataBar['config']['min'];
     max: IDataBar['config']['max'];
@@ -42,7 +42,9 @@ export const AddDataBarConditionalRuleCommand: ICommand<IAddUniqueValuesConditio
         if (!params) {
             return false;
         }
-        const { ranges, min, max, nativeColor, positiveColor, isGradient, stopIfTrue, isShowValue } = params;
+        const { min, max, nativeColor, positiveColor, isGradient, stopIfTrue, isShowValue } = params;
+        const ranges = params.ranges ?? accessor.get(SheetsSelectionsService).getCurrentSelections().map((selection) => selection.range);
+        if (!ranges.length) return false;
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 

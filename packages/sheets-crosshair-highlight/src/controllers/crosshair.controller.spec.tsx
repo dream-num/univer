@@ -15,6 +15,7 @@
  */
 
 import { CrossHighlightingIcon } from '@univerjs/icons';
+import { RibbonViewGroup } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import {
     DisableCrosshairHighlightOperation,
@@ -45,6 +46,8 @@ describe('SheetsCrosshairHighlightController', () => {
 
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
         expect(Object.keys(menuSchema).length).toBeGreaterThan(0);
+        const viewVisibility = (menuSchema as Record<string, Record<string, unknown>>)[RibbonViewGroup.VISIBILITY];
+        expect(viewVisibility).toHaveProperty(ToggleCrosshairHighlightOperation.id);
 
         controller.dispose();
     });

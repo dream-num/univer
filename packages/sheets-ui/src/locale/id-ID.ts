@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'Lainnya',
             toggleGridlines: 'Alihkan garis kisi',
+            fullscreen: 'Layar penuh',
         },
         align: {
             left: 'kiri',

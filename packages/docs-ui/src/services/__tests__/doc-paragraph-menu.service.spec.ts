@@ -15,11 +15,21 @@
  */
 
 import type { IMutiPageParagraphBound, ITableBound } from '../doc-event-manager.service';
-import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, DocumentBlockType, PresetListType } from '@univerjs/core';
+import {
+    BlockType,
+    DataStreamTreeTokenType,
+    DOC_RANGE_TYPE,
+    DocumentBlockRangeType,
+    DocumentBlockType,
+    PresetListType,
+} from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../views/paragraph-menu/component-keys';
+import {
+    DOC_PARAGRAPH_MENU_COMPONENT_KEY,
+    DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
+} from '../../views/paragraph-menu/component-keys';
 import {
     getPreferredParagraphBoundsInRange,
     getTableBlockMenuHoverRect,

@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: 'その他',
             toggleGridlines: 'グリッド線の表示/非表示',
+            fullscreen: '全画面表示',
         },
         align: {
             left: '左寄せ',

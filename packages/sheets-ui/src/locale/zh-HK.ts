@@ -68,6 +68,7 @@ const locale: typeof enUS = {
             },
             more: '更多',
             toggleGridlines: '切換網格線',
+            fullscreen: '全螢幕',
         },
         align: {
             left: '靠左對齊',

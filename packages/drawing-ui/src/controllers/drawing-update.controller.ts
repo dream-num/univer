@@ -65,12 +65,13 @@ interface IDrawingTransformStateWithClipBounds extends ITransformState {
 interface IDrawingRefreshMetadata {
     hidden?: boolean;
     behindText?: boolean;
+    selectable?: boolean;
 }
 
 type IDrawingParamWithRefreshMetadata = IDrawingParam & IDrawingRefreshMetadata;
 
 function hasRefreshMetadata(refreshParam: IDrawingSearch): refreshParam is IDrawingSearch & IDrawingRefreshMetadata {
-    return 'hidden' in refreshParam || 'behindText' in refreshParam;
+    return 'hidden' in refreshParam || 'behindText' in refreshParam || 'selectable' in refreshParam;
 }
 
 function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParamWithRefreshMetadata): void {
@@ -79,6 +80,36 @@ function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParamWi
     }
 
     drawingParam.hidden === true ? shape.hide() : shape.show();
+}
+
+function syncDrawingSelectableState(
+    shape: BaseObject,
+    drawingParam: IDrawingParamWithRefreshMetadata,
+    scene: Scene,
+    drawingManagerService: IDrawingManagerService
+): void {
+    const previousDrawing = drawingManagerService.getOldDrawingByParam(drawingParam);
+    // Some drawing types are eventless by design. Only override that behavior when selectable is explicitly
+    // managed; deleting a previously present field means restoring Shape's default selectable state.
+    if (!('selectable' in drawingParam) && (!previousDrawing || !('selectable' in previousDrawing))) {
+        return;
+    }
+
+    const selectable = drawingParam.selectable !== false;
+    shape.evented = selectable;
+    if (selectable) {
+        return;
+    }
+
+    // Disabling picking must also discard stale selection state, otherwise the transformer remains interactive.
+    scene.getTransformer()?.clearControlByIds([shape.oKey]);
+    const focusedDrawings = drawingManagerService.getFocusDrawings();
+    const remainingDrawings = focusedDrawings.filter(({ unitId, subUnitId, drawingId }) =>
+        unitId !== drawingParam.unitId || subUnitId !== drawingParam.subUnitId || drawingId !== drawingParam.drawingId
+    );
+    if (remainingDrawings.length !== focusedDrawings.length) {
+        drawingManagerService.focusDrawing(remainingDrawings);
+    }
 }
 
 function mergeRefreshMetadata(drawingParam: IDrawingParam, refreshParam: IDrawingSearch): IDrawingParamWithRefreshMetadata {
@@ -714,7 +745,9 @@ export class DrawingUpdateController extends Disposable {
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                    const drawingShape = scene.getObject(drawingShapeKey) as Image;
+                    // getObject() excludes hidden and grouped children, but both still need model updates and may
+                    // become visible again as part of this notification.
+                    const drawingShape = scene.getObjectIncludeInGroup(drawingShapeKey) as Image;
 
                     if (drawingShape == null) {
                         return true;
@@ -723,6 +756,7 @@ export class DrawingUpdateController extends Disposable {
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
                     syncDrawingHiddenState(drawingShape, drawingParam);
+                    syncDrawingSelectableState(drawingShape, drawingParam, scene, this._drawingManagerService);
                     ensureDrawingRenderLayer(scene, drawingShape, drawingParam);
 
                     scene.getTransformer()?.debounceRefreshControls();
@@ -779,6 +813,7 @@ export class DrawingUpdateController extends Disposable {
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
                     syncDrawingHiddenState(drawingShape as BaseObject, drawingParamWithRefreshMetadata);
+                    syncDrawingSelectableState(drawingShape as BaseObject, drawingParamWithRefreshMetadata, scene, this._drawingManagerService);
                     ensureDrawingRenderLayer(scene, drawingShape as BaseObject, drawingParamWithRefreshMetadata);
                 });
             })
@@ -798,7 +833,8 @@ export class DrawingUpdateController extends Disposable {
                     const { scene } = renderObject;
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                    const drawingShape = scene.getObject(drawingShapeKey);
+                    // Hidden objects are absent from getObject(), so use the unfiltered lookup to show them again.
+                    const drawingShape = scene.getObjectIncludeInGroup(drawingShapeKey);
 
                     if (drawingShape == null) {
                         return true;

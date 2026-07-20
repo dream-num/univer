@@ -248,6 +248,17 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     // Use in doc only.
     setDrawingData(unitId: string, subUnitId: string, data: IDrawingMapItemData<T>) {
+        const unitData = this.drawingManagerData[unitId];
+        const subUnitData = unitData[subUnitId];
+        // Docs replaces a whole subunit snapshot instead of applying JSON1. Isolate that subunit container so
+        // getOldDrawingByParam can still detect removed metadata fields after the current data is replaced.
+        this._oldDrawingManagerData = {
+            ...this.drawingManagerData,
+            [unitId]: {
+                ...unitData,
+                [subUnitId]: { ...subUnitData },
+            },
+        };
         this.drawingManagerData[unitId][subUnitId].data = data;
     }
 

@@ -80,7 +80,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.28.0",
+        "@univerjs/icons": "1.29.0",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

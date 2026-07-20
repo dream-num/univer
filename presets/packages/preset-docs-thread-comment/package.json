@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-docs-thread-comment",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.4",
     "private": false,
     "description": "Preset for thread comments in Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

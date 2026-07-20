@@ -127,13 +127,13 @@ export function ZoomInput(props: IZoomInputProps) {
         >
             <Input
                 className={`
-                  univer-box-border univer-h-6 univer-w-[52px] univer-border-none univer-bg-transparent
+                  univer-box-border univer-h-6 univer-min-w-0 univer-flex-1 univer-border-none univer-bg-transparent
                   [&_input:focus]:!univer-ring-0
-                  [&_input]:univer-h-6 [&_input]:univer-w-[52px] [&_input]:univer-border-none
+                  [&_input]:univer-h-6 [&_input]:univer-w-full [&_input]:univer-border-none
                   [&_input]:!univer-bg-transparent [&_input]:univer-px-1 [&_input]:univer-text-center
                   [&_input]:univer-text-xs [&_input]:univer-tabular-nums
                 `}
-                inputClass="univer-w-[52px]"
+                inputClass="univer-w-full"
                 size="mini"
                 value={inputValue}
                 disabled={disabled}

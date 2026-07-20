@@ -23,6 +23,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonViewGroup.VISIBILITY]: {
         [ToggleCrosshairHighlightOperation.id]: {
             order: 1,
+            gridLayout: { row: 2, column: 1, showLabel: true },
             menuItemFactory: CrosshairHighlightMenuItemFactory,
         },
     },

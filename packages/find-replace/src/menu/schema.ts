@@ -23,6 +23,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.ORGANIZATION]: {
         [OpenFindDialogOperation.id]: {
             order: 2,
+            gridLayout: { row: 1, column: 3 },
             menuItemFactory: FindReplaceMenuItemFactory,
         },
     },

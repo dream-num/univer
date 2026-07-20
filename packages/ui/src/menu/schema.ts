@@ -25,10 +25,12 @@ export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.HISTORY]: {
         [UndoCommand.id]: {
             order: 0,
+            gridLayout: { row: 1, column: 1, iconSize: 18 },
             menuItemFactory: UndoMenuItemFactory,
         },
         [RedoCommand.id]: {
             order: 1,
+            gridLayout: { row: 2, column: 1, iconSize: 18 },
             menuItemFactory: RedoMenuItemFactory,
         },
     },

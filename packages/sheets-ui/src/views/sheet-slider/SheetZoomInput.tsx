@@ -16,21 +16,22 @@
 
 import type { IZoomInputProps } from '@univerjs/ui';
 import { ICommandService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { useDependency, ZoomInput } from '@univerjs/ui';
 import { SetZoomRatioFromToolbarCommand } from '../../commands/commands/set-zoom-ratio-from-toolbar.command';
 
 export const SHEET_ZOOM_INPUT_COMPONENT = 'SHEET_ZOOM_INPUT_COMPONENT';
 
-export function SheetZoomInput(props: Omit<IZoomInputProps, 'className' | 'onChange'>) {
+export function SheetZoomInput({ className, ...props }: Omit<IZoomInputProps, 'onChange'>) {
     const commandService = useDependency(ICommandService);
 
     return (
         <ZoomInput
             {...props}
-            className="
+            className={clsx(`
               !univer-bg-transparent
               dark:!univer-bg-transparent
-            "
+            `, className)}
             onChange={(value) => commandService.executeCommand(SetZoomRatioFromToolbarCommand.id, { value })}
         />
     );

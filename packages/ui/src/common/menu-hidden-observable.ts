@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IAccessor } from '@univerjs/core';
-import { DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService, SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
 import { Observable } from 'rxjs';
 
 export function getMenuHiddenObservable(
@@ -25,6 +25,9 @@ export function getMenuHiddenObservable(
     needHideUnitId?: string | string[]
 ): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const getUnitType = (unitId: string) => SHEET_EDITOR_UNITS.includes(unitId)
+        ? UniverInstanceType.UNIVER_SHEET
+        : univerInstanceService.getUnitType(unitId);
 
     return new Observable((subscriber) => {
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
@@ -38,7 +41,7 @@ export function getMenuHiddenObservable(
             if (needHideUnitId && (Array.isArray(needHideUnitId) ? needHideUnitId.includes(unitId) : needHideUnitId === unitId)) {
                 return subscriber.next(true);
             }
-            const univerType = univerInstanceService.getUnitType(unitId);
+            const univerType = getUnitType(unitId);
 
             subscriber.next(univerType !== targetUniverType);
         });
@@ -49,7 +52,7 @@ export function getMenuHiddenObservable(
             const currentUnit = univerInstanceService.getCurrentUnitOfType(targetUniverType);
             subscriber.next(currentUnit == null);
         } else {
-            const univerType = univerInstanceService.getUnitType(focusedUniverInstance.getUnitId());
+            const univerType = getUnitType(focusedUniverInstance.getUnitId());
             subscriber.next(univerType !== targetUniverType);
         }
 

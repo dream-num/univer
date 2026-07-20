@@ -16,7 +16,7 @@
 
 import { Disposable, Inject } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
-import { ExpandIcon, IncreaseIcon, MoreDownIcon, RedoIcon, ReduceIcon, ShortcutIcon, ShrinkIcon, UndoIcon } from '@univerjs/icons';
+import { ExpandIcon, IncreaseIcon, KeyboardIcon, MoreDownIcon, RedoIcon, ReduceIcon, ShortcutIcon, ShrinkIcon, UndoIcon } from '@univerjs/icons';
 import { ShortcutPanelComponentName } from '../commands/operations/toggle-shortcut-panel.operation';
 import { ComponentManager, IconManager } from '../common';
 import { COLOR_PICKER_COMPONENT } from '../views/color-picker/interface';
@@ -48,6 +48,7 @@ export class ComponentsController extends Disposable {
         this.disposeWithMe(this._iconManager.register({
             ExpandIcon,
             IncreaseIcon,
+            KeyboardIcon,
             MoreDownIcon,
             RedoIcon,
             ReduceIcon,

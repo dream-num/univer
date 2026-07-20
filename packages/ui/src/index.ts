@@ -36,7 +36,7 @@ export { ShortcutPanelController } from './controllers/shortcut-display/shortcut
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { IUIController } from './controllers/ui/ui.controller';
-export type { IWorkbenchOptions } from './controllers/ui/ui.controller';
+export type { IWorkbenchOptions, RibbonType } from './controllers/ui/ui.controller';
 export { menuSchema as UIMenuSchema } from './menu/schema';
 export { UniverMobileUIPlugin } from './mobile-plugin';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './plugin';
@@ -91,8 +91,7 @@ export type {
     MenuItemDefaultValueType,
 } from './services/menu/menu';
 export { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
-export type { MenuSchemaType } from './services/menu/menu-manager.service';
-export { type IMenuSchema } from './services/menu/menu-manager.service';
+export type { IMenuSchema, IRibbonGridLayout, MenuSchemaType } from './services/menu/menu-manager.service';
 export {
     ContextMenuGroup,
     ContextMenuPosition,

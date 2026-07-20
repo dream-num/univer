@@ -151,11 +151,8 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
 
         this._hiddenSubscription?.unsubscribe();
 
-        this._hiddenSubscription = combineLatest(hiddenObservableMap)
-            .pipe(
-                startWith(new Array(hiddenObservableMap.length).fill(false)),
-                distinctUntilChanged(isSameHiddenMap)
-            )
+        this._hiddenSubscription = combineLatest(hiddenObservableMap.map((hidden$) => hidden$.pipe(startWith(false))))
+            .pipe(distinctUntilChanged(isSameHiddenMap))
             .subscribe((hiddenMap) => {
                 const newRibbon: IMenuSchema[] = [];
 

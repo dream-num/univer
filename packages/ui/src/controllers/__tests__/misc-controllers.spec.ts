@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { RedoCommand, UndoCommand } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
@@ -53,7 +54,7 @@ describe('shortcut-display controllers', () => {
             id: ToggleShortcutPanelOperation.id,
             title: 'ui.toggle-shortcut-panel',
             tooltip: 'ui.toggle-shortcut-panel',
-            icon: 'ShortcutIcon',
+            icon: 'KeyboardIcon',
             type: 0,
         });
     });
@@ -89,6 +90,11 @@ describe('menu schema and ui token', () => {
         expect(others).toBeDefined();
         expect(Object.keys(history).length).toBeGreaterThanOrEqual(2);
         expect(Object.keys(others).length).toBeGreaterThanOrEqual(1);
+        expect((history[UndoCommand.id] as { gridLayout?: unknown }).gridLayout).toEqual({ row: 1, column: 1, iconSize: 18 });
+        expect((history[RedoCommand.id] as { gridLayout?: unknown }).gridLayout).toEqual({ row: 2, column: 1, iconSize: 18 });
+        const shortcutPanel = others[ToggleShortcutPanelOperation.id] as { order?: number; gridLayout?: unknown };
+        expect(shortcutPanel.order).toBe(1);
+        expect(shortcutPanel.gridLayout).toBeUndefined();
     });
 
     it('should expose ui controller identifier', () => {

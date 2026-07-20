@@ -24,7 +24,7 @@ export function ShortcutPanelMenuItemFactory(): IMenuButtonItem<LocaleKey> {
         id: ToggleShortcutPanelOperation.id,
         title: 'ui.toggle-shortcut-panel',
         tooltip: 'ui.toggle-shortcut-panel',
-        icon: 'ShortcutIcon',
+        icon: 'KeyboardIcon',
         type: MenuItemType.BUTTON,
     };
 }

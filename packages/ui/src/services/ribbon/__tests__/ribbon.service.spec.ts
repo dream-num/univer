@@ -26,7 +26,7 @@ import {
     IUniverInstanceService,
     UniverInstanceService,
 } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { MenuItemType } from '../../menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager.service';
@@ -181,6 +181,43 @@ describe('DesktopRibbonService', () => {
         hidden$.next(true);
 
         expect(ribbons.length).toBe(publishCountAfterInitialHiddenState + 1);
+
+        ribbonSub.unsubscribe();
+    });
+
+    it('filters a hidden command even when another hidden state has not emitted', () => {
+        const { service, menuManagerService } = createService();
+        const silentHidden$ = new Subject<boolean>();
+        const hidden$ = new BehaviorSubject(true);
+        let latestRibbon: IMenuSchema[] = [];
+        const ribbonSub = service.ribbon$.subscribe((ribbon) => latestRibbon = ribbon);
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    order: 0,
+                    [`${RibbonPosition.START}.hidden-group`]: {
+                        order: 0,
+                        silentCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'silent-command', type: MenuItemType.BUTTON, hidden$: silentHidden$ }),
+                        },
+                        hiddenCommand: {
+                            order: 1,
+                            menuItemFactory: () => ({ id: 'hidden-command', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+
+        const commandKeys = latestRibbon
+            .find((group) => group.key === RibbonPosition.START)
+            ?.children
+            ?.flatMap((group) => group.children ?? [])
+            .map((child) => child.key);
+        expect(commandKeys).toContain('silentCommand');
+        expect(commandKeys).not.toContain('hiddenCommand');
 
         ribbonSub.unsubscribe();
     });

@@ -36,7 +36,7 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    ribbonType: 'classic',
+    ribbonType: 'grid',
 });
 
 univer.registerPlugin(UniverDocsPlugin);

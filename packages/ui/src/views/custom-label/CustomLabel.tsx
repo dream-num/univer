@@ -26,6 +26,8 @@ import { useDependency, useObservable } from '../../utils/di';
 export type ICustomLabelProps<T = undefined> = {
     className?: string;
 
+    iconSize?: number;
+
     value?: string | number | undefined;
 
     value$?: Observable<T>;
@@ -40,7 +42,7 @@ export type ICustomLabelProps<T = undefined> = {
  * @param props
  */
 export function CustomLabel(props: ICustomLabelProps) {
-    const { className, title, icon, label, value, value$ } = props;
+    const { className, iconSize, title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
     const iconManager = useDependency(IconManager);
@@ -72,6 +74,7 @@ export function CustomLabel(props: ICustomLabelProps) {
                 <Icon
                     key={index++}
                     className="univer-text-base"
+                    style={iconSize ? { width: iconSize, height: iconSize } : undefined}
                     extend={{ colorChannel1: isValid ? String(realValue) : 'var(--univer-primary-600)' }}
                 />
             );

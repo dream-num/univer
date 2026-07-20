@@ -24,6 +24,7 @@ import {
     forwardRef,
     useCallback,
     useContext,
+    useEffect,
     useImperativeHandle,
     useMemo,
     useRef,
@@ -126,6 +127,23 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
     const { children, overlay, disabled, align = 'start' } = props;
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const ownerDocument = triggerRef.current?.ownerDocument;
+        if (!dropdownVisible || !ownerDocument) return;
+
+        const handlePointerDown = (event: PointerEvent) => {
+            const target = event.target as Node | null;
+            if (!target || triggerRef.current?.contains(target) || overlayRef.current?.contains(target)) return;
+
+            setDropdownVisible(false);
+        };
+
+        ownerDocument.addEventListener('pointerdown', handlePointerDown, true);
+        return () => ownerDocument.removeEventListener('pointerdown', handlePointerDown, true);
+    }, [dropdownVisible, setDropdownVisible]);
 
     function handleVisibleChange(visible: boolean) {
         setDropdownVisible(visible);
@@ -135,7 +153,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
         <Dropdown
             align={align}
             overlay={(
-                <div className="univer-grid univer-gap-2">
+                <div ref={overlayRef} className="univer-grid univer-gap-2">
                     {overlay}
                 </div>
             )}
@@ -143,7 +161,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
             open={dropdownVisible}
             onOpenChange={handleVisibleChange}
         >
-            <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+            <div ref={triggerRef} className="univer-h-full" onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
         </Dropdown>

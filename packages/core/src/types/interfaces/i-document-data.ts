@@ -736,6 +736,10 @@ export interface IDocDrawingPosition {
     positionH: IObjectPositionH;
     positionV: IObjectPositionV;
     angle: number;
+    /** Horizontal flip persisted with the document drawing transform. */
+    flipX?: boolean;
+    /** Vertical flip persisted with the document drawing transform. */
+    flipY?: boolean;
     // Union field properties can be only one of the following:
     // shapeProperties?: IShapeProperties;
     // chartProperties?: IChartProperties;

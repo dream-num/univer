@@ -198,7 +198,12 @@ export class ImageUpdateController extends Disposable {
             }
 
             const images = await this._drawingRenderService.renderImages(imageParam, renderObject.scene);
-            this._drawingManagerService.refreshTransform([imageParam]);
+            // Image loading is asynchronous, so commands may have changed its transform or metadata while
+            // renderImages was pending. Refresh from the current model instead of the stale pre-load snapshot.
+            const currentImageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+            if (currentImageParam) {
+                this._drawingManagerService.refreshTransform([currentImageParam]);
+            }
 
             if (images == null || images.length === 0) {
                 return;

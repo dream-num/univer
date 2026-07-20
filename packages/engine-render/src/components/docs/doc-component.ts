@@ -39,6 +39,8 @@ export interface IDocumentsConfig extends IPageMarginLayout {
     pageFillColor?: string;
     pageStrokeColor?: string;
     marginStrokeColor?: string;
+    /** Called after an image used by a text fill finishes loading. */
+    onTextFillImageLoaded?: () => void;
 }
 
 export abstract class DocComponent extends RenderComponent<
@@ -52,6 +54,8 @@ export abstract class DocComponent extends RenderComponent<
 
     pageLayoutType: PageLayoutType = PageLayoutType.VERTICAL;
 
+    readonly onTextFillImageLoaded: () => void;
+
     constructor(
         oKey: string,
         private _skeleton?: DocumentSkeleton,
@@ -59,6 +63,11 @@ export abstract class DocComponent extends RenderComponent<
     ) {
         super(oKey);
 
+        this.onTextFillImageLoaded = () => {
+            // Picture text fills are unavailable during the first paint; loading must invalidate the document.
+            this.makeDirty(true);
+            config?.onTextFillImageLoaded?.();
+        };
         this._setConfig(config);
     }
 

@@ -51,6 +51,8 @@ export class FontAndBaseLine extends docExtension {
 
     private _textFillImageCache = new Map<string, HTMLImageElement>();
 
+    private _textFillImageLoadListeners = new Map<string, Set<() => void>>();
+
     constructor() {
         super();
     }
@@ -277,13 +279,37 @@ export class FontAndBaseLine extends docExtension {
     }
 
     private _getTextFillImage(source: string): HTMLImageElement | null {
+        const onTextFillImageLoaded = (this.parent as { onTextFillImageLoaded?: () => void } | null)
+            ?.onTextFillImageLoaded;
         const cached = this._textFillImageCache.get(source);
         if (cached) {
+            // The extension-level cache can serve multiple documents before one source finishes loading.
+            if (!cached.complete && onTextFillImageLoaded) {
+                this._textFillImageLoadListeners.get(source)?.add(onTextFillImageLoaded);
+            }
             return cached;
         }
 
+        // Do not force anonymous CORS: drawing does not read image pixels, while crossOrigin would reject remote
+        // sources that browsers can otherwise display when the server omits Access-Control-Allow-Origin.
         const image = new Image();
-        image.crossOrigin = 'anonymous';
+        const listeners = new Set<() => void>();
+        if (onTextFillImageLoaded) {
+            listeners.add(onTextFillImageLoaded);
+        }
+        this._textFillImageLoadListeners.set(source, listeners);
+        image.onload = () => {
+            image.onload = null;
+            image.onerror = null;
+            const loadListeners = this._textFillImageLoadListeners.get(source);
+            this._textFillImageLoadListeners.delete(source);
+            loadListeners?.forEach((listener) => listener());
+        };
+        image.onerror = () => {
+            image.onload = null;
+            image.onerror = null;
+            this._textFillImageLoadListeners.delete(source);
+        };
         image.src = source;
         this._textFillImageCache.set(source, image);
 

@@ -201,7 +201,17 @@ describe('ImageUpdateController', () => {
 
         update$.next([{ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'shape-3' }]);
 
-        expect(imageShape.transformByState).toHaveBeenCalledWith(transform);
+        expect(imageShape.transformByState).toHaveBeenCalledWith({
+            angle: 0,
+            flipX: false,
+            flipY: false,
+            height: 60,
+            left: 10,
+            skewX: 0,
+            skewY: 0,
+            top: 20,
+            width: 100,
+        });
         expect(imageShape.setClipBounds).toHaveBeenCalledWith(transform.clipBounds);
         expect(scene.removeObject).toHaveBeenCalledWith(imageShape);
         expect(scene.addObject).toHaveBeenCalledWith(imageShape, DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);

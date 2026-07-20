@@ -234,7 +234,7 @@ export class ImageUpdateController extends Disposable {
                     if (renderObject == null) {
                         return;
                     }
-                    const { scene, transformer } = renderObject;
+                    const { scene } = renderObject;
 
                     if (transform == null) {
                         return true;
@@ -248,7 +248,9 @@ export class ImageUpdateController extends Disposable {
                         return true;
                     }
 
-                    imageShape.transformByState(transform);
+                    const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
+
+                    imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (imageShape as Image & { setClipBounds?: (clipBounds?: unknown) => void }).setClipBounds?.((transform as { clipBounds?: unknown }).clipBounds);
                     ensureDrawingRenderLayer(scene, imageShape, drawingParam);
                     imageShape.setSrcRect(srcRect);

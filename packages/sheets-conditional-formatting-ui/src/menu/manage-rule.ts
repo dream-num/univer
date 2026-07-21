@@ -189,15 +189,16 @@ export function FactoryManageConditionalFormattingRule(accessor: IAccessor): IMe
             subscriber.next(hasPermission);
         })
     );
+
     const selections$ = new Observable<IValueOption<LocaleKey>[]>((subscriber) => {
-        clearRangeEnable$.subscribe((v) => {
+        const clearRangeSubscription = clearRangeEnable$.subscribe((v) => {
             const item = commonSelections.find((item) => item.value === CF_MENU_OPERATION.clearRangeRules);
             if (item) {
                 item.disabled = !v;
                 subscriber.next(commonSelections);
             }
         });
-        clearSheetEnable$.subscribe((v) => {
+        const clearSheetSubscription = clearSheetEnable$.subscribe((v) => {
             const item = commonSelections.find((item) => item.value === CF_MENU_OPERATION.clearWorkSheetRules);
             if (item) {
                 item.disabled = !v;
@@ -205,7 +206,12 @@ export function FactoryManageConditionalFormattingRule(accessor: IAccessor): IMe
             }
         });
         subscriber.next(commonSelections);
+        return () => {
+            clearRangeSubscription.unsubscribe();
+            clearSheetSubscription.unsubscribe();
+        };
     });
+
     return {
         id: OpenConditionalFormattingOperator.id,
         type: MenuItemType.SELECTOR,

@@ -18,20 +18,30 @@ export function requestImmediateMacroTask(callback: (value?: unknown) => void): 
     const channel = new MessageChannel();
     let cancelled = false;
 
+    const close = () => {
+        channel.port1.onmessage = null;
+        channel.port1.close();
+        channel.port2.close();
+    };
+
     const handler = () => {
         if (!cancelled) {
+            cancelled = true;
+            close();
             callback();
         }
     };
 
-    // This would cause memory leak. But we cannot use addEventListener because it won't work in web worker.
+    // Use onmessage for web worker compatibility and clear it when the task settles.
     channel.port1.onmessage = handler;
     channel.port2.postMessage(null);
 
     return () => {
+        if (cancelled) {
+            return;
+        }
+
         cancelled = true;
-        channel.port1.onmessage = null;
-        channel.port1.close();
-        channel.port2.close();
+        close();
     };
 }

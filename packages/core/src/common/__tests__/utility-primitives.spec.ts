@@ -25,6 +25,7 @@ import { mergeSets } from '../set';
 afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
 });
 
 describe('common utility primitives', () => {
@@ -99,6 +100,19 @@ describe('common utility primitives', () => {
 
     it('should schedule immediate macro tasks and allow cancellation', async () => {
         const events: string[] = [];
+        const port1Close = vi.fn();
+        const port2Close = vi.fn();
+        vi.stubGlobal('MessageChannel', class {
+            port1 = {
+                onmessage: null as null | (() => void),
+                close: port1Close,
+            };
+
+            port2 = {
+                postMessage: () => queueMicrotask(() => this.port1.onmessage?.()),
+                close: port2Close,
+            };
+        });
 
         await new Promise<void>((resolve) => {
             requestImmediateMacroTask(() => {
@@ -108,6 +122,8 @@ describe('common utility primitives', () => {
         });
 
         expect(events).toEqual(['ran']);
+        expect(port1Close).toHaveBeenCalledOnce();
+        expect(port2Close).toHaveBeenCalledOnce();
 
         await new Promise<void>((resolve) => {
             const cancel = requestImmediateMacroTask(() => {
@@ -119,5 +135,7 @@ describe('common utility primitives', () => {
         });
 
         expect(events).toEqual(['ran']);
+        expect(port1Close).toHaveBeenCalledTimes(2);
+        expect(port2Close).toHaveBeenCalledTimes(2);
     });
 });

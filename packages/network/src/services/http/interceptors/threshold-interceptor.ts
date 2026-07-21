@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { Subscription } from 'rxjs';
 import type { HTTPInterceptorFnFactory } from '../interceptor';
 import { remove } from '@univerjs/core';
 import { Observable } from 'rxjs';
@@ -42,13 +43,17 @@ export const ThresholdInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<ITh
 
     return (request, next) => {
         return new Observable((observer) => {
-            const handler = () => next(request).subscribe({
-                next: (event) => observer.next(event),
-                error: (err) => observer.error(err),
-                complete: () => observer.complete(),
-            });
+            let requestSubscription: Subscription | undefined;
+            const handler = () => {
+                requestSubscription = next(request).subscribe({
+                    next: (event) => observer.next(event),
+                    error: (err) => observer.error(err),
+                    complete: () => observer.complete(),
+                });
+            };
 
             const teardown = () => {
+                requestSubscription?.unsubscribe();
                 ongoingHandlers.delete(handler);
                 remove(handlers, handler);
                 tick();

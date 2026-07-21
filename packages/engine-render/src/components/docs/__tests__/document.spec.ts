@@ -745,6 +745,8 @@ describe('documents render', () => {
             padding: 4,
             dashStyle: DashStyleType.DASH,
         };
+        line.lineHeight += 6;
+        line.marginBottom = 6;
         (documents as any)._drawLiquid = { x: 0, y: 0 };
 
         const ctx = {

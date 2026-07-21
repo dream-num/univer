@@ -815,7 +815,8 @@ export class Documents extends DocComponent {
         x += marginLeft + (left ?? 0);
         y -= line.marginTop;
         y -= line.paddingTop;
-        y += marginTop + top + line.lineHeight + (line.borderBottom?.padding ?? 0);
+        // Paragraph spacing is included in lineHeight, while border padding is measured from the text bottom.
+        y += marginTop + top + line.lineHeight - line.marginBottom + (line.borderBottom?.padding ?? 0);
 
         ctx.save();
         const border = line.borderBottom;

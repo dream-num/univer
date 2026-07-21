@@ -474,16 +474,28 @@ export function lineBreaking(
         drawingAnchor?.set(segmentId, segmentDrawingAnchorCache);
     }
 
+    const resolvedParagraphStyle = _applyBlockRangeLayoutParagraphStyle(
+        viewModel.getBody?.() ?? null,
+        paragraph,
+        paragraphStyle,
+        documentStyle,
+        shouldApplyDocumentDefaults
+    );
+    const borderBottom = resolvedParagraphStyle.borderBottom;
+
+    if (borderBottom) {
+        // Keep the stroke inside the paragraph's post-text region when spaceBelow is smaller.
+        _withMinSpacing(
+            resolvedParagraphStyle,
+            'spaceBelow',
+            Math.max(0, borderBottom.padding ?? 0) + Math.max(0, borderBottom.width ?? 1) / 2
+        );
+    }
+
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
         documentCompatibilityPolicy,
-        paragraphStyle: _applyBlockRangeLayoutParagraphStyle(
-            viewModel.getBody?.() ?? null,
-            paragraph,
-            paragraphStyle,
-            documentStyle,
-            shouldApplyDocumentDefaults
-        ),
+        paragraphStyle: resolvedParagraphStyle,
         docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(
             viewModel,
             paragraph,

@@ -78,6 +78,31 @@ describe('linebreaking', () => {
         expect(result[0].sections.length).toBeGreaterThan(0);
     });
 
+    it('reserves bottom-border clearance when paragraph spacing is smaller', () => {
+        const content = 'Rule';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphStyle: {
+                        spaceBelow: { v: 0 },
+                        borderBottom: {
+                            color: { rgb: '#cdd0d8' },
+                            padding: 5,
+                            width: 2,
+                        },
+                    },
+                }],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        const paragraphConfig = ctx.paragraphConfigCache.get(curPage.segmentId)?.get(paragraphNode.endIndex);
+        expect(paragraphConfig?.paragraphStyle?.spaceBelow?.v).toBe(6);
+    });
+
     it('lays out longer text that may span multiple lines', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('This is a longer text that should still fit within a reasonable page width for testing purposes');
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);

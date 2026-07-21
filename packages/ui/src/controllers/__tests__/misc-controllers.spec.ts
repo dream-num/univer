@@ -20,11 +20,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { OpenFeatureSearchOperation } from '../../commands/operations/open-feature-search.operation';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { menuSchema } from '../../menu/schema';
+import { ShortcutPanelMenuItemFactory } from '../../menu/shortcut-panel.menu';
 import { RibbonStartGroup } from '../../services/menu/types';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { ErrorController } from '../error/error.controller';
 import { FeatureSearchController } from '../feature-search/feature-search.controller';
-import { ShortcutPanelMenuItemFactory } from '../shortcut-display/menu';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
 import { IUIController } from '../ui/ui.controller';
 

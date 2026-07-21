@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { IMenuButtonItem } from '../../services/menu/menu';
-import { OpenFeatureSearchOperation } from '../../commands/operations/open-feature-search.operation';
-import { MenuItemType } from '../../services/menu/menu';
+import type { LocaleKey } from '../locale/types';
+import type { IMenuButtonItem } from '../services/menu/menu';
+import { ToggleShortcutPanelOperation } from '../commands/operations/toggle-shortcut-panel.operation';
+import { MenuItemType } from '../services/menu/menu';
 
-export function FeatureSearchMenuItemFactory(): IMenuButtonItem<LocaleKey> {
+export function ShortcutPanelMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
-        id: OpenFeatureSearchOperation.id,
-        title: 'ui.featureSearch.title',
-        tooltip: 'ui.featureSearch.title',
-        icon: 'FeatureSearchIcon',
+        id: ToggleShortcutPanelOperation.id,
+        title: 'ui.toggle-shortcut-panel',
+        tooltip: 'ui.toggle-shortcut-panel',
+        icon: 'KeyboardIcon',
         type: MenuItemType.BUTTON,
     };
 }

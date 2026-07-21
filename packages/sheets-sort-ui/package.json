@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-sort-ui",
-    "version": "1.0.0-alpha.4",
+    "version": "1.0.0-alpha.5",
     "private": false,
     "description": "Sorting menus and panels for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

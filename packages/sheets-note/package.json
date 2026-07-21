@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-note",
-    "version": "1.0.0-alpha.4",
+    "version": "1.0.0-alpha.5",
     "private": false,
     "description": "Cell note model and commands for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

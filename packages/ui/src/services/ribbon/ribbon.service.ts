@@ -144,12 +144,13 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
             }
         }
 
+        this._hiddenSubscription?.unsubscribe();
+        this._hiddenSubscription = null;
+
         if (hiddenObservableMap.length === 0) {
             this._setRibbon(ribbon);
             return;
         }
-
-        this._hiddenSubscription?.unsubscribe();
 
         this._hiddenSubscription = combineLatest(hiddenObservableMap.map((hidden$) => hidden$.pipe(startWith(false))))
             .pipe(distinctUntilChanged(isSameHiddenMap))

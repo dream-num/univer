@@ -26,7 +26,7 @@ import {
     IUniverInstanceService,
     UniverInstanceService,
 } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { MenuItemType } from '../../menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager.service';
@@ -253,5 +253,46 @@ describe('DesktopRibbonService', () => {
         expect(ribbons.length).toBe(publishCountAfterMenuLoad + 1);
 
         ribbonSub.unsubscribe();
+    });
+
+    it('unsubscribes hidden states that are no longer in the ribbon', () => {
+        const { menuManagerService } = createService();
+        let subscriptions = 0;
+        let unsubscriptions = 0;
+        const hidden$ = new Observable<boolean>(() => {
+            subscriptions += 1;
+            return () => {
+                unsubscriptions += 1;
+            };
+        });
+        const groupKey = `${RibbonPosition.START}.temporary-group`;
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    [groupKey]: {
+                        order: 0,
+                        temporaryCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'temporary-command', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+        expect(subscriptions).toBe(1);
+
+        menuManagerService.mergeMenu({
+            [groupKey]: {
+                replace: true,
+                order: 0,
+                visibleCommand: {
+                    order: 0,
+                    menuItemFactory: () => ({ id: 'visible-command', type: MenuItemType.BUTTON }),
+                },
+            },
+        } as MenuSchemaType);
+
+        expect(unsubscriptions).toBe(1);
     });
 });

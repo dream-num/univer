@@ -441,6 +441,34 @@ describe('BaseSelectionRenderService', () => {
         expect(movingSelections.length).toBeGreaterThan(0);
     });
 
+    it('ends a leaked drag before handling pointer movement with no pressed buttons', () => {
+        const { service } = createSelectionRenderService();
+        const { scene } = service.changeRuntimeForTest();
+        service.resetSelectionsByModelData([selections[0]]);
+        service.listenPointerMoveForTest();
+
+        (scene.onPointerMove$ as unknown as { emit: (evt: unknown) => void }).emit({
+            offsetX: 350,
+            offsetY: 65,
+            buttons: 1,
+        });
+        expect(service.selectionMoving).toBe(true);
+
+        (scene.onPointerMove$ as unknown as { emit: (evt: unknown) => void }).emit({
+            offsetX: 450,
+            offsetY: 85,
+            buttons: 0,
+        });
+
+        expect(service.getActiveRange()).toEqual({
+            startRow: 1,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 3,
+        });
+        expect(service.selectionMoving).toBe(false);
+    });
+
     it('cancels an in-progress selection when another scene receives a pointer event', () => {
         const { service } = createSelectionRenderService();
         const { scene } = service.changeRuntimeForTest();

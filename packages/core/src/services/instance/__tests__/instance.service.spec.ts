@@ -24,7 +24,7 @@ import { Injector } from '../../../common/di';
 import { UnitModel, UniverInstanceType } from '../../../common/unit';
 import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
 import { Workbook as WorkbookModel } from '../../../sheets/workbook';
-import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../../context/context';
+import { FOCUSING_BOARD, FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../../context/context';
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
 import { IUniverInstanceService, UniverInstanceService } from '../instance.service';
@@ -145,24 +145,35 @@ describe('UniverInstanceService', () => {
         expect(service.getUnitType('missing')).toBe(UniverInstanceType.UNRECOGNIZED);
     });
 
-    it('should focus sheet, doc, slide and reset contexts on null focus', () => {
+    it('should focus sheet, doc, slide, board and reset contexts on null focus', () => {
         const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
         const doc = service.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
         const slide = service.createUnit<object, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {});
+        const board = service.createUnit<object, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, {});
 
         service.focusUnit(workbook.getUnitId());
         expect(contextService.getContextValue(FOCUSING_UNIT)).toBe(true);
         expect(contextService.getContextValue(FOCUSING_SHEET)).toBe(true);
         expect(contextService.getContextValue(FOCUSING_DOC)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_BOARD)).toBe(false);
 
         service.focusUnit(doc.getUnitId());
         expect(service.getFocusedUnit()?.getUnitId()).toBe(doc.getUnitId());
         expect(contextService.getContextValue(FOCUSING_DOC)).toBe(true);
         expect(contextService.getContextValue(FOCUSING_SHEET)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_BOARD)).toBe(false);
 
         service.focusUnit(slide.getUnitId());
         expect(contextService.getContextValue(FOCUSING_SLIDE)).toBe(true);
         expect(contextService.getContextValue(FOCUSING_DOC)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_BOARD)).toBe(false);
+
+        service.focusUnit(board.getUnitId());
+        expect(contextService.getContextValue(FOCUSING_UNIT)).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_BOARD)).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_DOC)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_SHEET)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_SLIDE)).toBe(false);
 
         service.focusUnit(null);
         expect(service.getFocusedUnit()).toBeNull();
@@ -170,6 +181,7 @@ describe('UniverInstanceService', () => {
         expect(contextService.getContextValue(FOCUSING_DOC)).toBe(false);
         expect(contextService.getContextValue(FOCUSING_SHEET)).toBe(false);
         expect(contextService.getContextValue(FOCUSING_SLIDE)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_BOARD)).toBe(false);
     });
 
     it('should replace docs and dispose units while resetting focus and current', () => {

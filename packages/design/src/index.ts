@@ -36,6 +36,16 @@ export type { ICheckboxProps } from './components/checkbox/Checkbox';
 export { ColorPicker } from './components/color-picker/ColorPicker';
 export type { IColorPickerProps } from './components/color-picker/ColorPicker';
 export { ColorPresets } from './components/color-picker/ColorPresets';
+export {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+    CommandShortcut,
+} from './components/command/Command';
 export { ConfigContext, ConfigProvider } from './components/config-provider/ConfigProvider';
 export type { IConfigProviderProps } from './components/config-provider/ConfigProvider';
 export { Confirm } from './components/confirm/Confirm';

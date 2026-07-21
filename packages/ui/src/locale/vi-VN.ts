@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/vi-VN.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'Tìm kiếm tính năng',
+            placeholder: 'Nhập tên tính năng hoặc menu...',
+            empty: 'Không tìm thấy tính năng khả dụng',
+            ribbon: 'Dải băng',
+            contextMenu: 'Menu ngữ cảnh',
+        },
         emojiPicker: {
             search: 'Tìm kiếm',
             random: 'Emoji ngẫu nhiên',

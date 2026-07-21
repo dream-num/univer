@@ -77,7 +77,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/icons": "1.31.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

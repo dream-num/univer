@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/fa-IR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'جستجوی قابلیت‌ها',
+            placeholder: 'نام قابلیت یا منو را وارد کنید…',
+            empty: 'هیچ قابلیت در دسترسی یافت نشد',
+            ribbon: 'نوار ابزار',
+            contextMenu: 'منوی زمینه‌ای',
+        },
         emojiPicker: {
             search: 'جستجو',
             random: 'ایموجی تصادفی',

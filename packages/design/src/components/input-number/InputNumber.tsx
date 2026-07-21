@@ -40,6 +40,7 @@ export interface IInputNumberProps
     onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
     onPressEnter?: (e: KeyboardEvent<HTMLInputElement>) => void;
     allowEmpty?: boolean;
+    allowClear?: boolean;
 }
 
 export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
@@ -65,6 +66,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             onFocus,
             onBlur,
             allowEmpty = false,
+            allowClear = false,
         },
         ref
     ) => {
@@ -338,6 +340,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                         className={clsx('univer-box-border', inputClassName)}
                         size={size}
                         value={inputValue}
+                        allowClear={allowClear}
                         disabled={disabled}
                         onChange={handleInputChange}
                         onFocus={onFocus}

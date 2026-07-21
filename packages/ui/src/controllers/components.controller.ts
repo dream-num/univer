@@ -16,11 +16,23 @@
 
 import { Disposable, Inject } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
-import { ExpandIcon, IncreaseIcon, KeyboardIcon, MoreDownIcon, RedoIcon, ReduceIcon, ShortcutIcon, ShrinkIcon, UndoIcon } from '@univerjs/icons';
+import {
+    ExpandIcon,
+    FeatureSearchIcon,
+    IncreaseIcon,
+    KeyboardIcon,
+    MoreDownIcon,
+    RedoIcon,
+    ReduceIcon,
+    ShortcutIcon,
+    ShrinkIcon,
+    UndoIcon,
+} from '@univerjs/icons';
 import { ShortcutPanelComponentName } from '../commands/operations/toggle-shortcut-panel.operation';
 import { ComponentManager, IconManager } from '../common';
 import { COLOR_PICKER_COMPONENT } from '../views/color-picker/interface';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../views/CommonLabel';
+import { FEATURE_SEARCH_COMPONENT, FeatureSearch } from '../views/components/feature-search/FeatureSearch';
 import { ShortcutPanel } from '../views/components/shortcut-panel/ShortcutPanel';
 import { EMOJI_PICKER_COMPONENT, EmojiPicker } from '../views/emoji-picker/index';
 import {
@@ -52,6 +64,7 @@ export class ComponentsController extends Disposable {
             MoreDownIcon,
             RedoIcon,
             ReduceIcon,
+            FeatureSearchIcon,
             ShortcutIcon,
             ShrinkIcon,
             UndoIcon,
@@ -67,6 +80,7 @@ export class ComponentsController extends Disposable {
             [FONT_SIZE_COMPONENT, FontSize],
             [COLOR_PICKER_COMPONENT, ColorPicker],
             [EMOJI_PICKER_COMPONENT, EmojiPicker],
+            [FEATURE_SEARCH_COMPONENT, FeatureSearch],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)

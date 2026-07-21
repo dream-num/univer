@@ -170,6 +170,10 @@ export class DrawingPopupMenuController extends RxDisposable {
 
             singletonPopupDisposer?.dispose();
             const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
+            // An explicitly registered empty menu suppresses the drawing overlay.
+            if (menus?.length === 0) {
+                return;
+            }
             singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                 componentKey: COMPONENT_IMAGE_POPUP_MENU,
                 direction: 'horizontal',

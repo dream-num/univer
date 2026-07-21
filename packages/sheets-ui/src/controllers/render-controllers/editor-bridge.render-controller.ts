@@ -84,10 +84,15 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
     private _initSelectionChangeListener(d: DisposableCollection) {
         d.add(merge(
-            this._selectionManagerService.selectionMoveEnd$,
             this._selectionManagerService.selectionSet$,
             this._selectionManagerService.selectionMoveStart$
         ).subscribe((params) => this._updateEditorPosition(params)));
+        d.add(this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+            this._updateEditorPosition(params);
+            if (params?.[params.length - 1]?.primary) {
+                this._updateInputPosition();
+            }
+        }));
     }
 
     private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
@@ -127,6 +132,26 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 sheetId,
             });
         }
+    }
+
+    private _updateInputPosition() {
+        if (this._editorBridgeService.isVisible().visible) {
+            return;
+        }
+
+        const layout = this._editorBridgeService.getEditCellLayout();
+        const docSelectionRenderService = this._renderManagerService
+            .getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)
+            ?.with(DocSelectionRenderService);
+        if (!layout || !docSelectionRenderService) {
+            return;
+        }
+
+        const { position, canvasOffset } = layout;
+        docSelectionRenderService.setInputPosition(
+            canvasOffset.left + position.startX,
+            canvasOffset.top + position.startY
+        );
     }
 
     refreshEditorPosition() {

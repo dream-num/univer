@@ -186,7 +186,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
     }
 
     async write(text: string, html: string, customData?: Record<string, string>): Promise<void> {
-        if (!this.supportClipboard) {
+        if (!this.supportClipboard || typeof ClipboardItem === 'undefined' || typeof navigator.clipboard.write !== 'function') {
             return this._legacyCopyHtml(text, html);
         }
 

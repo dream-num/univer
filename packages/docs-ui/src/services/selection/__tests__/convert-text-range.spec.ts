@@ -15,7 +15,7 @@
  */
 
 import type { INodePosition } from '@univerjs/engine-render';
-import { DataStreamTreeTokenType } from '@univerjs/core';
+import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { DocumentSkeletonPageType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
@@ -648,9 +648,51 @@ describe('selection convert text range helpers', () => {
         expect(result.borderBoxPointGroup).toHaveLength(0);
         expect(result.contentBoxPointGroup).toHaveLength(0);
     });
+
+    it('does not draw text selection rectangles for floating drawings', () => {
+        const { position, skeleton } = createEmbedCustomBlockCursorHarness({
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+        });
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(
+            { ...position, isBack: true },
+            { ...position, isBack: false }
+        );
+
+        expect(result.borderBoxPointGroup).toHaveLength(0);
+        expect(result.contentBoxPointGroup).toHaveLength(0);
+    });
+
+    it('keeps text selection rectangles for inline drawings', () => {
+        const { position, skeleton } = createEmbedCustomBlockCursorHarness({
+            layoutType: PositionedObjectLayoutType.INLINE,
+        });
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(
+            { ...position, isBack: true },
+            { ...position, isBack: false }
+        );
+
+        expect(result.borderBoxPointGroup).toHaveLength(1);
+        expect(result.contentBoxPointGroup).toHaveLength(1);
+    });
 });
 
-function createEmbedCustomBlockCursorHarness() {
+function createEmbedCustomBlockCursorHarness(drawing?: Record<string, unknown>) {
     const drawingId = 'embed-block-1';
     const glyph = {
         bBox: { ba: 480, bd: 0 },
@@ -702,12 +744,14 @@ function createEmbedCustomBlockCursorHarness() {
                 getSnapshot: () => ({
                     drawings: {
                         [drawingId]: {
-                            data: {
-                                version: 1,
-                                embedId: 'embed-1',
-                                hostAnchorId: drawingId,
-                                interactionMode: 'block',
-                            },
+                            ...(drawing ?? {
+                                data: {
+                                    version: 1,
+                                    embedId: 'embed-1',
+                                    hostAnchorId: drawingId,
+                                    interactionMode: 'block',
+                                },
+                            }),
                         },
                     },
                 }),

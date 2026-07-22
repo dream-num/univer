@@ -567,9 +567,16 @@ describe('doc table create command helpers', () => {
         const tableFixture = createTableFixture();
         const tableTestBed = createTableCommandBed(tableFixture);
         commandService = tableTestBed.get(ICommandService);
-        setActiveTableRange(tableTestBed, tableFixture.cellRanges[4].startIndex + 1);
+        setActiveTableRange(tableTestBed, tableFixture.tableRange.endIndex + 2);
 
-        expect(await commandService.executeCommand(DocTableDeleteTableCommand.id)).toBe(true);
+        expect(await commandService.executeCommand(DocTableDeleteTableCommand.id, {
+            targetRange: {
+                startOffset: tableFixture.tableRange.startIndex,
+                endOffset: tableFixture.tableRange.endIndex,
+                collapsed: false,
+                segmentId: '',
+            },
+        })).toBe(true);
         await awaitTime(0);
         expect(tableTestBed.doc.getBody()?.dataStream).toBe(TABLE_SUFFIX);
         expect(testBedSnapshotTableIds(tableTestBed)).toEqual([]);

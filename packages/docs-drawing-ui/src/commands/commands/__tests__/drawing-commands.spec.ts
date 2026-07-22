@@ -899,6 +899,7 @@ describe('docs drawing commands integration', () => {
                 skeFooters: new Map(),
             }),
         } as never);
+        const refreshDrawings = vi.spyOn(testBed.get(DocRefreshDrawingsService), 'refreshDrawings');
 
         expect(await testBed.commandService.executeCommand(UpdateDocDrawingWrappingStyleCommand.id, {
             unitId: 'test-doc',
@@ -923,6 +924,7 @@ describe('docs drawing commands integration', () => {
             relativeFrom: ObjectRelativeFromV.PARAGRAPH,
             posOffset: 5,
         });
+        expect(refreshDrawings).toHaveBeenCalledWith(skeletonManager.getSkeleton());
 
         testBed.univer.dispose();
     });
@@ -1037,6 +1039,9 @@ describe('docs drawing commands integration', () => {
 
     it('transforms a non-inline drawing and persists position, size and angle changes', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
+        const skeleton = {} as never;
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue(skeleton);
+        const refreshDrawings = vi.spyOn(testBed.get(DocRefreshDrawingsService), 'refreshDrawings');
 
         expect(await testBed.commandService.executeCommand(ITransformNonInlineDrawingCommand.id, {
             unitId: 'test-doc',
@@ -1084,6 +1089,7 @@ describe('docs drawing commands integration', () => {
             angle: 15,
         });
         expect(testBed.refreshControls).toHaveBeenCalled();
+        expect(refreshDrawings).toHaveBeenCalledWith(skeleton);
 
         testBed.univer.dispose();
     });

@@ -23,10 +23,10 @@ export interface IDataStreamChange {
 }
 
 /**
- * Finds one contiguous dataStream change. Pure structural insertions are
- * anchored by their new stable ids before falling back to string comparison.
+ * Finds one contiguous dataStream change. Pure structural insertions and deletions
+ * are anchored by their stable ids before falling back to string comparison.
  * This prevents an adjacent identical sentinel from being mistaken for an
- * unchanged prefix and keeps the inserted structure metadata in the TextX body.
+ * unchanged prefix and keeps the structure metadata aligned with the TextX body.
  */
 export function getSingleDataStreamChange(
     previousBody: IDocumentBody | undefined,
@@ -53,6 +53,17 @@ export function getSingleDataStreamChange(
         );
         if (structuralInsertion) {
             return structuralInsertion;
+        }
+    } else if (insertedLength < 0) {
+        const structuralDeletion = findStructuralDeletion(
+            previousBody,
+            nextBody,
+            previousDataStream,
+            nextDataStream,
+            -insertedLength
+        );
+        if (structuralDeletion) {
+            return structuralDeletion;
         }
     }
 
@@ -81,6 +92,25 @@ export function getSingleDataStreamChange(
         deleteLength: previousEnd - start,
         insertLength: nextEnd - start,
     };
+}
+
+function findStructuralDeletion(
+    previousBody: IDocumentBody,
+    nextBody: IDocumentBody,
+    previousDataStream: string,
+    nextDataStream: string,
+    deletedLength: number
+): IDataStreamChange | null {
+    for (const start of collectNewStructuralStartOffsets(nextBody, previousBody)) {
+        if (
+            previousDataStream.slice(0, start) === nextDataStream.slice(0, start) &&
+            previousDataStream.slice(start + deletedLength) === nextDataStream.slice(start)
+        ) {
+            return { start, deleteLength: deletedLength, insertLength: 0 };
+        }
+    }
+
+    return null;
 }
 
 function findStructuralInsertion(

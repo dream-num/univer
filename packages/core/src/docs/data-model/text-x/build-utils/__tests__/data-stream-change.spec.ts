@@ -46,6 +46,27 @@ describe('getSingleDataStreamChange', () => {
         });
     });
 
+    it('anchors a deleted block before an adjacent identical start sentinel', () => {
+        const T = DataStreamTreeTokenType;
+        const previousBody: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.BLOCK_START}B${T.PARAGRAPH}${T.BLOCK_END}`,
+            blockRanges: [
+                { blockId: 'code-1', blockType: DocumentBlockRangeType.CODE, startIndex: 0, endIndex: 3 },
+                { blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 4, endIndex: 7 },
+            ],
+        };
+        const nextBody: IDocumentBody = {
+            dataStream: `${T.BLOCK_START}B${T.PARAGRAPH}${T.BLOCK_END}`,
+            blockRanges: [{ blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 0, endIndex: 3 }],
+        };
+
+        expect(getSingleDataStreamChange(previousBody, nextBody)).toEqual({
+            start: 0,
+            deleteLength: 4,
+            insertLength: 0,
+        });
+    });
+
     it('falls back to the minimal contiguous text change', () => {
         expect(getSingleDataStreamChange(
             { dataStream: 'Alpha\r' },

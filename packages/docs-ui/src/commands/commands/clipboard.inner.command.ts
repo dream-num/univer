@@ -29,7 +29,7 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
     CommandType,
@@ -117,6 +117,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         const hasTable = !!body.tables?.length;
         const hasCustomBlock = !!body.customBlocks?.length;
+        const hasBlockRange = !!body.blockRanges?.length;
 
         // TODO: @JOCS A feature that has not yet been implemented,
         // and it is currently not possible to paste tables in the header and footer.
@@ -142,6 +143,16 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             const len = startOffset - memoryCursor.cursor;
 
             const cloneBody = Tools.deepClone(body);
+            const blockRangeMappings: IDocClipboardPasteBlockRangeMapping[] = [];
+            const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
+
+            if (hasBlockRange) {
+                cloneBody.blockRanges!.forEach((targetBlockRange, index) => {
+                    const sourceBlockRange = body.blockRanges![index];
+                    targetBlockRange.blockId = generateRandomId(6);
+                    blockRangeMappings.push({ sourceBlockRange, targetBlockRange });
+                });
+            }
 
             if (hasTable) {
                 for (const t of cloneBody.tables!) {
@@ -161,7 +172,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
             if (hasCustomBlock && drawings) {
                 const drawingLen = docDataModel.getSnapshot().drawingsOrder?.length ?? 0;
-                const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
 
                 for (const block of cloneBody.customBlocks!) {
                     const { blockId } = block;
@@ -182,23 +192,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     });
                 }
 
-                if (customBlockMappings.length > 0 && pasteAdapterService) {
-                    const mutationInfos = pasteAdapterService.getPasteMutationInfos({
-                        unitId,
-                        segmentId,
-                        doc,
-                        sourceBody: body,
-                        targetBody: cloneBody,
-                        customBlockMappings,
-                    });
-
-                    if (mutationInfos.redoMutations.length > 0 || mutationInfos.undoMutations.length > 0) {
-                        resourceRedoMutations.push(...mutationInfos.redoMutations);
-                        resourceUndoMutations.push(...mutationInfos.undoMutations);
-                        resourceMutationGroups.push(mutationInfos);
-                    }
-                }
-
                 customBlockMappings.forEach(({ targetBlockId, targetDrawing }) => {
                     const action = jsonX.insertOp(['drawings', targetBlockId], targetDrawing);
                     const orderAction = jsonX.insertOp(['drawingsOrder', drawingLen], targetBlockId);
@@ -206,6 +199,24 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     rawActions.push(action!);
                     rawActions.push(orderAction!);
                 });
+            }
+
+            if ((blockRangeMappings.length > 0 || customBlockMappings.length > 0) && pasteAdapterService) {
+                const mutationInfos = pasteAdapterService.getPasteMutationInfos({
+                    unitId,
+                    segmentId,
+                    doc,
+                    sourceBody: body,
+                    targetBody: cloneBody,
+                    blockRangeMappings,
+                    customBlockMappings,
+                });
+
+                if (mutationInfos.redoMutations.length > 0 || mutationInfos.undoMutations.length > 0) {
+                    resourceRedoMutations.push(...mutationInfos.redoMutations);
+                    resourceUndoMutations.push(...mutationInfos.undoMutations);
+                    resourceMutationGroups.push(mutationInfos);
+                }
             }
 
             const customRange = getCustomRangeAtPosition(originBody.customRanges ?? [], endOffset, UNITS.includes(unitId));

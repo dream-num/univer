@@ -193,12 +193,14 @@ export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
+export type { IDocClipboardHook } from './services/clipboard/clipboard.service';
 export {
     DocClipboardPasteAdapterService,
     IDocClipboardPasteAdapterService,
 } from './services/clipboard/doc-paste-mutation-adapter.service';
 export type {
     IDocClipboardPasteAdapter,
+    IDocClipboardPasteBlockRangeMapping,
     IDocClipboardPasteCustomBlockMapping,
     IDocClipboardPasteMutationInfoParams,
     IDocClipboardPasteMutationInfos,

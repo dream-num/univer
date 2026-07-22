@@ -111,10 +111,9 @@ export const DocPasteCommand: IMultiCommand = {
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
         const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
-        const clipboardItems = await clipboardInterfaceService.read();
-        if (clipboardItems.length === 0) {
-            return false;
-        }
+        const clipboardItems = clipboardInterfaceService.supportClipboard
+            ? await clipboardInterfaceService.read()
+            : [];
 
         return docClipboardService.paste(clipboardItems);
     },

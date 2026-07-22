@@ -22,6 +22,11 @@ import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.serv
 import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, JSONX, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { describe, expect, it } from 'vitest';
+import {
+    DocCopyCurrentParagraphCommand,
+    DocCutCurrentParagraphCommand,
+    DocPasteCommand,
+} from '../../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand } from '../../commands/commands/list.command';
@@ -30,6 +35,7 @@ import { H2HeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/
 import { DOC_PARAGRAPH_T_EDIT_MENU_ID, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
 import {
     buildUnwrapBlockRangeActions,
+    getBlockRangeClipboardTargetRange,
     getParagraphFormattingRange,
     getParagraphMenuCommandParams,
     getParagraphMenuCommandTargetRange,
@@ -171,6 +177,18 @@ describe('ParagraphMenu command behavior', () => {
         });
     });
 
+    it('pastes at the hovered paragraph cursor instead of selecting the paragraph', () => {
+        const caretRange: ITextRangeWithStyle = {
+            startOffset: 14,
+            endOffset: 14,
+            collapsed: true,
+            segmentId: 'header-left',
+        };
+        const paragraphRange = getParagraphFormattingRange(undefined, paragraphBound());
+
+        expect(getParagraphMenuCommandTargetRange(DocPasteCommand.id, caretRange, paragraphRange)).toBe(caretRange);
+    });
+
     it('targets the whole block and hides incompatible block conversions', () => {
         const paragraph = paragraphBound();
         const target = blockTarget({
@@ -189,6 +207,34 @@ describe('ParagraphMenu command behavior', () => {
 
         expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).toContain('docs-callout.command.insert');
         expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).not.toContain('docs-quote.command.insert');
+        expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, target)).not.toContain(DocPasteCommand.id);
+        expect(getParagraphMenuHiddenItemIds(DOC_PARAGRAPH_T_EDIT_MENU_ID, undefined)).toContain(DocPasteCommand.id);
+    });
+
+    it('uses the whole block for copy and cut and places paste after it', () => {
+        const paragraph = paragraphBound();
+        const target = blockTarget({
+            blockId: 'quote-1',
+            blockType: DocumentBlockRangeType.QUOTE,
+            startIndex: 20,
+            endIndex: 45,
+        } as IDocumentBlockRange);
+
+        const blockRange = {
+            startOffset: 20,
+            endOffset: 46,
+            collapsed: false,
+            segmentId: 'header-left',
+        };
+
+        expect(getBlockRangeClipboardTargetRange(DocCopyCurrentParagraphCommand.id, target, paragraph)).toEqual(blockRange);
+        expect(getBlockRangeClipboardTargetRange(DocCutCurrentParagraphCommand.id, target, paragraph)).toEqual(blockRange);
+        expect(getBlockRangeClipboardTargetRange(DocPasteCommand.id, target, paragraph)).toEqual({
+            startOffset: 46,
+            endOffset: 46,
+            collapsed: true,
+            segmentId: 'header-left',
+        });
     });
 
     it('adds block range context to current paragraph delete commands', () => {

@@ -30,7 +30,14 @@ import {
 } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
-import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import {
+    IPlatformService,
+    IShortcutService,
+    IUIRuntimeScopeService,
+    PlatformService,
+    ShortcutService,
+    UIRuntimeScopeService,
+} from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     createFakeEngine,
@@ -207,6 +214,7 @@ function createSelectionRenderService() {
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IPlatformService, { useClass: PlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([ThemeService]);
     injector.add([SheetSkeletonManagerService, { useClass: TestSheetSkeletonManagerService as never }]);

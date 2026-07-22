@@ -19,7 +19,14 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, getEmbedBoundaryOwner, isEmbedBoundaryTarget, keepInteractionInsideSameEmbedBoundary } from '../embed-boundary';
+import {
+    EMBED_CHILD_UNIT_ID_ATTRIBUTE,
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    getEmbedBoundaryOwner,
+    getEmbedChildUnitId,
+    isEmbedBoundaryTarget,
+    keepInteractionInsideSameEmbedBoundary,
+} from '../embed-boundary';
 
 describe('embed boundary utilities', () => {
     it('returns undefined for non-element targets so non-embed UI keeps the default behavior', () => {
@@ -37,6 +44,17 @@ describe('embed boundary utilities', () => {
 
         expect(getEmbedBoundaryOwner(target)).toBe('embed-1');
         expect(isEmbedBoundaryTarget(target)).toBe(true);
+    });
+
+    it('resolves the child unit owning an embedded runtime target', () => {
+        const runtime = document.createElement('div');
+        const target = document.createElement('canvas');
+
+        runtime.setAttribute(EMBED_CHILD_UNIT_ID_ATTRIBUTE, 'child-board');
+        runtime.appendChild(target);
+
+        expect(getEmbedChildUnitId(target)).toBe('child-board');
+        expect(getEmbedChildUnitId(new EventTarget())).toBeUndefined();
     });
 
     it('prevents outside handling only when both targets belong to the same embed boundary', () => {

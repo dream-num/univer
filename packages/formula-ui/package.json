@@ -1,0 +1,59 @@
+{
+    "name": "@univerjs/formula-ui",
+    "version": "1.0.0-alpha.4",
+    "private": false,
+    "description": "Shared formula search and highlighting helpers for Univer editors.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "main": "./src/index.ts",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/es/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "typecheck": "tsc --noEmit",
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
+    },
+    "dependencies": {
+        "@univerjs/engine-formula": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/formula": "workspace:*",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.10"
+    }
+}

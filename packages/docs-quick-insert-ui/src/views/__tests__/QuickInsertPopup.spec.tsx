@@ -39,10 +39,12 @@ import {
     IconManager,
     IPlatformService,
     IShortcutService,
+    IUIRuntimeScopeService,
     KeyCode,
     PlatformService,
     RediContext,
     ShortcutService,
+    UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -146,6 +148,7 @@ function createQuickInsertPopupTestBed(options?: {
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([LocaleService, { useClass: LocaleService }]);
     injector.add([IPlatformService, { useClass: PlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([ComponentManager, { useClass: ComponentManager }]);
     injector.add([IconManager, { useClass: IconManager }]);

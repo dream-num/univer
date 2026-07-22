@@ -15,8 +15,8 @@
  */
 
 import { FunctionType, sequenceNodeType } from '@univerjs/engine-formula';
+import { getFormulaReplaceResult } from '@univerjs/formula-ui';
 import { describe, expect, it } from 'vitest';
-import { getFormulaReplaceResult } from '../use-formula-search';
 
 describe('getFormulaReplaceResult', () => {
     it('adds the call bracket when replacing a typed function prefix and keeps the rest of the formula', () => {

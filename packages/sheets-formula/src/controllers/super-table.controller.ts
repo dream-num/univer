@@ -24,9 +24,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FunctionType, ISuperTableService, RemoveSuperTableMutation, serializeRangeWithSheet, SetSuperTableMutation } from '@univerjs/engine-formula';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { IDescriptionService } from '@univerjs/formula';
 
-import { IDescriptionService } from '../services/description.service';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 /**
  * header highlight

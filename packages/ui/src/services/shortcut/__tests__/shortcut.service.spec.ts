@@ -20,8 +20,10 @@
 
 import { ICommandService, IContextService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { EMBED_CHILD_UNIT_ID_ATTRIBUTE } from '../../../utils/embed-boundary';
 import { ILayoutService } from '../../layout/layout.service';
 import { IPlatformService } from '../../platform/platform.service';
+import { IUIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, MetaKeys } from '../keycode';
 import { ShortcutService } from '../shortcut.service';
 
@@ -75,6 +77,7 @@ function createService(options?: {
     const layoutService = {
         checkElementInCurrentContainers: vi.fn(() => options?.layoutAllowed),
     };
+    const getRuntimeScope = vi.fn();
 
     class TestCommandService {
         executeCommand = executeCommand;
@@ -92,17 +95,23 @@ function createService(options?: {
         checkElementInCurrentContainers = layoutService.checkElementInCurrentContainers;
     }
 
+    class TestRuntimeScopeService {
+        register = vi.fn();
+        get = getRuntimeScope;
+    }
+
     const injector = new Injector();
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([IPlatformService, { useClass: TestPlatformService }]);
     injector.add([IContextService, { useClass: TestContextService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: TestRuntimeScopeService }]);
     if (options?.layoutAllowed !== undefined) {
         injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     }
     injector.add([ShortcutService]);
     const service = injector.get(ShortcutService);
 
-    return { service, executeCommand, layoutService };
+    return { service, executeCommand, getRuntimeScope, layoutService };
 }
 
 describe('ShortcutService', () => {
@@ -252,6 +261,46 @@ describe('ShortcutService', () => {
         window.dispatchEvent(event);
 
         expect(executeCommand).toHaveBeenCalledWith('cmd.native', { from: 'test' });
+        expect(event.defaultPrevented).toBe(true);
+        service.dispose();
+    });
+
+    it('uses the embedded child runtime context and command service for shortcuts', () => {
+        const runtime = document.createElement('div');
+        const canvas = document.createElement('canvas');
+        runtime.setAttribute(EMBED_CHILD_UNIT_ID_ATTRIBUTE, 'child-board');
+        runtime.appendChild(canvas);
+
+        const scopedExecuteCommand = vi.fn(() => Promise.resolve(true));
+        const scopedContextService = {
+            getContextValue: vi.fn((key: string) => key === 'FOCUSING_BOARD'),
+        };
+        const scopedCommandService = {
+            executeCommand: scopedExecuteCommand,
+        };
+        const runtimeScope = {
+            has: vi.fn(() => true),
+            get: vi.fn((identifier: unknown) => identifier === IContextService ? scopedContextService : scopedCommandService),
+        };
+        const { service, executeCommand, getRuntimeScope } = createService();
+        getRuntimeScope.mockReturnValue(runtimeScope);
+        service.registerShortcut({
+            id: 'board.operation.grouping-shortcut',
+            binding: KeyCode.ENTER,
+            preconditions: (contextService) => contextService.getContextValue('FOCUSING_BOARD'),
+        });
+
+        const event = createKeyboardEvent(KeyCode.ENTER);
+        Object.defineProperty(event, 'target', {
+            configurable: true,
+            get: () => canvas,
+        });
+        window.dispatchEvent(event);
+
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-board');
+        expect(scopedContextService.getContextValue).toHaveBeenCalledWith('FOCUSING_BOARD');
+        expect(scopedExecuteCommand).toHaveBeenCalledWith('board.operation.grouping-shortcut', undefined);
+        expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(true);
         service.dispose();
     });

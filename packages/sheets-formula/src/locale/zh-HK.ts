@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/zh-TW';
-import compatibility from './function-list/compatibility/zh-TW';
-import cube from './function-list/cube/zh-TW';
-import database from './function-list/database/zh-TW';
-import date from './function-list/date/zh-TW';
-import engineering from './function-list/engineering/zh-TW';
-import financial from './function-list/financial/zh-TW';
-import information from './function-list/information/zh-TW';
-import logical from './function-list/logical/zh-TW';
-import lookup from './function-list/lookup/zh-TW';
-import math from './function-list/math/zh-TW';
-import statistical from './function-list/statistical/zh-TW';
-import text from './function-list/text/zh-TW';
-import univer from './function-list/univer/zh-TW';
-import web from './function-list/web/zh-TW';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': '正在分析陣列公式...',
             'array-calculation': '正在計算陣列公式...',
             done: '完成',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

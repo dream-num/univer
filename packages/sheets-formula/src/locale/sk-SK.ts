@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/sk-SK';
-import compatibility from './function-list/compatibility/sk-SK';
-import cube from './function-list/cube/sk-SK';
-import database from './function-list/database/sk-SK';
-import date from './function-list/date/sk-SK';
-import engineering from './function-list/engineering/sk-SK';
-import financial from './function-list/financial/sk-SK';
-import information from './function-list/information/sk-SK';
-import logical from './function-list/logical/sk-SK';
-import lookup from './function-list/lookup/sk-SK';
-import math from './function-list/math/sk-SK';
-import statistical from './function-list/statistical/sk-SK';
-import text from './function-list/text/sk-SK';
-import univer from './function-list/univer/sk-SK';
-import web from './function-list/web/sk-SK';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Analyzujú sa maticové vzorce...',
             'array-calculation': 'Počítajú sa maticové vzorce...',
             done: 'Hotovo',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

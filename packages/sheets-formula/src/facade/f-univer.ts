@@ -15,11 +15,11 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
+import type { IRegisterFunctionParams } from '@univerjs/formula';
 import { debounce } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { IRegisterFunctionService } from '@univerjs/formula';
 
 /**
  * @ignore
@@ -63,12 +63,7 @@ export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheets
     }
 
     override registerFunction(config: IRegisterFunctionParams): IDisposable {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
-
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
+        const registerFunctionService = this._injector.get(IRegisterFunctionService);
 
         const functionsDisposable = registerFunctionService.registerFunctions(config);
 

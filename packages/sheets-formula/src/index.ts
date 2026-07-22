@@ -20,26 +20,13 @@ export { QuickSumCommand } from './commands/commands/quick-sum.command';
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config/config';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
 export { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
-export { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 export { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 export { collectUnitQualifierFormulaPatches, UnitQualifierRenameController } from './controllers/unit-qualifier-rename.controller';
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 export { UpdateFormulaController } from './controllers/update-formula.controller';
 export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
-export { DescriptionService, IDescriptionService } from './services/description.service';
-export type { ISearchItem, ISearchItemWithType } from './services/description.service';
-export { FormulaCalculationSessionService } from './services/formula-calculation-session.service';
-export type { IFormulaCalculationSessionState } from './services/formula-calculation-session.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
-export type {
-    IRegisterAsyncFunction,
-    IRegisterFunction,
-    ISingleFunctionRegisterParams,
-} from './services/register-function.service';
-export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
-export { RegisterFunctionService } from './services/register-function.service';
-export { IRegisterFunctionService } from './services/register-function.service';
 export {
     IRemoteRegisterFunctionService,
     RemoteRegisterFunctionService,

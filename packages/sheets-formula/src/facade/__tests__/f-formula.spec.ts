@@ -18,28 +18,34 @@ import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, IConfigService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import {
+    ActiveDirtyManagerService,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
+    IActiveDirtyManagerService,
     IFunctionService,
     ISuperTableService,
+    RegisterOtherFormulaService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetTriggerFormulaCalculationStartMutation,
     SuperTableService,
 } from '@univerjs/engine-formula';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FormulaCalculationSessionController } from '../../controllers/formula-calculation-session.controller';
 import {
-    CalculationMode,
     DescriptionService,
+    FormulaCalculationSessionController,
+    FormulaCalculationSessionService,
     IDescriptionService,
     IRegisterFunctionService,
-    PLUGIN_CONFIG_KEY_BASE,
     RegisterFunctionService,
+} from '@univerjs/formula';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SheetFormulaCalculationResultApplyController } from '../../controllers/sheet-formula-calculation-result-apply.controller';
+import {
+    CalculationMode,
+    PLUGIN_CONFIG_KEY_BASE,
 } from '../../index';
-import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
 import { createFacadeTestBed } from './create-test-bed';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets/facade';
@@ -56,10 +62,14 @@ describe('sheets-formula facade mixins', () => {
         testBed.injector.add([IDescriptionService, { useClass: DescriptionService }]);
         testBed.injector.add([ISuperTableService, { useClass: SuperTableService }]);
         testBed.injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+        testBed.injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+        testBed.injector.add([RegisterOtherFormulaService]);
         testBed.injector.add([FormulaCalculationSessionService]);
         testBed.injector.add([FormulaCalculationSessionController]);
+        testBed.injector.add([SheetFormulaCalculationResultApplyController]);
         testBed.injector.get(FormulaCalculationSessionService);
         testBed.injector.get(FormulaCalculationSessionController);
+        testBed.injector.get(SheetFormulaCalculationResultApplyController);
 
         get = testBed.get;
         univerAPI = testBed.univerAPI;
@@ -148,7 +158,16 @@ describe('sheets-formula facade mixins', () => {
 
         const formula = univerAPI.getFormula();
         const resultPayload = {
-            unitData: {},
+            unitData: {
+                test: {
+                    sheet1: {
+                        0: {
+                            0: { v: 1 },
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
         };
 
         await new Promise<void>((resolve) => {
@@ -376,6 +395,56 @@ describe('sheets-formula facade mixins', () => {
         );
 
         await expect(waitForResult).resolves.toBeUndefined();
+    });
+
+    it('reads each of ten consecutive sheet results after its own application finishes', async () => {
+        vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
+            callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
+            return 1;
+        }) as typeof requestIdleCallback);
+
+        const formula = univerAPI.getFormula();
+        const workbook = univerAPI.getActiveWorkbook();
+        if (!workbook) {
+            throw new Error('Expected an active workbook in the facade test bed.');
+        }
+        const range = workbook.getActiveSheet().getRange('A1');
+        const expectedValues = [10, 3, 77, -5, 1000, 0, 42, 8.5, 999, -1200];
+        const actualValues: unknown[] = [];
+
+        for (const value of expectedValues) {
+            const resultApplied = formula.onCalculationResultApplied(1_000);
+            const resultPayload = {
+                unitData: {
+                    test: {
+                        sheet1: {
+                            0: {
+                                0: { v: value },
+                            },
+                        },
+                    },
+                },
+                unitOtherData: {},
+            };
+
+            await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+            await commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
+            await commandService.executeCommand(
+                SetRangeValuesMutation.id,
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    cellValue: { 0: { 0: { v: value } } },
+                },
+                {
+                    applyFormulaCalculationResult: true,
+                }
+            );
+            await resultApplied;
+            actualValues.push(range.getValue());
+        }
+
+        expect(actualValues).toEqual(expectedValues);
     });
 
     it('rejects onCalculationResultApplied when an explicit timeout is exceeded', async () => {

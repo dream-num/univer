@@ -42,12 +42,14 @@ import {
     IShortcutService,
     ISidebarService,
     IUIPartsService,
+    IUIRuntimeScopeService,
     KeyCode,
     MenuManagerService,
     PasteCommand,
     PlatformService,
     ShortcutService,
     UIPartsService,
+    UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FShortcut } from '../f-shortcut';
@@ -98,6 +100,7 @@ describe('ui facade', () => {
         injector.add([IPlatformService, { useClass: PlatformService }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
         injector.add([IShortcutService, { useClass: ShortcutService }]);
         injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

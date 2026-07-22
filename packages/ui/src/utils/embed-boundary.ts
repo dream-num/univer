@@ -15,6 +15,7 @@
  */
 
 export const EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
+export const EMBED_CHILD_UNIT_ID_ATTRIBUTE = 'data-embed-child-unit-id';
 
 interface IEmbedBoundaryElementLike {
     getAttribute: (name: string) => string | null;
@@ -35,6 +36,17 @@ export function getEmbedBoundaryOwner(target: EventTarget | null): string | unde
 
 export function isEmbedBoundaryTarget(target: EventTarget | null): boolean {
     return hasClosest(target) && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
+}
+
+export function getEmbedChildUnitId(target: EventTarget | null): string | undefined {
+    if (!hasClosest(target)) {
+        return undefined;
+    }
+
+    const childRuntime = target.closest(`[${EMBED_CHILD_UNIT_ID_ATTRIBUTE}]`);
+    return getAttributeValue(target, EMBED_CHILD_UNIT_ID_ATTRIBUTE) ??
+        getAttributeValue(childRuntime, EMBED_CHILD_UNIT_ID_ATTRIBUTE) ??
+        undefined;
 }
 
 export function keepInteractionInsideSameEmbedBoundary(event: {

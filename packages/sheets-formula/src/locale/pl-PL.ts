@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/pl-PL';
-import compatibility from './function-list/compatibility/pl-PL';
-import cube from './function-list/cube/pl-PL';
-import database from './function-list/database/pl-PL';
-import date from './function-list/date/pl-PL';
-import engineering from './function-list/engineering/pl-PL';
-import financial from './function-list/financial/pl-PL';
-import information from './function-list/information/pl-PL';
-import logical from './function-list/logical/pl-PL';
-import lookup from './function-list/lookup/pl-PL';
-import math from './function-list/math/pl-PL';
-import statistical from './function-list/statistical/pl-PL';
-import text from './function-list/text/pl-PL';
-import univer from './function-list/univer/pl-PL';
-import web from './function-list/web/pl-PL';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Analizowanie formuł tablicowych...',
             'array-calculation': 'Obliczanie formuł tablicowych...',
             done: 'Gotowe',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

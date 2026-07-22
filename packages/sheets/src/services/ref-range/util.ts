@@ -1634,7 +1634,7 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
         }
         case EffectRefRangId.RemoveRowCommandId: {
             const params = command.params as IRemoveRowColCommandParams;
-            const target = getSheetCommandTarget(univerInstanceService);
+            const target = getSheetCommandTarget(univerInstanceService, params);
             if (!target) return;
 
             const { worksheet, unitId, subUnitId } = target;
@@ -1655,7 +1655,7 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
         }
         case EffectRefRangId.RemoveColCommandId: {
             const params = command.params as IRemoveRowColCommandParams;
-            const target = getSheetCommandTarget(univerInstanceService);
+            const target = getSheetCommandTarget(univerInstanceService, params);
             if (!target) return;
 
             const { worksheet, unitId, subUnitId } = target;

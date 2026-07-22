@@ -126,9 +126,10 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             undoMutations.unshift(...undos);
         });
 
+        const interceptorParams: IRemoveRowColCommandParams = { range, unitId, subUnitId };
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommandId,
-            params: { range } as IRemoveRowColCommandParams,
+            params: interceptorParams,
         });
 
         const commandService = accessor.get(ICommandService);
@@ -146,7 +147,7 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
 
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveRowCommandId,
-                params: { range } as IRemoveRowColCommandParams,
+                params: interceptorParams,
             });
             sequenceExecute(afterInterceptors.redos, commandService);
 
@@ -202,7 +203,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: RemoveRowCommand.id,
-            params: { range } as IRemoveRowColCommandParams,
+            params: { range, unitId, subUnitId } as IRemoveRowColCommandParams,
         });
 
         if (!canPerform) {
@@ -248,9 +249,10 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
             cellValue: removedCols.getMatrix(),
         };
 
+        const interceptorParams: IRemoveRowColCommandParams = { range, unitId, subUnitId };
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommandId,
-            params: { range } as IRemoveRowColCommandParams,
+            params: interceptorParams,
         });
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
@@ -267,7 +269,7 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
 
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveColCommandId,
-                params: { range } as IRemoveRowColCommandParams,
+                params: interceptorParams,
             });
             sequenceExecute(afterInterceptors.redos, commandService);
 
@@ -311,7 +313,7 @@ export const RemoveColCommand: ICommand = {
         if (!range) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { worksheet, subUnitId, unitId } = target;
@@ -324,7 +326,7 @@ export const RemoveColCommand: ICommand = {
 
         const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: RemoveColCommand.id,
-            params: { range } as IRemoveRowColCommandParams,
+            params: { range, unitId, subUnitId } as IRemoveRowColCommandParams,
         });
 
         if (!canPerform) {

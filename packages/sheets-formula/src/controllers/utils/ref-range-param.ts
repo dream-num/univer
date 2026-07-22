@@ -328,8 +328,10 @@ function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, w
     const { params } = command;
     if (!params) return null;
 
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
+    const { range, unitId: paramUnitId, subUnitId } = params;
+    const { unitId: currentUnitId, sheetId: currentSheetId } = getCurrentSheetInfo(workbook);
+    const unitId = paramUnitId || currentUnitId;
+    const sheetId = subUnitId || currentSheetId;
 
     return {
         type: FormulaReferenceMoveType.RemoveRow,
@@ -344,8 +346,10 @@ function handleRefRemoveCol(command: ICommandInfo<IRemoveRowColCommandParams>, w
     const { params } = command;
     if (!params) return null;
 
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
+    const { range, unitId: paramUnitId, subUnitId } = params;
+    const { unitId: currentUnitId, sheetId: currentSheetId } = getCurrentSheetInfo(workbook);
+    const unitId = paramUnitId || currentUnitId;
+    const sheetId = subUnitId || currentSheetId;
 
     return {
         type: FormulaReferenceMoveType.RemoveColumn,

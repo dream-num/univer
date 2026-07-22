@@ -287,7 +287,7 @@ export class RefRangeService extends Disposable {
                         }
                         case EffectRefRangId.RemoveRowCommandId: {
                             const params = command.params as IRemoveRowColCommandParams;
-                            const target = getSheetCommandTarget(this._univerInstanceService);
+                            const target = getSheetCommandTarget(this._univerInstanceService, params);
                             if (!target) return [];
 
                             const { worksheet, unitId, subUnitId } = target;
@@ -303,7 +303,7 @@ export class RefRangeService extends Disposable {
                         }
                         case EffectRefRangId.RemoveColCommandId: {
                             const params = command.params as IRemoveRowColCommandParams;
-                            const target = getSheetCommandTarget(this._univerInstanceService);
+                            const target = getSheetCommandTarget(this._univerInstanceService, params);
                             if (!target) return [];
 
                             const { worksheet, unitId, subUnitId } = target;

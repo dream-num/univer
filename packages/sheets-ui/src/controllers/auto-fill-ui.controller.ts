@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IMutationCommonParams, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, IMutationCommonParams, IRange, Nullable, UnitModel, Workbook, Worksheet } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IAutoFillLocation, IRemoveSheetMutationParams } from '@univerjs/sheets';
 import {
     Disposable,
@@ -22,9 +23,8 @@ import {
     ICommandService,
     Inject,
     IUniverInstanceService,
-    UniverInstanceType,
 } from '@univerjs/core';
-import { DeviceInputEventType, getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import {
     AUTO_FILL_HOOK_TYPE,
     AutoClearContentCommand,
@@ -42,10 +42,10 @@ import {
     RemoveSheetMutation,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
-    SetSelectionsOperation,
     SetWorksheetActiveOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
@@ -61,8 +61,6 @@ export class AutoFillUIController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @Inject(AutoFillController) private _autoFillController: AutoFillController,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
     ) {
         super();
@@ -72,7 +70,6 @@ export class AutoFillUIController extends Disposable {
 
     private _init() {
         this._initDefaultHook();
-        this._initSelectionControlFillChanged();
         this._initQuitListener();
         this._initSkeletonChange();
     }
@@ -144,182 +141,147 @@ export class AutoFillUIController extends Disposable {
         this._autoFillController.quit();
         this._autoFillService.setShowMenu(false);
     }
+}
 
-    private _initSelectionControlFillChanged() {
-        const disposableCollection = new DisposableCollection();
-        let pendingRetry = false;
-        let retryCount = 0;
+export class AutoFillRenderController extends Disposable implements IRenderModule {
+    private readonly _selectionControlDisposables = new DisposableCollection();
 
-        const scheduleUpdateListener = (listener: () => void) => {
-            if (pendingRetry) {
-                return;
-            }
+    constructor(
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
+    ) {
+        super();
 
-            pendingRetry = true;
-            setTimeout(() => {
-                pendingRetry = false;
-                listener();
-            }, 0);
-        };
+        this._initSelectionControlFillChanged();
+    }
 
-        const updateListener = () => {
-            // Each range change requires re-listening.
-            disposableCollection.dispose();
+    override dispose(): void {
+        this._selectionControlDisposables.dispose();
+        super.dispose();
+    }
 
-            const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService);
-            if (!currentRenderer) return;
-
-            const selectionRenderService = getResolvedSelectionRenderService(currentRenderer);
-            if (!selectionRenderService) {
-                retryCount += 1;
-                if (retryCount <= 3) {
-                    scheduleUpdateListener(updateListener);
-                }
-                return;
-            }
-
-            retryCount = 0;
-
-            const selectionControls = selectionRenderService.getSelectionControls();
-            selectionControls.forEach((controlSelection) => {
-                disposableCollection.add(controlSelection.selectionFilled$.subscribe((filled) => {
-                    if (
-                        filled == null ||
-                                filled.startColumn === -1 ||
-                                filled.startRow === -1 ||
-                                filled.endColumn === -1 ||
-                                filled.endRow === -1
-                    ) {
-                        return;
-                    }
-                    const source: IRange = {
-                        startColumn: controlSelection.model.startColumn,
-                        endColumn: controlSelection.model.endColumn,
-                        startRow: controlSelection.model.startRow,
-                        endRow: controlSelection.model.endRow,
-                    };
-                    const selection: IRange = {
-                        startColumn: filled.startColumn,
-                        endColumn: filled.endColumn,
-                        startRow: filled.startRow,
-                        endRow: filled.endRow,
-                    };
-
-                    this._commandService.executeCommand(AutoFillCommand.id, { sourceRange: source, targetRange: selection });
-                }));
-
-                // double click to fill range, range length will align to left or right column.
-                // fill results will be as same as drag operation
-                disposableCollection.add(controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
-                    const source = {
-                        startColumn: controlSelection.model.startColumn,
-                        endColumn: controlSelection.model.endColumn,
-                        startRow: controlSelection.model.startRow,
-                        endRow: controlSelection.model.endRow,
-                    };
-                    this._handleDbClickFill(source);
-                }));
-
-                disposableCollection.add(controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
-                    const visibleState = this._editorBridgeService.isVisible();
-                    if (visibleState.visible) {
-                        this._commandService.syncExecuteCommand(
-                            SetCellEditVisibleOperation.id,
-                            {
-                                visible: false,
-                                eventType: DeviceInputEventType.PointerDown,
-                                unitId: currentRenderer.unitId,
-                            }
-                        );
-                    }
-                }));
-            });
-        };
-
-        scheduleUpdateListener(updateListener);
-
-        // Should subscribe current current renderer change as well.
-        // TODO@yuhongz: this seems not ideal. This should be an `IRenderModule` for running with multiple renderers?
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id === SetSelectionsOperation.id) {
-                scheduleUpdateListener(updateListener);
-            }
+    private _initSelectionControlFillChanged(): void {
+        this._updateSelectionControlListeners();
+        this.disposeWithMe(this._selectionManagerService.selectionChanged$.subscribe(() => {
+            this._updateSelectionControlListeners();
         }));
+    }
 
-        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
-            .subscribe(() => scheduleUpdateListener(updateListener)));
+    private _updateSelectionControlListeners(): void {
+        // Selection controls are recreated when the selected ranges change.
+        this._selectionControlDisposables.dispose();
+
+        this._selectionRenderService.getSelectionControls().forEach((controlSelection) => {
+            this._selectionControlDisposables.add(controlSelection.selectionFilled$.subscribe((filled) => {
+                if (
+                    filled == null ||
+                    filled.startColumn === -1 ||
+                    filled.startRow === -1 ||
+                    filled.endColumn === -1 ||
+                    filled.endRow === -1
+                ) {
+                    return;
+                }
+
+                const sourceRange: IRange = {
+                    startColumn: controlSelection.model.startColumn,
+                    endColumn: controlSelection.model.endColumn,
+                    startRow: controlSelection.model.startRow,
+                    endRow: controlSelection.model.endRow,
+                };
+                const targetRange: IRange = {
+                    startColumn: filled.startColumn,
+                    endColumn: filled.endColumn,
+                    startRow: filled.startRow,
+                    endRow: filled.endRow,
+                };
+
+                this._executeAutoFill(sourceRange, targetRange);
+            }));
+
+            // Double click has the same effect as dragging the fill control, but its target range is detected automatically.
+            this._selectionControlDisposables.add(controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
+                const sourceRange: IRange = {
+                    startColumn: controlSelection.model.startColumn,
+                    endColumn: controlSelection.model.endColumn,
+                    startRow: controlSelection.model.startRow,
+                    endRow: controlSelection.model.endRow,
+                };
+                this._handleDbClickFill(sourceRange);
+            }));
+
+            this._selectionControlDisposables.add(controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
+                const visibleState = this._editorBridgeService.isVisible();
+                if (visibleState.visible) {
+                    this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: false,
+                        eventType: DeviceInputEventType.PointerDown,
+                        unitId: this._context.unitId,
+                    });
+                }
+            }));
+        });
+    }
+
+    private _executeAutoFill(sourceRange: IRange, targetRange: IRange): void {
+        const subUnitId = this._context.unit.getActiveSheet().getSheetId();
+        this._commandService.executeCommand(AutoFillCommand.id, {
+            sourceRange,
+            targetRange,
+            unitId: this._context.unitId,
+            subUnitId,
+        });
     }
 
     private _handleDbClickFill(source: IRange) {
-        const selection = this._detectFillRange(source);
+        const worksheet = this._context.unit.getActiveSheet();
+        const selection = detectAutoFillRange(source, worksheet);
         // double click only works when dest range is longer than source range
         if (selection.endRow <= source.endRow) {
             return;
         }
 
-        // double click effect is the same as drag effect, but the apply area is automatically calculated (by method '_detectFillRange')
-        this._commandService.executeCommand(AutoFillCommand.id, { sourceRange: source, targetRange: selection });
-    }
-
-    private _detectFillRange(source: IRange) {
-        const { startRow, endRow, startColumn, endColumn } = source;
-        const worksheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
-        if (!worksheet) {
-            return source;
-        }
-        const matrix = worksheet.getCellMatrix();
-        const maxRow = worksheet.getMaxRows();
-        const maxColumn = worksheet.getMaxColumns();
-        let detectEndRow = endRow + 1;
-        // left column first, or consider right column.
-        if (startColumn > 0 && matrix.getValue(detectEndRow, startColumn - 1)?.v != null) {
-            while (matrix.getValue(detectEndRow + 1, startColumn - 1)?.v != null && detectEndRow < maxRow) {
-                detectEndRow += 1;
-            }
-        } else if (endColumn < maxColumn - 1 && matrix.getValue(detectEndRow, endColumn + 1)?.v != null) {
-            while (matrix.getValue(detectEndRow + 1, endColumn + 1)?.v != null && detectEndRow < maxRow) {
-                detectEndRow += 1;
-            }
-        } else {
-            detectEndRow = endRow;
-        }
-
-        // If the fill range contains data, stop filling at the first row of data.
-        for (let i = endRow + 1; i <= detectEndRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                if (matrix.getValue(i, j)?.v != null) {
-                    detectEndRow = i - 1;
-                    break;
-                }
-            }
-        }
-
-        return {
-            startColumn,
-            endColumn,
-            startRow,
-            endRow: detectEndRow,
-        };
+        // Double click uses the same fill command as dragging, with a target range calculated from adjacent data.
+        this._executeAutoFill(source, selection);
     }
 }
 
-function getResolvedSelectionRenderService(renderer: unknown): ISheetSelectionRenderService | undefined {
-    const injector = (renderer as { getInjector?: () => unknown }).getInjector?.();
-    const resolvedDependencies = (injector as {
-        resolvedDependencyCollection?: {
-            resolvedDependencies?: Map<unknown, unknown[]>;
-        };
-    } | undefined)?.resolvedDependencyCollection?.resolvedDependencies;
-
-    if (!resolvedDependencies) {
-        return undefined;
+export function detectAutoFillRange(source: IRange, worksheet: Worksheet): IRange {
+    const { startRow, endRow, startColumn, endColumn } = source;
+    const matrix = worksheet.getCellMatrix();
+    const maxRow = worksheet.getMaxRows();
+    const maxColumn = worksheet.getMaxColumns();
+    let detectEndRow = endRow + 1;
+    // left column first, or consider right column.
+    if (startColumn > 0 && matrix.getValue(detectEndRow, startColumn - 1)?.v != null) {
+        while (matrix.getValue(detectEndRow + 1, startColumn - 1)?.v != null && detectEndRow < maxRow) {
+            detectEndRow += 1;
+        }
+    } else if (endColumn < maxColumn - 1 && matrix.getValue(detectEndRow, endColumn + 1)?.v != null) {
+        while (matrix.getValue(detectEndRow + 1, endColumn + 1)?.v != null && detectEndRow < maxRow) {
+            detectEndRow += 1;
+        }
+    } else {
+        detectEndRow = endRow;
     }
 
-    for (const [identifier, values] of resolvedDependencies) {
-        if ((identifier as { decoratorName?: unknown }).decoratorName === (ISheetSelectionRenderService as unknown as { decoratorName?: unknown }).decoratorName) {
-            return values.length === 1 ? values[0] as ISheetSelectionRenderService : undefined;
+    // If the fill range contains data, stop filling at the first row of data.
+    for (let i = endRow + 1; i <= detectEndRow; i++) {
+        for (let j = startColumn; j <= endColumn; j++) {
+            if (matrix.getValue(i, j)?.v != null) {
+                detectEndRow = i - 1;
+                break;
+            }
         }
     }
 
-    return undefined;
+    return {
+        startColumn,
+        endColumn,
+        startRow,
+        endRow: detectEndRow,
+    };
 }

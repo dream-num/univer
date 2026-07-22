@@ -16,6 +16,7 @@
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCellValue } from '../../basics/utils';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
@@ -26,11 +27,9 @@ import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mu
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface IAutoFillCommandParams {
+export interface IAutoFillCommandParams extends Partial<ISheetCommandSharedParams> {
     sourceRange: IRange;
     targetRange: IRange;
-    unitId?: string; // if not provided, use current unitId
-    subUnitId?: string; // if not provided, use current subUnitId
     applyType?: AUTO_FILL_APPLY_TYPE; // manual apply type
 }
 
@@ -135,7 +134,7 @@ export const SheetCopyRightCommand: ICommand = {
     handler: async (accessor: IAccessor) => executeSheetCopyFill(accessor, 'right'),
 };
 
-export interface IAutoClearContentCommand {
+export interface IAutoClearContentCommand extends ISheetCommandSharedParams {
     clearRange: IRange;
     selectionRange: IRange;
 }
@@ -145,7 +144,7 @@ export const AutoClearContentCommand: ICommand = {
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IAutoClearContentCommand) => {
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const commandService = accessor.get(ICommandService);

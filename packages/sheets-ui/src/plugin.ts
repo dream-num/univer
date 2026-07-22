@@ -36,7 +36,7 @@ import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
+import { AutoFillRenderController, AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
@@ -289,6 +289,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [CellCustomRenderController],
             [SheetContextMenuRenderController],
             [MoveRangeRenderController],
+            [AutoFillRenderController],
 
             // editor
             [EditorBridgeRenderController],

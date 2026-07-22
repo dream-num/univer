@@ -16,19 +16,49 @@
 
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { DocumentFlavor, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, ThemeService, UniverInstanceType } from '@univerjs/core';
+import type {
+    DocumentSkeleton,
+    IDocumentSkeletonPage,
+    IRenderContext,
+    IRenderModule,
+    IWheelEvent,
+} from '@univerjs/engine-render';
+import {
+    Disposable,
+    DocumentFlavor,
+    ICommandService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    ThemeService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
+import {
+    DocBackground,
+    Documents,
+    IRenderManagerService,
+    Layer,
+    PageLayoutType,
+    ScrollBar,
+    Viewport,
+} from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
-import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
+import {
+    DOCS_COMPONENT_BACKGROUND_LAYER_INDEX,
+    DOCS_COMPONENT_DEFAULT_Z_INDEX,
+    DOCS_COMPONENT_HEADER_LAYER_INDEX,
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DOCS_VIEW_KEY,
+    VIEWPORT_KEY,
+} from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { resolveDocRenderBackground } from '../../services/doc-render-background';
 import { DocViewScaleService } from '../../services/doc-view-scale';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
-export class DocRenderController extends RxDisposable implements IRenderModule {
+export class DocRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,

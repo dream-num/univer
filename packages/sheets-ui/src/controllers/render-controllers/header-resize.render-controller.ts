@@ -18,13 +18,22 @@
 /* eslint-disable complexity */
 
 import type { EventState, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    SpreadsheetColumnHeader,
+    SpreadsheetHeader,
+} from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommandParams,
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '@univerjs/sheets';
-import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
+import type {
+    ISetWorksheetColIsAutoWidthCommandParams,
+} from '../../commands/commands/set-worksheet-auto-col-width.command';
 import {
     createInterceptorKey,
     Disposable,
@@ -34,7 +43,6 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,

@@ -20,6 +20,7 @@ import type { Dependency, DocumentDataModel, IDocumentData, Nullable } from '@un
 import type { DocumentSkeleton, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
+    Disposable,
     DisposableCollection,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ILogService,
@@ -29,7 +30,6 @@ import {
     IUniverInstanceService,
     LogLevel,
     Plugin,
-    RxDisposable,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -150,7 +150,7 @@ export function createDocUiTestBed(docData?: IDocumentData, dependencies?: Depen
     };
 }
 
-class MockDocSkeletonManagerService extends RxDisposable implements IRenderModule {
+class MockDocSkeletonManagerService extends Disposable implements IRenderModule {
     private _docViewModel!: DocumentViewModel;
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();

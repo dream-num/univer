@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, InterceptorEffectEnum, RxDisposable } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum } from '@univerjs/core';
 import { extractFormulaError, FormulaDataModel } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -25,7 +25,7 @@ const FORMULA_ERROR_MARK = {
     },
 };
 
-export class FormulaRenderManagerController extends RxDisposable {
+export class FormulaRenderManagerController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel

@@ -18,11 +18,11 @@ import type { Nullable } from '@univerjs/core';
 import type { BaseObject, IRenderModule } from '@univerjs/engine-render';
 import type { IPageElement } from '@univerjs/slides';
 import type { PageID } from '../type';
-import { RxDisposable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SlideRenderController } from './slide.render-controller';
 
-export class CanvasView extends RxDisposable implements IRenderModule {
+export class CanvasView extends Disposable implements IRenderModule {
     constructor(
         // this controller needs by commands. root injector. T
         // That means this controller is not init by renderUnit ---> no renderContext.

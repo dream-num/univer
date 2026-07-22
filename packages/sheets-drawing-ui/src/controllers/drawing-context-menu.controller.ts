@@ -15,13 +15,13 @@
  */
 
 import type { DrawingTypeEnum, IDrawingParam, Nullable, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { IDrawingContextMenuService } from '../services/drawing-context-menu.service';
 
-export class DrawingContextMenuController extends RxDisposable {
+export class DrawingContextMenuController extends Disposable {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,

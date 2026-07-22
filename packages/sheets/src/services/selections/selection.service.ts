@@ -18,7 +18,7 @@ import type { DeepReadonly, ISelectionCell, IStyleData, Nullable, Workbook } fro
 import type { Observable } from 'rxjs';
 import type { ISelectionWithStyle } from '../../basics/selection';
 import type { ISelectionManagerSearchParam } from './type';
-import { IUniverInstanceService, RxDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { distinctUntilChanged, of, share, shareReplay, skip, switchMap, takeUntil } from 'rxjs';
 import { WorkbookSelectionModel } from './selection-data-model';
 import { SelectionMoveType } from './type';
@@ -27,7 +27,7 @@ import { SelectionMoveType } from './type';
  * For normal selection.
  * Ref selection is in RefSelectionService which extends this class.
  */
-export class SheetsSelectionsService extends RxDisposable {
+export class SheetsSelectionsService extends Disposable {
     private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
         const workbook = this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return null;

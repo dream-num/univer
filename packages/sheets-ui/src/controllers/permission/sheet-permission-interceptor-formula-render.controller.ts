@@ -16,13 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, RxDisposable } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { NullValueObject } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { getSheetCommandTarget, RangeProtectionCache, WorksheetViewPermission } from '@univerjs/sheets';
 import { StatusBarController } from '../status-bar.controller';
 
-export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderModule {
+export class SheetPermissionInterceptorFormulaRenderController extends Disposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 
     constructor(

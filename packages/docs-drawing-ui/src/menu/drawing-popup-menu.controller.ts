@@ -18,6 +18,7 @@ import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
+    Disposable,
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
     ICommandService,
@@ -25,7 +26,6 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
-    RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IDocDrawingAdapterService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
@@ -43,7 +43,7 @@ import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing-floating-toolbar-adapter.service';
 
-export class DocDrawingPopupMenuController extends RxDisposable {
+export class DocDrawingPopupMenuController extends Disposable {
     private _initImagePopupMenu = new Set<string>();
     private _disposePopups: IDisposable[] = [];
     private _isDrawingPanelOpen = false;

@@ -19,7 +19,15 @@ import type { IObjectFullState, IRectProps, Scene, SpreadsheetSkeleton } from '@
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
 import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
-import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import {
+    cancelRequestFrame,
+    DashedRect,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    Group,
+    Rect,
+    requestNewFrame,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from '@univerjs/engine-render';
 import {
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
@@ -137,8 +145,8 @@ export class SelectionControl extends Disposable {
     protected _widgetRects: Rect[] = [];
     protected _controlExtension: Nullable<SelectionShapeExtension>;
 
-    private _dispose$ = new BehaviorSubject<SelectionControl>(this);
-    readonly dispose$ = this._dispose$.asObservable();
+    private _disposed$ = new BehaviorSubject<SelectionControl>(this);
+    readonly disposed$ = this._disposed$.asObservable();
 
     /**
      * eventSource: selectionShapeExtension selectionMoving$.next,
@@ -806,8 +814,8 @@ export class SelectionControl extends Disposable {
 
         super.dispose();
 
-        this._dispose$.next(this);
-        this._dispose$.complete();
+        this._disposed$.next(this);
+        this._disposed$.complete();
     }
 
     /**

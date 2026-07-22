@@ -19,7 +19,13 @@ import type { BaseObject, IRenderContext, IRenderModule, RichText, Scene, Slide 
 import type { SlideDataModel } from '@univerjs/slides';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
-import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DeviceInputEventType, ObjectType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
@@ -36,7 +42,7 @@ import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.servi
 //     CursorChange,
 // }
 
-export class SlideEditorBridgeRenderController extends RxDisposable implements IRenderModule {
+export class SlideEditorBridgeRenderController extends Disposable implements IRenderModule {
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */

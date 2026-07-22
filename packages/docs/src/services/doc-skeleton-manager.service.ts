@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, isInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
@@ -24,7 +24,7 @@ import { BehaviorSubject, takeUntil } from 'rxjs';
  * This service is for document build and manage doc skeletons. It also manages
  * DocumentViewModels.
  */
-export class DocSkeletonManagerService extends RxDisposable implements IRenderModule {
+export class DocSkeletonManagerService extends Disposable implements IRenderModule {
     private _skeleton: DocumentSkeleton;
     private _docViewModel: DocumentViewModel;
 

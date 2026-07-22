@@ -16,14 +16,19 @@
 
 import type { DocumentDataModel, DocumentFlavor, ICreateUnitOptions } from '@univerjs/core';
 import type { ICanvasColorService } from '@univerjs/engine-render';
-import { isInternalEditorID, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { resolveDocRenderBackground } from './doc-render-background';
 
 const DOC_MAIN_CANVAS_ID = 'univer-doc-main-canvas';
 
-export function getDocsCanvasBackgroundColor(documentFlavor?: DocumentFlavor, canvasColorService?: ICanvasColorService, editorBackgroundColor?: string, isEditor?: boolean) {
+export function getDocsCanvasBackgroundColor(
+    documentFlavor?: DocumentFlavor,
+    canvasColorService?: ICanvasColorService,
+    editorBackgroundColor?: string,
+    isEditor?: boolean
+) {
     return resolveDocRenderBackground({
         documentFlavor,
         canvasColorService,
@@ -32,7 +37,7 @@ export function getDocsCanvasBackgroundColor(documentFlavor?: DocumentFlavor, ca
     }).canvasElementBackgroundColor;
 }
 
-export class DocsRenderService extends RxDisposable {
+export class DocsRenderService extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService

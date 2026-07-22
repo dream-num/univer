@@ -20,8 +20,20 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelectionModel } from '@univerjs/sheets';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    SpreadsheetColumnHeader,
+    SpreadsheetHeader,
+} from '@univerjs/engine-render';
+import type {
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    ISelectionWithStyle,
+    WorkbookSelectionModel,
+} from '@univerjs/sheets';
 import {
     createInterceptorKey,
     Disposable,
@@ -44,7 +56,6 @@ import {
     MoveRowsCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

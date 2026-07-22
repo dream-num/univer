@@ -16,8 +16,16 @@
 
 import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
 import type { IObjectModel, IObjectPointModel } from '../type';
-import { ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-
+import {
+    Disposable,
+    ILogService,
+    Inject,
+    Injector,
+    IPermissionService,
+    IResourceManagerService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { takeUntil } from 'rxjs/operators';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
@@ -29,7 +37,7 @@ import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model'
 export const RULE_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_PLUGIN';
 export const POINT_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN';
 
-export class WorksheetPermissionService extends RxDisposable {
+export class WorksheetPermissionService extends Disposable {
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,

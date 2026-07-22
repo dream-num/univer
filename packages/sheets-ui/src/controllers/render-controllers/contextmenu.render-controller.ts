@@ -15,7 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type {
+    IRenderContext,
+    IRenderModule,
+    Spreadsheet,
+    SpreadsheetColumnHeader,
+    SpreadsheetHeader,
+} from '@univerjs/engine-render';
 import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import {
     Disposable,

@@ -20,7 +20,20 @@ import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-re
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, Optional, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    DisposableCollection,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_SHEET,
+    ICommandService,
+    IContextService,
+    Inject,
+    IUniverInstanceService,
+    Optional,
+    RxDisposable,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -33,7 +46,10 @@ import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.comm
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
-import { ISheetEmbedRuntimeFocusCoordinator, SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE } from '../../services/sheet-embed-integration.service';
+import {
+    ISheetEmbedRuntimeFocusCoordinator,
+    SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+} from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 

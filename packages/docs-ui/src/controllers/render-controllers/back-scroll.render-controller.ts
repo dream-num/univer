@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
 import type { Documents, INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, RxDisposable } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { takeUntil } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
@@ -26,7 +26,7 @@ import { getAnchorBounding } from '../../services/selection/text-range';
 
 const ANCHOR_WIDTH = 1.5;
 
-export class DocBackScrollRenderController extends RxDisposable implements IRenderModule {
+export class DocBackScrollRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,

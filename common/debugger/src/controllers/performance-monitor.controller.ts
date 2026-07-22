@@ -1,10 +1,10 @@
 import type { Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-import { Inject, IUniverInstanceService, LifecycleService, LifecycleStages, RxDisposable } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs';
 
-export class PerformanceMonitorController extends RxDisposable {
+export class PerformanceMonitorController extends Disposable {
     private _containerElement: HTMLDivElement | null;
 
     private _currentUnitSub: Nullable<Subscription>;

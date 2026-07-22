@@ -16,10 +16,10 @@
 
 import type { ICreateUnitOptions, IDisposable, Workbook } from '@univerjs/core';
 import {
+    Disposable,
     IContextService,
     Inject,
     IUniverInstanceService,
-    RxDisposable,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -32,7 +32,7 @@ const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
 /**
  * This controller is responsible for managing units of a specific kind (UniverSheet) to be rendered on the canvas.
  */
-export class SheetsRenderService extends RxDisposable {
+export class SheetsRenderService extends Disposable {
     private _skeletonChangeMutations = new Set<string>();
 
     constructor(

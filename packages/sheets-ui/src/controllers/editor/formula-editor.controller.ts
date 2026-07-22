@@ -19,6 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
+    Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -29,7 +30,6 @@ import {
     Inject,
     IUndoRedoService,
     IUniverInstanceService,
-    RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -45,7 +45,7 @@ import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
-export class FormulaEditorController extends RxDisposable {
+export class FormulaEditorController extends Disposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
 
     constructor(

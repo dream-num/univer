@@ -16,11 +16,16 @@
 
 import type { UnitModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWatermarkConfigWithType } from '@univerjs/engine-render';
-import { ILocalStorageService, Inject, RxDisposable, UserManagerService } from '@univerjs/core';
-import { IWatermarkTypeEnum, UNIVER_WATERMARK_LAYER_INDEX, UNIVER_WATERMARK_STORAGE_KEY, WatermarkLayer } from '@univerjs/engine-render';
+import { Disposable, ILocalStorageService, Inject, UserManagerService } from '@univerjs/core';
+import {
+    IWatermarkTypeEnum,
+    UNIVER_WATERMARK_LAYER_INDEX,
+    UNIVER_WATERMARK_STORAGE_KEY,
+    WatermarkLayer,
+} from '@univerjs/engine-render';
 import { WatermarkService } from '../services/watermark.service';
 
-export class WatermarkRenderController extends RxDisposable implements IRenderModule {
+export class WatermarkRenderController extends Disposable implements IRenderModule {
     private readonly _watermarkLayer: WatermarkLayer;
 
     constructor(

@@ -17,9 +17,9 @@
 import type { Workbook } from '@univerjs/core';
 import type { SlideDataModel } from '@univerjs/slides';
 import {
+    Disposable,
     IContextService,
     IUniverInstanceService,
-    RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -28,7 +28,7 @@ import { takeUntil } from 'rxjs';
 /**
  * This controller is responsible for managing units of a specific kind to be rendered on the canvas.
  */
-export class SlideRenderService extends RxDisposable {
+export class SlideRenderService extends Disposable {
     // private _skeletonChangeMutations = new Set<string>();
 
     constructor(

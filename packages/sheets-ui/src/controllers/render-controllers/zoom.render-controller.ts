@@ -16,7 +16,15 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional } from '@univerjs/core';
+import {
+    Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    FOCUSING_SHEET,
+    ICommandService,
+    IContextService,
+    Inject,
+    Optional,
+} from '@univerjs/core';
 import { getNextWheelZoomRatio } from '@univerjs/engine-render';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';

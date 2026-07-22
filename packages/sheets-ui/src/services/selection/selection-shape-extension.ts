@@ -110,7 +110,7 @@ export class SelectionShapeExtension {
         this._initialWidget();
         this._initialAutoFill();
 
-        this._control.dispose$.subscribe(() => {
+        this._control.disposed$.subscribe(() => {
             this.dispose();
         });
     }

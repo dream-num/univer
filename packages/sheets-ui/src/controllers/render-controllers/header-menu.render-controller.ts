@@ -15,7 +15,14 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    SpreadsheetColumnHeader,
+    SpreadsheetHeader,
+} from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     Disposable,
@@ -27,7 +34,6 @@ import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
-
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../../menu/header-menu-shape';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

@@ -17,12 +17,21 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../config/config';
-import { CellValueType, getNumfmtParseValueFilter, IConfigService, Inject, InterceptorEffectEnum, isRealNum, isTextFormat, RxDisposable } from '@univerjs/core';
+import {
+    CellValueType,
+    Disposable,
+    getNumfmtParseValueFilter,
+    IConfigService,
+    Inject,
+    InterceptorEffectEnum,
+    isRealNum,
+    isTextFormat,
+} from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-export class ForceStringRenderController extends RxDisposable implements IRenderModule {
+export class ForceStringRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

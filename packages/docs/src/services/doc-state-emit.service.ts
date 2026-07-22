@@ -16,7 +16,7 @@
 
 import type { JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { RxDisposable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 interface IDocChangeState {
@@ -41,7 +41,7 @@ export interface IDocStateChangeInfo extends IDocStateChangeParams {
     syncer?: string;
 }
 
-export class DocStateEmitService extends RxDisposable {
+export class DocStateEmitService extends Disposable {
     private readonly _docStateChangeParams$ = new BehaviorSubject<Nullable<IDocStateChangeInfo>>(null);
     readonly docStateChangeParams$ = this._docStateChangeParams$.asObservable();
 

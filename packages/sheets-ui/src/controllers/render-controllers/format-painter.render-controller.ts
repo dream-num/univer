@@ -22,7 +22,6 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
-
 import { ApplyFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';

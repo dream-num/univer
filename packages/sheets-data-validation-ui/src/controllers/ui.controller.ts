@@ -16,7 +16,7 @@
 
 import type { Ctor } from '@univerjs/core';
 import type { BaseSheetDataValidatorView } from '../views/validator-views/sheet-validator-view';
-import { Inject, Injector, RxDisposable } from '@univerjs/core';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { CheckboxValidatorView } from '../views/validator-views/checkbox-validator-view';
 import { CustomFormulaValidatorView } from '../views/validator-views/custom-validator-view';
@@ -27,7 +27,7 @@ import { ListValidatorView } from '../views/validator-views/list-validator-view'
 import { TextLengthValidatorView } from '../views/validator-views/text-length-validator.view';
 import { WholeValidatorView } from '../views/validator-views/whole-validator-view';
 
-export class SheetsDataValidationUIController extends RxDisposable {
+export class SheetsDataValidationUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService

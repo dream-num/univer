@@ -45,8 +45,13 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-
-import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    Rect,
+    SHEET_VIEWPORT_KEY,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+    Vector2,
+} from '@univerjs/engine-render';
 import {
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -71,8 +76,10 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
-import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
-
+import {
+    SetColumnHeaderHeightCommand,
+    SetRowHeaderWidthCommand,
+} from '../../commands/commands/headersize-changed.command';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';

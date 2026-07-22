@@ -17,7 +17,16 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, ObjectType, Scene } from '@univerjs/engine-render';
 import type { SlideDataModel } from '@univerjs/slides';
-import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    FOCUSING_COMMON_DRAWINGS,
+    ICommandService,
+    IContextService,
+    Inject,
+    IUniverInstanceService,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
@@ -27,7 +36,7 @@ import { CanvasView } from '../controllers/canvas-view';
 import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.service';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 
-export class SlidePopupMenuController extends RxDisposable {
+export class SlidePopupMenuController extends Disposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(

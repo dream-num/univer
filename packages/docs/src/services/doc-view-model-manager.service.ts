@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 
@@ -31,7 +31,7 @@ export interface IDocumentViewModelManagerParam {
  * The view model manager is used to manage Doc view model. Each view model has a one-to-one correspondence
  * with the doc skeleton.
  */
-export class DocViewModelManagerService extends RxDisposable implements IRenderModule {
+export class DocViewModelManagerService extends Disposable implements IRenderModule {
     private _docViewModelMap: Map<string, IDocumentViewModelManagerParam> = new Map();
 
     private readonly _currentDocViewModel$ = new BehaviorSubject<Nullable<IDocumentViewModelManagerParam>>(null);

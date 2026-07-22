@@ -18,12 +18,21 @@ import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ITableRangeWithState } from '@univerjs/sheets-table';
 import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
-import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, Injector, InterceptorEffectEnum, VerticalAlign } from '@univerjs/core';
+import {
+    INTERCEPTOR_POINT,
+    SetVerticalTextAlignCommand,
+    SheetInterceptorService,
+    SheetRangeThemeModel,
+} from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsTableFilterButtonShape } from '../views/widgets/table-filter-button.shape';
+import {
+    FILTER_ICON_PADDING,
+    FILTER_ICON_SIZE,
+    SheetsTableFilterButtonShape,
+} from '../views/widgets/table-filter-button.shape';
 
 const SHEETS_FILTER_BUTTON_Z_INDEX = 5000;
 
@@ -54,7 +63,7 @@ const computeIconTop = (
 /**
  * Show selected range in filter.
  */
-export class SheetsTableFilterButtonRenderController extends RxDisposable implements IRenderModule {
+export class SheetsTableFilterButtonRenderController extends Disposable implements IRenderModule {
     private _buttonRenderDisposable: IDisposable | null = null;
     private _tableFilterButtonShapes: SheetsTableFilterButtonShape[] = [];
 

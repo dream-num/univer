@@ -33,12 +33,34 @@ import type {
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    DataStreamTreeTokenType,
+    Disposable,
+    DOC_RANGE_TYPE,
+    ILogService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    Optional,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    getSystemHighlightColor,
+    GlyphType,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    PageLayoutType,
+    ScrollTimer,
+    Vector2,
+} from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
+import {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -60,7 +82,7 @@ export interface IEditorInputConfig {
     rangeList?: ITextRangeWithStyle[];
 }
 
-export class DocSelectionRenderService extends RxDisposable implements IRenderModule {
+export class DocSelectionRenderService extends Disposable implements IRenderModule {
     private readonly _onInputBefore$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onInputBefore$ = this._onInputBefore$.asObservable();
 

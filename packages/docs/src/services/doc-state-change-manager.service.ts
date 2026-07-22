@@ -17,7 +17,19 @@
 import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import type { IDocStateChangeInfo, IDocStateChangeParams } from './doc-state-emit.service';
-import { createIdentifier, ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, Optional, RedoCommandId, RxDisposable, UndoCommandId, UniverInstanceType } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUndoRedoService,
+    IUniverInstanceService,
+    JSONX,
+    Optional,
+    RedoCommandId,
+    UndoCommandId,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocStateEmitService } from './doc-state-emit.service';
 
@@ -38,7 +50,7 @@ export const IDocStateChangeInterceptorService = createIdentifier<IDocStateChang
 
 // This class sends out state-changing events, what the state is, the data model,
 // and cursor & selection information. It mainly serves history and collaboration.
-export class DocStateChangeManagerService extends RxDisposable {
+export class DocStateChangeManagerService extends Disposable {
     private readonly _docStateChange$ = new BehaviorSubject<Nullable<IDocStateChangeParams>>(null);
     readonly docStateChange$ = this._docStateChange$.asObservable();
     // This cache used for history compose.

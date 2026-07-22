@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { Inject, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ReCalcSheetsFilterMutation,
@@ -26,7 +26,7 @@ import {
 import { SheetsRenderService } from '@univerjs/sheets-ui';
 import { SheetsFilterRenderController } from '../views/render-modules/sheets-filter.render-controller';
 
-export class SheetsFilterUIMobileController extends RxDisposable {
+export class SheetsFilterUIMobileController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService

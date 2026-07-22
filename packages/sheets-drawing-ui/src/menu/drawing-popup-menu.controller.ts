@@ -20,6 +20,7 @@ import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { LocaleKey } from '../locale/types';
 import {
+    Disposable,
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
     ICommandService,
@@ -29,7 +30,6 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
-    RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
@@ -47,7 +47,7 @@ import { IMessageService } from '@univerjs/ui';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
-export class DrawingPopupMenuController extends RxDisposable {
+export class DrawingPopupMenuController extends Disposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(

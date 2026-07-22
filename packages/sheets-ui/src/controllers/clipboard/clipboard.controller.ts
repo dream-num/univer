@@ -44,6 +44,7 @@ import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.
 import {
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
+    Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
     getNumfmtParseValueFilter,
@@ -57,7 +58,6 @@ import {
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
-    RxDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -79,7 +79,13 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, connectInjector, IClipboardInterfaceService, IMessageService, IUIPartsService } from '@univerjs/ui';
+import {
+    BuiltInUIPart,
+    connectInjector,
+    IClipboardInterfaceService,
+    IMessageService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -128,7 +134,7 @@ const shouldRemoveShapeIds = [
     MoveColsMutation.id,
 ];
 
-export class SheetClipboardController extends RxDisposable {
+export class SheetClipboardController extends Disposable {
     private _refreshOptionalPaste$ = new Subject();
     refreshOptionalPaste$ = this._refreshOptionalPaste$.asObservable();
 

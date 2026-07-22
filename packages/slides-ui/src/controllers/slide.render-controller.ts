@@ -18,7 +18,15 @@ import type { EventState, IColorStyle, Nullable, UnitModel } from '@univerjs/cor
 import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import type { IPageElement, ISlidePage, SlideDataModel } from '@univerjs/slides';
 import type { PageID } from '../type';
-import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    debounce,
+    Disposable,
+    getColorStyle,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     getCurrentTypeOfRenderer,
     IRenderManagerService,
@@ -30,7 +38,7 @@ import {
 } from '@univerjs/engine-render';
 import { ObjectProvider, SLIDE_KEY } from '@univerjs/slides';
 
-export class SlideRenderController extends RxDisposable implements IRenderModule {
+export class SlideRenderController extends Disposable implements IRenderModule {
     private _objectProvider: ObjectProvider | null = null;
 
     constructor(

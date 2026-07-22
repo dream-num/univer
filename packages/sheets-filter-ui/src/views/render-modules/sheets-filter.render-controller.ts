@@ -19,10 +19,30 @@ import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univer
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
-import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService, VerticalAlign } from '@univerjs/core';
-import { attachSelectionWithCoord, INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    CommandType,
+    Disposable,
+    fromCallback,
+    ICommandService,
+    Inject,
+    Injector,
+    InterceptorEffectEnum,
+    ThemeService,
+    VerticalAlign,
+} from '@univerjs/core';
+import {
+    attachSelectionWithCoord,
+    INTERCEPTOR_POINT,
+    SetRangeValuesMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    getCoordByCell,
+    ISheetSelectionRenderService,
+    SelectionControl,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
@@ -58,7 +78,7 @@ function computeIconTop(
 /**
  * Show selected range in filter.
  */
-export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
+export class SheetsFilterRenderController extends Disposable implements IRenderModule {
     private _currentRenderParams: ISheetsFilterRenderParams | null = null;
     private _filterRangeShape: SelectionControl | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;

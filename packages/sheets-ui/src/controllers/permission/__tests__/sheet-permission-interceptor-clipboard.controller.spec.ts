@@ -16,7 +16,10 @@
 
 import { UnitAction } from '@univerjs/protocol';
 import { describe, expect, it, vi } from 'vitest';
-import { SHEET_PERMISSION_PASTE_PLUGIN, SheetPermissionInterceptorClipboardController } from '../sheet-permission-interceptor-clipboard.controller';
+import {
+    SHEET_PERMISSION_PASTE_PLUGIN,
+    SheetPermissionInterceptorClipboardController,
+} from '../sheet-permission-interceptor-clipboard.controller';
 
 function createController(protectedCell?: { row: number; col: number }) {
     let hook: any;

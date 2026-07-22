@@ -22,6 +22,10 @@ class TestDisposable extends Disposable {
     assertUsable() {
         this.ensureNotDisposed();
     }
+
+    getDispose$() {
+        return this.dispose$;
+    }
 }
 
 class TestRxDisposable extends RxDisposable {
@@ -65,18 +69,21 @@ describe('lifecycle helpers', () => {
     it('should track disposed state in Disposable and RxDisposable', () => {
         const disposable = new TestDisposable();
         const child = { dispose: vi.fn() };
+        const completed = vi.fn();
         disposable.disposeWithMe(child);
+        disposable.getDispose$().subscribe({ complete: completed });
         disposable.assertUsable();
         disposable.dispose();
 
         expect(child.dispose).toHaveBeenCalledTimes(1);
+        expect(completed).toHaveBeenCalledTimes(1);
         expect(() => disposable.assertUsable()).toThrow(/disposed/);
 
         const rxDisposable = new TestRxDisposable();
-        const completed = vi.fn();
-        rxDisposable.getDispose$().subscribe({ complete: completed });
+        const rxCompleted = vi.fn();
+        rxDisposable.getDispose$().subscribe({ complete: rxCompleted });
         rxDisposable.dispose();
-        expect(completed).toHaveBeenCalledTimes(1);
+        expect(rxCompleted).toHaveBeenCalledTimes(1);
     });
 
     it('should dispose root resource when RCDisposable reference reaches zero', () => {

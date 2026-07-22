@@ -15,10 +15,21 @@
  */
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPoint,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    IScrollObserverParam,
+} from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
+import type {
+    IScrollState,
+    IScrollStateSearchParam,
+    IViewportScrollState,
+} from '../../../services/scroll-manager.service';
 import {
     Direction,
     Disposable,
@@ -32,7 +43,11 @@ import {
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import {
+    ExpandSelectionCommand,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+} from '../../../commands/commands/set-selection.command';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';

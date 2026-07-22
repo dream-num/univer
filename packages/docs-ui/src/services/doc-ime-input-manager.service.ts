@@ -17,7 +17,7 @@
 import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { JSONX, RxDisposable } from '@univerjs/core';
+import { Disposable, JSONX } from '@univerjs/core';
 
 interface ICacheParams {
     undoCache: IRichTextEditingMutationParams[];
@@ -26,7 +26,7 @@ interface ICacheParams {
 
 // Used to record all intermediate states when typing with IME,
 // and then output the entire undo and redo operations.
-export class DocIMEInputManagerService extends RxDisposable implements IRenderModule {
+export class DocIMEInputManagerService extends Disposable implements IRenderModule {
     private _previousActiveRange: Nullable<ITextRangeWithStyle> = null;
 
     private _undoMutationParamsCache: IRichTextEditingMutationParams[] = [];

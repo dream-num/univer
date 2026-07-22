@@ -21,7 +21,7 @@ import type {
     ISuccinctDocRangeParam,
     ITextRangeWithStyle,
 } from '@univerjs/engine-render';
-import { ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
@@ -46,7 +46,7 @@ type ITextSelectionInfo = Map<string, Map<string, IDocSelectionInnerParam>>;
 /**
  * This service is for text selection.
  */
-export class DocSelectionManagerService extends RxDisposable {
+export class DocSelectionManagerService extends Disposable {
     private _currentSelection: Nullable<IDocSelectionManagerSearchParam> = null;
 
     private readonly _textSelectionInfo: ITextSelectionInfo = new Map();

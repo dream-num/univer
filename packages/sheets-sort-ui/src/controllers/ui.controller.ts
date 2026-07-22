@@ -17,7 +17,7 @@
 import type { UIPartsService } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
-import { ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, LocaleService } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
@@ -49,7 +49,7 @@ const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
 const CUSTOM_SORT_PANEL_WIDTH = 560;
 const CUSTOM_SORT_PANEL_TOP = 128;
 
-export class SheetsSortUIController extends RxDisposable {
+export class SheetsSortUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,

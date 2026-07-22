@@ -25,12 +25,8 @@ import {
     InterceptorManager,
     RxDisposable,
 } from '@univerjs/core';
-import {
-    SetSpecificColsVisibleCommand,
-    SetSpecificRowsVisibleCommand,
-} from '@univerjs/sheets';
+import { SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand } from '@univerjs/sheets';
 import { takeUntil } from 'rxjs';
-
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
 import { HeaderUnhideRangeAxis, HeaderUnhideRangeService } from '../../services/header-unhide-range.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

@@ -15,11 +15,25 @@
  */
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
-import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type {
+    IRenderContext,
+    IRenderModule,
+    IScrollObserverParam,
+    IWheelEvent,
+    Viewport,
+} from '@univerjs/engine-render';
+import type {
+    IScrollToCellOperationParams,
+    ISetSelectionsOperationParams,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
+import type {
+    IScrollState,
+    IScrollStateSearchParam,
+    IViewportScrollState,
+} from '../../services/scroll-manager.service';
 import {
     Direction,
     Disposable,

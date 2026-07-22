@@ -17,10 +17,10 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
+    Disposable,
     ICommandService,
     IContextService,
     Inject,
-    RxDisposable,
 } from '@univerjs/core';
 import {
     HTML_CLIPBOARD_MIME_TYPE,
@@ -34,7 +34,7 @@ import { DOC_INTERNAL_FRAGMENT_MIME } from '../../services/clipboard/internal-fr
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
-export class DocClipboardController extends RxDisposable implements IRenderModule {
+export class DocClipboardController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,

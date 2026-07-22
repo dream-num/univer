@@ -15,11 +15,25 @@
  */
 
 import type { CellValue, ICellRenderContext, IRange, Nullable } from '@univerjs/core';
-import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, Optional, RxDisposable, sequenceExecute } from '@univerjs/core';
+import {
+    DataValidationStatus,
+    DataValidationType,
+    Disposable,
+    ICommandService,
+    Inject,
+    InterceptorEffectEnum,
+    IUniverInstanceService,
+    Optional,
+    sequenceExecute,
+} from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import {
+    DataValidationCacheService,
+    getCellValueOrigin,
+    SheetDataValidationModel,
+} from '@univerjs/sheets-data-validation';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
 import { bufferTime, filter } from 'rxjs';
@@ -33,7 +47,7 @@ const INVALID_MARK = {
     },
 };
 
-export class SheetsDataValidationRenderController extends RxDisposable {
+export class SheetsDataValidationRenderController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
@@ -275,7 +289,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 }
 
 // The mobile version does not provide the ability to change data validation model.
-export class SheetsDataValidationMobileRenderController extends RxDisposable {
+export class SheetsDataValidationMobileRenderController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,

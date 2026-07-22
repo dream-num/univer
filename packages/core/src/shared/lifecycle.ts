@@ -90,6 +90,7 @@ export class DisposableCollection implements IDisposable {
 
 export class Disposable implements IDisposable {
     protected _disposed = false;
+    protected dispose$ = new Subject<void>();
     private readonly _collection = new DisposableCollection();
 
     public disposeWithMe(disposable: DisposableLike): IDisposable {
@@ -109,19 +110,15 @@ export class Disposable implements IDisposable {
 
         this._disposed = true;
         this._collection.dispose();
-    }
-}
-
-export class RxDisposable extends Disposable implements IDisposable {
-    protected dispose$ = new Subject<void>();
-
-    override dispose(): void {
-        super.dispose();
         this.dispose$.next();
         this.dispose$.complete();
     }
 }
 
+/** @deprecated Use `Disposable` instead. */
+export class RxDisposable extends Disposable implements IDisposable {}
+
+/** @deprecated Use `Disposable` instead. */
 export class RCDisposable extends Disposable {
     private _ref = 0;
 

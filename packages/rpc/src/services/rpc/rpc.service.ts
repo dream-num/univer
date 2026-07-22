@@ -17,7 +17,7 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { Subscription } from 'rxjs';
-import { RxDisposable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 
@@ -186,7 +186,7 @@ interface IResponseHandler {
  * This method provides implementation for `IChannel` and is responsible for
  * transforming a local calling to a RPC calling.
  */
-export class ChannelClient extends RxDisposable implements IChannelClient {
+export class ChannelClient extends Disposable implements IChannelClient {
     private _initialized = new BehaviorSubject<boolean>(false);
     private _lastRequestCounter = 0;
     private _pendingRequests = new Map<number, IResponseHandler>();
@@ -349,7 +349,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     }
 }
 
-export class ChannelServer extends RxDisposable implements IChannelServer {
+export class ChannelServer extends Disposable implements IChannelServer {
     private _channels = new Map<string, IChannel>();
 
     private _subscriptions = new Map<number, Subscription>();

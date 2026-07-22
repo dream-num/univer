@@ -17,11 +17,11 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import {
+    Disposable,
     ICommandService,
     Inject,
     IUniverInstanceService,
     LocaleService,
-    RxDisposable,
     toDisposable,
 } from '@univerjs/core';
 import { IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
@@ -51,7 +51,7 @@ const FIND_REPLACE_PANEL_WIDTH = 350;
 const FIND_REPLACE_PANEL_RIGHT_PADDING = 20;
 const FIND_REPLACE_PANEL_TOP_PADDING = 64;
 
-export class FindReplaceController extends RxDisposable {
+export class FindReplaceController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,

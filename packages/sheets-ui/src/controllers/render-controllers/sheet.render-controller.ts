@@ -14,13 +14,32 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    BooleanNumber,
+    ICommandInfo,
+    IExecutionOptions,
+    IRange,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
+import type {
+    IAfterRender$Info,
+    IBasicFrameInfo,
+    IExtendFrameInfo,
+    IRenderContext,
+    IRenderModule,
+    IScrollBarProps,
+    ISummaryFrameInfo,
+    ISummaryMetric,
+    ITimeMetric,
+    IViewportInfos,
+    Scene,
+} from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-
 import {
     Rect,
     ScrollBar,
@@ -31,7 +50,12 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    COMMAND_LISTENER_VALUE_CHANGE,
+    MoveRangeMutation,
+    SetRangeValuesMutation,
+} from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import {

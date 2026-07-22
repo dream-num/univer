@@ -15,7 +15,21 @@
  */
 
 import type { IUniverUIConfig } from './config/config';
-import { DependentOn, generateRandomId, IConfigService, IConfirmService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
+import {
+    DependentOn,
+    generateRandomId,
+    IConfigService,
+    IConfirmService,
+    IContextService,
+    ILocalStorageService,
+    Inject,
+    Injector,
+    merge,
+    mergeOverrideWithDependencies,
+    Plugin,
+    registerDependencies,
+    touchDependencies,
+} from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { ComponentManager } from './common/component-manager';
@@ -24,6 +38,7 @@ import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
+import { FeatureSearchController } from './controllers/feature-search/feature-search.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
@@ -137,6 +152,7 @@ export class UniverMobileUIPlugin extends Plugin {
             ],
             [SharedController],
             [ErrorController],
+            [FeatureSearchController],
             [ShortcutPanelController],
         ], this._config.override));
 
@@ -150,6 +166,7 @@ export class UniverMobileUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SharedController],
+            [FeatureSearchController],
         ]);
     }
 

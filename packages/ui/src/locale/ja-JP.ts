@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ja-JP.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: '機能を検索',
+            placeholder: '機能またはメニュー名を入力…',
+            empty: '利用可能な機能が見つかりません',
+            ribbon: 'リボン',
+            contextMenu: 'コンテキストメニュー',
+        },
         emojiPicker: {
             search: '検索',
             random: 'ランダム絵文字',

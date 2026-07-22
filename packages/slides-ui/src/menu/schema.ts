@@ -27,10 +27,12 @@ export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
         [SlideAddTextCommand.id]: {
             order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
             menuItemFactory: SlideAddTextMenuItemFactory,
         },
         [SLIDES_IMAGE_MENU_ID]: {
             order: 0,
+            gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
             menuItemFactory: SlideImageMenuFactory,
             [InsertSlideFloatImageCommand.id]: {
                 order: 0,
@@ -39,6 +41,7 @@ export const menuSchema: MenuSchemaType = {
         },
         [SHAPE_MENU_ID]: {
             order: 0,
+            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
             menuItemFactory: SlideShapeMenuFactory,
             [InsertSlideShapeRectangleCommand.id]: {
                 order: 0,

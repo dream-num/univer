@@ -29,7 +29,7 @@ import {
 } from '@univerjs/sheets-table';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { of, switchMap } from 'rxjs';
+import { of, startWith, switchMap } from 'rxjs';
 import { OpenTableSelectorOperation } from '../commands/operations/open-table-selector.operation';
 
 export const SHEET_TABLE_CONTEXT_INSERT_MENU_ID = 'sheet.table.context-insert_menu-id';
@@ -113,6 +113,7 @@ export function getSheetTableRowColOperationHidden$(accessor: IAccessor): Observ
                 switchMap((sheet) => {
                     if (!sheet) return of(true);
                     return sheetsSelectionsService.selectionMoveEnd$.pipe(
+                        startWith(sheetsSelectionsService.getCurrentSelections()),
                         switchMap((selections) => {
                             if (!selections.length || selections.length > 1) return of(true);
                             const selection = selections[0];
@@ -145,6 +146,7 @@ export function getSheetTableHeaderOperationHidden$(accessor: IAccessor): Observ
                 switchMap((sheet) => {
                     if (!sheet) return of(true);
                     return sheetsSelectionsService.selectionMoveEnd$.pipe(
+                        startWith(sheetsSelectionsService.getCurrentSelections()),
                         switchMap((selections) => {
                             if (!selections.length || selections.length > 1) return of(true);
                             const selection = selections[0];

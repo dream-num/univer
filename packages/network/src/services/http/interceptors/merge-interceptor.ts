@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { Subscription } from 'rxjs';
 import type { HTTPHandlerFn } from '../interceptor';
 import type { HTTPRequest } from '../request';
-import { noop } from '@univerjs/core';
+import { noop, remove } from '@univerjs/core';
 import { Observable } from 'rxjs';
 import { HTTPEventType, HTTPResponse } from '../response';
 
@@ -69,7 +70,9 @@ export const MergeInterceptorFactory = <T, C>(config: {
      */
         distributeResult?: (result: C, list: T[]) => { config: T; result: C }[];
     } = {}) => {
-    interface IHook { next: (v: HTTPResponse<C>) => void; config: T; error: (error: string) => void };
+    interface IBatch { hooks: IHook[]; subscription?: Subscription };
+    interface IHook { next: (v: HTTPResponse<C>) => void; config: T; error: (error: string) => void; active: boolean; batch?: IBatch };
+
     const { isMatch, getParamsFromRequest, mergeParamsToRequest } = config;
     const { fetchCheck = createDefaultFetchCheck(300), distributeResult = createDistributeResult() } = options;
     const hookList: IHook[] = [];
@@ -81,12 +84,16 @@ export const MergeInterceptorFactory = <T, C>(config: {
         }
         return new Observable<HTTPResponse<C>>((observer) => {
             const params = getParamsFromRequest(requestConfig);
-            hookList.push({
+            const hook: IHook = {
                 next: (v) => observer.next(v),
                 error: (error) => observer.error(error),
                 config: params,
-            });
+                active: true,
+            };
+            hookList.push(hook);
+
             const list = getPlainList(hookList);
+
             fetchCheck(requestConfig).then((isFetch) => {
                 if (isFetch) {
                     // Pin down the queue that currently needs a request.
@@ -100,12 +107,18 @@ export const MergeInterceptorFactory = <T, C>(config: {
                             // There's no corresponding callback here. It could be that other operations have been handled and do not need to be handled.
                         }
                     });
+                    const currentList = getPlainList(currentHookList);
+                    if (!currentList.length) {
+                        return;
+                    }
 
-                    next(mergeParamsToRequest(list, requestConfig)).subscribe({
+                    const batch: IBatch = { hooks: currentHookList };
+                    currentHookList.forEach((hookItem) => hookItem.batch = batch);
+                    batch.subscription = next(mergeParamsToRequest(currentList, requestConfig)).subscribe({
                         next: (e) => {
                             if (e.type === HTTPEventType.Response) {
                                 const body = e.body as C;
-                                const configList = distributeResult(body, list);
+                                const configList = distributeResult(body, currentList);
                                 currentHookList.forEach((hookItem) => {
                                     const res = configList.find((item) => item.config === hookItem.config);
                                     if (res) {
@@ -127,6 +140,14 @@ export const MergeInterceptorFactory = <T, C>(config: {
                     });
                 }
             });
+
+            return () => {
+                hook.active = false;
+                remove(hookList, hook);
+                if (hook.batch?.hooks.every((hookItem) => !hookItem.active)) {
+                    hook.batch.subscription?.unsubscribe();
+                }
+            };
         });
     };
 };

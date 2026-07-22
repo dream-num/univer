@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ru-RU.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'Поиск функций',
+            placeholder: 'Введите название функции или меню...',
+            empty: 'Доступные функции не найдены',
+            ribbon: 'Лента',
+            contextMenu: 'Контекстное меню',
+        },
         emojiPicker: {
             search: 'Поиск',
             random: 'Случайный эмодзи',

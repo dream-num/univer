@@ -17,7 +17,7 @@
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { cva } from '@univerjs/design';
+import { borderClassName, clsx, cva } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
@@ -27,8 +27,16 @@ import { MenuItemType } from '../../../services/menu/menu';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useToolbarItemStatus, useToolbarShortcutDisplay } from './hook';
-import { ToolbarButton } from './ToolbarButton';
+import { ToolbarButton, toolbarButtonVariants } from './ToolbarButton';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+
+type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
+    grid?: boolean;
+    large?: boolean;
+    showLabel?: boolean;
+    iconSize?: number;
+    fullWidth?: boolean;
+};
 
 const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600';
 
@@ -179,7 +187,7 @@ const toolbarSelectorTriggerVariants = cva(`
     },
 });
 
-export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
+export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((props, ref) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
@@ -192,7 +200,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, fullWidth } = props;
+    const gridLabel = title ?? tooltip;
 
     const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
     let tooltipTitle = tooltip ? localeService.t(tooltip) : '';
@@ -230,6 +239,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         const selectionsCommandId = (props as IDisplayMenuItem<IMenuSelectorItem>).selectionsCommandId;
         const bId = commandId ?? id;
         const sId = selectionsCommandId ?? commandId ?? id;
+        const titleToDisplay = grid ? (showLabel ? gridLabel : large ? undefined : title) : title;
 
         function handleSelect(option: IValueOption) {
             if (disabled) return;
@@ -262,15 +272,22 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 <div
                     data-u-command={id}
                     data-disabled={disabled}
-                    className={toolbarButtonSelectorRootVariants({ disabled })}
+                    className={clsx(toolbarButtonSelectorRootVariants({ disabled }), {
+                        'univer-box-border univer-h-full univer-min-w-14 univer-flex-col !univer-pr-0': grid && large,
+                        'univer-box-border univer-h-full': grid && !large,
+                    })}
                 >
                     <div
-                        className={toolbarButtonSelectorMainVariants({ active: activated, disabled })}
+                        className={clsx(toolbarButtonSelectorMainVariants({ active: activated, disabled }), {
+                            'univer-h-full univer-w-full univer-flex-col univer-justify-center univer-rounded univer-px-1 univer-pb-4 [&>svg]:univer-size-8': grid && large,
+                            '[&>svg]:univer-size-5': grid && !large,
+                        })}
                         onClick={handleClick}
                     >
                         <CustomLabel
                             icon={iconToDisplay}
-                            title={title!}
+                            iconSize={iconSize}
+                            title={titleToDisplay}
                             value={value}
                             label={label}
                             onChange={handleSelectionsValueChange}
@@ -286,7 +303,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         onOptionSelect={handleSelect}
                     >
                         <div
-                            className={toolbarButtonSelectorTriggerVariants({ disabled, active: activated })}
+                            className={clsx(toolbarButtonSelectorTriggerVariants({ disabled, active: activated }), {
+                                '!univer-top-auto univer-bottom-0 univer-h-4 univer-w-full univer-rounded-b univer-rounded-t-none': grid && large,
+                                'univer-h-full': grid && !large,
+                            })}
                             data-disabled={disabled}
                         >
                             <MoreDownIcon />
@@ -306,20 +326,52 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 >
                     <div
                         data-u-command={id}
-                        className={toolbarSelectorRootVariants({ disabled, active: activated })}
+                        className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
+                            'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-8': grid && large,
+                            'univer-box-border univer-h-full': grid && !large,
+                            'univer-bg-white dark:!univer-bg-gray-800': grid && !large && !icon,
+                            '[&>svg]:univer-size-5': grid && !large,
+                        }, grid && !large && !icon && borderClassName)}
                     >
-                        <CustomLabel
-                            icon={iconToDisplay}
-                            title={title!}
-                            value={value}
-                            label={label}
-                            onChange={handleSelectionsValueChange}
-                        />
-                        <div
-                            className={toolbarSelectorTriggerVariants({ disabled })}
-                        >
-                            <MoreDownIcon />
-                        </div>
+                        {grid && large
+                            ? (
+                                <>
+                                    <CustomLabel icon={iconToDisplay} iconSize={iconSize} />
+                                    <div
+                                        className={clsx(
+                                            toolbarSelectorTriggerVariants({ disabled }),
+                                            'univer-h-4 univer-justify-center univer-gap-0.5'
+                                        )}
+                                    >
+                                        <CustomLabel
+                                            title={titleToDisplay}
+                                            value={value}
+                                            label={label}
+                                            onChange={handleSelectionsValueChange}
+                                        />
+                                        <MoreDownIcon />
+                                    </div>
+                                </>
+                            )
+                            : (
+                                <>
+                                    <CustomLabel
+                                        icon={iconToDisplay}
+                                        iconSize={iconSize}
+                                        title={titleToDisplay}
+                                        value={value}
+                                        label={label}
+                                        onChange={handleSelectionsValueChange}
+                                    />
+                                    <div
+                                        className={clsx(toolbarSelectorTriggerVariants({ disabled }), {
+                                            'univer-ml-auto rtl:univer-ml-0 rtl:univer-mr-auto': grid && !large && !icon,
+                                        })}
+                                    >
+                                        <MoreDownIcon />
+                                    </div>
+                                </>
+                            )}
                     </div>
                 </DropdownMenuWrapper>
             );
@@ -328,11 +380,42 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
 
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
+        const buttonClassName = clsx(grid && !large && `
+          univer-h-full univer-min-w-8
+          [&>svg]:univer-size-5
+        `, grid && large
+            ? `
+              univer-h-full univer-min-w-14 univer-flex-col univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs
+              [&>svg]:univer-size-8
+            `
+            : showLabel
+                ? 'univer-gap-1 univer-px-1.5 univer-text-sm'
+                : 'univer-text-sm', grid && fullWidth && isCustomComponent && '!univer-px-0');
+        const buttonStyle = grid && large ? { textAlign: 'center', whiteSpace: 'normal' } as const : undefined;
+
+        if (isCustomComponent) {
+            return (
+                <span
+                    data-u-command={id}
+                    className={toolbarButtonVariants({ noIcon: !icon, active: activated, className: buttonClassName })}
+                    style={buttonStyle}
+                    aria-disabled={disabled}
+                >
+                    <CustomLabel
+                        className={grid && fullWidth ? '!univer-w-full' : undefined}
+                        title={grid && showLabel ? gridLabel! : title!}
+                        value={value}
+                        label={label}
+                    />
+                </span>
+            );
+        }
 
         return (
             <ToolbarButton
                 data-u-command={id}
-                className="univer-text-sm"
+                className={buttonClassName}
+                style={buttonStyle}
                 noIcon={!icon}
                 active={activated}
                 disabled={disabled}
@@ -342,13 +425,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 }}
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
-                {isCustomComponent
-                    ? (
-                        <CustomLabel title={title!} value={value} label={label} />
-                    )
-                    : (
-                        icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
-                    )}
+                {icon
+                    ? <CustomLabel icon={icon} iconSize={iconSize} title={grid && (large || showLabel) ? gridLabel : undefined} />
+                    : <CustomLabel title={title!} />}
             </ToolbarButton>
         );
     }

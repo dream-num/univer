@@ -17,12 +17,13 @@
 import type { Injector } from '@univerjs/core';
 import type { MockHTTPImplementation } from '../../__tests__/http-testing-utils';
 import { awaitTime } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { Observable } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHTTPTestBed } from '../../__tests__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
 import { HTTPService } from '../../http.service';
 import { IHTTPImplementation } from '../../implementations/implementation';
-import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
+import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION, HTTPRequest } from '../../request';
 import { HTTPResponse, HTTPResponseError } from '../../response';
 import { ThresholdInterceptorFactory } from '../threshold-interceptor';
 
@@ -134,5 +135,16 @@ describe('test "HTTPThresholdInterceptor"', () => {
 
         emitSuccess(1);
         expect(await request1).toBeDefined();
+    });
+
+    it('should cancel an active request when its subscriber unsubscribes', () => {
+        const teardown = vi.fn();
+        const request = new HTTPRequest('GET', 'http://example.com');
+        const request$ = ThresholdInterceptorFactory()(request, () => new Observable(() => teardown));
+
+        const subscription = request$.subscribe();
+        subscription.unsubscribe();
+
+        expect(teardown).toHaveBeenCalledOnce();
     });
 });

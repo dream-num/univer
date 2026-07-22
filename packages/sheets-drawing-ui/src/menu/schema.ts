@@ -25,6 +25,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [SHEETS_IMAGE_MENU_ID]: {
             order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
             menuItemFactory: ImageMenuFactory,
             [InsertFloatImageCommand.id]: {
                 order: 0,

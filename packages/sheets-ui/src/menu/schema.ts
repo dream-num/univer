@@ -233,48 +233,59 @@ export const menuSchema: MenuSchemaType = {
         [RibbonStartGroup.HISTORY]: {
             [SetOnceFormatPainterCommand.id]: {
                 order: 2,
+                gridLayout: { row: 1, column: 2, showLabel: true },
                 menuItemFactory: FormatPainterMenuItemFactory,
             },
             [ClearSelectionAllCommand.id]: {
                 order: 3,
+                gridLayout: { row: 2, column: 2, showLabel: true },
                 menuItemFactory: ClearSelectionAllToolbarMenuItemFactory,
             },
         },
         [RibbonStartGroup.FORMAT]: {
             [SetRangeFontFamilyCommand.id]: {
                 order: 1,
+                gridLayout: { row: 1, column: 1, columnSpan: 4, width: 240 },
                 menuItemFactory: FontFamilySelectorMenuItemFactory,
             },
             [SetRangeFontSizeCommand.id]: {
                 order: 2,
+                gridLayout: { row: 1, column: 5, width: 72 },
                 menuItemFactory: FontSizeSelectorMenuItemFactory,
             },
             [SetRangeFontIncreaseCommand.id]: {
                 order: 2.1,
+                gridLayout: { row: 1, column: 6 },
                 menuItemFactory: FontSizeIncreaseMenuItemFactory,
             },
             [SetRangeFontDecreaseCommand.id]: {
                 order: 2.2,
+                gridLayout: { row: 1, column: 7 },
                 menuItemFactory: FontSizeDecreaseMenuItemFactory,
             },
             [SetRangeBoldCommand.id]: {
                 order: 5,
+                gridLayout: { row: 2, column: 1 },
                 menuItemFactory: BoldMenuItemFactory,
             },
             [SetRangeItalicCommand.id]: {
                 order: 6,
+                gridLayout: { row: 2, column: 2 },
                 menuItemFactory: ItalicMenuItemFactory,
             },
             [SetRangeUnderlineCommand.id]: {
                 order: 7,
+                gridLayout: { row: 2, column: 3 },
                 menuItemFactory: UnderlineMenuItemFactory,
             },
             [SetRangeStrickThroughCommand.id]: {
                 order: 8,
+                gridLayout: { row: 2, column: 4 },
                 menuItemFactory: StrikeThroughMenuItemFactory,
             },
             [SetRangeTextColorCommand.id]: {
                 order: 9,
+                gridLayout: { row: 2, column: 7 },
                 menuItemFactory: TextColorSelectorMenuItemFactory,
                 [ResetTextColorCommand.id]: {
                     order: 0,
@@ -283,6 +294,7 @@ export const menuSchema: MenuSchemaType = {
             },
             [SetBackgroundColorCommand.id]: {
                 order: 10,
+                gridLayout: { row: 2, column: 6 },
                 menuItemFactory: BackgroundColorSelectorMenuItemFactory,
                 [ResetBackgroundColorCommand.id]: {
                     order: 0,
@@ -291,32 +303,39 @@ export const menuSchema: MenuSchemaType = {
             },
             [SetBorderBasicCommand.id]: {
                 order: 11,
+                gridLayout: { row: 2, column: 5 },
                 menuItemFactory: CellBorderSelectorMenuItemFactory,
             },
         },
         [RibbonStartGroup.LAYOUT]: {
             [SetHorizontalTextAlignCommand.id]: {
                 order: 0,
+                gridLayout: { row: 1, column: 1 },
                 menuItemFactory: HorizontalAlignMenuItemFactory,
             },
             [SetVerticalTextAlignCommand.id]: {
                 order: 3,
+                gridLayout: { row: 2, column: 1 },
                 menuItemFactory: VerticalAlignMenuItemFactory,
             },
             [SetTextWrapCommand.id]: {
                 order: 6,
+                gridLayout: { row: 1, column: 2 },
                 menuItemFactory: WrapTextMenuItemFactory,
             },
             [SetShrinkToFitCommand.id]: {
                 order: 7,
+                gridLayout: { row: 2, column: 2 },
                 menuItemFactory: ShrinkToFitMenuItemFactory,
             },
             [SetTextRotationCommand.id]: {
                 order: 8,
+                gridLayout: { row: 1, column: 3 },
                 menuItemFactory: TextRotateMenuItemFactory,
             },
             [AddWorksheetMergeCommand.id]: {
                 order: 9,
+                gridLayout: { row: 2, column: 3 },
                 menuItemFactory: CellMergeMenuItemFactory,
                 [AddWorksheetMergeAllCommand.id]: {
                     order: 0,
@@ -339,6 +358,7 @@ export const menuSchema: MenuSchemaType = {
         [RibbonStartGroup.OTHERS]: {
             [AddRangeProtectionFromToolbarCommand.id]: {
                 order: 0,
+                gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
                 menuItemFactory: sheetPermissionToolbarMenuFactory,
             },
         },
@@ -347,20 +367,24 @@ export const menuSchema: MenuSchemaType = {
         [RibbonViewGroup.DISPLAY]: {
             [SHEET_FROZEN_TOOLBAR_MENU_ID]: {
                 order: 0,
+                gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
                 menuItemFactory: SheetFrozenToolbarMenuItemFactory,
             },
             [ZOOM_RATIO_MENU_ID]: {
                 order: 1,
+                gridLayout: { row: 1, column: 2, width: 112 },
                 menuItemFactory: ZoomRatioMenuItemFactory,
             },
             [ToggleFullscreenOperation.id]: {
                 order: 2,
+                gridLayout: { row: 2, column: 2, showLabel: true, width: 112 },
                 menuItemFactory: FullscreenMenuItemFactory,
             },
         },
         [RibbonViewGroup.VISIBILITY]: {
             [ToggleGridlinesCommand.id]: {
                 order: 0,
+                gridLayout: { row: 1, column: 1, showLabel: true },
                 menuItemFactory: ToggleGridlinesMenuFactory,
             },
         },

@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/de-DE.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'Funktionen suchen',
+            placeholder: 'Funktion oder Menüname eingeben...',
+            empty: 'Keine verfügbaren Funktionen gefunden',
+            ribbon: 'Menüband',
+            contextMenu: 'Kontextmenü',
+        },
         emojiPicker: {
             search: 'Suchen',
             random: 'Zufälliges Emoji',

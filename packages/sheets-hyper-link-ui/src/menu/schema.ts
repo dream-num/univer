@@ -23,6 +23,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [InsertHyperLinkToolbarOperation.id]: {
             order: 1,
+            gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
             menuItemFactory: insertLinkMenuToolbarFactory,
         },
     },

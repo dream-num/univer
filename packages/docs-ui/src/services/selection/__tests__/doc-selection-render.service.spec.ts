@@ -1325,6 +1325,7 @@ describe('DocSelectionRenderService', () => {
 
         service.activate(35, 47);
 
+        expect(container.style.position).toBe('fixed');
         expect(container.style.left).toBe('-65px');
         expect(container.style.top).toBe('-153px');
     });

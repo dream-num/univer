@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/zh-CN.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: '搜索功能',
+            placeholder: '输入功能或菜单名称…',
+            empty: '未找到当前可用的功能',
+            ribbon: '功能区',
+            contextMenu: '右键菜单',
+        },
         emojiPicker: {
             search: '搜索',
             random: '随机表情',

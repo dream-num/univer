@@ -23,6 +23,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [ToggleSheetCommentPanelOperation.id]: {
             order: 2,
+            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
             menuItemFactory: threadPanelMenuFactory,
         },
     },

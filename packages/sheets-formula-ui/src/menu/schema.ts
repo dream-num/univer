@@ -41,6 +41,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonFormulasGroup.BASIC]: {
         [`${InsertFunctionOperation.id}.common`]: {
             order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: false },
             menuItemFactory: InsertCommonFunctionMenuItemFactory,
             [MoreFunctionsOperation.id]: {
                 order: 0,

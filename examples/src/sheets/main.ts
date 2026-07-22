@@ -88,6 +88,7 @@ function createNewInstance() {
         [UniverRenderEnginePlugin],
         [UniverUIPlugin, {
             container: 'app',
+            ribbonType: 'grid',
             customFontFamily: {
                 list: [
                     { value: 'PingFang SC', label: '苹方（简）', category: 'sans-serif' },

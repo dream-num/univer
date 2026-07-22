@@ -87,8 +87,8 @@ import { CreateDocTableCommand } from '../commands/commands/table/doc-table-crea
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
-import { DocMenuStyleService } from '../services/doc-menu-style.service';
 import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
+import { DocMenuStyleService } from '../services/doc-menu-style.service';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
 
 export function shouldSuppressDocMenuStateRefresh(accessor: IAccessor): boolean {
@@ -123,7 +123,11 @@ function getInsertTableHiddenObservable(
     const renderManagerService = accessor.get(IRenderManagerService);
 
     return new Observable((subscriber) => {
+        let editAreaSubscription: { unsubscribe: () => void } | null = null;
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            editAreaSubscription?.unsubscribe();
+            editAreaSubscription = null;
+
             if (unitId == null) {
                 return subscriber.next(true);
             }
@@ -140,12 +144,15 @@ function getInsertTableHiddenObservable(
 
             const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
 
-            viewModel.editAreaChange$.subscribe((editArea) => {
+            editAreaSubscription = viewModel.editAreaChange$.subscribe((editArea) => {
                 subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
             });
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            editAreaSubscription?.unsubscribe();
+            subscription.unsubscribe();
+        };
     });
 }
 
@@ -232,12 +239,8 @@ function getHeaderFooterMenuHiddenObservable(
 
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
-        if (docDataModel == null) {
-            return subscriber.next(true);
-        }
-
         const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
-        subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
+        subscriber.next(docDataModel == null || documentFlavor !== DocumentFlavor.TRADITIONAL);
 
         return () => {
             subscription0.dispose();

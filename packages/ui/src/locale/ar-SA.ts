@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ar-SA.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'بحث عن الميزات',
+            placeholder: 'اكتب اسم ميزة أو قائمة...',
+            empty: 'لم يتم العثور على ميزات متاحة',
+            ribbon: 'الشريط',
+            contextMenu: 'قائمة السياق',
+        },
         emojiPicker: {
             search: 'بحث',
             random: 'رمز تعبيري عشوائي',

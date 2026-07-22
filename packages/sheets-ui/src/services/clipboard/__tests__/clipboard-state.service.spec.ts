@@ -36,7 +36,12 @@ import {
     Workbook,
 } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import {
     IClipboardInterfaceService,
     INotificationService,

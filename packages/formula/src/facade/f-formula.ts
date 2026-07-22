@@ -29,12 +29,20 @@ export interface IFFormulaCalculationSessionMixin {
      * @returns A disposable used to unsubscribe.
      * @example
      * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * if (!workbook) throw new Error('No active workbook.');
+     * const range = workbook.getActiveSheet().getRange('A1');
      * const formula = univerAPI.getFormula();
+     * const applied = formula.onCalculationResultApplied(10_000);
      * const disposable = formula.calculationResultApplied((result) => {
      *   console.log('Formula results applied:', result);
      * });
      *
-     * // Later
+     * // Setting a formula automatically schedules calculation.
+     * range.setFormula('=SUM(B1:B3)');
+     * await applied;
+     *
+     * // Dispose the listener when it is no longer needed.
      * disposable.dispose();
      * ```
      */
@@ -42,16 +50,20 @@ export interface IFFormulaCalculationSessionMixin {
 
     /**
      * Waits until the latest formula-calculation results have been applied.
+     * Create the returned promise before the mutation whose result you need to
+     * observe. Formula-aware facade mutations schedule calculation automatically.
      * @param timeout Optional timeout in milliseconds.
      * @returns A promise that resolves after result application, or when no calculation starts.
      * @example
      * ```ts
-     * const formula = univerAPI.getFormula();
-     * await formula.onCalculationResultApplied(10_000);
-     *
      * const workbook = univerAPI.getActiveWorkbook();
-     * const value = workbook?.getActiveSheet()?.getRange('A1').getValue();
-     * console.log(value);
+     * if (!workbook) throw new Error('No active workbook.');
+     * const range = workbook.getActiveSheet().getRange('A1');
+     * const formula = univerAPI.getFormula();
+     * const applied = formula.onCalculationResultApplied(10_000);
+     * range.setFormula('=SUM(B1:B3)');
+     * await applied;
+     * console.log(range.getValue());
      * ```
      */
     onCalculationResultApplied(timeout?: number): Promise<void>;

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-sheets-node-core",
-    "version": "1.0.0-alpha.5",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Preset for running Univer Sheets on Node.js with core features.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

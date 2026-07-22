@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-docs-drawing",
-    "version": "1.0.0-alpha.5",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Preset for drawing capabilities in Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/core",
-    "version": "1.0.0-alpha.5",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Core runtime, data models, command system, dependency injection, and Facade APIs for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides-ui",
-    "version": "1.0.0-alpha.5",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Presentation editor UI layer for Univer Slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

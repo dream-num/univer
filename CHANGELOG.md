@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-alpha.6](https://github.com/dream-num/univer/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2026-07-22)
+
+### Bug Fixes
+
+* **presets:** declare core as a dependency in drawing presets ([#7304](https://github.com/dream-num/univer/issues/7304)) ([29fe941](https://github.com/dream-num/univer/commit/29fe9417bf480fb7cc4a2dab3735f31275c3ff66))
+
 ## [1.0.0-alpha.5](https://github.com/dream-num/univer/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2026-07-21)
 
 No classifiable changes.

@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-import './f-univer';
-import '@univerjs/formula/facade';
 import './f-formula';
-import './f-enum';
-import './f-workbook';
-import './f-range';
 
 export type * from './f-formula';
-export type * from './f-univer';

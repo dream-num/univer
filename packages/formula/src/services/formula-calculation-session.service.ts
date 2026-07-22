@@ -15,6 +15,7 @@
  */
 
 import type { IExecutionInProgressParams, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import type { Subscription } from 'rxjs';
 import { Disposable } from '@univerjs/core';
 import { FormulaExecutedStateType, FormulaExecuteStageType } from '@univerjs/engine-formula';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -28,6 +29,11 @@ export interface IFormulaCalculationSessionState {
     completed: boolean;
     resultEmitted: boolean;
     resultApplied: boolean;
+}
+
+export enum FormulaResultApplicationType {
+    SHEET = 'sheet',
+    OTHER_FORMULA = 'other-formula',
 }
 
 const INITIAL_SESSION_STATE: IFormulaCalculationSessionState = {
@@ -49,6 +55,15 @@ export class FormulaCalculationSessionService extends Disposable {
     private _currentResult: ISetFormulaCalculationResultMutation | null = null;
 
     private _hasEmittedCurrentResultApplied = false;
+
+    private _pendingResultApplicationTypes = new Set<FormulaResultApplicationType>();
+
+    private _preAppliedSessionTypes = new Set<FormulaResultApplicationType>();
+
+    private readonly _preAppliedResultTypes = new WeakMap<
+        ISetFormulaCalculationResultMutation,
+        Set<FormulaResultApplicationType>
+    >();
 
     readonly state$ = this._state$.asObservable();
 
@@ -84,6 +99,8 @@ export class FormulaCalculationSessionService extends Disposable {
         });
         this._currentResult = null;
         this._hasEmittedCurrentResultApplied = false;
+        this._pendingResultApplicationTypes.clear();
+        this._preAppliedSessionTypes.clear();
     }
 
     updateProgress(progress: IExecutionInProgressParams): void {
@@ -123,13 +140,23 @@ export class FormulaCalculationSessionService extends Disposable {
         });
     }
 
-    markResultEmitted(result: ISetFormulaCalculationResultMutation, hasResultToApply: boolean): void {
+    markResultEmitted(
+        result: ISetFormulaCalculationResultMutation,
+        pendingApplications: boolean | Iterable<FormulaResultApplicationType>
+    ): void {
         if (this._currentResult !== result) {
             this._hasEmittedCurrentResultApplied = false;
         }
 
         this._currentResult = result;
-        const resultApplied = this.state.resultApplied || !hasResultToApply;
+        this._pendingResultApplicationTypes = typeof pendingApplications === 'boolean'
+            ? new Set(pendingApplications ? [FormulaResultApplicationType.SHEET] : [])
+            : new Set(pendingApplications);
+        const preAppliedTypes = this._preAppliedResultTypes.get(result);
+        this._preAppliedSessionTypes.forEach((type) => this._pendingResultApplicationTypes.delete(type));
+        preAppliedTypes?.forEach((type) => this._pendingResultApplicationTypes.delete(type));
+        this._preAppliedSessionTypes.clear();
+        const resultApplied = this._pendingResultApplicationTypes.size === 0;
         this._emit({
             ...this.state,
             resultEmitted: true,
@@ -141,7 +168,27 @@ export class FormulaCalculationSessionService extends Disposable {
         }
     }
 
-    markResultApplied(): void {
+    markResultApplied(
+        type = FormulaResultApplicationType.SHEET,
+        result?: ISetFormulaCalculationResultMutation
+    ): void {
+        if (result && this._currentResult !== result) {
+            const types = this._preAppliedResultTypes.get(result) ?? new Set<FormulaResultApplicationType>();
+            types.add(type);
+            this._preAppliedResultTypes.set(result, types);
+            return;
+        }
+
+        if (!this._currentResult) {
+            this._preAppliedSessionTypes.add(type);
+            return;
+        }
+
+        this._pendingResultApplicationTypes.delete(type);
+        if (this._pendingResultApplicationTypes.size > 0) {
+            return;
+        }
+
         this._emit({
             ...this.state,
             resultApplied: true,
@@ -162,6 +209,15 @@ export class FormulaCalculationSessionService extends Disposable {
             let pendingResolveId: number | null = null;
             let stoppedResolveTimer: ReturnType<typeof setTimeout> | null = null;
             let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
+            let startTimer: ReturnType<typeof setTimeout> | null = null;
+            let subscription: Subscription | null = null;
+
+            const clearStartTimer = () => {
+                if (startTimer != null) {
+                    clearTimeout(startTimer);
+                    startTimer = null;
+                }
+            };
 
             const cleanup = () => {
                 if (timeoutTimer != null) {
@@ -173,7 +229,7 @@ export class FormulaCalculationSessionService extends Disposable {
                     clearTimeout(stoppedResolveTimer);
                     stoppedResolveTimer = null;
                 }
-                subscription.unsubscribe();
+                subscription?.unsubscribe();
             };
 
             const settleResolve = () => {
@@ -224,15 +280,6 @@ export class FormulaCalculationSessionService extends Disposable {
                 }, timeout);
             }
 
-            let startTimer: ReturnType<typeof setTimeout> | null = null;
-
-            const clearStartTimer = () => {
-                if (startTimer != null) {
-                    clearTimeout(startTimer);
-                    startTimer = null;
-                }
-            };
-
             const scheduleStartTimer = () => {
                 clearStartTimer();
                 startTimer = setTimeout(() => {
@@ -246,7 +293,7 @@ export class FormulaCalculationSessionService extends Disposable {
                 scheduleStartTimer();
             }
 
-            const subscription = this.state$.subscribe((state) => {
+            subscription = this.state$.subscribe((state) => {
                 if (state.id !== initialId || waitForExistingSession) {
                     clearStartTimer();
                 }

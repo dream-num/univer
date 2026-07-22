@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import pkg from '../package.json';
+import { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
+import { FormulaCalculationSessionService } from './services/formula-calculation-session.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 
 @DependentOn(UniverFormulaEnginePlugin)
@@ -34,5 +36,11 @@ export class UniverFormulaPlugin extends Plugin {
     override onStarting(): void {
         this._injector.add([IDescriptionService, { useClass: DescriptionService }]);
         this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+        this._injector.add([FormulaCalculationSessionService]);
+        this._injector.add([FormulaCalculationSessionController]);
+    }
+
+    override onReady(): void {
+        touchDependencies(this._injector, [[FormulaCalculationSessionController]]);
     }
 }

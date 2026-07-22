@@ -50,6 +50,9 @@ export class RegisterOtherFormulaService extends Disposable {
     private _formulaResult$ = new Subject<Record<string, Record<string, IOtherFormulaResult[]>>>();
     public formulaResult$ = this._formulaResult$.asObservable();
 
+    private _otherFormulaResultApplied$ = new Subject<ISetFormulaCalculationResultMutation>();
+    public otherFormulaResultApplied$ = this._otherFormulaResultApplied$.asObservable();
+
     public calculateStarted$ = new BehaviorSubject(false);
 
     constructor(
@@ -67,6 +70,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
+        this._otherFormulaResultApplied$.complete();
         this.calculateStarted$.complete();
     }
 
@@ -199,6 +203,7 @@ export class RegisterOtherFormulaService extends Disposable {
                     }
                 }
                 this._formulaResult$.next(results);
+                this._otherFormulaResultApplied$.next(params);
             }
         }));
     }

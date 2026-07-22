@@ -1484,6 +1484,9 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
+      rxjs:
+        specifier: '>=7.0.0'
+        version: 7.8.2
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1497,19 +1500,19 @@ importers:
 
   packages/formula-ui:
     dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/formula':
-        specifier: workspace:*
-        version: link:../formula
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/formula':
+        specifier: workspace:*
+        version: link:../formula
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

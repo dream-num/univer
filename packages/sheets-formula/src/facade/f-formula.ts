@@ -15,14 +15,14 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
-import type { IFunctionInfo, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
 import type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from '@univerjs/formula';
 import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService } from '@univerjs/formula';
-import { FormulaCalculationSessionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
+import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 
 /**
  * @ignore
@@ -279,56 +279,6 @@ export interface IFFormulaSheetsMixin {
      */
     registerAsyncFunction(name: string, func: IRegisterAsyncFunction, { locales, description }: { locales?: ILocales; description?: string | IFunctionInfo }): IDisposable;
 
-    /**
-     * Listens for the moment when formula-calculation results are applied.
-     *
-     * This event fires after the engine completes a calculation cycle and
-     * dispatches a `SetFormulaCalculationResultMutation`.
-     * The callback is invoked during an idle frame to avoid blocking UI updates.
-     *
-     * @param {Function} callback - A function called with the calculation result payload
-     * once the result-application mutation is emitted.
-     * @returns {IDisposable} A disposable used to unsubscribe from the event.
-     *
-     * @example
-     * ```ts
-     * const formulaEngine = univerAPI.getFormula();
-     *
-     * const dispose = formulaEngine.calculationResultApplied((result) => {
-     *   console.log('Calculation results applied:', result);
-     * });
-     *
-     * // Later…
-     * dispose.dispose();
-     * ```
-     */
-    calculationResultApplied(callback: (result: ISetFormulaCalculationResultMutation) => void): IDisposable;
-
-    /**
-     * Waits for formula-calculation results to be applied.
-     *
-     * The API follows the latest formula-calculation session. If a running
-     * calculation is stopped and immediately restarted, the promise waits for
-     * the restarted session to apply its results.
-     *
-     * @param {number} [timeout] Optional timeout in milliseconds. If omitted,
-     * the promise waits until calculation results are applied or no calculation
-     * occurs within the start-detection window.
-     * @returns {Promise<void>} A promise that resolves when calculation results are applied
-     * or when no calculation occurs within the start-detection window.
-     *
-     * @example
-     * ```ts
-     * const formulaEngine = univerAPI.getFormula();
-     *
-     * // Wait for formula updates to apply before reading values.
-     * await formulaEngine.onCalculationResultApplied();
-     *
-     * const value = sheet.getRange("C24").getValue();
-     * console.log("Updated value:", value);
-     * ```
-     */
-    onCalculationResultApplied(timeout?: number): Promise<void>;
 }
 
 export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
@@ -417,22 +367,6 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         const functionsDisposable = registerFunctionService.registerAsyncFunction(params);
         this._debouncedFormulaCalculation();
         return functionsDisposable;
-    }
-
-    override calculationResultApplied(callback: (result: ISetFormulaCalculationResultMutation) => void): IDisposable {
-        const subscription = this._injector.get(FormulaCalculationSessionService).resultApplied$.subscribe((result) => {
-            requestIdleCallback(() => {
-                callback(result);
-            });
-        });
-
-        return {
-            dispose: () => subscription.unsubscribe(),
-        };
-    }
-
-    override onCalculationResultApplied(timeout?: number): Promise<void> {
-        return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied(timeout);
     }
 }
 

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/formula-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.4",
     "private": false,
     "description": "Shared formula search and highlighting helpers for Univer editors.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -29,12 +29,14 @@
             "./*": {
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
-                "types": "./lib/types/*.d.ts"
+                "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*"
         }
     },
-    "files": ["lib"],
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -45,12 +47,12 @@
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/formula": "workspace:*"
+        "@univerjs/engine-formula": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/formula": "workspace:*",
         "typescript": "^6.0.3",
         "vitest": "^4.1.10"
     }

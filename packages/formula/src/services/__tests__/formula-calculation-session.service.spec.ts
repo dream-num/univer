@@ -18,7 +18,7 @@ import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-form
 import { Injector } from '@univerjs/core';
 import { FormulaExecutedStateType, FormulaExecuteStageType } from '@univerjs/engine-formula';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FormulaCalculationSessionService } from '../formula-calculation-session.service';
+import { FormulaCalculationSessionService, FormulaResultApplicationType } from '../formula-calculation-session.service';
 
 function createService(): FormulaCalculationSessionService {
     const injector = new Injector();
@@ -235,6 +235,101 @@ describe('FormulaCalculationSessionService', () => {
 
         expect(appliedResults).toEqual([result]);
 
+        subscription.unsubscribe();
+    });
+
+    it('waits until sheet and other-formula results are both applied', () => {
+        const service = createService();
+        const result: ISetFormulaCalculationResultMutation = {
+            unitData: {},
+            unitOtherData: {},
+        };
+        const appliedResults: ISetFormulaCalculationResultMutation[] = [];
+        const subscription = service.resultApplied$.subscribe((value) => appliedResults.push(value));
+
+        service.start();
+        service.markResultEmitted(result, [
+            FormulaResultApplicationType.SHEET,
+            FormulaResultApplicationType.OTHER_FORMULA,
+        ]);
+        service.markResultApplied(FormulaResultApplicationType.OTHER_FORMULA, result);
+
+        expect(appliedResults).toEqual([]);
+
+        service.markResultApplied(FormulaResultApplicationType.SHEET);
+
+        expect(appliedResults).toEqual([result]);
+        subscription.unsubscribe();
+    });
+
+    it('correlates ten consecutive mixed sheet and other-formula application cycles', async () => {
+        const service = createService();
+        service.initialize();
+        const inputValues = [10, 3, 77, -5, 1000, 0, 42, 8.5, 999, -1200];
+        const appliedResults: ISetFormulaCalculationResultMutation[] = [];
+        const subscription = service.resultApplied$.subscribe((result) => appliedResults.push(result));
+
+        for (const [index, value] of inputValues.entries()) {
+            const result: ISetFormulaCalculationResultMutation = {
+                unitData: {
+                    book: {
+                        sheet: {
+                            0: {
+                                0: { v: value },
+                            },
+                        },
+                    },
+                },
+                unitOtherData: {
+                    book: {
+                        sheet: {
+                            'formula.shape-1': {
+                                0: {
+                                    0: [[{ v: value * 2 }]],
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+
+            service.start();
+            const resultApplied = service.waitForLatestApplied(1_000);
+            service.markResultEmitted(result, [
+                FormulaResultApplicationType.SHEET,
+                FormulaResultApplicationType.OTHER_FORMULA,
+            ]);
+
+            if (index % 2 === 0) {
+                service.markResultApplied(FormulaResultApplicationType.SHEET, result);
+                service.markResultApplied(FormulaResultApplicationType.OTHER_FORMULA, result);
+            } else {
+                service.markResultApplied(FormulaResultApplicationType.OTHER_FORMULA, result);
+                service.markResultApplied(FormulaResultApplicationType.SHEET, result);
+            }
+
+            await resultApplied;
+            expect(appliedResults.at(-1)).toBe(result);
+        }
+
+        expect(appliedResults).toHaveLength(inputValues.length);
+        subscription.unsubscribe();
+    });
+
+    it('correlates other-formula application observed before result emission', () => {
+        const service = createService();
+        const result: ISetFormulaCalculationResultMutation = {
+            unitData: {},
+            unitOtherData: {},
+        };
+        const appliedResults: ISetFormulaCalculationResultMutation[] = [];
+        const subscription = service.resultApplied$.subscribe((value) => appliedResults.push(value));
+
+        service.start();
+        service.markResultApplied(FormulaResultApplicationType.OTHER_FORMULA, result);
+        service.markResultEmitted(result, [FormulaResultApplicationType.OTHER_FORMULA]);
+
+        expect(appliedResults).toEqual([result]);
         subscription.unsubscribe();
     });
 

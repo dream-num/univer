@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+export { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 export { UniverFormulaPlugin } from './plugin';
 export { DescriptionService, IDescriptionService } from './services/description.service';
 export type { ISearchItem, ISearchItemWithType } from './services/description.service';
+export { FormulaCalculationSessionService, FormulaResultApplicationType } from './services/formula-calculation-session.service';
+export type { IFormulaCalculationSessionState } from './services/formula-calculation-session.service';
 export { FUNCTION_LIST_ARRAY } from './services/function-list/array';
 export { FUNCTION_LIST_COMPATIBILITY } from './services/function-list/compatibility';
 export { FUNCTION_LIST_CUBE } from './services/function-list/cube';

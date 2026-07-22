@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import type { IUniverFormulaConfig } from './config/config';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import pkg from '../package.json';
+import { defaultPluginConfig, FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
 import { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaCalculationSessionService } from './services/formula-calculation-session.service';
@@ -29,8 +31,15 @@ export class UniverFormulaPlugin extends Plugin {
     static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
-    constructor(@Inject(Injector) protected readonly _injector: Injector) {
+    constructor(
+        private readonly _config: IUniverFormulaConfig = defaultPluginConfig,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
+    ) {
         super();
+
+        const { ...rest } = merge({}, defaultPluginConfig, this._config);
+        this._configService.setConfig(FORMULA_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

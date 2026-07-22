@@ -518,6 +518,40 @@ describe('ContextMenuPanel', () => {
         expect(screen.getByText('translated:docs-ui.fillColor')).not.toBeNull();
     });
 
+    it('closes an open submenu when its parent becomes disabled', async () => {
+        const disabled$ = new BehaviorSubject(false);
+
+        renderWithDependencies(
+            <ContextMenuPanel menuType="submenu-root" />,
+            {
+                'submenu-root': [
+                    {
+                        key: 'print',
+                        order: 0,
+                        item: {
+                            id: 'print',
+                            type: MenuItemType.SUBITEMS,
+                            title: 'docs-ui.print',
+                            disabled$,
+                        },
+                    },
+                ],
+                print: [
+                    createButtonItem('print-layout', {
+                        title: 'docs-ui.printLayout',
+                    }),
+                ],
+            }
+        );
+
+        const printButton = screen.getByRole('button', { name: 'translated:docs-ui.print' });
+        fireEvent.mouseEnter(printButton.parentElement as HTMLElement);
+        expect(screen.getByText('translated:docs-ui.printLayout')).not.toBeNull();
+
+        act(() => disabled$.next(true));
+        await waitFor(() => expect(screen.queryByText('translated:docs-ui.printLayout')).toBeNull());
+    });
+
     it('opens submenus to the left by default in rtl when there is enough space', async () => {
         renderWithDependencies(
             <ContextMenuPanel menuType="submenu-root" />,

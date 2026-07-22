@@ -15,9 +15,9 @@
  */
 
 import type { ComponentType, CSSProperties, ReactElement } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
@@ -96,6 +96,29 @@ function renderWithDependencies(element: ReactElement) {
 afterEach(cleanup);
 
 describe('ToolbarItem', () => {
+    it('closes open selector options when the parent becomes disabled', async () => {
+        const disabled$ = new BehaviorSubject(false);
+        const { container, findByText, queryByText } = renderWithDependencies(
+            <ToolbarItem
+                id="test-selector"
+                type={MenuItemType.SELECTOR}
+                icon="TestIcon"
+                title="Format"
+                selections={[{ label: 'Format rows', value: 'row' }]}
+                disabled$={disabled$}
+            />
+        );
+
+        fireEvent.pointerDown(container.querySelector('.univer-toolbar-selector-root') as HTMLElement, {
+            button: 0,
+            ctrlKey: false,
+        });
+        expect(await findByText('Format rows')).toBeTruthy();
+
+        act(() => disabled$.next(true));
+        await waitFor(() => expect(queryByText('Format rows')).toBeNull());
+    });
+
     it('shows a title and vertical layout for a large Grid button', () => {
         const { getByRole, getByText } = renderWithDependencies(
             <ToolbarItem

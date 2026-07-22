@@ -1179,6 +1179,12 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     useEffect(() => () => clearSubmenuCloseTimer(), [clearSubmenuCloseTimer]);
 
     useEffect(() => {
+        if (disabled) {
+            closeSubmenu();
+        }
+    }, [closeSubmenu, disabled]);
+
+    useEffect(() => {
         if (!submenuVisible) {
             setSubmenuPositionReady(false);
             return;

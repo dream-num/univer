@@ -131,6 +131,12 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     const overlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        if (disabled) {
+            setDropdownVisible(false);
+        }
+    }, [disabled, setDropdownVisible]);
+
+    useEffect(() => {
         const ownerDocument = triggerRef.current?.ownerDocument;
         if (!dropdownVisible || !ownerDocument) return;
 
@@ -226,6 +232,12 @@ export function DropdownMenuWrapper({
     onOptionSelect: (option: IValueOption) => void;
 }) {
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+
+    useEffect(() => {
+        if (disabled) {
+            setDropdownVisible(false);
+        }
+    }, [disabled, setDropdownVisible]);
 
     const menuManagerService = useDependency(IMenuManagerService);
     const resolveMenuItems = () => menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];

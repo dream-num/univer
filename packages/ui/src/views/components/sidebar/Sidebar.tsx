@@ -256,8 +256,9 @@ export function Sidebar() {
                         type="button"
                         className={`
                           focus:univer-ring-primary-500/50
-                          univer-cursor-pointer univer-appearance-none univer-rounded-sm univer-border-none
-                          univer-bg-transparent univer-p-0 univer-text-gray-500
+                          univer-flex univer-size-6 univer-cursor-pointer univer-appearance-none univer-items-center
+                          univer-justify-center univer-rounded-sm univer-border-none univer-bg-transparent univer-p-0
+                          univer-text-gray-500
                           focus:univer-outline-none focus:univer-ring-2
                           dark:!univer-text-gray-300
                         `}

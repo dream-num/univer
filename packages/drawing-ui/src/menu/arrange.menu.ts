@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { MenuItemType } from '@univerjs/ui';
+import { map, startWith } from 'rxjs';
 import {
     SetDrawingArrangeBackOperation,
     SetDrawingArrangeBackwardOperation,
@@ -25,12 +28,18 @@ import {
 } from '../commands/operations/drawing-arrange.operation';
 
 export const DRAWING_ARRANGE_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange';
-export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<LocaleKey> {
+export function DrawingArrangeContextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    const drawingManagerService = accessor.get(IDrawingManagerService);
+
     return {
         id: DRAWING_ARRANGE_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'TopmostIcon',
         title: 'drawing-ui.image-panel.arrange.title',
+        hidden$: drawingManagerService.focus$.pipe(
+            startWith(drawingManagerService.getFocusDrawings()),
+            map((drawings) => drawings.length === 0)
+        ),
     };
 }
 

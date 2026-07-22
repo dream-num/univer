@@ -24,6 +24,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
     DocumentDataModel,
+    FOCUSING_COMMON_DRAWINGS,
     ICommandService,
     IConfigService,
     IContextService,
@@ -320,6 +321,82 @@ describe('DocFloatMenuService', () => {
 
         expect(service.floatMenu).toBeNull();
         expect(popupService.ranges).toEqual([]);
+    });
+
+    it('does not show the text toolbar while a drawing is focused', () => {
+        const unitId = 'doc-drawing-menu';
+        const { injector, popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Drawing anchor\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_float_menu_drawing', startIndex: 14 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+        injector.get(IContextService).setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 0,
+                endOffset: 1,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toEqual([]);
+    });
+
+    it('hides and suppresses the text toolbar while another floating menu is active', () => {
+        const unitId = 'doc-suppressed-menu';
+        const { popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Suppressed menu\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_float_menu_suppressed', startIndex: 15 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 0,
+                endOffset: 10,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toMatchObject({ start: 0, end: 10 });
+
+        service.setSuppressed(true);
+
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.disposedCount).toBe(1);
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 1,
+                endOffset: 10,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toEqual(['0:10']);
     });
 
     it('places the floating toolbar below a forward selection that spans multiple lines', () => {

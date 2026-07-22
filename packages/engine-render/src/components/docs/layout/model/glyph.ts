@@ -94,10 +94,22 @@ export function createSkeletonWordGlyph(
 export function createSkeletonLetterGlyph(
     content: string,
     config: IFontCreateConfig,
-    glyphWidth?: number,
+    glyphMetrics?: number | { ascent?: number; descent?: number; width?: number },
     glyphInfo?: IOpenTypeGlyphInfo
 ): IDocumentSkeletonGlyph {
-    return _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth, glyphInfo);
+    const glyphWidth = typeof glyphMetrics === 'number' ? glyphMetrics : glyphMetrics?.width;
+    const glyph = _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth, glyphInfo);
+
+    if (typeof glyphMetrics === 'object') {
+        if (glyphMetrics.ascent != null) {
+            glyph.bBox.ba = glyph.bBox.aba = glyphMetrics.ascent;
+        }
+        if (glyphMetrics.descent != null) {
+            glyph.bBox.bd = glyph.bBox.abd = glyphMetrics.descent;
+        }
+    }
+
+    return glyph;
 }
 
 export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {

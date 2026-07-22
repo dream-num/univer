@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagr
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import { DocSelectionManagerService, generateParagraphs, RichTextEditingMutation } from '@univerjs/docs';
-import { getTextRunAtPosition } from '../../basics/paragraph';
+import { getTextRunAtPosition, isTopLevelStructuralGap } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 
 export { generateParagraphs };
@@ -208,15 +208,3 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         return Boolean(result);
     },
 };
-
-function isTopLevelStructuralGap(dataStream: string, offset: number): boolean {
-    const previousToken = dataStream[offset - 1];
-    const nextToken = dataStream[offset];
-
-    return previousToken === DataStreamTreeTokenType.BLOCK_END ||
-        previousToken === DataStreamTreeTokenType.TABLE_END ||
-        previousToken === DataStreamTreeTokenType.COLUMN_GROUP_END ||
-        nextToken === DataStreamTreeTokenType.BLOCK_START ||
-        nextToken === DataStreamTreeTokenType.TABLE_START ||
-        nextToken === DataStreamTreeTokenType.COLUMN_GROUP_START;
-}

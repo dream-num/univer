@@ -39,7 +39,6 @@ import { DocBlockMoveValidatorService, DocContentInsertService, DocSelectionMana
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ContextMenuPanel,
-    IClipboardInterfaceService,
     IconManager,
     ILayoutService,
     RectPopup,
@@ -317,6 +316,7 @@ const PARAGRAPH_MENU_BLOCK_RANGE_COMMAND_IDS = new Set(
 );
 
 const PARAGRAPH_MENU_SELECTION_COMMAND_IDS = new Set([
+    DocPasteCommand.id,
     BulletListCommand.id,
     OrderListCommand.id,
     CheckListCommand.id,
@@ -470,6 +470,10 @@ export function getParagraphMenuHiddenItemIds(
 
     const hiddenIds = [...getParagraphMenuHiddenHeadingCommandIds(namedStyleType)];
     const blockType = target?.kind === 'blockRange' ? target.blockRange?.blockType : undefined;
+
+    if (target?.kind !== 'blockRange') {
+        hiddenIds.push(DocPasteCommand.id);
+    }
 
     if (blockType === DocumentBlockRangeType.CALLOUT) {
         hiddenIds.push(
@@ -796,6 +800,10 @@ export function getParagraphMenuCommandTargetRange(
     targetRange?: ITextRangeWithStyle | null,
     formattingRange?: ITextRangeWithStyle | null
 ): ITextRangeWithStyle | null | undefined {
+    if (commandId === DocPasteCommand.id) {
+        return targetRange;
+    }
+
     if (commandId && PARAGRAPH_MENU_SELECTION_COMMAND_IDS.has(commandId)) {
         return formattingRange ?? targetRange;
     }
@@ -831,6 +839,31 @@ function getBlockSelectionRange(target: IDocBlockMenuTarget | null | undefined, 
     };
 }
 
+export function getBlockRangeClipboardTargetRange(
+    commandId: string,
+    target: IDocBlockMenuTarget | null | undefined,
+    paragraph?: IMutiPageParagraphBound | null | void
+): ITextRangeWithStyle | null {
+    if (target?.kind !== 'blockRange') {
+        return null;
+    }
+
+    if (commandId === DocPasteCommand.id) {
+        return {
+            startOffset: target.moveRange.endOffset,
+            endOffset: target.moveRange.endOffset,
+            collapsed: true,
+            segmentId: paragraph?.segmentId,
+        };
+    }
+
+    if (commandId === DocCopyCurrentParagraphCommand.id || commandId === DocCutCurrentParagraphCommand.id) {
+        return getBlockSelectionRange(target, paragraph ?? undefined);
+    }
+
+    return null;
+}
+
 function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; tableBlockOnly?: boolean }) {
     const [visible, setVisible] = useState(false);
     const [openMode, setOpenMode] = useState<ParagraphMenuOpenMode>('pointer');
@@ -850,7 +883,6 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const docClipboardService = useDependency(IDocClipboardService);
     const docContentInsertService = useDependency(DocContentInsertService);
     const docBlockMoveValidatorService = useDependency(DocBlockMoveValidatorService);
-    const clipboardInterfaceService = useDependency(IClipboardInterfaceService);
     const layoutService = useDependency(ILayoutService);
     const iconManager = useDependency(IconManager);
     const anchorRef = useRef<HTMLDivElement>(null);
@@ -1105,6 +1137,20 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
         if (latestTarget?.kind === 'blockRange') {
             const currentBlockCommandId = getParagraphMenuBlockRangeCommandId(latestTarget.blockRange?.blockType);
+            const clipboardRange = getBlockRangeClipboardTargetRange(commandId, latestTarget, activeParagraphBound);
+
+            if (clipboardRange) {
+                if (commandId === DocCopyCurrentParagraphCommand.id) {
+                    await docClipboardService.copy(SliceBodyType.copy, [clipboardRange]);
+                } else if (commandId === DocCutCurrentParagraphCommand.id) {
+                    await docClipboardService.cut([clipboardRange]);
+                } else {
+                    replaceSelection(clipboardRange);
+                    await executeResolvedCommand(option, clipboardRange);
+                }
+                finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                return;
+            }
 
             if (commandId === currentBlockCommandId) {
                 await unwrapActiveBlockRange();
@@ -1427,8 +1473,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
                                     if (commandId === DocPasteCommand.id) {
                                         docSelectionManagerService.replaceTextRanges([afterTableRange], false);
-                                        const clipboardItems = await clipboardInterfaceService.read();
-                                        await docClipboardService.paste(clipboardItems);
+                                        await commandService.executeCommand(DocPasteCommand.id);
                                         finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
                                         return;
                                     }
@@ -1440,7 +1485,9 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                     }
 
                                     if (commandService && commandId) {
-                                        commandService.executeCommand(commandId, commandParams);
+                                        commandService.executeCommand(commandId, commandId === DocTableDeleteTableCommand.id
+                                            ? { ...commandParams, targetRange: tableRange }
+                                            : commandParams);
                                     }
 
                                     finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);

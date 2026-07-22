@@ -681,6 +681,13 @@ export const menuSchema: MenuSchemaType = {
                     menuItemFactory: InsertDefaultTableMenuFactory,
                 },
             },
+            format: {
+                order: 3,
+                [DocPasteCommand.id]: {
+                    order: 0,
+                    menuItemFactory: PasteMenuFactory,
+                },
+            },
         },
         [DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID]: {
             quickTop: {
@@ -809,8 +816,12 @@ export const menuSchema: MenuSchemaType = {
                     order: 1,
                     menuItemFactory: CopyCurrentParagraphMenuItemFactory,
                 },
-                [DeleteCurrentParagraphCommand.id]: {
+                [DocPasteCommand.id]: {
                     order: 2,
+                    menuItemFactory: PasteMenuFactory,
+                },
+                [DeleteCurrentParagraphCommand.id]: {
+                    order: 3,
                     menuItemFactory: DeleteCurrentParagraphMenuItemFactory,
                 },
             },

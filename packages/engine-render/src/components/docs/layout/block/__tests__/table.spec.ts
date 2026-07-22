@@ -32,6 +32,7 @@ import {
     createTableSkeletons,
     getNullTableSkeleton,
     getTableIdAndSliceIndex,
+    getTableLeft,
     getTableSliceId,
     rollbackListCache,
 } from '../table';
@@ -155,6 +156,13 @@ function useDocumentFlavor(sectionBreakConfig: Record<string, unknown>, document
 }
 
 describe('table utilities', () => {
+    describe('getTableLeft', () => {
+        it('centers a table within the supplied column width', () => {
+            expect(getTableLeft(243, 243, TableAlignmentType.CENTER)).toBe(0);
+            expect(261 + getTableLeft(243, 120, TableAlignmentType.CENTER)).toBe(322.5);
+        });
+    });
+
     describe('getTableSliceId', () => {
         it('concatenates tableId and sliceIndex with delimiter', () => {
             expect(getTableSliceId('table1', 0)).toBe('table1#-#0');

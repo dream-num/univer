@@ -54,7 +54,7 @@ import {
     HEADING_LIST,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Observable, shareReplay } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import {
@@ -1240,7 +1240,10 @@ export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<Loc
 
         calc();
         return disposable.dispose;
-    });
+    }).pipe(
+        distinctUntilChanged(),
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
 
     return {
         id: AlignOperationCommand.id,

@@ -386,17 +386,42 @@ export function createSkeletonCellPages(
         maxCellPageHeight
     );
 
-    const { pages } = dealWithSection(
-        ctx,
-        viewModel,
-        sectionNode,
-        areaPage,
-        cellSectionBreakConfig
-    );
+    const segmentId = tableConfig.tableId;
+    const retainedPages: IDocumentSkeletonPage[] = [];
+    let currentPage = areaPage;
+    let pages: IDocumentSkeletonPage[] = [];
+
+    for (let count = 0; count <= 10; count++) {
+        const layoutAnchor = ctx.layoutStartPointer[segmentId];
+        ctx.layoutStartPointer[segmentId] = null;
+
+        const result = dealWithSection(
+            ctx,
+            viewModel,
+            sectionNode,
+            currentPage,
+            cellSectionBreakConfig,
+            layoutAnchor
+        );
+        pages = [...retainedPages, ...result.pages];
+
+        if (!ctx.isDirty || ctx.layoutStartPointer[segmentId] == null || count === 10) {
+            break;
+        }
+
+        const retryPage = pages.at(-1);
+        if (retryPage == null) {
+            break;
+        }
+
+        retainedPages.splice(0, retainedPages.length, ...pages.slice(0, -1));
+        currentPage = retryPage;
+        resetContext(ctx);
+    }
 
     for (const p of pages) {
         p.type = DocumentSkeletonPageType.CELL;
-        p.segmentId = tableConfig.tableId;
+        p.segmentId = segmentId;
     }
 
     updateBlockIndex(

@@ -75,7 +75,7 @@ import {
 } from '@univerjs/core';
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
-import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
@@ -1522,13 +1522,30 @@ export function getCustomRangeGlyphWidth(
     paragraphNode: DataStreamTreeNode,
     config: IFontCreateConfig
 ): number | undefined {
+    return getCustomRangeGlyphMetrics(index, viewModel, paragraphNode, config)?.width;
+}
+
+export function getCustomRangeGlyphMetrics(
+    index: number,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    config: IFontCreateConfig
+): { ascent?: number; descent?: number; width?: number } | undefined {
     const customRange = viewModel.getCustomRange(index + paragraphNode.startIndex);
-    const glyphWidthEm = customRange?.glyphWidthEm;
-    if (typeof glyphWidthEm !== 'number' || !Number.isFinite(glyphWidthEm) || glyphWidthEm < 0) {
+    if (!customRange) {
         return undefined;
     }
 
-    return glyphWidthEm * config.fontStyle.originFontSize;
+    const fontSize = ptToPixel(config.fontStyle.originFontSize);
+    const toPixels = (value: unknown) =>
+        typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value * fontSize : undefined;
+    const metrics = {
+        ascent: toPixels(customRange.glyphAscentEm),
+        descent: toPixels(customRange.glyphDescentEm),
+        width: toPixels(customRange.glyphWidthEm),
+    };
+
+    return metrics.ascent == null && metrics.descent == null && metrics.width == null ? undefined : metrics;
 }
 
 // Generate an empty doc skeleton with the initial states.

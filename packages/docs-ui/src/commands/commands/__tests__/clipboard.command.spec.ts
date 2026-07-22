@@ -53,6 +53,8 @@ class TestDocClipboardService {
     readonly copies: Array<{ sliceType?: SliceBodyType; ranges?: ITextRangeWithStyle[] }> = [];
     readonly cuts: Array<{ ranges?: ITextRangeWithStyle[] }> = [];
     readonly pastes: ClipboardItem[][] = [];
+    memoryPasteResult = false;
+    memoryPastes = 0;
 
     async copy(sliceType?: SliceBodyType, ranges?: ITextRangeWithStyle[]): Promise<boolean> {
         this.copies.push({ sliceType, ranges });
@@ -64,7 +66,12 @@ class TestDocClipboardService {
         return true;
     }
 
-    async paste(items: ClipboardItem[]): Promise<boolean> {
+    async paste(items?: ClipboardItem[]): Promise<boolean> {
+        if (!items?.length) {
+            this.memoryPastes++;
+            return this.memoryPasteResult;
+        }
+
         this.pastes.push(items);
         return true;
     }
@@ -80,15 +87,20 @@ class TestDocClipboardService {
 
 class TestClipboardInterfaceService {
     items: ClipboardItem[] = [{ types: ['text/plain'] } as unknown as ClipboardItem];
+    supported = true;
+    reads = 0;
 
     get supportClipboard(): boolean {
-        return true;
+        return this.supported;
     }
 
     async writeText(): Promise<void> {}
     async write(): Promise<void> {}
     async readText(): Promise<string> { return ''; }
-    async read(): Promise<ClipboardItem[]> { return this.items; }
+    async read(): Promise<ClipboardItem[]> {
+        this.reads++;
+        return this.items;
+    }
 }
 
 function getDocumentData() {
@@ -689,6 +701,17 @@ describe('test cases in clipboard', () => {
             await commandService.executeCommand(DocPasteCommand.id);
 
             expect(docClipboardService.pastes).toEqual([clipboardInterfaceService.items]);
+        });
+
+        it('Should paste the internal copy when browser clipboard reads are unsupported', async () => {
+            const docClipboardService = get(IDocClipboardService) as unknown as TestDocClipboardService;
+            const clipboardInterfaceService = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            docClipboardService.memoryPasteResult = true;
+            clipboardInterfaceService.supported = false;
+
+            expect(await commandService.executeCommand(DocPasteCommand.id)).toBe(true);
+            expect(docClipboardService.memoryPastes).toBe(1);
+            expect(clipboardInterfaceService.reads).toBe(0);
         });
     });
 });

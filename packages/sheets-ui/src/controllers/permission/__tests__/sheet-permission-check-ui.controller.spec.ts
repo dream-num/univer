@@ -24,6 +24,7 @@ import { InsertTextCommand } from '@univerjs/docs';
 import { IMEInputCommand } from '@univerjs/docs-ui';
 import { EMPTY } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../../commands/commands/clipboard.command';
 import { SheetPermissionCheckUIController } from '../sheet-permission-check-ui.controller';
 
 type ControllerConstructorArgs = ConstructorParameters<typeof SheetPermissionCheckUIController>;
@@ -31,6 +32,7 @@ type ControllerConstructorArgs = ConstructorParameters<typeof SheetPermissionChe
 function createController() {
     let beforeCommandExecuted: ((commandInfo: ICommandInfo) => void) | undefined;
     const permissionCheckWithoutRange = vi.fn(() => false);
+    const permissionCheckWithRanges = vi.fn(() => true);
     const blockExecuteWithoutPermission = vi.fn();
     const controller = new SheetPermissionCheckUIController(
         {
@@ -39,23 +41,24 @@ function createController() {
                 return { dispose: vi.fn() };
             }),
         } as unknown as ControllerConstructorArgs[0],
-        {} as unknown as ControllerConstructorArgs[1],
-        { getShowComponents: vi.fn(() => true) } as unknown as ControllerConstructorArgs[2],
-        { open: vi.fn(), close: vi.fn() } as unknown as ControllerConstructorArgs[3],
-        {} as unknown as ControllerConstructorArgs[4],
-        { t: vi.fn((key: string) => `translated:${key}`) } as unknown as ControllerConstructorArgs[5],
-        { getContextValue: vi.fn(() => false) } as unknown as ControllerConstructorArgs[6],
+        { getShowComponents: vi.fn(() => true) } as unknown as ControllerConstructorArgs[1],
+        { open: vi.fn(), close: vi.fn() } as unknown as ControllerConstructorArgs[2],
+        {} as unknown as ControllerConstructorArgs[3],
+        { t: vi.fn((key: string) => `translated:${key}`) } as unknown as ControllerConstructorArgs[4],
+        { getContextValue: vi.fn(() => false) } as unknown as ControllerConstructorArgs[5],
         {
             triggerPermissionUIEvent$: EMPTY,
             permissionCheckWithoutRange,
+            permissionCheckWithRanges,
             blockExecuteWithoutPermission,
-        } as unknown as ControllerConstructorArgs[7]
+        } as unknown as ControllerConstructorArgs[6]
     );
 
     return {
         controller,
         executeBefore: (commandInfo: ICommandInfo) => beforeCommandExecuted?.(commandInfo),
         permissionCheckWithoutRange,
+        permissionCheckWithRanges,
         blockExecuteWithoutPermission,
     };
 }
@@ -94,6 +97,20 @@ describe('SheetPermissionCheckUIController', () => {
 
         expect(permissionCheckWithoutRange).toHaveBeenCalledOnce();
         expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('translated:sheets-ui.permission.dialog.editErr');
+        controller.dispose();
+    });
+
+    it.each([
+        [SheetCopyCommand.id, 'copy'],
+        [SheetCutCommand.id, 'cut'],
+        [SheetPasteCommand.id, 'paste'],
+    ])('does not preflight the global %s command before its multi-command implementation is selected', (id) => {
+        const { controller, executeBefore, permissionCheckWithRanges, blockExecuteWithoutPermission } = createController();
+
+        executeBefore({ id });
+
+        expect(permissionCheckWithRanges).not.toHaveBeenCalled();
+        expect(blockExecuteWithoutPermission).not.toHaveBeenCalled();
         controller.dispose();
     });
 });

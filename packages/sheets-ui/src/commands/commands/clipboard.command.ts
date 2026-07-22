@@ -15,8 +15,22 @@
  */
 
 import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
-import { CommandType, ICommandService } from '@univerjs/core';
+import { CommandType, ICommandService, IPermissionService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import {
+    getSheetCommandTarget,
+    RangeProtectionPermissionEditPoint,
+    RangeProtectionPermissionViewPoint,
+    SheetPermissionCheckController,
+    WorkbookCopyPermission,
+    WorkbookEditablePermission,
+    WorksheetCopyPermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+    WorksheetSetCellValuePermission,
+    WorksheetSetColumnStylePermission,
+} from '@univerjs/sheets';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
 import { whenSheetFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
@@ -31,6 +45,7 @@ export const SheetCopyCommand: IMultiCommand = {
     priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetFocused,
     handler: async (accessor) => {
+        checkSheetClipboardPermission(accessor, CopyCommand.id);
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.copy();
     },
@@ -44,6 +59,7 @@ export const SheetCutCommand: IMultiCommand = {
     priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetFocused,
     handler: async (accessor) => {
+        checkSheetClipboardPermission(accessor, CutCommand.id);
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
     },
@@ -68,6 +84,7 @@ export const SheetPasteCommand: IMultiCommand = {
     priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetFocused,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
+        checkSheetClipboardPermission(accessor, PasteCommand.id, params);
         // const messageService = accessor.get(IMessageService);
 
         // TODO: @yuhongz: check if there is excel content in the clipboard, if so
@@ -97,6 +114,7 @@ export const SheetPasteShortKeyCommand: ICommand = {
     id: SheetPasteShortKeyCommandName,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISheetPasteByShortKeyParams) => {
+        checkSheetClipboardPermission(accessor, PasteCommand.id);
         const clipboardService = accessor.get(ISheetClipboardService);
         const { htmlContent, textContent, files, formulaClipboardPayload } = params;
         clipboardService.legacyPaste(htmlContent, textContent, files, formulaClipboardPayload);
@@ -104,6 +122,91 @@ export const SheetPasteShortKeyCommand: ICommand = {
         return true;
     },
 };
+
+function checkSheetClipboardPermission(accessor: IAccessor, commandId: string, params?: ISheetPasteParams): void {
+    const permissionCheckController = accessor.get(SheetPermissionCheckController);
+    let permission = true;
+    let errorKey: LocaleKey = 'sheets-ui.permission.dialog.commonErr';
+
+    switch (commandId) {
+        case CopyCommand.id:
+            permission = permissionCheckController.permissionCheckWithRanges({
+                workbookTypes: [WorkbookCopyPermission],
+                worksheetTypes: [WorksheetCopyPermission],
+                rangeTypes: [RangeProtectionPermissionViewPoint],
+            });
+            errorKey = 'sheets-ui.permission.dialog.copyErr';
+            break;
+        case CutCommand.id:
+            permission = permissionCheckController.permissionCheckWithRanges({
+                workbookTypes: [WorkbookCopyPermission, WorkbookEditablePermission],
+                worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
+                rangeTypes: [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint],
+            });
+            errorKey = 'sheets-ui.permission.dialog.copyErr';
+            break;
+        case PasteCommand.id:
+            permission = checkSheetPastePermission(permissionCheckController, params);
+            errorKey = 'sheets-ui.permission.dialog.pasteErr';
+            break;
+    }
+
+    if (permission) {
+        return;
+    }
+
+    const localeService = accessor.get(LocaleService);
+    let errorMsg = localeService.t<LocaleKey>(errorKey);
+    if (commandId === CopyCommand.id || commandId === CutCommand.id) {
+        const instanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(instanceService);
+        const permissionService = accessor.get(IPermissionService);
+        if (
+            target &&
+            !permissionService.getPermissionPoint(new WorkbookCopyPermission(target.unitId).id)?.value
+        ) {
+            errorMsg = localeService.t<LocaleKey>('sheets-ui.permission.dialog.workbookCopyErr');
+        }
+    }
+
+    permissionCheckController.blockExecuteWithoutPermission(errorMsg);
+}
+
+function checkSheetPastePermission(
+    permissionCheckController: SheetPermissionCheckController,
+    params?: ISheetPasteParams
+): boolean {
+    if (
+        params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE ||
+        params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA ||
+        params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT
+    ) {
+        return permissionCheckController.permissionCheckWithRanges({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        });
+    }
+
+    if (params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
+        return permissionCheckController.permissionCheckWithRanges({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [
+                WorksheetEditPermission,
+                WorksheetSetCellValuePermission,
+                WorksheetSetCellStylePermission,
+                WorksheetSetColumnStylePermission,
+            ],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        });
+    }
+
+    return permissionCheckController.permissionCheckWithRanges({
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+}
 
 export const SheetPasteValueCommand: ICommand = {
     id: 'sheet.command.paste-value',

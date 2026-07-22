@@ -18,6 +18,7 @@ import type { IRange } from '@univerjs/core';
 import {
     ICommandService,
     IConfirmService,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
 } from '@univerjs/core';
@@ -26,6 +27,7 @@ import {
     DeleteRangeMoveUpCommand,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
+    SheetPermissionCheckController,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import * as sheets from '@univerjs/sheets';
@@ -257,6 +259,13 @@ describe('clipboard command branches', () => {
         const accessor = createAccessor([
             [ISheetClipboardService, clipboardService],
             [IClipboardInterfaceService, { supportClipboard: true, read }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
+            [IPermissionService, { getPermissionPoint: vi.fn(() => undefined) }],
+            [LocaleService, { t: vi.fn((key: string) => key) }],
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges: vi.fn(() => true),
+                blockExecuteWithoutPermission: vi.fn(),
+            }],
         ]);
 
         expect(await SheetCopyCommand.handler(accessor)).toBe(true);
@@ -267,6 +276,13 @@ describe('clipboard command branches', () => {
         const accessorWithoutClipboardAPI = createAccessor([
             [ISheetClipboardService, clipboardService],
             [IClipboardInterfaceService, { supportClipboard: false, read: vi.fn(async () => []) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
+            [IPermissionService, { getPermissionPoint: vi.fn(() => undefined) }],
+            [LocaleService, { t: vi.fn((key: string) => key) }],
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges: vi.fn(() => true),
+                blockExecuteWithoutPermission: vi.fn(),
+            }],
         ]);
         expect(await SheetPasteCommand.handler(accessorWithoutClipboardAPI, { value: 'value-only' })).toBe(true);
         expect(pasteByCopyId).toHaveBeenCalledWith('copy-1', 'value-only');
@@ -277,6 +293,13 @@ describe('clipboard command branches', () => {
                 copyContentCache: () => ({ getLastCopyId: () => '' }),
             }],
             [IClipboardInterfaceService, { supportClipboard: true, read: vi.fn(async () => []) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
+            [IPermissionService, { getPermissionPoint: vi.fn(() => undefined) }],
+            [LocaleService, { t: vi.fn((key: string) => key) }],
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges: vi.fn(() => true),
+                blockExecuteWithoutPermission: vi.fn(),
+            }],
         ]);
         expect(await SheetPasteCommand.handler(accessorNoData, { value: 'none' })).toBe(false);
 
@@ -290,6 +313,40 @@ describe('clipboard command branches', () => {
 
         expect(await SheetOptionalPasteCommand.handler(accessor, { type: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE })).toBe(true);
         expect(rePasteWithPasteType).toHaveBeenCalledWith(PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE);
+    });
+
+    it('checks clipboard permissions only after the sheet implementation is selected', async () => {
+        const copy = vi.fn(async () => true);
+        const cut = vi.fn(async () => true);
+        const legacyPaste = vi.fn();
+        const permissionCheckWithRanges = vi.fn(() => false);
+        const blockExecuteWithoutPermission = vi.fn((message: string) => {
+            throw new Error(message);
+        });
+        const accessor = createAccessor([
+            [ISheetClipboardService, {
+                copy,
+                cut,
+                legacyPaste,
+            }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
+            [IPermissionService, { getPermissionPoint: vi.fn(() => undefined) }],
+            [LocaleService, { t: vi.fn((key: string) => `translated:${key}`) }],
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges,
+                blockExecuteWithoutPermission,
+            }],
+        ]);
+
+        await expect(SheetCopyCommand.handler(accessor)).rejects.toThrow('translated:sheets-ui.permission.dialog.copyErr');
+        await expect(SheetCutCommand.handler(accessor)).rejects.toThrow('translated:sheets-ui.permission.dialog.copyErr');
+        await expect(SheetPasteCommand.handler(accessor, { value: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE })).rejects.toThrow('translated:sheets-ui.permission.dialog.pasteErr');
+        await expect(SheetPasteShortKeyCommand.handler(accessor, {})).rejects.toThrow('translated:sheets-ui.permission.dialog.pasteErr');
+
+        expect(permissionCheckWithRanges).toHaveBeenCalledTimes(4);
+        expect(copy).not.toHaveBeenCalled();
+        expect(cut).not.toHaveBeenCalled();
+        expect(legacyPaste).not.toHaveBeenCalled();
     });
 
     it('routes special paste commands to SheetPasteCommand', async () => {

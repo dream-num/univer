@@ -3031,6 +3031,9 @@ importers:
 
   presets/packages/preset-docs-drawing:
     dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
       '@univerjs/docs-drawing':
         specifier: workspace:*
         version: link:../../../packages/docs-drawing
@@ -3047,9 +3050,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../../common/shared
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
       '@univerjs/presets':
         specifier: workspace:*
         version: link:../..
@@ -3302,6 +3302,9 @@ importers:
 
   presets/packages/preset-sheets-drawing:
     dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
       '@univerjs/docs-drawing':
         specifier: workspace:*
         version: link:../../../packages/docs-drawing
@@ -3321,9 +3324,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../../common/shared
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
       '@univerjs/presets':
         specifier: workspace:*
         version: link:../..

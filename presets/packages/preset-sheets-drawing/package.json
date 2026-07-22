@@ -70,6 +70,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/core": "workspace:*",
         "@univerjs/docs-drawing": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
@@ -78,7 +79,6 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/core": "workspace:*",
         "@univerjs/presets": "workspace:*",
         "react": "18.3.1",
         "react-dom": "18.3.1",

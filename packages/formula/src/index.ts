@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export { FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
+export type { IUniverFormulaConfig } from './config/config';
 export { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 export { UniverFormulaPlugin } from './plugin';
 export { DescriptionService, IDescriptionService } from './services/description.service';

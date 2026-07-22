@@ -31,7 +31,7 @@
             "./*": {
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
-                "types": "./lib/types/*.d.ts"
+                "types": "./lib/types/index.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/es/locale/*.js",
@@ -51,7 +51,9 @@
             "./lib/*": "./lib/*"
         }
     },
-    "files": ["lib"],
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",

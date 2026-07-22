@@ -54,6 +54,7 @@ export function generateParagraphs(
         if (borderBottom) {
             paragraph.paragraphStyle ??= {};
             paragraph.paragraphStyle.borderBottom = Tools.deepClone(borderBottom);
+            paragraph.paragraphStyle.spaceBelow = { v: 10 };
         }
     }
 

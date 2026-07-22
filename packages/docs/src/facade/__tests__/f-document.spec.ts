@@ -380,5 +380,6 @@ describe('FDocument', () => {
             width: 1,
             color: { rgb: '#CDD0D8' },
         });
+        expect(rule?.getInfo().paragraph.paragraphStyle?.spaceBelow).toEqual({ v: 10 });
     });
 });

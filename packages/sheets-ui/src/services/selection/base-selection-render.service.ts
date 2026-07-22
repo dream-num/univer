@@ -520,6 +520,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // #region onPointerMove$
         // eslint-disable-next-line max-lines-per-function, complexity
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            if (moveEvt.buttons === 0) {
+                this.endSelection();
+                return;
+            }
+
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));

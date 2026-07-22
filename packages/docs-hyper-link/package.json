@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-hyper-link",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Hyperlink model and commands for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

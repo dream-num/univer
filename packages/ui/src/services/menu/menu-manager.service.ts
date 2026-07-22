@@ -27,6 +27,16 @@ export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer
 export type ContextMenuQuickLayout = 'icon' | 'tile';
 export type ContextMenuQuickLayoutVariant = 'default' | 'compact';
 
+export interface IRibbonGridLayout {
+    row: number;
+    column: number;
+    rowSpan?: number;
+    columnSpan?: number;
+    showLabel?: boolean;
+    width?: number;
+    iconSize?: number;
+}
+
 export interface IMenuSchema {
     key: string;
     order: number;
@@ -39,6 +49,7 @@ export interface IMenuSchema {
     quickColumns?: number;
     quickLayoutVariant?: ContextMenuQuickLayoutVariant;
     tiny?: boolean;
+    gridLayout?: IRibbonGridLayout;
 }
 
 export interface IMenuManagerService {
@@ -64,6 +75,7 @@ export type MenuSchemaType = {
     quickColumns?: number;
     quickLayoutVariant?: ContextMenuQuickLayoutVariant;
     tiny?: boolean;
+    gridLayout?: IRibbonGridLayout;
 } | {
     [key: string]: MenuSchemaType;
 };
@@ -85,8 +97,11 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 [RibbonStartGroup.LAYOUT]: {
                     order: 2,
                 },
-                [RibbonStartGroup.OTHERS]: {
+                [RibbonStartGroup.NUMBER]: {
                     order: 3,
+                },
+                [RibbonStartGroup.OTHERS]: {
+                    order: 4,
                 },
             },
             [RibbonPosition.INSERT]: {
@@ -330,6 +345,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 quickColumns: value.quickColumns,
                 quickLayoutVariant: value.quickLayoutVariant,
                 tiny: value.tiny,
+                gridLayout: value.gridLayout,
             };
 
             if (value.menuItemFactory) {

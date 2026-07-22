@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/action-recorder",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Record and replay user actions in Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -76,7 +76,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

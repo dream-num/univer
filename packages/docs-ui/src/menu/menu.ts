@@ -123,7 +123,11 @@ function getInsertTableHiddenObservable(
     const renderManagerService = accessor.get(IRenderManagerService);
 
     return new Observable((subscriber) => {
+        let editAreaSubscription: { unsubscribe: () => void } | null = null;
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            editAreaSubscription?.unsubscribe();
+            editAreaSubscription = null;
+
             if (unitId == null) {
                 return subscriber.next(true);
             }
@@ -140,12 +144,15 @@ function getInsertTableHiddenObservable(
 
             const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
 
-            viewModel.editAreaChange$.subscribe((editArea) => {
+            editAreaSubscription = viewModel.editAreaChange$.subscribe((editArea) => {
                 subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
             });
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            editAreaSubscription?.unsubscribe();
+            subscription.unsubscribe();
+        };
     });
 }
 
@@ -232,12 +239,8 @@ function getHeaderFooterMenuHiddenObservable(
 
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
-        if (docDataModel == null) {
-            return subscriber.next(true);
-        }
-
         const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
-        subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
+        subscriber.next(docDataModel == null || documentFlavor !== DocumentFlavor.TRADITIONAL);
 
         return () => {
             subscription0.dispose();

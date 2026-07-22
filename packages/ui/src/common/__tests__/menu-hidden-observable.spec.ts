@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from '../menu-hidden-observable';
@@ -103,6 +103,23 @@ describe('getMenuHiddenObservable', () => {
 
         expect(hiddenValues).toEqual([true]);
         sub.unsubscribe();
+    });
+
+    it('should treat the formula bar document as part of its sheet host', () => {
+        const { accessor } = createMenuAccessor({
+            focusedUnitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            unitType: UniverInstanceType.UNIVER_DOC,
+        });
+        const sheetHiddenValues: boolean[] = [];
+        const docHiddenValues: boolean[] = [];
+        const sheetSub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET).subscribe((hidden) => sheetHiddenValues.push(hidden));
+        const docSub = getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC).subscribe((hidden) => docHiddenValues.push(hidden));
+
+        expect(sheetHiddenValues).toEqual([false]);
+        expect(docHiddenValues).toEqual([true]);
+
+        sheetSub.unsubscribe();
+        docSub.unsubscribe();
     });
 
     it('should hide when focused unit does not match matchUnitId', () => {

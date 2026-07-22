@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-thread-comment-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Thread comment UI integration for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -77,7 +77,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

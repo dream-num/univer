@@ -124,6 +124,22 @@ describe('UnitDrawingService', () => {
         });
     });
 
+    it('preserves previous drawing data when docs replace a subunit snapshot', () => {
+        service.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: { a: createDrawing('a', { selectable: false }) },
+                order: ['a'],
+            },
+        });
+
+        service.setDrawingData(unitId, subUnitId, {
+            a: createDrawing('a'),
+        });
+
+        expect(service.getDrawingByParam(createSearch('a'))?.selectable).toBeUndefined();
+        expect(service.getOldDrawingByParam(createSearch('a'))?.selectable).toBe(false);
+    });
+
     it('expands grouped remove operations to include all nested drawing records', () => {
         service.applyJson1(unitId, subUnitId, service.getBatchAddOp([
             createDrawing('group', { drawingType: DrawingTypeEnum.DRAWING_GROUP }),

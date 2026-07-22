@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Shared thread comment UI components and services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -77,7 +77,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

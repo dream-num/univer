@@ -15,7 +15,14 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { CellValueType, DEFAULT_TEXT_FORMAT_EXCEL, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import {
+    CellValueType,
+    DEFAULT_TEXT_FORMAT_EXCEL,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleType,
+    RANGE_TYPE,
+} from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
@@ -31,7 +38,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample, excelSample2, excelSample3, excelSample4, excelSample5, excelSample6, excelSample7 } from './constant';
+import {
+    excelSample,
+    excelSample2,
+    excelSample3,
+    excelSample4,
+    excelSample5,
+    excelSample6,
+    excelSample7,
+} from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;

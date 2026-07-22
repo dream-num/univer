@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/id-ID.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'Cari fitur',
+            placeholder: 'Ketik nama fitur atau menu...',
+            empty: 'Tidak ada fitur yang tersedia',
+            ribbon: 'Pita',
+            contextMenu: 'Menu konteks',
+        },
         emojiPicker: {
             search: 'Cari',
             random: 'Emoji acak',

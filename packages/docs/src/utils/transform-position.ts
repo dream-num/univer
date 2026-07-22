@@ -38,6 +38,8 @@ export function docDrawingPositionToTransform(position: IDocDrawingPosition): IT
         top: position.positionV.posOffset,
         width: position.size.width,
         height: position.size.height,
+        flipX: position.flipX,
+        flipY: position.flipY,
     };
 }
 
@@ -56,5 +58,7 @@ export function transformToDocDrawingPosition(transform: ITransformState, margin
             posOffset: (transform.top || 0) - marginTop,
         },
         angle: transform.angle || 0,
+        flipX: transform.flipX,
+        flipY: transform.flipY,
     };
 }

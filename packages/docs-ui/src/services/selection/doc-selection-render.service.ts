@@ -372,10 +372,23 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._updateInputPosition();
     }
 
+    setInputPosition(x: number, y: number) {
+        this._positionInput(x, y);
+    }
+
     activate(x: number, y: number, force = false) {
+        this._positionInput(x, y);
+
+        if ((force && !this._shouldPreserveExternalFocus()) || (!force && this.canFocusing)) {
+            this.focus();
+        }
+    }
+
+    private _positionInput(x: number, y: number) {
         // Keep the hidden editor inside the Portal subtree when possible to avoid focus-trap loops,
         // then compensate coordinates if a transformed ancestor changes the fixed containing block.
         this._ensureHostContainer();
+        this._container.style.position = 'fixed';
         let left = x;
         let top = y;
         const fixedContainer = this._container.offsetParent;
@@ -388,10 +401,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._container.style.left = `${left}px`;
         this._container.style.top = `${top}px`;
         this._container.style.zIndex = '1000';
-
-        if ((force && !this._shouldPreserveExternalFocus()) || (!force && this.canFocusing)) {
-            this.focus();
-        }
     }
 
     hasFocus(): boolean {

@@ -390,4 +390,77 @@ describe('docs font and baseline extension', () => {
         }));
         expect(TestContext.fillText).toHaveBeenCalled();
     });
+
+    it('loads picture text fills without forcing anonymous CORS mode', () => {
+        const extension = new FontAndBaseLine() as any;
+        const NativeImage = window.Image;
+        class TestImage {
+            complete = false;
+            crossOrigin: string | null = null;
+            src = '';
+        }
+        window.Image = TestImage as never;
+
+        try {
+            extension._getTextFillImage('https://github.com/dream-num.png');
+            const image = extension._textFillImageCache.get('https://github.com/dream-num.png') as TestImage;
+
+            expect(image.crossOrigin).toBeNull();
+            expect(image.src).toBe('https://github.com/dream-num.png');
+        } finally {
+            window.Image = NativeImage;
+        }
+    });
+
+    it('notifies the document when a picture text fill finishes loading', () => {
+        const extension = new FontAndBaseLine() as any;
+        const onTextFillImageLoaded = vi.fn();
+        extension.parent = { onTextFillImageLoaded };
+        const NativeImage = window.Image;
+        class TestImage {
+            complete = false;
+            onload: (() => void) | null = null;
+            src = '';
+        }
+        window.Image = TestImage as never;
+
+        try {
+            extension._getTextFillImage('https://example.com/text-fill.png');
+            const image = extension._textFillImageCache.get('https://example.com/text-fill.png') as TestImage;
+
+            expect(image.onload).toBeTypeOf('function');
+            image.onload?.();
+            expect(onTextFillImageLoaded).toHaveBeenCalledOnce();
+        } finally {
+            window.Image = NativeImage;
+        }
+    });
+
+    it('notifies every document waiting for the same picture text fill', () => {
+        const extension = new FontAndBaseLine() as any;
+        const firstDocumentLoaded = vi.fn();
+        const secondDocumentLoaded = vi.fn();
+        const NativeImage = window.Image;
+        class TestImage {
+            complete = false;
+            onload: (() => void) | null = null;
+            src = '';
+        }
+        window.Image = TestImage as never;
+
+        try {
+            extension.parent = { onTextFillImageLoaded: firstDocumentLoaded };
+            extension._getTextFillImage('https://example.com/shared-text-fill.png');
+            extension.parent = { onTextFillImageLoaded: secondDocumentLoaded };
+            extension._getTextFillImage('https://example.com/shared-text-fill.png');
+
+            const image = extension._textFillImageCache.get('https://example.com/shared-text-fill.png') as TestImage;
+            image.onload?.();
+
+            expect(firstDocumentLoaded).toHaveBeenCalledOnce();
+            expect(secondDocumentLoaded).toHaveBeenCalledOnce();
+        } finally {
+            window.Image = NativeImage;
+        }
+    });
 });

@@ -143,6 +143,57 @@ describe('ImageUpdateController', () => {
         expect(drawingManagerService.refreshTransform).toHaveBeenCalledWith([imageParam]);
     });
 
+    it('refreshes a loaded image from the current drawing state after updates during loading', async () => {
+        vi.useFakeTimers();
+        const add$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
+        const update$ = new Subject();
+        const insertedImage = {
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'shape-2',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            transform: { left: 0, top: 0, width: 100, height: 50, angle: 0 },
+        };
+        const updatedImage = {
+            ...insertedImage,
+            transform: { ...insertedImage.transform, left: 200, top: 120 },
+        };
+        let currentImage = insertedImage;
+        let finishRendering!: (images: never[]) => void;
+        const renderImages = vi.fn(() => new Promise<never[]>((resolve) => {
+            finishRendering = resolve;
+        }));
+        const refreshTransform = vi.fn();
+        const controller = new ImageUpdateController(
+            { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
+            {
+                getRenderById: vi.fn(() => ({
+                    scene: { getTransformerByCreate: vi.fn(), getObject: vi.fn() },
+                })),
+            } as never,
+            {
+                add$,
+                update$,
+                getDrawingByParam: vi.fn(() => currentImage),
+                refreshTransform,
+            } as never,
+            {} as never,
+            {} as never,
+            { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
+            { renderImages } as never
+        );
+
+        add$.next([{ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'shape-2' }]);
+        await vi.advanceTimersByTimeAsync(40);
+        currentImage = updatedImage;
+        finishRendering([]);
+        await Promise.resolve();
+
+        expect(refreshTransform).toHaveBeenCalledWith([updatedImage]);
+
+        controller.dispose();
+    });
+
     it('applies refreshed transform, clip bounds, and behind-text layer to existing images', () => {
         const add$ = new Subject();
         const update$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();

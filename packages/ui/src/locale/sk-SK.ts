@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/sk-SK.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: 'Vyhľadať funkcie',
+            placeholder: 'Zadajte názov funkcie alebo ponuky...',
+            empty: 'Nenašli sa žiadne dostupné funkcie',
+            ribbon: 'Pás s nástrojmi',
+            contextMenu: 'Kontextová ponuka',
+        },
         emojiPicker: {
             search: 'Hľadať',
             random: 'Náhodné emoji',

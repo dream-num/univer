@@ -19,7 +19,6 @@
 import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -28,6 +27,7 @@ import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.c
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 
 function createEventSubject() {
@@ -114,7 +114,10 @@ function createController(options?: {
             [SHEET_VIEW_KEY.LEFT_TOP, spreadsheetLeftTopPlaceholder],
         ]),
     };
-    const docSelectionRenderService = { onInputBefore$: inputBefore$ };
+    const docSelectionRenderService = {
+        onInputBefore$: inputBefore$,
+        setInputPosition: vi.fn(),
+    };
     const renderManagerService = {
         created$: new Subject<any>(),
         getRenderById: vi.fn((unitId: string) => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
@@ -126,6 +129,10 @@ function createController(options?: {
     };
     const editorBridgeService = {
         getEditCellState: vi.fn(() => options?.currentEditCellState ?? null),
+        getEditCellLayout: vi.fn(() => ({
+            position: { startX: 120, startY: 80 },
+            canvasOffset: { left: 30, top: 20 },
+        })),
         getEditLocation: vi.fn(() => options?.currentEditLocation ?? null),
         isVisible: vi.fn(() => ({ visible: options?.editorVisible ?? false })),
         isForceKeepVisible: vi.fn(() => options?.forceKeepVisible ?? false),
@@ -195,6 +202,7 @@ function createController(options?: {
     return {
         commandService,
         controller,
+        docSelectionRenderService,
         editorBridgeService,
         inputBefore$,
         selectionMoveEnd$,
@@ -302,6 +310,25 @@ describe('EditorBridgeRenderController business flows', () => {
         commandService.emitAfter({ id: ClearSelectionFormatCommand.id });
         commandService.emitAfter({ id: SetZoomRatioCommand.id });
         expect(editorBridgeService.refreshEditCellState).toHaveBeenCalledTimes(2);
+
+        controller.dispose();
+    });
+
+    it('moves the hidden input when the user finishes selecting a cell', () => {
+        const { controller, docSelectionRenderService, selectionMoveEnd$ } = createController();
+
+        selectionMoveEnd$.next([{
+            primary: {
+                actualRow: 3,
+                actualColumn: 4,
+                startRow: 3,
+                startColumn: 4,
+                endRow: 3,
+                endColumn: 4,
+            },
+        }]);
+
+        expect(docSelectionRenderService.setInputPosition).toHaveBeenCalledWith(150, 100);
 
         controller.dispose();
     });

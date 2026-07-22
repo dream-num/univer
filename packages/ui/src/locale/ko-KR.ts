@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ko-KR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        featureSearch: {
+            title: '기능 검색',
+            placeholder: '기능 또는 메뉴 이름 입력...',
+            empty: '사용 가능한 기능을 찾을 수 없습니다',
+            ribbon: '리본',
+            contextMenu: '상황에 맞는 메뉴',
+        },
         emojiPicker: {
             search: '검색',
             random: '무작위 이모지',

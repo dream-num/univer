@@ -14,11 +14,38 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
+import type {
+    IAccessor,
+    IPermissionTypes,
+    IRange,
+    Nullable,
+    Workbook,
+    WorkbookPermissionPointConstructor,
+    Worksheet,
+} from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../services/editor-bridge.service';
-import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHAPE_TEXT_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import {
+    FOCUSING_COMMON_DRAWINGS,
+    FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_SHAPE_TEXT_EDITOR,
+    IContextService,
+    IPermissionService,
+    IUniverInstanceService,
+    Rectangle,
+    Tools,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
+import {
+    IExclusiveRangeService,
+    RangeProtectionPermissionEditPoint,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import { combineLatest, merge, of } from 'rxjs';
 import { debounceTime, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 import { IEditorBridgeService } from '../services/editor-bridge.service';

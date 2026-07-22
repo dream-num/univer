@@ -32,6 +32,7 @@ export enum RibbonStartGroup {
     HISTORY = 'ribbon.start.history',
     FORMAT = 'ribbon.start.format',
     LAYOUT = 'ribbon.start.layout',
+    NUMBER = 'ribbon.start.number',
     OTHERS = 'ribbon.start.others',
 }
 

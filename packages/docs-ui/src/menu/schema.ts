@@ -207,42 +207,52 @@ export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
         [SetInlineFormatBoldCommand.id]: {
             order: 0,
+            gridLayout: { row: 2, column: 1 },
             menuItemFactory: BoldMenuItemFactory,
         },
         [SetInlineFormatItalicCommand.id]: {
             order: 1,
+            gridLayout: { row: 2, column: 2 },
             menuItemFactory: ItalicMenuItemFactory,
         },
         [SetInlineFormatUnderlineCommand.id]: {
             order: 2,
+            gridLayout: { row: 2, column: 3 },
             menuItemFactory: UnderlineMenuItemFactory,
         },
         [SetInlineFormatStrikethroughCommand.id]: {
             order: 3,
+            gridLayout: { row: 2, column: 4 },
             menuItemFactory: StrikeThroughMenuItemFactory,
         },
         [SetInlineFormatSubscriptCommand.id]: {
             order: 4,
+            gridLayout: { row: 2, column: 5 },
             menuItemFactory: SubscriptMenuItemFactory,
         },
         [SetInlineFormatSuperscriptCommand.id]: {
             order: 5,
+            gridLayout: { row: 2, column: 6 },
             menuItemFactory: SuperscriptMenuItemFactory,
         },
         [SetParagraphNamedStyleCommand.id]: {
             order: 5.5,
+            gridLayout: { row: 1, column: 1, columnSpan: 2, width: 100 },
             menuItemFactory: HeadingSelectorMenuItemFactory,
         },
         [SetInlineFormatFontSizeCommand.id]: {
             order: 6,
+            gridLayout: { row: 1, column: 7, width: 64 },
             menuItemFactory: FontSizeSelectorMenuItemFactory,
         },
         [SetInlineFormatFontFamilyCommand.id]: {
             order: 7,
+            gridLayout: { row: 1, column: 3, columnSpan: 4, width: 160 },
             menuItemFactory: FontFamilySelectorMenuItemFactory,
         },
         [SetInlineFormatTextColorCommand.id]: {
             order: 8,
+            gridLayout: { row: 2, column: 7 },
             menuItemFactory: TextColorSelectorMenuItemFactory,
             [ResetInlineFormatTextColorCommand.id]: {
                 order: 0,
@@ -251,6 +261,7 @@ export const menuSchema: MenuSchemaType = {
         },
         [SetInlineFormatTextBackgroundColorCommand.id]: {
             order: 9,
+            gridLayout: { row: 2, column: 8 },
             menuItemFactory: BackgroundColorSelectorMenuItemFactory,
             [ResetInlineFormatTextBackgroundColorCommand.id]: {
                 order: 0,
@@ -261,22 +272,27 @@ export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.LAYOUT]: {
         [AlignOperationCommand.id]: {
             order: 2,
+            gridLayout: { row: 1, column: 1 },
             menuItemFactory: AlignMenuItemFactory,
         },
         [OrderListCommand.id]: {
             order: 7,
+            gridLayout: { row: 2, column: 1 },
             menuItemFactory: OrderListMenuItemFactory,
         },
         [BulletListCommand.id]: {
             order: 8,
+            gridLayout: { row: 1, column: 2 },
             menuItemFactory: BulletListMenuItemFactory,
         },
         [CheckListCommand.id]: {
             order: 9,
+            gridLayout: { row: 2, column: 2 },
             menuItemFactory: CheckListMenuItemFactory,
         },
         [OpenHeaderFooterPanelCommand.id]: {
             order: 10,
+            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
             menuItemFactory: HeaderFooterMenuItemFactory,
         },
         // [SwitchDocModeCommand.id]: {
@@ -285,12 +301,14 @@ export const menuSchema: MenuSchemaType = {
         // },
         [DocOpenPageSettingCommand.id]: {
             order: 12,
+            gridLayout: { row: 1, column: 4, rowSpan: 2, showLabel: true },
             menuItemFactory: PageSettingMenuItemFactory,
         },
     },
     [RibbonInsertGroup.MEDIA]: {
         [TABLE_MENU_ID]: {
             order: 2,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
             menuItemFactory: TableMenuFactory,
             [DocCreateTableOperation.id]: {
                 order: 0,
@@ -299,6 +317,7 @@ export const menuSchema: MenuSchemaType = {
         },
         [HorizontalLineCommand.id]: {
             order: 3,
+            gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
             menuItemFactory: HorizontalLineFactory,
         },
     },

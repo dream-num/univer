@@ -26,7 +26,7 @@ import {
     IUniverInstanceService,
     UniverInstanceService,
 } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { MenuItemType } from '../../menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager.service';
@@ -185,6 +185,43 @@ describe('DesktopRibbonService', () => {
         ribbonSub.unsubscribe();
     });
 
+    it('filters a hidden command even when another hidden state has not emitted', () => {
+        const { service, menuManagerService } = createService();
+        const silentHidden$ = new Subject<boolean>();
+        const hidden$ = new BehaviorSubject(true);
+        let latestRibbon: IMenuSchema[] = [];
+        const ribbonSub = service.ribbon$.subscribe((ribbon) => latestRibbon = ribbon);
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    order: 0,
+                    [`${RibbonPosition.START}.hidden-group`]: {
+                        order: 0,
+                        silentCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'silent-command', type: MenuItemType.BUTTON, hidden$: silentHidden$ }),
+                        },
+                        hiddenCommand: {
+                            order: 1,
+                            menuItemFactory: () => ({ id: 'hidden-command', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+
+        const commandKeys = latestRibbon
+            .find((group) => group.key === RibbonPosition.START)
+            ?.children
+            ?.flatMap((group) => group.children ?? [])
+            .map((child) => child.key);
+        expect(commandKeys).toContain('silentCommand');
+        expect(commandKeys).not.toContain('hiddenCommand');
+
+        ribbonSub.unsubscribe();
+    });
+
     it('does not republish the ribbon when focus emits the same unit id', () => {
         const focused$ = new BehaviorSubject<string | null>('unit-1');
         const { service, menuManagerService } = createService({ focused$ });
@@ -216,5 +253,46 @@ describe('DesktopRibbonService', () => {
         expect(ribbons.length).toBe(publishCountAfterMenuLoad + 1);
 
         ribbonSub.unsubscribe();
+    });
+
+    it('unsubscribes hidden states that are no longer in the ribbon', () => {
+        const { menuManagerService } = createService();
+        let subscriptions = 0;
+        let unsubscriptions = 0;
+        const hidden$ = new Observable<boolean>(() => {
+            subscriptions += 1;
+            return () => {
+                unsubscriptions += 1;
+            };
+        });
+        const groupKey = `${RibbonPosition.START}.temporary-group`;
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    [groupKey]: {
+                        order: 0,
+                        temporaryCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'temporary-command', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+        expect(subscriptions).toBe(1);
+
+        menuManagerService.mergeMenu({
+            [groupKey]: {
+                replace: true,
+                order: 0,
+                visibleCommand: {
+                    order: 0,
+                    menuItemFactory: () => ({ id: 'visible-command', type: MenuItemType.BUTTON }),
+                },
+            },
+        } as MenuSchemaType);
+
+        expect(unsubscriptions).toBe(1);
     });
 });

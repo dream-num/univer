@@ -24,6 +24,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.ORGANIZATION]: {
         [OpenTableSelectorOperation.id]: {
             order: 0,
+            gridLayout: { row: 1, column: 1 },
             menuItemFactory: sheetTableToolbarInsertMenuFactory,
         },
     },

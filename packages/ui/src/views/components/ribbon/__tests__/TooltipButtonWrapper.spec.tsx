@@ -19,13 +19,13 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { connectInjector } from '../../../../utils/di';
-import { DropdownMenuLabel } from '../TooltipButtonWrapper';
+import { DropdownMenuLabel, DropdownWrapper, ToolbarDropdownProvider, TooltipWrapper } from '../TooltipButtonWrapper';
 
 class TestLocaleService {
     t(key: string) {
@@ -50,6 +50,8 @@ function renderWithDependencies(element: ReactElement) {
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
     return render(<ConnectedTestRoot />);
 }
+
+afterEach(cleanup);
 
 describe('DropdownMenuLabel', () => {
     it('preserves option metadata when a custom label emits a dynamic value', () => {
@@ -77,5 +79,25 @@ describe('DropdownMenuLabel', () => {
             ...option,
             value: 'dynamic-value',
         });
+    });
+});
+
+describe('DropdownWrapper', () => {
+    it('closes on an outside pointerdown even when no click follows', async () => {
+        const { findByText, getByRole, queryByText } = render(
+            <ToolbarDropdownProvider>
+                <TooltipWrapper dropdownKey="test-dropdown">
+                    <DropdownWrapper overlay={<div>Dropdown content</div>}>
+                        <button type="button">Open dropdown</button>
+                    </DropdownWrapper>
+                </TooltipWrapper>
+            </ToolbarDropdownProvider>
+        );
+
+        fireEvent.click(getByRole('button', { name: 'Open dropdown' }));
+        await findByText('Dropdown content');
+        fireEvent.pointerDown(document.body);
+
+        expect(queryByText('Dropdown content')).toBeNull();
     });
 });

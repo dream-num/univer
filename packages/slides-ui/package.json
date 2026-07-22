@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Presentation editor UI layer for Univer Slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -80,7 +80,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

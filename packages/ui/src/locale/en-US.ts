@@ -18,6 +18,13 @@ import emojiLocale from './emoji-locale/en-US.generated';
 
 const locale = {
     ui: {
+        featureSearch: {
+            title: 'Search features',
+            placeholder: 'Type a feature or menu name...',
+            empty: 'No available features found',
+            ribbon: 'Ribbon',
+            contextMenu: 'Context menu',
+        },
         emojiPicker: {
             search: 'Search',
             random: 'Random emoji',

@@ -17,7 +17,15 @@
 import type { Workbook } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { createIdentifier, Disposable, generateRandomId, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    generateRandomId,
+    Inject,
+    IUniverInstanceService,
+    ThemeService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { attachSelectionWithCoord, SheetSkeletonService } from '@univerjs/sheets';
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';

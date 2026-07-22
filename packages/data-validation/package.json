@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/data-validation",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Shared data validation models and rule services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

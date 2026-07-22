@@ -28,7 +28,11 @@ import {
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
-import { createFakeScene, createFakeSkeleton, createFakeViewport } from '../../../controllers/render-controllers/__tests__/render-test-bed';
+import {
+    createFakeScene,
+    createFakeSkeleton,
+    createFakeViewport,
+} from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { IMarkSelectionService, MarkSelectionService } from '../mark-selection.service';
 
 class TestSheetSkeletonService {

@@ -28,6 +28,8 @@ import { connectInjector, useDependency, useObservable } from '../../../utils/di
 import { ComponentContainer } from '../ComponentContainer';
 import { ClassicMenu } from './ribbon-menu/ClassicMenu';
 import { DefaultMenu } from './ribbon-menu/DefaultMenu';
+import { RibbonGridMenu } from './ribbon-menu/RibbonGridMenu';
+import { RibbonGrid } from './RibbonGrid';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
 import { ToolbarDropdownProvider } from './TooltipButtonWrapper';
@@ -120,7 +122,7 @@ export function Ribbon(props: IRibbonProps) {
     }, [collapsedIds, ribbon, activatedTab]);
 
     useEffect(() => {
-        if (hideToolbar) {
+        if (hideToolbar || ribbonType === 'grid') {
             toolbarItemRefs.current = {};
             ribbonService.setCollapsedIds([]);
             ribbonService.setFakeToolbarVisible(false);
@@ -172,7 +174,7 @@ export function Ribbon(props: IRibbonProps) {
             timer && cancelAnimationFrame(timer);
             observer.disconnect();
         };
-    }, [hideToolbar, ribbon, activatedTab, ribbonService]);
+    }, [hideToolbar, ribbon, activatedTab, ribbonService, ribbonType]);
 
     const fakeToolbar = useMemo(() => {
         return (
@@ -233,7 +235,7 @@ export function Ribbon(props: IRibbonProps) {
                 {...embedRibbonOverrideAttributes}
                 className={clsx('univer-relative univer-select-none', headerClassName, {
                     'univer-hidden': toolbarOnly,
-                    'univer-h-9': !toolbarOnly && (ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0)),
+                    'univer-h-9': !toolbarOnly && (ribbonType === 'classic' || ribbonType === 'grid' || (headerMenuComponents && headerMenuComponents.size > 0)),
                 })}
             >
                 {!toolbarOnly && ribbonOverride?.placeholderTitle && ribbon.length === 0 && (
@@ -262,6 +264,14 @@ export function Ribbon(props: IRibbonProps) {
                     />
                 )}
 
+                {!toolbarOnly && ribbonType === 'grid' && ribbon.length >= 1 && (
+                    <RibbonGridMenu
+                        ribbon={ribbon}
+                        activatedTab={activatedTab}
+                        onSelectTab={handleSelectTab}
+                    />
+                )}
+
                 {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
                     <div
                         className={`
@@ -278,7 +288,15 @@ export function Ribbon(props: IRibbonProps) {
                 )}
             </div>
 
-            {!hideToolbar && (
+            {!hideToolbar && ribbonType === 'grid' && (
+                <RibbonGrid
+                    {...embedRibbonOverrideAttributes}
+                    groups={activeGroup.allGroups}
+                    title={activatedTabTitle}
+                />
+            )}
+
+            {!hideToolbar && ribbonType !== 'grid' && (
                 <div
                     {...embedRibbonOverrideAttributes}
                     className={clsx(`
@@ -374,7 +392,7 @@ export function Ribbon(props: IRibbonProps) {
             )}
 
             {/* fake toolbar */}
-            {fakeToolbar}
+            {ribbonType !== 'grid' && fakeToolbar}
         </>
     );
 

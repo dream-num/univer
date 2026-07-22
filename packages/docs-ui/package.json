@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Editor UI layer for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -89,7 +89,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Hyperlink editing UI for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -91,7 +91,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",

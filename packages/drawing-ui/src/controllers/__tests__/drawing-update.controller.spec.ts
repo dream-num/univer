@@ -31,6 +31,7 @@ interface IDrawingNotification {
     drawingId: string;
     behindText?: boolean;
     hidden?: boolean;
+    selectable?: boolean;
 }
 
 interface IDrawingTransformObject {
@@ -67,16 +68,22 @@ function createHarness() {
     const sceneTransformer = {
         debounceRefreshControls,
         clearSelectedObjects: vi.fn(),
+        clearControlByIds: vi.fn(),
     };
 
     const zIndexShape = { setProps: vi.fn(), makeDirty: vi.fn() };
     const disposeShape = { dispose: vi.fn() };
     const showHideShape = { show: vi.fn(), hide: vi.fn() };
     const transformShape = { layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
-    const getSceneObject = vi.fn((key: string) => {
+    const hiddenTransformShape = { layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
+    const selectableShape = { oKey: 'unit-1#-#sheet-1#-#drawing-selectable', evented: true, layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
+    const eventlessShape = { oKey: 'unit-1#-#sheet-1#-#drawing-eventless', evented: false, layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
+    const getSceneObject = vi.fn((key: string): unknown => {
         if (key === 'unit-1#-#sheet-1#-#drawing-visible') return showHideShape;
         if (key === 'unit-1#-#sheet-1#-#drawing-transform') return transformShape;
         if (key === 'unit-1#-#sheet-1#-#drawing-transform-refresh-hidden') return transformShape;
+        if (key === selectableShape.oKey) return selectableShape;
+        if (key === eventlessShape.oKey) return eventlessShape;
         if (key === 'unit-1#-#sheet-1#-#drawing-remove') return disposeShape;
         return null;
     });
@@ -85,7 +92,10 @@ function createHarness() {
         getTransformerByCreate: vi.fn(() => transformer),
         getTransformer: vi.fn(() => sceneTransformer),
         getObject: getSceneObject,
-        getObjectIncludeInGroup: vi.fn(getSceneObject),
+        getObjectIncludeInGroup: vi.fn((key: string) => {
+            if (key === 'unit-1#-#sheet-1#-#drawing-hidden-to-visible') return hiddenTransformShape;
+            return getSceneObject(key);
+        }),
         fuzzyMathObjects: vi.fn((key: string) => {
             if (key.includes('drawing-z')) return [zIndexShape];
             if (key.includes('drawing-remove')) return [disposeShape];
@@ -101,13 +111,16 @@ function createHarness() {
         getRenderById: vi.fn(() => ({ scene })),
     };
 
-    const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; behindText?: boolean; hidden?: boolean; transform: { left: number; top: number; width: number; height: number; angle: number; clipBounds?: { left: number; top: number; width: number; height: number } } }>([
+    const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; behindText?: boolean; hidden?: boolean; selectable?: boolean; transform: { left: number; top: number; width: number; height: number; angle: number; clipBounds?: { left: number; top: number; width: number; height: number } } }>([
         ['drawing-a', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-a', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 } }],
         ['drawing-b', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 20, top: 0, width: 10, height: 10, angle: 0 } }],
         ['chart-1', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'chart-1', drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 40, top: 0, width: 20, height: 10, angle: 0 } }],
         ['drawing-transform', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform', drawingType: DrawingTypeEnum.DRAWING_IMAGE, behindText: true, hidden: true, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
         ['drawing-transform-in-group', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform-in-group', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 8, top: 9, width: 10, height: 11, angle: 0 } }],
         ['drawing-transform-refresh-hidden', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform-refresh-hidden', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
+        ['drawing-hidden-to-visible', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-hidden-to-visible', drawingType: DrawingTypeEnum.DRAWING_IMAGE, hidden: false, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0 } }],
+        ['drawing-selectable', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-selectable', drawingType: DrawingTypeEnum.DRAWING_IMAGE, selectable: false, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0 } }],
+        ['drawing-eventless', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-eventless', drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 4, top: 5, width: 6, height: 7, angle: 0 } }],
         ['drawing-refresh-missing', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 4, top: 5, width: 6, height: 7, angle: 0 } }],
     ]);
 
@@ -122,12 +135,19 @@ function createHarness() {
         group$,
         ungroup$,
         getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => drawingParams.get(drawingId) ?? null),
+        getOldDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => {
+            const drawing = drawingParams.get(drawingId);
+            return drawingId === 'drawing-selectable' && drawing
+                ? { ...drawing, selectable: false }
+                : drawing ?? null;
+        }),
         getDrawingOKey: vi.fn((oKey: string) => ({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: oKey, drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 } })),
         getDrawingOrder: vi.fn(() => ['drawing-z']),
         getFocusDrawings: vi.fn(() => [
             { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-a', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
             { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
         ]),
+        focusDrawing: vi.fn(),
         addNotification: vi.fn(),
         featurePluginUpdateNotification: vi.fn(),
     };
@@ -161,6 +181,7 @@ function createHarness() {
         changeEnd$,
         commandExecuted: () => commandExecuted,
         drawingManagerService,
+        drawingParams,
         group$,
         order$,
         refreshTransform$,
@@ -168,6 +189,9 @@ function createHarness() {
         scene,
         showHideShape,
         transformShape,
+        hiddenTransformShape,
+        selectableShape,
+        eventlessShape,
         update$,
         visible$,
         zIndexShape,
@@ -244,6 +268,81 @@ describe('DrawingUpdateController', () => {
 
         harness.remove$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-remove' }]);
         expect(harness.disposeShape.dispose).toHaveBeenCalledTimes(1);
+
+        harness.controller.dispose();
+    });
+
+    it('restores a hidden render object when drawing metadata becomes visible', () => {
+        const harness = createHarness();
+
+        harness.update$.next([{
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-hidden-to-visible',
+        }]);
+
+        expect(harness.hiddenTransformShape.show).toHaveBeenCalledTimes(1);
+
+        harness.controller.dispose();
+    });
+
+    it('restores a hidden render object from a visibility notification', () => {
+        const harness = createHarness();
+
+        harness.visible$.next([{
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-hidden-to-visible',
+            visible: true,
+        }]);
+
+        expect(harness.hiddenTransformShape.show).toHaveBeenCalledTimes(1);
+
+        harness.controller.dispose();
+    });
+
+    it('syncs drawing selectability to canvas picking and the active selection', () => {
+        const harness = createHarness();
+        const drawing = harness.drawingParams.get('drawing-selectable')!;
+        harness.drawingManagerService.getFocusDrawings.mockReturnValue([
+            { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-selectable', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
+            { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
+        ]);
+
+        harness.update$.next([{
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        }]);
+
+        expect(harness.selectableShape.evented).toBe(false);
+        expect(harness.scene.getTransformer().clearControlByIds).toHaveBeenCalledWith([harness.selectableShape.oKey]);
+        expect(harness.drawingManagerService.focusDrawing).toHaveBeenCalledWith([
+            expect.objectContaining({ drawingId: 'drawing-b' }),
+        ]);
+
+        delete drawing.selectable;
+        harness.update$.next([{
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        }]);
+
+        expect(harness.selectableShape.evented).toBe(true);
+
+        harness.controller.dispose();
+    });
+
+    it('preserves eventless render objects without selectable metadata', () => {
+        const harness = createHarness();
+
+        harness.update$.next([{
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-eventless',
+        }]);
+
+        expect(harness.eventlessShape.evented).toBe(false);
 
         harness.controller.dispose();
     });

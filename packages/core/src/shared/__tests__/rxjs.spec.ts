@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from '../rxjs';
 
@@ -24,6 +24,32 @@ describe('test custom rxjs utils', () => {
         const nums$ = of(1, 2, 3, 4, 5);
         nums$.pipe(takeAfter((val) => val === 3)).subscribe((v) => acculated.push(v));
         expect(acculated).toEqual([1, 2, 3]);
+    });
+
+    it('should unsubscribe from the source when a takeAfter subscriber unsubscribes', () => {
+        const teardown = vi.fn();
+        const source$ = new Observable<number>(() => teardown);
+
+        const subscription = source$.pipe(takeAfter(() => false)).subscribe();
+        subscription.unsubscribe();
+
+        expect(teardown).toHaveBeenCalledOnce();
+    });
+
+    it('should stop synchronous source work after the takeAfter condition matches', () => {
+        const visited: number[] = [];
+        const source$ = new Observable<number>((subscriber) => {
+            [1, 2, 3, 4, 5].forEach((value) => {
+                if (!subscriber.closed) {
+                    visited.push(value);
+                    subscriber.next(value);
+                }
+            });
+        });
+
+        source$.pipe(takeAfter((value) => value === 3)).subscribe();
+
+        expect(visited).toEqual([1, 2, 3]);
     });
 
     describe('test "createTimerObservable$"', () => {

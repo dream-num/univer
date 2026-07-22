@@ -26,7 +26,7 @@ const univer = new Univer({
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    ribbonType: 'classic',
+    ribbonType: 'grid',
 });
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin);

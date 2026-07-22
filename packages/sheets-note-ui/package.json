@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-note-ui",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Cell note UI for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -74,7 +74,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.29.0",
+        "@univerjs/icons": "1.32.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-note": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

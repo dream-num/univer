@@ -550,6 +550,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 width,
                 height,
                 angle,
+                // The layout engine resolves position and size, while flips remain drawing metadata.
+                flipX: drawingOrigin.docTransform.flipX,
+                flipY: drawingOrigin.docTransform.flipY,
                 clipBounds: pageClipBounds,
             } as IDrawingTransformStateWithClipBounds;
             if (updateDrawingMap[drawingId] == null) {

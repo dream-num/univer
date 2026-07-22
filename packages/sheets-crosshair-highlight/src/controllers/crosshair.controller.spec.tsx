@@ -46,8 +46,8 @@ describe('SheetsCrosshairHighlightController', () => {
 
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
         expect(Object.keys(menuSchema).length).toBeGreaterThan(0);
-        const viewVisibility = (menuSchema as Record<string, Record<string, unknown>>)[RibbonViewGroup.VISIBILITY];
-        expect(viewVisibility).toHaveProperty(ToggleCrosshairHighlightOperation.id);
+        const viewVisibility = (menuSchema as Record<string, Record<string, { gridLayout?: unknown }>>)[RibbonViewGroup.VISIBILITY];
+        expect(viewVisibility[ToggleCrosshairHighlightOperation.id].gridLayout).toEqual({ row: 2, column: 1, showLabel: true });
 
         controller.dispose();
     });

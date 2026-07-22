@@ -28,8 +28,8 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDrawingDocTransform {
     drawingId: string;
-    key: 'size' | 'angle' | 'positionH' | 'positionV';
-    value: ISize | number | IObjectPositionH | IObjectPositionV;
+    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY';
+    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV;
 }
 
 export interface IUpdateDrawingDocTransformCommandParams {
@@ -61,8 +61,12 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
 
         for (const { drawingId, key, value } of drawings) {
             const oldValue = oldDrawings[drawingId]?.docTransform?.[key];
-            if (oldValue == null || !Tools.diffValue(oldValue, value)) {
-                actions.push(jsonX.replaceOp(['drawings', drawingId, 'docTransform', key], oldValue, value)!);
+            if (!Tools.diffValue(oldValue, value)) {
+                const path = ['drawings', drawingId, 'docTransform', key];
+                // Optional transform fields such as flips do not exist in older documents.
+                actions.push(oldValue === undefined
+                    ? jsonX.insertOp(path, value)!
+                    : jsonX.replaceOp(path, oldValue, value)!);
             }
         }
 

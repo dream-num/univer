@@ -159,6 +159,18 @@ describe('InputNumber', () => {
         expect(input).toBeDisabled();
     });
 
+    it('should clear an optional value while keeping increment and decrement controls', () => {
+        const onLocalChange = vi.fn();
+        const { container } = render(<InputNumber allowClear allowEmpty defaultValue={3} onChange={onLocalChange} />);
+
+        const clearButton = container.querySelector('button') as HTMLButtonElement;
+        expect(clearButton).not.toBeNull();
+        expect(container.querySelectorAll('[role="button"]')).toHaveLength(2);
+
+        fireEvent.click(clearButton);
+        expect(onLocalChange).toHaveBeenCalledWith(null);
+    });
+
     it('should support ref callback and object ref', () => {
         const callbackRef = vi.fn();
         const objectRef = { current: null as HTMLInputElement | null };

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { LocaleKey } from '../../../locale/types';
 import type {
     IDisplayMenuItem,
@@ -41,6 +42,7 @@ type MobileMenuView =
         kind: 'schema';
         title?: string;
         schemas: IMenuSchema[];
+        disabled$?: Observable<boolean>;
     }
     | {
         kind: 'options';
@@ -49,6 +51,7 @@ type MobileMenuView =
         menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
         menuKey: string;
         currentValue: MenuItemDefaultValueType;
+        disabled$?: Observable<boolean>;
     };
 
 interface IMobileMenuProps extends IBaseMenuProps {
@@ -140,6 +143,7 @@ export function MobileMenu(props: IMobileMenuProps) {
                             menuType={menuType}
                             onExecute={onOptionSelect}
                             onOpenView={openView}
+                            inheritedDisabled$={currentView?.disabled$}
                         />
                     </div>
                 )}
@@ -151,6 +155,7 @@ export function MobileMenu(props: IMobileMenuProps) {
                             menuItem={currentView.menuItem}
                             options={currentView.options}
                             currentValue={currentView.currentValue}
+                            inheritedDisabled$={currentView.disabled$}
                             onExecute={onOptionSelect}
                         />
                     </div>
@@ -166,8 +171,9 @@ function MobileSchemaList(props: {
     menuType?: string;
     onExecute?: IBaseMenuProps['onOptionSelect'];
     onOpenView: (view: MobileMenuView) => void;
+    inheritedDisabled$?: Observable<boolean>;
 }) {
-    const { schemas, menuManagerService, menuType, onExecute, onOpenView } = props;
+    const { schemas, menuManagerService, menuType, onExecute, onOpenView, inheritedDisabled$ } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(schemas);
 
@@ -193,6 +199,7 @@ function MobileSchemaList(props: {
                             menuType={menuType}
                             onExecute={onExecute}
                             onOpenView={onOpenView}
+                            inheritedDisabled$={inheritedDisabled$}
                             bordered={index !== visibleSchemas.length - 1}
                         />
                     );
@@ -228,6 +235,7 @@ function MobileSchemaList(props: {
                                 menuType={menuType}
                                 onExecute={onExecute}
                                 onOpenView={onOpenView}
+                                inheritedDisabled$={inheritedDisabled$}
                                 bordered={childIndex !== schema.children!.length - 1}
                             />
                         ))}
@@ -244,10 +252,11 @@ function MobileSchemaRow(props: {
     menuType?: string;
     onExecute?: IBaseMenuProps['onOptionSelect'];
     onOpenView: (view: MobileMenuView) => void;
+    inheritedDisabled$?: Observable<boolean>;
     bordered: boolean;
 }) {
-    const { schema, menuManagerService, menuType, onExecute, onOpenView, bordered } = props;
-    const interaction = useMobileSchemaInteraction({ schema, menuManagerService, menuType, onOpenView });
+    const { schema, menuManagerService, menuType, onExecute, onOpenView, inheritedDisabled$, bordered } = props;
+    const interaction = useMobileSchemaInteraction({ schema, menuManagerService, menuType, onOpenView, inheritedDisabled$ });
 
     if (!interaction || interaction.hidden) {
         return null;
@@ -299,9 +308,11 @@ function MobileSelectionOptionsView(props: {
     menuKey: string;
     menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
     currentValue: MenuItemDefaultValueType;
+    inheritedDisabled$?: Observable<boolean>;
     onExecute?: IBaseMenuProps['onOptionSelect'];
 }) {
-    const { options, menuKey, menuItem, currentValue, onExecute } = props;
+    const { options, menuKey, menuItem, currentValue, inheritedDisabled$, onExecute } = props;
+    const inheritedDisabled = useObservable<boolean>(inheritedDisabled$, false);
 
     return (
         <>
@@ -312,6 +323,7 @@ function MobileSelectionOptionsView(props: {
                     menuKey={menuKey}
                     menuItem={menuItem}
                     currentValue={currentValue}
+                    disabled={inheritedDisabled}
                     bordered={index !== options.length - 1}
                     onExecute={onExecute}
                 />
@@ -325,13 +337,15 @@ function MobileSelectionOptionRow(props: {
     menuKey: string;
     menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
     currentValue: MenuItemDefaultValueType;
+    disabled: boolean;
     bordered: boolean;
     onExecute?: IBaseMenuProps['onOptionSelect'];
 }) {
-    const { option, menuKey, menuItem, currentValue, bordered, onExecute } = props;
+    const { option, menuKey, menuItem, currentValue, disabled, bordered, onExecute } = props;
     const optionValue = useObservable(option.value$);
     const displayValue = option.value ?? optionValue;
     const selected = displayValue === currentValue;
+    const optionDisabled = disabled || Boolean(option.disabled);
 
     return (
         <button
@@ -347,8 +361,12 @@ function MobileSelectionOptionRow(props: {
                 `,
                 bordered && borderBottomClassName
             )}
-            disabled={option.disabled}
+            disabled={optionDisabled}
             onClick={() => {
+                if (optionDisabled) {
+                    return;
+                }
+
                 onExecute?.({
                     ...option,
                     value: displayValue,
@@ -377,12 +395,19 @@ function useMobileSchemaInteraction(props: {
     menuManagerService: IMenuManagerService;
     menuType?: string;
     onOpenView: (view: MobileMenuView) => void;
+    inheritedDisabled$?: Observable<boolean>;
 }) {
-    const { schema, menuManagerService, menuType, onOpenView } = props;
+    const { schema, menuManagerService, menuType, onOpenView, inheritedDisabled$ } = props;
     const localeService = useDependency(LocaleService);
     const menuItem = schema.item as IDisplayMenuItem<IMenuItem> | undefined;
     const selectorItem = menuItem as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>> | undefined;
-    const disabled = useObservable<boolean>(menuItem?.disabled$, false);
+    const disabled$ = useMemo(() => {
+        const sources = [inheritedDisabled$, menuItem?.disabled$].filter((source): source is Observable<boolean> => Boolean(source));
+        return sources.length
+            ? combineLatest(sources.map((source) => source.pipe(startWith(false)))).pipe(map((states) => states.some(Boolean)))
+            : undefined;
+    }, [inheritedDisabled$, menuItem?.disabled$]);
+    const disabled = useObservable<boolean>(disabled$, false);
     const hidden = useObservable<boolean>(menuItem?.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem?.value$);
     const selectionsFromObservable = useObservable(
@@ -418,11 +443,16 @@ function useMobileSchemaInteraction(props: {
     const currentValueText = typeof value === 'string' || typeof value === 'number' ? String(value) : '';
 
     const onPress = (onExecute?: IBaseMenuProps['onOptionSelect']) => {
+        if (disabled) {
+            return;
+        }
+
         if (schemaChildren.length > 0) {
             onOpenView({
                 kind: 'schema',
                 title: getMenuSchemaTitle(schema, localeService),
                 schemas: schemaChildren,
+                disabled$,
             });
             return;
         }
@@ -435,6 +465,7 @@ function useMobileSchemaInteraction(props: {
                 menuItem: selectorItem,
                 menuKey: schema.key,
                 currentValue: value,
+                disabled$,
             });
             return;
         }
@@ -444,6 +475,7 @@ function useMobileSchemaInteraction(props: {
                 kind: 'schema',
                 title: getMenuSchemaTitle(schema, localeService),
                 schemas: subMenuItems,
+                disabled$,
             });
             return;
         }

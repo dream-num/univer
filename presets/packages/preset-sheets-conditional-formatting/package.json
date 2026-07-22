@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-sheets-conditional-formatting",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.6",
     "private": false,
     "description": "Preset for conditional formatting in Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

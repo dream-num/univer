@@ -21,6 +21,8 @@ import {
     deepCompare,
     Disposable,
     DocumentBlockRangeType,
+    FOCUSING_COMMON_DRAWINGS,
+    IContextService,
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
@@ -49,13 +51,15 @@ const SKIP_SYMBOLS: string[] = [
 
 export class DocFloatMenuService extends Disposable implements IRenderModule {
     private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number }> = null;
+    private _suppressed = false;
 
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -77,6 +81,17 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         this._hideFloatMenu();
     }
 
+    setSuppressed(suppressed: boolean): void {
+        if (this._suppressed === suppressed) {
+            return;
+        }
+
+        this._suppressed = suppressed;
+        if (suppressed) {
+            this._hideFloatMenu();
+        }
+    }
+
     private _initSelectionChange() {
         this.disposeWithMe(this._docSelectionRenderService.onSelectionStart$.subscribe(() => {
             this._hideFloatMenu();
@@ -85,6 +100,11 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe((selection) => {
             const { unitId, textRanges } = selection;
             if (unitId !== this._context.unitId) {
+                return;
+            }
+
+            if (this._suppressed || this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
+                this._hideFloatMenu();
                 return;
             }
 

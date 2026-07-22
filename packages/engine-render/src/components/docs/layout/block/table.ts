@@ -148,7 +148,7 @@ export function createTableSkeleton(
 
     const { pageWidth, marginLeft = 0, marginRight = 0 } = curPage;
 
-    tableSkeleton.left = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
+    tableSkeleton.left = getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
 
     return tableSkeleton;
 }
@@ -254,7 +254,7 @@ function updateTableSkeletonsPosition(
 ) {
     const { pageWidth, marginLeft = 0, marginRight = 0 } = curPage;
     const { tableWidth } = cache;
-    const tableLeft = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
+    const tableLeft = getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
 
     let tableIndex = 0;
     for (const tableSkeleton of skeTables) {
@@ -663,7 +663,7 @@ function isCoveredTableCell(cellConfig: ITableCell | undefined): boolean {
     return cellConfig?.rowSpan === 0 || cellConfig?.columnSpan === 0;
 }
 
-function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {
+export function getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {
     switch (align) {
         case TableAlignmentType.START: {
             return indent.v;

@@ -101,13 +101,15 @@ describe('language-ruler', () => {
             expect(result.glyphGroup.length).toBe(2);
         });
 
-        it('uses runtime custom range width for placeholder glyphs', () => {
+        it('uses runtime custom range metrics for placeholder glyphs', () => {
             const { viewModel } = createViewModel('i');
             const paragraphNode = getParagraphNode(viewModel);
             const paragraph = getParagraph(viewModel);
             const sectionBreakConfig = createSectionBreakConfig();
             vi.spyOn(viewModel, 'getCustomRange').mockReturnValue({
                 endIndex: 0,
+                glyphAscentEm: 1.5,
+                glyphDescentEm: 0.5,
                 glyphWidthEm: 3,
                 rangeId: 'formula-1',
                 startIndex: 0,
@@ -115,8 +117,11 @@ describe('language-ruler', () => {
 
             const result = otherHandler(0, 'i', viewModel, paragraphNode, sectionBreakConfig, paragraph);
             const glyph = result.glyphGroup[0];
+            const emSize = glyph.fontStyle!.originFontSize / 0.75;
 
-            expect(glyph.width).toBeCloseTo(glyph.fontStyle!.originFontSize * 3);
+            expect(glyph.width).toBeCloseTo(emSize * 3);
+            expect(glyph.bBox.ba).toBeCloseTo(emSize * 1.5);
+            expect(glyph.bBox.bd).toBeCloseTo(emSize * 0.5);
         });
     });
 

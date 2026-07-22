@@ -239,13 +239,15 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
     },
 };
 
-export interface IDocTableDeleteTableCommandParams {}
+export interface IDocTableDeleteTableCommandParams {
+    targetRange?: ITextRangeWithStyle;
+}
 
 export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandParams> = {
     id: 'doc.table.delete-table',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor) => {
+    handler: async (accessor, params) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
@@ -253,7 +255,10 @@ export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandPar
         const activeRectRanges = docSelectionManagerService.getRectRanges();
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
-        const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
+        const rangeInfo = getRangeInfoFromRanges(
+            params?.targetRange ?? activeTextRange,
+            params?.targetRange ? [] : activeRectRanges
+        );
 
         if (rangeInfo == null) {
             return false;

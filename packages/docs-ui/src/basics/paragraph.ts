@@ -15,6 +15,19 @@
  */
 
 import type { ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import { DataStreamTreeTokenType } from '@univerjs/core';
+
+export function isTopLevelStructuralGap(dataStream: string, offset: number): boolean {
+    const previousToken = dataStream[offset - 1];
+    const nextToken = dataStream[offset];
+
+    return previousToken === DataStreamTreeTokenType.BLOCK_END ||
+        previousToken === DataStreamTreeTokenType.TABLE_END ||
+        previousToken === DataStreamTreeTokenType.COLUMN_GROUP_END ||
+        nextToken === DataStreamTreeTokenType.BLOCK_START ||
+        nextToken === DataStreamTreeTokenType.TABLE_START ||
+        nextToken === DataStreamTreeTokenType.COLUMN_GROUP_START;
+}
 
 export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
     return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);

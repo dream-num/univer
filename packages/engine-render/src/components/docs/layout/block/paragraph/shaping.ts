@@ -48,7 +48,7 @@ import { getBoundingBox } from '../../model/line';
 import { fontLibrary } from '../../shaping-engine/font-library';
 import { textShape } from '../../shaping-engine/text-shaping';
 import { prepareParagraphBody } from '../../shaping-engine/utils';
-import { getCharSpaceApply, getCustomRangeGlyphWidth, getFontCreateConfig } from '../../tools';
+import { getCharSpaceApply, getCustomRangeGlyphMetrics, getFontCreateConfig } from '../../tools';
 import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -212,7 +212,7 @@ export function shaping(
                     const newSpan = createSkeletonLetterGlyph(
                         char,
                         config,
-                        getCustomRangeGlyphWidth(start, viewModel, paragraphNode, config),
+                        getCustomRangeGlyphMetrics(start, viewModel, paragraphNode, config),
                         glyphInfo
                     );
                     shapedGlyphs.push(newSpan);
@@ -285,7 +285,7 @@ export function shaping(
                             newGlyph = createSkeletonLetterGlyph(
                                 char,
                                 config,
-                                getCustomRangeGlyphWidth(i, viewModel, paragraphNode, config)
+                                getCustomRangeGlyphMetrics(i, viewModel, paragraphNode, config)
                             );
                         }
                     } else {

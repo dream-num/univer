@@ -46,7 +46,7 @@ function createService() {
 describe('BrowserClipboardService', () => {
     beforeEach(() => {
         vi.mocked(supportClipboardAPI).mockReturnValue(true);
-        (globalThis as any).ClipboardItem = MockClipboardItem;
+        vi.stubGlobal('ClipboardItem', MockClipboardItem);
         Object.defineProperty(navigator, 'clipboard', {
             configurable: true,
             value: {
@@ -61,6 +61,7 @@ describe('BrowserClipboardService', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
     it('should expose clipboard support from utility', () => {
@@ -96,6 +97,16 @@ describe('BrowserClipboardService', () => {
         await service.write('legacy', '<i>legacy</i>');
 
         expect(document.execCommand).toHaveBeenCalledWith('copy');
+    });
+
+    it('should fallback to legacy copy when ClipboardItem is unavailable', async () => {
+        vi.stubGlobal('ClipboardItem', undefined);
+        const { service } = createService();
+
+        await service.write('legacy', '<i>legacy</i>');
+
+        expect(document.execCommand).toHaveBeenCalledWith('copy');
+        expect(navigator.clipboard.write).not.toHaveBeenCalled();
     });
 
     it('should write raw sanitized html during legacy copy event', async () => {

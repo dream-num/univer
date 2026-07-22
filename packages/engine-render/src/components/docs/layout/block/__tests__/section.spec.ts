@@ -112,11 +112,26 @@ describe('section', () => {
                 createSectionLayoutTestBed(['Hello', 'World']);
 
             // Mark the second paragraph to open a new page.
-            ctx.paragraphsOpenNewPage.add(sectionNode.children[1].endIndex);
+            const paragraphEndIndex = sectionNode.children[1].endIndex;
+            ctx.paragraphsOpenNewPage.add(paragraphEndIndex);
             const result = dealWithSection(ctx, viewModel, sectionNode, curPage, sectionBreakConfig, null);
 
             // Should have two pages because the second paragraph starts on a new page.
             expect(result.pages.length).toBeGreaterThanOrEqual(2);
+            expect(ctx.paragraphsOpenNewPage.has(paragraphEndIndex)).toBe(false);
+        });
+
+        it('reuses an empty rollback page when opening the anchor paragraph', () => {
+            const { ctx, viewModel, sectionNode, curPage, sectionBreakConfig } =
+                createSectionLayoutTestBed(['Hello']);
+            const paragraphEndIndex = sectionNode.children[0].endIndex;
+            ctx.paragraphsOpenNewPage.add(paragraphEndIndex);
+
+            const result = dealWithSection(ctx, viewModel, sectionNode, curPage, sectionBreakConfig, null);
+
+            expect(result.pages).toHaveLength(1);
+            expect(result.pages[0].pageNumber).toBe(curPage.pageNumber);
+            expect(ctx.paragraphsOpenNewPage.has(paragraphEndIndex)).toBe(false);
         });
 
         it('lays out column group blocks into page skeleton columns', () => {

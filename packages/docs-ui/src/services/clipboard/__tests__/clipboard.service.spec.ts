@@ -20,9 +20,11 @@ import {
     BooleanNumber,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
+    DocumentBlockRangeType,
     ICommandService,
     ImageSourceType,
     IUniverInstanceService,
+    SliceBodyType,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
@@ -51,6 +53,12 @@ class TestClipboardInterfaceService {
 
     async readText(): Promise<string> { return ''; }
     async read(): Promise<ClipboardItem[]> { return []; }
+}
+
+class RejectingClipboardInterfaceService extends TestClipboardInterfaceService {
+    override async write(): Promise<void> {
+        throw new Error('clipboard write failed');
+    }
 }
 
 describe('DocClipboardService table copy helpers', () => {
@@ -175,6 +183,37 @@ describe('DocClipboardService table copy helpers', () => {
         expect(clipboard.writes[0].html).toContain('data-copy-id=');
         expect(clipboard.writes[0].html).toContain('<!--univer-doc-fragment:');
         expect(internalDoc?.body?.dataStream).toBe('Alpha');
+
+        testBed.univer.dispose();
+    });
+
+    it('returns false when writing copied content to the clipboard fails', async () => {
+        const documentData: IDocumentData = {
+            id: 'failed-copy-doc',
+            body: {
+                dataStream: 'Alpha\r\n',
+                paragraphs: [{ paragraphId: 'para_docs_ui_clipboard_fixture_failed_copy', startIndex: 5 }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: RejectingClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'failed-copy-doc', subUnitId: '' });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+        }]);
+
+        expect(await testBed.get(IDocClipboardService).copy()).toBe(false);
 
         testBed.univer.dispose();
     });
@@ -342,6 +381,118 @@ describe('DocClipboardService table copy helpers', () => {
         const univerInstanceService = testBed.get(IUniverInstanceService);
         const documentModel = univerInstanceService.getUnit<DocumentDataModel>('html-clipboard-doc', UniverInstanceType.UNIVER_DOC)!;
         expect(documentModel.getBody()?.dataStream).toContain('HTML clipboard');
+
+        testBed.univer.dispose();
+    });
+
+    it('keeps plain text pasted after a block range separate from the following paragraph', async () => {
+        const tokens = DataStreamTreeTokenType;
+        const blockStream = `${tokens.BLOCK_START}Callout${tokens.PARAGRAPH}${tokens.BLOCK_END}`;
+        const documentData: IDocumentData = {
+            id: 'block-boundary-paste-doc',
+            body: {
+                dataStream: `${blockStream}Quote${tokens.PARAGRAPH}${tokens.SECTION_BREAK}`,
+                paragraphs: [
+                    { paragraphId: 'para_docs_ui_clipboard_fixture_block', startIndex: blockStream.length - 2 },
+                    { paragraphId: 'para_docs_ui_clipboard_fixture_quote', startIndex: blockStream.length + 5 },
+                ],
+                blockRanges: [{
+                    blockId: 'callout-1',
+                    blockType: DocumentBlockRangeType.CALLOUT,
+                    startIndex: 0,
+                    endIndex: blockStream.length - 1,
+                }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(InnerPasteCommand);
+        commandService.registerCommand(RichTextEditingMutation);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'block-boundary-paste-doc', subUnitId: '' });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: blockStream.length,
+            endOffset: blockStream.length,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+        }]);
+
+        expect(await testBed.get(IDocClipboardService).legacyPaste({ text: 'Pasted', files: [] })).toBe(true);
+
+        const documentModel = testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('block-boundary-paste-doc', UniverInstanceType.UNIVER_DOC)!;
+        expect(documentModel.getBody()?.dataStream).toBe(`${blockStream}Pasted${tokens.PARAGRAPH}Quote${tokens.PARAGRAPH}${tokens.SECTION_BREAK}`);
+
+        testBed.univer.dispose();
+    });
+
+    it('copies and pastes a complete block range after itself', async () => {
+        const tokens = DataStreamTreeTokenType;
+        const blockStream = `${tokens.BLOCK_START}Callout${tokens.PARAGRAPH}${tokens.BLOCK_END}`;
+        const clipboard = new TestClipboardInterfaceService();
+        const documentData: IDocumentData = {
+            id: 'block-copy-paste-doc',
+            body: {
+                dataStream: `${blockStream}After${tokens.PARAGRAPH}${tokens.SECTION_BREAK}`,
+                paragraphs: [
+                    { paragraphId: 'para_docs_ui_clipboard_fixture_source_block', startIndex: blockStream.length - 2 },
+                    { paragraphId: 'para_docs_ui_clipboard_fixture_after_block', startIndex: blockStream.length + 5 },
+                ],
+                blockRanges: [{
+                    blockId: 'callout-1',
+                    blockType: DocumentBlockRangeType.CALLOUT,
+                    startIndex: 0,
+                    endIndex: blockStream.length - 1,
+                }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useValue: clipboard }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(InnerPasteCommand);
+        commandService.registerCommand(RichTextEditingMutation);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'block-copy-paste-doc', subUnitId: '' });
+        const service = testBed.get(IDocClipboardService);
+
+        expect(await service.copy(SliceBodyType.copy, [{
+            startOffset: 0,
+            endOffset: blockStream.length,
+            collapsed: false,
+            segmentId: '',
+        }])).toBe(true);
+
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: blockStream.length,
+            endOffset: blockStream.length,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+        }]);
+
+        expect(await service.paste()).toBe(true);
+
+        const documentModel = testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('block-copy-paste-doc', UniverInstanceType.UNIVER_DOC)!;
+        expect(documentModel.getBody()?.dataStream).toBe(`${blockStream}${blockStream}After${tokens.PARAGRAPH}${tokens.SECTION_BREAK}`);
+        const blockRanges = documentModel.getBody()?.blockRanges ?? [];
+        expect(blockRanges).toHaveLength(2);
+        expect(blockRanges[0].blockId).toBe('callout-1');
+        expect(blockRanges[1].blockId).not.toBe('callout-1');
 
         testBed.univer.dispose();
     });

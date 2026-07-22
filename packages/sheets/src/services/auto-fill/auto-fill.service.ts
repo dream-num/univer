@@ -176,6 +176,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         // situation 1: drag to smaller range, horizontally.
         if (selection.endColumn < source.endColumn && selection.endColumn > source.startColumn) {
             return this._commandService.executeCommand(AutoClearContentCommand.id, {
+                unitId,
+                subUnitId,
                 clearRange: {
                     startRow: selection.startRow,
                     endRow: selection.endRow,
@@ -188,6 +190,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         // situation 2: drag to smaller range, vertically.
         if (selection.endRow < source.endRow && selection.endRow > source.startRow) {
             return this._commandService.executeCommand(AutoClearContentCommand.id, {
+                unitId,
+                subUnitId,
                 clearRange: {
                     startRow: selection.endRow + 1,
                     endRow: source.endRow,
@@ -225,8 +229,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
         this.direction = direction;
 
-        const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor));
-        const autoFillTarget = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(target, accessor));
+        const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor, unitId, subUnitId));
+        const autoFillTarget = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(target, accessor, unitId, subUnitId));
 
         if (!autoFillSource || !autoFillTarget) {
             return false;

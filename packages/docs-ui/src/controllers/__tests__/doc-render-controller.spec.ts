@@ -295,6 +295,34 @@ describe('doc render controller', () => {
         expect((context.components.get(DOCS_VIEW_KEY.BACKGROUND) as { width: number }).width).toBe(960);
     });
 
+    it('keeps modern doc width anchored to page width when a floating drawing extends past the page', () => {
+        const { context, skeletonManager } = createControllerFixture({
+            documentFlavor: DocumentFlavor.MODERN,
+            pages: [{
+                pageWidth: 960,
+                pageHeight: Number.POSITIVE_INFINITY,
+                width: 826.6666666666667,
+                height: 640,
+                marginLeft: 66.66666666666667,
+                marginRight: 66.66666666666667,
+                marginTop: 72,
+                marginBottom: 72,
+                skeDrawings: new Map([['drawing-1', {
+                    aLeft: 1051.6084250425697,
+                    aTop: 82.39,
+                    width: 160,
+                    height: 96,
+                }]]),
+                skeTables: new Map(),
+            }],
+        });
+
+        skeletonManager.currentSkeletonBefore$.next(skeletonManager.getSkeleton());
+
+        expect(context.mainComponent?.width).toBe(960);
+        expect((context.components.get(DOCS_VIEW_KEY.BACKGROUND) as { width: number }).width).toBe(960);
+    });
+
     it('keeps internal editor doc background transparent before the render config is registered', () => {
         const { canvasElement, context, skeletonManager } = createControllerFixture({
             documentFlavor: DocumentFlavor.UNSPECIFIED,

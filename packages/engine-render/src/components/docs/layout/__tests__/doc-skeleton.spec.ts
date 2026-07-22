@@ -23,9 +23,11 @@ import {
     LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
+    PositionedObjectLayoutType,
     SectionType,
     TableSizeType,
     Univer,
+    WrapTextType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
@@ -690,6 +692,129 @@ describe('doc skeleton', () => {
 
         const noNode = skeleton.findNodeByCharIndex(9999);
         expect(noNode).toBeUndefined();
+    });
+
+    it('restores a truncated continuous section in place for incremental layout', () => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        body.page.pageHeight = 300;
+        body.section.top = 80;
+        body.section.height = 60;
+        body.section.colCount = 2;
+        const retainedColumn = body.section.columns[0];
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 200, height: 300 },
+                },
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+
+        (skeleton as any)._restoreContinuousSection(
+            body.page,
+            [
+                { width: 80, paddingEnd: 10 },
+                { width: 80, paddingEnd: 0 },
+            ],
+            ColumnSeparatorType.BETWEEN_EACH_COLUMN
+        );
+
+        expect(body.page.sections).toHaveLength(1);
+        expect(body.section.top).toBe(80);
+        expect(body.section.height).toBe(200);
+        expect(body.section.columns).toHaveLength(2);
+        expect(body.section.columns[0]).toBe(retainedColumn);
+        expect(body.section.columns[1].left).toBe(90);
+        expect(body.section.columns[1].parent).toBe(body.section);
+
+        (skeleton as any)._restoreContinuousSection(
+            body.page,
+            [
+                { width: 80, paddingEnd: 10 },
+                { width: 80, paddingEnd: 0 },
+            ],
+            ColumnSeparatorType.BETWEEN_EACH_COLUMN
+        );
+        expect(body.section.columns).toHaveLength(2);
+    });
+
+    it('does not restore a later continuous section into the anchored title section', () => {
+        const firstTitleParagraph = `First title${DataStreamTreeTokenType.PARAGRAPH}`;
+        const secondTitleParagraph = `Second title${DataStreamTreeTokenType.PARAGRAPH}`;
+        const anchoredTitleParagraph = `Anchor${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.PARAGRAPH}`;
+        const title = `${firstTitleParagraph}${secondTitleParagraph}${anchoredTitleParagraph}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const bodyText = `${'Body text '.repeat(80)}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-section-after-anchored-title',
+            body: {
+                dataStream: `${title}${bodyText}`,
+                paragraphs: [
+                    { startIndex: firstTitleParagraph.length - 1, paragraphId: 'title-1' },
+                    { startIndex: firstTitleParagraph.length + secondTitleParagraph.length - 1, paragraphId: 'title-2' },
+                    { startIndex: title.length - 2, paragraphId: 'title-anchor' },
+                    { startIndex: title.length + bodyText.length - 2, paragraphId: 'body' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'title-section', startIndex: title.length - 1 },
+                    {
+                        sectionId: 'body-section',
+                        startIndex: title.length + bodyText.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                        columnProperties: [
+                            { width: 120, paddingEnd: 10 },
+                            { width: 120, paddingEnd: 0 },
+                        ],
+                    },
+                ],
+                customBlocks: [{ startIndex: firstTitleParagraph.length + secondTitleParagraph.length + 6, blockId: 'title-shape' }],
+            },
+            drawings: {
+                'title-shape': {
+                    unitId: 'continuous-section-after-anchored-title',
+                    subUnitId: 'continuous-section-after-anchored-title',
+                    drawingId: 'title-shape',
+                    drawingType: 1,
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 40 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: -30 },
+                        size: { width: 150, height: 100 },
+                    },
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const viewModel = new DocumentViewModel(documentModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        const createSkeletonSpy = vi.spyOn(skeleton as any, '_createSkeleton');
+        const restoreContinuousSectionSpy = vi.spyOn(skeleton as any, '_restoreContinuousSection');
+
+        skeleton.calculate();
+
+        expect(createSkeletonSpy.mock.calls.length).toBeGreaterThan(1);
+        expect(restoreContinuousSectionSpy).not.toHaveBeenCalled();
+        const firstPageSections = skeleton.getSkeletonData()?.pages[0]?.sections ?? [];
+        expect(firstPageSections).toHaveLength(2);
+        expect(firstPageSections[0].colCount).toBe(1);
+        expect(firstPageSections[0].columns).toHaveLength(1);
+        expect(firstPageSections[1].colCount).toBe(2);
+        expect(firstPageSections[1].columns).toHaveLength(2);
+        expect(firstPageSections[0].columns[0].width).toBeGreaterThan(firstPageSections[1].columns[0].width);
+
+        skeleton.dispose();
+        univer.dispose();
     });
 
     it('calculates real skeleton layout from document view model', () => {

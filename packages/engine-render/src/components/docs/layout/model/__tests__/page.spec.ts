@@ -335,6 +335,62 @@ describe('page model', () => {
         expect(updateInlineDrawingCoordsAndBorderMock).toHaveBeenCalled();
     });
 
+    it('finishes dirty floating-object relayout inside the table cell segment', () => {
+        dealWithSectionMock.mockClear();
+        resetContextMock.mockClear();
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        resetContextMock.mockImplementationOnce(() => {
+            ctx.isDirty = false;
+        });
+        dealWithSectionMock
+            .mockImplementationOnce((_ctx: any, _vm: any, _node: any, areaPage: any) => {
+                ctx.isDirty = true;
+                ctx.layoutStartPointer['table-1'] = 7;
+                return {
+                    pages: [
+                        { ...createDealPage(areaPage), pageNumber: 1 },
+                        { ...createDealPage(areaPage), pageNumber: 2 },
+                    ],
+                };
+            })
+            .mockImplementationOnce((_ctx: any, _vm: any, _node: any, areaPage: any, _config: any, layoutAnchor: any) => {
+                expect(layoutAnchor).toBe(7);
+                expect(areaPage.pageNumber).toBe(2);
+                return { pages: [createDealPage(areaPage)] };
+            });
+
+        const pages = createSkeletonCellPages(
+            ctx,
+            {} as any,
+            { startIndex: 10, endIndex: 20, children: [{}] } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+                pageSize: { width: 300, height: 200 },
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+            } as any,
+            {
+                tableId: 'table-1',
+                tableRows: [{ tableCells: [{}] }],
+                tableColumns: [{ size: { width: { v: 80 } } }],
+            } as any,
+            0,
+            0
+        );
+
+        expect(pages.map((page) => page.pageNumber)).toEqual([1, 2]);
+        expect(ctx.isDirty).toBe(false);
+        expect(ctx.layoutStartPointer['table-1']).toBeNull();
+        expect(dealWithSectionMock).toHaveBeenCalledTimes(2);
+        expect(resetContextMock).toHaveBeenCalledTimes(1);
+    });
+
     it('shrinks default cell margins for extremely narrow table columns', () => {
         const ctx = {
             layoutStartPointer: {},

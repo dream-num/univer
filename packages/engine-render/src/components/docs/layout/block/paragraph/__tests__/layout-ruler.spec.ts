@@ -25,6 +25,8 @@ import {
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     SpacingRule,
+    TableAlignmentType,
+    TableTextWrapType,
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -547,6 +549,72 @@ describe('layout-ruler', () => {
         expect(ctx.paragraphsOpenNewPage.has(9)).toBe(false);
     });
 
+    it('does not mistake another continuous-section fragment for a new page', () => {
+        const cachedLine: any = { paragraphIndex: 1, top: 0, lineHeight: 20 };
+        const cachedColumn: any = { width: 100, left: 0, lines: [cachedLine] };
+        const cachedPage: any = {
+            pageNumber: 1,
+            segmentId: '',
+            skeDrawings: new Map([['floating', {}]]),
+            sections: [{ top: 20, columns: [cachedColumn] }],
+        };
+        cachedLine.parent = cachedColumn;
+        cachedColumn.parent = { top: 20, parent: cachedPage };
+        const page: any = {
+            pageNumber: 1,
+            segmentId: '',
+            sections: [{ columns: [] }],
+        };
+        const column: any = {
+            width: 100,
+            left: 0,
+            lines: [{ paragraphIndex: 2, top: 0, lineHeight: 20 }],
+            parent: { top: 20, parent: page },
+        };
+        page.sections[0].columns = [column];
+        const floatObject: any = {
+            id: 'floating',
+            top: 20,
+            left: 0,
+            width: 50,
+            height: 50,
+            angle: 0,
+            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+        };
+        const ctx: any = {
+            floatObjectsCache: new Map([['floating', { count: 1, floatObject, page: cachedPage }]]),
+            isDirty: false,
+            layoutStartPointer: { '': null },
+            paragraphsOpenNewPage: new Set(),
+        };
+
+        __testing.reLayoutCheck(ctx, [floatObject], column, 9);
+
+        expect(ctx.isDirty).toBe(false);
+        expect(ctx.floatObjectsCache.has('floating')).toBe(true);
+        expect(ctx.paragraphsOpenNewPage.has(9)).toBe(false);
+
+        page.pageNumber = 2;
+        __testing.reLayoutCheck(ctx, [floatObject], column, 9);
+
+        expect(ctx.isDirty).toBe(true);
+        expect(ctx.floatObjectsCache.has('floating')).toBe(false);
+        expect(ctx.paragraphsOpenNewPage.has(9)).toBe(true);
+    });
+
+    it('does not treat the first paragraph of a continuous section as a page break', () => {
+        const page: any = { sections: [{}] };
+        const section: any = { columns: [], parent: page };
+        const column: any = { lines: [], parent: section };
+        section.columns.push(column);
+        page.sections.push(section);
+
+        expect(__testing.checkPageBreak(column)).toBe(false);
+
+        page.sections = [section];
+        expect(__testing.checkPageBreak(column)).toBe(true);
+    });
+
     it('does not dirty relayout for behind-doc floating objects', () => {
         const page: any = {
             segmentId: '',
@@ -658,14 +726,14 @@ describe('layout-ruler', () => {
     it('moves non-wrap tables into the usable area beside flow-affecting drawings', () => {
         const table = {
             top: 120,
-            left: 0,
+            left: 261,
             width: 280,
             height: 80,
         } as any;
         const page = {
             skeDrawings: new Map([['left-wrap', {
                 aTop: 40,
-                aLeft: 10,
+                aLeft: 271,
                 width: 90,
                 height: 220,
                 drawingOrigin: {
@@ -675,12 +743,62 @@ describe('layout-ruler', () => {
             }]]),
         } as any;
         const column = {
+            left: 261,
             width: 420,
         } as any;
 
         __testing.avoidFlowAffectingDrawingsForTable(table, page, column);
 
-        expect(table.left).toBe(108);
+        expect(table.left).toBe(369);
+    });
+
+    it('positions a sliced table continuation in its current column', () => {
+        const table = {
+            tableId: 'table#-#1',
+            tableSource: {
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+            },
+            top: 0,
+            left: 0,
+            width: 243,
+            height: 114,
+        } as any;
+        const page = {
+            skeDrawings: new Map(),
+            skeTables: new Map(),
+        } as any;
+        const section = {
+            top: 40,
+            height: 678,
+        } as any;
+        const column = {
+            left: 261,
+            width: 243,
+        } as any;
+        const cache = [{
+            table,
+            tableId: table.tableId,
+            hasPositioned: false,
+            isSlideTable: true,
+            tableNode: {},
+        }] as any;
+
+        __testing.updateAndPositionTable(
+            {} as any,
+            0,
+            14,
+            page,
+            column,
+            section,
+            cache,
+            0,
+            {} as any
+        );
+
+        expect(table).toMatchObject({ left: 261, top: 40 });
+        expect(page.skeTables.get(table.tableId)).toBe(table);
     });
 
     it('stores custom block render viewport on inline skeleton drawings', () => {

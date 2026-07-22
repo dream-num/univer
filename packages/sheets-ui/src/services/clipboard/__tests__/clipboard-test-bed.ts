@@ -45,7 +45,14 @@ import {
     LexerTreeBuilder,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    RangeProtectionRuleModel,
+    SheetInterceptorService,
+    SheetPermissionCheckController,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import {
     BrowserClipboardService,
     DesktopMessageService,
@@ -573,6 +580,9 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             const injector = this._injector;
             injector.add([IUIPartsService, { useClass: UIPartsService }]);
             injector.add([SheetsSelectionsService]);
+            injector.add([WorksheetProtectionRuleModel]);
+            injector.add([RangeProtectionRuleModel]);
+            injector.add([SheetPermissionCheckController]);
             injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
             injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);

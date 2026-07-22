@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ICommandService,
@@ -45,8 +45,10 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { AutoFillUIController } from '../../../controllers/auto-fill-ui.controller';
+import { Subject } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AutoFillRenderController, AutoFillUIController, detectAutoFillRange } from '../../../controllers/auto-fill-ui.controller';
+import { createRenderTestBed } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
@@ -55,9 +57,71 @@ import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 class mockSheetsRenderService {
-    registerSkeletonChangingMutations(id: string) {
+    registerSkeletonChangingMutations(_id: string) {
     }
 }
+
+describe('AutoFillRenderController', () => {
+    it('routes fill events to the workbook owned by the render context', () => {
+        const selectionFilled$ = new Subject<IRange | null>();
+        const getSelectionControls = vi.fn(() => [{
+            model: {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 2,
+                endRow: 2,
+            },
+            selectionFilled$,
+            fillControl: {
+                onDblclick$: {
+                    subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })),
+                },
+                onPointerDown$: {
+                    subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })),
+                },
+            },
+        }]);
+        const testBed = createRenderTestBed({
+            dependencies: [
+                [ISheetSelectionRenderService, { useValue: { getSelectionControls } }],
+                [IEditorBridgeService, {
+                    useValue: {
+                        isVisible: () => ({ visible: false }),
+                    },
+                }],
+            ],
+        });
+        const executeCommand = vi.spyOn(testBed.commandService, 'executeCommand').mockResolvedValue(true);
+        const controller = testBed.injector.createInstance(AutoFillRenderController, testBed.context);
+
+        selectionFilled$.next({
+            startColumn: 1,
+            endColumn: 1,
+            startRow: 2,
+            endRow: 5,
+        });
+
+        expect(executeCommand).toHaveBeenCalledWith(AutoFillCommand.id, {
+            sourceRange: {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 2,
+                endRow: 2,
+            },
+            targetRange: {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 2,
+                endRow: 5,
+            },
+            unitId: testBed.context.unitId,
+            subUnitId: testBed.sheet.getActiveSheet().getSheetId(),
+        });
+
+        controller.dispose();
+        testBed.univer.dispose();
+    });
+});
 
 const TEST_WORKBOOK_DATA = {
     id: 'test',
@@ -263,10 +327,8 @@ const TEST_WORKBOOK_DATA = {
 };
 
 describe('Test auto fill rules in controller', () => {
-    let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillUIController;
     let themeService: ThemeService;
 
     let getValues: (
@@ -282,8 +344,6 @@ describe('Test auto fill rules in controller', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
-    let selectionManagerService: SheetsSelectionsService;
-
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [DocSelectionManagerService],
@@ -300,7 +360,6 @@ describe('Test auto fill rules in controller', () => {
             [AutoFillController],
             [AutoFillUIController],
         ]);
-        univer = testBed.univer;
         get = testBed.get;
 
         commandService = get(ICommandService);
@@ -309,8 +368,7 @@ describe('Test auto fill rules in controller', () => {
         const newTheme = set(theme, 'black', '#35322b');
         themeService.setTheme(newTheme);
 
-        autoFillController = get(AutoFillUIController);
-        selectionManagerService = get(SheetsSelectionsService);
+        get(AutoFillUIController);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
@@ -655,11 +713,19 @@ describe('Test auto fill rules in controller', () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
             // test other string
-            (autoFillController as any)._handleDbClickFill({
+            const sourceRange: IRange = {
                 startRow: 10,
                 startColumn: 1,
                 endRow: 10,
                 endColumn: 1,
+            };
+            const worksheet = workbook.getSheetBySheetId('sheet1');
+            if (!worksheet) throw new Error('Worksheet sheet1 does not exist');
+            await commandService.executeCommand(AutoFillCommand.id, {
+                sourceRange,
+                targetRange: detectAutoFillRange(sourceRange, worksheet),
+                unitId: workbook.getUnitId(),
+                subUnitId: worksheet.getSheetId(),
             });
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(2);
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(2);

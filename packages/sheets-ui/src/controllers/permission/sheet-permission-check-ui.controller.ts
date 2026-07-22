@@ -17,7 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IIMEInputCommandParams } from '@univerjs/docs-ui';
-import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import type { LocaleKey } from '../../locale/types';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -29,37 +28,23 @@ import {
     IContextService,
     Inject,
     IPermissionService,
-    IUniverInstanceService,
     LocaleService,
     SHEET_EDITOR_UNITS,
 } from '@univerjs/core';
 import { InsertTextCommand } from '@univerjs/docs';
 import { IMEInputCommand } from '@univerjs/docs-ui';
 import {
-    getSheetCommandTarget,
     RangeProtectionPermissionEditPoint,
-    RangeProtectionPermissionViewPoint,
     RangeProtectionRuleModel,
     SheetPermissionCheckController,
-    WorkbookCopyPermission,
     WorkbookEditablePermission,
-    WorksheetCopyPermission,
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
-    WorksheetSetColumnStylePermission,
 } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
-import {
-    SheetCopyCommand,
-    SheetCutCommand,
-    SheetPasteColWidthCommand,
-    SheetPasteCommand,
-    SheetPasteShortKeyCommand,
-} from '../../commands/commands/clipboard.command';
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import { PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import {
     UNIVER_SHEET_PERMISSION_ALERT_DIALOG,
     UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID,
@@ -70,7 +55,6 @@ export class SheetPermissionCheckUIController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IDialogService private readonly _dialogService: IDialogService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
@@ -117,14 +101,12 @@ export class SheetPermissionCheckUIController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function,complexity
     private _getPermissionCheck(commandInfo: ICommandInfo) {
         const { id } = commandInfo;
 
         let permission = true;
         let errorMsg = '';
         let params;
-        let target;
 
         switch (id) {
             case InsertTextCommand.id:
@@ -160,21 +142,6 @@ export class SheetPermissionCheckUIController extends Disposable {
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.editErr');
                 break;
-            case SheetPasteColWidthCommand.id:
-                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
-                    workbookTypes: [WorkbookEditablePermission],
-                    worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                });
-                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.pasteErr');
-                break;
-            case SheetPasteShortKeyCommand.id:
-            case SheetPasteCommand.id:
-                params = commandInfo.params as ISheetPasteParams;
-
-                permission = this._permissionCheckByPaste(params);
-                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.pasteErr');
-                break;
             case ApplyFormatPainterCommand.id:
                 permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                     workbookTypes: [WorkbookEditablePermission],
@@ -183,43 +150,6 @@ export class SheetPermissionCheckUIController extends Disposable {
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.commonErr');
                 break;
-            case SheetCopyCommand.id:
-                permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookCopyPermission],
-                    worksheetTypes: [WorksheetCopyPermission],
-                    rangeTypes: [RangeProtectionPermissionViewPoint],
-                });
-                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.copyErr');
-
-                target = getSheetCommandTarget(this._univerInstanceService);
-                if (
-                    !permission &&
-                    target &&
-                    !this._permissionService.getPermissionPoint(new WorkbookCopyPermission(target.unitId).id)?.value
-                ) {
-                    errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.workbookCopyErr');
-                }
-
-                break;
-            case SheetCutCommand.id:
-                permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookCopyPermission, WorkbookEditablePermission],
-                    worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
-                    rangeTypes: [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint],
-                });
-                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.copyErr');
-
-                target = getSheetCommandTarget(this._univerInstanceService);
-                if (
-                    !permission &&
-                    target &&
-                    !this._permissionService.getPermissionPoint(new WorkbookCopyPermission(target.unitId).id)?.value
-                ) {
-                    errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.workbookCopyErr');
-                }
-
-                break;
-
             default:
                 break;
         }
@@ -239,27 +169,5 @@ export class SheetPermissionCheckUIController extends Disposable {
                 this._getPermissionCheck(commandInfo);
             })
         );
-    }
-
-    private _permissionCheckByPaste(params: ISheetPasteParams) {
-        if (params.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE || params.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA) {
-            return this._sheetPermissionCheckController.permissionCheckWithRanges({
-                workbookTypes: [WorkbookEditablePermission],
-                worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
-                rangeTypes: [RangeProtectionPermissionEditPoint],
-            });
-        } else if (params.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT) {
-            return this._sheetPermissionCheckController.permissionCheckWithRanges({
-                workbookTypes: [WorkbookEditablePermission],
-                worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
-                rangeTypes: [RangeProtectionPermissionEditPoint],
-            });
-        } else {
-            return this._sheetPermissionCheckController.permissionCheckWithRanges({
-                workbookTypes: [WorkbookEditablePermission],
-                worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
-                rangeTypes: [RangeProtectionPermissionEditPoint],
-            });
-        }
     }
 }

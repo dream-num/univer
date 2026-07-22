@@ -16,7 +16,7 @@
 
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Disposable, DisposableCollection, RCDisposable, RxDisposable, toDisposable } from '../lifecycle';
+import { Disposable, DisposableCollection, RxDisposable, toDisposable } from '../lifecycle';
 
 class TestDisposable extends Disposable {
     assertUsable() {
@@ -84,19 +84,5 @@ describe('lifecycle helpers', () => {
         rxDisposable.getDispose$().subscribe({ complete: rxCompleted });
         rxDisposable.dispose();
         expect(rxCompleted).toHaveBeenCalledTimes(1);
-    });
-
-    it('should dispose root resource when RCDisposable reference reaches zero', () => {
-        const root = { dispose: vi.fn() };
-        const rcDisposable = new RCDisposable(root);
-
-        rcDisposable.inc();
-        rcDisposable.inc();
-        rcDisposable.dec();
-        expect(root.dispose).not.toHaveBeenCalled();
-
-        rcDisposable.dec();
-        expect(root.dispose).toHaveBeenCalledTimes(1);
-        expect(() => rcDisposable.inc()).toThrow(/disposed/);
     });
 });

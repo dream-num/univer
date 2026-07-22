@@ -325,12 +325,12 @@ export interface IGetResourcesResponse {
     resources: { [key: string]: IResource };
 }
 
-interface IListUnitsRequest {
+export interface IListUnitsRequest {
     type: UniverType;
     nextCursor: string;
 }
 
-interface IListUnitsResponse {
+export interface IListUnitsResponse {
     error: IError | undefined;
     units: IUnit[];
     nextCursor: string;

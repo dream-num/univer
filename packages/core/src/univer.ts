@@ -42,6 +42,7 @@ import { PermissionService } from './services/permission/permission.service';
 import { IPermissionService } from './services/permission/type';
 import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 import { PluginService } from './services/plugin/plugin.service';
+import { RegionService } from './services/region/region.service';
 import { ResourceLoaderService } from './services/resource-loader/resource-loader.service';
 import { IResourceLoaderService } from './services/resource-loader/type';
 import { ResourceManagerService } from './services/resource-manager/resource-manager.service';
@@ -69,6 +70,11 @@ export interface IUniverConfig {
      * The locale of the Univer instance.
      */
     locale?: LocaleType;
+
+    /**
+     * The region of the Univer instance. It follows locale until explicitly configured.
+     */
+    region?: LocaleType;
 
     /**
      * The direction of the Univer instance.
@@ -123,11 +129,12 @@ export class Univer implements IDisposable {
     constructor(config: Partial<IUniverConfig> = {}, parentInjector?: Injector) {
         const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
-        const { theme, darkMode, locale, locales, direction, logLevel, logCommandExecution } = config;
+        const { theme, darkMode, locale, region, locales, direction, logLevel, logCommandExecution } = config;
         if (theme) this._injector.get(ThemeService).setTheme(theme);
         if (darkMode) this._injector.get(ThemeService).setDarkMode(darkMode);
         if (locales) this._injector.get(LocaleService).load(locales);
         if (locale) this._injector.get(LocaleService).setLocale(locale);
+        if (region) this._injector.get(RegionService).setRegion(region);
         if (direction) this._injector.get(LocaleService).setDirection(direction);
         if (logLevel) this._injector.get(ILogService).setLogLevel(logLevel);
         if (logCommandExecution !== undefined) {
@@ -164,6 +171,10 @@ export class Univer implements IDisposable {
 
     setLocale(locale: LocaleType): void {
         this._injector.get(LocaleService).setLocale(locale);
+    }
+
+    setRegion(region: LocaleType): void {
+        this._injector.get(RegionService).setRegion(region);
     }
 
     createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: Partial<T>): U {
@@ -246,6 +257,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
     const dependencies: Dependency[] = mergeOverrideWithDependencies([
         [ErrorService],
         [LocaleService],
+        [RegionService],
         [ThemeService],
         [LifecycleService],
         [PluginService],

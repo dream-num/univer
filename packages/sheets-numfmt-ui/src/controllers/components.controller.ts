@@ -15,7 +15,20 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { AddDigitsIcon, DollarIcon, EuroIcon, PercentIcon, ReduceDigitsIcon, RmbIcon, RoubleIcon } from '@univerjs/icons';
+import {
+    AddDigitsIcon,
+    DollarIcon,
+    DongIcon,
+    EuroIcon,
+    PercentIcon,
+    ReduceDigitsIcon,
+    RialIcon,
+    RmbIcon,
+    RoubleIcon,
+    RupiahIcon,
+    WonIcon,
+    ZlotyIcon,
+} from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 import { SheetNumfmtPanel } from '../views/SheetNumfmtPanel';
@@ -37,11 +50,16 @@ export class ComponentsController extends Disposable {
         this.disposeWithMe(this._iconManager.register({
             AddDigitsIcon,
             DollarIcon,
+            DongIcon,
             EuroIcon,
             PercentIcon,
             ReduceDigitsIcon,
+            RialIcon,
             RmbIcon,
             RoubleIcon,
+            RupiahIcon,
+            WonIcon,
+            ZlotyIcon,
         }));
     }
 

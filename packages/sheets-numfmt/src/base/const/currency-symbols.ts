@@ -67,14 +67,39 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
                 symbol: localeCurrencySymbolMap.get(locale) || '¥',
                 locale,
             };
-        case LocaleType.AR_SA:
-        case LocaleType.EN_US:
-        case LocaleType.FA_IR:
-        case LocaleType.ID_ID:
-        case LocaleType.KO_KR:
-        case LocaleType.PL_PL:
-        case LocaleType.PT_BR:
         case LocaleType.VI_VN:
+            return {
+                icon: 'DongIcon',
+                symbol: localeCurrencySymbolMap.get(locale) || '₫',
+                locale,
+            };
+        case LocaleType.AR_SA:
+        case LocaleType.FA_IR:
+            return {
+                icon: 'RialIcon',
+                symbol: localeCurrencySymbolMap.get(locale) || '﷼',
+                locale,
+            };
+        case LocaleType.KO_KR:
+            return {
+                icon: 'WonIcon',
+                symbol: localeCurrencySymbolMap.get(locale) || '₩',
+                locale,
+            };
+        case LocaleType.ID_ID:
+            return {
+                icon: 'RupiahIcon',
+                symbol: localeCurrencySymbolMap.get(locale) || 'Rp',
+                locale,
+            };
+        case LocaleType.PL_PL:
+            return {
+                icon: 'ZlotyIcon',
+                symbol: localeCurrencySymbolMap.get(locale) || 'zł',
+                locale,
+            };
+        case LocaleType.EN_US:
+        case LocaleType.PT_BR:
         case LocaleType.ZH_HK:
         case LocaleType.ZH_TW:
         default:

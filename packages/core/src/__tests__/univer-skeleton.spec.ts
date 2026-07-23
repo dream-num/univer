@@ -22,6 +22,7 @@ import { COMMAND_LOG_EXECUTION_CONFIG_KEY } from '../services/command/command.se
 import { IConfigService } from '../services/config/config.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { LogLevel } from '../services/log/log.service';
+import { RegionService } from '../services/region/region.service';
 import { Skeleton } from '../skeleton';
 import { LocaleType } from '../types/enum/locale-type';
 import { Univer } from '../univer';
@@ -56,6 +57,7 @@ describe('Univer', () => {
             darkMode: true,
             locales,
             locale: LocaleType.EN_US,
+            region: LocaleType.FR_FR,
             direction: 'rtl',
             logLevel: LogLevel.VERBOSE,
             logCommandExecution: true,
@@ -63,15 +65,21 @@ describe('Univer', () => {
 
         const injector = univer.__getInjector();
         const localeService = injector.get(LocaleService);
+        const regionService = injector.get(RegionService);
 
         expect(localeService.getCurrentLocale()).toBe(LocaleType.EN_US);
+        expect(regionService.getCurrentRegion()).toBe(LocaleType.FR_FR);
         expect(localeService.getDirection()).toBe('rtl');
         expect(localeService.t('test.greeting', 'Univer')).toBe('Hello Univer');
         expect(injector.get(IConfigService).getConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY)).toBe(true);
 
         univer.setLocale(LocaleType.ZH_CN);
         expect(localeService.getCurrentLocale()).toBe(LocaleType.ZH_CN);
+        expect(regionService.getCurrentRegion()).toBe(LocaleType.FR_FR);
         expect(localeService.getDirection()).toBe('rtl');
+
+        univer.setRegion(LocaleType.JA_JP);
+        expect(regionService.getCurrentRegion()).toBe(LocaleType.JA_JP);
 
         univer.dispose();
     });

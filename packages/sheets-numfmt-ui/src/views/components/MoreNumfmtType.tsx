@@ -16,13 +16,13 @@
 
 import type { FormatType } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
-import { ICommandService, LocaleService, Range } from '@univerjs/core';
+import { ICommandService, LocaleService, Range, RegionService } from '@univerjs/core';
 import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import {
+    getCurrencySymbolByLocale,
     getPatternPreview,
     getPatternType,
-    localeCurrencySymbolMap,
     SetNumfmtCommand,
     SheetsNumfmtCellContentController,
 } from '@univerjs/sheets-numfmt';
@@ -45,9 +45,11 @@ export function MoreNumfmtType(props: { value?: string }) {
 export function Options() {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const regionService = useDependency(RegionService);
     const layoutService = useDependency(ILayoutService);
     const sheetsNumfmtCellContentController = useDependency(SheetsNumfmtCellContentController);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
+    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
 
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const setNumfmt = (pattern: string | null) => {
@@ -71,9 +73,9 @@ export function Options() {
     };
 
     const menuOptions = useMemo(() => {
-        const currencySymbol = localeCurrencySymbolMap.get(localeService.getCurrentLocale()) as string;
+        const currencySymbol = getCurrencySymbolByLocale(region);
         return MENU_OPTIONS(currencySymbol);
-    }, [localeService]);
+    }, [region]);
 
     const handleClick = (index: number) => {
         if (index === 0) {

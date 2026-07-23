@@ -119,6 +119,7 @@ export { mergeOverrideWithDependencies } from './services/plugin/plugin-override
 export type { DependencyOverride } from './services/plugin/plugin-override';
 export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
+export { RegionService } from './services/region/region.service';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook, IResources } from './services/resource-manager/type';

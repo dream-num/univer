@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
-import { CommandType, ICommandService, LocaleService, Range } from '@univerjs/core';
+import { CommandType, ICommandService, Range, RegionService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { getCurrencyFormat, getCurrencySymbolIconByLocale } from '../../base/const/currency-symbols';
 import { SetNumfmtCommand } from './set-numfmt.command';
@@ -31,7 +31,7 @@ export const SetCurrencyCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const localeService = accessor.get(LocaleService);
+        const regionService = accessor.get(RegionService);
 
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
@@ -39,7 +39,7 @@ export const SetCurrencyCommand: ICommand = {
         }
 
         const values: ISetNumfmtCommandParams['values'] = [];
-        const currencySymbolIcon = getCurrencySymbolIconByLocale(localeService.getCurrentLocale());
+        const currencySymbolIcon = getCurrencySymbolIconByLocale(regionService.getCurrentRegion());
         const currencyFormat = getCurrencyFormat(currencySymbolIcon.locale);
 
         selections.forEach((selection) => {

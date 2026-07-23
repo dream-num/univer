@@ -30,7 +30,7 @@ export interface ISymbolPickerPopupProps {
     onSelect?: (symbol: string, options?: { keepOpen?: boolean }) => void;
 }
 
-export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps> }) {
+export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps>; className?: string }) {
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
@@ -44,11 +44,15 @@ export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps> })
     return (
         <section
             data-u-comp={SYMBOL_PICKER_COMPONENT}
-            className="
-              univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden univer-rounded-[10px]
-              univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-shadow-lg
-              dark:!univer-border-gray-600 dark:!univer-bg-gray-900
-            "
+            className={clsx(
+                `
+                  univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden
+                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                  univer-shadow-lg
+                  dark:!univer-border-gray-600 dark:!univer-bg-gray-900
+                `,
+                props.className
+            )}
         >
             <div className="univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-p-4">
                 <div className="univer-flex univer-flex-col univer-gap-5">

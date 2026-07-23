@@ -15,6 +15,5 @@
  */
 
 export { SYMBOL_PICKER_COMPONENT, SymbolPicker } from './SymbolPicker';
-export type { ISymbolPickerPopupProps } from './SymbolPicker';
 export { SYMBOL_CATEGORIES } from './symbols';
 export type { ISymbolCategory, SymbolCategory } from './symbols';

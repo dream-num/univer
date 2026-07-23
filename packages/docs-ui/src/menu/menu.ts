@@ -45,6 +45,7 @@ import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render
 import {
     COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
+    EMOJI_PICKER_COMPONENT,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FONT_SIZE_COMPONENT,
@@ -53,6 +54,7 @@ import {
     HEADING_ITEM_COMPONENT,
     HEADING_LIST,
     MenuItemType,
+    SYMBOL_PICKER_COMPONENT,
 } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, map, Observable, shareReplay } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
@@ -73,6 +75,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from '../commands/commands/inline-format.command';
+import { InsertSpecialCharacterCommand } from '../commands/commands/insert-special-character.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
 import {
     AlignCenterCommand,
@@ -348,6 +351,49 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
 
         return () => subscription.unsubscribe();
     });
+}
+
+export const DOC_INSERT_EMOJI_MENU_ID = 'doc.menu.insert-emoji';
+export const DOC_INSERT_SYMBOL_MENU_ID = 'doc.menu.insert-symbol';
+
+export function EmojiPickerMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string, string> {
+    return {
+        id: DOC_INSERT_EMOJI_MENU_ID,
+        type: MenuItemType.SELECTOR,
+        icon: 'SmileIcon',
+        tooltip: 'ui.emojiPicker.emojis',
+        selectionsCommandId: InsertSpecialCharacterCommand.id,
+        selections: [{
+            label: {
+                name: EMOJI_PICKER_COMPONENT,
+                hoverable: false,
+                selectable: false,
+                props: { embedded: true },
+            },
+        }],
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function SymbolPickerMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string, string> {
+    return {
+        id: DOC_INSERT_SYMBOL_MENU_ID,
+        type: MenuItemType.SELECTOR,
+        icon: 'SymbolsIcon',
+        tooltip: 'ui.emojiPicker.symbols',
+        selectionsCommandId: InsertSpecialCharacterCommand.id,
+        selections: [{
+            label: {
+                name: SYMBOL_PICKER_COMPONENT,
+                hoverable: false,
+                selectable: false,
+                props: { embedded: true },
+            },
+        }],
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
 }
 
 export function isTextRangeInAnyBlockRange(document: Nullable<DocumentDataModel>, range: ITextRangeParam): boolean {

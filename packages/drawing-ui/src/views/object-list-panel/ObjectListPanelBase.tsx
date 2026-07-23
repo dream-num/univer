@@ -323,7 +323,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
         <div
             className="
               univer-box-border univer-flex univer-size-full univer-min-w-0 univer-max-w-full univer-flex-col
-              univer-gap-3 univer-overflow-hidden univer-text-gray-700
+              univer-gap-3 univer-overflow-hidden univer-py-2 univer-text-gray-700
               dark:!univer-text-gray-200
             "
             data-drawing-object-list-panel="true"

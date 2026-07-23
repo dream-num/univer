@@ -18,19 +18,26 @@ import type { LocaleKey } from '../../locale/types';
 import type { IPopup } from '../../services/popup/canvas-popup.service';
 import type { ISymbolCategory } from './symbols';
 import { LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 import { SYMBOL_CATEGORIES } from './symbols';
 
 export const SYMBOL_PICKER_COMPONENT = 'ui.symbol-picker';
 
-export interface ISymbolPickerPopupProps {
+interface ISymbolPickerPopupProps {
     activeSymbol?: string;
     onSelect?: (symbol: string, options?: { keepOpen?: boolean }) => void;
 }
 
-export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps>; className?: string }) {
+interface ISymbolPickerProps {
+    className?: string;
+    embedded?: boolean;
+    onChange?: (symbol: string) => void;
+    popup?: IPopup<ISymbolPickerPopupProps>;
+}
+
+export function SymbolPicker(props: ISymbolPickerProps) {
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
@@ -38,6 +45,7 @@ export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps>; c
 
     const handleSelect = (symbol: string) => {
         setActiveSymbol(symbol);
+        props.onChange?.(symbol);
         extraProps?.onSelect?.(symbol, { keepOpen: true });
     };
 
@@ -45,8 +53,8 @@ export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps>; c
         <section
             data-u-comp={SYMBOL_PICKER_COMPONENT}
             className={clsx(
-                `
-                  univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden
+                'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
+                !props.embedded && `
                   univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-white
                   univer-shadow-lg
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-900
@@ -54,7 +62,12 @@ export function SymbolPicker(props: { popup?: IPopup<ISymbolPickerPopupProps>; c
                 props.className
             )}
         >
-            <div className="univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-p-4">
+            <div
+                className={clsx(
+                    'univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-p-4',
+                    scrollbarClassName
+                )}
+            >
                 <div className="univer-flex univer-flex-col univer-gap-5">
                     {SYMBOL_CATEGORIES.map((category) => (
                         <SymbolSection

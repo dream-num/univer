@@ -48,10 +48,6 @@ export const SidebarDefinedNameOperation: ICommand = {
                     onClose: () => {
                     },
                     width: 333,
-                    bodyStyle: {
-                        height: '100%',
-                        overflow: 'hidden',
-                    },
                 });
                 break;
 

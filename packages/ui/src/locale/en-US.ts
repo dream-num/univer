@@ -40,6 +40,11 @@ const locale = {
             noResults: 'No emoji found',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'Mathematics',
+            greek: 'Greek',
+            common: 'Common',
+        },
         toolbar: {
             heading: {
                 normal: 'Normal',

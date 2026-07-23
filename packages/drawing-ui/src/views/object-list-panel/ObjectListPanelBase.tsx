@@ -25,6 +25,7 @@ import {
     LockIcon,
     MoreDownIcon,
     MoreRightIcon,
+    UnlockIcon,
 } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { OBJECT_LIST_CANVAS_SECTION_ID, OBJECT_LIST_FLOATING_SECTION_ID } from './object-list-panel-layer';
@@ -703,7 +704,7 @@ function ObjectListRow(props: {
             {showLock && (
                 <button
                     type="button"
-                    className={clsx(iconButtonClassName, !locked && 'univer-opacity-70')}
+                    className={iconButtonClassName}
                     disabled={disabled}
                     title={locked ? labels.unlock : labels.lock}
                     aria-label={locked ? labels.unlock : labels.lock}
@@ -712,7 +713,7 @@ function ObjectListRow(props: {
                         onToggleSelectable();
                     }}
                 >
-                    <LockIcon />
+                    {locked ? <LockIcon /> : <UnlockIcon />}
                 </button>
             )}
             {showVisible && (

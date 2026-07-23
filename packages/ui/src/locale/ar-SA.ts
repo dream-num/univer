@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: 'لم يتم العثور على رمز تعبيري',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'الرياضيات',
+            greek: 'اليونانية',
+            common: 'شائع',
+        },
         toolbar: {
             heading: {
                 normal: 'عادي',

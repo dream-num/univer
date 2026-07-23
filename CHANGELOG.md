@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0-alpha.7](https://github.com/dream-num/univer/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2026-07-23)
+
+### Bug Fixes
+
+* **formula:** align new packages with conventions ([#7308](https://github.com/dream-num/univer/issues/7308)) ([19b3c94](https://github.com/dream-num/univer/commit/19b3c942c5079f7b49fd1caf32e236d4c43007f7))
+* **sheets:** stabilize embedded clipboard and autofill ([#7307](https://github.com/dream-num/univer/issues/7307)) ([73a3de7](https://github.com/dream-num/univer/commit/73a3de7232103b9fde1b407b68f1300d11e95f83))
+* **docs:** respect layout fragment geometry ([#7287](https://github.com/dream-num/univer/issues/7287)) ([23029b5](https://github.com/dream-num/univer/commit/23029b582966b233cf984f63bce5e867bbff8051))
+* **sheets-ui:** end selection when pointer is released ([#7301](https://github.com/dream-num/univer/issues/7301)) ([5828eec](https://github.com/dream-num/univer/commit/5828eec9b00231a8402a99eca708614c27abc128))
+
+### Features
+
+* **docs:** add emoji and symbol pickers to ribbon ([#7314](https://github.com/dream-num/univer/issues/7314)) ([8045a32](https://github.com/dream-num/univer/commit/8045a328e1b9aead808f819db05d0329b57ac7d6))
+* add symbol picker and refine editor controls ([#7313](https://github.com/dream-num/univer/issues/7313)) ([fc6d01a](https://github.com/dream-num/univer/commit/fc6d01afccfe02098da59c8db6e41e8b9d1db9c9))
+* **sheets-drawing:** transform drawings with sheet structure ([#7312](https://github.com/dream-num/univer/issues/7312)) ([aa61a84](https://github.com/dream-num/univer/commit/aa61a8462350fb843c9c6d6e597419f0913e1323))
+* support region-aware currency formats and refine ribbon icons ([#7310](https://github.com/dream-num/univer/issues/7310)) ([c31ec1d](https://github.com/dream-num/univer/commit/c31ec1d8ffc126f1ffb516a55fd96c53caf6deb4))
+* **ui:** expose active context menu state ([#7309](https://github.com/dream-num/univer/issues/7309)) ([4edb17e](https://github.com/dream-num/univer/commit/4edb17effebb937f4c16bb0039a6e57452fa60fd))
+* add shared formula packages ([#7294](https://github.com/dream-num/univer/issues/7294)) ([3b73c60](https://github.com/dream-num/univer/commit/3b73c60ebf08b3281befd97a7576df2bda9f79ec))
+* adopt grid ribbon layout ([#7299](https://github.com/dream-num/univer/issues/7299)) ([c3880d3](https://github.com/dream-num/univer/commit/c3880d3036a3f0ab2d517ef9eeac733544cb7d06))
+
 ## [1.0.0-alpha.6](https://github.com/dream-num/univer/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2026-07-22)
 
 ### Bug Fixes

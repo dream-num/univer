@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-docs-hyper-link",
-    "version": "1.0.0-alpha.6",
+    "version": "1.0.0-alpha.7",
     "private": false,
     "description": "Preset for hyperlink support in Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-numfmt-ui",
-    "version": "1.0.0-alpha.6",
+    "version": "1.0.0-alpha.7",
     "private": false,
     "description": "Number format menus, editors, and previews for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

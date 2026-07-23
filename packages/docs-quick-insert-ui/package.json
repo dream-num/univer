@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-quick-insert-ui",
-    "version": "1.0.0-alpha.6",
+    "version": "1.0.0-alpha.7",
     "private": false,
     "description": "Quick insert UI integration for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

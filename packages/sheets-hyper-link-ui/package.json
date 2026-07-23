@@ -91,7 +91,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.33.0",
+        "@univerjs/icons": "1.34.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",

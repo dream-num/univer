@@ -93,7 +93,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/formula": "workspace:*",
         "@univerjs/formula-ui": "workspace:*",
-        "@univerjs/icons": "1.33.0",
+        "@univerjs/icons": "1.34.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

@@ -44,6 +44,7 @@ import {
 import { FontSize } from '../views/font-size/FontSize';
 import { FONT_SIZE_COMPONENT } from '../views/font-size/interface';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../views/index';
+import { SYMBOL_PICKER_COMPONENT, SymbolPicker } from '../views/symbol-picker/index';
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -80,6 +81,7 @@ export class ComponentsController extends Disposable {
             [FONT_SIZE_COMPONENT, FontSize],
             [COLOR_PICKER_COMPONENT, ColorPicker],
             [EMOJI_PICKER_COMPONENT, EmojiPicker],
+            [SYMBOL_PICKER_COMPONENT, SymbolPicker],
             [FEATURE_SEARCH_COMPONENT, FeatureSearch],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(

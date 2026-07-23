@@ -140,10 +140,6 @@ describe('SidebarDefinedNameOperation', () => {
             width: 333,
             header: { title: 'localized:sheets-ui.definedName.featureTitle' },
             children: { label: DEFINED_NAME_CONTAINER },
-            bodyStyle: {
-                height: '100%',
-                overflow: 'hidden',
-            },
         })]);
         (sidebarService.openCalls[0] as { onClose: () => void }).onClose();
         expect(sidebarService.closeCount).toBe(0);

@@ -666,6 +666,43 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('insets the icon inside a small rotate control and matches the connector to its border', () => {
+        const { engine, scene } = createFixture();
+        engine.setActiveScene(scene.sceneKey);
+
+        const rect = scene.getObject('rect-main') as Rect;
+        rect.transformerConfig = {
+            rotateAnchorPosition: 'bottom',
+            rotateAnchorOffset: 20,
+            rotateLineEnabled: true,
+            rotateSize: 14,
+            rotateCornerRadius: 4,
+            rotateStroke: '#d1d5db',
+            rotateIconEnabled: true,
+        };
+        const transformer = new Transformer(scene, {
+            rotateEnabled: true,
+            resizeEnabled: true,
+            borderEnabled: true,
+        });
+
+        transformer.setSelectedControl(rect);
+        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
+        const controlObjects = control.getObjects();
+        const rotateLine = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__')) as Rect;
+        const rotate = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotate__') && !o.oKey.includes('_ICON_')) as Rect;
+        const rotateIcon = controlObjects.find((o) => o.oKey.includes('_ICON_')) as Rect;
+
+        expect(rotateLine.stroke).toBe('#d1d5db');
+        expect(rotate.radius).toBe(4);
+        expect(rotateIcon.width).toBe(10);
+        expect(rotateIcon.height).toBe(10);
+
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('expands transformer outline symmetrically when border spacing is configured', () => {
         const { engine, scene } = createFixture();
         const rect = scene.getObject('rect-main') as Rect;

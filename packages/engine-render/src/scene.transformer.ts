@@ -1367,15 +1367,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _createRotateIcon(applyObject: BaseObject, zIndex: number, left: number, top: number) {
         const { rotateSize, rotateIconStroke, rotateIconStrokeWidth, borderStroke } = this._getConfig(applyObject);
-        const iconOffset = (rotateSize - ROTATE_ICON_SIZE) / 2;
+        const iconSize = Math.min(ROTATE_ICON_SIZE, Math.max(rotateSize - 4, 1));
+        const iconOffset = (rotateSize - iconSize) / 2;
 
         return new TransformerRotateIcon(`${TransformerManagerType.ROTATE}_ICON_${zIndex}`, {
             zIndex,
             evented: false,
             left: left + iconOffset,
             top: top + iconOffset,
-            width: ROTATE_ICON_SIZE,
-            height: ROTATE_ICON_SIZE,
+            width: iconSize,
+            height: iconSize,
             fill: null,
             stroke: rotateIconStroke ?? borderStroke,
             strokeWidth: rotateIconStrokeWidth,
@@ -1873,7 +1874,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     height: rotateAnchorOffset,
                     width: 1,
                     strokeWidth: borderStrokeWidth,
-                    stroke: borderStroke,
+                    stroke: rotateStroke ?? borderStroke,
                 });
 
                 const { left: rotateLeft, top: rotateTop } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);

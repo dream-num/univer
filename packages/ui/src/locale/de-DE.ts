@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: 'Kein Emoji gefunden',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'Mathematik',
+            greek: 'Griechisch',
+            common: 'Allgemein',
+        },
         toolbar: {
             heading: {
                 normal: 'Normal',

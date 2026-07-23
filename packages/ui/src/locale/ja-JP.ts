@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: '絵文字が見つかりません',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: '数学',
+            greek: 'ギリシャ文字',
+            common: '一般',
+        },
         toolbar: {
             heading: {
                 normal: '標準',

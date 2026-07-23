@@ -17,7 +17,7 @@
 import type { HTMLAttributes } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
+import { borderBottomClassName, borderRightClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { useDependency } from '../../../utils/di';
 import { placeRibbonGridItems } from './ribbon-grid-layout';
 import { ToolbarItem } from './ToolbarItem';
@@ -40,7 +40,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
               univer-box-border univer-flex univer-h-[88px] univer-overflow-x-auto univer-overflow-y-hidden
               univer-bg-gray-50 univer-px-2 univer-text-sm
               dark:!univer-bg-gray-900
-            `, borderBottomClassName, className)}
+            `, borderBottomClassName, scrollbarClassName, className)}
             role="toolbar"
             aria-label={localeService.t(title)}
         >

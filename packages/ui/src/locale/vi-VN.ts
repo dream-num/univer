@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: 'Không tìm thấy emoji',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'Toán học',
+            greek: 'Chữ Hy Lạp',
+            common: 'Thông dụng',
+        },
         toolbar: {
             heading: {
                 normal: 'Văn bản',

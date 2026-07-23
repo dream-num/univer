@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-export * from './CommonLabel';
-export * from './custom-label/index';
-export * from './emoji-picker/index';
-export * from './HeadingItem';
-export { useScrollYOverContainer } from './hooks/layout';
-
-export { type ISliderProps, type IZoomInputProps, Slider, ZoomInput } from './slider/index';
-
-export * from './symbol-picker/index';
+export { SYMBOL_PICKER_COMPONENT, SymbolPicker } from './SymbolPicker';
+export type { ISymbolPickerPopupProps } from './SymbolPicker';
+export { SYMBOL_CATEGORIES } from './symbols';
+export type { ISymbolCategory, SymbolCategory } from './symbols';

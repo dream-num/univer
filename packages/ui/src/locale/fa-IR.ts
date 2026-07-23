@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: 'ایموجی پیدا نشد',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'ریاضیات',
+            greek: 'یونانی',
+            common: 'رایج',
+        },
         toolbar: {
             heading: {
                 normal: 'متن عادی',

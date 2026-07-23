@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: 'Эмодзи не найден',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'Математика',
+            greek: 'Греческие буквы',
+            common: 'Общие',
+        },
         toolbar: {
             heading: {
                 normal: 'Обычный текст',

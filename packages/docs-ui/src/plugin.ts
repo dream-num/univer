@@ -29,18 +29,39 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocInterceptorService, DocSkeletonManagerService, IDocStateChangeInterceptorService, UniverDocsPlugin } from '@univerjs/docs';
+import {
+    DocInterceptorService,
+    DocSkeletonManagerService,
+    IDocStateChangeInterceptorService,
+    UniverDocsPlugin,
+} from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
 import pkg from '../package.json';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
-import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from './commands/commands/clipboard.command';
+import {
+    DocCopyCommand,
+    DocCopyCurrentParagraphCommand,
+    DocCutCommand,
+    DocCutCurrentParagraphCommand,
+    DocPasteCommand,
+} from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
-import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
+import {
+    DeleteCurrentParagraphCommand,
+    DeleteCustomBlockCommand,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    MergeTwoParagraphCommand,
+    RemoveHorizontalLineCommand,
+} from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
-import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from './commands/commands/doc-horizontal-line.command';
+import {
+    HorizontalLineCommand,
+    InsertHorizontalLineBellowCommand,
+} from './commands/commands/doc-horizontal-line.command';
 import { DocPageSetupCommand } from './commands/commands/doc-page-setup.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
@@ -62,6 +83,7 @@ import {
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
 import { InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
+import { InsertSpecialCharacterCommand } from './commands/commands/insert-special-character.command';
 import {
     BulletListCommand,
     ChangeListNestingLevelCommand,
@@ -75,13 +97,40 @@ import {
     QuickListCommand,
     ToggleCheckListCommand,
 } from './commands/commands/list.command';
-import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { CoverContentCommand, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
+import {
+    AlignCenterCommand,
+    AlignJustifyCommand,
+    AlignLeftCommand,
+    AlignOperationCommand,
+    AlignRightCommand,
+} from './commands/commands/paragraph-align.command';
+import {
+    CoverContentCommand,
+    ReplaceContentCommand,
+    ReplaceSelectionCommand,
+    ReplaceSnapshotCommand,
+    ReplaceTextRunsCommand,
+} from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, QuickHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from './commands/commands/set-heading.command';
+import {
+    H1HeadingCommand,
+    H2HeadingCommand,
+    H3HeadingCommand,
+    H4HeadingCommand,
+    H5HeadingCommand,
+    NormalTextHeadingCommand,
+    QuickHeadingCommand,
+    SetParagraphNamedStyleCommand,
+    SubtitleHeadingCommand,
+    TitleHeadingCommand,
+} from './commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
-import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
+import {
+    DocTableDeleteColumnsCommand,
+    DocTableDeleteRowsCommand,
+    DocTableDeleteTableCommand,
+} from './commands/commands/table/doc-table-delete.command';
 import {
     DocTableInsertColumnCommand,
     DocTableInsertColumnLeftCommand,
@@ -111,14 +160,19 @@ import { DocContextMenuRenderController } from './controllers/render-controllers
 import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
-import { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
+import {
+    DocParagraphPlaceholderRenderController,
+} from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocUIController } from './controllers/ui.controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
-import { DocClipboardPasteAdapterService, IDocClipboardPasteAdapterService } from './services/clipboard/doc-paste-mutation-adapter.service';
+import {
+    DocClipboardPasteAdapterService,
+    IDocClipboardPasteAdapterService,
+} from './services/clipboard/doc-paste-mutation-adapter.service';
 import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
@@ -134,7 +188,13 @@ import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
-import { BreakLineShortcut, CloseHeaderFooterShortcut, DeleteLeftShortcut, DeleteRightShortcut, SoftBreakLineShortcut } from './shortcuts/core-editing.shortcut';
+import {
+    BreakLineShortcut,
+    CloseHeaderFooterShortcut,
+    DeleteLeftShortcut,
+    DeleteRightShortcut,
+    SoftBreakLineShortcut,
+} from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDocumentEndShortcut,
     MoveCursorDocumentStartShortcut,
@@ -163,7 +223,14 @@ import {
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
-import { H1HeadingShortcut, H2HeadingShortcut, H3HeadingShortcut, H4HeadingShortcut, H5HeadingShortcut, NormalTextHeadingShortcut } from './shortcuts/heading.shortcut';
+import {
+    H1HeadingShortcut,
+    H2HeadingShortcut,
+    H3HeadingShortcut,
+    H4HeadingShortcut,
+    H5HeadingShortcut,
+    NormalTextHeadingShortcut,
+} from './shortcuts/heading.shortcut';
 
 @DependentOn(UniverRenderEnginePlugin, UniverDocsPlugin)
 export class UniverDocsUIPlugin extends Plugin {
@@ -294,6 +361,7 @@ export class UniverDocsUIPlugin extends Plugin {
             ReplaceTextRunsCommand,
             ReplaceSelectionCommand,
             InsertCustomRangeCommand,
+            InsertSpecialCharacterCommand,
             SetParagraphNamedStyleCommand,
             QuickHeadingCommand,
             DocCopyCurrentParagraphCommand,

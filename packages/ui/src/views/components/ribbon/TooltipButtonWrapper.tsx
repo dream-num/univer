@@ -309,10 +309,12 @@ export function DropdownMenuWrapper({
 
     // options menu
     if (options?.length) {
+        const isSingleCustomPanel = options.length === 1 && typeof options[0].label === 'object' && options[0].label?.hoverable === false;
         const items: IDropdownMenuProps['items'] = options.map((option) => ({
             type: 'item',
             className: clsx({
                 'focus:univer-bg-white': typeof option.label !== 'string' && option.label?.hoverable === false,
+                '!univer-p-0': typeof option.label !== 'string' && option.label?.hoverable === false,
             }),
             children: (
                 <DropdownMenuLabel
@@ -373,6 +375,7 @@ export function DropdownMenuWrapper({
         return (
             <DropdownMenu
                 align="start"
+                className={clsx({ '!univer-p-0': isSingleCustomPanel })}
                 items={items}
                 disabled={disabled}
                 open={dropdownVisible}

@@ -217,7 +217,7 @@ describe('ToolbarItem', () => {
         expect(getByText('Financial')).toBeTruthy();
     });
 
-    it('uses a regular icon for a one-row Grid button', () => {
+    it('uses a compact icon for a one-row Grid button', () => {
         const { getByRole } = renderWithDependencies(
             <ToolbarItem
                 id="test-grid-regular-button"
@@ -227,7 +227,7 @@ describe('ToolbarItem', () => {
             />
         );
 
-        expect(getByRole('button').className).toContain('[&>svg]:univer-size-5');
+        expect(getByRole('button').className).toContain('[&>svg]:univer-size-4');
         expect(getByRole('button').className).not.toContain('[&>svg]:univer-size-8');
         expect(getByRole('button').className).toContain('univer-h-full');
         expect(getByRole('button').className).toContain('univer-min-w-8');
@@ -292,6 +292,7 @@ describe('ToolbarItem', () => {
 
         expect(container.querySelector('.univer-toolbar-button-selector-root')?.className).toContain('univer-h-full');
         expect(container.querySelector('.univer-toolbar-button-selector-root')?.className).toContain('univer-box-border');
+        expect(container.querySelector('.univer-toolbar-button-selector-main')?.className).toContain('[&>svg]:univer-size-4');
         expect(container.querySelector('.univer-toolbar-button-selector-trigger')?.className).toContain('univer-h-full');
     });
 
@@ -324,6 +325,7 @@ describe('ToolbarItem', () => {
 
         expect(container.querySelector('.univer-toolbar-selector-root')?.className).toContain('univer-h-full');
         expect(container.querySelector('.univer-toolbar-selector-root')?.className).toContain('univer-box-border');
+        expect(container.querySelector('.univer-toolbar-selector-root')?.className).toContain('[&>svg]:univer-size-4');
         expect(container.querySelector('.univer-toolbar-selector-root')?.className).toContain('univer-border-solid');
         expect(container.querySelector('.univer-toolbar-selector-root')?.className).toContain('univer-bg-white');
         expect(container.querySelector('.univer-toolbar-selector-trigger')?.className).toContain('univer-ml-auto');

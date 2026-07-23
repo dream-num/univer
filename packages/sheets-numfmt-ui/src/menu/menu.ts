@@ -25,6 +25,7 @@ import {
     isPatternEqualWithoutDecimal,
     IUniverInstanceService,
     LocaleService,
+    RegionService,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -46,7 +47,7 @@ import {
 } from '@univerjs/sheets-numfmt';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { filter, merge, Observable } from 'rxjs';
+import { filter, map, merge, Observable } from 'rxjs';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 
@@ -119,14 +120,10 @@ export const MENU_OPTIONS = (currencySymbol: string): Array<{
 };
 
 export function CurrencySymbolIconMenuItem(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const regionService = accessor.get(RegionService);
+
     return {
-        icon: new Observable<string>((subscribe) => {
-            const localeService = accessor.get(LocaleService);
-            subscribe.next(getCurrencySymbolIconByLocale(localeService.getCurrentLocale()).icon);
-            return localeService.localeChanged$.subscribe(() => {
-                subscribe.next(getCurrencySymbolIconByLocale(localeService.getCurrentLocale()).icon);
-            });
-        }),
+        icon: regionService.currentRegion$.pipe(map((region) => getCurrencySymbolIconByLocale(region).icon)),
         id: SetCurrencyCommand.id,
         title: 'sheets-numfmt-ui.currency',
         tooltip: 'sheets-numfmt-ui.currency',
@@ -193,6 +190,7 @@ export function FactoryOtherMenuItem(accessor: IAccessor): IMenuSelectorItem<Loc
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
     const localeService = accessor.get(LocaleService);
+    const regionService = accessor.get(RegionService);
 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
@@ -202,6 +200,7 @@ export function FactoryOtherMenuItem(accessor: IAccessor): IMenuSelectorItem<Loc
         ({ workbook, worksheet }) => new Observable((subscribe) =>
             merge(
                 selectionManagerService.selectionMoveEnd$,
+                regionService.currentRegion$,
                 fromCallback(commandService.onCommandExecuted.bind(commandService)).pipe(
                     filter(([commandInfo]) => commandList.includes(commandInfo.id))
                 )
@@ -213,7 +212,7 @@ export function FactoryOtherMenuItem(accessor: IAccessor): IMenuSelectorItem<Loc
                     const col = range.startColumn;
                     const numfmtValue = workbook.getStyles().get(worksheet.getCell(row, col)?.s)?.n;
                     const pattern = numfmtValue?.pattern;
-                    const currencySymbol = getCurrencySymbolByLocale(localeService.getCurrentLocale());
+                    const currencySymbol = getCurrencySymbolByLocale(regionService.getCurrentRegion());
 
                     // Adapts the 'General' obtained during import, or the 'General' set manually
                     let value: string = localeService.t<LocaleKey>('sheets-numfmt-ui.general');

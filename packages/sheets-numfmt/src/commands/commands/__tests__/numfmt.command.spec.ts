@@ -29,6 +29,7 @@ import {
     Plugin,
     RANGE_TYPE,
     RedoCommand,
+    RegionService,
     UndoCommand,
     Univer,
     UniverInstanceType,
@@ -353,9 +354,10 @@ describe('Sheets numfmt commands', () => {
             },
         ]);
 
+        get(RegionService).setRegion(LocaleType.FR_FR);
         await expect(commandService.executeCommand(SetCurrencyCommand.id)).resolves.toBe(true);
         expect(numfmtService.getValue('test', 'sheet1', 0, 4)).toEqual({
-            pattern: getCurrencyFormat(LocaleType.ZH_CN),
+            pattern: getCurrencyFormat(LocaleType.FR_FR),
         });
     });
 

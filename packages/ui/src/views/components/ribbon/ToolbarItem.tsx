@@ -280,7 +280,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     <div
                         className={clsx(toolbarButtonSelectorMainVariants({ active: activated, disabled }), {
                             'univer-h-full univer-w-full univer-flex-col univer-justify-center univer-rounded univer-px-1 univer-pb-4 [&>svg]:univer-size-8': grid && large,
-                            '[&>svg]:univer-size-5': grid && !large,
+                            '[&>svg]:univer-size-4': grid && !large,
                         })}
                         onClick={handleClick}
                     >
@@ -330,7 +330,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                             'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-8': grid && large,
                             'univer-box-border univer-h-full': grid && !large,
                             'univer-bg-white dark:!univer-bg-gray-800': grid && !large && !icon,
-                            '[&>svg]:univer-size-5': grid && !large,
+                            '[&>svg]:univer-size-4': grid && !large,
                         }, grid && !large && !icon && borderClassName)}
                     >
                         {grid && large
@@ -382,7 +382,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
         const buttonClassName = clsx(grid && !large && `
           univer-h-full univer-min-w-8
-          [&>svg]:univer-size-5
+          [&>svg]:univer-size-4
         `, grid && large
             ? `
               univer-h-full univer-min-w-14 univer-flex-col univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs

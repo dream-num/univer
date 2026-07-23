@@ -74,10 +74,23 @@ describe('test numfmt utils function', () => {
             locale: LocaleType.FR_FR,
         });
         expect(getCurrencySymbolIconByLocale(LocaleType.KO_KR)).toEqual({
-            icon: 'DollarIcon',
+            icon: 'WonIcon',
             symbol: '₩',
             locale: LocaleType.KO_KR,
         });
+        expect([
+            LocaleType.VI_VN,
+            LocaleType.FA_IR,
+            LocaleType.AR_SA,
+            LocaleType.ID_ID,
+            LocaleType.PL_PL,
+        ].map((locale) => getCurrencySymbolIconByLocale(locale).icon)).toEqual([
+            'DongIcon',
+            'RialIcon',
+            'RialIcon',
+            'RupiahIcon',
+            'ZlotyIcon',
+        ]);
         expect(getCurrencyFormat(LocaleType.ZH_CN, 3)).toContain('"¥"#,##0.000');
         expect(getCurrencyFormat(LocaleType.EN_US, 200)).toContain(`.${'0'.repeat(127)}`);
     });

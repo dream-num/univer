@@ -354,6 +354,20 @@ describe('UnitDrawingService', () => {
         expect(service.getFocusDrawings()).toEqual([]);
     });
 
+    it('does not add omitted multi-transform fields during a transform refresh', () => {
+        const drawing = createDrawing('a', { transform: { left: 0, top: 0 } });
+        service.applyJson1(unitId, subUnitId, service.getBatchAddOp([drawing]).redo);
+
+        service.refreshTransform([{ ...drawing, transform: { left: 1, top: 2 } }]);
+
+        expect(service.getDrawingByParam(createSearch('a'))).toEqual({
+            ...drawing,
+            transform: { left: 1, top: 2 },
+        });
+        expect(Object.hasOwn(service.getDrawingByParam(createSearch('a'))!, 'transforms')).toBe(false);
+        expect(Object.hasOwn(service.getDrawingByParam(createSearch('a'))!, 'isMultiTransform')).toBe(false);
+    });
+
     it('should update drawing order in all directions', () => {
         service.registerDrawingData(unitId, {
             [subUnitId]: {

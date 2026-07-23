@@ -20,7 +20,9 @@ import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverIns
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
+import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
+import { SheetDrawingTransformPlanService } from './services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 
 @DependentOn(UniverDrawingPlugin)
@@ -49,9 +51,12 @@ export class UniverSheetsDrawingPlugin extends Plugin {
     override onStarting(): void {
         ([
             [SheetsDrawingLoadController],
+            [SheetDrawingTransformPlanService],
+            [SheetDrawingTransformAffectedController],
             [ISheetDrawingService, { useClass: SheetDrawingService }],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
         this._injector.get(SheetsDrawingLoadController);
+        this._injector.get(SheetDrawingTransformAffectedController);
     }
 }

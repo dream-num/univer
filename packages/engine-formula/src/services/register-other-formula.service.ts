@@ -37,6 +37,7 @@ export enum OtherFormulaBizType {
     CONDITIONAL_FORMATTING = 'cf',
     DOC = 'doc',
     SLIDE = 'slide',
+    SHAPE = 'shape',
 }
 
 export class RegisterOtherFormulaService extends Disposable {
@@ -48,6 +49,9 @@ export class RegisterOtherFormulaService extends Disposable {
     // FIXME: this design could be improved.
     private _formulaResult$ = new Subject<Record<string, Record<string, IOtherFormulaResult[]>>>();
     public formulaResult$ = this._formulaResult$.asObservable();
+
+    private _otherFormulaResultApplied$ = new Subject<ISetFormulaCalculationResultMutation>();
+    public otherFormulaResultApplied$ = this._otherFormulaResultApplied$.asObservable();
 
     public calculateStarted$ = new BehaviorSubject(false);
 
@@ -66,6 +70,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
+        this._otherFormulaResultApplied$.complete();
         this.calculateStarted$.complete();
     }
 
@@ -198,6 +203,7 @@ export class RegisterOtherFormulaService extends Disposable {
                     }
                 }
                 this._formulaResult$.next(results);
+                this._otherFormulaResultApplied$.next(params);
             }
         }));
     }

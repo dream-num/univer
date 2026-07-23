@@ -20,6 +20,7 @@ import { act, cleanup, render, screen } from '@testing-library/react';
 import { ICommandService, IContextService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { IPlatformService } from '../../../../services/platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
 import { KeyCode, MetaKeys } from '../../../../services/shortcut/keycode';
 import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { RediProvider } from '../../../../utils/di';
@@ -46,6 +47,7 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([IContextService, { useClass: TestContextService as never }]);
     injector.add([IPlatformService, { useClass: TestPlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([LocaleService]);
 

@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/ar-SA';
-import compatibility from './function-list/compatibility/ar-SA';
-import cube from './function-list/cube/ar-SA';
-import database from './function-list/database/ar-SA';
-import date from './function-list/date/ar-SA';
-import engineering from './function-list/engineering/ar-SA';
-import financial from './function-list/financial/ar-SA';
-import information from './function-list/information/ar-SA';
-import logical from './function-list/logical/ar-SA';
-import lookup from './function-list/lookup/ar-SA';
-import math from './function-list/math/ar-SA';
-import statistical from './function-list/statistical/ar-SA';
-import text from './function-list/text/ar-SA';
-import univer from './function-list/univer/ar-SA';
-import web from './function-list/web/ar-SA';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'جارٍ تحليل صيغ الصفائف...',
             'array-calculation': 'جارٍ حساب صيغ الصفائف...',
             done: 'تم',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

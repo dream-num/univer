@@ -129,7 +129,12 @@ export class FFormula extends FBase {
     }
 
     /**
-     * Start the calculation of the formula.
+     * Forces formula calculation explicitly.
+     *
+     * Normal facade mutations such as `range.setFormula()` already mark formula
+     * data dirty and schedule calculation automatically. Use this method only when
+     * an external data change did not produce a dirty command or an explicit full
+     * recalculation is required.
      *
      * @example
      * ```ts

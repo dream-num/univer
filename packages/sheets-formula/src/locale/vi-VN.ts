@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/vi-VN';
-import compatibility from './function-list/compatibility/vi-VN';
-import cube from './function-list/cube/vi-VN';
-import database from './function-list/database/vi-VN';
-import date from './function-list/date/vi-VN';
-import engineering from './function-list/engineering/vi-VN';
-import financial from './function-list/financial/vi-VN';
-import information from './function-list/information/vi-VN';
-import logical from './function-list/logical/vi-VN';
-import lookup from './function-list/lookup/vi-VN';
-import math from './function-list/math/vi-VN';
-import statistical from './function-list/statistical/vi-VN';
-import text from './function-list/text/vi-VN';
-import univer from './function-list/univer/vi-VN';
-import web from './function-list/web/vi-VN';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Đang phân tích công thức mảng...',
             'array-calculation': 'Đang tính toán công thức mảng...',
             done: 'Hoàn tất',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

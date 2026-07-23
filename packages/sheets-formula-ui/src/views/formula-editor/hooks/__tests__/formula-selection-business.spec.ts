@@ -18,6 +18,13 @@
 
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, toDisposable } from '@univerjs/core';
 import { sequenceNodeType } from '@univerjs/engine-formula';
+import {
+    buildFormulaTextRuns as buildTextRuns,
+    getFormulaHighlightDataStream,
+    getFormulaSequenceCharacterAtOffset as getSequenceNodeCharAtOffset,
+    isFormulaReferenceAddingContext,
+    isFormulaReferenceAddingTextContext,
+} from '@univerjs/formula-ui';
 import { describe, expect, it, vi } from 'vitest';
 import {
     FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
@@ -27,9 +34,9 @@ import {
 } from '../../formula-embed-integration.service';
 import { focusFormulaEditor, hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, shouldSkipFormulaEditorMouseUpFocus } from '../use-focus';
 import { FormulaSelectingType, resolveFormulaSelectingIntent, resolveFormulaSelectionCursorIndex, resolveFormulaSelectionDataStream, resolveFormulaSelectionWorkbook, shouldSkipReferenceEditingByPointer } from '../use-formula-selection';
-import { buildTextRuns, calcHighlightRanges, createFormulaHighlightBody, getFormulaHighlightDataStream } from '../use-highlight';
+import { calcHighlightRanges, createFormulaHighlightBody } from '../use-highlight';
 import { isFormulaEditorInteractionOwner, shouldMoveFormulaSelectionFromCurrentSelection } from '../use-left-and-right-arrow';
-import { createSelectionChangeDuplicateEndGuard, createSelectionChangeHandler, getInitialFormulaReferenceSelectionCount, getLastFormulaSelection, getSelectionsForFormulaRefUpdate, getSequenceNodeCharAtOffset, getSharedSelectionChangeDuplicateEndGuard, insertFormulaReferenceText, isFormulaReferenceAddingContext, isFormulaReferenceAddingTextContext, isSameFormulaSelection, prepareSelectionChangeContext, replaceFormulaControlSelection, shouldSkipFormulaReferenceUpdate } from '../use-sheet-selection-change';
+import { createSelectionChangeDuplicateEndGuard, createSelectionChangeHandler, getInitialFormulaReferenceSelectionCount, getLastFormulaSelection, getSelectionsForFormulaRefUpdate, getSharedSelectionChangeDuplicateEndGuard, insertFormulaReferenceText, isSameFormulaSelection, prepareSelectionChangeContext, replaceFormulaControlSelection, shouldSkipFormulaReferenceUpdate } from '../use-sheet-selection-change';
 
 function range(row: number, col: number, sheetId = 'sheet1', unitId = 'unit1') {
     return {

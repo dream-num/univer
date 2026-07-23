@@ -190,6 +190,8 @@ export {
     type IGetSheetBlockResponse,
     type IGetUnitOnRevRequest,
     type IGetUnitOnRevResponse,
+    type IListUnitsRequest,
+    type IListUnitsResponse,
     type IMGetChangesetsByRevisionRequest,
     type IMGetChangesetsByRevisionResponse,
     type IMGetUnitMetaRequest,

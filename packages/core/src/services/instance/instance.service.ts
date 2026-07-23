@@ -24,7 +24,7 @@ import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
-import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
+import { FOCUSING_BOARD, FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
 
@@ -298,24 +298,35 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, true);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
+            this._contextService.setContextValue(FOCUSING_BOARD, false);
             this.setCurrentUnitForType(id!);
         } else if (this.focused instanceof DocumentDataModel) {
             this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, true);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
+            this._contextService.setContextValue(FOCUSING_BOARD, false);
             this.setCurrentUnitForType(id!);
         } else if (this.focused?.type === UniverInstanceType.UNIVER_SLIDE) {
             this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, true);
+            this._contextService.setContextValue(FOCUSING_BOARD, false);
+            this.setCurrentUnitForType(id!);
+        } else if (this.focused?.type === UniverInstanceType.UNIVER_BOARD) {
+            this._contextService.setContextValue(FOCUSING_UNIT, true);
+            this._contextService.setContextValue(FOCUSING_DOC, false);
+            this._contextService.setContextValue(FOCUSING_SHEET, false);
+            this._contextService.setContextValue(FOCUSING_SLIDE, false);
+            this._contextService.setContextValue(FOCUSING_BOARD, true);
             this.setCurrentUnitForType(id!);
         } else {
             this._contextService.setContextValue(FOCUSING_UNIT, false);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
+            this._contextService.setContextValue(FOCUSING_BOARD, false);
         }
     }
 

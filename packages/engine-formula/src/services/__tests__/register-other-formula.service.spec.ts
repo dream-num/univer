@@ -126,6 +126,38 @@ describe('RegisterOtherFormulaService', () => {
         expect((value?.result as FormulaResultMatrix | undefined)?.[0]?.[0]?.[0]?.v).toBe(2);
     });
 
+    it('should acknowledge other-formula application after cache and result subscribers update', async () => {
+        const { service, commandService } = createService();
+        const formulaId = service.registerFormulaWithRange('unit-1', 'sheet-1', '=A1+1');
+        const resultPayload = {
+            unitData: {},
+            unitOtherData: {
+                'unit-1': {
+                    'sheet-1': {
+                        [formulaId]: { 0: { 0: [{ v: 2 }] } },
+                    },
+                },
+            },
+        };
+        let resultDistributed = false;
+        let acknowledgedPayload: unknown;
+
+        const resultSubscription = service.formulaResult$.subscribe(() => {
+            resultDistributed = true;
+        });
+        const appliedSubscription = service.otherFormulaResultApplied$.subscribe((payload) => {
+            expect(resultDistributed).toBe(true);
+            expect(service.getFormulaValueSync('unit-1', 'sheet-1', formulaId)?.status).toBe(FormulaResultStatus.SUCCESS);
+            acknowledgedPayload = payload;
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
+
+        expect(acknowledgedPayload).toBe(resultPayload);
+        resultSubscription.unsubscribe();
+        appliedSubscription.unsubscribe();
+    });
+
     it('should support delete and dirty marking', async () => {
         const { service, commandService } = createService();
         const executedIds: string[] = [];

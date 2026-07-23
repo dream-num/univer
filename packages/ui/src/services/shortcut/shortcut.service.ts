@@ -19,9 +19,10 @@ import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { fromGlobalEvent } from '../../common/lifecycle';
-import { isEmbedBoundaryTarget } from '../../utils/embed-boundary';
+import { getEmbedChildUnitId, isEmbedBoundaryTarget } from '../../utils/embed-boundary';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
+import { IUIRuntimeScopeService } from '../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, KeyCodeToChar, MetaKeys } from './keycode';
 
 /**
@@ -163,6 +164,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
         @IContextService private readonly _contextService: IContextService,
+        @IUIRuntimeScopeService private readonly _runtimeScopeService: IUIRuntimeScopeService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
@@ -269,7 +271,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
     private _resolveKeyboardEvent(e: KeyboardEvent): void {
         const candidate = this.dispatch(e);
         if (candidate) {
-            this._commandService.executeCommand(candidate.id, candidate.staticParameters);
+            this._getRuntimeService<ICommandService>(e, ICommandService)?.executeCommand(candidate.id, candidate.staticParameters) ??
+                this._commandService.executeCommand(candidate.id, candidate.staticParameters);
             e.preventDefault();
         }
     }
@@ -302,9 +305,10 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return undefined;
         }
 
+        const contextService = this._getRuntimeService<IContextService>(e, IContextService) ?? this._contextService;
         const candidateShortcut = Array.from(shortcuts)
             .sort((s1, s2) => (s2.priority ?? 0) - (s1.priority ?? 0))
-            .find((s) => s.preconditions?.(this._contextService) ?? true);
+            .find((s) => s.preconditions?.(contextService) ?? true);
 
         return candidateShortcut;
     }
@@ -365,5 +369,11 @@ export class ShortcutService extends Disposable implements IShortcutService {
             target instanceof HTMLTextAreaElement;
 
         return isNativeTextEditor && isEmbedBoundaryTarget(target);
+    }
+
+    private _getRuntimeService<T>(event: KeyboardEvent, identifier: unknown): T | undefined {
+        const childUnitId = getEmbedChildUnitId(event.target);
+        const runtimeScope = this._runtimeScopeService.get(childUnitId);
+        return runtimeScope?.has(identifier) ? runtimeScope.get<T>(identifier) : undefined;
     }
 }

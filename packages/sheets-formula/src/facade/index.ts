@@ -15,6 +15,7 @@
  */
 
 import './f-univer';
+import '@univerjs/formula/facade';
 import './f-formula';
 import './f-enum';
 import './f-workbook';

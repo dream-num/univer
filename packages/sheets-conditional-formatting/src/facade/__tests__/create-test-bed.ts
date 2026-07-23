@@ -50,6 +50,14 @@ import {
 } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
+    DescriptionService,
+    FormulaCalculationSessionController,
+    FormulaCalculationSessionService,
+    IDescriptionService,
+    IRegisterFunctionService,
+    RegisterFunctionService,
+} from '@univerjs/formula';
+import {
     RefRangeService,
     SheetInterceptorService,
     SheetSkeletonService,
@@ -64,14 +72,6 @@ import {
     ConditionalFormattingStyleComposer,
     ConditionalFormattingViewModel,
 } from '@univerjs/sheets-conditional-formatting';
-import {
-    DescriptionService,
-    FormulaCalculationSessionController,
-    FormulaCalculationSessionService,
-    IDescriptionService,
-    IRegisterFunctionService,
-    RegisterFunctionService,
-} from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 import '@univerjs/sheets/facade';

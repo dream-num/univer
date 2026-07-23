@@ -72,13 +72,13 @@ import {
     ValueNodeFactory,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     DescriptionService,
     IDescriptionService,
     IRegisterFunctionService,
     RegisterFunctionService,
-} from '@univerjs/sheets-formula';
+} from '@univerjs/formula';
+import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import '@univerjs/engine-formula/facade';

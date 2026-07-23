@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/it-IT';
-import compatibility from './function-list/compatibility/it-IT';
-import cube from './function-list/cube/it-IT';
-import database from './function-list/database/it-IT';
-import date from './function-list/date/it-IT';
-import engineering from './function-list/engineering/it-IT';
-import financial from './function-list/financial/it-IT';
-import information from './function-list/information/it-IT';
-import logical from './function-list/logical/it-IT';
-import lookup from './function-list/lookup/it-IT';
-import math from './function-list/math/it-IT';
-import statistical from './function-list/statistical/it-IT';
-import text from './function-list/text/it-IT';
-import univer from './function-list/univer/it-IT';
-import web from './function-list/web/it-IT';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': 'Analisi delle formule matrice...',
             'array-calculation': 'Calcolo delle formule matrice...',
             done: 'Completato',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

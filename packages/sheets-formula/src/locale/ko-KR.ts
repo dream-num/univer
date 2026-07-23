@@ -16,22 +16,6 @@
 
 import type enUS from './en-US';
 
-import array from './function-list/array/ko-KR';
-import compatibility from './function-list/compatibility/ko-KR';
-import cube from './function-list/cube/ko-KR';
-import database from './function-list/database/ko-KR';
-import date from './function-list/date/ko-KR';
-import engineering from './function-list/engineering/ko-KR';
-import financial from './function-list/financial/ko-KR';
-import information from './function-list/information/ko-KR';
-import logical from './function-list/logical/ko-KR';
-import lookup from './function-list/lookup/ko-KR';
-import math from './function-list/math/ko-KR';
-import statistical from './function-list/statistical/ko-KR';
-import text from './function-list/text/ko-KR';
-import univer from './function-list/univer/ko-KR';
-import web from './function-list/web/ko-KR';
-
 const locale: typeof enUS = {
     'sheets-formula': {
         progress: {
@@ -40,23 +24,6 @@ const locale: typeof enUS = {
             'array-analysis': '배열 수식 분석 중...',
             'array-calculation': '배열 수식 계산 중...',
             done: '완료',
-        },
-        functionList: {
-            ...array,
-            ...compatibility,
-            ...cube,
-            ...database,
-            ...date,
-            ...engineering,
-            ...financial,
-            ...information,
-            ...logical,
-            ...lookup,
-            ...math,
-            ...statistical,
-            ...text,
-            ...univer,
-            ...web,
         },
     },
 };

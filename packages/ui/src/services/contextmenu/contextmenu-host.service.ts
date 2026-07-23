@@ -15,10 +15,13 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IContextMenuHostService {
     readonly activeMenuId: string | null;
+    readonly activeMenuId$: Observable<string | null>;
     registerMenu(menuId: string, hide: () => void): IDisposable;
     activateMenu(menuId: string): void;
     deactivateMenu(menuId: string): void;
@@ -29,10 +32,11 @@ export const IContextMenuHostService = createIdentifier<IContextMenuHostService>
 
 export class ContextMenuHostService extends Disposable implements IContextMenuHostService {
     private readonly _menuMap = new Map<string, () => void>();
-    private _activeMenuId: string | null = null;
+    private readonly _activeMenuId$ = new BehaviorSubject<string | null>(null);
+    readonly activeMenuId$ = this._activeMenuId$.asObservable();
 
     get activeMenuId(): string | null {
-        return this._activeMenuId;
+        return this._activeMenuId$.value;
     }
 
     registerMenu(menuId: string, hide: () => void): IDisposable {
@@ -40,30 +44,36 @@ export class ContextMenuHostService extends Disposable implements IContextMenuHo
 
         return toDisposable(() => {
             this._menuMap.delete(menuId);
-            if (this._activeMenuId === menuId) {
-                this._activeMenuId = null;
+            if (this.activeMenuId === menuId) {
+                this._activeMenuId$.next(null);
             }
         });
     }
 
     activateMenu(menuId: string): void {
         this.hideActiveMenu(menuId);
-        this._activeMenuId = menuId;
+        this._activeMenuId$.next(menuId);
     }
 
     deactivateMenu(menuId: string): void {
-        if (this._activeMenuId === menuId) {
-            this._activeMenuId = null;
+        if (this.activeMenuId === menuId) {
+            this._activeMenuId$.next(null);
         }
     }
 
     hideActiveMenu(exceptMenuId?: string): void {
-        if (!this._activeMenuId || this._activeMenuId === exceptMenuId) {
+        const activeMenuId = this.activeMenuId;
+        if (!activeMenuId || activeMenuId === exceptMenuId) {
             return;
         }
 
-        const hide = this._menuMap.get(this._activeMenuId);
-        this._activeMenuId = null;
+        const hide = this._menuMap.get(activeMenuId);
+        this._activeMenuId$.next(null);
         hide?.();
+    }
+
+    override dispose(): void {
+        this._activeMenuId$.complete();
+        super.dispose();
     }
 }

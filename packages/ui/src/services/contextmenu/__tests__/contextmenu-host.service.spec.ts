@@ -49,4 +49,16 @@ describe('ContextMenuHostService', () => {
 
         expect(service.activeMenuId).toBeNull();
     });
+
+    it('publishes active menu changes', () => {
+        const activeMenuIds: Array<string | null> = [];
+        service.registerMenu('main', vi.fn());
+        const subscription = service.activeMenuId$.subscribe((menuId) => activeMenuIds.push(menuId));
+
+        service.activateMenu('main');
+        service.deactivateMenu('main');
+
+        expect(activeMenuIds).toEqual([null, 'main', null]);
+        subscription.unsubscribe();
+    });
 });

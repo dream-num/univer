@@ -101,9 +101,11 @@ import {
     IPlatformService,
     IShortcutService,
     ISidebarService,
+    IUIRuntimeScopeService,
     PlatformService,
     RediContext,
     ShortcutService,
+    UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -406,6 +408,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [IDescriptionService, { useClass: TestDescriptionService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService as never }],
                 [IPlatformService, { useClass: PlatformService }],
+                [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
                 [IShortcutService, { useClass: ShortcutService }],
                 [ILayoutService, { useClass: TestLayoutService as never }],
                 [WorksheetPermissionService],

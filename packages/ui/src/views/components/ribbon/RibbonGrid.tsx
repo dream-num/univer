@@ -60,7 +60,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                 data-testid="ribbon-grid-group-grid"
                                 className="
                                   univer-grid univer-min-h-0 univer-flex-1 univer-grid-flow-col univer-grid-rows-2
-                                  univer-content-center univer-gap-x-1 univer-gap-y-3 univer-py-2
+                                  univer-content-center univer-gap-x-1 univer-gap-y-2 univer-py-2
                                   [&>div>span>span]:univer-h-full
                                 "
                             >

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ComponentType, CSSProperties, ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
+import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -81,8 +82,8 @@ function renderWithDependencies(element: ReactElement) {
     ));
 
     injector.get(IconManager).register({
-        TestIcon: ({ className, style }: { className?: string; style?: CSSProperties }) => (
-            <span className={className} data-icon="test" style={style} />
+        TestIcon: ({ className, style, extend }: IIconProps) => (
+            <span className={className} data-color-channel={extend?.colorChannel1} data-icon="test" style={style} />
         ),
     });
 
@@ -416,6 +417,28 @@ describe('ToolbarItem', () => {
                 params: { rule },
             },
         ]);
+    });
+
+    it('overrides a button selector icon color without changing its command value', () => {
+        const { container, commandService } = renderWithDependencies(
+            <ToolbarItem
+                id="test-color-selector"
+                type={MenuItemType.BUTTON_SELECTOR}
+                icon="TestIcon"
+                iconColor="var(--univer-primary-600)"
+                value$={new BehaviorSubject('#ffffff')}
+                selections={[]}
+            />
+        );
+
+        expect(container.querySelector('[data-icon="test"]')?.getAttribute('data-color-channel'))
+            .toBe('var(--univer-primary-600)');
+
+        fireEvent.click(container.querySelector('.univer-toolbar-button-selector-main') as HTMLElement);
+        expect(commandService.calls).toEqual([{
+            commandId: 'test-color-selector',
+            params: { value: '#ffffff' },
+        }]);
     });
 
     it('resolves option params with a value emitted by a custom option', async () => {

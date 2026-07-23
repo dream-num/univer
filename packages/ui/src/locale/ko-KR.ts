@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: '이모지를 찾을 수 없음',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: '수학',
+            greek: '그리스 문자',
+            common: '일반',
+        },
         toolbar: {
             heading: {
                 normal: '일반',

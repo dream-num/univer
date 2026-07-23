@@ -234,7 +234,10 @@ export const DefinedNameContainer = () => {
     return (
         <div
             data-u-comp="defined-name-container"
-            className="univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-flex-col"
+            className="
+              univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-flex-col
+              univer-overflow-hidden
+            "
         >
             <div key="insertDefinedName" className="univer-mb-4">
                 <Button

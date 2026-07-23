@@ -41,6 +41,11 @@ const locale: typeof enUS = {
             noResults: 'Nenašli sa žiadne emoji',
             ...emojiLocale,
         },
+        symbolPicker: {
+            mathematics: 'Matematika',
+            greek: 'Grécke písmená',
+            common: 'Bežné',
+        },
         toolbar: {
             heading: {
                 normal: 'Normálne',

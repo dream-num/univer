@@ -35,6 +35,7 @@ type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     large?: boolean;
     showLabel?: boolean;
     iconSize?: number;
+    iconColor?: string;
     fullWidth?: boolean;
 };
 
@@ -200,7 +201,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, fullWidth } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth } = props;
     const gridLabel = title ?? tooltip;
 
     const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
@@ -288,7 +289,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                             icon={iconToDisplay}
                             iconSize={iconSize}
                             title={titleToDisplay}
-                            value={value}
+                            value={iconColor ?? value}
                             label={label}
                             onChange={handleSelectionsValueChange}
                         />

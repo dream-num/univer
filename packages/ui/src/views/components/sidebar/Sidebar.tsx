@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { LocaleService } from '@univerjs/core';
@@ -29,7 +29,6 @@ export interface ISidebarMethodOptions {
     id?: string;
     header?: ICustomLabelProps;
     children?: ICustomLabelProps;
-    bodyStyle?: CSSProperties;
     footer?: ICustomLabelProps;
 
     visible?: boolean;
@@ -269,7 +268,7 @@ export function Sidebar() {
                     </button>
                 </header>
 
-                <section className="univer-box-border univer-cursor-default univer-px-4" style={options?.bodyStyle}>
+                <section className="univer-box-border univer-cursor-default univer-px-4">
                     {options?.children}
                 </section>
 

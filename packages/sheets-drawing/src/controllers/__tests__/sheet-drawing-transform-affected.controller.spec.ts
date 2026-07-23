@@ -40,6 +40,8 @@ function createSkeleton(options: { rowHeights?: number[]; colWidths?: number[] }
         columnHeaderHeight: 0,
         rowTotalHeight: 2000,
         columnTotalWidth: 1000,
+        makeDirty: vi.fn(),
+        calculate: vi.fn(),
         getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => {
             const startY = sumRows(row);
             const startX = sumCols(column);
@@ -132,12 +134,60 @@ function createController(options: { drawingData?: Record<string, any>; skeleton
     controller._sheetDrawingService = sheetDrawingService;
     controller._drawingManagerService = drawingManagerService;
     controller._commandService = { syncExecuteCommand: vi.fn() };
+    controller._transformPlanService = {
+        transform: vi.fn(() => ({ preRedos: [], redos: [], preUndos: [], undos: [] })),
+    };
     controller._getUnitIdAndSubUnitId = vi.fn(() => ({ unitId: UNIT_ID, subUnitId: SUB_UNIT_ID }));
 
     return { controller, skeleton, sheetDrawingService, drawingManagerService };
 }
 
 describe('SheetDrawingTransformAffectedController', () => {
+    it('finalizes complete drawing candidates through extensions in mutation order', () => {
+        const skeleton = createSkeleton();
+        const drawing = createDrawing({ drawingId: 'extended' }, skeleton);
+        const { controller, sheetDrawingService } = createController({
+            skeleton,
+            drawingData: { [drawing.drawingId]: drawing },
+        });
+        controller._transformPlanService.transform.mockImplementation((plan: any) => {
+            const candidate = plan.updates.get(drawing.drawingId);
+            expect(candidate).toMatchObject({
+                drawingId: drawing.drawingId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                anchorType: SheetDrawingAnchorType.Both,
+            });
+            plan.updates.set(drawing.drawingId, {
+                ...candidate,
+                transform: { ...candidate.transform, left: 77, top: 88 },
+            });
+            return {
+                preRedos: [{ id: 'feature.pre-redo', params: {} }],
+                redos: [{ id: 'feature.redo', params: {} }],
+                preUndos: [{ id: 'feature.pre-undo', params: {} }],
+                undos: [{ id: 'feature.undo', params: {} }],
+            };
+        });
+
+        const result = controller._moveColInterceptor({
+            range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 },
+        }, 'insert');
+
+        expect(result.redos.map(({ id }: any) => id)).toEqual([
+            'feature.pre-redo',
+            SetDrawingApplyMutation.id,
+            'feature.redo',
+            ClearSheetDrawingTransformerOperation.id,
+        ]);
+        expect(result.undos.map(({ id }: any) => id)).toEqual([
+            'feature.pre-undo',
+            SetDrawingApplyMutation.id,
+            'feature.undo',
+            ClearSheetDrawingTransformerOperation.id,
+        ]);
+        expect(sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0].transform).toMatchObject({ left: 77, top: 88 });
+    });
+
     it('removes drawings covered by deleted rows and shifts drawings below into undoable mutations', () => {
         const skeleton = createSkeleton();
         const deleted = createDrawing({
@@ -212,6 +262,62 @@ describe('SheetDrawingTransformAffectedController', () => {
             },
         });
         expect(result.redos).toContainEqual({ id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] });
+    });
+
+    it('shrinks a both-anchored drawing when deleted rows cover its top anchor', () => {
+        const skeleton = createSkeleton();
+        const drawing = createDrawing({
+            drawingId: 'row-delete-top-anchor',
+            sheetTransform: {
+                from: { row: 2, column: 1, rowOffset: 5, columnOffset: 0 },
+                to: { row: 6, column: 2, rowOffset: 5, columnOffset: 5 },
+            },
+        }, skeleton);
+        const { controller, sheetDrawingService } = createController({
+            skeleton,
+            drawingData: { [drawing.drawingId]: drawing },
+        });
+
+        controller._moveRowInterceptor({
+            range: { startRow: 2, endRow: 4, startColumn: 0, endColumn: 9 },
+        }, 'remove');
+        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
+
+        expect(updatedDrawing).toMatchObject({
+            transform: { top: 40, height: 25 },
+            sheetTransform: {
+                from: { row: 2, rowOffset: 0 },
+                to: { row: 3, rowOffset: 5 },
+            },
+        });
+    });
+
+    it('shrinks a both-anchored drawing when deleted columns cover its left anchor', () => {
+        const skeleton = createSkeleton();
+        const drawing = createDrawing({
+            drawingId: 'column-delete-left-anchor',
+            sheetTransform: {
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 5 },
+                to: { row: 2, column: 6, rowOffset: 5, columnOffset: 5 },
+            },
+        }, skeleton);
+        const { controller, sheetDrawingService } = createController({
+            skeleton,
+            drawingData: { [drawing.drawingId]: drawing },
+        });
+
+        controller._moveColInterceptor({
+            range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 4 },
+        }, 'remove');
+        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
+
+        expect(updatedDrawing).toMatchObject({
+            transform: { left: 20, width: 15 },
+            sheetTransform: {
+                from: { column: 2, columnOffset: 0 },
+                to: { column: 3, columnOffset: 5 },
+            },
+        });
     });
 
     it('updates both-anchored drawings when hidden rows cut through their top edge', () => {
@@ -334,6 +440,7 @@ describe('SheetDrawingTransformAffectedController', () => {
         });
         expect(result.redos).toEqual([
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
+            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
     });
 });

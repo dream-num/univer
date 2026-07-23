@@ -19,7 +19,7 @@ import type { LocaleKey } from '../../locale/types';
 import type { IPopup } from '../../services/popup/canvas-popup.service';
 import type { EmojiCategory, IEmojiItem } from './emoji-picker-utils';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
-import { borderTopClassName, clsx, Input } from '@univerjs/design';
+import { borderTopClassName, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import {
     ActivityIcon,
     FoodsIcon,
@@ -51,16 +51,22 @@ export const EMOJI_PICKER_COMPONENT = 'ui.emoji-picker';
 const RECENTS_STORAGE_KEY = 'univer.ui.recent-emojis';
 const ACTIVE_SECTION_SCROLL_OFFSET = 28;
 
-export interface IEmojiPickerPopupProps {
+interface IEmojiPickerPopupProps {
     activeEmoji?: string;
     onSelect?: (emoji: string, options?: { keepOpen?: boolean }) => void;
     recentStorageKey?: string;
 }
 
+interface IEmojiPickerProps {
+    embedded?: boolean;
+    onChange?: (emoji: string) => void;
+    popup?: IPopup<IEmojiPickerPopupProps>;
+}
+
 type EmojiSectionKey = 'recent' | EmojiCategory;
 interface IEmojiSection { emojis: IEmojiItem[]; key: EmojiSectionKey; title: string }
 
-export function EmojiPicker(props: { popup?: IPopup<IEmojiPickerPopupProps> }) {
+export function EmojiPicker(props: IEmojiPickerProps) {
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     const localStorageService = useDependency(ILocalStorageService);
@@ -114,6 +120,7 @@ export function EmojiPicker(props: { popup?: IPopup<IEmojiPickerPopupProps> }) {
         setActiveEmoji(item.emoji);
         setRecents(nextRecents);
         writeRecents(localStorageService, recentStorageKey, nextRecents);
+        props.onChange?.(item.emoji);
         extraProps?.onSelect?.(item.emoji, options);
     };
 
@@ -143,11 +150,14 @@ export function EmojiPicker(props: { popup?: IPopup<IEmojiPickerPopupProps> }) {
     return (
         <section
             data-u-comp={EMOJI_PICKER_COMPONENT}
-            className="
-              univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden univer-rounded-[10px]
-              univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-shadow-lg
-              dark:!univer-border-gray-600 dark:!univer-bg-gray-900
-            "
+            className={clsx(
+                'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
+                !props.embedded && `
+                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                  univer-shadow-lg
+                  dark:!univer-border-gray-600 dark:!univer-bg-gray-900
+                `
+            )}
         >
             <div className="univer-flex univer-items-center univer-gap-1 univer-px-3 univer-pb-2 univer-pt-3">
                 <Input
@@ -185,7 +195,10 @@ export function EmojiPicker(props: { popup?: IPopup<IEmojiPickerPopupProps> }) {
 
             <div
                 ref={scrollRef}
-                className="univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-px-3"
+                className={clsx(
+                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-px-3',
+                    scrollbarClassName
+                )}
                 onScroll={handleScroll}
             >
                 {renderedSections.length

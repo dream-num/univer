@@ -28,4 +28,3 @@ export {
 } from './emoji-picker-utils';
 export type { EmojiCategory, IEmojiItem, IEmojiLocaleData } from './emoji-picker-utils';
 export { EMOJI_PICKER_COMPONENT, EmojiPicker } from './EmojiPicker';
-export type { IEmojiPickerPopupProps } from './EmojiPicker';

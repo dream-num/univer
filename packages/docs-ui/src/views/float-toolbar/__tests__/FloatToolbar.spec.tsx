@@ -41,7 +41,10 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SetInlineFormatBoldCommand } from '../../../commands/commands/inline-format.command';
+import {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+} from '../../../commands/commands/inline-format.command';
 import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../../menu/menu';
 import { FloatToolbar, resolveFloatToolbarMenus } from '../FloatToolbar';
 
@@ -242,6 +245,20 @@ describe('FloatToolbar', () => {
             HYPERLINK_MENU_ID,
             COMMENT_MENU_ID,
         ]);
+    });
+
+    it('passes presentation config through to the resolved floating toolbar menu', () => {
+        const backgroundItem = createMenuItem(SetInlineFormatTextBackgroundColorCommand.id);
+        const menuManagerService = new TestMenuManagerService();
+        menuManagerService.setMenus([backgroundItem]);
+
+        const { menus, extraMenus } = resolveFloatToolbarMenus(menuManagerService as never, [{
+            id: SetInlineFormatTextBackgroundColorCommand.id,
+            iconColor: 'var(--univer-primary-600)',
+        }]);
+
+        expect(menus[0]?.iconColor).toBe('var(--univer-primary-600)');
+        expect(extraMenus).toEqual([]);
     });
 
     it('renders available menus and refreshes when the menu service changes', async () => {

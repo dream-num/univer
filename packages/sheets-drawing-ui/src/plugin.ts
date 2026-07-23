@@ -41,11 +41,11 @@ import { SheetsDrawingRenderController } from './controllers/render-controllers/
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
 import { SheetCellImageCopyPasteController } from './controllers/sheet-cell-image-copy-paste.controller';
 import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
+import { SheetDrawingActiveRenderController } from './controllers/sheet-drawing-active-render.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
 import { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
-import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/ui.controller';
 import { touchSheetsDrawingFloatingHostCapabilityWhenReady } from './embed/floating-host';
@@ -133,7 +133,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     private _registerRenderModules(): void {
         ([
             [SheetDrawingUpdateController],
-            [SheetDrawingTransformAffectedController],
+            [SheetDrawingActiveRenderController],
             [SheetsDrawingRenderController],
             [SheetCellImageHoverRenderController],
         ] as Dependency[]).forEach((m) => {

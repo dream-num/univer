@@ -21,11 +21,19 @@
 import type { ComponentType, ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { connectInjector } from '../../../../utils/di';
-import { DropdownMenuLabel, DropdownWrapper, ToolbarDropdownProvider, TooltipWrapper } from '../TooltipButtonWrapper';
+import {
+    DropdownMenuLabel,
+    DropdownMenuWrapper,
+    DropdownWrapper,
+    ToolbarDropdownProvider,
+    TooltipWrapper,
+} from '../TooltipButtonWrapper';
 
 class TestLocaleService {
     t(key: string) {
@@ -43,6 +51,15 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
+    injector.add([IMenuManagerService, {
+        useValue: {
+            menuChanged$: of(undefined),
+            mergeMenu: () => {},
+            appendRootMenu: () => {},
+            getMenuByPositionKey: () => [],
+            getFlatMenuByPositionKey: () => [],
+        },
+    }]);
     injector.get(ComponentManager).register('TestDynamicOption', ({ onChange }: { onChange: (value: string) => void }) => (
         <button type="button" onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
     ));
@@ -99,5 +116,37 @@ describe('DropdownWrapper', () => {
         fireEvent.pointerDown(document.body);
 
         expect(queryByText('Dropdown content')).toBeNull();
+    });
+});
+
+describe('DropdownMenuWrapper', () => {
+    it('renders a single non-hoverable custom panel flush with the dropdown edge', async () => {
+        const { findByRole, getByRole } = renderWithDependencies(
+            <ToolbarDropdownProvider>
+                <TooltipWrapper dropdownKey="test-custom-panel">
+                    <DropdownMenuWrapper
+                        menuId="test-menu"
+                        options={[{
+                            label: {
+                                name: 'TestDynamicOption',
+                                hoverable: false,
+                                selectable: false,
+                            },
+                        }]}
+                        onOptionSelect={vi.fn()}
+                    >
+                        <button type="button">Open custom panel</button>
+                    </DropdownMenuWrapper>
+                </TooltipWrapper>
+            </ToolbarDropdownProvider>
+        );
+
+        fireEvent.pointerDown(getByRole('button', { name: 'Open custom panel' }), { button: 0, ctrlKey: false });
+        const option = await findByRole('button', { name: 'Choose dynamic value' });
+        const menuItem = option.closest('[data-slot="dropdown-menu-item"]');
+        const menuContent = option.closest('[data-slot="dropdown-menu-content"]');
+
+        expect(menuItem?.className).toContain('!univer-p-0');
+        expect(menuContent?.className).toContain('!univer-p-0');
     });
 });

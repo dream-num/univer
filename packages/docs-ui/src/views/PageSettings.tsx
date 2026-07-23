@@ -29,7 +29,7 @@ import {
     PAPER_TYPES,
     UniverInstanceType,
 } from '@univerjs/core';
-import { clsx, InputNumber, Select } from '@univerjs/design';
+import { borderClassName, clsx, InputNumber, resetButtonClassName, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
@@ -197,13 +197,11 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 <button
                                     key={option}
                                     type="button"
-                                    className={clsx(`
-                                      univer-flex univer-h-16 univer-cursor-pointer univer-flex-col univer-items-center
-                                      univer-justify-center univer-gap-1 univer-rounded-lg univer-border
-                                      univer-border-solid univer-border-gray-200 univer-bg-white univer-text-sm
-                                      univer-font-medium univer-text-gray-700 univer-transition-colors
+                                    className={clsx(resetButtonClassName, borderClassName, `
+                                      univer-h-16 univer-flex-col univer-gap-1 univer-rounded-lg univer-bg-white
+                                      univer-text-sm univer-font-medium univer-text-gray-700 univer-transition-colors
                                       hover:univer-border-primary-500 hover:univer-text-primary-600
-                                      dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-gray-100
+                                      dark:!univer-bg-gray-900 dark:!univer-text-gray-100
                                     `, {
                                         '!univer-border-primary-500 !univer-bg-primary-50 !univer-text-primary-600 dark:!univer-bg-primary-900': settings.modernWidth === option,
                                     })}

@@ -25,6 +25,7 @@ import {
     LockIcon,
     MoreDownIcon,
     MoreRightIcon,
+    UnlockIcon,
 } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { OBJECT_LIST_CANVAS_SECTION_ID, OBJECT_LIST_FLOATING_SECTION_ID } from './object-list-panel-layer';
@@ -322,7 +323,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
         <div
             className="
               univer-box-border univer-flex univer-size-full univer-min-w-0 univer-max-w-full univer-flex-col
-              univer-gap-3 univer-overflow-hidden univer-text-gray-700
+              univer-gap-3 univer-overflow-hidden univer-py-2 univer-text-gray-700
               dark:!univer-text-gray-200
             "
             data-drawing-object-list-panel="true"
@@ -703,7 +704,7 @@ function ObjectListRow(props: {
             {showLock && (
                 <button
                     type="button"
-                    className={clsx(iconButtonClassName, !locked && 'univer-opacity-70')}
+                    className={iconButtonClassName}
                     disabled={disabled}
                     title={locked ? labels.unlock : labels.lock}
                     aria-label={locked ? labels.unlock : labels.lock}
@@ -712,7 +713,7 @@ function ObjectListRow(props: {
                         onToggleSelectable();
                     }}
                 >
-                    <LockIcon />
+                    {locked ? <LockIcon /> : <UnlockIcon />}
                 </button>
             )}
             {showVisible && (

@@ -28,6 +28,7 @@
         "univer-cli": "bin/index.mts"
     },
     "scripts": {
+        "test": "vitest run",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {

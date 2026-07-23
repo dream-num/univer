@@ -32,12 +32,21 @@ import {
 import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../menu/menu';
 
 interface IFloatToolbarProps {
-    avaliableMenus?: string[];
+    avaliableMenus?: Array<string | IFloatToolbarMenuConfig>;
+}
+
+interface IFloatToolbarMenuConfig {
+    id: string;
+    iconColor?: string;
+}
+
+interface IFloatToolbarMenuSchema extends IMenuSchema {
+    iconColor?: string;
 }
 
 export const FLOAT_MENU_COMPONENT_KEY = 'univer.doc.float-menu';
 
-const DEFAULT_AVALIABLE_MENUS: string[] = [
+const DEFAULT_AVALIABLE_MENUS: Array<string | IFloatToolbarMenuConfig> = [
     FLOAT_TEXT_STYLE_MENU_ID,
     SetInlineFormatFontSizeCommand.id,
     SetInlineFormatBoldCommand.id,
@@ -47,30 +56,35 @@ const DEFAULT_AVALIABLE_MENUS: string[] = [
     SetInlineFormatSubscriptCommand.id,
     SetInlineFormatSuperscriptCommand.id,
     SetInlineFormatTextColorCommand.id,
-    SetInlineFormatTextBackgroundColorCommand.id,
+    {
+        id: SetInlineFormatTextBackgroundColorCommand.id,
+        iconColor: 'var(--univer-primary-600)',
+    },
 ];
 
 export function resolveFloatToolbarMenus(
     menuManagerService: IMenuManagerServiceType,
-    avaliableMenus: string[]
-): { menus: IMenuSchema[]; extraMenus: IMenuSchema[] } {
+    avaliableMenus: Array<string | IFloatToolbarMenuConfig>
+): { menus: IFloatToolbarMenuSchema[]; extraMenus: IMenuSchema[] } {
     const floatToolbarMenus = menuManagerService.getMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION);
     const flatMenus = [
         ...menuManagerService.getFlatMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION),
         ...menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON),
     ];
 
-    const menus: IMenuSchema[] = [];
-    for (const key of avaliableMenus) {
-        const item = flatMenus.find((item) => item.key === key);
+    const menus: IFloatToolbarMenuSchema[] = [];
+    const menuIds = avaliableMenus.map((config) => typeof config === 'string' ? config : config.id);
+    for (const config of avaliableMenus) {
+        const menuId = typeof config === 'string' ? config : config.id;
+        const item = flatMenus.find((item) => item.key === menuId);
         if (item) {
-            menus.push(item);
+            menus.push(typeof config === 'string' ? item : { ...item, iconColor: config.iconColor });
         }
     }
 
     return {
         menus,
-        extraMenus: floatToolbarMenus.filter((item) => item.item && !avaliableMenus.includes(item.key)),
+        extraMenus: floatToolbarMenus.filter((item) => item.item && !menuIds.includes(item.key)),
     };
 }
 
@@ -79,7 +93,7 @@ export function FloatToolbar(props: IFloatToolbarProps) {
 
     const menuManagerService = useDependency(IMenuManagerService);
 
-    const [menus, setMenus] = useState<IMenuSchema[]>([]);
+    const [menus, setMenus] = useState<IFloatToolbarMenuSchema[]>([]);
     const [extraMenus, setExtraMenus] = useState<IMenuSchema[]>([]);
 
     // subscribe to menu changes
@@ -107,7 +121,7 @@ export function FloatToolbar(props: IFloatToolbarProps) {
         >
             {menus.map((groupItem) => groupItem.item && (
                 <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
-                    <ToolbarItem key={groupItem.key} {...groupItem.item} />
+                    <ToolbarItem key={groupItem.key} {...groupItem.item} iconColor={groupItem.iconColor} />
                 </div>
             ))}
             {extraMenus.length > 0 && (

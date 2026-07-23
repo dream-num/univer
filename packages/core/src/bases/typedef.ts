@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ImageSourceType } from '../services/image-io/image-io.service';
 import type { CellValueType, LocaleType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
 
@@ -49,6 +50,19 @@ export interface IBaseResources {
     memberSets?: Record<string, string[]>;
     attachmentSets?: Record<string, string[]>;
     attachments?: Record<string, Record<string, unknown>>;
+}
+
+export interface IBaseAttachment {
+    id: string;
+    name: string;
+    mimeType?: string;
+    size?: number;
+    width?: number;
+    height?: number;
+    sourceType?: ImageSourceType;
+    source?: string;
+    base64?: string;
+    thumbnail?: string;
 }
 
 export enum BaseFieldType {

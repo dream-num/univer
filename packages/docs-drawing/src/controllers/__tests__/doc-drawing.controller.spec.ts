@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import type { CommandListener } from '@univerjs/core';
+import { BooleanNumber, CommandType, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import { RichTextEditingMutation } from '@univerjs/docs';
 import { describe, expect, it, vi } from 'vitest';
 import { DocDrawingController, DOCS_DRAWING_PLUGIN } from '../doc-drawing.controller';
 
@@ -48,13 +50,20 @@ describe('DocDrawingController', () => {
                 return { dispose: vi.fn() };
             }),
         };
+        let commandExecutedListener: CommandListener | undefined;
 
         const controller = new DocDrawingController(
             { registerDrawingData } as any,
             { registerDrawingData: registerDrawingDataForManager } as any,
             resourceManagerService as any,
             univerInstanceService as any,
-            { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as any
+            {
+                registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+                onCommandExecuted: vi.fn((listener: CommandListener) => {
+                    commandExecutedListener = listener;
+                    return { dispose: vi.fn() };
+                }),
+            } as any
         );
 
         expect(resourceManagerService.registerPluginResource).toHaveBeenCalledTimes(1);
@@ -116,6 +125,29 @@ describe('DocDrawingController', () => {
         const loadedDocDrawingData = registerDrawingData.mock.calls.at(-1)?.[1];
         expect(loadedDocDrawingData?.['doc-1']?.order).toEqual(['mask', 'photo', 'd2']);
         expect(loadedDrawingData?.['doc-1']?.data?.d2).not.toHaveProperty('transform');
+
+        const drawingDataCallCount = registerDrawingData.mock.calls.length;
+        commandExecutedListener?.({
+            id: RichTextEditingMutation.id,
+            type: CommandType.MUTATION,
+            params: {
+                unitId: 'doc-1',
+                actions: ['body'],
+                textRanges: null,
+            },
+        });
+        expect(registerDrawingData).toHaveBeenCalledTimes(drawingDataCallCount);
+
+        commandExecutedListener?.({
+            id: RichTextEditingMutation.id,
+            type: CommandType.MUTATION,
+            params: {
+                unitId: 'doc-1',
+                actions: ['drawingsOrder'],
+                textRanges: null,
+            },
+        });
+        expect(registerDrawingData).toHaveBeenCalledTimes(drawingDataCallCount + 1);
 
         capturedResource.onUnLoad('doc-1');
         expect(registerDrawingData).toHaveBeenLastCalledWith('doc-1', {

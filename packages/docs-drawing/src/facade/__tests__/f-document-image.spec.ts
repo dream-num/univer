@@ -195,6 +195,43 @@ describe('FDocument image facade', () => {
         expect(imageData?.transforms).toEqual(imageData?.transform ? [imageData.transform] : null);
     });
 
+    it('arranges an image immediately after insertion without docs-drawing-ui', async () => {
+        const firstImage = await testBed.document.insertImage({
+            source: 'data:image/png;base64,first-image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 1,
+                endOffset: 1,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+        const secondImage = await testBed.document.insertImage({
+            source: 'data:image/png;base64,second-image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 3,
+                endOffset: 3,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+
+        expect(firstImage).not.toBeNull();
+        expect(secondImage).not.toBeNull();
+        if (!firstImage || !secondImage) {
+            throw new Error('Expected both document images to be inserted');
+        }
+
+        expect(testBed.document.save().drawingsOrder).toEqual([firstImage.getId(), secondImage.getId()]);
+        expect(secondImage.setBack()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([secondImage.getId(), firstImage.getId()]);
+    });
+
     it('routes image updates, arranging, and removal through docs-drawing commands', async () => {
         const image = await testBed.document.insertImage({
             source: 'data:image/png;base64,image',

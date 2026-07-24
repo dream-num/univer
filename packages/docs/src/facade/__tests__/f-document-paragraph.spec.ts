@@ -221,6 +221,27 @@ describe('FDocumentParagraph', () => {
         ]);
     });
 
+    it('keeps original document offsets when case folding changes string length', () => {
+        createDocumentFacade(createDocumentData('doc-find-unicode', {
+            dataStream: 'İx and a.b\r\n',
+            paragraphs: [{ startIndex: 10, paragraphId: 'para_unicode' }],
+            sectionBreaks: [{ sectionId: 'section_unicode', startIndex: 11 }],
+        }));
+
+        const paragraph = document.getParagraphs()[0];
+
+        expect(paragraph.findText('x', { matchCase: false })?.describe()).toMatchObject({
+            startOffset: 1,
+            endOffset: 2,
+            text: 'x',
+        });
+        expect(paragraph.findText('A.B', { matchCase: false })?.describe()).toMatchObject({
+            startOffset: 7,
+            endOffset: 10,
+            text: 'a.b',
+        });
+    });
+
     it('rejects invalid document text ranges', () => {
         createDocumentFacade(createSimpleDocument());
 

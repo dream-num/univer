@@ -17,7 +17,7 @@
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { getParagraphContentStartOffset, PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { getParagraphContentStartOffset, PresetListType, regexp, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
@@ -233,30 +233,22 @@ export class FDocumentParagraph extends FBaseInitialable {
             throw new TypeError('Text to find must not be empty.');
         }
 
-        const paragraphText = this.getText();
         const matchCase = options.matchCase ?? true;
-        const source = matchCase ? paragraphText : paragraphText.toLocaleLowerCase();
-        const query = matchCase ? text : text.toLocaleLowerCase();
+        const paragraphText = this.getText();
+        const matcher = regexp.createLiteralRegExp(text, matchCase ? 'gu' : 'giu');
         const { startOffset } = this.getInfo();
         const matches: FDocumentTextRange[] = [];
-        let relativeOffset = 0;
 
-        while (relativeOffset <= source.length - query.length) {
-            const matchOffset = source.indexOf(query, relativeOffset);
-            if (matchOffset < 0) {
-                break;
-            }
-
-            const matchStartOffset = startOffset + matchOffset;
+        for (const match of paragraphText.matchAll(matcher)) {
+            const matchStartOffset = startOffset + match.index;
             matches.push(this._injector.createInstance(
                 FDocumentTextRange,
                 this._document,
                 matchStartOffset,
-                matchStartOffset + text.length,
+                matchStartOffset + match[0].length,
                 this._segmentId,
                 this._injector
             ));
-            relativeOffset = matchOffset + query.length;
         }
 
         return matches;

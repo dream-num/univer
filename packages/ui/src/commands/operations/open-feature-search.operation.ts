@@ -15,6 +15,7 @@
  */
 
 import type { IOperation } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { IDialogService } from '../../services/dialog/dialog.service';
 import {
@@ -32,7 +33,7 @@ export const OpenFeatureSearchOperation: IOperation = {
         dialogService.open({
             id: FEATURE_SEARCH_DIALOG_ID,
             width: 560,
-            title: { title: localeService.t('ui.featureSearch.title') },
+            title: { title: localeService.t<LocaleKey>('ui.featureSearch.title') },
             children: { label: FEATURE_SEARCH_COMPONENT },
             onClose: () => dialogService.close(FEATURE_SEARCH_DIALOG_ID),
         });

@@ -38,6 +38,7 @@ import {
     LocaleService,
     LocaleType,
     LogLevel,
+    RegionService,
     toDisposable,
     UniverInstanceType,
     UserManagerService,
@@ -367,6 +368,7 @@ function createTreeTestBed() {
         [IContextService, { useClass: ContextService }],
         [IConfigService, { useClass: ConfigService }],
         [LocaleService, { useClass: TestLocaleService as never }],
+        [RegionService],
         [IEditorService, { useClass: TestEditorService as never }],
         [IRenderManagerService, { useClass: TestRenderManagerService as never }],
         [IShortcutService, { useClass: TestShortcutService as never }],
@@ -422,7 +424,7 @@ function renderTree(injector: Injector, element: React.ReactElement) {
     return { container, root };
 }
 
-function renderDefaultTree(injector: Injector, commentId: string) {
+function renderDefaultTree(injector: Injector, commentId?: string) {
     return renderTree(
         injector,
         <ThreadCommentTree
@@ -562,10 +564,11 @@ describe('ThreadCommentTree', () => {
         expect(time?.getAttribute('dir')).toBe('ltr');
     });
 
-    it('formats comment timestamps with dateKit intl using the current locale', () => {
+    it('formats comment timestamps with dateKit intl using the current region', () => {
         const testBed = createTreeTestBed();
         const rawDate = '2026/07/07 20:35';
-        testBed.injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        testBed.injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
+        testBed.injector.get(RegionService).setRegion(LocaleType.EN_US);
         addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: rawDate }));
 
         const rendered = renderDefaultTree(testBed.injector, 'root-thread');
@@ -584,6 +587,16 @@ describe('ThreadCommentTree', () => {
 
         expect(time?.textContent).toBe(expected);
         expect(time?.textContent).not.toBe(rawDate);
+    });
+
+    it('does not render a timestamp for a new comment', () => {
+        const testBed = createTreeTestBed();
+
+        const rendered = renderDefaultTree(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('time')).toBeNull();
     });
 
     it('adds a reply through the tree editor and stores it under the root thread', async () => {

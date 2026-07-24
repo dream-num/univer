@@ -224,6 +224,10 @@ function resolveImageSize(
     options: Pick<IFDocumentInsertImageOptions, 'width' | 'height'>
 ): Required<ISize> {
     const { width: intrinsicWidth, height: intrinsicHeight } = intrinsicSize;
+    if (options.width != null && options.height != null) {
+        return { width: options.width, height: options.height };
+    }
+
     if (options.width != null) {
         return { width: options.width, height: intrinsicHeight * options.width / intrinsicWidth };
     }

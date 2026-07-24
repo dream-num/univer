@@ -24,9 +24,9 @@ const locale: typeof enUS = {
         },
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: '插入圖形',
+                rectangle: '插入矩形',
+                ellipse: '插入橢圓形',
             },
         },
         panel: {

@@ -18,22 +18,42 @@ import { useEffect, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface ISwitchProps {
+    checked?: boolean;
     defaultChecked?: boolean;
+    disabled?: boolean;
+    ariaLabel?: string;
     onChange?: (checked: boolean) => void;
 }
 
 const Switch = (props: ISwitchProps) => {
-    const { defaultChecked = false, onChange } = props;
-    const [checked, setChecked] = useState(defaultChecked);
+    const {
+        checked,
+        defaultChecked = false,
+        disabled = false,
+        ariaLabel,
+        onChange,
+    } = props;
+    const [uncontrolledChecked, setUncontrolledChecked] = useState(defaultChecked);
+    const isControlled = checked !== undefined;
+    const currentChecked = isControlled ? checked : uncontrolledChecked;
 
     const handleChange = () => {
-        setChecked(!checked);
-        onChange?.(!checked);
+        if (disabled) {
+            return;
+        }
+
+        const nextChecked = !currentChecked;
+        if (!isControlled) {
+            setUncontrolledChecked(nextChecked);
+        }
+        onChange?.(nextChecked);
     };
 
     useEffect(() => {
-        setChecked(defaultChecked);
-    }, [defaultChecked]);
+        if (!isControlled) {
+            setUncontrolledChecked(defaultChecked);
+        }
+    }, [defaultChecked, isControlled]);
 
     return (
         <div className="univer-h-4">
@@ -41,7 +61,9 @@ const Switch = (props: ISwitchProps) => {
                 <input
                     className="univer-size-0 univer-opacity-0"
                     type="checkbox"
-                    checked={checked}
+                    aria-label={ariaLabel}
+                    checked={currentChecked}
+                    disabled={disabled}
                     onChange={handleChange}
                 />
                 <span
@@ -49,8 +71,9 @@ const Switch = (props: ISwitchProps) => {
                       univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-transition-colors
                       univer-duration-200
                     `, {
-                        'univer-bg-primary-600': checked,
-                        'univer-bg-gray-200 dark:!univer-bg-gray-600': !checked,
+                        'univer-bg-primary-600': currentChecked,
+                        'univer-bg-gray-200 dark:!univer-bg-gray-600': !currentChecked,
+                        'univer-cursor-not-allowed univer-opacity-60': disabled,
                     })}
                 >
                     <span
@@ -58,7 +81,7 @@ const Switch = (props: ISwitchProps) => {
                           univer-absolute univer-bottom-0.5 univer-left-0.5 univer-size-3 univer-rounded-full
                           univer-bg-white univer-transition-transform univer-duration-200
                         `, {
-                            'univer-translate-x-3': checked,
+                            'univer-translate-x-3': currentChecked,
                         })}
                     />
                 </span>

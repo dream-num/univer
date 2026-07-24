@@ -35,6 +35,20 @@ const options = [
 afterEach(cleanup);
 
 describe('Select', () => {
+    it('should expose an accessible, keyboard-focusable trigger', () => {
+        const { container, rerender } = render(
+            <Select ariaLabel="Chart type" value="1" options={options} onChange={() => {}} />
+        );
+        const trigger = container.querySelector('[data-u-comp="select"]');
+
+        expect(trigger).toHaveAttribute('aria-label', 'Chart type');
+        expect(trigger).toHaveAttribute('role', 'button');
+        expect(trigger).toHaveAttribute('tabindex', '0');
+
+        rerender(<Select ariaLabel="Chart type" value="1" options={options} onChange={() => {}} disabled />);
+        expect(container.querySelector('[data-u-comp="select"]')).toHaveAttribute('tabindex', '-1');
+    });
+
     it('should render with value', () => {
         const { getByText } = render(<Select value="1" options={options} onChange={() => {}} />);
         expect(getByText('Option 1')).toBeInTheDocument();
@@ -80,6 +94,22 @@ describe('Select', () => {
 });
 
 describe('MultipleSelect', () => {
+    it('should expose an accessible, keyboard-focusable trigger', () => {
+        const { container, rerender } = render(
+            <MultipleSelect ariaLabel="Chart series" value={['1']} options={options} onChange={() => {}} />
+        );
+        const trigger = container.querySelector('[data-u-comp="multiple-select"]');
+
+        expect(trigger).toHaveAttribute('aria-label', 'Chart series');
+        expect(trigger).toHaveAttribute('role', 'button');
+        expect(trigger).toHaveAttribute('tabindex', '0');
+
+        rerender(
+            <MultipleSelect ariaLabel="Chart series" value={['1']} options={options} onChange={() => {}} disabled />
+        );
+        expect(container.querySelector('[data-u-comp="multiple-select"]')).toHaveAttribute('tabindex', '-1');
+    });
+
     it('should render with values', () => {
         const { getByText } = render(<MultipleSelect value={['1', '2']} options={options} onChange={() => {}} />);
         expect(getByText('Option 1')).toBeInTheDocument();

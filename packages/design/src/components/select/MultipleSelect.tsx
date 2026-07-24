@@ -31,6 +31,7 @@ interface IOption {
 
 export interface IMultipleSelectProps {
     className?: string;
+    ariaLabel?: string;
 
     /**
      * The value of select
@@ -64,6 +65,7 @@ export interface IMultipleSelectProps {
 export function MultipleSelect(props: IMultipleSelectProps) {
     const {
         className,
+        ariaLabel,
         value = [],
         disabled = false,
         options = [],
@@ -125,6 +127,9 @@ export function MultipleSelect(props: IMultipleSelectProps) {
         >
             <div
                 data-u-comp="multiple-select"
+                aria-label={ariaLabel}
+                role="button"
+                tabIndex={disabled ? -1 : 0}
                 className={clsx(selectClassName, {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,

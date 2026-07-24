@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Switch } from '../Switch';
 
 afterEach(cleanup);
@@ -44,5 +44,46 @@ describe('Switch', () => {
         checkboxElement.click();
 
         expect(checkboxElement.checked).toBeFalsy();
+    });
+
+    it('keeps the supplied checked value when the parent rejects a change', () => {
+        const onChange = vi.fn();
+        const { getByRole, rerender } = render(
+            <Switch ariaLabel="Show legend" checked onChange={onChange} />
+        );
+        const checkbox = getByRole('checkbox', { name: 'Show legend' }) as HTMLInputElement;
+
+        fireEvent.click(checkbox);
+        expect(onChange).toHaveBeenCalledWith(false);
+
+        rerender(<Switch ariaLabel="Show legend" checked onChange={onChange} />);
+        expect(checkbox.checked).toBe(true);
+    });
+
+    it('follows delayed controlled commits', () => {
+        const onChange = vi.fn();
+        const { getByRole, rerender } = render(
+            <Switch ariaLabel="Show legend" checked={false} onChange={onChange} />
+        );
+        const checkbox = getByRole('checkbox', { name: 'Show legend' }) as HTMLInputElement;
+
+        fireEvent.click(checkbox);
+        expect(onChange).toHaveBeenCalledWith(true);
+        expect(checkbox.checked).toBe(false);
+
+        rerender(<Switch ariaLabel="Show legend" checked onChange={onChange} />);
+        expect(checkbox.checked).toBe(true);
+    });
+
+    it('does not emit changes when disabled', () => {
+        const onChange = vi.fn();
+        const { getByRole } = render(
+            <Switch ariaLabel="Show legend" checked disabled onChange={onChange} />
+        );
+        const checkbox = getByRole('checkbox', { name: 'Show legend' });
+
+        fireEvent.click(checkbox);
+        expect((checkbox as HTMLInputElement).disabled).toBe(true);
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

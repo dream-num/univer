@@ -39,6 +39,15 @@ describe('InputNumber', () => {
         return <InputNumber value={value} onChange={handleChange} {...restProps} />;
     }
 
+    it('should forward native input attributes to the input', () => {
+        const { getByRole } = render(
+            <InputNumber aria-label="Minimum scale" data-testid="minimum-scale" defaultValue={1} />
+        );
+        const input = getByRole('textbox', { name: 'Minimum scale' });
+
+        expect(input).toHaveAttribute('data-testid', 'minimum-scale');
+    });
+
     it('should render with default value', () => {
         const { getByRole } = render(<InputNumber defaultValue={5} />);
         const input = getByRole('textbox') as HTMLInputElement;

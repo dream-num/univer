@@ -67,6 +67,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             onBlur,
             allowEmpty = false,
             allowClear = false,
+            ...restProps
         },
         ref
     ) => {
@@ -336,6 +337,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             <div className={clsx('univer-inline-block', className)}>
                 <div className="univer-relative univer-w-full">
                     <Input
+                        {...restProps}
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}
                         size={size}

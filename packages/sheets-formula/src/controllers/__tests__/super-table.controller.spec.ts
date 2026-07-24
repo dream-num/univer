@@ -18,10 +18,17 @@ import type { Dependency, IWorkbookData } from '@univerjs/core';
 import type { ISuperTable } from '@univerjs/engine-formula';
 import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { ICommandService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { FunctionType, ISuperTableService, RemoveSuperTableMutation, serializeRangeWithSheet, SetSuperTableMutation, SuperTableService } from '@univerjs/engine-formula';
-import { DescriptionService, IDescriptionService } from '@univerjs/formula';
+import {
+    DescriptionService,
+    FunctionType,
+    IDescriptionService,
+    ISuperTableService,
+    RemoveSuperTableMutation,
+    serializeRangeWithSheet,
+    SetSuperTableMutation,
+    SuperTableService,
+} from '@univerjs/engine-formula';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-
 import { afterEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { SuperTableController } from '../super-table.controller';

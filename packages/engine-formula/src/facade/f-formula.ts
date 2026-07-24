@@ -27,6 +27,7 @@ import type {
     ISequenceNode,
     ISetCellFormulaDependencyCalculationResultMutation,
     ISetFormulaCalculationNotificationMutation,
+    ISetFormulaCalculationResultMutation,
     ISetFormulaCalculationStartMutation,
     ISetFormulaDependencyCalculationResultMutation,
     ISetFormulaStringBatchCalculationResultMutation,
@@ -37,6 +38,7 @@ import { FBase } from '@univerjs/core/facade';
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
+    FormulaCalculationSessionService,
     GlobalComputingStatusService,
     IDefinedNamesService,
     IFunctionService,
@@ -206,6 +208,29 @@ export class FFormula extends FBase {
                 callback(params.functionsExecutedState);
             }
         });
+    }
+
+    /**
+     * Listens for formula results after every affected model has applied them.
+     */
+    calculationResultApplied(callback: (result: ISetFormulaCalculationResultMutation) => void): IDisposable {
+        const subscription = this._injector.get(FormulaCalculationSessionService).resultApplied$.subscribe((result) => {
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(() => callback(result));
+                return;
+            }
+
+            queueMicrotask(() => callback(result));
+        });
+
+        return { dispose: () => subscription.unsubscribe() };
+    }
+
+    /**
+     * Waits until the latest formula-calculation results have been applied.
+     */
+    onCalculationResultApplied(timeout?: number): Promise<void> {
+        return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied(timeout);
     }
 
     /**

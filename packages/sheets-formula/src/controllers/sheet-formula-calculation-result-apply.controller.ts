@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { FormulaCalculationSessionService, FormulaResultApplicationType } from '@univerjs/formula';
+import { FormulaCalculationSessionService, FormulaResultApplicationType } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 
 export class SheetFormulaCalculationResultApplyController extends Disposable {

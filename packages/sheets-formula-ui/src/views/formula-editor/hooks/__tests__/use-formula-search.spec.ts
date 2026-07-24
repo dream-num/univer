@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { FunctionType, sequenceNodeType } from '@univerjs/engine-formula';
-import { getFormulaReplaceResult } from '@univerjs/formula-ui';
+import { FunctionType, getFormulaReplaceResult, sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 
 describe('getFormulaReplaceResult', () => {

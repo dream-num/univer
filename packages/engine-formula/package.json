@@ -2,7 +2,7 @@
     "name": "@univerjs/engine-formula",
     "version": "1.0.0-alpha.7",
     "private": false,
-    "description": "Formula parsing, dependency management, and calculation engine for Univer.",
+    "description": "Formula parsing, function registration, dependency management, and calculation engine for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {

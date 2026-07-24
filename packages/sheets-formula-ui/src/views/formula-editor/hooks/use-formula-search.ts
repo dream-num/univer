@@ -15,12 +15,14 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import type { FunctionType } from '@univerjs/engine-formula';
-import type { ISearchItemWithType } from '@univerjs/formula';
+import type { FunctionType, ISearchItemWithType } from '@univerjs/engine-formula';
 import type { INode } from './use-formula-token';
-import { sequenceNodeType } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
-import { getFormulaReplaceResult as getSharedFormulaReplaceResult, searchFormulaFunctions } from '@univerjs/formula-ui';
+import {
+    getFormulaReplaceResult as getSharedFormulaReplaceResult,
+    IDescriptionService,
+    searchFormulaFunctions,
+    sequenceNodeType,
+} from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';

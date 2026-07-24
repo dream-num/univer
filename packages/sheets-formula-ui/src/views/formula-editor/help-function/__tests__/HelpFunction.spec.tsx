@@ -28,8 +28,7 @@ import {
     LocaleType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { FunctionType, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
+import { FunctionType, IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';

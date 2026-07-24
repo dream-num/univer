@@ -2,7 +2,7 @@
     "name": "@univerjs/engine-formula",
     "version": "1.0.0-alpha.7",
     "private": false,
-    "description": "Formula parsing, dependency management, and calculation engine for Univer.",
+    "description": "Formula parsing, function registration, dependency management, and calculation engine for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -27,7 +27,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./facade": "./src/facade/index.ts"
+        "./facade": "./src/facade/index.ts",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -45,6 +46,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
             },
             "./facade": {
                 "import": "./lib/es/facade.js",

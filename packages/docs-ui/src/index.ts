@@ -43,7 +43,10 @@ export {
     DeleteRightCommand,
     MergeTwoParagraphCommand,
 } from './commands/commands/doc-delete.command';
-export type { IDeleteCurrentParagraphCommandParams, IDeleteCustomBlockParams } from './commands/commands/doc-delete.command';
+export type {
+    IDeleteCurrentParagraphCommandParams,
+    IDeleteCustomBlockParams,
+} from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
@@ -153,7 +156,11 @@ export {
     resolveDocsTableLikeCustomBlockContentWidth,
 } from './embed-docs-custom-block-bleed';
 export type { IDocsCustomBlockBleedViewport, IDocsCustomBlockBleedViewportHint } from './embed-docs-custom-block-bleed';
-export { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
+export {
+    collectDocsTableLikeEmbedChildUnitIds,
+    createDocsCustomBlockSizeRefreshScheduler,
+    shouldRefreshDocsCustomBlockSizeForCommand,
+} from './embed-docs-custom-block-refresh';
 export { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 export type { IDocsTableLikeCustomBlockScrollOptions } from './embed-docs-custom-block-scroll';
 export { resolveDocsCustomBlockRenderViewport } from './embed-host-anchor';
@@ -260,5 +267,4 @@ export type {
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
 export type { IRichTextEditorProps } from './views/RichTextEditor';
-export { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation, createEmbedDocsCustomBlockData, createInsertCustomBlockActions, createRemoveCustomBlockActions, EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, isSheetLikeDocsCustomBlockChildType, resolveDocsCustomBlockSize } from '@univerjs/docs';
 export type { IDocsCustomBlockMutationParams, IEmbedDocsCustomBlockData } from '@univerjs/docs';

@@ -21,13 +21,13 @@ import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/she
 import type { INode } from './use-formula-token';
 import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { IDescriptionService } from '@univerjs/formula';
 import {
     buildFormulaTextRuns,
-    getFormulaHighlightDataStream as getSharedFormulaHighlightDataStream,
-} from '@univerjs/formula-ui';
+    deserializeRangeWithSheet,
+    getFormulaHighlightDataStream,
+    IDescriptionService,
+} from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent } from '@univerjs/ui';
@@ -301,10 +301,6 @@ export function useDocHight(_leadingCharacter: string = '') {
  */
 export function createFormulaHighlightBody(dataStream: string, textRuns: ITextRun[]): IDocumentBody {
     return { dataStream, textRuns };
-}
-
-function getFormulaHighlightDataStream(leadingCharacter: string, sequenceNodes: Array<ISequenceNode | string>, sourceText?: string): string {
-    return getSharedFormulaHighlightDataStream(leadingCharacter, sequenceNodes, sourceText);
 }
 
 interface IColorMap {

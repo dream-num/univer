@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
-import type { ISearchItem } from '@univerjs/formula';
+import type { IFunctionInfo, IFunctionParam, ISearchItem } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, divideYClassName, Input, scrollbarClassName, Select } from '@univerjs/design';
-import { IDescriptionService } from '@univerjs/formula';
+import { IDescriptionService } from '@univerjs/engine-formula';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';

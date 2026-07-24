@@ -148,8 +148,6 @@ export function syncCounterpartFormulaEditorSelection(
     editorService.getEditor(syncEditorId)?.setSelectionRanges(selections, false);
 }
 
-export { getSelectionAfterLaggingFormulaInput } from './hooks/use-formula-selection';
-
 export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IFormulaEditorRef>) => {
     const {
         errorText,

@@ -19,11 +19,17 @@ import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, IConfigService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
+    DescriptionService,
+    FormulaCalculationSessionController,
+    FormulaCalculationSessionService,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
     IActiveDirtyManagerService,
+    IDescriptionService,
     IFunctionService,
+    IRegisterFunctionService,
     ISuperTableService,
+    RegisterFunctionService,
     RegisterOtherFormulaService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
@@ -31,17 +37,11 @@ import {
     SetTriggerFormulaCalculationStartMutation,
     SuperTableService,
 } from '@univerjs/engine-formula';
-import {
-    DescriptionService,
-    FormulaCalculationSessionController,
-    FormulaCalculationSessionService,
-    IDescriptionService,
-    IRegisterFunctionService,
-    RegisterFunctionService,
-} from '@univerjs/formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SheetFormulaCalculationResultApplyController } from '../../controllers/sheet-formula-calculation-result-apply.controller';
+import {
+    SheetFormulaCalculationResultApplyController,
+} from '../../controllers/sheet-formula-calculation-result-apply.controller';
 import {
     CalculationMode,
     PLUGIN_CONFIG_KEY_BASE,

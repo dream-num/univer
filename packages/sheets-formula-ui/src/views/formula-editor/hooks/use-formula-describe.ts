@@ -16,8 +16,7 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
+import { IDescriptionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs';

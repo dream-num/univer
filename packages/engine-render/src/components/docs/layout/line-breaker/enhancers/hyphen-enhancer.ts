@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { Hyphen } from '../../hyphenation/hyphen';
 import type { Lang } from '../../hyphenation/lang';
-import type { IBreakPoints, LineBreaker } from '../line-breaker';
+import type { IBreakPoints } from '../line-breaker';
 import { Break, BreakPointType } from '../break';
 import { getSlicePosition, getWord } from './utils';
 
@@ -41,7 +41,7 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
     public content = '';
 
     constructor(
-        private _lineBreaker: LineBreaker,
+        private _lineBreaker: IBreakPoints,
         private _hyphen: Hyphen,
         private _lang: Lang,
         private _doNotHyphenateCaps = false

@@ -18,6 +18,7 @@ import type { Injector, ITextStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { Tools, UpdateDocsAttributeType } from '@univerjs/core';
+import { FBaseInitialable } from '@univerjs/core/facade';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
 /** A clipped text-style run in document offsets. */
@@ -51,14 +52,15 @@ export interface IFDocumentTextRangeDescription extends IFDocumentTextRange {
  * that insert or remove content before it.
  * @hideconstructor
  */
-export class FDocumentTextRange {
+export class FDocumentTextRange extends FBaseInitialable {
     constructor(
-        private readonly _document: FDocument,
-        private readonly _startOffset: number,
-        private readonly _endOffset: number,
-        private readonly _segmentId: string,
-        private readonly _injector: Injector
+        protected readonly _document: FDocument,
+        protected readonly _startOffset: number,
+        protected readonly _endOffset: number,
+        protected readonly _segmentId: string,
+        protected override readonly _injector: Injector
     ) {
+        super(_injector);
         this._validateRange();
     }
 

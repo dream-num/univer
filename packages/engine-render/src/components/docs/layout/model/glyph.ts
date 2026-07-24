@@ -112,6 +112,35 @@ export function createSkeletonLetterGlyph(
     return glyph;
 }
 
+const WHOLE_ENTITY_RENDER_MARKER = '\u200B';
+
+/**
+ * Creates one non-text skeleton glyph for a whole entity whose source spans
+ * multiple model characters. `raw` and `count` retain the source mapping.
+ *
+ * The zero-width marker keeps the glyph in the document paint loop so a
+ * component extension can render the entity, without painting its model
+ * source as ordinary text.
+ */
+export function createSkeletonWholeEntityGlyph(
+    raw: string,
+    config: IFontCreateConfig,
+    glyphMetrics: { ascent?: number; descent?: number; width?: number }
+): IDocumentSkeletonGlyph {
+    const glyph = createSkeletonLetterGlyph(raw, config, glyphMetrics);
+
+    glyph.adjustability = baseAdjustability(WHOLE_ENTITY_RENDER_MARKER, glyph.width);
+    glyph.bBox.width = glyph.width;
+    glyph.content = WHOLE_ENTITY_RENDER_MARKER;
+    glyph.count = raw.length;
+    glyph.glyphType = GlyphType.PLACEHOLDER;
+    glyph.isJustifiable = false;
+    glyph.raw = raw;
+    glyph.streamType = DataStreamTreeTokenType.LETTER;
+
+    return glyph;
+}
+
 export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {
     return _createSkeletonWordOrLetter(GlyphType.TAB, DataStreamTreeTokenType.TAB, config, glyphWidth);
 }

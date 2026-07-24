@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import type { ICustomRangeForInterceptor, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import type { IBreakPoints } from '../../line-breaker/line-breaker';
 import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
 import type { ILayoutContext } from '../../tools';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import { cjk } from '../../../../../basics/cjk-regexp';
+import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
     hasArabic,
     hasThai,
@@ -35,12 +37,14 @@ import { LineBreaker } from '../../line-breaker';
 import { BreakPointType } from '../../line-breaker/break';
 import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
 import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
+import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/whole-entity-enhancer';
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
 import {
     createSkeletonCustomBlockGlyph,
     createSkeletonLetterGlyph,
     createSkeletonTabGlyph,
+    createSkeletonWholeEntityGlyph,
     glyphShrinkLeft,
     glyphShrinkRight,
 } from '../../model/glyph';
@@ -48,7 +52,13 @@ import { getBoundingBox } from '../../model/line';
 import { fontLibrary } from '../../shaping-engine/font-library';
 import { textShape } from '../../shaping-engine/text-shaping';
 import { prepareParagraphBody } from '../../shaping-engine/utils';
-import { getCharSpaceApply, getCustomRangeGlyphMetrics, getFontCreateConfig } from '../../tools';
+import {
+    getCharSpaceApply,
+    getCustomRangeGlyphMetrics,
+    getCustomRangeGlyphMetricsFromRange,
+    getFontCreateConfig,
+    isMeasuredWholeEntityRange,
+} from '../../tools';
 import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -119,6 +129,73 @@ export interface IShapedText {
     breakPointType: BreakPointType;
 }
 
+function collectMeasuredWholeEntityRanges(
+    content: string,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode
+): ICustomRangeForInterceptor[] {
+    const ranges: ICustomRangeForInterceptor[] = [];
+    const contentStartIndex = paragraphNode.startIndex;
+    const contentEndIndex = contentStartIndex + content.length - 1;
+    const customRanges = viewModel.getBody()?.customRanges ?? [];
+
+    for (const customRange of customRanges) {
+        if (
+            !customRange.wholeEntity ||
+            customRange.startIndex < contentStartIndex ||
+            customRange.endIndex < customRange.startIndex ||
+            customRange.endIndex > contentEndIndex
+        ) {
+            continue;
+        }
+
+        const interceptedRange = viewModel.getCustomRange(customRange.startIndex);
+        if (
+            interceptedRange?.rangeId === customRange.rangeId &&
+            interceptedRange.startIndex === customRange.startIndex &&
+            interceptedRange.endIndex === customRange.endIndex &&
+            isMeasuredWholeEntityRange(interceptedRange)
+        ) {
+            ranges.push(interceptedRange);
+        }
+    }
+
+    return ranges.sort((a, b) => a.startIndex - b.startIndex);
+}
+
+function createMeasuredWholeEntityGlyph(
+    content: string,
+    range: ICustomRangeForInterceptor,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraph: IParagraph
+): IDocumentSkeletonGlyph | undefined {
+    const relativeStartIndex = range.startIndex - paragraphNode.startIndex;
+    const relativeEndIndex = range.endIndex - paragraphNode.startIndex + 1;
+    const raw = content.slice(relativeStartIndex, relativeEndIndex);
+    const config = getFontCreateConfig(relativeStartIndex, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+    const metrics = getCustomRangeGlyphMetricsFromRange(range, config);
+
+    if (!raw || !metrics) {
+        return undefined;
+    }
+
+    return createSkeletonWholeEntityGlyph(raw, config, metrics);
+}
+
+function getShapedGlyphText(glyph: IDocumentSkeletonGlyph): string {
+    if (
+        glyph.glyphType === GlyphType.PLACEHOLDER &&
+        glyph.streamType === DataStreamTreeTokenType.LETTER &&
+        glyph.raw !== glyph.content
+    ) {
+        return glyph.raw;
+    }
+
+    return glyph.content;
+}
+
 export function shaping(
     ctx: ILayoutContext,
     content: string,
@@ -134,11 +211,20 @@ export function shaping(
         drawings = {},
     } = sectionBreakConfig;
     const shapedTextList: IShapedText[] = [];
-    let breaker = new LineBreaker(content);
+    const lineBreaker = new LineBreaker(content);
     const { endIndex } = paragraphNode;
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
     const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const measuredWholeEntityRanges = collectMeasuredWholeEntityRanges(content, viewModel, paragraphNode);
+    const measuredWholeEntityRangeByStart = new Map(measuredWholeEntityRanges.map((range) => [
+        range.startIndex - paragraphNode.startIndex,
+        range,
+    ]));
+    const measuredWholeEntityRangeStarts = measuredWholeEntityRanges.map(
+        (range) => range.startIndex - paragraphNode.startIndex
+    );
+    let measuredWholeEntityRangeIndex = 0;
     let last = 0;
     let bk;
     let lastGlyphIndex = 0;
@@ -156,10 +242,10 @@ export function shaping(
     // console.log('Text Shaping Time:', +new Date() - now);
 
     // Add custom extension for linebreak.
-    tabLineBreakExtension(breaker);
-    customBlockLineBreakExtension(breaker);
+    tabLineBreakExtension(lineBreaker);
+    customBlockLineBreakExtension(lineBreaker);
 
-    breaker = new LineBreakerLinkEnhancer(breaker) as unknown as LineBreaker;
+    let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker);
 
     const lang = languageDetector.detect(content);
 
@@ -169,11 +255,16 @@ export function shaping(
     if (lang !== Lang.UNKNOWN && needHyphen) {
         // Use hyphen enhancer when the lang pattern is loaded.
         if (hyphen.hasPattern(lang)) {
-            breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang, doNotHyphenateCaps) as unknown as LineBreaker;
+            breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang, doNotHyphenateCaps);
         } else {
             hyphen.loadPattern(lang);
         }
     }
+    breaker = new LineBreakerWholeEntityEnhancer(
+        breaker,
+        measuredWholeEntityRanges,
+        paragraphNode.startIndex
+    );
 
     // eslint-disable-next-line no-cond-assign
     while ((bk = breaker.nextBreakPoint())) {
@@ -197,8 +288,33 @@ export function shaping(
             }
             lastGlyphIndex = i;
 
-            for (const glyphInfo of glyphInfosInWord) {
+            for (let glyphInfoIndex = 0; glyphInfoIndex < glyphInfosInWord.length; glyphInfoIndex++) {
+                const glyphInfo = glyphInfosInWord[glyphInfoIndex];
                 const { start, char } = glyphInfo;
+                const measuredRange = measuredWholeEntityRangeByStart.get(start);
+
+                if (measuredRange) {
+                    const glyph = createMeasuredWholeEntityGlyph(
+                        content,
+                        measuredRange,
+                        viewModel,
+                        paragraphNode,
+                        sectionBreakConfig,
+                        paragraph
+                    );
+                    if (glyph) {
+                        shapedGlyphs.push(glyph);
+                        const relativeEndIndex = measuredRange.endIndex - paragraphNode.startIndex + 1;
+                        while (
+                            glyphInfoIndex + 1 < glyphInfosInWord.length &&
+                            glyphInfosInWord[glyphInfoIndex + 1].start < relativeEndIndex
+                        ) {
+                            glyphInfoIndex++;
+                        }
+                        continue;
+                    }
+                }
+
                 const config = getFontCreateConfig(start, viewModel, paragraphNode, sectionBreakConfig, paragraph);
 
                 if (char === DataStreamTreeTokenType.TAB) {
@@ -222,10 +338,38 @@ export function shaping(
             let src = word;
             let i = last;
             while (src.length > 0) {
+                while (
+                    measuredWholeEntityRangeIndex < measuredWholeEntityRangeStarts.length &&
+                    measuredWholeEntityRangeStarts[measuredWholeEntityRangeIndex] < i
+                ) {
+                    measuredWholeEntityRangeIndex++;
+                }
+
                 const char = src.match(/^[\s\S]/gu)?.[0];
 
                 if (char == null) {
                     break;
+                }
+
+                const measuredRange = measuredWholeEntityRangeByStart.get(i);
+                if (measuredRange) {
+                    const glyph = createMeasuredWholeEntityGlyph(
+                        content,
+                        measuredRange,
+                        viewModel,
+                        paragraphNode,
+                        sectionBreakConfig,
+                        paragraph
+                    );
+                    if (glyph) {
+                        shapedGlyphs.push(glyph);
+                        const count = measuredRange.endIndex - measuredRange.startIndex + 1;
+                        i += count;
+                        src = src.substring(count);
+                        measuredWholeEntityRangeIndex++;
+                        continue;
+                    }
+                    measuredWholeEntityRangeIndex++;
                 }
 
                 if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
@@ -348,9 +492,13 @@ export function shaping(
 
                     src = src.substring(step);
                 } else {
+                    const nextMeasuredRangeStart = measuredWholeEntityRangeStarts[measuredWholeEntityRangeIndex];
+                    const sourceBeforeMeasuredRange = nextMeasuredRangeStart == null
+                        ? src
+                        : src.slice(0, nextMeasuredRangeStart - i);
                     const { step, glyphGroup } = otherHandler(
                         i,
-                        src,
+                        sourceBeforeMeasuredRange,
                         viewModel,
                         paragraphNode,
                         sectionBreakConfig,
@@ -387,7 +535,7 @@ export function shaping(
         const lastShapedGlyphs = shapedGlyphsList[shapedGlyphsList.length - 1];
 
         for (const shapedGlyphs of shapedGlyphsList) {
-            const word = shapedGlyphs.map((g) => g.content).join('');
+            const word = shapedGlyphs.map(getShapedGlyphText).join('');
 
             shapedTextList.push({
                 text: word,

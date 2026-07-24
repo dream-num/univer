@@ -35,6 +35,7 @@ export type {
     FieldConfig,
     FieldId,
     FieldSnapshot,
+    IBaseAttachment,
     IBaseCellData,
     IBaseInvalidation,
     IBaseRect,

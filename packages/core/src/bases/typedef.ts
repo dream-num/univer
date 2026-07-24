@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ImageSourceType } from '../services/image-io/image-io.service';
 import type { CellValueType, LocaleType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
 
@@ -49,6 +50,29 @@ export interface IBaseResources {
     memberSets?: Record<string, string[]>;
     attachmentSets?: Record<string, string[]>;
     attachments?: Record<string, Record<string, unknown>>;
+}
+
+export interface IBaseAttachment {
+    /** Stable attachment identifier. Use the uploaded file id for remote attachments. */
+    id: string;
+    /** Display name, including the file extension when available. */
+    name: string;
+    /** MIME type used to classify and preview the attachment. */
+    mimeType?: string;
+    /** File size in bytes. */
+    size?: number;
+    /** Image width in pixels when known. */
+    width?: number;
+    /** Image height in pixels when known. */
+    height?: number;
+    /** How to interpret `source`, for example UUID, URL, or Base64 data. */
+    sourceType?: ImageSourceType;
+    /** Canonical attachment source: an uploaded file id, URL, or Base64 data URL. */
+    source?: string;
+    /** @deprecated Store Base64 data in `source` with `sourceType` set to `BASE64`. */
+    base64?: string;
+    /** Optional preview source when it is distinct from the canonical attachment source. */
+    thumbnail?: string;
 }
 
 export enum BaseFieldType {

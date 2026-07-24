@@ -136,6 +136,25 @@ describe('FDocument image facade', () => {
         expect(image?.getSize()).toEqual({ width: 500, height: 250 });
     });
 
+    it('uses explicit dimensions without loading the image source', async () => {
+        vi.stubGlobal('Image', undefined);
+
+        const image = await testBed.document.insertImage({
+            source: 'data:image/png;base64,image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+
+        expect(image?.getSize()).toEqual({ width: 160, height: 90 });
+    });
+
     it('inserts an image with a non-inline wrapping style', async () => {
         const image = await testBed.document.insertImage({
             source: 'data:image/png;base64,image',

@@ -26,6 +26,8 @@ import {
     ActiveDirtyManagerService,
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
+    FormulaCalculationSessionController,
+    FormulaCalculationSessionService,
     FormulaCalculationTriggerService,
     FormulaDataModel,
     FormulaExecutedStateType,
@@ -38,10 +40,8 @@ import {
     SetFormulaStringBatchCalculationMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
-import { FormulaCalculationSessionController, FormulaCalculationSessionService } from '@univerjs/formula';
 import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { SheetFormulaCalculationResultApplyController } from '../sheet-formula-calculation-result-apply.controller';

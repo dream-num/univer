@@ -15,11 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IRegisterFunctionParams } from '@univerjs/formula';
+import type { IRegisterFunctionParams } from '@univerjs/engine-formula';
 import { debounce } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { IRegisterFunctionService } from '@univerjs/formula';
+import { IRegisterFunctionService, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 
 /**
  * @ignore

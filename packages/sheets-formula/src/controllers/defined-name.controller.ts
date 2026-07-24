@@ -27,10 +27,10 @@ import {
 import {
     FunctionType,
     IDefinedNamesService,
+    IDescriptionService,
     RemoveDefinedNameMutation,
     SetDefinedNameMutation,
 } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
 import {
     getSheetCommandTarget,
     SCOPE_WORKBOOK_VALUE_DEFINED_NAME,

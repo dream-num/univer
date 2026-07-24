@@ -29,9 +29,8 @@ import {
     LocaleService,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { FunctionType, sequenceNodeType } from '@univerjs/engine-formula';
+import { FunctionType, IDescriptionService, sequenceNodeType } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IDescriptionService } from '@univerjs/formula';
 import { IShortcutService, ISidebarService, KeyCode, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

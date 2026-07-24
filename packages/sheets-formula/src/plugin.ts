@@ -16,9 +16,18 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
-import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { IDescriptionService, UniverFormulaPlugin } from '@univerjs/formula';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    isNodeEnv,
+    merge,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { IDescriptionService, UniverFormulaEnginePlugin, UniverFormulaPlugin } from '@univerjs/engine-formula';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
@@ -35,14 +44,20 @@ import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
-import { SheetFormulaCalculationResultApplyController } from './controllers/sheet-formula-calculation-result-apply.controller';
+import {
+    SheetFormulaCalculationResultApplyController,
+} from './controllers/sheet-formula-calculation-result-apply.controller';
 import { SuperTableController } from './controllers/super-table.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UnitQualifierRenameController } from './controllers/unit-qualifier-rename.controller';
 import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
-import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
+import {
+    IRemoteRegisterFunctionService,
+    RemoteRegisterFunctionService,
+    RemoteRegisterFunctionServiceName,
+} from './services/remote/remote-register-function.service';
 
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverRemoteSheetsFormulaPlugin extends Plugin {

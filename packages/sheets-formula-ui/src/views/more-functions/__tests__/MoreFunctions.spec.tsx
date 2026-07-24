@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { ISearchItem } from '@univerjs/formula';
+import type { IFunctionInfo, ISearchItem } from '@univerjs/engine-formula';
 import type { Root } from 'react-dom/client';
 import {
     CommandType,
@@ -32,8 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { FunctionType } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
+import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';

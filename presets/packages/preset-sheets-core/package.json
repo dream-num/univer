@@ -81,7 +81,6 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/formula": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",

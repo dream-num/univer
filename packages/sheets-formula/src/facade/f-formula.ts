@@ -15,13 +15,16 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from '@univerjs/formula';
+import type {
+    IFunctionInfo,
+    IRegisterAsyncFunction,
+    IRegisterFunction,
+    ISingleFunctionRegisterParams,
+} from '@univerjs/engine-formula';
 import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { IRegisterFunctionService, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
-import { IRegisterFunctionService } from '@univerjs/formula';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 
 /**

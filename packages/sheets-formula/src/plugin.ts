@@ -27,7 +27,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IDescriptionService, UniverFormulaEnginePlugin, UniverFormulaPlugin } from '@univerjs/engine-formula';
+import { IDescriptionService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
@@ -91,7 +91,7 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     }
 }
 
-@DependentOn(UniverFormulaPlugin, UniverSheetsPlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
     static override packageName = pkg.name;

@@ -21,6 +21,7 @@ import pkg from '../package.json';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
 import { CalculateController } from './controllers/calculate.controller';
 import { ComputingStatusReporterController } from './controllers/computing-status.controller';
+import { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 import { FormulaCalculationTriggerController } from './controllers/formula-calculation-trigger.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { SetDependencyController } from './controllers/set-dependency.controller';
@@ -54,6 +55,9 @@ import {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 import { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
+import { DescriptionService, IDescriptionService } from './services/formula/description.service';
+import { FormulaCalculationSessionService } from './services/formula/formula-calculation-session.service';
+import { IRegisterFunctionService, RegisterFunctionService } from './services/formula/register-function.service';
 import { FunctionService, IFunctionService } from './services/function.service';
 import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import {
@@ -96,6 +100,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
+            [FormulaCalculationSessionController],
             [FormulaCalculationTriggerController],
             [SuperTableActiveDirtyController],
             // [SetSuperTableController],
@@ -128,6 +133,9 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IFunctionService, { useClass: FunctionService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [IDescriptionService, { useClass: DescriptionService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+            [FormulaCalculationSessionService],
             [FormulaCalculationTriggerService],
             [RegisterOtherFormulaService],
             [IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }],
@@ -138,6 +146,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [FormulaDataModel],
             //Controllers
             [FormulaController],
+            [FormulaCalculationSessionController],
             [FormulaCalculationTriggerController],
             [SuperTableActiveDirtyController],
             // [SetSuperTableController],

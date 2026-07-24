@@ -33,7 +33,7 @@ import univer from './function-list/univer/vi-VN';
 import web from './function-list/web/vi-VN';
 
 const locale: typeof enUS = {
-    formula: {
+    'engine-formula': {
         functionList: {
             ...array,
             ...compatibility,

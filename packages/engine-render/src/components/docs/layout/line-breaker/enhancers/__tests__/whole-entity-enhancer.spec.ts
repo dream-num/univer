@@ -67,4 +67,26 @@ describe('LineBreakerWholeEntityEnhancer', () => {
 
         expect(positions.some((position) => position > 2 && position <= 4)).toBe(false);
     });
+
+    it('handles multiple ranges in model order even when the input is unsorted', () => {
+        const content = 'A B C D E';
+        const positions = collectBreakPositions(content, [
+            {
+                startIndex: 6,
+                endIndex: 8,
+                rangeId: 'formula-2',
+                rangeType: CustomRangeType.CUSTOM,
+            },
+            {
+                startIndex: 2,
+                endIndex: 4,
+                rangeId: 'formula-1',
+                rangeType: CustomRangeType.CUSTOM,
+            },
+        ]);
+
+        expect(positions.some((position) => position > 2 && position <= 4)).toBe(false);
+        expect(positions.some((position) => position > 6 && position <= 8)).toBe(false);
+        expect(positions).toContain(content.length);
+    });
 });

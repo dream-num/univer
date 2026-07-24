@@ -52,7 +52,13 @@ import { getBoundingBox } from '../../model/line';
 import { fontLibrary } from '../../shaping-engine/font-library';
 import { textShape } from '../../shaping-engine/text-shaping';
 import { prepareParagraphBody } from '../../shaping-engine/utils';
-import { getCharSpaceApply, getCustomRangeGlyphMetrics, getFontCreateConfig, isMeasuredWholeEntityRange } from '../../tools';
+import {
+    getCharSpaceApply,
+    getCustomRangeGlyphMetrics,
+    getCustomRangeGlyphMetricsFromRange,
+    getFontCreateConfig,
+    isMeasuredWholeEntityRange,
+} from '../../tools';
 import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -131,26 +137,30 @@ function collectMeasuredWholeEntityRanges(
     const ranges: ICustomRangeForInterceptor[] = [];
     const contentStartIndex = paragraphNode.startIndex;
     const contentEndIndex = contentStartIndex + content.length - 1;
-    let offset = 0;
+    const customRanges = viewModel.getBody()?.customRanges ?? [];
 
-    while (offset < content.length) {
-        const absoluteIndex = contentStartIndex + offset;
-        const customRange = viewModel.getCustomRange(absoluteIndex);
-
+    for (const customRange of customRanges) {
         if (
-            isMeasuredWholeEntityRange(customRange) &&
-            customRange.startIndex === absoluteIndex &&
-            customRange.endIndex <= contentEndIndex
+            !customRange.wholeEntity ||
+            customRange.startIndex < contentStartIndex ||
+            customRange.endIndex < customRange.startIndex ||
+            customRange.endIndex > contentEndIndex
         ) {
-            ranges.push(customRange);
-            offset += customRange.endIndex - customRange.startIndex + 1;
             continue;
         }
 
-        offset++;
+        const interceptedRange = viewModel.getCustomRange(customRange.startIndex);
+        if (
+            interceptedRange?.rangeId === customRange.rangeId &&
+            interceptedRange.startIndex === customRange.startIndex &&
+            interceptedRange.endIndex === customRange.endIndex &&
+            isMeasuredWholeEntityRange(interceptedRange)
+        ) {
+            ranges.push(interceptedRange);
+        }
     }
 
-    return ranges;
+    return ranges.sort((a, b) => a.startIndex - b.startIndex);
 }
 
 function createMeasuredWholeEntityGlyph(
@@ -165,7 +175,7 @@ function createMeasuredWholeEntityGlyph(
     const relativeEndIndex = range.endIndex - paragraphNode.startIndex + 1;
     const raw = content.slice(relativeStartIndex, relativeEndIndex);
     const config = getFontCreateConfig(relativeStartIndex, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-    const metrics = getCustomRangeGlyphMetrics(relativeStartIndex, viewModel, paragraphNode, config);
+    const metrics = getCustomRangeGlyphMetricsFromRange(range, config);
 
     if (!raw || !metrics) {
         return undefined;
@@ -211,6 +221,10 @@ export function shaping(
         range.startIndex - paragraphNode.startIndex,
         range,
     ]));
+    const measuredWholeEntityRangeStarts = measuredWholeEntityRanges.map(
+        (range) => range.startIndex - paragraphNode.startIndex
+    );
+    let measuredWholeEntityRangeIndex = 0;
     let last = 0;
     let bk;
     let lastGlyphIndex = 0;
@@ -324,6 +338,13 @@ export function shaping(
             let src = word;
             let i = last;
             while (src.length > 0) {
+                while (
+                    measuredWholeEntityRangeIndex < measuredWholeEntityRangeStarts.length &&
+                    measuredWholeEntityRangeStarts[measuredWholeEntityRangeIndex] < i
+                ) {
+                    measuredWholeEntityRangeIndex++;
+                }
+
                 const char = src.match(/^[\s\S]/gu)?.[0];
 
                 if (char == null) {
@@ -345,8 +366,10 @@ export function shaping(
                         const count = measuredRange.endIndex - measuredRange.startIndex + 1;
                         i += count;
                         src = src.substring(count);
+                        measuredWholeEntityRangeIndex++;
                         continue;
                     }
+                    measuredWholeEntityRangeIndex++;
                 }
 
                 if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
@@ -469,9 +492,13 @@ export function shaping(
 
                     src = src.substring(step);
                 } else {
+                    const nextMeasuredRangeStart = measuredWholeEntityRangeStarts[measuredWholeEntityRangeIndex];
+                    const sourceBeforeMeasuredRange = nextMeasuredRangeStart == null
+                        ? src
+                        : src.slice(0, nextMeasuredRangeStart - i);
                     const { step, glyphGroup } = otherHandler(
                         i,
-                        src,
+                        sourceBeforeMeasuredRange,
                         viewModel,
                         paragraphNode,
                         sectionBreakConfig,

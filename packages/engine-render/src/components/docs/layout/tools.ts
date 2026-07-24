@@ -1545,7 +1545,7 @@ export function isMeasuredWholeEntityRange(
         customRange.glyphAscentEm,
         customRange.glyphDescentEm,
         customRange.glyphWidthEm,
-    ].some((value) => typeof value === 'number' && Number.isFinite(value) && value >= 0);
+    ].every((value) => typeof value === 'number' && Number.isFinite(value) && value >= 0);
 }
 
 export function getCustomRangeGlyphMetrics(
@@ -1559,6 +1559,13 @@ export function getCustomRangeGlyphMetrics(
         return undefined;
     }
 
+    return getCustomRangeGlyphMetricsFromRange(customRange, config);
+}
+
+export function getCustomRangeGlyphMetricsFromRange(
+    customRange: ICustomRangeForInterceptor,
+    config: IFontCreateConfig
+): { ascent?: number; descent?: number; width?: number } | undefined {
     const fontSize = ptToPixel(config.fontStyle.originFontSize);
     const toPixels = (value: unknown) =>
         typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value * fontSize : undefined;

@@ -26,12 +26,16 @@ import type { IBreakPoints } from '../line-breaker';
 export class LineBreakerWholeEntityEnhancer implements IBreakPoints {
     readonly content: string;
 
+    private readonly _ranges: readonly ICustomRange[];
+    private _rangeIndex = 0;
+
     constructor(
         private readonly _lineBreaker: IBreakPoints,
-        private readonly _ranges: readonly ICustomRange[],
+        ranges: readonly ICustomRange[],
         private readonly _contentStartIndex: number
     ) {
         this.content = _lineBreaker.content;
+        this._ranges = [...ranges].sort((a, b) => a.startIndex - b.startIndex);
     }
 
     nextBreakPoint(): Nullable<Break> {
@@ -46,9 +50,15 @@ export class LineBreakerWholeEntityEnhancer implements IBreakPoints {
 
     private _isInsideWholeEntity(position: number): boolean {
         const absolutePosition = this._contentStartIndex + position;
+        let range = this._ranges[this._rangeIndex];
 
-        return this._ranges.some((range) =>
-            absolutePosition > range.startIndex && absolutePosition <= range.endIndex
-        );
+        while (range && absolutePosition > range.endIndex) {
+            this._rangeIndex++;
+            range = this._ranges[this._rangeIndex];
+        }
+
+        return range != null &&
+            absolutePosition > range.startIndex &&
+            absolutePosition <= range.endIndex;
     }
 }

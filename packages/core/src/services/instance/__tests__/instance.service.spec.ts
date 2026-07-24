@@ -16,14 +16,13 @@
 
 import type { Nullable } from '../../../shared/types';
 import type { IWorkbookData } from '../../../sheets/typedef';
-import type { Workbook } from '../../../sheets/workbook';
 import type { IDocumentData } from '../../../types/interfaces/i-document-data';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Injector } from '../../../common/di';
 import { UnitModel, UniverInstanceType } from '../../../common/unit';
 import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
-import { Workbook as WorkbookModel } from '../../../sheets/workbook';
+import { Workbook } from '../../../sheets/workbook';
 import { FOCUSING_BOARD, FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../../context/context';
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
@@ -98,14 +97,14 @@ describe('UniverInstanceService', () => {
         logService.setLogLevel(LogLevel.SILENT);
         service = injector.get(IUniverInstanceService) as UniverInstanceService;
 
-        service.registerCtorForType(UniverInstanceType.UNIVER_SHEET, WorkbookModel as never);
+        service.registerCtorForType(UniverInstanceType.UNIVER_SHEET, Workbook as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_BOARD, MockBoardUnit as never);
         service.__setCreateHandler((type, data, _ctor, options) => {
             let unit: UnitModel;
             if (type === UniverInstanceType.UNIVER_SHEET) {
-                unit = injector.createInstance(WorkbookModel as never, data as Partial<IWorkbookData>, logService) as UnitModel;
+                unit = injector.createInstance(Workbook as never, data as Partial<IWorkbookData>, logService) as UnitModel;
             } else if (type === UniverInstanceType.UNIVER_DOC) {
                 unit = injector.createInstance(DocumentDataModel as never, data as Partial<IDocumentData>) as UnitModel;
             } else if (type === UniverInstanceType.UNIVER_BOARD) {
@@ -131,22 +130,22 @@ describe('UniverInstanceService', () => {
             added.push(event.unit.getUnitId());
         });
 
-        const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        const workbook = service.createUnit<Partial<IWorkbookData>, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
         const doc = service.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData(), { makeCurrent: false });
 
         expect(added).toEqual(['sheet-unit']);
         expect(workbook.getUnitId()).toBe('sheet-unit');
-        expect(service.getCurrentUnitOfType<WorkbookModel>(UniverInstanceType.UNIVER_SHEET)?.getUnitId()).toBe('sheet-unit');
+        expect(service.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId()).toBe('sheet-unit');
         expect(service.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)).toBeUndefined();
-        expect(service.getUnit<WorkbookModel>('sheet-unit', UniverInstanceType.UNIVER_SHEET)?.getUnitId()).toBe('sheet-unit');
+        expect(service.getUnit<Workbook>('sheet-unit', UniverInstanceType.UNIVER_SHEET)?.getUnitId()).toBe('sheet-unit');
         expect(service.getUnit('sheet-unit', UniverInstanceType.UNIVER_DOC)).toBeNull();
-        expect(service.getAllUnitsForType<WorkbookModel>(UniverInstanceType.UNIVER_SHEET)).toHaveLength(1);
+        expect(service.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)).toHaveLength(1);
         expect(service.getUnitType(doc.getUnitId())).toBe(UniverInstanceType.UNIVER_DOC);
         expect(service.getUnitType('missing')).toBe(UniverInstanceType.UNRECOGNIZED);
     });
 
     it('should focus sheet, doc, slide, board and reset contexts on null focus', () => {
-        const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        const workbook = service.createUnit<Partial<IWorkbookData>, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
         const doc = service.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
         const slide = service.createUnit<object, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {});
         const board = service.createUnit<object, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, {});
@@ -206,15 +205,15 @@ describe('UniverInstanceService', () => {
 
     it('should throw on duplicate unit id and support current type stream', () => {
         const currentIds: Array<string | null> = [];
-        service.getCurrentTypeOfUnit$<WorkbookModel>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+        service.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
             currentIds.push(unit?.getUnitId() ?? null);
         });
 
-        service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
-        service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData('sheet-unit-2'));
+        service.createUnit<Partial<IWorkbookData>, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        service.createUnit<Partial<IWorkbookData>, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData('sheet-unit-2'));
         service.setCurrentUnitForType('sheet-unit-2');
 
-        expect(() => service.__addUnit(new WorkbookModel(createWorkbookData('sheet-unit-2'), logService))).toThrow(/same unit id/);
+        expect(() => service.__addUnit(new Workbook(createWorkbookData('sheet-unit-2'), logService))).toThrow(/same unit id/);
         expect(() => service.setCurrentUnitForType('missing')).toThrow(/no document with unitId missing/);
         expect(currentIds).toContain('sheet-unit');
         expect(currentIds).toContain('sheet-unit-2');
@@ -232,10 +231,10 @@ describe('UniverInstanceService', () => {
     });
 
     it('does not rebroadcast unchanged current or focused units', () => {
-        const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        const workbook = service.createUnit<Partial<IWorkbookData>, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
         const currentIds: Array<string | null> = [];
         const focusedIds: Array<Nullable<string>> = [];
-        service.getCurrentTypeOfUnit$<WorkbookModel>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+        service.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
             currentIds.push(unit?.getUnitId() ?? null);
         });
         service.focused$.subscribe((unitId) => {

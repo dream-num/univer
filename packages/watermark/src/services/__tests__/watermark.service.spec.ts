@@ -17,7 +17,7 @@
 import { ILocalStorageService, Injector } from '@univerjs/core';
 import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
-import { WatermarkService } from './watermark.service';
+import { WatermarkService } from '../watermark.service';
 
 const getItem = vi.fn(async () => ({ type: 'text' }));
 const setItem = vi.fn();

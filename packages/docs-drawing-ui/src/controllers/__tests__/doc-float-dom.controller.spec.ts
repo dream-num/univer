@@ -19,7 +19,11 @@ import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { calcDocFloatDomPositionByRect, DocFloatDomController } from '../doc-float-dom.controller';
+import {
+    calcDocFloatDomPositionByRect,
+    DocFloatDomController,
+    mergeDocFloatDomRuntimeProps,
+} from '../doc-float-dom.controller';
 
 function createScene() {
     const viewport = { viewportScrollX: 10, viewportScrollY: 20, onScrollAfter$: new Subject() };
@@ -125,6 +129,21 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
 }
 
 describe('DocFloatDomController', () => {
+    it('preserves existing props while adding custom block runtime viewport', () => {
+        expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, viewportHeight: 320 },
+        } as never)).toEqual({
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, viewportHeight: 320 },
+            keep: true,
+        });
+    });
+
+    it('keeps existing props when no valid runtime viewport is available', () => {
+        expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
+            customBlockRenderViewport: { contentWidth: 0 },
+        } as never)).toEqual({ keep: true });
+    });
+
     it('calculates float dom bounds using doc viewport scroll and ancestor scale', () => {
         const scene = createScene();
 

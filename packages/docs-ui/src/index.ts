@@ -267,14 +267,4 @@ export type {
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
 export type { IRichTextEditorProps } from './views/RichTextEditor';
-export {
-    createDocsCustomBlockInsertMutation,
-    createDocsCustomBlockRemoveMutation,
-    createEmbedDocsCustomBlockData,
-    createInsertCustomBlockActions,
-    createRemoveCustomBlockActions,
-    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
-    isSheetLikeDocsCustomBlockChildType,
-    resolveDocsCustomBlockSize,
-} from '@univerjs/docs';
 export type { IDocsCustomBlockMutationParams, IEmbedDocsCustomBlockData } from '@univerjs/docs';

@@ -133,6 +133,7 @@ const locale = {
             },
             sectionSetting: {
                 selectedSections: '{0} sections selected',
+                multipleValues: 'Multiple values',
                 columnCount: 'Column count',
                 columnGap: 'Column gap',
                 columnSeparator: 'Separator',

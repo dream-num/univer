@@ -42,6 +42,7 @@ import {
     DataStreamTreeTokenType,
     DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
     DocumentBlockRangeType,
+    DocxBreakType,
     PositionedObjectLayoutType,
     resolveDocumentParagraphStyle,
 } from '@univerjs/core';
@@ -65,9 +66,8 @@ function _endsWithToken(text: string, glyphs: IDocumentSkeletonGlyph[], token: D
 
 function _isMarkedDocxColumnBreak(viewModel: DocumentViewModel, absoluteIndex: number): boolean {
     const customRange = viewModel.getCustomRange(absoluteIndex);
-    const properties = customRange?.properties as { docxBreakType?: unknown } | undefined;
 
-    return properties?.docxBreakType === 'column';
+    return customRange?.properties?.docxBreakType === DocxBreakType.COLUMN;
 }
 
 function _glyphCount(glyphs: IDocumentSkeletonGlyph[]): number {

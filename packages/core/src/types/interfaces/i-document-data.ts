@@ -417,6 +417,11 @@ export enum CustomRangeType {
     DELTED = 9999,
 }
 
+export enum DocxBreakType {
+    COLUMN = 'column',
+    TEXT_WRAPPING = 'textWrapping',
+}
+
 /**
  * Custom Block
  */

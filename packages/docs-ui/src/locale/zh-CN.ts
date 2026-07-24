@@ -135,6 +135,7 @@ const locale: typeof enUS = {
             },
             sectionSetting: {
                 selectedSections: '已选择 {0} 个节',
+                multipleValues: '多个值',
                 columnCount: '栏数',
                 columnGap: '栏间距',
                 columnSeparator: '分隔线',

@@ -44,6 +44,7 @@ import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
 import {
+    getLastNotFullColumnInfo,
     getLastPage,
     getNullSkeleton,
     getPageFromPath,
@@ -53,6 +54,27 @@ import {
     updateBlockIndex,
     updateInlineDrawingCoordsAndBorder,
 } from './tools';
+
+function getEffectiveSectionType(sectionType: SectionType | undefined): SectionType {
+    return sectionType == null || sectionType === SectionType.SECTION_TYPE_UNSPECIFIED
+        ? SectionType.NEXT_PAGE
+        : sectionType;
+}
+
+function hasCompatiblePageGeometry(page: IDocumentSkeletonPage, config: ReturnType<typeof prepareSectionBreakConfig>): boolean {
+    const { pageSize, pageOrient, marginTop, marginBottom, marginLeft, marginRight } = config;
+    return page.pageWidth === pageSize?.width &&
+        page.pageHeight === pageSize?.height &&
+        page.pageOrient === pageOrient &&
+        page.originMarginTop === marginTop &&
+        page.originMarginBottom === marginBottom &&
+        page.marginLeft === marginLeft &&
+        page.marginRight === marginRight;
+}
+
+function isTargetPageParity(pageNumber: number, sectionType: SectionType): boolean {
+    return sectionType === SectionType.EVEN_PAGE ? pageNumber % 2 === 0 : pageNumber % 2 === 1;
+}
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -1357,26 +1379,66 @@ export class DocumentSkeleton extends Skeleton {
             const sectionNode = viewModel.getChildren()[i];
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
             const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
+            const explicitPageNumberStart = viewModel.getSectionBreak(sectionNode.endIndex)?.pageNumberStart;
+            const effectiveSectionType = getEffectiveSectionType(sectionType);
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
-            let isContinuous = false;
+            let reuseCurrentPage = false;
+            let reuseNextColumn = false;
 
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
-            if (sectionType === SectionType.CONTINUOUS && curSkeletonPage != null) {
+            if (
+                effectiveSectionType === SectionType.NEXT_COLUMN &&
+                layoutAnchor == null &&
+                curSkeletonPage != null &&
+                hasCompatiblePageGeometry(curSkeletonPage, sectionBreakConfig)
+            ) {
+                updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
+                reuseNextColumn = this._addNewSectionByNextColumn(
+                    curSkeletonPage,
+                    columnProperties!,
+                    columnSeparatorType!
+                );
+            }
+
+            if (
+                effectiveSectionType === SectionType.CONTINUOUS &&
+                curSkeletonPage != null &&
+                hasCompatiblePageGeometry(curSkeletonPage, sectionBreakConfig)
+            ) {
                 updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
                 if (layoutAnchor != null && layoutAnchor >= sectionNode.startIndex && layoutAnchor <= sectionNode.endIndex) {
                     this._restoreContinuousSection(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 } else {
                     this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 }
-                isContinuous = true;
+                reuseCurrentPage = true;
+            } else if (reuseNextColumn) {
+                reuseCurrentPage = true;
             } else if (layoutAnchor == null || curSkeletonPage == null) {
+                let nextPageNumber = curSkeletonPage == null
+                    ? pageNumberStart
+                    : explicitPageNumberStart ?? curSkeletonPage.pageNumber + 1;
+                if (
+                    curSkeletonPage != null &&
+                    (effectiveSectionType === SectionType.EVEN_PAGE || effectiveSectionType === SectionType.ODD_PAGE) &&
+                    !isTargetPageParity(nextPageNumber, effectiveSectionType)
+                ) {
+                    const fillerPage = createSkeletonPage(
+                        ctx,
+                        sectionBreakConfig,
+                        skeletonResourceReference,
+                        nextPageNumber
+                    );
+                    allSkeletonPages.push(fillerPage);
+                    nextPageNumber++;
+                }
                 curSkeletonPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
-                    curSkeletonPage?.pageNumber ?? pageNumberStart
+                    nextPageNumber
                 );
             }
 
@@ -1395,10 +1457,10 @@ export class DocumentSkeleton extends Skeleton {
                 // TODO
             }
 
-            if (isContinuous) {
-                const continuousFirstPage = pages.shift();
-                if (continuousFirstPage && allSkeletonPages.length > 0) {
-                    allSkeletonPages[allSkeletonPages.length - 1] = continuousFirstPage;
+            if (reuseCurrentPage) {
+                const reusedFirstPage = pages.shift();
+                if (reusedFirstPage && allSkeletonPages.length > 0) {
+                    allSkeletonPages[allSkeletonPages.length - 1] = reusedFirstPage;
                 }
             }
 
@@ -1468,6 +1530,43 @@ export class DocumentSkeleton extends Skeleton {
         );
         newSection.parent = curSkeletonPage;
         sections.push(newSection);
+    }
+
+    private _addNewSectionByNextColumn(
+        curSkeletonPage: IDocumentSkeletonPage,
+        columnProperties: ISectionColumnProperties[],
+        columnSeparatorType: ColumnSeparatorType
+    ): boolean {
+        const currentColumn = getLastNotFullColumnInfo(curSkeletonPage);
+        const nextColumnIndex = currentColumn == null ? 0 : currentColumn.index + 1;
+        const columnCount = columnProperties.length || 1;
+        if (nextColumnIndex >= columnCount) {
+            return false;
+        }
+
+        const {
+            pageWidth,
+            pageHeight,
+            marginTop,
+            marginBottom,
+            marginLeft,
+            marginRight,
+        } = curSkeletonPage;
+        const sectionTop = curSkeletonPage.sections.at(-1)?.top ?? 0;
+        const newSection = createSkeletonSection(
+            columnProperties,
+            columnSeparatorType,
+            sectionTop,
+            0,
+            pageWidth - marginLeft - marginRight,
+            pageHeight - marginTop - marginBottom - sectionTop
+        );
+        newSection.columns.slice(0, nextColumnIndex).forEach((column) => {
+            column.isFull = true;
+        });
+        newSection.parent = curSkeletonPage;
+        curSkeletonPage.sections.push(newSection);
+        return true;
     }
 
     private _restoreContinuousSection(

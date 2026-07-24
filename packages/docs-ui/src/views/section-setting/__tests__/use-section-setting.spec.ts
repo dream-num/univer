@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentDataModel, SectionType } from '@univerjs/core';
+import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentDataModel, PageOrientType, SectionType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createSectionColumnUpdates, getSectionSettingValues, getSelectedSections } from '../use-section-setting';
+import { createSectionColumnUpdates, createSectionOrientationUpdates, getSectionSettingValues, getSelectedSections } from '../use-section-setting';
 
 describe('section setting selection', () => {
     it('maps ranges to top-level sections by their stable ids', () => {
@@ -68,11 +68,19 @@ describe('section setting selection', () => {
             },
         ];
 
-        expect(getSectionSettingValues(sections)).toEqual({
+        expect(getSectionSettingValues(sections, {})).toEqual({
             columnCount: undefined,
             columnGap: undefined,
             separatorType: undefined,
             sectionType: undefined,
+            pageWidth: undefined,
+            pageHeight: undefined,
+            pageOrient: undefined,
+            marginTop: 0,
+            marginBottom: 0,
+            marginLeft: 0,
+            marginRight: 0,
+            pageNumberStart: 1,
         });
     });
 
@@ -102,5 +110,20 @@ describe('section setting selection', () => {
         expect(updates[1].config.columnProperties).toHaveLength(3);
         expect(updates[0].config.columnProperties?.[0].paddingEnd).toBe(24);
         expect(updates[1].config.columnProperties?.[0].paddingEnd).toBe(24);
+    });
+
+    it('swaps page dimensions when changing a section orientation', () => {
+        expect(createSectionOrientationUpdates([{
+            sectionId: 'section_1',
+            startIndex: 2,
+            pageSize: { width: 600, height: 800 },
+            pageOrient: PageOrientType.PORTRAIT,
+        }], {}, PageOrientType.LANDSCAPE)).toEqual([{
+            sectionId: 'section_1',
+            config: {
+                pageOrient: PageOrientType.LANDSCAPE,
+                pageSize: { width: 800, height: 600 },
+            },
+        }]);
     });
 });

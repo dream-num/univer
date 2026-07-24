@@ -22,6 +22,7 @@ import type {
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonRow,
+    IDocumentSkeletonSection,
     IDocumentSkeletonTable,
 } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
@@ -32,7 +33,7 @@ import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extensi
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
-import { CellValueType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, ColumnSeparatorType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -68,6 +69,37 @@ export interface IDocumentOffsetConfig extends IPageMarginLayout {
     docsLeft: number;
     docsTop: number;
     documentTransform: Transform;
+}
+
+export function drawSectionColumnSeparators(
+    ctx: UniverRenderingContext,
+    section: IDocumentSkeletonSection,
+    height: number,
+    offsetX = 0,
+    offsetY = 0
+): void {
+    if (section.columns.length < 2) {
+        return;
+    }
+
+    ctx.save();
+    ctx.strokeStyle = '#000000';
+    ctx.setLineWidthByPrecision(1);
+    ctx.beginPath();
+
+    for (const column of section.columns.slice(0, -1)) {
+        if (column.separator !== ColumnSeparatorType.BETWEEN_EACH_COLUMN) {
+            continue;
+        }
+
+        const separatorX = offsetX + column.left + column.width + column.spaceWidth / 2;
+        ctx.moveToByPrecision(separatorX, offsetY);
+        ctx.lineToByPrecision(separatorX, offsetY + height);
+    }
+
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
 }
 
 export class Documents extends DocComponent {
@@ -259,11 +291,26 @@ export class Documents extends DocComponent {
 
             this._startRotation(ctx, finalAngle);
 
-            for (const section of sections) {
+            for (const [sectionIndex, section] of sections.entries()) {
                 const { columns } = section;
+                const nextSectionTop = sections
+                    .slice(sectionIndex + 1)
+                    .find((candidate) => candidate.top > section.top)
+                    ?.top;
+                const separatorHeight = Math.max(
+                    0,
+                    (nextSectionTop ?? page.pageHeight - pagePaddingTop - pagePaddingBottom) - section.top
+                );
 
                 this._drawLiquid.translateSave();
                 this._drawLiquid.translateSection(section);
+                drawSectionColumnSeparators(
+                    ctx,
+                    section,
+                    separatorHeight,
+                    alignOffsetNoAngle.x,
+                    alignOffsetNoAngle.y
+                );
 
                 for (const column of columns) {
                     const { lines, width: columnWidth } = column;

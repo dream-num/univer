@@ -34,7 +34,7 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentSectionBreakCommand } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand } from '@univerjs/docs';
 import { FDocumentParagraph } from './f-document-paragraph';
 import { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 import { FDocumentTextRange } from './f-document-text-range';
@@ -255,7 +255,7 @@ export class FDocument extends FBaseInitialable {
     }
 
     /**
-     * Returns document-level header/footer switches and margins. Margin values are in points (pt).
+     * Returns document-level header/footer switches and margins. Margin values use 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -274,7 +274,7 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Updates document-level header/footer switches and margins in a traditional document.
-     * `marginHeader` and `marginFooter` are in points (pt).
+     * `marginHeader` and `marginFooter` use 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -326,7 +326,7 @@ export class FDocument extends FBaseInitialable {
             return [];
         }
         return getTopLevelSectionBreaks(this.getBody()).map((sectionBreak) =>
-            this._injector.createInstance(FDocumentSection, this, sectionBreak.sectionId, this._injector));
+            this._injector.createInstance(FDocumentSection, this, sectionBreak.sectionId));
     }
 
     /**
@@ -356,14 +356,14 @@ export class FDocument extends FBaseInitialable {
     getSectionAt(offset: number): FDocumentSection | null {
         return this.getSections().find((section) => {
             const range = section.getRange();
-            return offset >= range.startOffset && offset <= range.endOffset;
+            return offset >= range.startOffset && offset < range.endOffset;
         }) ?? null;
     }
 
     /**
      * Inserts a traditional document section break and returns its stable facade.
      * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
-     * Numeric layout values in `config` are in points (pt).
+     * Numeric layout values in `config` are in 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -386,11 +386,12 @@ export class FDocument extends FBaseInitialable {
             sectionId,
             config,
         });
-        return success ? this._injector.createInstance(FDocumentSection, this, sectionId, this._injector) : null;
+        return success ? this._injector.createInstance(FDocumentSection, this, sectionId) : null;
     }
 
     /**
      * Inserts a column-break token in a traditional document.
+     * In a single-column section, the traditional renderer advances to the next physical page.
      * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
      * @example
      * ```ts
@@ -408,7 +409,10 @@ export class FDocument extends FBaseInitialable {
         if (this._documentDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL) {
             throw new DocsSectionUnsupportedDocumentFlavorError();
         }
-        return this.insertText(offset, DataStreamTreeTokenType.COLUMN_BREAK);
+        return this._commandService.syncExecuteCommand(InsertDocumentColumnBreakCommand.id, {
+            unitId: this.getId(),
+            offset,
+        });
     }
 
     /**

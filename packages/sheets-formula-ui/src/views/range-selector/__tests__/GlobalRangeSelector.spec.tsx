@@ -29,8 +29,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
+import { IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { RediContext } from '@univerjs/ui';

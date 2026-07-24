@@ -37,6 +37,8 @@ import { IEditorService } from '@univerjs/docs-ui';
 import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
+    isFormulaReferenceAddingContext,
+    isFormulaReferenceAddingTextContext,
     LexerTreeBuilder,
     sequenceNodeType,
     serializeRange,
@@ -44,10 +46,6 @@ import {
     serializeRangeWithSpreadsheet,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import {
-    isFormulaReferenceAddingContext,
-    isFormulaReferenceAddingTextContext,
-} from '@univerjs/formula-ui';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -55,7 +53,10 @@ import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
-import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
+import {
+    findIndexFromSequenceNodes,
+    findRefSequenceIndex,
+} from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';

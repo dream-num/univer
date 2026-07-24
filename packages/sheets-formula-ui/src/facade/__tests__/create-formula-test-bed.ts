@@ -36,6 +36,7 @@ import {
     CalculateFormulaService,
     DefinedNamesService,
     DependencyManagerService,
+    DescriptionService,
     FeatureCalculationManagerService,
     FormulaCurrentConfigService,
     FormulaDataModel,
@@ -48,6 +49,7 @@ import {
     ICalculateFormulaService,
     IDefinedNamesService,
     IDependencyManagerService,
+    IDescriptionService,
     IFeatureCalculationManagerService,
     IFormulaCurrentConfigService,
     IFormulaRuntimeService,
@@ -55,6 +57,7 @@ import {
     IHyperlinkEngineFormulaService,
     Interpreter,
     IOtherFormulaManagerService,
+    IRegisterFunctionService,
     ISheetRowFilteredService,
     ISuperTableService,
     LambdaNodeFactory,
@@ -65,6 +68,7 @@ import {
     OtherFormulaManagerService,
     PrefixNodeFactory,
     ReferenceNodeFactory,
+    RegisterFunctionService,
     SheetRowFilteredService,
     SuffixNodeFactory,
     SuperTableService,
@@ -72,12 +76,6 @@ import {
     ValueNodeFactory,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import {
-    DescriptionService,
-    IDescriptionService,
-    IRegisterFunctionService,
-    RegisterFunctionService,
-} from '@univerjs/formula';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';

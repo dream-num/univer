@@ -77,7 +77,6 @@
     "dependencies": {
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/formula": "workspace:*",
         "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",

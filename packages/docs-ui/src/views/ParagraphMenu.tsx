@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBlockRange, IDocumentBody, IParagraph, ITextRun, JSONXActions } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IDocumentBlockRange,
+    IDocumentBody,
+    IParagraph,
+    ITextRun,
+    JSONXActions,
+} from '@univerjs/core';
 import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IPopup, IValueOption, RectPopupDirection } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
+import type { LocaleKey } from '../locale/types';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../services/doc-paragraph-menu.service';
 import {
@@ -35,7 +43,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { DocBlockMoveValidatorService, DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    DocBlockMoveValidatorService,
+    DocContentInsertService,
+    DocSelectionManagerService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ContextMenuPanel,
@@ -127,19 +140,6 @@ const PARAGRAPH_MENU_HOVER_HIDE_DELAY = 240;
 const PARAGRAPH_MENU_HOVER_BRIDGE_EDGE_OVERLAP = 12;
 const PARAGRAPH_MENU_HOVER_BRIDGE_VERTICAL_PADDING = 8;
 type ParagraphMenuOpenMode = 'pointer' | 'slash';
-
-function getParagraphMenuTriggerClassName(visible: boolean) {
-    return clsx(`
-      univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1 univer-rounded-md
-      univer-border univer-border-gray-200 univer-bg-white univer-px-2 univer-py-0 univer-shadow-sm
-      univer-transition-colors
-      hover:univer-bg-gray-50 hover:univer-shadow-md
-      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
-      dark:hover:!univer-bg-gray-800
-    `, {
-        'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
-    });
-}
 
 export function shouldExecuteParagraphMenuMove(
     validatorService: Pick<DocBlockMoveValidatorService, 'canMoveBlock'>,
@@ -1269,7 +1269,16 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             <div
                 data-u-comp="paragraph-menu"
                 ref={anchorRef}
-                className={getParagraphMenuTriggerClassName(visible)}
+                className={clsx(`
+                  univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
+                  univer-rounded-md univer-border univer-border-gray-200 univer-bg-white univer-px-2 univer-py-0
+                  univer-shadow-sm univer-transition-colors
+                  hover:univer-bg-gray-50 hover:univer-shadow-md
+                  dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+                  dark:hover:!univer-bg-gray-800
+                `, {
+                    'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
+                })}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     setParagraphMenuInteractionActive(docParagraphMenuService, true);
@@ -1298,8 +1307,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                           univer-justify-center univer-border-none univer-bg-transparent univer-p-0
                           active:univer-cursor-grabbing
                         `}
-                        aria-label={localeService.t('docs-ui.doc.blockMenu.dragBlock')}
-                        title={localeService.t('docs-ui.doc.blockMenu.dragBlock')}
+                        aria-label={localeService.t<LocaleKey>('docs-ui.doc.blockMenu.dragBlock')}
+                        title={localeService.t<LocaleKey>('docs-ui.doc.blockMenu.dragBlock')}
                         onPointerDown={(event) => {
                             const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
                             const moveRange = latestTarget?.moveRange;

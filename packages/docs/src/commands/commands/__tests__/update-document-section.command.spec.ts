@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, DocumentFlavor, ICommandService, SectionType } from '@univerjs/core';
+import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, ICommandService, IUndoRedoService, PageOrientType, RedoCommand, SectionType, UndoCommand } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDocumentData, createTestBed } from '../../../facade/__tests__/create-test-bed';
-import { UpdateDocumentSectionCommand } from '../update-document-section.command';
+import { InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from '../update-document-section.command';
 
 describe('UpdateDocumentSectionCommand', () => {
     let testBed: ReturnType<typeof createTestBed>;
@@ -96,5 +96,95 @@ describe('UpdateDocumentSectionCommand', () => {
             unitId: 'section-command-doc',
             updates: [{ sectionId: 'section_one', config: { sectionType: SectionType.NEXT_PAGE } }],
         })).toBe(false);
+    });
+
+    it('rejects invalid page geometry without mutating the section', () => {
+        expect(commandService.syncExecuteCommand(UpdateDocumentSectionCommand.id, {
+            unitId: 'section-command-doc',
+            updates: [{ sectionId: 'section_one', config: { marginLeft: -1 } }],
+        })).toBe(false);
+        expect(commandService.syncExecuteCommand(UpdateDocumentSectionCommand.id, {
+            unitId: 'section-command-doc',
+            updates: [{
+                sectionId: 'section_one',
+                config: {
+                    pageSize: { width: 100, height: 100 },
+                    marginLeft: 50,
+                    marginRight: 50,
+                },
+            }],
+        })).toBe(false);
+        expect(testBed.doc.getBody()?.sectionBreaks?.[0].marginLeft).toBeUndefined();
+    });
+
+    it('updates section page geometry and numbering through one rich-text mutation', () => {
+        expect(commandService.syncExecuteCommand(UpdateDocumentSectionCommand.id, {
+            unitId: 'section-command-doc',
+            updates: [{
+                sectionId: 'section_one',
+                config: {
+                    pageNumberStart: 5,
+                    pageSize: { width: 960, height: 720 },
+                    pageOrient: PageOrientType.LANDSCAPE,
+                    marginTop: 48,
+                    marginBottom: 56,
+                    marginLeft: 64,
+                    marginRight: 72,
+                },
+            }],
+        })).toBe(true);
+
+        expect(testBed.doc.getBody()?.sectionBreaks?.[0]).toMatchObject({
+            pageNumberStart: 5,
+            pageSize: { width: 960, height: 720 },
+            pageOrient: PageOrientType.LANDSCAPE,
+            marginTop: 48,
+            marginBottom: 56,
+            marginLeft: 64,
+            marginRight: 72,
+        });
+    });
+
+    it('inserts a top-level column break with OOXML round-trip metadata', () => {
+        expect(commandService.syncExecuteCommand(InsertDocumentColumnBreakCommand.id, {
+            unitId: 'section-command-doc',
+            offset: 2,
+        })).toBe(true);
+
+        const body = testBed.doc.getBody()!;
+        expect(body.dataStream[2]).toBe(DataStreamTreeTokenType.COLUMN_BREAK);
+        expect(body.customRanges).toContainEqual(expect.objectContaining({
+            startIndex: 2,
+            endIndex: 2,
+            wholeEntity: true,
+            properties: { docxBreakType: 'column' },
+        }));
+    });
+
+    it('inserts a boundary and configures the following section as one undoable mutation', () => {
+        testBed.get(IUndoRedoService);
+        const originalBody = structuredClone(testBed.doc.getBody())!;
+
+        expect(commandService.syncExecuteCommand(InsertDocumentSectionBreakCommand.id, {
+            unitId: 'section-command-doc',
+            offset: 5,
+            sectionId: 'section_inserted',
+            nextSectionType: SectionType.ODD_PAGE,
+        })).toBe(true);
+        expect(testBed.doc.getBody()?.sectionBreaks).toEqual([
+            expect.objectContaining({ sectionId: 'section_one', startIndex: 4 }),
+            expect.objectContaining({ sectionId: 'section_inserted', startIndex: 5 }),
+            expect.objectContaining({ sectionId: 'section_two', startIndex: 10, sectionType: SectionType.ODD_PAGE }),
+        ]);
+
+        expect(commandService.syncExecuteCommand(UndoCommand.id)).toBe(true);
+        expect(testBed.doc.getBody()?.dataStream).toBe(originalBody.dataStream);
+        expect(testBed.doc.getBody()?.sectionBreaks).toEqual(originalBody.sectionBreaks);
+        expect(commandService.syncExecuteCommand(RedoCommand.id)).toBe(true);
+        expect(testBed.doc.getBody()?.sectionBreaks).toEqual([
+            expect.objectContaining({ sectionId: 'section_one', startIndex: 4 }),
+            expect.objectContaining({ sectionId: 'section_inserted', startIndex: 5 }),
+            expect.objectContaining({ sectionId: 'section_two', startIndex: 10, sectionType: SectionType.ODD_PAGE }),
+        ]);
     });
 });

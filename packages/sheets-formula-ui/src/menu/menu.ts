@@ -18,8 +18,7 @@ import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem, IValueOption } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
-import { FunctionType } from '@univerjs/engine-formula';
-import { IDescriptionService } from '@univerjs/formula';
+import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,

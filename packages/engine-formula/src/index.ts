@@ -139,6 +139,7 @@ export {
 } from './config/config';
 export type { IUniverEngineFormulaConfig } from './config/config';
 export { CalculateController } from './controllers/calculate.controller';
+export { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 export { SuperTableActiveDirtyController } from './controllers/super-table-active-dirty.controller';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
@@ -219,6 +220,27 @@ export {
     NumberValueObject,
     StringValueObject,
 } from './engine/value-object/primitive-object';
+export {
+    buildFormulaTextRuns,
+    findFormulaStructuredReferences,
+    getFormulaHighlightDataStream,
+    getFormulaReferenceIndex,
+    getFormulaReplaceResult,
+    getFormulaSequenceCharacterAtOffset,
+    getFormulaSequenceNodeIndex,
+    isFormulaReferenceAddingContext,
+    isFormulaReferenceAddingTextContext,
+    resolveFormulaReferenceEditingContext,
+    searchFormulaFunctions,
+} from './formula-editor-helpers';
+export type {
+    FormulaReferenceEditingMode,
+    FormulaSequenceNode,
+    IFormulaHighlightColors,
+    IFormulaReferenceEditingContext,
+    IFormulaRefSelection,
+    IFormulaStructuredReferenceRange,
+} from './formula-editor-helpers';
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';
@@ -281,6 +303,41 @@ export type { IFeatureCalculationManagerParam } from './services/feature-calcula
 export { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaResultStatus } from './services/formula-common';
+export { DescriptionService, IDescriptionService } from './services/formula/description.service';
+export type { ISearchItem, ISearchItemWithType } from './services/formula/description.service';
+export {
+    FormulaCalculationSessionService,
+    FormulaResultApplicationType,
+} from './services/formula/formula-calculation-session.service';
+export type { IFormulaCalculationSessionState } from './services/formula/formula-calculation-session.service';
+export { FUNCTION_LIST_ARRAY } from './services/formula/function-list/array';
+export { FUNCTION_LIST_COMPATIBILITY } from './services/formula/function-list/compatibility';
+export { FUNCTION_LIST_CUBE } from './services/formula/function-list/cube';
+export { FUNCTION_LIST_DATABASE } from './services/formula/function-list/database';
+export { FUNCTION_LIST_DATE } from './services/formula/function-list/date';
+export { FUNCTION_LIST_ENGINEERING } from './services/formula/function-list/engineering';
+export { FUNCTION_LIST_FINANCIAL } from './services/formula/function-list/financial';
+export { FUNCTION_LIST } from './services/formula/function-list/function-list';
+export { FUNCTION_LIST_INFORMATION } from './services/formula/function-list/information';
+export { FUNCTION_LIST_LOGICAL } from './services/formula/function-list/logical';
+export { FUNCTION_LIST_LOOKUP } from './services/formula/function-list/lookup';
+export { FUNCTION_LIST_MATH } from './services/formula/function-list/math';
+export { FUNCTION_LIST_STATISTICAL } from './services/formula/function-list/statistical';
+export { FUNCTION_LIST_TEXT } from './services/formula/function-list/text';
+export { FUNCTION_LIST_UNIVER } from './services/formula/function-list/univer';
+export { FUNCTION_LIST_WEB } from './services/formula/function-list/web';
+export {
+    IRegisterFunctionService,
+    RegisterFunctionService,
+} from './services/formula/register-function.service';
+export type {
+    IRegisterAsyncFunction,
+    IRegisterFunction,
+    IRegisterFunctionParams,
+    ISingleFunctionRegisterParams,
+    IUnregisterFunctionParams,
+} from './services/formula/register-function.service';
+export { generateParam, getFunctionName } from './services/formula/utils';
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
 export { GlobalComputingStatusService } from './services/global-computing-status.service';

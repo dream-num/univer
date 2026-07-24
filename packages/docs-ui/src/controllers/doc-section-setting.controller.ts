@@ -15,13 +15,17 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { ISidebarService } from '@univerjs/ui';
 import { DOC_SECTION_SETTING_COMPONENT } from '../views/section-setting/component-name';
 
 export class DocSectionSettingController extends Disposable {
     private readonly _panelId = 'DocSectionSetting';
 
-    constructor(@Inject(ISidebarService) private readonly _sidebarService: ISidebarService) {
+    constructor(
+        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService,
+        @Inject(DocSelectionManagerService) private readonly _selectionManager: DocSelectionManagerService
+    ) {
         super();
     }
 
@@ -36,5 +40,16 @@ export class DocSectionSettingController extends Disposable {
 
     closePanel(): void {
         this._sidebarService.close(this._panelId);
+    }
+
+    navigateToSectionEnd(unitId: string, sectionStart: number, sectionEnd: number): void {
+        const params = { unitId, subUnitId: unitId };
+        const cursorOffset = Math.max(sectionStart, sectionEnd - 1);
+        this._selectionManager.replaceDocRanges(
+            [{ startOffset: cursorOffset, endOffset: cursorOffset }],
+            params,
+            true,
+            { shouldFocus: false }
+        );
     }
 }

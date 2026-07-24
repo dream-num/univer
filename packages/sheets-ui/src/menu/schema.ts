@@ -310,7 +310,7 @@ export const menuSchema: MenuSchemaType = {
         [RibbonStartGroup.LAYOUT]: {
             [SetHorizontalTextAlignCommand.id]: {
                 order: 0,
-                gridLayout: { row: 1, column: 3 },
+                gridLayout: { row: 1, column: 1 },
                 menuItemFactory: HorizontalAlignMenuItemFactory,
             },
             [SetVerticalTextAlignCommand.id]: {
@@ -358,7 +358,7 @@ export const menuSchema: MenuSchemaType = {
         [RibbonStartGroup.OTHERS]: {
             [AddRangeProtectionFromToolbarCommand.id]: {
                 order: 0,
-                gridLayout: { row: 1, column: 3 },
+                gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
                 menuItemFactory: sheetPermissionToolbarMenuFactory,
             },
         },

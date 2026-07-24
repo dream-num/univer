@@ -21,6 +21,7 @@ import {
     DocumentFlavor,
     ICommandService,
     IUniverInstanceService,
+    PageOrientType,
     SectionType,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -33,6 +34,7 @@ import {
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map, startWith } from 'rxjs';
+import { DocSectionSettingController } from '../../controllers/doc-section-setting.controller';
 
 const DEFAULT_SECTION_COLUMN_GAP = 18;
 
@@ -41,6 +43,14 @@ export interface ISectionSettingValues {
     columnGap: number | undefined;
     separatorType: ColumnSeparatorType | undefined;
     sectionType: SectionType | undefined;
+    pageWidth: number | undefined;
+    pageHeight: number | undefined;
+    pageOrient: PageOrientType | undefined;
+    marginTop: number | undefined;
+    marginBottom: number | undefined;
+    marginLeft: number | undefined;
+    marginRight: number | undefined;
+    pageNumberStart: number | undefined;
 }
 
 function getCommonValue<T>(values: T[]): T | undefined {
@@ -56,12 +66,20 @@ function getSectionColumnGap(section: ISectionBreak): number {
     return section.columnProperties?.[0]?.paddingEnd ?? DEFAULT_SECTION_COLUMN_GAP;
 }
 
-export function getSectionSettingValues(sections: ISectionBreak[]): ISectionSettingValues {
+export function getSectionSettingValues(sections: ISectionBreak[], documentStyle: IDocumentStyle): ISectionSettingValues {
     return {
         columnCount: getCommonValue(sections.map(getSectionColumnCount)),
         columnGap: getCommonValue(sections.map(getSectionColumnGap)),
         separatorType: getCommonValue(sections.map((section) => section.columnSeparatorType ?? ColumnSeparatorType.NONE)),
         sectionType: getCommonValue(sections.map((section) => section.sectionType ?? SectionType.SECTION_TYPE_UNSPECIFIED)),
+        pageWidth: getCommonValue(sections.map((section) => section.pageSize?.width ?? documentStyle.pageSize?.width)),
+        pageHeight: getCommonValue(sections.map((section) => section.pageSize?.height ?? documentStyle.pageSize?.height)),
+        pageOrient: getCommonValue(sections.map((section) => section.pageOrient ?? documentStyle.pageOrient)),
+        marginTop: getCommonValue(sections.map((section) => section.marginTop ?? documentStyle.marginTop ?? 0)),
+        marginBottom: getCommonValue(sections.map((section) => section.marginBottom ?? documentStyle.marginBottom ?? 0)),
+        marginLeft: getCommonValue(sections.map((section) => section.marginLeft ?? documentStyle.marginLeft ?? 0)),
+        marginRight: getCommonValue(sections.map((section) => section.marginRight ?? documentStyle.marginRight ?? 0)),
+        pageNumberStart: getCommonValue(sections.map((section) => section.pageNumberStart ?? documentStyle.pageNumberStart ?? 1)),
     };
 }
 
@@ -77,6 +95,26 @@ export function createSectionColumnUpdates(
             sectionId: section.sectionId,
             config: {
                 columnProperties: createSectionColumnProperties(documentStyle, section, columnCount, columnGap),
+            },
+        };
+    });
+}
+
+export function createSectionOrientationUpdates(
+    sections: ISectionBreak[],
+    documentStyle: IDocumentStyle,
+    pageOrient: PageOrientType
+): IDocumentSectionUpdate[] {
+    return sections.map((section) => {
+        const currentOrient = section.pageOrient ?? documentStyle.pageOrient ?? PageOrientType.PORTRAIT;
+        const currentPageSize = section.pageSize ?? documentStyle.pageSize;
+        return {
+            sectionId: section.sectionId,
+            config: {
+                pageOrient,
+                ...(currentOrient !== pageOrient && currentPageSize?.width != null && currentPageSize.height != null
+                    ? { pageSize: { width: currentPageSize.height, height: currentPageSize.width } }
+                    : {}),
             },
         };
     });
@@ -99,10 +137,28 @@ export function getSelectedSections(documentDataModel: DocumentDataModel, ranges
     });
 }
 
+function navigateToSection(
+    controller: DocSectionSettingController,
+    documentDataModel: DocumentDataModel | null | undefined,
+    sections: ISectionBreak[],
+    sectionId: string
+): void {
+    const index = sections.findIndex((section) => section.sectionId === sectionId);
+    if (!documentDataModel || index < 0) {
+        return;
+    }
+    controller.navigateToSectionEnd(
+        documentDataModel.getUnitId(),
+        index === 0 ? 0 : sections[index - 1].startIndex + 1,
+        sections[index].startIndex
+    );
+}
+
 export function useSectionSetting() {
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(DocSelectionManagerService);
+    const controller = useDependency(DocSectionSettingController);
     const documentDataModel = useObservable(useMemo(
         () => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
         [instanceService]
@@ -121,7 +177,12 @@ export function useSectionSetting() {
         false,
         [documentDataModel, selectionManager]
     );
-    const values = getSectionSettingValues(sections);
+    const documentStyle = documentDataModel?.getDocumentStyle() ?? {};
+    const values = getSectionSettingValues(sections, documentStyle);
+    const body = documentDataModel?.getBody();
+    const allSections = documentDataModel?.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL && body
+        ? getTopLevelSectionBreaks(body)
+        : [];
 
     const update = (updates: IDocumentSectionUpdate[]) => {
         if (!documentDataModel || updates.length === 0) {
@@ -140,7 +201,15 @@ export function useSectionSetting() {
     return {
         valid: Boolean(documentDataModel && sections.length > 0),
         selectedCount: sections.length,
+        sectionOptions: allSections.map((section, index) => ({
+            label: `#${index + 1}`,
+            value: section.sectionId,
+        })),
+        selectedSectionId: sections.length === 1 ? sections[0].sectionId : undefined,
         ...values,
+        selectSection(sectionId: string) {
+            navigateToSection(controller, documentDataModel ?? undefined, allSections, sectionId);
+        },
         setColumnCount(value: number) {
             const next = Math.max(1, Math.round(value));
             return update(documentDataModel
@@ -158,6 +227,36 @@ export function useSectionSetting() {
         },
         setSectionType(value: SectionType) {
             return updateAll({ sectionType: value });
+        },
+        setPageWidth(value: number) {
+            return update(sections.map((section) => ({
+                sectionId: section.sectionId,
+                config: { pageSize: { ...documentStyle.pageSize, ...section.pageSize, width: Math.max(1, value) } },
+            })));
+        },
+        setPageHeight(value: number) {
+            return update(sections.map((section) => ({
+                sectionId: section.sectionId,
+                config: { pageSize: { ...documentStyle.pageSize, ...section.pageSize, height: Math.max(1, value) } },
+            })));
+        },
+        setPageOrient(value: PageOrientType) {
+            return update(createSectionOrientationUpdates(sections, documentStyle, value));
+        },
+        setMarginTop(value: number) {
+            return updateAll({ marginTop: Math.max(0, value) });
+        },
+        setMarginBottom(value: number) {
+            return updateAll({ marginBottom: Math.max(0, value) });
+        },
+        setMarginLeft(value: number) {
+            return updateAll({ marginLeft: Math.max(0, value) });
+        },
+        setMarginRight(value: number) {
+            return updateAll({ marginRight: Math.max(0, value) });
+        },
+        setPageNumberStart(value: number) {
+            return updateAll({ pageNumberStart: Math.max(1, Math.round(value)) });
         },
     };
 }

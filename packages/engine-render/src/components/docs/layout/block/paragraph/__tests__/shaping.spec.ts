@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import type { ICustomRangeForInterceptor } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
@@ -42,6 +43,95 @@ describe('shaping', () => {
         expect(result.length).toBeGreaterThan(0);
         const allGlyphs = result.flatMap((r) => r.glyphs);
         expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes a hidden measured whole entity as one atomic glyph', () => {
+        const source = String.raw`\sqrt{x^2 + 1}+\sum_{i=1}^{n} i^2`;
+        const prefix = 'Formula: ';
+        const content = `${prefix}${source} after`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content);
+        const range: ICustomRangeForInterceptor = {
+            startIndex: prefix.length,
+            endIndex: prefix.length + source.length - 1,
+            rangeId: 'formula-1',
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            show: false,
+            glyphAscentEm: 1.75,
+            glyphDescentEm: 1.25,
+            glyphWidthEm: 7.25,
+        };
+        vi.spyOn(viewModel, 'getCustomRange').mockImplementation((index) =>
+            index >= range.startIndex && index <= range.endIndex ? range : undefined
+        );
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const allGlyphs = result.flatMap((item) => item.glyphs);
+        const formulaGlyph = allGlyphs.find((glyph) => glyph.raw === source);
+        let breakPosition = 0;
+        const breakPositions = result.map((item) => {
+            breakPosition += item.text.length;
+            return breakPosition;
+        });
+
+        expect(formulaGlyph).toBeDefined();
+        if (!formulaGlyph?.fontStyle) {
+            throw new Error('Expected the measured whole entity to produce a font-backed glyph.');
+        }
+        const emSize = formulaGlyph.fontStyle.originFontSize / 0.75;
+        expect(formulaGlyph.content).toBe('\u200B');
+        expect(formulaGlyph.count).toBe(source.length);
+        expect(formulaGlyph.width).toBeCloseTo(emSize * 7.25);
+        expect(formulaGlyph.bBox.ba).toBeCloseTo(emSize * 1.75);
+        expect(formulaGlyph.bBox.bd).toBeCloseTo(emSize * 1.25);
+        expect(allGlyphs.filter((glyph) => glyph.raw === source)).toHaveLength(1);
+        expect(breakPositions.some((position) =>
+            position > range.startIndex && position <= range.endIndex
+        )).toBe(false);
+    });
+
+    it('preserves the model text for a one-character measured whole entity', () => {
+        const content = 'axb';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content);
+        const range: ICustomRangeForInterceptor = {
+            startIndex: 1,
+            endIndex: 1,
+            rangeId: 'formula-1',
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            show: false,
+            glyphWidthEm: 1,
+        };
+        vi.spyOn(viewModel, 'getCustomRange').mockImplementation((index) =>
+            index === range.startIndex ? range : undefined
+        );
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.map((item) => item.text).join('')).toBe(`${content}${DataStreamTreeTokenType.PARAGRAPH}`);
+        expect(result.flatMap((item) => item.glyphs).filter((glyph) => glyph.raw === 'x')).toHaveLength(1);
+    });
+
+    it('keeps visible whole-entity text on the normal shaping path', () => {
+        const source = 'abc';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(source);
+        const range: ICustomRangeForInterceptor = {
+            startIndex: 0,
+            endIndex: source.length - 1,
+            rangeId: 'mention-1',
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            glyphWidthEm: 3,
+        };
+        vi.spyOn(viewModel, 'getCustomRange').mockImplementation((index) =>
+            index >= range.startIndex && index <= range.endIndex ? range : undefined
+        );
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const sourceGlyphs = result.flatMap((item) => item.glyphs).filter((glyph) => source.includes(glyph.raw));
+
+        expect(sourceGlyphs.map((glyph) => glyph.raw).join('')).toBe(source);
+        expect(sourceGlyphs).toHaveLength(source.length);
     });
 
     it('shapes text with tab characters', () => {

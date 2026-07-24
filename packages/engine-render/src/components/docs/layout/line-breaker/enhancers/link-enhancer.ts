@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IBreakPoints, LineBreaker } from '../line-breaker';
+import type { IBreakPoints } from '../line-breaker';
 import { Break, BreakPointType } from '../break';
 import { getSlicePosition } from './utils';
 
@@ -114,7 +114,7 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
     public content = '';
 
     constructor(
-        private _lineBreaker: LineBreaker
+        private _lineBreaker: IBreakPoints
     ) {
         this.content = _lineBreaker.content;
     }

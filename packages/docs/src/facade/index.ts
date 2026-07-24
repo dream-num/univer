@@ -19,7 +19,7 @@ import './f-enum';
 
 export { FDocument } from './f-document';
 export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
-export type { IFDocumentParagraphInfo } from './f-document-paragraph';
+export type { IFDocumentFindTextOptions, IFDocumentParagraphInfo } from './f-document-paragraph';
 export { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 export type { IFDocumentSectionColumnOptions, IFDocumentSectionDescription } from './f-document-section';
 export { FDocumentTextRange } from './f-document-text-range';

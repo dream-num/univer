@@ -18,6 +18,7 @@ import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univ
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { getParagraphContentStartOffset, PresetListType, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { FBaseInitialable } from '@univerjs/core/facade';
 import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
@@ -36,6 +37,23 @@ export interface IFDocumentParagraphInfo {
 }
 
 /**
+ * Options for locating text inside a document paragraph.
+ */
+export interface IFDocumentFindTextOptions {
+    /**
+     * Whether matching is case-sensitive.
+     * @default true
+     */
+    matchCase?: boolean;
+
+    /**
+     * Zero-based occurrence to return from {@link FDocumentParagraph.findText}.
+     * @default 0
+     */
+    occurrence?: number;
+}
+
+/**
  * A paragraph facade wrapper.
  *
  * Paragraph identity is backed by the persisted `paragraphId`. The id is
@@ -44,13 +62,15 @@ export interface IFDocumentParagraphInfo {
  *
  * @hideconstructor
  */
-export class FDocumentParagraph {
+export class FDocumentParagraph extends FBaseInitialable {
     constructor(
-        private readonly _document: FDocument,
-        private readonly _paragraphId: string,
-        private readonly _segmentId = '',
-        private readonly _injector: Injector
-    ) {}
+        protected readonly _document: FDocument,
+        protected readonly _paragraphId: string,
+        protected readonly _segmentId = '',
+        protected override readonly _injector: Injector
+    ) {
+        super(_injector);
+    }
 
     /**
      * Get the persisted paragraph id.
@@ -147,6 +167,99 @@ export class FDocumentParagraph {
     getTextRange(): FDocumentTextRange {
         const { startOffset, endOffset } = this.getInfo();
         return this._injector.createInstance(FDocumentTextRange, this._document, startOffset, endOffset, this._segmentId, this._injector);
+    }
+
+    /**
+     * Finds one literal text occurrence inside this paragraph.
+     *
+     * The returned text range is fixed when it is created. Resolve a new range
+     * after edits that insert or remove content before the match.
+     *
+     * @param {string} text Literal text to find. It must not be empty.
+     * @param {IFDocumentFindTextOptions} [options] Case sensitivity and zero-based occurrence.
+     * @returns {FDocumentTextRange | null} The matching fixed text range, or `null` when no such occurrence exists.
+     * @example
+     * ```ts
+     * const univerAPI = FUniver.newAPI(univer);
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) throw new Error('No active document');
+     *
+     * const paragraph = document.findParagraphByText('Launch formula');
+     * if (!paragraph) throw new Error('Target paragraph not found');
+     *
+     * const range = paragraph.findText('formula');
+     * if (!range) throw new Error('Target text not found');
+     *
+     * console.log(range.describe());
+     * ```
+     */
+    findText(text: string, options: IFDocumentFindTextOptions = {}): FDocumentTextRange | null {
+        const occurrence = options.occurrence ?? 0;
+        if (!Number.isInteger(occurrence) || occurrence < 0) {
+            throw new RangeError('Text occurrence must be a non-negative integer.');
+        }
+
+        return this.findAllText(text, options)[occurrence] ?? null;
+    }
+
+    /**
+     * Finds every non-overlapping literal text occurrence inside this paragraph.
+     *
+     * Results are ordered from the start of the paragraph. The returned ranges
+     * are fixed when created; use them immediately and resolve new ranges after
+     * edits that change earlier document content.
+     *
+     * @param {string} text Literal text to find. It must not be empty.
+     * @param {Omit<IFDocumentFindTextOptions, 'occurrence'>} [options] Case-sensitivity option.
+     * @returns {FDocumentTextRange[]} All matching fixed text ranges, or an empty array when no matches exist.
+     * @example
+     * ```ts
+     * const univerAPI = FUniver.newAPI(univer);
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) throw new Error('No active document');
+     *
+     * const paragraph = document.findParagraphByText('x plus x');
+     * if (!paragraph) throw new Error('Target paragraph not found');
+     *
+     * const matches = paragraph.findAllText('x');
+     * console.log(matches.map((range) => range.describe()));
+     * ```
+     */
+    findAllText(
+        text: string,
+        options: Omit<IFDocumentFindTextOptions, 'occurrence'> = {}
+    ): FDocumentTextRange[] {
+        if (text.length === 0) {
+            throw new TypeError('Text to find must not be empty.');
+        }
+
+        const paragraphText = this.getText();
+        const matchCase = options.matchCase ?? true;
+        const source = matchCase ? paragraphText : paragraphText.toLocaleLowerCase();
+        const query = matchCase ? text : text.toLocaleLowerCase();
+        const { startOffset } = this.getInfo();
+        const matches: FDocumentTextRange[] = [];
+        let relativeOffset = 0;
+
+        while (relativeOffset <= source.length - query.length) {
+            const matchOffset = source.indexOf(query, relativeOffset);
+            if (matchOffset < 0) {
+                break;
+            }
+
+            const matchStartOffset = startOffset + matchOffset;
+            matches.push(this._injector.createInstance(
+                FDocumentTextRange,
+                this._document,
+                matchStartOffset,
+                matchStartOffset + text.length,
+                this._segmentId,
+                this._injector
+            ));
+            relativeOffset = matchOffset + query.length;
+        }
+
+        return matches;
     }
 
     /**

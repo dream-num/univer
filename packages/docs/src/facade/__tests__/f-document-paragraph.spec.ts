@@ -166,6 +166,61 @@ describe('FDocumentParagraph', () => {
         });
     });
 
+    it('finds literal text ranges inside a paragraph', () => {
+        createDocumentFacade(createSimpleDocument());
+
+        const paragraph = document.getParagraphs()[0];
+
+        expect(paragraph.findText('pha')?.describe()).toMatchObject({
+            startOffset: 2,
+            endOffset: 5,
+            segmentId: '',
+            text: 'pha',
+        });
+        expect(paragraph.findText('PHA')).toBeNull();
+        expect(paragraph.findText('PHA', { matchCase: false })?.getText()).toBe('pha');
+        expect(paragraph.findAllText('a').map((range) => range.getRange())).toEqual([
+            { startOffset: 4, endOffset: 5, segmentId: '' },
+        ]);
+        expect(paragraph.findText('missing')).toBeNull();
+        expect(() => paragraph.findText('', { occurrence: 0 })).toThrow(TypeError);
+        expect(() => paragraph.findText('a', { occurrence: -1 })).toThrow(RangeError);
+    });
+
+    it('resolves repeated text occurrences and keeps header matches scoped to their segment', () => {
+        const headerId = 'header-find';
+        createDocumentFacade({
+            ...createDocumentData('doc-find-repeated', {
+                dataStream: 'x plus x\r\n',
+                paragraphs: [{ startIndex: 8, paragraphId: 'para_body_repeated' }],
+                sectionBreaks: [{ sectionId: 'section_body_repeated', startIndex: 9 }],
+            }),
+            headers: {
+                [headerId]: {
+                    headerId,
+                    body: {
+                        dataStream: 'X and x\r\n',
+                        paragraphs: [{ startIndex: 7, paragraphId: 'para_header_repeated' }],
+                        sectionBreaks: [{ sectionId: 'section_header_repeated', startIndex: 8 }],
+                    },
+                },
+            },
+        });
+
+        const bodyParagraph = document.getParagraphs()[0];
+        const headerParagraph = document.getParagraphs(headerId)[0];
+
+        expect(bodyParagraph.findAllText('x').map((range) => range.getRange())).toEqual([
+            { startOffset: 0, endOffset: 1, segmentId: '' },
+            { startOffset: 7, endOffset: 8, segmentId: '' },
+        ]);
+        expect(bodyParagraph.findText('x', { occurrence: 1 })?.getText()).toBe('x');
+        expect(headerParagraph.findAllText('x', { matchCase: false }).map((range) => range.getRange())).toEqual([
+            { startOffset: 0, endOffset: 1, segmentId: headerId },
+            { startOffset: 6, endOffset: 7, segmentId: headerId },
+        ]);
+    });
+
     it('rejects invalid document text ranges', () => {
         createDocumentFacade(createSimpleDocument());
 

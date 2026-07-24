@@ -17,10 +17,30 @@
 import { addCustomDecorationTextX, deleteCustomDecorationTextX } from './custom-decoration';
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
 import { addDrawing } from './drawings';
-import { changeParagraphBulletNestLevel, setParagraphBullet, setParagraphStyle, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
+import {
+    changeParagraphBulletNestLevel,
+    setParagraphBullet,
+    setParagraphStyle,
+    switchParagraphBullet,
+    toggleChecklistParagraph,
+} from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
-import { getParagraphsInRange, getParagraphsInRanges, isSegmentIntersects, makeSelection, normalizeSelection, transformParagraphs } from './selection';
-import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextRuns, replaceSelectionTextX, retainSelectionTextX } from './text-x-utils';
+import {
+    getParagraphsInRange,
+    getParagraphsInRanges,
+    isSegmentIntersects,
+    makeSelection,
+    normalizeSelection,
+    transformParagraphs,
+} from './selection';
+import {
+    addCustomRangeTextX,
+    deleteCustomRangeTextX,
+    deleteSelectionTextX,
+    replaceSelectionTextRuns,
+    replaceSelectionTextX,
+    retainSelectionTextX,
+} from './text-x-utils';
 
 export class BuildTextUtils {
     static customRange = {
@@ -82,7 +102,11 @@ export class BuildTextUtils {
 export { getSingleDataStreamChange } from './data-stream-change';
 export type { IDataStreamChange } from './data-stream-change';
 export { getCustomBlockIdsInSelections } from './drawings';
-export { getParagraphContentStartOffset, getParagraphContentStartOffsets, getParagraphFollowingBlockOffset } from './paragraph';
+export {
+    getParagraphContentStartOffset,
+    getParagraphContentStartOffsets,
+    getParagraphFollowingBlockOffset,
+} from './paragraph';
 export {
     containsInteriorInsertionOffset,
     containsStreamIndex,

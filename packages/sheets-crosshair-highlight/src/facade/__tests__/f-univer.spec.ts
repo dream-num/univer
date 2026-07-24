@@ -24,8 +24,8 @@ import {
     ToggleCrosshairHighlightOperation,
 } from '@univerjs/sheets-crosshair-highlight';
 import { describe, expect, it, vi } from 'vitest';
-import { FSheetsCrosshairHighlightEventNameMixin } from './f-event';
-import { FUniverSheetsCrosshairHighlightMixin } from './f-univer';
+import { FSheetsCrosshairHighlightEventNameMixin } from '../f-event';
+import { FUniverSheetsCrosshairHighlightMixin } from '../f-univer';
 
 class TestCommandService {
     readonly callbacks: Array<(commandInfo: { id: string }) => void> = [];

@@ -17,7 +17,7 @@
 import { Injector, ThemeService } from '@univerjs/core';
 import { firstValueFrom, skip, take } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS, SheetsCrosshairHighlightService } from './crosshair.service';
+import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS, SheetsCrosshairHighlightService } from '../crosshair.service';
 
 function createService(): { service: SheetsCrosshairHighlightService; themeService: ThemeService } {
     const injector = new Injector();

@@ -21,8 +21,11 @@
 import type { Nullable } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { Root } from 'react-dom/client';
-import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import type { ICellEditorBoundingClientRect, ICellEditorManagerParam } from '../../services/editor/cell-editor-manager.service';
+import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../../services/editor-bridge.service';
+import type {
+    ICellEditorBoundingClientRect,
+    ICellEditorManagerParam,
+} from '../../../services/editor/cell-editor-manager.service';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
@@ -39,12 +42,19 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
-import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
-import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator, ISheetEmbedInteractionBoundaryService, ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
-import { EditorContainer, shouldRefocusCellEditorAfterPointerDown } from './EditorContainer';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { ICellEditorManagerService } from '../../../services/editor/cell-editor-manager.service';
+import { SheetCellEditorResizeService } from '../../../services/editor/cell-editor-resize.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
+    EmbedInteractionBoundaryService,
+    EmbedRuntimeFocusCoordinator,
+    ISheetEmbedInteractionBoundaryService,
+    ISheetEmbedRuntimeFocusCoordinator,
+} from '../../../services/sheet-embed-integration.service';
+import { EditorContainer, shouldRefocusCellEditorAfterPointerDown } from '../EditorContainer';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

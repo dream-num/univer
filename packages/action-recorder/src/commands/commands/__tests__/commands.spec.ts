@@ -34,10 +34,18 @@ import {
 import { MessageType } from '@univerjs/design';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ActionRecorderService } from '../../services/action-recorder.service';
-import { ActionReplayService } from '../../services/replay.service';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from './record.command';
-import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from './replay.command';
+import { ActionRecorderService } from '../../../services/action-recorder.service';
+import { ActionReplayService } from '../../../services/replay.service';
+import {
+    CompleteRecordingActionCommand,
+    StartRecordingActionCommand,
+    StopRecordingActionCommand,
+} from '../record.command';
+import {
+    ReplayLocalRecordCommand,
+    ReplayLocalRecordOnActiveCommand,
+    ReplayLocalRecordOnNamesakeCommand,
+} from '../replay.command';
 
 const APPLY_CELL_VALUE_COMMAND_ID = 'action-recorder.command-test.apply-cell-value';
 

@@ -18,7 +18,7 @@ import { awaitTime } from '@univerjs/core';
 import { IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { WatermarkRenderController } from './watermark.render.controller';
+import { WatermarkRenderController } from '../watermark.render.controller';
 
 const layerInstances: Array<{ updateConfig: ReturnType<typeof vi.fn> }> = [];
 

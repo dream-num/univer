@@ -24,8 +24,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
     CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS,
     SheetsCrosshairHighlightService,
-} from '../../services/crosshair.service';
-import { CrosshairOverlay } from './CrosshairHighlight';
+} from '../../../services/crosshair.service';
+import { CrosshairOverlay } from '../CrosshairHighlight';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

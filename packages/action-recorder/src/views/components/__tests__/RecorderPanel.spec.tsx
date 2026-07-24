@@ -36,11 +36,15 @@ import { ILocalFileService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
-import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../../commands/operations/operation';
-import enUS from '../../locale/en-US';
-import { ActionRecorderService } from '../../services/action-recorder.service';
-import { RecorderPanel } from './RecorderPanel';
+import {
+    CompleteRecordingActionCommand,
+    StartRecordingActionCommand,
+    StopRecordingActionCommand,
+} from '../../../commands/commands/record.command';
+import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../../../commands/operations/operation';
+import enUS from '../../../locale/en-US';
+import { ActionRecorderService } from '../../../services/action-recorder.service';
+import { RecorderPanel } from '../RecorderPanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

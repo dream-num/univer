@@ -134,8 +134,12 @@ export class FDocumentImageMixin extends FDocument implements IFDocumentImageMix
     override async insertImage(options: IFDocumentInsertImageOptions): Promise<FDocumentImage | null> {
         const unitId = this.getId();
         const imageId = generateRandomId(6);
-        const intrinsicSize = await this._getIntrinsicSize(options.source, options.imageSourceType);
-        const size = resolveImageSize(intrinsicSize, options);
+        const size = options.width != null && options.height != null
+            ? { width: options.width, height: options.height }
+            : resolveImageSize(
+                await this._getIntrinsicSize(options.source, options.imageSourceType),
+                options
+            );
         const defaultTransform = buildDocTransform(size.width, size.height);
         const wrappingStyle = options.wrappingStyle ?? TextWrappingStyle.INLINE;
         const docTransform = {
@@ -220,10 +224,6 @@ function resolveImageSize(
     options: Pick<IFDocumentInsertImageOptions, 'width' | 'height'>
 ): Required<ISize> {
     const { width: intrinsicWidth, height: intrinsicHeight } = intrinsicSize;
-    if (options.width != null && options.height != null) {
-        return { width: options.width, height: options.height };
-    }
-
     if (options.width != null) {
         return { width: options.width, height: intrinsicHeight * options.width / intrinsicWidth };
     }

@@ -33,8 +33,8 @@ export type {
 } from './commands/commands/set-document-default-paragraph-style.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
-export { DeleteDocumentSectionBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
-export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
+export { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
+export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentColumnBreakCommandParams, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
 export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
@@ -86,7 +86,7 @@ export {
 } from './utils/custom-range-factory';
 export { generateParagraphs } from './utils/paragraphs';
 export { replaceSelectionFactory } from './utils/replace-selection-factory';
-export { createSectionColumnProperties } from './utils/section-columns';
+export { createSectionColumnProperties, getSectionContentWidth } from './utils/section-columns';
 export { getTopLevelSectionBreaks } from './utils/sections';
 export { buildDocTransform, docDrawingPositionToTransform, transformToDocDrawingPosition } from './utils/transform-position';
 export { consumeContentInsertRange, getContentInsertRange, isHeaderFooterSelection, normalizeTextRange } from './utils/util';

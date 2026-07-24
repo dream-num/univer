@@ -16,10 +16,10 @@
 
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
-import { ColumnSeparatorType, LocaleService, SectionType } from '@univerjs/core';
+import { ColumnSeparatorType, LocaleService, PageOrientType, SectionType } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { DocSectionSettingController } from '../../controllers/doc-section-setting.controller';
 import { useSectionSetting } from './use-section-setting';
 
@@ -43,8 +43,9 @@ export function SectionSetting() {
     const localeService = useDependency(LocaleService);
     const controller = useDependency(DocSectionSettingController);
     const setting = useSectionSetting();
-    const locale = useObservable(localeService.currentLocale$);
-    const labels = useMemo(() => ({
+    useObservable(localeService.currentLocale$);
+    const labels = {
+        section: localeService.t<LocaleKey>('docs-ui.doc.slider.sectionSetting'),
         selectedSections: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.selectedSections', String(setting.selectedCount)),
         columnCount: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount'),
         columnGap: `${localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')}(px)`,
@@ -54,10 +55,22 @@ export function SectionSetting() {
         sectionStart: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.sectionStart'),
         unspecified: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.unspecified'),
         continuous: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.continuous'),
+        nextColumn: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.nextColumn'),
         nextPage: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.nextPage'),
         evenPage: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.evenPage'),
         oddPage: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.oddPage'),
-    }), [locale, localeService, setting.selectedCount]);
+        pageSetup: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageSetup'),
+        pageWidth: `${localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageWidth')} (px)`,
+        pageHeight: `${localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageHeight')} (px)`,
+        orientation: localeService.t<LocaleKey>('docs-ui.page-settings.orientation'),
+        portrait: localeService.t<LocaleKey>('docs-ui.page-settings.portrait'),
+        landscape: localeService.t<LocaleKey>('docs-ui.page-settings.landscape'),
+        marginTop: `${localeService.t<LocaleKey>('docs-ui.page-settings.top')} (px)`,
+        marginBottom: `${localeService.t<LocaleKey>('docs-ui.page-settings.bottom')} (px)`,
+        marginLeft: `${localeService.t<LocaleKey>('docs-ui.page-settings.left')} (px)`,
+        marginRight: `${localeService.t<LocaleKey>('docs-ui.page-settings.right')} (px)`,
+        pageNumberStart: localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageNumberStart'),
+    };
 
     useEffect(() => {
         if (!setting.valid) {
@@ -82,14 +95,24 @@ export function SectionSetting() {
                 </div>
             )}
             <div className="univer-grid univer-gap-3">
+                <SettingRow label={labels.section}>
+                    <Select
+                        aria-label={String(labels.section)}
+                        className="univer-w-full"
+                        value={setting.selectedSectionId ?? ''}
+                        options={setting.sectionOptions}
+                        onChange={setting.selectSection}
+                    />
+                </SettingRow>
                 <SettingRow label={labels.columnCount}>
-                    <InputNumber className="univer-w-full" min={1} max={12} step={1} precision={0} value={setting.columnCount} onChange={(value) => value != null && setting.setColumnCount(value)} />
+                    <InputNumber aria-label={String(labels.columnCount)} className="univer-w-full" min={1} max={12} step={1} precision={0} value={setting.columnCount} onChange={(value) => value != null && setting.setColumnCount(value)} />
                 </SettingRow>
                 <SettingRow label={labels.columnGap}>
-                    <InputNumber className="univer-w-full" min={0} max={1000} step={1} precision={1} value={setting.columnGap} onChange={(value) => value != null && setting.setColumnGap(value)} />
+                    <InputNumber aria-label={String(labels.columnGap)} className="univer-w-full" min={0} max={1000} step={1} precision={1} value={setting.columnGap} onChange={(value) => value != null && setting.setColumnGap(value)} />
                 </SettingRow>
                 <SettingRow label={labels.columnSeparator}>
                     <Select
+                        aria-label={String(labels.columnSeparator)}
                         className="univer-w-full"
                         value={setting.separatorType == null ? '' : String(setting.separatorType)}
                         options={[
@@ -101,17 +124,53 @@ export function SectionSetting() {
                 </SettingRow>
                 <SettingRow label={labels.sectionStart}>
                     <Select
+                        aria-label={String(labels.sectionStart)}
                         className="univer-w-full"
                         value={setting.sectionType == null ? '' : String(setting.sectionType)}
                         options={[
                             { label: labels.unspecified, value: String(SectionType.SECTION_TYPE_UNSPECIFIED) },
                             { label: labels.continuous, value: String(SectionType.CONTINUOUS) },
+                            { label: labels.nextColumn, value: String(SectionType.NEXT_COLUMN) },
                             { label: labels.nextPage, value: String(SectionType.NEXT_PAGE) },
                             { label: labels.evenPage, value: String(SectionType.EVEN_PAGE) },
                             { label: labels.oddPage, value: String(SectionType.ODD_PAGE) },
                         ]}
                         onChange={(value) => setting.setSectionType(Number(value))}
                     />
+                </SettingRow>
+                <div className="univer-pt-2 univer-text-sm univer-font-medium">{labels.pageSetup}</div>
+                <SettingRow label={labels.pageWidth}>
+                    <InputNumber aria-label={String(labels.pageWidth)} className="univer-w-full" min={1} step={1} precision={1} value={setting.pageWidth} onChange={(value) => value != null && setting.setPageWidth(value)} />
+                </SettingRow>
+                <SettingRow label={labels.pageHeight}>
+                    <InputNumber aria-label={String(labels.pageHeight)} className="univer-w-full" min={1} step={1} precision={1} value={setting.pageHeight} onChange={(value) => value != null && setting.setPageHeight(value)} />
+                </SettingRow>
+                <SettingRow label={labels.orientation}>
+                    <Select
+                        aria-label={String(labels.orientation)}
+                        className="univer-w-full"
+                        value={setting.pageOrient == null ? '' : String(setting.pageOrient)}
+                        options={[
+                            { label: labels.portrait, value: String(PageOrientType.PORTRAIT) },
+                            { label: labels.landscape, value: String(PageOrientType.LANDSCAPE) },
+                        ]}
+                        onChange={(value) => setting.setPageOrient(Number(value))}
+                    />
+                </SettingRow>
+                <SettingRow label={labels.marginTop}>
+                    <InputNumber aria-label={String(labels.marginTop)} className="univer-w-full" min={0} step={1} precision={1} value={setting.marginTop} onChange={(value) => value != null && setting.setMarginTop(value)} />
+                </SettingRow>
+                <SettingRow label={labels.marginBottom}>
+                    <InputNumber aria-label={String(labels.marginBottom)} className="univer-w-full" min={0} step={1} precision={1} value={setting.marginBottom} onChange={(value) => value != null && setting.setMarginBottom(value)} />
+                </SettingRow>
+                <SettingRow label={labels.marginLeft}>
+                    <InputNumber aria-label={String(labels.marginLeft)} className="univer-w-full" min={0} step={1} precision={1} value={setting.marginLeft} onChange={(value) => value != null && setting.setMarginLeft(value)} />
+                </SettingRow>
+                <SettingRow label={labels.marginRight}>
+                    <InputNumber aria-label={String(labels.marginRight)} className="univer-w-full" min={0} step={1} precision={1} value={setting.marginRight} onChange={(value) => value != null && setting.setMarginRight(value)} />
+                </SettingRow>
+                <SettingRow label={labels.pageNumberStart}>
+                    <InputNumber aria-label={String(labels.pageNumberStart)} className="univer-w-full" min={1} step={1} precision={0} value={setting.pageNumberStart} onChange={(value) => value != null && setting.setPageNumberStart(value)} />
                 </SettingRow>
             </div>
         </div>

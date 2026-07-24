@@ -143,6 +143,7 @@ import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.comm
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from './commands/operations/doc-section-setting-panel.operation';
+import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from './commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -356,6 +357,8 @@ export class UniverDocsUIPlugin extends Plugin {
             DocSelectAllCommand,
             DocParagraphSettingPanelOperation,
             DocSectionSettingPanelOperation,
+            InsertDocumentColumnBreakOperation,
+            InsertDocumentSectionBreakOperation,
             MoveCursorOperation,
             MoveSelectionOperation,
             ReplaceTextRunsCommand,

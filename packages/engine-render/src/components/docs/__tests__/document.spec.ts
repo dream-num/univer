@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DashStyleType, DocumentFlavor } from '@univerjs/core';
+import { ColumnSeparatorType, DashStyleType, DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import {
@@ -25,13 +25,14 @@ import {
 } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
+import { UniverRenderingContext } from '../../../context';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Path, Rect } from '../../../shape';
 import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
-import { Documents } from '../document';
+import { Documents, drawSectionColumnSeparators } from '../document';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
@@ -411,6 +412,53 @@ describe('documents render', () => {
         expect(ctx.stroke).toHaveBeenCalledTimes(1);
 
         documents.dispose();
+    });
+
+    it('draws section column separators between columns', () => {
+        const nativeContext = document.createElement('canvas').getContext('2d');
+        if (!nativeContext) {
+            throw new Error('Expected a canvas 2D context.');
+        }
+        const ctx = new UniverRenderingContext(nativeContext);
+        vi.spyOn(ctx, 'moveToByPrecision');
+        vi.spyOn(ctx, 'lineToByPrecision');
+        vi.spyOn(ctx, 'stroke');
+
+        drawSectionColumnSeparators(ctx, {
+            height: 300,
+            colCount: 2,
+            top: 0,
+            st: 0,
+            ed: 0,
+            columns: [
+                {
+                    lines: [],
+                    left: 0,
+                    width: 120,
+                    spaceWidth: 20,
+                    separator: ColumnSeparatorType.BETWEEN_EACH_COLUMN,
+                    st: 0,
+                    ed: 0,
+                    drawingLRIds: [],
+                    isFull: false,
+                },
+                {
+                    lines: [],
+                    left: 140,
+                    width: 120,
+                    spaceWidth: 0,
+                    separator: ColumnSeparatorType.BETWEEN_EACH_COLUMN,
+                    st: 0,
+                    ed: 0,
+                    drawingLRIds: [],
+                    isFull: false,
+                },
+            ],
+        }, 500, 96, 72);
+
+        expect(ctx.moveToByPrecision).toHaveBeenCalledWith(226, 72);
+        expect(ctx.lineToByPrecision).toHaveBeenCalledWith(226, 572);
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
     });
 
     it('aligns table cell background to precise start and end edges', () => {

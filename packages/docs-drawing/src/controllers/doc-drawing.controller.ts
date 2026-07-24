@@ -15,11 +15,9 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
 import type { IDocDrawing } from '../services/doc-drawing.service';
 import { BooleanNumber, Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
@@ -54,27 +52,6 @@ function isDocDrawingBehindText(drawing: NonNullable<IDocumentData['drawings']>[
     return drawing?.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawing.behindDoc === BooleanNumber.TRUE;
 }
 
-const DOC_DRAWING_SNAPSHOT_KEYS: readonly (keyof IDocumentData)[] = ['drawings', 'drawingsOrder'];
-
-function hasDocDrawingAction(action: unknown): boolean {
-    if (!Array.isArray(action)) {
-        return false;
-    }
-
-    if (DOC_DRAWING_SNAPSHOT_KEYS.some((key) => key === action[0])) {
-        return true;
-    }
-
-    return action.some(hasDocDrawingAction);
-}
-
-function isRichTextEditingMutationParams(params: object | undefined): params is IRichTextEditingMutationParams {
-    return params != null &&
-        'unitId' in params &&
-        typeof params.unitId === 'string' &&
-        'actions' in params;
-}
-
 export class DocDrawingController extends Disposable {
     constructor(
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
@@ -90,22 +67,7 @@ export class DocDrawingController extends Disposable {
 
     private _init(): void {
         this._initSnapshot();
-        this._initDrawingDataSync();
         this._initCommands();
-    }
-
-    private _initDrawingDataSync(): void {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command) => {
-                if (command.id !== RichTextEditingMutation.id ||
-                    !isRichTextEditingMutationParams(command.params) ||
-                    !hasDocDrawingAction(command.params.actions)) {
-                    return;
-                }
-
-                this.loadDrawingDataForUnit(command.params.unitId);
-            })
-        );
     }
 
     private _initSnapshot() {

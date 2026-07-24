@@ -33,7 +33,7 @@ import univer from './function-list/univer/ca-ES';
 import web from './function-list/web/ca-ES';
 
 const locale: typeof enUS = {
-    formula: {
+    'engine-formula': {
         functionList: {
             ...array,
             ...compatibility,

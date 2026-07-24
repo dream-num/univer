@@ -31,7 +31,7 @@ import univer from './function-list/univer/en-US';
 import web from './function-list/web/en-US';
 
 const locale = {
-    formula: {
+    'engine-formula': {
         functionList: {
             ...array,
             ...compatibility,

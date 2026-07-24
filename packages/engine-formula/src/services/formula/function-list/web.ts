@@ -22,12 +22,12 @@ export const FUNCTION_LIST_WEB: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_WEB.ENCODEURL,
         functionType: FunctionType.Web,
-        description: 'formula.functionList.ENCODEURL.description',
-        abstract: 'formula.functionList.ENCODEURL.abstract',
+        description: 'engine-formula.functionList.ENCODEURL.description',
+        abstract: 'engine-formula.functionList.ENCODEURL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ENCODEURL.functionParameter.text.name',
-                detail: 'formula.functionList.ENCODEURL.functionParameter.text.detail',
+                name: 'engine-formula.functionList.ENCODEURL.functionParameter.text.name',
+                detail: 'engine-formula.functionList.ENCODEURL.functionParameter.text.detail',
                 example: '"https://univer.ai/"',
                 require: 1,
                 repeat: 0,
@@ -38,19 +38,19 @@ export const FUNCTION_LIST_WEB: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_WEB.FILTERXML,
         functionType: FunctionType.Web,
-        description: 'formula.functionList.FILTERXML.description',
-        abstract: 'formula.functionList.FILTERXML.abstract',
+        description: 'engine-formula.functionList.FILTERXML.description',
+        abstract: 'engine-formula.functionList.FILTERXML.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.FILTERXML.functionParameter.xml.name',
-                detail: 'formula.functionList.FILTERXML.functionParameter.xml.detail',
+                name: 'engine-formula.functionList.FILTERXML.functionParameter.xml.name',
+                detail: 'engine-formula.functionList.FILTERXML.functionParameter.xml.detail',
                 example: '"<root><item>value</item></root>"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.FILTERXML.functionParameter.xpath.name',
-                detail: 'formula.functionList.FILTERXML.functionParameter.xpath.detail',
+                name: 'engine-formula.functionList.FILTERXML.functionParameter.xpath.name',
+                detail: 'engine-formula.functionList.FILTERXML.functionParameter.xpath.detail',
                 example: '"//item"',
                 require: 1,
                 repeat: 0,
@@ -60,12 +60,12 @@ export const FUNCTION_LIST_WEB: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_WEB.WEBSERVICE,
         functionType: FunctionType.Web,
-        description: 'formula.functionList.WEBSERVICE.description',
-        abstract: 'formula.functionList.WEBSERVICE.abstract',
+        description: 'engine-formula.functionList.WEBSERVICE.description',
+        abstract: 'engine-formula.functionList.WEBSERVICE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.WEBSERVICE.functionParameter.url.name',
-                detail: 'formula.functionList.WEBSERVICE.functionParameter.url.detail',
+                name: 'engine-formula.functionList.WEBSERVICE.functionParameter.url.name',
+                detail: 'engine-formula.functionList.WEBSERVICE.functionParameter.url.detail',
                 example: '"https://example.com/api"',
                 require: 1,
                 repeat: 0,

@@ -138,8 +138,6 @@ export {
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
 } from './config/config';
 export type { IUniverEngineFormulaConfig } from './config/config';
-export { FORMULA_PLUGIN_CONFIG_KEY } from './config/formula.config';
-export type { IUniverFormulaConfig } from './config/formula.config';
 export { CalculateController } from './controllers/calculate.controller';
 export { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 export { SuperTableActiveDirtyController } from './controllers/super-table-active-dirty.controller';
@@ -243,7 +241,6 @@ export type {
     IFormulaRefSelection,
     IFormulaStructuredReferenceRange,
 } from './formula-editor-helpers';
-export { UniverFormulaPlugin } from './formula.plugin';
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';

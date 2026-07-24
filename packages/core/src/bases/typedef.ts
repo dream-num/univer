@@ -69,8 +69,6 @@ export interface IBaseAttachment {
     sourceType?: ImageSourceType;
     /** Canonical attachment source: an uploaded file id, URL, or Base64 data URL. */
     source?: string;
-    /** @deprecated Store Base64 data in `source` with `sourceType` set to `BASE64`. */
-    base64?: string;
     /** Optional preview source when it is distinct from the canonical attachment source. */
     thumbnail?: string;
 }

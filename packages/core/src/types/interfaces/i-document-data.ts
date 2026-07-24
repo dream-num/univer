@@ -331,10 +331,14 @@ export enum BulletAlignment {
 // }
 
 export interface IMargin {
-    marginTop?: number; // marginTop
-    marginBottom?: number; // marginBottom
-    marginRight?: number; // marginRight
-    marginLeft?: number; // marginLeft
+    /** Top page margin in 96-DPI layout pixels. */
+    marginTop?: number;
+    /** Bottom page margin in 96-DPI layout pixels. */
+    marginBottom?: number;
+    /** Right page margin in 96-DPI layout pixels. */
+    marginRight?: number;
+    /** Left page margin in 96-DPI layout pixels. */
+    marginLeft?: number;
 }
 
 export interface ITableOfContent {}
@@ -413,6 +417,11 @@ export enum CustomRangeType {
     DELTED = 9999,
 }
 
+export enum DocxBreakType {
+    COLUMN = 'column',
+    TEXT_WRAPPING = 'textWrapping',
+}
+
 /**
  * Custom Block
  */
@@ -468,15 +477,16 @@ export enum DocumentFlavor {
  */
 export interface IDocStyleBase extends IMargin {
     pageNumberStart?: number; // pageNumberStart
-    pageSize?: ISize; // pageSize
+    /** Page size in 96-DPI layout pixels. */
+    pageSize?: ISize;
 
     pageOrient?: PageOrientType;
 
     documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
 
-    /** Distance from the page edge to the header, in points (pt). */
+    /** Distance from the page edge to the header, in 96-DPI layout pixels. */
     marginHeader?: number;
-    /** Distance from the page edge to the footer, in points (pt). */
+    /** Distance from the page edge to the footer, in 96-DPI layout pixels. */
     marginFooter?: number;
 
     renderConfig?: IDocumentRenderConfig;
@@ -572,9 +582,10 @@ export interface ISectionBreak extends IDocStyleBase, ISectionBreakBase, IHeader
 export enum SectionType {
     SECTION_TYPE_UNSPECIFIED, // The section type is unspecified.
     CONTINUOUS, // The section starts immediately after the last paragraph of the previous section.
+    NEXT_COLUMN, // The section starts in the next column, or on the next page when no column remains.
     NEXT_PAGE, // The section starts on the next page.
-    EVEN_PAGE, // The section starts on the next page.
-    ODD_PAGE, // The section starts on the next page.
+    EVEN_PAGE, // The section starts on the next even-numbered page.
+    ODD_PAGE, // The section starts on the next odd-numbered page.
 }
 
 /**
@@ -599,9 +610,9 @@ export enum TextDirectionType {
  * Properties of section column
  */
 export interface ISectionColumnProperties {
-    /** Column width in points (pt). */
+    /** Column width in 96-DPI layout pixels. */
     width: number;
-    /** Trailing space after the column in points (pt). */
+    /** Trailing space after the column in 96-DPI layout pixels. */
     paddingEnd: number;
 }
 

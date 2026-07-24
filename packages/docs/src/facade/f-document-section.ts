@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-import type { Injector, IResolvedSectionHeaderFooterReference, ISectionBreak, ISectionColumnProperties, SectionHeaderFooterKind, SectionHeaderFooterVariant } from '@univerjs/core';
+import type { IResolvedSectionHeaderFooterReference, ISectionBreak, ISectionColumnProperties, SectionHeaderFooterKind, SectionHeaderFooterVariant } from '@univerjs/core';
 import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
-import { CreateHeaderFooterCommand, createSectionColumnProperties, DeleteDocumentSectionBreakCommand, getTopLevelSectionBreaks, HeaderFooterType, SetSectionHeaderFooterLinkCommand, UpdateDocumentSectionCommand } from '@univerjs/docs';
+import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, PageOrientType, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
+import { CreateHeaderFooterCommand, createSectionColumnProperties, DeleteDocumentSectionBreakCommand, getSectionContentWidth, getTopLevelSectionBreaks, HeaderFooterType, SetSectionHeaderFooterLinkCommand, UpdateDocumentSectionCommand } from '@univerjs/docs';
 
 export interface IFDocumentSectionColumnOptions {
-    /** Gap after each column except the last, in points (pt). */
+    /** Gap after each column except the last, in 96-DPI layout pixels. */
     gap?: number;
-    /** Optional explicit column widths in points (pt). Length must equal `columnCount`. */
+    /** Optional explicit column widths in 96-DPI layout pixels. Length must equal `columnCount`. */
     widths?: number[];
     /** Whether to draw separators, or the exact separator enum value. */
     separator?: boolean | ColumnSeparatorType;
-    /** How the following section starts. */
-    sectionType?: SectionType;
 }
+
+export type FDocumentSectionPageSetup = Pick<
+    ISectionBreak,
+    'pageNumberStart' | 'pageSize' | 'pageOrient' | 'marginTop' | 'marginBottom' | 'marginLeft' | 'marginRight'
+>;
 
 export interface IFDocumentSectionDescription {
     sectionId: string;
@@ -70,7 +73,7 @@ export class FDocumentSection {
     constructor(
         private readonly _document: FDocument,
         private readonly _sectionId: string,
-        private readonly _injector: Injector
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     /**
@@ -131,7 +134,7 @@ export class FDocumentSection {
 
     /**
      * Returns the explicit columns. An empty array means the normal single-column layout.
-     * Column widths and trailing spaces are in points (pt).
+     * Column widths and trailing spaces are in 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -177,7 +180,7 @@ export class FDocumentSection {
     /**
      * Sets equal or explicitly sized columns for this traditional section.
      * Use `columnCount = 1` to restore normal single-column layout.
-     * `gap` and `widths` are in points (pt).
+     * `gap` and `widths` are in 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -194,6 +197,9 @@ export class FDocumentSection {
         if (options.widths && options.widths.length !== columnCount) {
             throw new RangeError('Section column widths must match the column count.');
         }
+        if (options.gap != null && (!Number.isFinite(options.gap) || options.gap < 0)) {
+            throw new RangeError('Section column gap must be finite and non-negative.');
+        }
 
         const gap = Math.max(0, options.gap ?? 18);
         const config = this.getConfig();
@@ -207,16 +213,18 @@ export class FDocumentSection {
         const separator = typeof options.separator === 'boolean'
             ? options.separator ? ColumnSeparatorType.BETWEEN_EACH_COLUMN : ColumnSeparatorType.NONE
             : options.separator ?? ColumnSeparatorType.NONE;
+        if (!Object.values(ColumnSeparatorType).includes(separator)) {
+            throw new RangeError('Invalid section column separator type.');
+        }
 
         return this._update({
             columnProperties: columns,
             columnSeparatorType: separator,
-            ...(options.sectionType == null ? {} : { sectionType: options.sectionType }),
         });
     }
 
     /**
-     * Sets explicit OOXML-compatible column width and trailing-space values in points (pt).
+     * Sets explicit OOXML-compatible column width and trailing-space values in 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -230,8 +238,18 @@ export class FDocumentSection {
      */
     setColumnProperties(columns: ISectionColumnProperties[], separator = ColumnSeparatorType.NONE): boolean {
         this._assertTraditionalDocument();
-        if (columns.some(({ width, paddingEnd }) => width < 0 || paddingEnd < 0)) {
-            throw new RangeError('Section column widths and padding must be non-negative.');
+        if (!Object.values(ColumnSeparatorType).includes(separator)) {
+            throw new RangeError('Invalid section column separator type.');
+        }
+        if (columns.some(({ width, paddingEnd }) => !Number.isFinite(width) || !Number.isFinite(paddingEnd) || width < 0 || paddingEnd < 0)) {
+            throw new RangeError('Section column widths and padding must be finite and non-negative.');
+        }
+        const contentWidth = getSectionContentWidth(
+            this._document.getDocumentDataModel().getSnapshot().documentStyle,
+            this.getConfig()
+        );
+        if (columns.reduce((sum, { width, paddingEnd }) => sum + width + paddingEnd, 0) > contentWidth) {
+            throw new RangeError('Section columns exceed the available page content width.');
         }
         return this._update({
             columnProperties: Tools.deepClone(columns),
@@ -240,7 +258,7 @@ export class FDocumentSection {
     }
 
     /**
-     * Sets how the next section begins.
+     * Sets how this section begins relative to the previous section.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -251,7 +269,72 @@ export class FDocumentSection {
      */
     setSectionType(sectionType: SectionType): boolean {
         this._assertTraditionalDocument();
+        if (!Object.values(SectionType).includes(sectionType)) {
+            throw new RangeError('Invalid section type.');
+        }
         return this._update({ sectionType });
+    }
+
+    /**
+     * Returns this section's explicit page setup overrides.
+     * Missing values inherit from the document style. Geometry values use 96-DPI layout pixels.
+     */
+    getPageSetup(): FDocumentSectionPageSetup {
+        const {
+            pageNumberStart,
+            pageSize,
+            pageOrient,
+            marginTop,
+            marginBottom,
+            marginLeft,
+            marginRight,
+        } = this.getConfig();
+        return Tools.deepClone({
+            pageNumberStart,
+            pageSize,
+            pageOrient,
+            marginTop,
+            marginBottom,
+            marginLeft,
+            marginRight,
+        });
+    }
+
+    /**
+     * Updates this section's page setup through the document section command.
+     * Geometry values use 96-DPI layout pixels.
+     */
+    setPageSetup(pageSetup: FDocumentSectionPageSetup): boolean {
+        this._assertTraditionalDocument();
+        const { pageNumberStart, pageSize, pageOrient, marginTop, marginBottom, marginLeft, marginRight } = pageSetup;
+        if (pageNumberStart != null && (!Number.isInteger(pageNumberStart) || pageNumberStart < 1)) {
+            throw new RangeError('Section page number start must be a positive integer.');
+        }
+        if (pageSize && [pageSize.width, pageSize.height]
+            .some((size) => size != null && (!Number.isFinite(size) || size <= 0))) {
+            throw new RangeError('Section page size must be finite and positive.');
+        }
+        if (pageOrient != null && !Object.values(PageOrientType).includes(pageOrient)) {
+            throw new RangeError('Invalid section page orientation.');
+        }
+        if ([marginTop, marginBottom, marginLeft, marginRight]
+            .some((margin) => margin != null && (!Number.isFinite(margin) || margin < 0))) {
+            throw new RangeError('Section page margins must be finite and non-negative.');
+        }
+        const current = this.getConfig();
+        const documentStyle = this._document.getDocumentDataModel().getSnapshot().documentStyle;
+        const effectivePageSize = pageSize ?? current.pageSize ?? documentStyle.pageSize;
+        const effectiveMarginTop = marginTop ?? current.marginTop ?? documentStyle.marginTop ?? 0;
+        const effectiveMarginBottom = marginBottom ?? current.marginBottom ?? documentStyle.marginBottom ?? 0;
+        const effectiveMarginLeft = marginLeft ?? current.marginLeft ?? documentStyle.marginLeft ?? 0;
+        const effectiveMarginRight = marginRight ?? current.marginRight ?? documentStyle.marginRight ?? 0;
+        if ((effectivePageSize?.width != null &&
+            effectiveMarginLeft + effectiveMarginRight >= effectivePageSize.width) ||
+            (effectivePageSize?.height != null &&
+                effectiveMarginTop + effectiveMarginBottom >= effectivePageSize.height)) {
+            throw new RangeError('Section page margins must leave a positive content area.');
+        }
+        return this._update(Tools.deepClone(pageSetup));
     }
 
     /**
@@ -366,7 +449,7 @@ export class FDocumentSection {
 
     /**
      * Updates header/footer switches and margins on this section break.
-     * `marginHeader` and `marginFooter` are in points (pt).
+     * `marginHeader` and `marginFooter` are in 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -399,7 +482,7 @@ export class FDocumentSection {
      */
     remove(): boolean {
         this._assertTraditionalDocument();
-        return this._injector.get(ICommandService).syncExecuteCommand(DeleteDocumentSectionBreakCommand.id, {
+        return this._commandService.syncExecuteCommand(DeleteDocumentSectionBreakCommand.id, {
             unitId: this._document.getId(),
             sectionId: this._sectionId,
         });
@@ -407,7 +490,7 @@ export class FDocumentSection {
 
     private _update(patch: Partial<ISectionBreak>): boolean {
         const { sectionId: _sectionId, startIndex: _startIndex, ...config } = patch;
-        return this._injector.get(ICommandService).syncExecuteCommand(UpdateDocumentSectionCommand.id, {
+        return this._commandService.syncExecuteCommand(UpdateDocumentSectionCommand.id, {
             unitId: this._document.getId(),
             updates: [{ sectionId: this._sectionId, config }],
         });
@@ -425,7 +508,7 @@ export class FDocumentSection {
 
         if (index > 0) {
             const segmentId = generateRandomId(6);
-            const success = this._injector.get(ICommandService).syncExecuteCommand(SetSectionHeaderFooterLinkCommand.id, {
+            const success = this._commandService.syncExecuteCommand(SetSectionHeaderFooterLinkCommand.id, {
                 unitId: this._document.getId(),
                 sectionId: this._sectionId,
                 kind,
@@ -445,7 +528,7 @@ export class FDocumentSection {
             even: kind === 'header' ? HeaderFooterType.EVEN_PAGE_HEADER : HeaderFooterType.EVEN_PAGE_FOOTER,
         };
         const segmentId = generateRandomId(6);
-        const success = this._injector.get(ICommandService).syncExecuteCommand(CreateHeaderFooterCommand.id, {
+        const success = this._commandService.syncExecuteCommand(CreateHeaderFooterCommand.id, {
             unitId: this._document.getId(),
             segmentId,
             createType: types[variant],
@@ -488,7 +571,7 @@ export class FDocumentSection {
         linkedToPrevious: boolean
     ): boolean {
         this._assertTraditionalDocument();
-        return this._injector.get(ICommandService).syncExecuteCommand(SetSectionHeaderFooterLinkCommand.id, {
+        return this._commandService.syncExecuteCommand(SetSectionHeaderFooterLinkCommand.id, {
             unitId: this._document.getId(),
             sectionId: this._sectionId,
             kind,

@@ -31,6 +31,7 @@ import {
     NAMED_STYLE_MAP,
     NamedStyleType,
     PresetListType,
+    SectionType,
     ThemeService,
     Tools,
     UniverInstanceType,
@@ -88,6 +89,7 @@ import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.
 // import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
+import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
 import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
@@ -209,7 +211,7 @@ export function disableMenuWhenHeaderFooterEditing(accessor: IAccessor): Observa
     });
 }
 
-function getHeaderFooterMenuHiddenObservable(
+function getTraditionalDocMenuHiddenObservable(
     accessor: IAccessor
 ): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -1038,10 +1040,77 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'HeaderFooterIcon',
         tooltip: 'docs-ui.toolbar.headerFooter',
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getTraditionalDocMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
     };
+}
+
+export const DOC_BREAKS_MENU_ID = 'doc.menu.breaks';
+export const DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID = 'doc.menu.section-break.next-page';
+export const DOC_SECTION_BREAK_CONTINUOUS_MENU_ID = 'doc.menu.section-break.continuous';
+export const DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID = 'doc.menu.section-break.next-column';
+export const DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID = 'doc.menu.section-break.even-page';
+export const DOC_SECTION_BREAK_ODD_PAGE_MENU_ID = 'doc.menu.section-break.odd-page';
+
+export function BreaksMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+    return {
+        id: DOC_BREAKS_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'ColumnIcon',
+        tooltip: 'docs-ui.toolbar.breaks',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: combineLatest(
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+            getTraditionalDocMenuHiddenObservable(accessor),
+            (hidden, unsupported) => hidden || unsupported
+        ),
+    };
+}
+
+export function InsertColumnBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return {
+        id: InsertDocumentColumnBreakOperation.id,
+        type: MenuItemType.BUTTON,
+        title: 'docs-ui.toolbar.columnBreak',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+    };
+}
+
+function createSectionBreakMenuItem(
+    accessor: IAccessor,
+    id: string,
+    title: LocaleKey,
+    sectionType: SectionType
+): IMenuButtonItem<LocaleKey> {
+    return {
+        id,
+        commandId: InsertDocumentSectionBreakOperation.id,
+        params: { sectionType },
+        type: MenuItemType.BUTTON,
+        title,
+        disabled$: disableMenuWhenNoDocRange(accessor),
+    };
+}
+
+export function InsertNextPageSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID, 'docs-ui.toolbar.sectionBreakNextPage', SectionType.NEXT_PAGE);
+}
+
+export function InsertContinuousSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_CONTINUOUS_MENU_ID, 'docs-ui.toolbar.sectionBreakContinuous', SectionType.CONTINUOUS);
+}
+
+export function InsertNextColumnSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID, 'docs-ui.toolbar.sectionBreakNextColumn', SectionType.NEXT_COLUMN);
+}
+
+export function InsertEvenPageSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID, 'docs-ui.toolbar.sectionBreakEvenPage', SectionType.EVEN_PAGE);
+}
+
+export function InsertOddPageSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_ODD_PAGE_MENU_ID, 'docs-ui.toolbar.sectionBreakOddPage', SectionType.ODD_PAGE);
 }
 
 export const TableIcon = 'GridIcon';

@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMenuCommandParams, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
+import type { LocaleKey } from '../../../locale/types';
+import type {
+    IMenuCommandParams,
+    IMenuItem,
+    IValueOption,
+    MenuItemDefaultValueType,
+} from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { ICommandService, LocaleService, Tools } from '@univerjs/core';
 import {
@@ -217,12 +223,12 @@ export function FeatureSearch() {
             const candidates = [
                 ...collectCandidates(
                     ribbon,
-                    [localeService.t('ui.featureSearch.ribbon')],
+                    [localeService.t<LocaleKey>('ui.featureSearch.ribbon')],
                     [MenuManagerPosition.RIBBON]
                 ),
                 ...collectCandidates(
                     menuManagerService.getMenuByPositionKey(MenuManagerPosition.CONTEXT_MENU),
-                    [localeService.t('ui.featureSearch.contextMenu')],
+                    [localeService.t<LocaleKey>('ui.featureSearch.contextMenu')],
                     [MenuManagerPosition.CONTEXT_MENU]
                 ),
             ];
@@ -251,10 +257,10 @@ export function FeatureSearch() {
     }
 
     return (
-        <Command label={localeService.t('ui.featureSearch.title')} loop>
-            <CommandInput autoFocus placeholder={localeService.t('ui.featureSearch.placeholder')} />
+        <Command label={localeService.t<LocaleKey>('ui.featureSearch.title')} loop>
+            <CommandInput autoFocus placeholder={localeService.t<LocaleKey>('ui.featureSearch.placeholder')} />
             <CommandList>
-                <CommandEmpty>{localeService.t('ui.featureSearch.empty')}</CommandEmpty>
+                <CommandEmpty>{localeService.t<LocaleKey>('ui.featureSearch.empty')}</CommandEmpty>
                 <CommandGroup>
                     {items.map((item) => (
                         <CommandItem

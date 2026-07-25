@@ -57,12 +57,6 @@ export interface IRenderManagerService extends IDisposable {
     createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender;
     removeRender(unitId: string): void;
     /**
-     * @deprecated use getRenderUnitById instead
-     * Get RenderUnit By Id, RenderUnit implements IRender
-     * @param unitId
-     */
-    getRenderById(unitId: string): Nullable<IRender>;
-    /**
      * Get RenderUnit By Id, RenderUnit implements IRender
      * @param unitId
      */
@@ -257,7 +251,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @returns renderUnit:IRender
      */
     protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions, parentInjector: Injector = this._injector): IRender {
-        const existItem = this.getRenderById(unitId);
+        const existItem = this.getRenderUnitById(unitId);
         let shouldDestroyEngine = true;
 
         if (existItem != null) {
@@ -344,16 +338,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     has(unitId: string): boolean {
         return this._renderMap.has(unitId);
-    }
-
-    /**
-     * @deprecated use getRenderUnitById instead
-     * Get RenderUnit from this._renderMap.
-     * @param unitId
-     * @returns RenderUnit, aka IRender
-     */
-    getRenderById(unitId: string): Nullable<IRender> {
-        return this._renderMap.get(unitId);
     }
 
     getRenderUnitById(unitId: string): Nullable<IRender> {

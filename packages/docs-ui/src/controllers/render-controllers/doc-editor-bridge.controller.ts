@@ -174,7 +174,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                     return;
                 }
                 const unitId = unit.getUnitId();
-                const render = this._renderManagerService.getRenderById(unitId);
+                const render = this._renderManagerService.getRenderUnitById(unitId);
                 const canvasEle = render?.engine.getCanvas().getCanvasEle();
                 if (canvasEle == null) {
                     return;

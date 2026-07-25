@@ -76,7 +76,7 @@ function createController(options: { cancelResize?: boolean; sheetEditor?: boole
             getSkeleton: vi.fn(() => skeleton),
         } as never,
         {
-            getRenderById: vi.fn(() => ({
+            getRenderUnitById: vi.fn(() => ({
                 engine: {
                     getCanvas: () => ({
                         getCanvasEle: () => canvasEle,

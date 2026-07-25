@@ -75,7 +75,7 @@ export class SheetCellEditorResizeService extends Disposable {
     }
 
     private get _editingRenderer() {
-        return this._renderManagerService.getRenderById(this._editingUnitId);
+        return this._renderManagerService.getRenderUnitById(this._editingUnitId);
     }
 
     private get _renderer() {
@@ -480,7 +480,7 @@ export class SheetCellEditorResizeService extends Disposable {
     }
 
     private _getEditorSkeleton() {
-        return this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
+        return this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
     }
 }
 

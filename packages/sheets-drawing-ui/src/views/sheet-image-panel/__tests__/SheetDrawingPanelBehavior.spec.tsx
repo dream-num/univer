@@ -69,7 +69,7 @@ class TestRenderManagerService {
     readonly transformer = new TestTransformer();
     readonly scene = new TestScene(this.transformer);
 
-    getRenderById() {
+    getRenderUnitById() {
         return {
             scene: this.scene,
         };

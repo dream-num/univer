@@ -175,10 +175,6 @@ class TestRenderManagerService {
     getRenderUnitById(_unitId: string) {
         return this._getRender();
     }
-
-    getRenderById(_unitId: string) {
-        return this._getRender();
-    }
 }
 
 function createDocData(): IDocumentData {

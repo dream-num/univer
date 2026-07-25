@@ -94,7 +94,7 @@ export class SheetsCfRenderController extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const render = this._renderManagerService.getRenderById(unitId);
+        const render = this._renderManagerService.getRenderUnitById(unitId);
         const skeletonManagerService = render?.with(SheetSkeletonManagerService);
         const currentSkeleton = skeletonManagerService?.getCurrentSkeleton();
         const dirtyRanges = this._intersectDirtyRangesWithRenderedRange(

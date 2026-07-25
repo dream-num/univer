@@ -43,7 +43,7 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
 
         const { unitId } = this._context;
         const { skeleton } = param;
-        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
 
         if (skeleton == null || scene == null) {
             return;

@@ -49,7 +49,7 @@ describe('DocThreadCommentSelectionController', () => {
         };
 
         const docThreadCommentService = { addingComment: null, endAdd: vi.fn() };
-        const renderManagerService = { getRenderById: vi.fn(() => null) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => null) };
         const threadCommentModel = { getComment: vi.fn(() => ({ resolved: false })) };
 
         const controller = new DocThreadCommentSelectionController(
@@ -100,7 +100,7 @@ describe('DocThreadCommentSelectionController', () => {
         };
 
         const docThreadCommentService = { addingComment: null, endAdd: vi.fn() };
-        const renderManagerService = { getRenderById: vi.fn(() => null) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => null) };
         const threadCommentModel = { getComment: vi.fn(() => ({ resolved: false })) };
 
         const controller = new DocThreadCommentSelectionController(
@@ -156,7 +156,7 @@ describe('DocThreadCommentSelectionController', () => {
             },
             endAdd: vi.fn(),
         };
-        const renderManagerService = { getRenderById: vi.fn(() => null) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => null) };
         const threadCommentModel = { getComment: vi.fn(() => null) };
 
         const controller = new DocThreadCommentSelectionController(

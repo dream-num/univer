@@ -51,7 +51,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     }
 
     reRender(unitId: string) {
-        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const docSkeletonManagerService = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         const skeleton = docSkeletonManagerService?.getSkeleton();
         if (!skeleton) {
             return;

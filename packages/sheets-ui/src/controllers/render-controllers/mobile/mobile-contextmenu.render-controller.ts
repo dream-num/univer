@@ -179,7 +179,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
     }
 
     private _getCurrentRenderSelections(): ISelectionWithStyle[] {
-        const currentRender = this._renderManagerService.getRenderById(this._context.unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(this._context.unitId);
         const selectionRenderService = currentRender?.with(ISheetSelectionRenderService);
         return selectionRenderService?.getSelectionControls().map((control) => convertSelectionDataToRange(control.getValue())) ?? [];
     }

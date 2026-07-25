@@ -45,7 +45,7 @@ class TestRenderManagerService {
         this.hasRender = false;
     }
 
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         if (!TestRenderManagerService.hasRender || unitId !== 'slide-1') {
             return null;
         }

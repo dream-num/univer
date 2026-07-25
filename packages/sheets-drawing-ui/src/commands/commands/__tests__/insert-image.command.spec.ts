@@ -83,10 +83,6 @@ class TestRenderManagerService {
             },
         };
     }
-
-    getRenderById() {
-        return this.getRenderUnitById();
-    }
 }
 
 function createImageFile(name: string): File {

@@ -262,7 +262,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
             }
 
             this._textSelectionManagerService.replaceDocRanges([{ ...range }], { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
-            const currentRender = this._injector.get(IRenderManagerService).getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            const currentRender = this._injector.get(IRenderManagerService).getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             if (!currentRender) {
                 return;
             }

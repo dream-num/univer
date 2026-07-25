@@ -44,7 +44,7 @@ function createController() {
         }),
     };
     controller._renderManagerService = {
-        getRenderById: vi.fn(() => null),
+        getRenderUnitById: vi.fn(() => null),
     };
     return controller;
 }
@@ -202,7 +202,7 @@ describe('DocDrawingTransformerController business methods', () => {
 
     it('limits a drawing away from the gap between document pages while preserving drawings already on one page', () => {
         const controller = createController();
-        controller._renderManagerService.getRenderById.mockReturnValue({
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({
             mainComponent: {
                 top: 5,
                 pageLayoutType: 0,
@@ -262,7 +262,7 @@ describe('DocDrawingTransformerController business methods', () => {
 
     it('limits page content size by the page containing the drawing and falls back when the skeleton is unavailable', () => {
         const controller = createController();
-        controller._renderManagerService.getRenderById.mockReturnValue({
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({
             with: vi.fn(() => ({
                 getSkeleton: () => ({
                     getSkeletonData: () => ({
@@ -284,14 +284,14 @@ describe('DocDrawingTransformerController business methods', () => {
 
         expect(controller._getPageContentSize(drawing())).toEqual({ width: 620, height: 840 });
 
-        controller._renderManagerService.getRenderById.mockReturnValue(null);
+        controller._renderManagerService.getRenderUnitById.mockReturnValue(null);
         expect(controller._getPageContentSize(drawing())).toEqual({ width: 500, height: 500 });
     });
 
     it('creates and updates the inline anchor from resolved text range points', () => {
         const controller = createController();
         const scene = { addObject: vi.fn() };
-        controller._renderManagerService.getRenderById.mockReturnValue({
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({
             mainComponent: {
                 getOffsetConfig: () => ({ docsLeft: 8, docsTop: 12 }),
             },
@@ -330,10 +330,10 @@ describe('DocDrawingTransformerController business methods', () => {
 
         expect(controller._getSceneAndTransformerByDrawingSearch(null)).toBeUndefined();
 
-        controller._renderManagerService.getRenderById.mockReturnValue({});
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({});
         expect(controller._getSceneAndTransformerByDrawingSearch('unit-1')).toBeUndefined();
 
-        controller._renderManagerService.getRenderById.mockReturnValue({ scene });
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({ scene });
         expect(controller._getSceneAndTransformerByDrawingSearch('unit-1')).toEqual({ scene, transformer });
     });
 
@@ -398,7 +398,7 @@ describe('DocDrawingTransformerController business methods', () => {
             layoutType: PositionedObjectLayoutType.INLINE,
         };
         controller.disposeWithMe = vi.fn();
-        controller._renderManagerService.getRenderById.mockReturnValue({
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({
             scene: {
                 getTransformerByCreate: vi.fn(() => transformer),
             },

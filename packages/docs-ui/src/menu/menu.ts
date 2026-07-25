@@ -142,7 +142,7 @@ function getInsertTableHiddenObservable(
                 return subscriber.next(true);
             }
 
-            const currentRender = renderManagerService.getRenderById(unitId);
+            const currentRender = renderManagerService.getRenderUnitById(unitId);
             if (currentRender == null) {
                 return subscriber.next(true);
             }
@@ -185,7 +185,7 @@ export function disableMenuWhenHeaderFooterEditing(accessor: IAccessor): Observa
                 return;
             }
 
-            const currentRender = renderManagerService.getRenderById(unitId);
+            const currentRender = renderManagerService.getRenderUnitById(unitId);
             const skeletonManager = currentRender?.with(DocSkeletonManagerService);
             const viewModel = skeletonManager?.getViewModel();
             if (!viewModel) {

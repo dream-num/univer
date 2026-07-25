@@ -64,7 +64,7 @@ function createController() {
             })),
         } as never,
         {
-            getRenderById: vi.fn(() => ({
+            getRenderUnitById: vi.fn(() => ({
                 with: vi.fn(() => ({ getCurrentSkeleton: vi.fn(() => ({ resetRangeCache, rowColumnSegment })), reCalculate })),
                 mainComponent: { makeDirty },
             })),

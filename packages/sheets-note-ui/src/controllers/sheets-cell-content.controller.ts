@@ -71,7 +71,7 @@ export class SheetsCellContentController extends Disposable {
             const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
             const unitId = workbook.getUnitId();
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+            const currentRender = this._renderManagerService.getRenderUnitById(unitId);
             currentRender?.mainComponent?.makeForceDirty();
         };
 

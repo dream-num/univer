@@ -97,7 +97,7 @@ export const StartAddCommentOperation: ICommand = {
             return false;
         }
 
-        const docSelectionRenderManager = renderManagerService.getRenderById(doc.getUnitId())?.with(DocSelectionRenderService);
+        const docSelectionRenderManager = renderManagerService.getRenderUnitById(doc.getUnitId())?.with(DocSelectionRenderService);
         docSelectionRenderManager?.setReserveRangesStatus(true);
         if (textRange.collapsed) {
             if (panelService.panelVisible) {

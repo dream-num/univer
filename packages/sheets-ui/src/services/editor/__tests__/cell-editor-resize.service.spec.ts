@@ -202,7 +202,7 @@ class TestRenderManagerService {
         getActualSize: () => ({ actualWidth: 120, actualHeight: 36 }),
     };
 
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         if (unitId === 'unit-1') {
             return {
                 engine: this.sheetEngine,

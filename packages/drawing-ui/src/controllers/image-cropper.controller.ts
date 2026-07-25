@@ -92,7 +92,7 @@ export class ImageCropperController extends Disposable {
 
                 const { unitId, subUnitId, drawingId } = drawingParam;
 
-                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
 
                 const scene = renderObject?.scene;
 
@@ -228,7 +228,7 @@ export class ImageCropperController extends Disposable {
 
                 const { unitId, subUnitId, drawingId } = params;
 
-                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
 
                 const scene = renderObject?.scene;
 
@@ -309,7 +309,7 @@ export class ImageCropperController extends Disposable {
                 }
 
                 const unitId = currentUnit.getUnitId();
-                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
 
                 const scene = renderObject?.scene;
 

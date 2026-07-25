@@ -179,7 +179,7 @@ export class DocFloatDomController extends Disposable {
             return;
         }
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
 
         if (renderObject == null) {
             return null;
@@ -391,7 +391,7 @@ export class DocFloatDomController extends Disposable {
                 map((documentDataModel) => {
                     if (!documentDataModel) return null;
                     const unitId = documentDataModel.getUnitId();
-                    const render = this._renderManagerService.getRenderById(unitId);
+                    const render = this._renderManagerService.getRenderUnitById(unitId);
                     return render ? { render, unitId } : null;
                 }),
                 switchMap((render) =>

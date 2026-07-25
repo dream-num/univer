@@ -526,7 +526,7 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
     override setCurrent(unitId: string): void {
         const rendererManagerService = this._injector.get(IRenderManagerService);
-        const renderUnit = rendererManagerService.getRenderById(unitId);
+        const renderUnit = rendererManagerService.getRenderUnitById(unitId);
         if (!renderUnit) {
             throw new Error('Unit not found');
         }

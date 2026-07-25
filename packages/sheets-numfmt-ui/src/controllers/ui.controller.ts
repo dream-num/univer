@@ -178,7 +178,7 @@ export class SheetNumfmtUIController extends Disposable {
             return;
         }
 
-        const renderUnit = this._renderManagerService.getRenderById(resolvedUnitId);
+        const renderUnit = this._renderManagerService.getRenderUnitById(resolvedUnitId);
 
         renderUnit?.with(SheetSkeletonManagerService).reCalculate();
         renderUnit?.mainComponent?.makeDirty();
@@ -289,7 +289,7 @@ export class SheetNumfmtUIController extends Disposable {
                                 },
                             })
                         );
-                        this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
+                        this._renderManagerService.getRenderUnitById(workbook.getUnitId())?.mainComponent?.makeDirty();
                     })
             )
         );

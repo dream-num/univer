@@ -213,7 +213,6 @@ class TestRenderManagerService {
     addRender(): void {}
     createRender() { return undefined; }
     removeRender(): void {}
-    getRenderById() { return undefined; }
     getRenderUnitById() { return undefined; }
     getAllRenderersOfType() { return []; }
     getRenderAll() { return new Map(); }

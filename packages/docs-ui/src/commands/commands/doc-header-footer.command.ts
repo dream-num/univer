@@ -137,7 +137,7 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
             return false;
         }
 
-        const renderObject = renderManagerService.getRenderById(unitId);
+        const renderObject = renderManagerService.getRenderUnitById(unitId);
         if (renderObject == null) {
             return false;
         }

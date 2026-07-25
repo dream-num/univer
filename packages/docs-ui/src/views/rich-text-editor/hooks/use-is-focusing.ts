@@ -20,7 +20,7 @@ import { DocSelectionRenderService } from '../../../services/selection/doc-selec
 
 export function useIsFocusing(editorId: string) {
     const renderManagerService = useDependency(IRenderManagerService);
-    const renderer = renderManagerService.getRenderById(editorId);
+    const renderer = renderManagerService.getRenderUnitById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const selections = useObservable(docSelectionRenderService?.textSelectionInner$);
     return Boolean((docSelectionRenderService?.isFocusing ?? false) && selections?.textRanges.some((r) => r.collapsed));

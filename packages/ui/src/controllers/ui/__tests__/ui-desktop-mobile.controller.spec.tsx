@@ -46,7 +46,7 @@ function createCommonDeps() {
         },
         renderManagerService: {
             getRenderAll: vi.fn(() => new Map()),
-            getRenderById: vi.fn(() => null),
+            getRenderUnitById: vi.fn(() => null),
             created$: new Subject<any>(),
             disposed$: new Subject<string>(),
         },

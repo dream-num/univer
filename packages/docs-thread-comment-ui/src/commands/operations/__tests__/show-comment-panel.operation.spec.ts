@@ -110,8 +110,8 @@ class TestSidebarService extends Disposable implements ISidebarService {
     }
 }
 
-class TestRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
-    getRenderById(): IRender | null {
+class TestRenderManagerService implements Pick<IRenderManagerService, 'getRenderUnitById'> {
+    getRenderUnitById(): IRender | null {
         return null;
     }
 }

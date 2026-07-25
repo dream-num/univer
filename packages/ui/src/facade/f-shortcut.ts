@@ -108,7 +108,7 @@ export class FShortcut extends FBase {
             return;
         }
 
-        const renderUnit = this._renderManagerService.getRenderById(workbook.getUnitId());
+        const renderUnit = this._renderManagerService.getRenderUnitById(workbook.getUnitId());
         if (!renderUnit) {
             return;
         }

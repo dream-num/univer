@@ -182,7 +182,7 @@ class TestLayoutService {
 }
 
 class TestRenderManagerService {
-    getRenderById() {
+    getRenderUnitById() {
         return undefined;
     }
 }

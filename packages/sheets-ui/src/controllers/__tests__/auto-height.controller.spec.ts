@@ -45,7 +45,7 @@ describe('AutoHeightController', () => {
         } as unknown as IUniverInstanceService;
 
         const renderManagerService = {
-            getRenderById: () => ({
+            getRenderUnitById: () => ({
                 with: () => ({
                     ensureSkeleton: () => null,
                 }),
@@ -130,7 +130,7 @@ describe('AutoHeightController', () => {
 
         const controller = new AutoHeightController(
             {
-                getRenderById: () => ({
+                getRenderUnitById: () => ({
                     with: () => ({
                         ensureSkeleton: () => ({
                             calculateAutoHeightInRange: () => [

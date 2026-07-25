@@ -306,7 +306,7 @@ export function SheetBarTabs() {
     }, [workbook]);
 
     const syncActiveSheetRender = useCallback((subUnitId: string) => {
-        const render = renderManagerService.getRenderById(workbookRef.current.getUnitId());
+        const render = renderManagerService.getRenderUnitById(workbookRef.current.getUnitId());
         try {
             render?.with(SheetSkeletonManagerService).setCurrent({ sheetId: subUnitId });
             render?.scene.makeDirty(true);

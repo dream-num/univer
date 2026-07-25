@@ -80,7 +80,7 @@ class TestRenderManagerService {
     readonly clearControl$ = new Subject<boolean>();
     readonly changeStart$ = new Subject<{ objects: Map<string, unknown> }>();
 
-    getRenderById() {
+    getRenderUnitById() {
         return {
             scene: {
                 getTransformerByCreate: () => ({

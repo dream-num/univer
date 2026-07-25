@@ -74,7 +74,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
 
             const unitId = this._context.unitId;
             const { skeleton } = skeletonParam;
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+            const currentRender = this._renderManagerService.getRenderUnitById(unitId);
             if (currentRender && currentRender.mainComponent) {
                 const spreadsheet = currentRender.mainComponent as Spreadsheet;
                 // eslint-disable-next-line max-lines-per-function

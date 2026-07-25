@@ -119,7 +119,7 @@ function createController(options: {
         replaceDocRanges: vi.fn(),
     };
     const renderManagerSrv = {
-        getRenderById: vi.fn(() => renderUnit),
+        getRenderUnitById: vi.fn(() => renderUnit),
     };
     const docDrawingService = {
         focusDrawing: vi.fn(),

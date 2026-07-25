@@ -41,7 +41,7 @@ describe('SheetCellDropdownManagerService', () => {
         const attachPopupToCell: any = vi.fn(() => popupDisposable);
         const canvas = { id: 'canvas' } as any;
         const renderManager = {
-            getRenderById: vi.fn((unitId: string) => {
+            getRenderUnitById: vi.fn((unitId: string) => {
                 if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
                     return {
                         engine: {
@@ -95,7 +95,7 @@ describe('SheetCellDropdownManagerService', () => {
     });
 
     it('throws when popup cannot be attached', () => {
-        const renderManager = { getRenderById: vi.fn(() => null) };
+        const renderManager = { getRenderUnitById: vi.fn(() => null) };
 
         const attachFailService = new SheetCellDropdownManagerService(
             { attachPopupToCell: vi.fn(() => null) } as any,

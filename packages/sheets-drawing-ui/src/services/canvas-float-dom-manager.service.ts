@@ -924,7 +924,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     }
 
     private _commitFloatDomMove(info: ICanvasFloatDomInfo): void {
-        const skeletonParam = this._renderManagerService.getRenderById(info.unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(info.subUnitId);
+        const skeletonParam = this._renderManagerService.getRenderUnitById(info.unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(info.subUnitId);
         const drawing = this._sheetDrawingService.getDrawingByParam({
             unitId: info.unitId,
             subUnitId: info.subUnitId,
@@ -1161,7 +1161,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             return;
         }
 
-        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
 
         const scene = renderUnit?.scene;
 
@@ -1197,7 +1197,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
+                    const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
                     if (!skeleton) {
                         return;
                     }
@@ -1518,7 +1518,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 .filter((info) => info.subUnitId === subUnitId && info.unitId === unitId)
                 .map((info) => info.id);
             const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
-            const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
+            const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
             if (!renderObject || !target || !skeleton) {
                 return;
             }
@@ -1553,7 +1553,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 map((worksheet) => {
                     if (!worksheet) return null;
                     const unitId = worksheet.getUnitId();
-                    const render = this._renderManagerService.getRenderById(unitId);
+                    const render = this._renderManagerService.getRenderUnitById(unitId);
                     return render ? { render, unitId, subUnitId: worksheet.getSheetId() } : null;
                 }),
                 switchMap((render) =>
@@ -1676,7 +1676,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
     private _getPosition(position: IPosition, unitId: string): Nullable<ISheetDrawingPosition> {
         const { startX, endX, startY, endY } = position;
-        const selectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
+        const selectionRenderService = this._renderManagerService.getRenderUnitById(unitId)?.with(ISheetSelectionRenderService);
         if (selectionRenderService == null) {
             return;
         }
@@ -1865,9 +1865,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const { unitId, subUnitId } = target;
         const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
         if (!renderObject) return;
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) return;
-        const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
+        const skeletonParam = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
         if (!skeletonParam) return;
 
         const { componentKey, data, allowTransform = true } = config;
@@ -1917,7 +1917,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 return;
             }
 
-            const skMangerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            const skMangerService = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService);
             if (!skMangerService) {
                 return;
             }
@@ -2091,7 +2091,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 const newPos = calcSheetFloatDomPosition(newRect, renderObject.renderUnit.scene, skeletonParam.skeleton, target.worksheet, floatDomInfo);
                 position$.next(newPos);
             }));
-            const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            const skm = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService);
 
             const skeletonSubscription = skm?.currentSkeleton$.subscribe((skeleton) => {
                 if (!skeleton) return;
@@ -2130,9 +2130,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const { unitId, subUnitId } = target;
         const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
         if (!renderObject) return;
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) return;
-        const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
+        const skeletonParam = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
         if (!skeletonParam) return;
 
         const { componentKey, data, allowTransform = true } = config;
@@ -2188,7 +2188,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 return;
             }
 
-            const skMangerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            const skMangerService = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService);
             if (!skMangerService) {
                 return;
             }
@@ -2340,7 +2340,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 position$.next(newPos);
             }));
 
-            const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            const skm = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService);
             skm?.currentSkeleton$.subscribe((skeleton) => {
                 if (!skeleton) return;
                 if (skeletonParam.sheetId !== skeleton.sheetId) {

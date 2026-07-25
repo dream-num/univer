@@ -120,7 +120,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
                 return;
             }
 
-            const renderUnit = this._renderManagerService.getRenderById(unitId) as RenderUnit;
+            const renderUnit = this._renderManagerService.getRenderUnitById(unitId) as RenderUnit;
             if (!renderUnit) return;
 
             const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);

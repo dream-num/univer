@@ -215,7 +215,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editor, editorId, isFocus, disableOnClick: disableSelectionOnClick });
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
-    const renderer = renderManagerService.getRenderById(editorId);
+    const renderer = renderManagerService.getRenderUnitById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const isFocusing = docSelectionRenderService?.isFocusing;
     const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);

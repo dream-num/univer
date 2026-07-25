@@ -41,8 +41,8 @@ class TestUniverInstanceService {
 class TestRenderManagerService {
     static service: Partial<IRenderManagerService>;
 
-    getRenderById(...args: Parameters<IRenderManagerService['getRenderById']>) {
-        return TestRenderManagerService.service.getRenderById!(...args);
+    getRenderUnitById(...args: Parameters<IRenderManagerService['getRenderUnitById']>) {
+        return TestRenderManagerService.service.getRenderUnitById!(...args);
     }
 }
 
@@ -115,7 +115,7 @@ describe('HoverManagerService', () => {
         };
 
         const renderManagerService: Partial<IRenderManagerService> = {
-            getRenderById: () => render as any,
+            getRenderUnitById: () => render as any,
         };
 
         const service = createHoverManagerService(univerInstanceService, renderManagerService);
@@ -241,7 +241,7 @@ describe('HoverManagerService', () => {
         };
 
         const renderManagerService: Partial<IRenderManagerService> = {
-            getRenderById: () => render as any,
+            getRenderUnitById: () => render as any,
         };
 
         const service = createHoverManagerService(univerInstanceService, renderManagerService);

@@ -87,7 +87,7 @@ class TestRenderManagerService {
     enableScrollRender = false;
     readonly scrollRanges: unknown[] = [];
 
-    getRenderById(id: string) {
+    getRenderUnitById(id: string) {
         if (id !== UNIT_ID || !this.enableScrollRender) {
             return undefined;
         }

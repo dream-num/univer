@@ -40,7 +40,7 @@ describe('doc auto format controller', () => {
             }),
         };
         const renderManagerService = {
-            getRenderById: vi.fn(() => ({
+            getRenderUnitById: vi.fn(() => ({
                 with: vi.fn(() => ({
                     getSkeleton: () => ({ id: 'skeleton' }),
                 })),

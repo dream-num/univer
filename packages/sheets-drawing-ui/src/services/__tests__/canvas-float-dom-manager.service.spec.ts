@@ -164,10 +164,6 @@ class TestRenderManagerService extends Disposable implements Partial<IRenderMana
         this._render = render;
     }
 
-    getRenderById(): IRender | null {
-        return this._render;
-    }
-
     getRenderUnitById(): IRender | null {
         return this._render;
     }

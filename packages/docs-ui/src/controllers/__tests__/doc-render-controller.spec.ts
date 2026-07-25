@@ -196,7 +196,7 @@ function createControllerFixture(options?: {
             getEditorRenderConfig: vi.fn(() => editorRenderConfig),
         },
         {
-            getRenderById: vi.fn(() => ({
+            getRenderUnitById: vi.fn(() => ({
                 with: vi.fn(() => skeletonManager),
             })),
         },

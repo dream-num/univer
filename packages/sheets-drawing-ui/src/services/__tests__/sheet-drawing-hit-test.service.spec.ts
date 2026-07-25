@@ -66,7 +66,7 @@ function createServiceHarness(options: { drawing?: IDrawingParam | null } = {}) 
         getActiveSheet: vi.fn(() => ({ getSheetId: vi.fn(() => 'sheet-1') })),
     };
     const renderManagerService = {
-        getRenderById: vi.fn((unitId: string) => unitId === 'unit-1' ? currentRender : null),
+        getRenderUnitById: vi.fn((unitId: string) => unitId === 'unit-1' ? currentRender : null),
         created$: renderCreated$.asObservable(),
         disposed$: renderDisposed$.asObservable(),
     };

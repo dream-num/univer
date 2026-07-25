@@ -111,7 +111,7 @@ function DocSideMenuContent() {
     const fullDataStream = documentData?.body?.dataStream ?? '';
     const [activeId, setActiveId] = useState<string | undefined>(undefined);
     const unitId = currentDoc?.getUnitId() ?? '';
-    const renderer = renderManagerService.getRenderById(unitId);
+    const renderer = renderManagerService.getRenderUnitById(unitId);
     const title = documentData?.title;
     const docEventManagerService = renderer?.with(DocEventManagerService);
     const paragraphBounds = docEventManagerService?.paragraphBounds;

@@ -109,7 +109,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     return;
                 }
                 const { unitId, subUnitId, row, col } = currentCell;
-                const renderer = this._renderManagerService.getRenderById(unitId);
+                const renderer = this._renderManagerService.getRenderUnitById(unitId);
                 if (!renderer) {
                     return;
                 }
@@ -194,7 +194,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     }
 
                     const { editorUnitId, unitId, sheetId, row, column } = state;
-                    const renderer = this._renderManagerService.getRenderById(editorUnitId);
+                    const renderer = this._renderManagerService.getRenderUnitById(editorUnitId);
                     if (!renderer) {
                         return;
                     }
@@ -211,7 +211,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                             return;
                         }
                         const rect = customRange.rects[customRange.rects.length - 1];
-                        const skeleton = this._renderManagerService.getRenderById(unitId)
+                        const skeleton = this._renderManagerService.getRenderUnitById(unitId)
                             ?.with(SheetSkeletonManagerService)
                             .getSkeletonParam(sheetId)
                             ?.skeleton;

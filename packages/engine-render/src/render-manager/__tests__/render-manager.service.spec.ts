@@ -63,7 +63,6 @@ describe('render manager service', () => {
 
         service.addRender('u-1', render);
         expect(service.has('u-1')).toBe(true);
-        expect(service.getRenderById('u-1')).toBe(render);
         expect(service.getRenderUnitById('u-1')).toBe(render);
         expect(service.getAllRenderersOfType(UniverInstanceType.UNIVER_SHEET).length).toBe(1);
 
@@ -129,7 +128,7 @@ describe('render manager service', () => {
             dpr: 1,
         }));
         expect(thumbnailRender.isThumbNail).toBe(true);
-        expect(service.getRenderById('slide-unit')).toBe(thumbnailRender);
+        expect(service.getRenderUnitById('slide-unit')).toBe(thumbnailRender);
 
         const current = getCurrentTypeOfRenderer(
             UniverInstanceType.UNIVER_SHEET,

@@ -305,6 +305,18 @@ describe('InputNumber', () => {
         expect(onLocalChange).toHaveBeenCalledWith(2);
     });
 
+    it('should emit a rounded value when stepping with decimal precision', () => {
+        const onLocalChange = vi.fn();
+        const { container } = render(
+            <InputNumber defaultValue={0.65} precision={2} step={0.05} onChange={onLocalChange} />
+        );
+        const [incBtn] = Array.from(container.querySelectorAll('[role="button"]')) as HTMLElement[];
+
+        fireEvent.click(incBtn);
+
+        expect(onLocalChange).toHaveBeenLastCalledWith(0.7);
+    });
+
     it('should prevent interactions when disabled and prevent default on control mousedown', () => {
         const onLocalChange = vi.fn();
         const onKeyDown = vi.fn();

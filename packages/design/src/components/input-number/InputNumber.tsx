@@ -288,6 +288,10 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             }
 
             let newValue = currentValue + stepValue;
+            if (precision !== undefined) {
+                const factor = 10 ** precision;
+                newValue = Math.round(newValue * factor) / factor;
+            }
 
             // Apply min/max constraints
             if (max !== undefined && newValue > max) {

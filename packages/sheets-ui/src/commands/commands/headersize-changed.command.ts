@@ -41,9 +41,9 @@ export const SetRowHeaderWidthCommand: ICommand<ISetHeaderSizeParams> = {
             return false;
         }
         const { unitId, subUnitId, size } = params;
-        const render = renderManagerSrv.getRenderById(unitId);
+        const render = renderManagerSrv.getRenderUnitById(unitId);
         if (render) {
-            const skm = renderManagerSrv.getRenderById(unitId)!.with(SheetSkeletonManagerService);
+            const skm = renderManagerSrv.getRenderUnitById(unitId)!.with(SheetSkeletonManagerService);
             skm.setRowHeaderSize(render, subUnitId, size);
 
             const { components } = render;
@@ -70,9 +70,9 @@ export const SetColumnHeaderHeightCommand: ICommand<ISetHeaderSizeParams> = {
             return false;
         }
         const { unitId, subUnitId, size } = params;
-        const render = renderManagerSrv.getRenderById(unitId);
+        const render = renderManagerSrv.getRenderUnitById(unitId);
         if (render) {
-            const skm = renderManagerSrv.getRenderById(unitId)!.with(SheetSkeletonManagerService);
+            const skm = renderManagerSrv.getRenderUnitById(unitId)!.with(SheetSkeletonManagerService);
             skm.setColumnHeaderSize(render, subUnitId, size);
             const { components } = render;
             const renderComponent = components.get(SHEET_VIEW_KEY.COLUMN);

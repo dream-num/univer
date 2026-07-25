@@ -215,7 +215,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     private _isInsertInHeaderFooter() {
         const { unitId } = this._context;
-        const viewModel = this._renderManagerSrv.getRenderById(unitId)
+        const viewModel = this._renderManagerSrv.getRenderUnitById(unitId)
             ?.with(DocSkeletonManagerService)
             .getViewModel();
 
@@ -377,7 +377,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
         const { unit: docDataModel, scene, unitId } = this._context;
         const viewModel = this._renderManagerSrv
-            .getRenderById(unitId)
+            .getRenderUnitById(unitId)
             ?.with(DocSkeletonManagerService)
             .getViewModel();
 
@@ -426,7 +426,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     private _editAreaChangeListener() {
         const { unitId } = this._context;
         const viewModel = this._renderManagerSrv
-            .getRenderById(unitId)
+            .getRenderUnitById(unitId)
             ?.with(DocSkeletonManagerService)
             .getViewModel();
 

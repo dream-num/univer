@@ -103,7 +103,7 @@ class TestDocCanvasPopManagerService {
 }
 
 class TestRenderManagerService {
-    getRenderById() {
+    getRenderUnitById() {
         return {
             with(token: unknown) {
                 if (token === DocEventManagerService) {

@@ -76,7 +76,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const { drawings, hasArrange = true, hasTransform = true, hasAlign = true, hasCropper = true, hasGroup = true } = props;
 
     const drawingParam = drawings[0];
-    const renderObject = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId) : undefined;
+    const renderObject = drawingParam ? renderManagerService.getRenderUnitById(drawingParam.unitId) : undefined;
     const scene = renderObject?.scene;
     const transformer = scene?.getTransformerByCreate();
 

@@ -207,7 +207,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     }
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string, subUnitId: string): void {
-        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!renderUnit || !skeleton) return;
 

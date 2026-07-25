@@ -30,7 +30,7 @@ vi.mock('../../common/utils', () => ({
 }));
 
 type DragManagerInstanceServiceStub = Pick<IUniverInstanceService, 'getCurrentTypeOfUnit$' | 'getCurrentUnitOfType'>;
-type DragManagerRenderManagerStub = Pick<IRenderManagerService, 'getRenderById'>;
+type DragManagerRenderManagerStub = Pick<IRenderManagerService, 'getRenderUnitById'>;
 
 function createRender() {
     return {
@@ -68,7 +68,7 @@ function createUniverInstanceService(
 
 function createRenderManagerService(render: ReturnType<typeof createRender>): DragManagerRenderManagerStub {
     return {
-        getRenderById() {
+        getRenderUnitById() {
             return render as unknown as IRender;
         },
     };

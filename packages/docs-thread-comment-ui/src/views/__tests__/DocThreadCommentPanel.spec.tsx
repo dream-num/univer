@@ -95,11 +95,7 @@ class TestSidebarService extends Disposable implements ISidebarService {
     }
 }
 
-class TestRenderManagerService implements Pick<IRenderManagerService, 'getRenderById' | 'getRenderUnitById'> {
-    getRenderById(): IRender | null {
-        return null;
-    }
-
+class TestRenderManagerService implements Pick<IRenderManagerService, 'getRenderUnitById'> {
     getRenderUnitById(): IRender | null {
         return null;
     }

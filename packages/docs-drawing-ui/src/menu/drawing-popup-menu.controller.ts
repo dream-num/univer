@@ -139,7 +139,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _popupMenuListener(unitId: string) {
-        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
         if (!scene) {
             return;
         }

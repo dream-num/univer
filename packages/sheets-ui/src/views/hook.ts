@@ -71,7 +71,7 @@ export function useSheetSkeleton() {
 
     const { sheetSkeletonManagerService } = useMemo(() => {
         if (workbook) {
-            const ru = renderManagerService.getRenderById(workbook.getUnitId());
+            const ru = renderManagerService.getRenderUnitById(workbook.getUnitId());
             return {
                 sheetSkeletonManagerService: ru?.with(SheetSkeletonManagerService),
             };

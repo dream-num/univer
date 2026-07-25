@@ -49,7 +49,7 @@ function createController() {
             getFormulaStringByCell: vi.fn(() => '=SUM(A1:A2)'),
         } as never,
         { getColorFromTheme: vi.fn(() => '#fff') } as never,
-        { getRenderById: vi.fn(() => null) } as never,
+        { getRenderUnitById: vi.fn(() => null) } as never,
         {
             currentSkeleton$,
             getCurrentSkeleton: vi.fn(() => skeleton),

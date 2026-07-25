@@ -73,7 +73,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
+        const scrollManagerService = renderManagerSrv.getRenderUnitById(unitId)!.with(SheetScrollManagerService);
         const currentScroll = scrollManagerService.getCurrentScrollState();
         const { offsetX = 0, offsetY = 0 } = params || {};
         const {
@@ -122,7 +122,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet, unitId } = target;
-        const renderUnit = renderManagerSrv.getRenderById(unitId);
+        const renderUnit = renderManagerSrv.getRenderUnitById(unitId);
         if (!renderUnit) return false;
 
         const scrollManagerService = renderUnit.with(SheetScrollManagerService);
@@ -196,7 +196,7 @@ export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
         const instanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollController = renderManagerService
-            .getRenderById(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
+            .getRenderUnitById(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
             .with(SheetsScrollRenderController);
         return scrollController.scrollToRange(params!.range, params!.forceTop, params!.forceLeft);
     },

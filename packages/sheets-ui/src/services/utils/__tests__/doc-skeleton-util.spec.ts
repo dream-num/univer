@@ -236,7 +236,7 @@ describe('doc-skeleton-util', () => {
             getSheetBySheetId: () => worksheet,
         };
         const renderManagerService = {
-            getRenderById: () => ({
+            getRenderUnitById: () => ({
                 with: () => ({
                     getSkeletonParam: () => ({ skeleton }),
                 }),
@@ -256,14 +256,14 @@ describe('doc-skeleton-util', () => {
     it('getCustomRangePosition returns null for missing workbook/worksheet/customRange', () => {
         const noWorkbookInjector = createAccessor([
             [IUniverInstanceService, { getUnit: () => null }],
-            [IRenderManagerService, { getRenderById: () => null }],
+            [IRenderManagerService, { getRenderUnitById: () => null }],
         ]);
         expect(getCustomRangePosition(noWorkbookInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
 
         const workbook = { getSheetBySheetId: () => null };
         const noWorksheetInjector = createAccessor([
             [IUniverInstanceService, { getUnit: () => workbook }],
-            [IRenderManagerService, { getRenderById: () => null }],
+            [IRenderManagerService, { getRenderUnitById: () => null }],
         ]);
         expect(getCustomRangePosition(noWorksheetInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
 
@@ -284,20 +284,20 @@ describe('doc-skeleton-util', () => {
         };
         const noRangeInjector = createAccessor([
             [IUniverInstanceService, { getUnit: () => ({ getUnitId: () => 'unit-1', getSheetBySheetId: () => worksheet }) }],
-            [IRenderManagerService, { getRenderById: () => ({ with: () => ({ getSkeletonParam: () => ({ skeleton }) }) }) }],
+            [IRenderManagerService, { getRenderUnitById: () => ({ with: () => ({ getSkeletonParam: () => ({ skeleton }) }) }) }],
         ]);
         expect(getCustomRangePosition(noRangeInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
 
         const noSkeletonInjector = createAccessor([
             [IUniverInstanceService, { getUnit: () => ({ getUnitId: () => 'unit-1', getSheetBySheetId: () => worksheet }) }],
-            [IRenderManagerService, { getRenderById: () => ({ with: () => ({ getSkeletonParam: () => null }) }) }],
+            [IRenderManagerService, { getRenderUnitById: () => ({ with: () => ({ getSkeletonParam: () => null }) }) }],
         ]);
         expect(getCustomRangePosition(noSkeletonInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeUndefined();
 
         const noDocSkeletonInjector = createAccessor([
             [IUniverInstanceService, { getUnit: () => ({ getUnitId: () => 'unit-1', getSheetBySheetId: () => worksheet }) }],
             [IRenderManagerService, {
-                getRenderById: () => ({
+                getRenderUnitById: () => ({
                     with: () => ({
                         getSkeletonParam: () => ({
                             skeleton: {
@@ -319,7 +319,7 @@ describe('doc-skeleton-util', () => {
             isVisible: () => ({ visible: true }),
         };
         const renderManagerService = {
-            getRenderById: (id: string) => {
+            getRenderUnitById: (id: string) => {
                 if (id === 'doc-1') {
                     return {
                         with: () => ({ getSkeleton: () => docSkeleton }),
@@ -367,14 +367,14 @@ describe('doc-skeleton-util', () => {
 
         const missingRendererInjector = createAccessor([
             [IEditorBridgeService, editorBridgeService],
-            [IRenderManagerService, { getRenderById: () => null }],
+            [IRenderManagerService, { getRenderUnitById: () => null }],
         ]);
         expect(getEditingCustomRangePosition(missingRendererInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
 
         const noEditingRangeInjector = createAccessor([
             [IEditorBridgeService, editorBridgeService],
             [IRenderManagerService, {
-                getRenderById: (id: string) => {
+                getRenderUnitById: (id: string) => {
                     if (id === 'doc-1') {
                         return {
                             with: () => ({ getSkeleton: () => createDocSkeleton('other-id') }),

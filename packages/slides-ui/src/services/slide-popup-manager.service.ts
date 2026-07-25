@@ -124,7 +124,7 @@ export class SlideCanvasPopMangerService extends Disposable {
         const unitId = workbook.getUnitId();
         // const subUnitId =
 
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) {
             return {
                 dispose: () => {

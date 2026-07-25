@@ -35,7 +35,7 @@ class TestEditorService {
 }
 
 class TestRenderManagerService {
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         if (unitId !== 'slide-1') {
             return null;
         }

@@ -29,7 +29,7 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, 
     const refSelectionsService = useDependency(IRefSelectionsService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
-    const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
+    const render = renderManagerService.getRenderUnitById(currentUnit?.getUnitId() ?? '');
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     useLayoutEffect(() => {

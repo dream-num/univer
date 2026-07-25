@@ -119,7 +119,7 @@ function createController(options?: { hasDrawingData?: boolean }) {
         } as never,
         { renderDrawing: vi.fn(() => Promise.resolve()) } as never,
         { getDrawingDataForUnit: vi.fn(() => options?.hasDrawingData === false ? undefined : drawingData['unit-1']) } as never,
-        { getRenderById: vi.fn(() => render) } as never,
+        { getRenderUnitById: vi.fn(() => render) } as never,
         {
             get: vi.fn((key: string) => `${key}-Component`),
         } as never,

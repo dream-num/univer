@@ -66,7 +66,7 @@ describe('ImageUpdateController', () => {
         const controller = new ImageUpdateController(
             commandService as never,
             {
-                getRenderById: vi.fn(() => ({
+                getRenderUnitById: vi.fn(() => ({
                     scene: {
                         getObject: vi.fn(() => imageShape),
                         getTransformerByCreate: vi.fn(() => ({
@@ -121,7 +121,7 @@ describe('ImageUpdateController', () => {
         const controller = new ImageUpdateController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
             {
-                getRenderById: vi.fn(() => ({
+                getRenderUnitById: vi.fn(() => ({
                     scene: { getTransformerByCreate: vi.fn(), getObject: vi.fn() },
                 })),
             } as never,
@@ -167,7 +167,7 @@ describe('ImageUpdateController', () => {
         const controller = new ImageUpdateController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
             {
-                getRenderById: vi.fn(() => ({
+                getRenderUnitById: vi.fn(() => ({
                     scene: { getTransformerByCreate: vi.fn(), getObject: vi.fn() },
                 })),
             } as never,
@@ -239,7 +239,7 @@ describe('ImageUpdateController', () => {
         const controller = new ImageUpdateController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
             {
-                getRenderById: vi.fn(() => ({ scene })),
+                getRenderUnitById: vi.fn(() => ({ scene })),
             } as never,
             drawingManagerService as never,
             {} as never,

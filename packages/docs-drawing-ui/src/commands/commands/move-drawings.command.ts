@@ -52,7 +52,7 @@ export const MoveDocDrawingsCommand: ICommand = {
 
         const unitId = drawings[0].unitId;
 
-        const renderObject = renderManagerService.getRenderById(unitId);
+        const renderObject = renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
         if (scene == null) {
             return false;

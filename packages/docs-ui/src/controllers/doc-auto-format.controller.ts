@@ -97,7 +97,7 @@ export class DocAutoFormatController extends Disposable {
 
                     const { startNodePosition, endNodePosition } = selection;
 
-                    const renderObject = this._renderManagerService.getRenderById(unit.getUnitId());
+                    const renderObject = this._renderManagerService.getRenderUnitById(unit.getUnitId());
                     const skeleton = renderObject?.with(DocSkeletonManagerService).getSkeleton();
 
                     if (skeleton == null) {

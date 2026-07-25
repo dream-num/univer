@@ -172,7 +172,7 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const themeService = useDependency(ThemeService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const ownerRender = renderManagerService.getRenderById(unitId);
+    const ownerRender = renderManagerService.getRenderUnitById(unitId);
     const ownerRefSelectionsRenderService = ownerRender?.with(RefSelectionsRenderService);
 
     const getHighlightWorkbook = useEvent((refSelections: IRefSelection[]) => {
@@ -189,7 +189,7 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor, isEnd = false) => {
         const currentWorkbook = getHighlightWorkbook(refSelections);
         if (!currentWorkbook) return;
-        const currentRender = renderManagerService.getRenderById(currentWorkbook.getUnitId());
+        const currentRender = renderManagerService.getRenderUnitById(currentWorkbook.getUnitId());
         const refSelectionsRenderService = currentRender?.with(RefSelectionsRenderService);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
         const sheetSkeletonManagerService = currentRender?.with(SheetSkeletonManagerService);

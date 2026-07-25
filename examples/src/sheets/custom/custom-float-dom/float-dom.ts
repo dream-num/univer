@@ -58,7 +58,7 @@ function installFloatDomContentBoxFixture(univer: Univer, univerAPI: FUniver): v
     const renderManagerService = univer.__getInjector().get(IRenderManagerService);
     const getDrawingAndScene = () => {
         const workbook = univerAPI.getActiveWorkbook()!;
-        const scene = renderManagerService.getRenderById(workbook.getId())?.scene;
+        const scene = renderManagerService.getRenderUnitById(workbook.getId())?.scene;
         const rect = scene?.getObject(getDrawingShapeKeyByDrawingSearch({
             unitId: workbook.getId(),
             subUnitId: worksheet.getSheetId(),

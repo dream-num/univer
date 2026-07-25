@@ -46,7 +46,7 @@ class TestSheetSkeletonService {
 class TestRenderManagerService {
     readonly scene = createFakeScene(new Map([[SHEET_VIEWPORT_KEY.VIEW_MAIN, createFakeViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)]]));
 
-    getRenderById() {
+    getRenderUnitById() {
         return { scene: this.scene };
     }
 }

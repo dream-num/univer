@@ -53,7 +53,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         }
 
         const renderManagerSrv = accessor.get(IRenderManagerService);
-        const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
+        const scrollManagerService = renderManagerSrv.getRenderUnitById(unitId)!.with(SheetScrollManagerService);
         const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollState() || {};
 
         let startRow;

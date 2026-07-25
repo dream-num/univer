@@ -88,7 +88,7 @@ export class AutoHeightController extends Disposable {
                 subUnitId = worksheet.getSheetId();
             }
         }
-        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
+        const sheetSkeletonService = this._renderManagerService.getRenderUnitById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
 
         // Better NOT use `getCurrentParam` method, because users may manipulate another worksheet in active sheet.
         // const { skeleton } = sheetSkeletonService.getCurrentParam()!;

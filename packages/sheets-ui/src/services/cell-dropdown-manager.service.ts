@@ -58,7 +58,7 @@ export class SheetCellDropdownManagerService extends Disposable implements IShee
         const { row, col, unitId, subUnitId } = location;
 
         const component = dropdownMap[param.type];
-        const currentRender = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const currentRender = this._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         const disposable = new DisposableCollection();
         const popupDisposable = this._canvasPopupManagerService.attachPopupToCell(
             row,

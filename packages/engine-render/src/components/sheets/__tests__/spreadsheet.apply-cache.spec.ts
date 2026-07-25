@@ -82,7 +82,7 @@ describe('spreadsheet _applyCache blit clipping', () => {
 
         expect(ctx.drawImage).toHaveBeenCalledWith(
             cacheCanvas.canvasEle,
-            0 * 2, // sx
+            0, // sx
             100 * 2, // sy
             80 * 2, // sw clipped from 126 to the canvas width
             280 * 2, // sh

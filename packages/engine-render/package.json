@@ -26,6 +26,7 @@
     ],
     "exports": {
         ".": "./src/index.ts",
+        "./basics/drawing-effect": "./src/basics/drawing-effect.ts",
         "./*": "./src/*"
     },
     "main": "./src/index.ts",
@@ -39,6 +40,11 @@
                 "import": "./lib/es/index.js",
                 "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./basics/drawing-effect": {
+                "import": "./lib/es/basics/drawing-effect.js",
+                "require": "./lib/cjs/basics/drawing-effect.js",
+                "types": "./lib/types/basics/drawing-effect.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",

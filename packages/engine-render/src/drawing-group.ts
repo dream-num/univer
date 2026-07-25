@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-import type { IGroupBaseBound } from '@univerjs/core';
+import type { IGlowEffect, IGroupBaseBound, IShadowEffect } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
 import { RENDER_CLASS_TYPE, Transform } from './basics';
+import { combineDrawingEffectFilter, createDrawingEffectFilter } from './basics/drawing-effect';
 import { Group } from './group';
-
-export interface IDrawingGroupShadow {
-    shadowColor: string;
-    shadowBlur: number;
-    shadowOffsetX: number;
-    shadowOffsetY: number;
-}
 
 export class DrawingGroupObject extends Group {
     protected override _selfSizeMode: boolean = true;
@@ -43,10 +37,17 @@ export class DrawingGroupObject extends Group {
         height: 0,
     };
 
-    private _outerShadow?: IDrawingGroupShadow;
+    private _outerShadow?: IShadowEffect;
 
-    setOuterShadow(shadow?: IDrawingGroupShadow): void {
+    private _glow?: IGlowEffect;
+
+    setOuterShadow(shadow?: IShadowEffect): void {
         this._outerShadow = shadow;
+        this.makeDirty(true);
+    }
+
+    setGlow(glow?: IGlowEffect): void {
+        this._glow = glow;
         this.makeDirty(true);
     }
 
@@ -103,11 +104,9 @@ export class DrawingGroupObject extends Group {
         const centerX = realLeft + realWidth / 2;
         const centerY = realTop + realHeight / 2;
         ctx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
-        if (this._outerShadow) {
-            ctx.shadowColor = this._outerShadow.shadowColor;
-            ctx.shadowBlur = this._outerShadow.shadowBlur;
-            ctx.shadowOffsetX = this._outerShadow.shadowOffsetX;
-            ctx.shadowOffsetY = this._outerShadow.shadowOffsetY;
+        const effectFilter = createDrawingEffectFilter(this._glow, this._outerShadow);
+        if (effectFilter) {
+            ctx.filter = combineDrawingEffectFilter(ctx.filter, effectFilter);
         }
         const objects = this.getObjectsByOrder();
 

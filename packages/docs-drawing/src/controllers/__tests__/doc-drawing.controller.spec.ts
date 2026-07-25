@@ -48,13 +48,14 @@ describe('DocDrawingController', () => {
                 return { dispose: vi.fn() };
             }),
         };
-
         const controller = new DocDrawingController(
             { registerDrawingData } as any,
             { registerDrawingData: registerDrawingDataForManager } as any,
             resourceManagerService as any,
             univerInstanceService as any,
-            { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as any
+            {
+                registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+            } as any
         );
 
         expect(resourceManagerService.registerPluginResource).toHaveBeenCalledTimes(1);

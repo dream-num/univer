@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     IBullet,
+    ICustomRangeForInterceptor,
     IDocumentStyle,
     INumberUnit,
     IObjectPositionH,
@@ -1525,6 +1526,28 @@ export function getCustomRangeGlyphWidth(
     return getCustomRangeGlyphMetrics(index, viewModel, paragraphNode, config)?.width;
 }
 
+/**
+ * Returns whether a custom range should occupy one measured glyph in the
+ * document skeleton while preserving its complete source text in the model.
+ *
+ * Visible whole-entity ranges such as mentions keep their existing shaping.
+ * The atomic behavior is reserved for hidden ranges whose renderer provides
+ * explicit glyph metrics, such as an inline formula.
+ */
+export function isMeasuredWholeEntityRange(
+    customRange: Nullable<ICustomRangeForInterceptor>
+): customRange is ICustomRangeForInterceptor {
+    if (!customRange?.wholeEntity || customRange.show !== false) {
+        return false;
+    }
+
+    return [
+        customRange.glyphAscentEm,
+        customRange.glyphDescentEm,
+        customRange.glyphWidthEm,
+    ].every((value) => typeof value === 'number' && Number.isFinite(value) && value >= 0);
+}
+
 export function getCustomRangeGlyphMetrics(
     index: number,
     viewModel: DocumentViewModel,
@@ -1536,6 +1559,13 @@ export function getCustomRangeGlyphMetrics(
         return undefined;
     }
 
+    return getCustomRangeGlyphMetricsFromRange(customRange, config);
+}
+
+export function getCustomRangeGlyphMetricsFromRange(
+    customRange: ICustomRangeForInterceptor,
+    config: IFontCreateConfig
+): { ascent?: number; descent?: number; width?: number } | undefined {
     const fontSize = ptToPixel(config.fontStyle.originFontSize);
     const toPixels = (value: unknown) =>
         typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value * fontSize : undefined;

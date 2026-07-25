@@ -64,6 +64,7 @@ function mapFirst(c: number) {
 }
 
 export interface IBreakPoints {
+    readonly content: string;
     nextBreakPoint(): Nullable<Break>;
 }
 

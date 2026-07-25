@@ -77,6 +77,7 @@ import {
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
+import { InsertDocumentColumnBreakOperation } from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import {
     CopyMenuFactory,
@@ -105,10 +106,17 @@ import {
     AlignRightMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
+    BreaksMenuFactory,
     BulletListMenuItemFactory,
     CheckListMenuItemFactory,
+    DOC_BREAKS_MENU_ID,
     DOC_INSERT_EMOJI_MENU_ID,
     DOC_INSERT_SYMBOL_MENU_ID,
+    DOC_SECTION_BREAK_CONTINUOUS_MENU_ID,
+    DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID,
+    DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID,
+    DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID,
+    DOC_SECTION_BREAK_ODD_PAGE_MENU_ID,
     // DocSwitchModeMenuItemFactory,
     EmojiPickerMenuItemFactory,
     FLOAT_TEXT_STYLE_MENU_ID,
@@ -119,7 +127,13 @@ import {
     HeaderFooterMenuItemFactory,
     HeadingSelectorMenuItemFactory,
     HorizontalLineFactory,
+    InsertColumnBreakMenuFactory,
+    InsertContinuousSectionBreakMenuFactory,
     InsertDefaultTableMenuFactory,
+    InsertEvenPageSectionBreakMenuFactory,
+    InsertNextColumnSectionBreakMenuFactory,
+    InsertNextPageSectionBreakMenuFactory,
+    InsertOddPageSectionBreakMenuFactory,
     InsertTableMenuFactory,
     ItalicMenuItemFactory,
     OrderListMenuItemFactory,
@@ -324,14 +338,43 @@ export const menuSchema: MenuSchemaType = {
             gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
             menuItemFactory: HorizontalLineFactory,
         },
-        [DOC_INSERT_EMOJI_MENU_ID]: {
+        [DOC_BREAKS_MENU_ID]: {
             order: 4,
-            gridLayout: { row: 1, column: 3 },
+            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
+            menuItemFactory: BreaksMenuFactory,
+            [InsertDocumentColumnBreakOperation.id]: {
+                order: 0,
+                menuItemFactory: InsertColumnBreakMenuFactory,
+            },
+            [DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID]: {
+                order: 1,
+                menuItemFactory: InsertNextPageSectionBreakMenuFactory,
+            },
+            [DOC_SECTION_BREAK_CONTINUOUS_MENU_ID]: {
+                order: 2,
+                menuItemFactory: InsertContinuousSectionBreakMenuFactory,
+            },
+            [DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID]: {
+                order: 3,
+                menuItemFactory: InsertNextColumnSectionBreakMenuFactory,
+            },
+            [DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID]: {
+                order: 4,
+                menuItemFactory: InsertEvenPageSectionBreakMenuFactory,
+            },
+            [DOC_SECTION_BREAK_ODD_PAGE_MENU_ID]: {
+                order: 5,
+                menuItemFactory: InsertOddPageSectionBreakMenuFactory,
+            },
+        },
+        [DOC_INSERT_EMOJI_MENU_ID]: {
+            order: 5,
+            gridLayout: { row: 1, column: 4 },
             menuItemFactory: EmojiPickerMenuItemFactory,
         },
         [DOC_INSERT_SYMBOL_MENU_ID]: {
-            order: 5,
-            gridLayout: { row: 2, column: 3 },
+            order: 6,
+            gridLayout: { row: 2, column: 4 },
             menuItemFactory: SymbolPickerMenuItemFactory,
         },
     },

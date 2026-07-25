@@ -16,7 +16,7 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, ICommandService, IResourceManagerService, IUndoRedoService, SectionType, UniverInstanceType } from '@univerjs/core';
+import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, ICommandService, IResourceManagerService, IUndoRedoService, PageOrientType, SectionType, UniverInstanceType } from '@univerjs/core';
 import { InsertTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
@@ -40,7 +40,14 @@ describe('FDocument', () => {
     });
 
     it('exposes section enums through univerAPI', () => {
-        expect(univerAPI.Enum.SectionType.NEXT_PAGE).toBe(SectionType.NEXT_PAGE);
+        expect(univerAPI.Enum.SectionType).toMatchObject({
+            SECTION_TYPE_UNSPECIFIED: 0,
+            CONTINUOUS: 1,
+            NEXT_COLUMN: 2,
+            NEXT_PAGE: 3,
+            EVEN_PAGE: 4,
+            ODD_PAGE: 5,
+        });
         expect(univerAPI.Enum.ColumnSeparatorType.BETWEEN_EACH_COLUMN).toBe(ColumnSeparatorType.BETWEEN_EACH_COLUMN);
     });
 
@@ -208,9 +215,12 @@ describe('FDocument', () => {
 
         expect(document.getSections()).toHaveLength(2);
         expect(document.getSectionAt(6)?.getIndex()).toBe(1);
+        expect(document.getSectionAt(4)).toBeNull();
+        expect(document.getSectionAt(5)?.getIndex()).toBe(1);
         const first = document.getSection(0)!;
         expect(first.getRange()).toEqual({ startOffset: 0, endOffset: 4, segmentId: '' });
-        expect(first.setColumns(2, { gap: 20, separator: true, sectionType: SectionType.CONTINUOUS })).toBe(true);
+        expect(first.setColumns(2, { gap: 20, separator: true })).toBe(true);
+        expect(first.setSectionType(SectionType.CONTINUOUS)).toBe(true);
         expect(first.describe()).toMatchObject({
             columnCount: 2,
             columnSeparatorType: ColumnSeparatorType.BETWEEN_EACH_COLUMN,
@@ -221,7 +231,76 @@ describe('FDocument', () => {
         expect(document.save().body?.sectionBreaks?.[0].defaultHeaderId).toBe(headerId);
         expect(document.save().documentStyle.defaultHeaderId).toBeFalsy();
         expect(document.insertColumnBreak(2)).toBe(true);
-        expect(document.save().body?.dataStream[2]).toBe(DataStreamTreeTokenType.COLUMN_BREAK);
+        const body = document.save().body;
+        expect(body?.dataStream[2]).toBe(DataStreamTreeTokenType.COLUMN_BREAK);
+        expect(body?.customRanges).toContainEqual(expect.objectContaining({
+            startIndex: 2,
+            endIndex: 2,
+            wholeEntity: true,
+            properties: { docxBreakType: 'column' },
+        }));
+    });
+
+    it('rejects explicit columns that overflow the section content width', () => {
+        univer.dispose();
+        const data = createDocumentData('section-validation-doc', {
+            dataStream: 'One\r\n',
+            paragraphs: [{ startIndex: 3, paragraphId: 'para-section-validation' }],
+            sectionBreaks: [{ sectionId: 'section_validation', startIndex: 4 }],
+        });
+        data.documentStyle = { ...data.documentStyle, documentFlavor: DocumentFlavor.TRADITIONAL };
+        createDocumentFacade(data);
+        const section = document.getSection(0)!;
+
+        expect(() => section.setColumns(2, { gap: 20, widths: [300, 300] })).toThrow('exceed the available page content width');
+        expect(() => section.setColumnProperties([
+            { width: 300, paddingEnd: 20 },
+            { width: 300, paddingEnd: 0 },
+        ])).toThrow('exceed the available page content width');
+    });
+
+    it('updates per-section page setup through commands with undo and redo', () => {
+        univer.dispose();
+        const data = createDocumentData('section-page-setup-doc', {
+            dataStream: 'One\r\n',
+            paragraphs: [{ startIndex: 3, paragraphId: 'para-page-setup' }],
+            sectionBreaks: [{ sectionId: 'section_page_setup', startIndex: 4 }],
+        });
+        data.documentStyle = { ...data.documentStyle, documentFlavor: DocumentFlavor.TRADITIONAL };
+        createDocumentFacade(data);
+        get(IUndoRedoService);
+
+        const section = document.getSection(0)!;
+        expect(() => section.setPageSetup({
+            pageSize: { width: 100, height: 100 },
+            marginLeft: 50,
+            marginRight: 50,
+        })).toThrow('must leave a positive content area');
+        expect(() => section.setPageSetup({ marginTop: Number.NaN })).toThrow('must be finite');
+        const pageSetup = {
+            pageNumberStart: 3,
+            pageSize: { width: 960, height: 720 },
+            pageOrient: PageOrientType.LANDSCAPE,
+            marginTop: 48,
+            marginBottom: 56,
+            marginLeft: 64,
+            marginRight: 72,
+        };
+
+        expect(section.setPageSetup(pageSetup)).toBe(true);
+        expect(section.getPageSetup()).toEqual(pageSetup);
+        expect(document.undo()).toBe(true);
+        expect(section.getPageSetup()).toEqual({
+            pageNumberStart: undefined,
+            pageSize: undefined,
+            pageOrient: undefined,
+            marginTop: undefined,
+            marginBottom: undefined,
+            marginLeft: undefined,
+            marginRight: undefined,
+        });
+        expect(document.redo()).toBe(true);
+        expect(section.getPageSetup()).toEqual(pageSetup);
     });
 
     it('keeps traditional section mutation unavailable in modern documents', () => {

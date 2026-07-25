@@ -19,7 +19,7 @@ import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandPar
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
-import { dateKit, generateRandomId, ICommandService, LOCALE_META, LocaleService, UserManagerService } from '@univerjs/core';
+import { dateKit, generateRandomId, ICommandService, LOCALE_META, LocaleService, RegionService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, SuccessIcon, SuccessOutlineIcon } from '@univerjs/icons';
 import {
@@ -85,11 +85,11 @@ export interface IThreadCommentItemProps {
 
 const MOCK_ID = '__mock__';
 
-function formatCommentDateTime(value: string, locale: LocaleType): string {
+function formatCommentDateTime(value: string, region: LocaleType): string {
     const date = dateKit(value);
-    const localeTag = LOCALE_META[locale].tag;
+    const regionTag = LOCALE_META[region].tag;
 
-    return date.formatIntl(localeTag, {
+    return date.formatIntl(regionTag, {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric',
@@ -100,9 +100,23 @@ function formatCommentDateTime(value: string, locale: LocaleType): string {
 }
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment, type, threadCommentEditorId } = props;
+    const {
+        item,
+        unitId,
+        subUnitId,
+        editing,
+        onEditingChange,
+        onReply,
+        resolved,
+        isRoot,
+        onClose,
+        onDeleteComment,
+        type,
+        threadCommentEditorId,
+    } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const regionService = useDependency(RegionService);
     const userManagerService = useDependency(UserManagerService);
     const user = userManagerService.getUser(item.personId);
     const currentUser = useObservable(userManagerService.currentUser$);
@@ -111,8 +125,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const [showReply, setShowReply] = useState(false);
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const avatarFallback = uiConfig?.avatarFallback;
-    const currentLocale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
-    const dateText = formatCommentDateTime(item.dT, currentLocale);
+    const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const dateText = isMock ? null : formatCommentDateTime(item.dT, currentRegion);
 
     const handleDeleteItem = () => {
         if (onDeleteComment?.(item) === false) {
@@ -232,15 +246,17 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     </div>
                 )
                 : null}
-            <time
-                dir="ltr"
-                className={`
-                  univer-mb-1 univer-block univer-text-xs/normal univer-text-gray-600
-                  dark:!univer-text-gray-200
-                `}
-            >
-                {dateText}
-            </time>
+            {dateText && (
+                <time
+                    dir="ltr"
+                    className={`
+                      univer-mb-1 univer-block univer-text-xs/normal univer-text-gray-600
+                      dark:!univer-text-gray-200
+                    `}
+                >
+                    {dateText}
+                </time>
+            )}
             {editing
                 ? (
                     <ThreadCommentEditor

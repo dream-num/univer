@@ -286,6 +286,11 @@ export class FDocumentImage {
 
     /**
      * Sets the image wrapping style.
+     *
+     * Use `INLINE` to place the image in the text flow, `WRAP_SQUARE` to flow text beside it, or
+     * `WRAP_TOP_AND_BOTTOM` to keep text above and below it. `BEHIND_TEXT` and `IN_FRONT_OF_TEXT` do not reserve space
+     * in the text layout and can overlap text.
+     *
      * When switching from inline to a floating style in a UI environment, the current visual position is preserved.
      * @param {TextWrappingStyle} wrappingStyle The wrapping style to apply.
      * @returns {boolean} `true` when the update command succeeds; otherwise, `false`.
@@ -295,6 +300,7 @@ export class FDocumentImage {
      * const image = fDocument.getImages()[0];
      *
      * if (image) {
+     *   // Float the image beside body text without covering it.
      *   const success = image.setWrappingStyle(univerAPI.Enum.DocsImageWrappingStyle.WRAP_SQUARE);
      *   console.log(success);
      * }

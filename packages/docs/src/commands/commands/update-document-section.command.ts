@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IMutationInfo, ISectionBreak } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ISectionBreak } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import {
+    ColumnSeparatorType,
     CommandType,
     containsInteriorInsertionOffset,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
+    DocxBreakType,
+    generateRandomId,
     getBlockRangeInterval,
     getColumnGroupRangeInterval,
     getRichTextEditPath,
@@ -29,12 +33,15 @@ import {
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
+    PageOrientType,
+    SectionType,
     TextX,
     TextXActionType,
     Tools,
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
+import { getSectionContentWidth } from '../../utils/section-columns';
 import { getTopLevelSectionBreaks } from '../../utils/sections';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
@@ -55,11 +62,17 @@ export interface IInsertDocumentSectionBreakCommandParams {
     offset: number;
     sectionId: string;
     config?: Partial<IDocumentSectionConfig>;
+    nextSectionType?: SectionType;
 }
 
 export interface IDeleteDocumentSectionBreakCommandParams {
     unitId: string;
     sectionId: string;
+}
+
+export interface IInsertDocumentColumnBreakCommandParams {
+    unitId: string;
+    offset: number;
 }
 
 export const UpdateDocumentSectionCommand: ICommand<IUpdateDocumentSectionCommandParams> = {
@@ -91,6 +104,13 @@ export const UpdateDocumentSectionCommand: ICommand<IUpdateDocumentSectionComman
             .filter((section) => selectedIds.has(section.sectionId))
             .sort((left, right) => left.startIndex - right.startIndex);
         if (sections.length !== selectedIds.size) {
+            return false;
+        }
+        const documentStyle = documentDataModel.getDocumentStyle();
+        if (sections.some((section) => !isValidSectionConfig(
+            { ...section, ...updates.get(section.sectionId) },
+            documentStyle
+        ))) {
             return false;
         }
 
@@ -141,18 +161,19 @@ export const InsertDocumentSectionBreakCommand: ICommand<IInsertDocumentSectionB
             return false;
         }
         const context = getTraditionalDocumentContext(accessor, params.unitId);
-        if (!context || !params.sectionId || !Number.isInteger(params.offset)) {
+        if (!context || !params.sectionId || !Number.isInteger(params.offset) ||
+            (params.nextSectionType != null && !isValidEnumValue(SectionType, params.nextSectionType))) {
             return false;
         }
         const { body, documentDataModel, commandService } = context;
-        if (
-            params.offset < 0 ||
-            params.offset > body.dataStream.length ||
-            body.sectionBreaks?.some((section) => section.sectionId === params.sectionId) ||
-            body.tables?.some((range) => containsInteriorInsertionOffset(getTableRangeInterval(range), params.offset)) ||
-            body.columnGroups?.some((range) => containsInteriorInsertionOffset(getColumnGroupRangeInterval(range), params.offset)) ||
-            body.blockRanges?.some((range) => containsInteriorInsertionOffset(getBlockRangeInterval(range), params.offset))
-        ) {
+        if (!isValidTopLevelInsertionOffset(body, params.offset) ||
+            body.sectionBreaks?.some((section) => section.sectionId === params.sectionId)) {
+            return false;
+        }
+        const nextSection = params.nextSectionType == null
+            ? undefined
+            : getTopLevelSectionBreaks(body).find((section) => section.startIndex >= params.offset);
+        if (params.nextSectionType != null && !nextSection) {
             return false;
         }
 
@@ -166,7 +187,52 @@ export const InsertDocumentSectionBreakCommand: ICommand<IInsertDocumentSectionB
                 startIndex: 0,
             }],
         });
+        if (nextSection && params.nextSectionType != null) {
+            textX.retain(nextSection.startIndex - params.offset);
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    sectionBreaks: [{
+                        ...Tools.deepClone(nextSection),
+                        sectionType: params.nextSectionType,
+                        startIndex: 0,
+                    }],
+                },
+            });
+        }
         return executeSectionTextX(commandService, documentDataModel, textX, InsertDocumentSectionBreakCommand.id);
+    },
+};
+
+export const InsertDocumentColumnBreakCommand: ICommand<IInsertDocumentColumnBreakCommandParams> = {
+    id: 'doc.command.insert-column-break',
+    type: CommandType.COMMAND,
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        const context = getTraditionalDocumentContext(accessor, params.unitId);
+        if (!context || !isValidTopLevelInsertionOffset(context.body, params.offset)) {
+            return false;
+        }
+
+        const textX = new TextX();
+        textX.retain(params.offset);
+        textX.insert(1, {
+            dataStream: DataStreamTreeTokenType.COLUMN_BREAK,
+            customRanges: [{
+                startIndex: 0,
+                endIndex: 0,
+                rangeId: `docx-break-${generateRandomId()}`,
+                rangeType: CustomRangeType.CUSTOM,
+                wholeEntity: true,
+                properties: { docxBreakType: DocxBreakType.COLUMN },
+            }],
+        });
+        return executeSectionTextX(context.commandService, context.documentDataModel, textX, InsertDocumentColumnBreakCommand.id);
     },
 };
 
@@ -186,7 +252,7 @@ export const DeleteDocumentSectionBreakCommand: ICommand<IDeleteDocumentSectionB
             return false;
         }
         const section = sections.find((item) => item.sectionId === params.sectionId);
-        if (!section) {
+        if (!section || section === sections.at(-1)) {
             return false;
         }
 
@@ -212,6 +278,66 @@ function getTraditionalDocumentContext(accessor: Parameters<typeof UpdateDocumen
         documentDataModel,
         commandService: accessor.get(ICommandService),
     };
+}
+
+function isValidTopLevelInsertionOffset(body: IDocumentBody, offset: number): boolean {
+    return Number.isInteger(offset) &&
+        offset >= 0 &&
+        offset <= body.dataStream.length &&
+        !body.tables?.some((range) => containsInteriorInsertionOffset(getTableRangeInterval(range), offset)) &&
+        !body.columnGroups?.some((range) => containsInteriorInsertionOffset(getColumnGroupRangeInterval(range), offset)) &&
+        !body.blockRanges?.some((range) => containsInteriorInsertionOffset(getBlockRangeInterval(range), offset));
+}
+
+function isValidSectionConfig(
+    section: ISectionBreak,
+    documentStyle: ReturnType<DocumentDataModel['getDocumentStyle']>
+): boolean {
+    if (section.sectionType != null && !isValidEnumValue(SectionType, section.sectionType)) {
+        return false;
+    }
+    if (section.pageOrient != null && !isValidEnumValue(PageOrientType, section.pageOrient)) {
+        return false;
+    }
+    if (section.columnSeparatorType != null && !isValidEnumValue(ColumnSeparatorType, section.columnSeparatorType)) {
+        return false;
+    }
+    if (section.pageNumberStart != null &&
+        (!Number.isInteger(section.pageNumberStart) || section.pageNumberStart < 1)) {
+        return false;
+    }
+    if (section.pageSize &&
+        (!isPositiveFinite(section.pageSize.width) || !isPositiveFinite(section.pageSize.height))) {
+        return false;
+    }
+    if ([section.marginTop, section.marginBottom, section.marginLeft, section.marginRight]
+        .some((margin) => margin != null && (!Number.isFinite(margin) || margin < 0))) {
+        return false;
+    }
+    const pageSize = section.pageSize ?? documentStyle.pageSize;
+    const marginTop = section.marginTop ?? documentStyle.marginTop ?? 0;
+    const marginBottom = section.marginBottom ?? documentStyle.marginBottom ?? 0;
+    const marginLeft = section.marginLeft ?? documentStyle.marginLeft ?? 0;
+    const marginRight = section.marginRight ?? documentStyle.marginRight ?? 0;
+    if ((pageSize?.width != null && marginLeft + marginRight >= pageSize.width) ||
+        (pageSize?.height != null && marginTop + marginBottom >= pageSize.height)) {
+        return false;
+    }
+    const columns = section.columnProperties ?? [];
+    if (columns.some(({ width, paddingEnd }) =>
+        !Number.isFinite(width) || !Number.isFinite(paddingEnd) || width < 0 || paddingEnd < 0)) {
+        return false;
+    }
+    return columns.reduce((sum, { width, paddingEnd }) => sum + width + paddingEnd, 0) <=
+        getSectionContentWidth(documentStyle, section);
+}
+
+function isPositiveFinite(value: number | undefined): boolean {
+    return value != null && Number.isFinite(value) && value > 0;
+}
+
+function isValidEnumValue(enumObject: object, value: number): boolean {
+    return Object.values(enumObject).includes(value);
 }
 
 function executeSectionTextX(

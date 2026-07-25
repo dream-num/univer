@@ -25,7 +25,7 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
+import { IDocDrawingService, TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RemoveDocDrawingCommand } from '../../commands/commands/remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
@@ -136,6 +136,25 @@ describe('FDocument image facade', () => {
         expect(image?.getSize()).toEqual({ width: 500, height: 250 });
     });
 
+    it('uses explicit dimensions without loading the image source', async () => {
+        vi.stubGlobal('Image', undefined);
+
+        const image = await testBed.document.insertImage({
+            source: 'data:image/png;base64,image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+
+        expect(image?.getSize()).toEqual({ width: 160, height: 90 });
+    });
+
     it('inserts an image with a non-inline wrapping style', async () => {
         const image = await testBed.document.insertImage({
             source: 'data:image/png;base64,image',
@@ -174,6 +193,89 @@ describe('FDocument image facade', () => {
         expect(testBed.document.save().headers?.[segmentId].body.dataStream).toBe('\b\r\n');
         expect(imageData?.isMultiTransform).toBe(BooleanNumber.TRUE);
         expect(imageData?.transforms).toEqual(imageData?.transform ? [imageData.transform] : null);
+    });
+
+    it('arranges images from the document model when the headless drawing projection is stale', async () => {
+        const firstImage = await testBed.document.insertImage({
+            source: 'data:image/png;base64,first-image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 1,
+                endOffset: 1,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+        const secondImage = await testBed.document.insertImage({
+            source: 'data:image/png;base64,second-image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 3,
+                endOffset: 3,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+        const thirdImage = await testBed.document.insertImage({
+            source: 'data:image/png;base64,third-image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: {
+                startOffset: 5,
+                endOffset: 5,
+                collapsed: true,
+                segmentId: '',
+            },
+        });
+
+        expect(firstImage).not.toBeNull();
+        expect(secondImage).not.toBeNull();
+        expect(thirdImage).not.toBeNull();
+        if (!firstImage || !secondImage || !thirdImage) {
+            throw new Error('Expected all document images to be inserted');
+        }
+
+        const firstImageId = firstImage.getId();
+        const secondImageId = secondImage.getId();
+        const thirdImageId = thirdImage.getId();
+        const docDrawingService = testBed.injector.get(IDocDrawingService);
+
+        expect(docDrawingService.getDrawingOrder('test-doc', 'test-doc')).toEqual([]);
+        expect(testBed.document.save().drawingsOrder).toEqual([firstImageId, secondImageId, thirdImageId]);
+
+        expect(secondImage.setFront()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([firstImageId, thirdImageId, secondImageId]);
+
+        expect(secondImage.setBackward()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([firstImageId, secondImageId, thirdImageId]);
+
+        expect(firstImage.setForward()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([secondImageId, firstImageId, thirdImageId]);
+
+        expect(thirdImage.setBack()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([thirdImageId, secondImageId, firstImageId]);
+
+        expect(testBed.document.undo()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([secondImageId, firstImageId, thirdImageId]);
+
+        expect(testBed.document.redo()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([thirdImageId, secondImageId, firstImageId]);
+
+        expect(testBed.injector.get(ICommandService).syncExecuteCommand(SetDocDrawingArrangeCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingIds: [thirdImageId, secondImageId],
+            arrangeType: ArrangeTypeEnum.front,
+        })).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([firstImageId, thirdImageId, secondImageId]);
+
+        expect(testBed.document.undo()).toBe(true);
+        expect(testBed.document.save().drawingsOrder).toEqual([thirdImageId, secondImageId, firstImageId]);
     });
 
     it('routes image updates, arranging, and removal through docs-drawing commands', async () => {

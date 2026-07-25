@@ -8,7 +8,7 @@ on:
 jobs:
     dispatch-sync:
         if: github.repository == 'dream-num/univer'
-        runs-on: ubuntu-latest
+        runs-on: minimum-runner
 
         steps:
             - name: Dispatch sync event to univer-pro

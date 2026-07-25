@@ -24,6 +24,9 @@ import { TextWrappingStyle } from '@univerjs/docs-drawing';
 export interface IFDocumentImageEnumMixin {
     /**
      * Represents the wrapping styles used by docs image operations.
+     *
+     * Prefer `INLINE`, `WRAP_SQUARE`, or `WRAP_TOP_AND_BOTTOM` for ordinary document content.
+     * `BEHIND_TEXT` and `IN_FRONT_OF_TEXT` are overlay styles that do not cause text to reflow.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -31,6 +34,7 @@ export interface IFDocumentImageEnumMixin {
      *   source: 'https://avatars.githubusercontent.com/u/61444807?s=48&v=4',
      *   imageSourceType: univerAPI.Enum.ImageSourceType.URL,
      *   width: 320,
+     *   // Float the image and wrap body text around its rectangular bounds.
      *   wrappingStyle: univerAPI.Enum.DocsImageWrappingStyle.WRAP_SQUARE,
      *   textRange: {
      *     startOffset: 30,

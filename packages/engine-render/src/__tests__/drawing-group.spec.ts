@@ -131,11 +131,10 @@ describe('drawing group', () => {
         const childRenderSpy = vi.spyOn(child, 'render').mockImplementation(() => child);
         drawingGroup.addObject(child);
         drawingGroup.setOuterShadow({
-            color: '#000000',
-            opacity: 0.5,
-            blurRadius: 12,
-            direction: 0,
-            distance: 4,
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            shadowBlur: 12,
+            shadowOffsetX: 4,
+            shadowOffsetY: 0,
         });
         drawingGroup.setGlow({
             color: '#5b9bd5',
@@ -150,7 +149,9 @@ describe('drawing group', () => {
         expect(ctx.transform).toHaveBeenCalled();
         expect(childRenderSpy).toHaveBeenCalled();
         expect(ctx.filter).toContain('drop-shadow(0px 0px 2px #5b9bd5)');
-        expect(ctx.filter).toContain('drop-shadow(4px 0px 12px rgba(0,0,0,0.5))');
+        expect(ctx.shadowColor).toBe('rgba(0, 0, 0, 0.5)');
+        expect(ctx.shadowBlur).toBe(12);
+        expect(ctx.shadowOffsetX).toBe(4);
     });
 
     it('maps children of nested drawing groups through the parent rendered bound', () => {

@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import {
     combineDrawingEffectFilter,
     createDrawingEffectFilter,
+    resolveDrawingEffectMasks,
     resolveGlowEffect,
     resolveOuterShadowEffect,
 } from '../drawing-effect';
@@ -64,5 +65,16 @@ describe('drawing effect', () => {
         );
         expect(combineDrawingEffectFilter('blur(1px)', 'drop-shadow(0 0 1px red)'))
             .toBe('blur(1px) drop-shadow(0 0 1px red)');
+    });
+
+    it('resolves alpha-mask passes for glow and outer shadow', () => {
+        expect(resolveDrawingEffectMasks(
+            { color: '#5b9bd5', radius: 4 },
+            { color: '#000000', blurRadius: 3 }
+        )).toEqual([
+            { color: '#5b9bd5', blurRadius: 2, offsetX: 0, offsetY: 0 },
+            { color: '#5b9bd5', blurRadius: 2, offsetX: 0, offsetY: 0 },
+            { color: '#000000', blurRadius: 3, offsetX: 0, offsetY: 0 },
+        ]);
     });
 });

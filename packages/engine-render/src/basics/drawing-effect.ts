@@ -17,7 +17,8 @@
 import type { IGlowEffect, IShadowEffect } from '@univerjs/core';
 import { ColorKit } from '@univerjs/core';
 
-const GLOW_BLUR_SCALE = 0.5;
+// Canvas blur visually spans about twice the DrawingML glow radius. This factor is verified against PowerPoint output.
+const DRAWINGML_GLOW_BLUR_SCALE = 0.5;
 
 export interface IResolvedDrawingShadow {
     color: string;
@@ -75,10 +76,33 @@ export function resolveGlowEffect(effect: IGlowEffect | undefined): IResolvedDra
 
     return {
         color: effect.color,
-        blurRadius: Math.max(0, effect.radius ?? 0) * GLOW_BLUR_SCALE,
+        blurRadius: Math.max(0, effect.radius ?? 0) * DRAWINGML_GLOW_BLUR_SCALE,
         offsetX: 0,
         offsetY: 0,
     };
+}
+
+/**
+ * Resolves effects painted from an off-screen alpha mask.
+ *
+ * A glow uses two centered mask passes to match PowerPoint's DrawingML glow density without repainting source content.
+ */
+export function resolveDrawingEffectMasks(
+    glow: IGlowEffect | undefined,
+    outerShadow: IShadowEffect | undefined
+): IResolvedDrawingShadow[] {
+    const effects: IResolvedDrawingShadow[] = [];
+    const resolvedGlow = resolveGlowEffect(glow);
+    const resolvedOuterShadow = resolveOuterShadowEffect(outerShadow);
+
+    if (resolvedGlow) {
+        effects.push(resolvedGlow, resolvedGlow);
+    }
+    if (resolvedOuterShadow) {
+        effects.push(resolvedOuterShadow);
+    }
+
+    return effects;
 }
 
 export function createDrawingEffectFilter(

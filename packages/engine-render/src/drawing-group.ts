@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import type { IGlowEffect, IGroupBaseBound, IShadowEffect } from '@univerjs/core';
+import type { IGlowEffect, IGroupBaseBound } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
 import { RENDER_CLASS_TYPE, Transform } from './basics';
 import { combineDrawingEffectFilter, createDrawingEffectFilter } from './basics/drawing-effect';
 import { Group } from './group';
+
+export interface IDrawingGroupShadow {
+    shadowColor: string;
+    shadowBlur: number;
+    shadowOffsetX: number;
+    shadowOffsetY: number;
+}
 
 export class DrawingGroupObject extends Group {
     protected override _selfSizeMode: boolean = true;
@@ -37,11 +44,11 @@ export class DrawingGroupObject extends Group {
         height: 0,
     };
 
-    private _outerShadow?: IShadowEffect;
+    private _outerShadow?: IDrawingGroupShadow;
 
     private _glow?: IGlowEffect;
 
-    setOuterShadow(shadow?: IShadowEffect): void {
+    setOuterShadow(shadow?: IDrawingGroupShadow): void {
         this._outerShadow = shadow;
         this.makeDirty(true);
     }
@@ -104,9 +111,15 @@ export class DrawingGroupObject extends Group {
         const centerX = realLeft + realWidth / 2;
         const centerY = realTop + realHeight / 2;
         ctx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
-        const effectFilter = createDrawingEffectFilter(this._glow, this._outerShadow);
+        const effectFilter = createDrawingEffectFilter(this._glow, undefined);
         if (effectFilter) {
             ctx.filter = combineDrawingEffectFilter(ctx.filter, effectFilter);
+        }
+        if (this._outerShadow) {
+            ctx.shadowColor = this._outerShadow.shadowColor;
+            ctx.shadowBlur = this._outerShadow.shadowBlur;
+            ctx.shadowOffsetX = this._outerShadow.shadowOffsetX;
+            ctx.shadowOffsetY = this._outerShadow.shadowOffsetY;
         }
         const objects = this.getObjectsByOrder();
 

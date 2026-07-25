@@ -42,7 +42,7 @@ import { DocMenuStyleService } from '../doc-menu-style.service';
 class TestRenderManagerService {
     editArea: DocumentEditArea | undefined;
 
-    getRenderById() {
+    getRenderUnitById() {
         if (this.editArea == null) {
             return;
         }

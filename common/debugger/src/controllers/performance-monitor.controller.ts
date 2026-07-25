@@ -45,7 +45,7 @@ export class PerformanceMonitorController extends RxDisposable {
     }
 
     private _listenToRenderer(unitId: string) {
-        const renderer = this._renderManagerService.getRenderById(unitId);
+        const renderer = this._renderManagerService.getRenderUnitById(unitId);
         if (renderer) {
             const { engine } = renderer;
             this._currentUnitSub = engine.endFrame$.subscribe(() => {

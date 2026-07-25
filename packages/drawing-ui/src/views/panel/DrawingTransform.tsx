@@ -38,7 +38,7 @@ const INPUT_DEBOUNCE_TIME = 300;
 export const DrawingTransform = (props: IDrawingTransformProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingParam = props.drawings[0];
-    const scene = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId)?.scene : undefined;
+    const scene = drawingParam ? renderManagerService.getRenderUnitById(drawingParam.unitId)?.scene : undefined;
     const topScene = scene?.getEngine()?.activeScene as Nullable<Scene>;
 
     if (!drawingParam?.transform || !scene || !topScene) {
@@ -60,7 +60,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
 
     const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
 
-    const renderObject = renderManagerService.getRenderById(unitId);
+    const renderObject = renderManagerService.getRenderUnitById(unitId);
     const scene = renderObject!.scene!;
     const topScene = scene.getEngine()!.activeScene as Scene;
 

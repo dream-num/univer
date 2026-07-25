@@ -47,7 +47,7 @@ export interface IDocDrawingPositionProps {
 export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingParam = props.drawings[0];
-    const scene = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId)?.scene : undefined;
+    const scene = drawingParam ? renderManagerService.getRenderUnitById(drawingParam.unitId)?.scene : undefined;
 
     return drawingParam && scene ? <DocDrawingPositionContent {...props} /> : null;
 };
@@ -69,7 +69,7 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
 
     const documentFlavor = documentDataModel?.getSnapshot().documentStyle.documentFlavor;
 
-    const renderObject = renderManagerService.getRenderById(unitId);
+    const renderObject = renderManagerService.getRenderUnitById(unitId);
     const scene = renderObject!.scene!;
     const transformer = scene.getTransformerByCreate();
 
@@ -146,7 +146,7 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
             })),
         });
 
-        const docSelectionRenderService = renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+        const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
 
         if (docSelectionRenderService) {
             docSelectionRenderService.blur();
@@ -174,7 +174,7 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
 
         let drawing: Nullable<IDocumentSkeletonDrawing> = null;
         let pageMarginLeft = 0;
-        const skeleton = renderManagerService.getRenderById(unitId)
+        const skeleton = renderManagerService.getRenderUnitById(unitId)
             ?.with(DocSkeletonManagerService)
             .getSkeleton();
 

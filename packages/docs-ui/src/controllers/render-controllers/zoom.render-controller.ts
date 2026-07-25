@@ -76,7 +76,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this._initCommandExecutedListener();
         this._isSheetEditor = this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
         const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
+        const sheetRenderer = currentSheet && this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
         // TODO: do not use setTimeout.
         this._initTimer = window.setTimeout(() => {
             const zoomRatio = sheetRenderer && this._isSheetEditor

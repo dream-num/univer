@@ -53,7 +53,7 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const initialWidthRef = useRef<number | null>(null);
-    const currentRender = renderManagerService.getRenderById(activePopup.unitId)!;
+    const currentRender = renderManagerService.getRenderUnitById(activePopup.unitId)!;
 
     const [note, setNote] = useState<Partial<ISheetNote> | null>(null);
     const applyResizeOffset = useCallback((width: number) => {

@@ -281,7 +281,7 @@ export const useSheetSelectionChange = (
     const contextRef = useStateRef({ activeSheet, sheetName });
     const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
     const activeWorkbook = resolveFormulaSelectionWorkbook(currentUnit, workbook);
-    const render = renderManagerService.getRenderById(activeWorkbook?.getUnitId() ?? unitId);
+    const render = renderManagerService.getRenderUnitById(activeWorkbook?.getUnitId() ?? unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);

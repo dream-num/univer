@@ -350,7 +350,7 @@ export class SheetUIController extends Disposable {
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now
                 const renderManagerService = this._injector.get(IRenderManagerService);
-                const cellEditorRender = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                const cellEditorRender = renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
                 const docSelectionRenderService = cellEditorRender?.with(DocSelectionRenderService);
 
                 docSelectionRenderService?.focus();

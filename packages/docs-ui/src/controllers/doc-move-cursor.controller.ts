@@ -123,7 +123,7 @@ export class DocMoveCursorController extends Disposable {
             return;
         }
 
-        const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
+        const skeleton = this._renderManagerService.getRenderUnitById(docDataModel.getUnitId())
             ?.with(DocSkeletonManagerService)
             .getSkeleton();
         const docObject = this._getDocObject();
@@ -321,7 +321,7 @@ export class DocMoveCursorController extends Disposable {
             return false;
         }
 
-        const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
+        const skeleton = this._renderManagerService.getRenderUnitById(docDataModel.getUnitId())
             ?.with(DocSkeletonManagerService)
             .getSkeleton();
         const docObject = this._getDocObject();
@@ -1465,7 +1465,7 @@ export class DocMoveCursorController extends Disposable {
     }
 
     private _scrollToFocusNodePosition(unitId: string, offset: number) {
-        const backScrollController = this._renderManagerService.getRenderById(unitId)?.with(DocBackScrollRenderController);
+        const backScrollController = this._renderManagerService.getRenderUnitById(unitId)?.with(DocBackScrollRenderController);
         if (backScrollController == null) {
             return;
         }

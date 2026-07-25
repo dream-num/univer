@@ -55,7 +55,7 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
         })),
     };
     const renderManagerService = {
-        getRenderById: vi.fn(() => renderUnit),
+        getRenderUnitById: vi.fn(() => renderUnit),
     };
     const drawing = {
         unitId: 'doc-1',

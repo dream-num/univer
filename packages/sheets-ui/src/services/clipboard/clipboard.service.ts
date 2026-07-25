@@ -1118,7 +1118,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return null;
         }
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+        const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         if (!skeleton) {
             return null;
         }

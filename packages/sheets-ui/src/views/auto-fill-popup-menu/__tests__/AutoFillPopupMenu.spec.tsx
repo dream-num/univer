@@ -125,7 +125,7 @@ class TestRenderUnit {
 class TestRenderManagerService {
     readonly renderUnit = new TestRenderUnit();
 
-    getRenderById(): TestRenderUnit {
+    getRenderUnitById(): TestRenderUnit {
         return this.renderUnit;
     }
 }

@@ -43,7 +43,7 @@ export class DrawingContextMenuController extends RxDisposable {
             return;
         }
 
-        const scene = this._renderManagerService.getRenderById(workbook.getUnitId())?.scene;
+        const scene = this._renderManagerService.getRenderUnitById(workbook.getUnitId())?.scene;
         if (!scene) {
             return;
         }

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '../../shared';
-import type { IDocumentStyle, IParagraphStyle } from '../../types/interfaces';
+import type { IDocStyles, IDocumentStyle, IParagraphStyle } from '../../types/interfaces';
 import { Tools } from '../../shared';
 import {
     DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
@@ -23,11 +23,18 @@ import {
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
     NAMED_STYLE_SPACE_MAP,
 } from '../../types/const';
-import { DocumentFlavor } from '../../types/interfaces';
+import { BooleanNumber } from '../../types/enum';
+import { DocStyleType, DocumentFlavor } from '../../types/interfaces';
 
 export interface IResolveDocumentParagraphStyleOptions {
+    /** Exclude document-level outer spacing while retaining all other defaults. */
     excludeDocumentOuterSpacing?: boolean;
+    /** Preserve the legacy Modern Doc spacing defaults when no explicit flavor is available. */
     useLegacyModernDefaults?: boolean;
+    /** Named document styles keyed by stable style id. */
+    styles?: IDocStyles;
+    /** Named paragraph style referenced by the paragraph. */
+    paragraphStyleId?: string;
 }
 
 function _definedStyle(style: Nullable<IParagraphStyle>): IParagraphStyle {
@@ -35,9 +42,38 @@ function _definedStyle(style: Nullable<IParagraphStyle>): IParagraphStyle {
         return {};
     }
 
-    return Object.fromEntries(
-        Object.entries(style).filter(([, value]) => value != null)
-    ) as IParagraphStyle;
+    const definedStyle = Tools.deepClone(style);
+    Tools.removeNull(definedStyle);
+    return definedStyle;
+}
+
+function _resolveNamedParagraphStyle(
+    styles: IDocStyles | undefined,
+    styleId: string | undefined
+): IParagraphStyle {
+    if (!styles || !styleId) {
+        return {};
+    }
+
+    const visiting = new Set<string>();
+    const resolve = (currentStyleId: string): IParagraphStyle => {
+        if (visiting.has(currentStyleId)) {
+            return {};
+        }
+        const style = styles[currentStyleId];
+        if (!style || style.type !== DocStyleType.paragraph) {
+            return {};
+        }
+
+        visiting.add(currentStyleId);
+        const base = style.basedOn ? resolve(style.basedOn) : {};
+        visiting.delete(currentStyleId);
+        return {
+            ...base,
+            ..._definedStyle(style.paragraphStyle),
+        };
+    };
+    return resolve(styleId);
 }
 
 export function resolveDocumentParagraphStyle(
@@ -54,7 +90,12 @@ export function resolveDocumentParagraphStyle(
             spaceBelow: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW },
         }
         : {};
+    const traditionalStyle: IParagraphStyle =
+        documentStyle?.documentFlavor === DocumentFlavor.TRADITIONAL
+            ? { widowControl: BooleanNumber.TRUE }
+            : {};
     const documentDefaults = {
+        ...traditionalStyle,
         ...legacyStyle,
         ..._definedStyle(documentStyle?.defaultParagraphStyle),
     };
@@ -65,13 +106,19 @@ export function resolveDocumentParagraphStyle(
     }
 
     const definedParagraphStyle = _definedStyle(paragraphStyle);
-    const namedStyle = definedParagraphStyle.namedStyleType == null
+    const referencedParagraphStyle = _resolveNamedParagraphStyle(
+        options.styles,
+        options.paragraphStyleId
+    );
+    const namedStyleType = definedParagraphStyle.namedStyleType ?? referencedParagraphStyle.namedStyleType;
+    const namedStyle = namedStyleType == null
         ? null
-        : NAMED_STYLE_SPACE_MAP[definedParagraphStyle.namedStyleType];
+        : NAMED_STYLE_SPACE_MAP[namedStyleType];
 
     return Tools.deepClone({
         ...documentDefaults,
         ...namedStyle,
+        ...referencedParagraphStyle,
         ...definedParagraphStyle,
     });
 }

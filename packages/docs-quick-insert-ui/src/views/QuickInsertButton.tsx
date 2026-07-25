@@ -37,7 +37,7 @@ export const QuickInsertButton = ({ className = '' }: {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const currentDoc = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), [univerInstanceService]));
-    const currentUnit = currentDoc && renderManagerService.getRenderById(currentDoc.getUnitId());
+    const currentUnit = currentDoc && renderManagerService.getRenderUnitById(currentDoc.getUnitId());
     const docQuickInsertMenuController = currentUnit?.with(DocQuickInsertMenuController);
     const layoutService = useDependency(ILayoutService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);

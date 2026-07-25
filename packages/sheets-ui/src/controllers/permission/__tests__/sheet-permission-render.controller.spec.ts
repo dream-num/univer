@@ -88,7 +88,7 @@ describe('permission render controllers', () => {
             makeDirty: vi.fn(),
         };
         const skeletonManagerService = { reCalculate: vi.fn() };
-        const renderManagerService = { getRenderById: vi.fn(() => ({ mainComponent: spreadsheet })) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => ({ mainComponent: spreadsheet })) };
         const controller = new WorksheetProtectionRenderController(
             { unitId: 'unit-1', mainComponent: spreadsheet } as any,
             renderManagerService as any,
@@ -106,7 +106,7 @@ describe('permission render controllers', () => {
         const disabledSpreadsheet = { getExtensionByKey: vi.fn(), register: vi.fn() };
         const disabledController = new WorksheetProtectionRenderController(
             { unitId: 'unit-1', mainComponent: disabledSpreadsheet } as any,
-            { getRenderById: vi.fn(() => ({ mainComponent: disabledSpreadsheet })) } as any,
+            { getRenderUnitById: vi.fn(() => ({ mainComponent: disabledSpreadsheet })) } as any,
             { reCalculate: vi.fn() } as any,
             { worksheetRuleInitStateChange$: new Subject() } as any,
             { getConfig: vi.fn(() => ({ protectedRangeShadow: 'none' })) } as any

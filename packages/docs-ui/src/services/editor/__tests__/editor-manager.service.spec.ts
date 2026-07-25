@@ -145,7 +145,7 @@ class TestRegisterRenderManagerService {
         TestRegisterRenderManagerService.renders.set(unitId, new TestRegisterRender(new TestDocSelectionRenderService()));
     }
 
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         return TestRegisterRenderManagerService.renders.get(unitId);
     }
 
@@ -158,7 +158,7 @@ class TestRegisterRenderManagerService {
 class TestMissingRenderManagerService {
     create() {}
 
-    getRenderById() {
+    getRenderUnitById() {
         return null;
     }
 
@@ -168,7 +168,7 @@ class TestMissingRenderManagerService {
 class TestEditorRenderManagerService {
     static readonly skeleton = { unitId: EDITOR_ID };
 
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         if (unitId !== EDITOR_ID) {
             return undefined;
         }

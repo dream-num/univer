@@ -79,7 +79,7 @@ class TestRenderManagerService {
         this._srcRect = srcRect;
     }
 
-    getRenderById() {
+    getRenderUnitById() {
         return {
             scene: {
                 getObject: () => ({

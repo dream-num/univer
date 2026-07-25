@@ -166,8 +166,14 @@ export const InsertDocumentSectionBreakCommand: ICommand<IInsertDocumentSectionB
             return false;
         }
         const { body, documentDataModel, commandService } = context;
+        const insertedSection: ISectionBreak = {
+            ...Tools.deepClone(params.config ?? {}),
+            sectionId: params.sectionId,
+            startIndex: params.offset,
+        };
         if (!isValidTopLevelInsertionOffset(body, params.offset) ||
-            body.sectionBreaks?.some((section) => section.sectionId === params.sectionId)) {
+            body.sectionBreaks?.some((section) => section.sectionId === params.sectionId) ||
+            !isValidSectionConfig(insertedSection, documentDataModel.getDocumentStyle())) {
             return false;
         }
         const nextSection = params.nextSectionType == null
@@ -182,8 +188,7 @@ export const InsertDocumentSectionBreakCommand: ICommand<IInsertDocumentSectionB
         textX.insert(1, {
             dataStream: DataStreamTreeTokenType.SECTION_BREAK,
             sectionBreaks: [{
-                ...Tools.deepClone(params.config ?? {}),
-                sectionId: params.sectionId,
+                ...insertedSection,
                 startIndex: 0,
             }],
         });

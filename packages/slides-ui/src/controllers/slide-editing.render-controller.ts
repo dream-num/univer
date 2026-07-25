@@ -201,11 +201,11 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     private _getEditorSkeleton(editorId: string) {
-        return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
+        return this._renderManagerService.getRenderUnitById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
     }
 
     private _getEditorViewModel(editorId: string) {
-        return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
+        return this._renderManagerService.getRenderUnitById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
     private _initialCursorSync(d: DisposableCollection) {
@@ -620,7 +620,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             },
         ]);
 
-        this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
+        this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();
     }
 
     private _resetBodyStyle(body: IDocumentBody, removeStyle = false) {
@@ -873,7 +873,7 @@ export function getEditorObject(
         return;
     }
 
-    const currentRender = renderManagerService.getRenderById(unitId);
+    const currentRender = renderManagerService.getRenderUnitById(unitId);
 
     if (currentRender == null) {
         return;

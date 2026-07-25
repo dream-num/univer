@@ -194,7 +194,7 @@ describe('AutoWidthController', () => {
         };
         const controller = new AutoWidthController(
             {
-                getRenderById: vi.fn(() => ({
+                getRenderUnitById: vi.fn(() => ({
                     with: vi.fn(() => ({
                         getCurrentParam: vi.fn(() => ({
                             skeleton: {

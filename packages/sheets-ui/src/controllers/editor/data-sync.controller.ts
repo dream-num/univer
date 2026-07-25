@@ -93,7 +93,7 @@ export class EditorDataSyncController extends Disposable {
     }
 
     private _getEditorViewModel(unitId: string): Nullable<DocumentViewModel> {
-        return this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getViewModel();
+        return this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
     // Sync cell content to formula editor bar when sheet selection changed.
@@ -222,7 +222,7 @@ export class EditorDataSyncController extends Disposable {
         parmas: IRichTextEditingMutationParams
     ) {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (currentRender == null) {
             return;
         }
@@ -266,7 +266,7 @@ export class EditorDataSyncController extends Disposable {
         }
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
+        const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = this._getEditorViewModel(unitId);
 
@@ -280,7 +280,7 @@ export class EditorDataSyncController extends Disposable {
 
         this._checkAndSetRenderStyleConfig(docDataModel);
         docViewModel.reset(docDataModel);
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (currentRender == null) {
             return;
         }
@@ -304,7 +304,7 @@ export class EditorDataSyncController extends Disposable {
     }
 
     private _refreshRenderStyleConfig(unitId: string) {
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = this._getEditorViewModel(unitId);

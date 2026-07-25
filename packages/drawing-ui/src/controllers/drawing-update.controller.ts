@@ -241,7 +241,7 @@ export class DrawingUpdateController extends Disposable {
             return;
         }
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
 
         const scene = renderObject?.scene;
 

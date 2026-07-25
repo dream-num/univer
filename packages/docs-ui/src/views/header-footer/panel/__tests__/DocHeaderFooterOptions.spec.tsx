@@ -205,7 +205,7 @@ class TestRenderUnit {
 class TestRenderManagerService {
     static renderUnit: TestRenderUnit;
 
-    getRenderById(): TestRenderUnit {
+    getRenderUnitById(): TestRenderUnit {
         return TestRenderManagerService.renderUnit;
     }
 }

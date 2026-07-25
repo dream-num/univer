@@ -43,7 +43,7 @@ import { DisableLinkType, getShouldDisableCellLink, shouldDisableAddLink } from 
 const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const docSelctionService = accessor.get(IRenderManagerService)
-        .getRenderById(unitId)
+        .getRenderUnitById(unitId)
         ?.with(DocSelectionRenderService);
     if (!docSelctionService) {
         return of(true);

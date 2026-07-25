@@ -35,6 +35,8 @@ export interface IDocumentData extends IReferenceSource {
     title?: string;
     body?: IDocumentBody; // Rich text.
     documentStyle: IDocumentStyle;
+    /** OOXML-compatible named document styles keyed by stable style id. */
+    styles?: IDocStyles;
     settings?: IDocumentSettings;
     // The type of data depends on how the plug-in is defined
     resources?: IResources;
@@ -165,10 +167,11 @@ export enum DocumentBlockType {
 
 export interface IDocStyle {
     name: string;
-    basedOn: string;
-    link: string;
+    basedOn?: string;
+    link?: string;
     type: DocStyleType;
-    textStyle: ITextStyle;
+    textStyle?: ITextStyle;
+    paragraphStyle?: IParagraphStyle;
 }
 
 export enum DocStyleType {
@@ -620,6 +623,8 @@ export interface IParagraph {
     // elements: IElement[]; // elements
     startIndex: number;
     paragraphId: string;
+    /** Optional stable named-style reference. Direct paragraph style has higher precedence. */
+    styleId?: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
     // dIds?: string[]; // drawingIds drawingId
@@ -881,10 +886,52 @@ export interface IParagraphProperties extends IIndentStart {
     borderBottom?: IParagraphBorder; // borderBottom
     borderLeft?: IParagraphBorder; // borderLeft
     borderRight?: IParagraphBorder; // borderRight
-    keepLines?: BooleanNumber; // 17.3.1.14 keepLines (Keep All Lines On One Page)
-    keepNext?: BooleanNumber; // 17.3.1.15 keepNext (Keep Paragraph With Next Paragraph)
+    /**
+     * Keeps all measured lines of this paragraph on one physical page when they fit.
+     *
+     * `undefined` inherits, `TRUE` enables, and an explicit `FALSE` disables an
+     * inherited value. An oversized paragraph still splits after starting on a
+     * fresh page. This Word-compatible pagination rule is rendered only by
+     * Traditional Docs.
+     *
+     * OOXML: 17.3.1.14 `keepLines`.
+     */
+    keepLines?: BooleanNumber;
+    /**
+     * Keeps this paragraph with the following paragraph when they fit together.
+     *
+     * Consecutive `TRUE` values form a bounded keep chain. Set the final
+     * paragraph to `FALSE` when it must terminate an inherited or authored chain.
+     * `undefined` inherits. This Word-compatible pagination rule is rendered only
+     * by Traditional Docs.
+     *
+     * OOXML: 17.3.1.15 `keepNext`.
+     */
+    keepNext?: BooleanNumber;
+    /**
+     * Starts this paragraph on the next physical page unless it is already at a
+     * page boundary.
+     *
+     * `undefined` inherits, `TRUE` enables, and an explicit `FALSE` disables an
+     * inherited value. Use a Section Break instead when the following content
+     * also needs different page geometry, columns, headers, or footers. This
+     * Word-compatible pagination rule is rendered only by Traditional Docs.
+     *
+     * OOXML: 17.3.1.23 `pageBreakBefore`.
+     */
+    pageBreakBefore?: BooleanNumber;
     wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)
-    widowControl?: BooleanNumber; // 17.3.1.44 widowControl (Allow First/Last Line to Display on a Separate Page)
+    /**
+     * Avoids leaving a single measured first or last line on a separate page
+     * when the paragraph can be adjusted without violating stronger keep rules.
+     *
+     * `undefined` inherits, `TRUE` enables, and an explicit `FALSE` disables an
+     * inherited value. This Word-compatible pagination rule is rendered only by
+     * Traditional Docs.
+     *
+     * OOXML: 17.3.1.44 `widowControl`.
+     */
+    widowControl?: BooleanNumber;
     shading?: IShading; // shading
     suppressHyphenation?: BooleanNumber; // 17.3.1.34 suppressAutoHyphens (Suppress Hyphenation for Paragraph)
 }

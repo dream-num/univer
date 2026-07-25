@@ -38,7 +38,7 @@ export class ConditionalFormattingViewportController extends Disposable {
             this._unitDisposable.dispose();
             this._unitDisposable = new DisposableCollection();
             const unitId = unit.getUnitId();
-            const render = this._renderManagerService.getRenderById(unitId);
+            const render = this._renderManagerService.getRenderUnitById(unitId);
             if (!render) {
                 return;
             }

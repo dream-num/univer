@@ -39,7 +39,8 @@ describe('FDocument', () => {
         createDocumentFacade();
     });
 
-    it('exposes section enums through univerAPI', () => {
+    it('exposes document layout enums through univerAPI', () => {
+        expect(univerAPI.Enum.DocumentFlavor).toBe(DocumentFlavor);
         expect(univerAPI.Enum.SectionType).toMatchObject({
             SECTION_TYPE_UNSPECIFIED: 0,
             CONTINUOUS: 1,
@@ -49,6 +50,21 @@ describe('FDocument', () => {
             ODD_PAGE: 5,
         });
         expect(univerAPI.Enum.ColumnSeparatorType.BETWEEN_EACH_COLUMN).toBe(ColumnSeparatorType.BETWEEN_EACH_COLUMN);
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, traditional: true, modern: false },
+        { flavor: DocumentFlavor.MODERN, traditional: false, modern: true },
+        { flavor: DocumentFlavor.UNSPECIFIED, traditional: false, modern: false },
+    ])('reports the exact $flavor document flavor', ({ flavor, traditional, modern }) => {
+        univer.dispose();
+        const data = createSimpleDocument(`flavor-${flavor}`);
+        data.documentStyle = { ...data.documentStyle, documentFlavor: flavor };
+        createDocumentFacade(data);
+
+        expect(document.getDocumentFlavor()).toBe(flavor);
+        expect(document.isTraditional()).toBe(traditional);
+        expect(document.isModern()).toBe(modern);
     });
 
     afterEach(() => {
@@ -289,6 +305,21 @@ describe('FDocument', () => {
 
         expect(section.setPageSetup(pageSetup)).toBe(true);
         expect(section.getPageSetup()).toEqual(pageSetup);
+        expect(section.getEffectivePageSetup()).toEqual({
+            pageNumberStart: 3,
+            pageSize: { width: 960, height: 720 },
+            pageOrient: PageOrientType.LANDSCAPE,
+            margins: {
+                top: 48,
+                bottom: 56,
+                left: 64,
+                right: 72,
+            },
+            contentSize: {
+                width: 824,
+                height: 616,
+            },
+        });
         expect(document.undo()).toBe(true);
         expect(section.getPageSetup()).toEqual({
             pageNumberStart: undefined,
@@ -303,10 +334,19 @@ describe('FDocument', () => {
         expect(section.getPageSetup()).toEqual(pageSetup);
     });
 
-    it('keeps traditional section mutation unavailable in modern documents', () => {
-        expect(document.getSections()).toEqual([]);
-        expect(() => document.insertColumnBreak(0)).toThrow('Section column APIs are supported only in traditional documents');
-    });
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.UNSPECIFIED])(
+        'keeps traditional section mutation unavailable for document flavor %s',
+        (documentFlavor) => {
+            univer.dispose();
+            const data = createSimpleDocument(`unsupported-sections-${documentFlavor}`);
+            data.documentStyle = { ...data.documentStyle, documentFlavor };
+            createDocumentFacade(data);
+
+            expect(document.getSections()).toEqual([]);
+            expect(() => document.insertColumnBreak(0)).toThrow('Section column APIs are supported only in traditional documents');
+            expect(() => document.insertSectionBreak(0)).toThrow('Section column APIs are supported only in traditional documents');
+        }
+    );
 
     it('keeps section facade identity stable when section order changes', () => {
         univer.dispose();
@@ -443,6 +483,35 @@ describe('FDocument', () => {
         expect(inserted?.remove()).toBe(true);
         expect(document.getSections().map((section) => section.getId())).toEqual(['section_root']);
         expect(document.getSection(0)?.remove()).toBe(false);
+    });
+
+    it('atomically sets how the following section begins when inserting a section break', () => {
+        univer.dispose();
+        const data = createDocumentData('section-next-page-doc', {
+            dataStream: 'Alpha\r\n',
+            paragraphs: [{ startIndex: 5, paragraphId: 'para_alpha_section' }],
+            sectionBreaks: [{ startIndex: 6, sectionId: 'section_root' }],
+        });
+        data.documentStyle = { ...data.documentStyle, documentFlavor: DocumentFlavor.TRADITIONAL };
+        createDocumentFacade(data);
+        get(IUndoRedoService);
+
+        const inserted = document.insertSectionBreak(6, {
+            sectionType: SectionType.CONTINUOUS,
+            nextSectionType: SectionType.NEXT_PAGE,
+        });
+
+        expect(inserted?.getConfig().sectionType).toBe(SectionType.CONTINUOUS);
+        expect(document.getSection(1)?.getId()).toBe('section_root');
+        expect(document.getSection(1)?.getConfig().sectionType).toBe(SectionType.NEXT_PAGE);
+
+        expect(document.undo()).toBe(true);
+        expect(document.getSections().map((section) => section.getId())).toEqual(['section_root']);
+        expect(document.getSection(0)?.getConfig().sectionType).toBeUndefined();
+
+        expect(document.redo()).toBe(true);
+        expect(document.getSections()).toHaveLength(2);
+        expect(document.getSection(1)?.getConfig().sectionType).toBe(SectionType.NEXT_PAGE);
     });
 
     it('inserts a horizontal rule as a bordered paragraph', () => {

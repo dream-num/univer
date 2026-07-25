@@ -58,7 +58,7 @@ const useMenuPosition = (range?: IDiscreteRange) => {
         return null;
     }
 
-    const ru = renderManagerService.getRenderById(workbook.getUnitId());
+    const ru = renderManagerService.getRenderUnitById(workbook.getUnitId());
     const sheetSkeletonManagerService = ru?.with(SheetSkeletonManagerService);
     const selectionRenderService = ru?.with(ISheetSelectionRenderService);
 

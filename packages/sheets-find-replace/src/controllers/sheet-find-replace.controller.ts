@@ -513,7 +513,7 @@ export class SheetFindModel extends FindModel {
         }
 
         const unitId = this._workbook.getUnitId();
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (currentRender == null) {
             return;
         }
@@ -996,7 +996,7 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
         if (!workbook) return [];
 
         const parsedQuery = this._preprocessQuery(query);
-        const skeletonManagerService = this._renderManagerService.getRenderById(workbook.getUnitId())!.with(SheetSkeletonManagerService);
+        const skeletonManagerService = this._renderManagerService.getRenderUnitById(workbook.getUnitId())!.with(SheetSkeletonManagerService);
         const sheetFind = this._injector.createInstance(SheetFindModel, workbook, skeletonManagerService);
         this._findModelsByUnitId.set(workbook.getUnitId(), sheetFind);
         sheetFind.start(parsedQuery);

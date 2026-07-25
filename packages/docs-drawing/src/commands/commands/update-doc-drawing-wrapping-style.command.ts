@@ -29,11 +29,43 @@ import {
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
+/**
+ * Controls how a document drawing participates in text layout.
+ *
+ * `INLINE`, `WRAP_SQUARE`, and `WRAP_TOP_AND_BOTTOM` participate in text layout and can cause text to reflow.
+ * `BEHIND_TEXT` and `IN_FRONT_OF_TEXT` are overlay styles and do not cause text to reflow.
+ */
 export enum TextWrappingStyle {
+    /**
+     * Places the drawing in the text flow like a character.
+     *
+     * The drawing occupies layout space and does not overlap surrounding text. Its position is determined by its
+     * document range, so floating position settings have no visible effect.
+     */
     INLINE = 'inline',
+    /**
+     * Floats the drawing behind document text without causing the text to reflow.
+     *
+     * Use this style for backgrounds or watermarks. Text can overlap the drawing, so ensure that it remains readable.
+     */
     BEHIND_TEXT = 'behindText',
+    /**
+     * Floats the drawing in front of document text without causing the text to reflow.
+     *
+     * The drawing can cover overlapping text. Use this style only when an overlay is intentional.
+     */
     IN_FRONT_OF_TEXT = 'inFrontOfText',
+    /**
+     * Floats the drawing and wraps text around its rectangular bounds.
+     *
+     * Use this style for images that should appear beside body text, such as portraits or illustrations.
+     */
     WRAP_SQUARE = 'wrapSquare',
+    /**
+     * Floats the drawing in a horizontal band, with text only above and below it.
+     *
+     * Use this style for wide figures or standalone illustrations that should not have text beside them.
+     */
     WRAP_TOP_AND_BOTTOM = 'wrapTopAndBottom',
 }
 

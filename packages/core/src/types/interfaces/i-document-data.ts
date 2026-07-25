@@ -727,15 +727,25 @@ export enum WrapTextType {
 }
 
 /**
- * The possible layouts of a [PositionedObject]
+ * Controls how a positioned object participates in document text layout.
+ *
+ * `WRAP_NONE` does not by itself determine whether the object is in front of or behind text. Drawing data uses
+ * `behindDoc` for that stacking choice.
  */
 export enum PositionedObjectLayoutType {
+    /** Places the object in the text flow like a character and lets it affect the containing line's metrics. */
     INLINE,
+    /** Floats the object without reflowing text. The object and text can overlap. */
     WRAP_NONE,
+    /** Floats the object and wraps text around the custom polygon defined by its wrap path. */
     WRAP_POLYGON,
+    /** Floats the object and wraps text around its rectangular bounds. */
     WRAP_SQUARE,
+    /** Floats the object and allows text to flow through eligible open regions in its wrap contour. */
     WRAP_THROUGH,
+    /** Floats the object and wraps text closely around its contour instead of its rectangular bounds. */
     WRAP_TIGHT,
+    /** Floats the object in a horizontal band, leaving text only above and below it. */
     WRAP_TOP_AND_BOTTOM,
 }
 

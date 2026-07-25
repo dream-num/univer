@@ -58,7 +58,13 @@ export interface IFDocumentInsertImageOptions {
      * It has a visible positioning effect only when `wrappingStyle` is not `INLINE`.
      */
     positionV?: IObjectPositionV;
-    /** The image wrapping style. Defaults to `TextWrappingStyle.INLINE`. */
+    /**
+     * The image wrapping style. Defaults to `TextWrappingStyle.INLINE`.
+     *
+     * Use `INLINE` to place the image in the text flow, `WRAP_SQUARE` to flow text beside it, or
+     * `WRAP_TOP_AND_BOTTOM` to keep text above and below it. `BEHIND_TEXT` and `IN_FRONT_OF_TEXT` are overlay styles:
+     * they do not reserve space in the text layout, so text and the image can overlap.
+     */
     wrappingStyle?: TextWrappingStyle;
     /** The document range at which to insert the image. The current selection is used when omitted. */
     textRange?: ITextRangeParam;
@@ -70,6 +76,9 @@ export interface IFDocumentImageMixin {
      * Inserts an image into the document.
      *
      * When width and height are both omitted, the intrinsic size is proportionally limited to 500 by 500 pixels.
+     * For ordinary content, prefer `INLINE`, `WRAP_SQUARE`, or `WRAP_TOP_AND_BOTTOM`. Use `BEHIND_TEXT` for
+     * backgrounds or watermarks and `IN_FRONT_OF_TEXT` only for intentional overlays, because these two styles do not
+     * cause text to reflow.
      *
      * @param {IFDocumentInsertImageOptions} options The image source, optional transform, and insertion range.
      * @returns {Promise<FDocumentImage | null>} The inserted image facade, or `null` when the insertion command fails.
@@ -80,6 +89,8 @@ export interface IFDocumentImageMixin {
      *   source: 'https://avatars.githubusercontent.com/u/61444807?s=48&v=4',
      *   imageSourceType: univerAPI.Enum.ImageSourceType.URL,
      *   width: 320,
+     *   // Keep the image in the text flow so it cannot cover surrounding text.
+     *   wrappingStyle: univerAPI.Enum.DocsImageWrappingStyle.INLINE,
      *   textRange: {
      *     startOffset: 30,
      *   },
@@ -94,6 +105,7 @@ export interface IFDocumentImageMixin {
      *   source: 'https://avatars.githubusercontent.com/u/61444807?s=48&v=4',
      *   imageSourceType: univerAPI.Enum.ImageSourceType.URL,
      *   width: 320,
+     *   // Float the image and let body text flow beside its rectangular bounds.
      *   wrappingStyle: univerAPI.Enum.DocsImageWrappingStyle.WRAP_SQUARE,
      *   textRange: {
      *     startOffset: 30,

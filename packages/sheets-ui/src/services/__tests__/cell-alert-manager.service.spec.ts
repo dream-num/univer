@@ -43,7 +43,7 @@ describe('CellAlertManagerService', () => {
             .mockReturnValueOnce(oldPopupDispose)
             .mockReturnValueOnce(newPopupDispose);
         const service = new CellAlertManagerService(
-            { getRenderById: vi.fn(() => ({ id: 'render' })) } as any,
+            { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as any,
             { showPopup } as any
         );
 
@@ -80,7 +80,7 @@ describe('CellAlertManagerService', () => {
         const popupB = { dispose: vi.fn() };
         const showPopup = vi.fn().mockReturnValueOnce(popupA).mockReturnValueOnce(popupB);
         const renderManager: any = {
-            getRenderById: vi.fn(() => ({ id: 'render' })),
+            getRenderUnitById: vi.fn(() => ({ id: 'render' })),
         };
         const service = new CellAlertManagerService(renderManager as any, { showPopup } as any);
 
@@ -93,7 +93,7 @@ describe('CellAlertManagerService', () => {
         expect(popupA.dispose).toHaveBeenCalled();
         expect(popupB.dispose).toHaveBeenCalled();
 
-        renderManager.getRenderById = vi.fn(() => null);
+        renderManager.getRenderUnitById = vi.fn(() => null);
         service.showAlert(createAlert('no-render') as any);
         expect(showPopup).toHaveBeenCalledTimes(2);
         expect(service.currentAlert.has('no-render')).toBe(true);

@@ -260,7 +260,7 @@ export const CellLinkEdit = () => {
     }, [type]);
 
     useEffect(() => {
-        const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
+        const render = renderManagerService.getRenderUnitById(editorBridgeService.getCurrentEditorId());
         const disposeCollection = new DisposableCollection();
 
         if (render) {

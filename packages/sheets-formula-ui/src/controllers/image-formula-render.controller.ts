@@ -32,7 +32,7 @@ export class ImageFormulaRenderController extends Disposable {
             const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
 
-            const render = this._renderManagerService.getRenderById(workbook.getUnitId());
+            const render = this._renderManagerService.getRenderUnitById(workbook.getUnitId());
             if (!render) return;
 
             render.with(SheetSkeletonManagerService).reCalculate();

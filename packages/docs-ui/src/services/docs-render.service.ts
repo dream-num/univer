@@ -70,7 +70,7 @@ export class DocsRenderService extends RxDisposable {
             return;
         }
 
-        const renderer = this._renderManagerService.getRenderById(unitId);
+        const renderer = this._renderManagerService.getRenderUnitById(unitId);
         if (renderer) {
             this._syncRendererCanvas(renderer, doc);
         }

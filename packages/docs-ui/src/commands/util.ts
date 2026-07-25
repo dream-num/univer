@@ -25,5 +25,5 @@ import { IRenderManagerService } from '@univerjs/engine-render';
  */
 export function getCommandSkeleton(accessor: IAccessor, unitId: string) {
     const renderManagerService = accessor.get(IRenderManagerService);
-    return renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+    return renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
 }

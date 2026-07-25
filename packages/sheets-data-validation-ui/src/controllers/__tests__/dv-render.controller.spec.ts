@@ -36,7 +36,7 @@ describe('SheetsDataValidationRenderController', () => {
             { executeCommand: vi.fn() } as never,
             { mergeMenu: vi.fn() } as never,
             {
-                getRenderById: vi.fn(() => ({
+                getRenderUnitById: vi.fn(() => ({
                     with: vi.fn(() => ({
                         getSkeletonParam: vi.fn(() => ({ skeleton })),
                     })),

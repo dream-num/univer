@@ -50,7 +50,7 @@ export function getDocObject(
     }
 
     const unitId = documentModel.getUnitId();
-    const currentRender = renderManagerService.getRenderById(unitId);
+    const currentRender = renderManagerService.getRenderUnitById(unitId);
     if (currentRender == null) {
         return;
     }
@@ -71,7 +71,7 @@ export function getDocObjectById(
     unitId: string,
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
-    const currentRender = renderManagerService.getRenderById(unitId);
+    const currentRender = renderManagerService.getRenderUnitById(unitId);
     if (currentRender == null) {
         return;
     }

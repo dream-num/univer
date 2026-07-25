@@ -32,7 +32,7 @@ describe('ImageFormulaRenderController', () => {
 
         new ImageFormulaRenderController(
             { registerRefreshRenderFunction: vi.fn((fn) => { refresh = fn; }) } as any,
-            { getRenderById: vi.fn(() => render) } as any,
+            { getRenderUnitById: vi.fn(() => render) } as any,
             { getCurrentUnitOfType: vi.fn((type) => type === UniverInstanceType.UNIVER_SHEET ? workbook : null) } as any
         );
 
@@ -48,7 +48,7 @@ describe('ImageFormulaRenderController', () => {
         const imageFormulaController = { registerRefreshRenderFunction: vi.fn((fn) => {
             refresh = fn;
         }) };
-        const renderManagerService = { getRenderById: vi.fn<(...args: any[]) => any>(() => null) };
+        const renderManagerService = { getRenderUnitById: vi.fn<(...args: any[]) => any>(() => null) };
         const univerInstanceService = { getCurrentUnitOfType: vi.fn<(...args: any[]) => any>(() => null) };
 
         new ImageFormulaRenderController(
@@ -58,13 +58,13 @@ describe('ImageFormulaRenderController', () => {
         );
 
         refresh();
-        expect(renderManagerService.getRenderById).not.toHaveBeenCalled();
+        expect(renderManagerService.getRenderUnitById).not.toHaveBeenCalled();
 
         univerInstanceService.getCurrentUnitOfType.mockReturnValue({ getUnitId: () => 'unit-1' });
         refresh();
-        expect(renderManagerService.getRenderById).toHaveBeenCalledWith('unit-1');
+        expect(renderManagerService.getRenderUnitById).toHaveBeenCalledWith('unit-1');
 
-        renderManagerService.getRenderById.mockReturnValue({
+        renderManagerService.getRenderUnitById.mockReturnValue({
             with: vi.fn(() => ({ reCalculate: vi.fn() })),
             mainComponent: null,
         });

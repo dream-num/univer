@@ -67,7 +67,7 @@ export class AutoWidthController extends Disposable {
         if (!target) return defaultValue;
 
         const { unitId, subUnitId, worksheet } = target;
-        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
+        const sheetSkeletonService = this._renderManagerService.getRenderUnitById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
 
         if (!sheetSkeletonService.getCurrentParam()) return defaultValue;
 

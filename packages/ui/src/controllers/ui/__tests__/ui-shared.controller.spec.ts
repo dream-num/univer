@@ -99,7 +99,7 @@ describe('SingleUnitUIController', () => {
 
         const renderManagerService = {
             getRenderAll: vi.fn(() => rendererMap),
-            getRenderById: vi.fn((id: string) => rendererMap.get(id)),
+            getRenderUnitById: vi.fn((id: string) => rendererMap.get(id)),
             created$,
             disposed$,
         };
@@ -180,7 +180,7 @@ describe('SingleUnitUIController', () => {
 
         const renderManagerService = {
             getRenderAll: vi.fn(() => rendererMap),
-            getRenderById: vi.fn((id: string) => rendererMap.get(id)),
+            getRenderUnitById: vi.fn((id: string) => rendererMap.get(id)),
             created$,
             disposed$: new Subject<string>(),
         };
@@ -242,7 +242,7 @@ describe('SingleUnitUIController', () => {
             },
             {
                 getRenderAll: vi.fn(() => new Map()),
-                getRenderById: vi.fn(() => null),
+                getRenderUnitById: vi.fn(() => null),
                 created$: new Subject<any>(),
                 disposed$: new Subject<string>(),
             },
@@ -272,7 +272,7 @@ describe('SingleUnitUIController', () => {
             },
             {
                 getRenderAll: vi.fn(() => new Map()),
-                getRenderById: vi.fn(() => null),
+                getRenderUnitById: vi.fn(() => null),
                 created$: new Subject<any>(),
                 disposed$: new Subject<string>(),
             },

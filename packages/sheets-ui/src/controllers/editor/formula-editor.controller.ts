@@ -116,7 +116,7 @@ export class FormulaEditorController extends RxDisposable {
             return;
         }
 
-        const formulaEditorDocObject = this._renderManagerService.getRenderById(unitId);
+        const formulaEditorDocObject = this._renderManagerService.getRenderUnitById(unitId);
         if (formulaEditorDocObject == null) {
             return;
         }
@@ -232,8 +232,8 @@ export class FormulaEditorController extends RxDisposable {
     autoScroll() {
         const position = this._formulaEditorManagerService.getPosition();
 
-        const skeleton = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
-        const editorObject = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const skeleton = this._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
+        const editorObject = this._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
         const formulaEditorDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
             DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,

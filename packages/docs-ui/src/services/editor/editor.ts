@@ -418,7 +418,7 @@ export class Editor extends Disposable implements IEditor {
     }
 
     getSkeleton() {
-        const skeleton = this._injector.get(IRenderManagerService).getRenderById(this._getEditorId())?.with(DocSkeletonManagerService).getSkeleton();
+        const skeleton = this._injector.get(IRenderManagerService).getRenderUnitById(this._getEditorId())?.with(DocSkeletonManagerService).getSkeleton();
         return skeleton;
     }
 

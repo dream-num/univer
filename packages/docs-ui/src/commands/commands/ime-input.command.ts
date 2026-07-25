@@ -45,7 +45,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-        const imeInputManagerService = renderManagerService.getRenderById(unitId)?.with(DocIMEInputManagerService);
+        const imeInputManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocIMEInputManagerService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null || imeInputManagerService == null) {

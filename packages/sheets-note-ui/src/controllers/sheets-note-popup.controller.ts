@@ -46,7 +46,7 @@ export class SheetsNotePopupController extends Disposable {
 
     private _handleSelectionChange(selections: ISelectionWithStyle[], unitId: string, subUnitId: string) {
         const range = selections[0]?.range;
-        const render = this._renderManagerService.getRenderById(unitId);
+        const render = this._renderManagerService.getRenderUnitById(unitId);
         const skeleton = render?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId)?.skeleton;
         if (!skeleton) {
             return;
@@ -112,7 +112,7 @@ export class SheetsNotePopupController extends Disposable {
                 if (!cell?.location) return;
 
                 const { unitId, subUnitId, row, col } = cell.location;
-                const render = this._renderManagerService.getRenderById(unitId);
+                const render = this._renderManagerService.getRenderUnitById(unitId);
                 const skeleton = render?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId)?.skeleton;
 
                 let targetRow = row;

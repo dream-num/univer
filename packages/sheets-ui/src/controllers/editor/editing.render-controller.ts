@@ -204,7 +204,7 @@ export class EditingRenderController extends Disposable {
 
                 if (!unit) return;
 
-                const editorBridgeRenderController = this._renderManagerService.getRenderById(unit.getUnitId())?.with(EditorBridgeRenderController);
+                const editorBridgeRenderController = this._renderManagerService.getRenderUnitById(unit.getUnitId())?.with(EditorBridgeRenderController);
                 if (editorBridgeRenderController) {
                     editorBridgeRenderController.refreshEditorPosition();
                 }
@@ -254,7 +254,7 @@ export class EditingRenderController extends Disposable {
             const docUnitId = editorId ?? this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
             if (!docUnitId) return;
 
-            const docSelectionRenderManager = this._renderManagerService.getRenderById(docUnitId)?.with(DocSelectionRenderService);
+            const docSelectionRenderManager = this._renderManagerService.getRenderUnitById(docUnitId)?.with(DocSelectionRenderService);
             if (!docSelectionRenderManager) return;
 
             docSelectionRenderManager.sync();
@@ -357,8 +357,8 @@ export class EditingRenderController extends Disposable {
                 }
             );
 
-            const cellSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-            const formulaSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+            const cellSelectionRenderManager = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+            const formulaSelectionRenderManager = this._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
             if (cellSelectionRenderManager?.canFocusing || formulaSelectionRenderManager?.canFocusing) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
                 cellSelectionRenderManager?.activate(
@@ -542,7 +542,7 @@ export class EditingRenderController extends Disposable {
             ]);
         }
 
-        this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
+        this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();
     }
 
     private _refreshCurrentSelections(sheetId: string) {
@@ -844,11 +844,11 @@ export class EditingRenderController extends Disposable {
     }
 
     private _getEditorSkeleton(editorId: string) {
-        return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
+        return this._renderManagerService.getRenderUnitById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
     }
 
     private _getEditorViewModel(editorId: string) {
-        return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
+        return this._renderManagerService.getRenderUnitById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
     private _getEditingUnit() {

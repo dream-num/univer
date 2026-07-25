@@ -121,7 +121,7 @@ class TestUniverInstanceService {
 class TestRenderManagerService {
     render: any;
 
-    getRenderById() {
+    getRenderUnitById() {
         return this.render;
     }
 }

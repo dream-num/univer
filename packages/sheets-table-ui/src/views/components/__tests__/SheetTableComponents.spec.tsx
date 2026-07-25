@@ -117,7 +117,7 @@ class TestDialogService {
 }
 
 class TestRenderManagerService {
-    getRenderById(): undefined {
+    getRenderUnitById(): undefined {
         return undefined;
     }
 }

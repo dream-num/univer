@@ -83,7 +83,7 @@ export interface IDocHeaderFooterOptionsProps {
 
 export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
-    const docSelectionRenderService = renderManagerService.getRenderById(props.unitId)!.with(DocSelectionRenderService)!;
+    const docSelectionRenderService = renderManagerService.getRenderUnitById(props.unitId)!.with(DocSelectionRenderService)!;
     const segmentContext = useObservable(docSelectionRenderService.segmentContext$, {
         segmentId: docSelectionRenderService.getSegment(),
         segmentPage: docSelectionRenderService.getSegmentPage(),
@@ -102,12 +102,12 @@ function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
 
     const { unitId } = props;
 
-    const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService)!;
+    const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)!.with(DocSelectionRenderService)!;
     const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
     const getCurrentSectionContext = () => {
         const snapshot = docDataModel?.getSnapshot();
-        const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         const page = docSkeletonManagerService?.getSkeleton?.()?.getSkeletonData()?.pages[docSelectionRenderService.getSegmentPage()];
         return snapshot == null ? undefined : { ...getDocPageSectionContext(snapshot, page), page };
     };
@@ -121,7 +121,7 @@ function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
         };
     });
     const sectionContext = getCurrentSectionContext();
-    const editArea = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
+    const editArea = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
     const headerFooterKind = editArea === DocumentEditArea.FOOTER ? 'footer' : 'header';
     const variant = getHeaderFooterVariant(
         sectionContext?.config ?? {},
@@ -142,7 +142,7 @@ function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
 
         const sectionContext = getCurrentSectionContext();
         const documentStyle = sectionContext?.config;
-        const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         const viewModel = docSkeletonManagerService?.getViewModel();
 
         if (documentStyle == null || viewModel == null) {
@@ -258,7 +258,7 @@ function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
         if (!context?.sectionId || context.sectionIndex <= 0 || !docDataModel) {
             return;
         }
-        const currentEditArea = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
+        const currentEditArea = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
         const kind = currentEditArea === DocumentEditArea.FOOTER ? 'footer' : 'header';
         const currentVariant = getHeaderFooterVariant(context.config, docSelectionRenderService.getSegmentPage(), context.page);
         const key = getSectionHeaderFooterReferenceKey(kind, currentVariant);

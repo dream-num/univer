@@ -85,6 +85,7 @@ class TestDocSkeletonManagerService {
     getViewModel() {
         return {
             getEditArea: () => DocumentEditArea.BODY,
+            reset: () => undefined,
         };
     }
 }
@@ -137,10 +138,6 @@ class TestRenderManagerService {
     }
 
     getRenderUnitById(_unitId: string) {
-        return this._render;
-    }
-
-    getRenderById(_unitId: string) {
         return {
             ...(this._render as object),
             scene: this._scene,

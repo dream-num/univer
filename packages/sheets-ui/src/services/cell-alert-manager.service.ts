@@ -82,7 +82,7 @@ export class CellAlertManagerService extends Disposable {
         const { location } = alert;
         const { row, col, unitId, subUnitId } = location;
 
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) {
             return;
         }

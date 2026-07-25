@@ -83,7 +83,7 @@ describe('doc menu observable lifecycles', () => {
             getUnitType: () => UniverInstanceType.UNIVER_DOC,
         };
         const renderManagerService = {
-            getRenderById: () => ({
+            getRenderUnitById: () => ({
                 with: () => ({ getViewModel: () => viewModel }),
             }),
         };

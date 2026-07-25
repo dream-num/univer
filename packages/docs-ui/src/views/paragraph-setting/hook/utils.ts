@@ -256,7 +256,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
         if (!docDataModel) {
             return undefined;
         }
-        return renderManagerService.getRenderById(docDataModel?.getUnitId())?.with(DocSkeletonManagerService).getSkeleton();
+        return renderManagerService.getRenderUnitById(docDataModel?.getUnitId())?.with(DocSkeletonManagerService).getSkeleton();
     }, []);
 
     const stateChange$ = useMemo(() => new BehaviorSubject<{ spacingRule?: SpacingRule; lineSpacing?: number }>({}), []);

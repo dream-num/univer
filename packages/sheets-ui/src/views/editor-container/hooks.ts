@@ -55,7 +55,7 @@ export function useKeyEventConfig(unitId?: string) {
 
 export function useIsFocusing(editorId: string) {
     const renderManagerService = useDependency(IRenderManagerService);
-    const docSelectionRenderService = renderManagerService.getRenderById(editorId)?.with(DocSelectionRenderService);
+    const docSelectionRenderService = renderManagerService.getRenderUnitById(editorId)?.with(DocSelectionRenderService);
     return useObservable(
         docSelectionRenderService
             ? () => merge(

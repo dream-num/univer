@@ -243,10 +243,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             );
         }
 
-        let render = this._renderManagerService.getRenderById(editorUnitId);
+        let render = this._renderManagerService.getRenderUnitById(editorUnitId);
         if (render == null) {
             this._renderManagerService.create(editorUnitId);
-            render = this._renderManagerService.getRenderById(editorUnitId);
+            render = this._renderManagerService.getRenderUnitById(editorUnitId);
         }
 
         if (render) {

@@ -39,7 +39,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
     const { drawings } = props;
 
     const drawingParam = drawings[0] as ISheetDrawing | undefined;
-    const renderObject = drawingParam ? renderManagerService.getRenderById(drawingParam.unitId) : undefined;
+    const renderObject = drawingParam ? renderManagerService.getRenderUnitById(drawingParam.unitId) : undefined;
     const scene = renderObject?.scene;
     const transformer = scene?.getTransformerByCreate();
 

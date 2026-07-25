@@ -129,7 +129,7 @@ export class WorksheetProtectionRenderController extends Disposable implements I
 
     private _initRender() {
         const renderId = this._context.unitId;
-        const render = renderId && this._renderManagerService.getRenderById(renderId);
+        const render = renderId && this._renderManagerService.getRenderUnitById(renderId);
         const spreadsheetRender = render && render.mainComponent as Spreadsheet;
         if (spreadsheetRender) {
             if (!spreadsheetRender.getExtensionByKey(worksheetProtectionKey)) {

@@ -712,7 +712,7 @@ describe('Test commands used for change selections', () => {
         it('should move active cell inside multi-selections and wrap to the next selection', async () => {
             const refreshSelectionMoveEnd = vi.fn();
             const renderManagerService = get(IRenderManagerService);
-            vi.spyOn(renderManagerService, 'getRenderById').mockReturnValue({
+            vi.spyOn(renderManagerService, 'getRenderUnitById').mockReturnValue({
                 with: (identifier: unknown) => {
                     if (identifier === ISheetSelectionRenderService) {
                         return { refreshSelectionMoveEnd };

@@ -73,7 +73,7 @@ export class SheetDrawingHitTestService extends Disposable {
     }
 
     hitTest(unitId: string, subUnitId: string, offsetX: number, offsetY: number): ISheetDrawingHitTestResult | null {
-        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
         if (!scene) {
             return null;
         }
@@ -115,7 +115,7 @@ export class SheetDrawingHitTestService extends Disposable {
             return;
         }
 
-        const render = this._renderManagerService.getRenderById(context.unitId);
+        const render = this._renderManagerService.getRenderUnitById(context.unitId);
         const scene = render?.scene;
         if (!render || !scene) {
             this._disposeDoubleClickListener();

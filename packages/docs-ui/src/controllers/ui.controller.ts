@@ -128,7 +128,7 @@ export class DocUIController extends Disposable {
                 }
 
                 const renderManagerService = this._injector.get(IRenderManagerService);
-                const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService);
+                const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)!.with(DocSelectionRenderService);
 
                 docSelectionRenderService.focus();
             })

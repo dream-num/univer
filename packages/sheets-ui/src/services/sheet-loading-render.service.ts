@@ -285,7 +285,7 @@ export class SheetLoadingRenderService extends Disposable implements ISheetLoadi
     }
 
     private _getFinalRender$(sourceUnitId: string): Observable<IRender> {
-        const existingRender = this._renderManagerService.getRenderById(sourceUnitId);
+        const existingRender = this._renderManagerService.getRenderUnitById(sourceUnitId);
         return existingRender
             ? of(existingRender)
             : this._renderManagerService.created$.pipe(

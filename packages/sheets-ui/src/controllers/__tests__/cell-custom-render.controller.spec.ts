@@ -83,7 +83,7 @@ function createController(options?: { editable?: boolean; selectionEditable?: bo
             getCurrentParam: vi.fn(() => ({ skeleton })),
         } as any,
         {
-            getRenderById: vi.fn(() => ({ mainComponent: spreadsheet, scene })),
+            getRenderUnitById: vi.fn(() => ({ mainComponent: spreadsheet, scene })),
         } as any,
         {
             composePermission: vi.fn(() => [{ value: options?.editable ?? true }]),

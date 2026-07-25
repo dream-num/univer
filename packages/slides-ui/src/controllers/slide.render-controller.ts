@@ -209,7 +209,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }
 
     private _thumbSceneRender(pageId: string, slide: Slide) {
-        const render = this._renderManagerService.getRenderById(pageId);
+        const render = this._renderManagerService.getRenderUnitById(pageId);
 
         if (render == null) {
             return;

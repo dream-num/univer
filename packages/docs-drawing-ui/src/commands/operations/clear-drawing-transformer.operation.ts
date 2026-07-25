@@ -25,7 +25,7 @@ export const ClearDocDrawingTransformerOperation: IMutation<string[]> = {
         const renderManagerService = accessor.get(IRenderManagerService);
 
         params.forEach((unitId) => {
-            renderManagerService.getRenderById(unitId)?.scene.getTransformer()?.debounceRefreshControls();
+            renderManagerService.getRenderUnitById(unitId)?.scene.getTransformer()?.debounceRefreshControls();
         });
 
         return true;

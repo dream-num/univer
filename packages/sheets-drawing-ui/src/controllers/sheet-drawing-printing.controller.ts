@@ -79,7 +79,7 @@ export class SheetDrawingPrintingController extends Disposable {
                 {
                     handler: (range, pos, next) => {
                         const { unitId, subUnitId } = pos;
-                        const renderer = this._renderManagerService.getRenderById(unitId);
+                        const renderer = this._renderManagerService.getRenderUnitById(unitId);
                         if (!renderer) {
                             return next(range);
                         }

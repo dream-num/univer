@@ -145,14 +145,6 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         portalContainer.dir = direction;
     }, [direction, portalContainer]);
 
-    if (!ready) {
-        return (
-            <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
-                <WorkbenchSkeleton darkMode={darkMode} direction={direction} />
-            </ConfigProvider>
-        );
-    }
-
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
             <div className="univer-relative univer-h-full univer-min-h-0">
@@ -252,7 +244,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                         )}
                     </section>
                 </div>
-                {externalSkeletonVisible && (
+                {(!ready || externalSkeletonVisible) && (
                     <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
                 )}
             </div>

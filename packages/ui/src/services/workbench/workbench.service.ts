@@ -47,8 +47,7 @@ export class WorkbenchService extends Disposable implements IWorkbenchService {
 
             this._skeletonVisible$.next(false);
         });
-        this.disposeWithMe(disposable);
-        return disposable;
+        return this.disposeWithMe(disposable);
     }
 
     override dispose(): void {

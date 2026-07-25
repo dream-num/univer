@@ -96,8 +96,7 @@ describe('DesktopWorkbenchContent lifecycle', () => {
         );
 
         expect(result.container.querySelector('[aria-busy="true"]')).not.toBeNull();
-        expect(result.container.querySelector('[aria-busy="true"] aside')).toBeNull();
-        expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).toBeNull();
+        expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).not.toBeNull();
         expect(onRendered).not.toHaveBeenCalled();
 
         lifecycleService.stage = LifecycleStages.Ready;

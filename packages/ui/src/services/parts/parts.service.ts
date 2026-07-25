@@ -122,8 +122,7 @@ export class UIPartsService extends Disposable implements IUIPartsService {
             subscription.unsubscribe();
             update(false);
         });
-        this.disposeWithMe(disposable);
-        return disposable;
+        return this.disposeWithMe(disposable);
     }
 
     registerComponent<T>(part: ComponentPartKey, componentFactory: () => React.ComponentType<T>): IDisposable {

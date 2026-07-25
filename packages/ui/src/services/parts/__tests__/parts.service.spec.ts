@@ -62,5 +62,6 @@ describe('UIPartsService', () => {
 
         disposable.dispose();
         expect(service.isUIVisible(BuiltInUIPart.TOOLBAR)).toBe(true);
+        expect((service as any)._collection._disposables).toHaveLength(0);
     });
 });

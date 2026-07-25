@@ -39,5 +39,6 @@ describe('WorkbenchService', () => {
 
         second.dispose();
         expect(states).toEqual([false, true, false]);
+        expect((service as any)._collection._disposables).toHaveLength(0);
     });
 });

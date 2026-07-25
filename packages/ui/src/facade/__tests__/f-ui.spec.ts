@@ -71,7 +71,7 @@ class FakeShortcutService {
 class FakeRenderManagerService {
     static renderUnit: unknown;
 
-    getRenderById(_unitId: string) {
+    getRenderUnitById(_unitId: string) {
         return FakeRenderManagerService.renderUnit;
     }
 }

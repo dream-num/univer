@@ -123,7 +123,7 @@ export class DocQuickInsertPopupService extends Disposable {
     } | null = null;
 
     private getDocEventManagerService(unitId: string) {
-        return this._renderManagerService.getRenderById(unitId)?.with(DocEventManagerService);
+        return this._renderManagerService.getRenderUnitById(unitId)?.with(DocEventManagerService);
     }
 
     constructor(
@@ -273,7 +273,7 @@ export class DocQuickInsertPopupService extends Disposable {
     }
 
     private _mountInputPlaceholder(unitId: string, fallbackRect: IBoundRectNoAngle): IDisposable {
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         const docSkeletonManagerService = currentRender?.with(DocSkeletonManagerService);
         const activeRange = this._docSelectionManagerService.getActiveTextRange();
         if (!currentRender || !docSkeletonManagerService || !activeRange) {

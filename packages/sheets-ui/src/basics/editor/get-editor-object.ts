@@ -33,7 +33,7 @@ export function getEditorObject(
         return;
     }
 
-    const currentRender = renderManagerService.getRenderById(unitId);
+    const currentRender = renderManagerService.getRenderUnitById(unitId);
 
     if (currentRender == null) {
         return;

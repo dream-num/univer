@@ -275,7 +275,7 @@ export class DocCanvasPopManagerService extends Disposable {
     }
 
     attachPopupToRect(rect: IBoundRectNoAngle | (() => IBoundRectNoAngle), popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
@@ -310,7 +310,7 @@ export class DocCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
@@ -352,7 +352,7 @@ export class DocCanvasPopManagerService extends Disposable {
             throw new Error(`Document not found, unitId: ${unitId}`);
         }
         const { direction = 'top', multipleDirection } = popup;
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }

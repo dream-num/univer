@@ -22,7 +22,7 @@ import { getEditorObject } from '../get-editor-object';
 describe('getEditorObject', () => {
     it('returns undefined when unitId is null or render is missing', () => {
         const renderManagerService = {
-            getRenderById: () => null,
+            getRenderUnitById: () => null,
         } as unknown as IRenderManagerService;
 
         expect(getEditorObject(null, renderManagerService)).toBeUndefined();
@@ -36,7 +36,7 @@ describe('getEditorObject', () => {
         const engine = { id: 'engine' };
 
         const renderManagerService = {
-            getRenderById: () => ({
+            getRenderUnitById: () => ({
                 mainComponent: document,
                 scene,
                 engine,

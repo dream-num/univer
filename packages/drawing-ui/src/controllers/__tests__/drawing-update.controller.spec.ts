@@ -108,7 +108,7 @@ function createHarness() {
     };
 
     const renderManagerService = {
-        getRenderById: vi.fn(() => ({ scene })),
+        getRenderUnitById: vi.fn(() => ({ scene })),
     };
 
     const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; behindText?: boolean; hidden?: boolean; selectable?: boolean; transform: { left: number; top: number; width: number; height: number; angle: number; clipBounds?: { left: number; top: number; width: number; height: number } } }>([

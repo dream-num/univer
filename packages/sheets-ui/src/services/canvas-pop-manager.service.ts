@@ -304,9 +304,9 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+        const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
 
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender || !skeleton) {
             return {
                 dispose: () => {
@@ -381,9 +381,9 @@ export class SheetCanvasPopManagerService extends Disposable {
             return;
         }
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+        const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
 
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender || !skeleton) {
             return null;
         }
@@ -469,9 +469,9 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+        const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
 
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (!currentRender || !skeleton) {
             return null;
         }
@@ -530,7 +530,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
 
@@ -618,7 +618,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         if ((_unitId && unitId !== _unitId) || (_subUnitId && subUnitId !== _subUnitId)) {
             return null;
         }
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
 

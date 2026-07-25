@@ -60,7 +60,7 @@ const FailingUpdateNoteMutation = {
 };
 
 class TestRenderManagerService {
-    getRenderById() {
+    getRenderUnitById() {
         return {
             engine: {
                 getCanvasElement() {

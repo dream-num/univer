@@ -38,17 +38,17 @@ describe('component tools', () => {
             getCurrentUnitOfType: vi.fn(() => null),
         };
         const renderManager = {
-            getRenderById: vi.fn(),
+            getRenderUnitById: vi.fn(),
         };
         expect(getSheetObject(noWorkbookInstance as any, renderManager as any)).toBeNull();
-        expect(renderManager.getRenderById).not.toHaveBeenCalled();
+        expect(renderManager.getRenderUnitById).not.toHaveBeenCalled();
 
         const workbook = { getUnitId: () => 'unit-1' };
         const noRenderInstance = {
             getCurrentUnitOfType: () => workbook,
         };
         expect(getSheetObject(noRenderInstance as any, renderManager as any)).toBeNull();
-        expect(renderManager.getRenderById).toHaveBeenCalledWith('unit-1');
+        expect(renderManager.getRenderUnitById).toHaveBeenCalledWith('unit-1');
     });
 
     it('getSheetObject extracts spreadsheet components from render manager', () => {
@@ -64,7 +64,7 @@ describe('component tools', () => {
             getCurrentUnitOfType: () => workbook,
         };
         const renderManager = {
-            getRenderById: () => render,
+            getRenderUnitById: () => render,
         };
 
         const sheetObject = getSheetObject(instance as any, renderManager as any);

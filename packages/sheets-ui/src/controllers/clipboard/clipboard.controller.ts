@@ -191,14 +191,14 @@ export class SheetClipboardController extends RxDisposable {
         // But when creating a sheet unit again after the previous sheet unit has been disposed, clipboard controller would init before docSelectionRenderService.
         // In this case, DocSelectionRenderService isn't ready when clipboardService controller init.
         // So better listening to the created$ event of the renderManagerService to get the DocSelectionRenderService instance.
-        let docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+        let docSelectionRenderService = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
 
         if (docSelectionRenderService) {
             sheetPasteShortKeyFn(docSelectionRenderService);
         }
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+                docSelectionRenderService = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
                 if (docSelectionRenderService) {
                     sheetPasteShortKeyFn(docSelectionRenderService);
                 }

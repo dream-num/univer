@@ -70,7 +70,7 @@ function createController() {
             }),
         } as never,
         { t: (key: string) => key } as never,
-        { getRenderById: vi.fn(() => ({ scene })) } as never,
+        { getRenderUnitById: vi.fn(() => ({ scene })) } as never,
         permissionService as never,
         {
             getCurrentTypeOfUnit$: vi.fn(() => workbook$),

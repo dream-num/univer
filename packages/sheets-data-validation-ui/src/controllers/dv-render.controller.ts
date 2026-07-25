@@ -190,7 +190,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         };
 
                         cell.interceptorAutoHeight = () => {
-                            const skeleton = this._renderManagerService.getRenderById(unitId)
+                            const skeleton = this._renderManagerService.getRenderUnitById(unitId)
                                 ?.with(SheetSkeletonManagerService)
                                 .getSkeletonParam(subUnitId)
                                 ?.skeleton;
@@ -213,7 +213,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             return validator?.canvasRender?.calcCellAutoHeight?.(info);
                         };
                         cell.interceptorAutoWidth = () => {
-                            const skeleton = this._renderManagerService.getRenderById(unitId)
+                            const skeleton = this._renderManagerService.getRenderUnitById(unitId)
                                 ?.with(SheetSkeletonManagerService)
                                 .getSkeletonParam(subUnitId)
                                 ?.skeleton;
@@ -344,7 +344,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                             }, row, col),
                         };
                         cell.interceptorAutoHeight = () => {
-                            const skeleton = this._renderManagerService.getRenderById(unitId)
+                            const skeleton = this._renderManagerService.getRenderUnitById(unitId)
                                 ?.with(SheetSkeletonManagerService)
                                 .getSkeletonParam(subUnitId)
                                 ?.skeleton;
@@ -367,7 +367,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                             return validator?.canvasRender?.calcCellAutoHeight?.(info);
                         };
                         cell.interceptorAutoWidth = () => {
-                            const skeleton = this._renderManagerService.getRenderById(unitId)
+                            const skeleton = this._renderManagerService.getRenderUnitById(unitId)
                                 ?.with(SheetSkeletonManagerService)
                                 .getSkeletonParam(subUnitId)
                                 ?.skeleton;

@@ -34,7 +34,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
 
     private _getSlideRenderControllerFromRenderUnit(unitId: string) {
         const renderUnit = this._renderManagerService
-            .getRenderById(unitId)!;
+            .getRenderUnitById(unitId)!;
         const slideRC = renderUnit.with(SlideRenderController);
         return slideRC;
     }

@@ -15,9 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
+import { Injector, LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
 import { SingleUnitUIController } from '../ui-shared.controller';
 
 class TestSingleUnitUIController extends SingleUnitUIController {
@@ -67,6 +68,16 @@ describe('SingleUnitUIController', () => {
 
     it('should bootstrap and switch renderers with lifecycle updates', async () => {
         vi.useFakeTimers();
+        vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+            callback(0);
+            return 0;
+        });
+
+        const injector = new Injector([
+            [IWorkbenchService, { useClass: WorkbenchService }],
+        ]);
+        const skeletonStates: boolean[] = [];
+        injector.get(IWorkbenchService).skeletonVisible$.subscribe((visible) => skeletonStates.push(visible));
 
         const layoutService = {
             registerRootContainerElement: vi.fn(() => ({ dispose: vi.fn() })),
@@ -88,7 +99,7 @@ describe('SingleUnitUIController', () => {
 
         const renderManagerService = {
             getRenderAll: vi.fn(() => rendererMap),
-            getRenderById: vi.fn((id: string) => rendererMap.get(id)),
+            getRenderUnitById: vi.fn((id: string) => rendererMap.get(id)),
             created$,
             disposed$,
         };
@@ -105,7 +116,7 @@ describe('SingleUnitUIController', () => {
         };
 
         const controller = new TestSingleUnitUIController(
-            {} as any,
+            injector,
             instanceService,
             layoutService,
             lifecycleService,
@@ -115,6 +126,7 @@ describe('SingleUnitUIController', () => {
         );
 
         controller.runBootstrap();
+        expect(skeletonStates).toEqual([false, true]);
 
         await controller.callbackPromise;
         expect(layoutService.registerRootContainerElement).toHaveBeenCalledTimes(1);
@@ -124,6 +136,7 @@ describe('SingleUnitUIController', () => {
         expect(render2.engine.mount).toHaveBeenCalledTimes(1);
         expect(render2.activate).toHaveBeenCalledTimes(1);
         expect(lifecycleService.stage).toBe(LifecycleStages.Rendered);
+        expect(skeletonStates).toEqual([false, true, false]);
 
         focused$.next('render-2');
         expect(render2.engine.mount).toHaveBeenCalledTimes(1);
@@ -167,7 +180,7 @@ describe('SingleUnitUIController', () => {
 
         const renderManagerService = {
             getRenderAll: vi.fn(() => rendererMap),
-            getRenderById: vi.fn((id: string) => rendererMap.get(id)),
+            getRenderUnitById: vi.fn((id: string) => rendererMap.get(id)),
             created$,
             disposed$: new Subject<string>(),
         };
@@ -184,7 +197,7 @@ describe('SingleUnitUIController', () => {
         };
 
         const controller = new TestSingleUnitUIController(
-            {} as any,
+            new Injector(),
             instanceService,
             layoutService,
             lifecycleService,
@@ -216,7 +229,7 @@ describe('SingleUnitUIController', () => {
         };
 
         const controller = new TestSingleUnitUIController(
-            {} as any,
+            new Injector(),
             {
                 focused$: new Subject<string>(),
                 getFocusedUnit: vi.fn(() => null),
@@ -229,7 +242,7 @@ describe('SingleUnitUIController', () => {
             },
             {
                 getRenderAll: vi.fn(() => new Map()),
-                getRenderById: vi.fn(() => null),
+                getRenderUnitById: vi.fn(() => null),
                 created$: new Subject<any>(),
                 disposed$: new Subject<string>(),
             },
@@ -244,7 +257,7 @@ describe('SingleUnitUIController', () => {
     it('should rethrow non-lifecycle errors from bootstrap callback', async () => {
         const error = new Error('unexpected');
         const controller = new TestSingleUnitUIController(
-            {} as any,
+            new Injector(),
             {
                 focused$: new Subject<string>(),
                 getFocusedUnit: vi.fn(() => null),
@@ -259,7 +272,7 @@ describe('SingleUnitUIController', () => {
             },
             {
                 getRenderAll: vi.fn(() => new Map()),
-                getRenderById: vi.fn(() => null),
+                getRenderUnitById: vi.fn(() => null),
                 created$: new Subject<any>(),
                 disposed$: new Subject<string>(),
             },

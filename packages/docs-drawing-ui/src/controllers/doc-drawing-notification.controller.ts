@@ -275,7 +275,7 @@ export class DocDrawingAddRemoveController extends Disposable {
                 }
 
                 const { unitId } = command.params as IUpdateDrawingDocTransformCommandParams | IUpdateDocDrawingWrappingStyleParams;
-                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
                 const scene = renderObject?.scene;
                 if (renderObject == null || scene == null) {
                     return;
@@ -322,7 +322,7 @@ export class DocDrawingAddRemoveController extends Disposable {
             unitId,
             UniverInstanceType.UNIVER_DOC
         );
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
         const skeletonManager = renderObject?.with(DocSkeletonManagerService);
         const skeletonData = skeletonManager?.getSkeleton().getSkeletonData();
         const viewModel = skeletonManager?.getViewModel();

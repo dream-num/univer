@@ -67,7 +67,7 @@ function createController() {
         position$: new Subject(),
     };
     controller._renderManagerService = {
-        getRenderById: vi.fn((unitId: string) => unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? render : null),
+        getRenderUnitById: vi.fn((unitId: string) => unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? render : null),
     };
     controller._univerInstanceService = {
         setCurrentUnitForType: vi.fn(),

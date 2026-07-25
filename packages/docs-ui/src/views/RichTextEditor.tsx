@@ -90,7 +90,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         isSingle,
     });
     const renderManagerService = useDependency(IRenderManagerService);
-    const renderer = renderManagerService.getRenderById(editorId);
+    const renderer = renderManagerService.getRenderUnitById(editorId);
     const selectionIsFocusing = useIsFocusing(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const editorFocused = useObservable(

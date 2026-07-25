@@ -127,7 +127,7 @@ export class SheetDrawingPermissionController extends Disposable {
         const drawingData = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
         const drawingDataValues = Object.values(drawingData);
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
 
         if (!scene) {
@@ -199,7 +199,7 @@ export class SheetDrawingPermissionController extends Disposable {
         const drawingData = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
         const drawingDataValues = Object.values(drawingData);
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
         const scene = renderObject?.scene;
 
         if (!scene) {
@@ -236,7 +236,7 @@ export class SheetDrawingPermissionController extends Disposable {
 
                                 const unitId = workbook.getUnitId();
                                 const subUnitId = sheet.getSheetId();
-                                const renderObject = this._renderManagerService.getRenderById(unitId);
+                                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
                                 const scene = renderObject?.scene;
 
                                 if (!scene) {
@@ -328,7 +328,7 @@ export class SheetDrawingPermissionController extends Disposable {
 
                                 const unitId = workbook.getUnitId();
                                 const subUnitId = sheet.getSheetId();
-                                const renderObject = this._renderManagerService.getRenderById(unitId);
+                                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
                                 const scene = renderObject?.scene;
 
                                 if (!scene) {
@@ -405,7 +405,7 @@ export class SheetDrawingPermissionController extends Disposable {
                         }
 
                         const subUnitId = sheet.getSheetId();
-                        const renderObject = this._renderManagerService.getRenderById(unitId);
+                        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
                         const scene = renderObject?.scene;
 
                         if (!scene) {

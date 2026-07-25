@@ -112,7 +112,7 @@ export function getDrawingSizeByCell(
 ) {
     const { rotatedHeight, rotatedWidth } = rotatedBoundingBox(originImageWidth, originImageHeight, angle);
     const renderManagerService = accessor.get(IRenderManagerService);
-    const currentRender = renderManagerService.getRenderById(location.unitId);
+    const currentRender = renderManagerService.getRenderUnitById(location.unitId);
     if (!currentRender) {
         return false;
     }

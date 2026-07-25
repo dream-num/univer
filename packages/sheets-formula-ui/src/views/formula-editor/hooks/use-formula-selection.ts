@@ -126,8 +126,8 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
     const { editor, editorId, isFocus, disableOnClick, unitId, subUnitId } = opts;
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const sheetRenderer = renderManagerService.getRenderById(unitId);
-    const renderer = renderManagerService.getRenderById(editorId);
+    const sheetRenderer = renderManagerService.getRenderUnitById(unitId);
+    const renderer = renderManagerService.getRenderUnitById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const injector = useDependency(Injector);

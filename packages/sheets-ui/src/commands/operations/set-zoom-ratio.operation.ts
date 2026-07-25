@@ -30,7 +30,7 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     type: CommandType.OPERATION,
     handler: (accessor, params: ISetZoomRatioOperationParams) => {
         const renderManagerService = accessor.get(IRenderManagerService);
-        const renderUnit = renderManagerService.getRenderById(params.unitId);
+        const renderUnit = renderManagerService.getRenderUnitById(params.unitId);
         if (!renderUnit) return false;
 
         return renderUnit.with(SheetsZoomRenderController).updateZoom(params.subUnitId, params.zoomRatio);

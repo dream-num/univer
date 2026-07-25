@@ -269,7 +269,7 @@ export class HoverManagerService extends Disposable {
             return null;
         }
 
-        const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
+        const currentRender = this._renderManagerService.getRenderUnitById(workbook.getUnitId());
         if (!currentRender) return null;
         const skeletonParam = currentRender.with(SheetSkeletonManagerService).getSkeletonParam(worksheet.getSheetId());
         if (!skeletonParam) return null;

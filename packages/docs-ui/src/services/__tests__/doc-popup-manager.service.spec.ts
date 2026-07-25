@@ -67,7 +67,7 @@ class TestRenderManagerService {
     readonly onTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
 
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         if (unitId === 'missing-doc') {
             return undefined;
         }

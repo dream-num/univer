@@ -33,7 +33,7 @@ export const useSwitchSheet = (
     const commandService = useDependency(ICommandService);
     const editorService = useDependency(IEditorService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const render = renderManagerService.getRenderById(unitId);
+    const render = renderManagerService.getRenderUnitById(unitId);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 

@@ -141,7 +141,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
         const layout = this._editorBridgeService.getEditCellLayout();
         const docSelectionRenderService = this._renderManagerService
-            .getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)
+            .getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)
             ?.with(DocSelectionRenderService);
         if (!layout || !docSelectionRenderService) {
             return;
@@ -228,7 +228,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             }
         };
 
-        const render = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const render = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         if (render) {
             addEvent(render);
         } else {
@@ -255,7 +255,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _focusCellEditorInput(): void {
-        const render = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const render = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const docSelectionRenderService = render?.with(DocSelectionRenderService);
 
         if (!docSelectionRenderService?.isFocusing) {

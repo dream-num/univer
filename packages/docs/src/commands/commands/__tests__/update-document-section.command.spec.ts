@@ -187,4 +187,32 @@ describe('UpdateDocumentSectionCommand', () => {
             expect.objectContaining({ sectionId: 'section_two', startIndex: 10, sectionType: SectionType.ODD_PAGE }),
         ]);
     });
+
+    it('rejects invalid section insertion inputs without partial changes', () => {
+        const originalBody = structuredClone(testBed.doc.getBody())!;
+
+        expect(commandService.syncExecuteCommand(InsertDocumentSectionBreakCommand.id, {
+            unitId: 'section-command-doc',
+            offset: 5,
+            sectionId: 'section_one',
+        })).toBe(false);
+        expect(commandService.syncExecuteCommand(InsertDocumentSectionBreakCommand.id, {
+            unitId: 'section-command-doc',
+            offset: 5,
+            sectionId: 'section_bad_geometry',
+            config: {
+                pageSize: { width: 100, height: 100 },
+                marginLeft: 50,
+                marginRight: 50,
+            },
+        })).toBe(false);
+        expect(commandService.syncExecuteCommand(InsertDocumentSectionBreakCommand.id, {
+            unitId: 'section-command-doc',
+            offset: 10,
+            sectionId: 'section_without_following_section',
+            nextSectionType: SectionType.NEXT_PAGE,
+        })).toBe(false);
+
+        expect(testBed.doc.getBody()).toEqual(originalBody);
+    });
 });

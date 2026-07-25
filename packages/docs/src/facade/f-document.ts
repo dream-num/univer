@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraphBorder, ISectionBreak, SectionHeaderFooterKind } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraphBorder, ISectionBreak, SectionHeaderFooterKind, SectionType } from '@univerjs/core';
 import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { IFDocumentTextRange } from './utils';
 import {
@@ -45,6 +45,22 @@ export interface IFDocumentParagraphQuery {
     paragraphId?: string;
     segmentId?: string;
 }
+
+/**
+ * Options for inserting a section break in a traditional document.
+ *
+ * Section properties such as margins and page size describe the section created
+ * before the inserted break. `nextSectionType` controls how the existing section
+ * after the break begins relative to that newly created section.
+ */
+export type IFDocumentInsertSectionBreakOptions = Partial<Omit<ISectionBreak, 'sectionId' | 'startIndex'>> & {
+    /**
+     * How the existing section after the inserted boundary begins relative to
+     * the newly created section. Prefer this atomic option to inserting a break
+     * and then resolving and updating the following section separately.
+     */
+    nextSectionType?: SectionType;
+};
 
 /**
  * Facade API object bounded to a document. It provides a set of methods to interact with the document.
@@ -362,29 +378,67 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Inserts a traditional document section break and returns its stable facade.
+     *
+     * `options` configures the section created before the inserted break.
+     * Set `options.nextSectionType` to control how the existing section after the
+     * break begins. For example, use `SectionType.NEXT_PAGE` to start a chapter on
+     * a new physical page. Both changes are executed by one command and are
+     * undone or redone together.
+     *
+     * The offset must be a top-level document position. To insert a break before
+     * a table or block such as a callout, use that object's start offset instead
+     * of an offset inside the object.
+     *
      * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
-     * Numeric layout values in `config` are in 96-DPI layout pixels.
+     * Numeric layout values in `options` are in 96-DPI layout pixels.
+     *
+     * @param {number} offset Top-level data-stream offset where the section break is inserted.
+     * @param {IFDocumentInsertSectionBreakOptions} [options] Section properties and the optional type of the following section.
+     * @returns {FDocumentSection | null} The section created before the break, or `null` when the command rejects the insertion.
      * @example
      * ```ts
-     * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
-     *   const paragraph = fDocument.findParagraphByText('Appendix');
-     *   const offset = paragraph?.getInfo().startOffset;
-     *   const section = offset == null ? null : fDocument.insertSectionBreak(offset);
-     *   console.log(section?.getId());
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) {
+     *   throw new Error('No active document');
      * }
+     * if (document.isModern()) {
+     *   throw new Error('Traditional document sections are required');
+     * }
+     *
+     * const chapter = document.findParagraphByText('Chapter 2');
+     * if (!chapter) {
+     *   throw new Error('Chapter heading not found');
+     * }
+     *
+     * // Insert the boundary immediately before the chapter heading. The command
+     * // also marks the following section as NEXT_PAGE, so the two model changes
+     * // share one undo/redo step.
+     * const sectionBeforeChapter = document.insertSectionBreak(
+     *   chapter.getInfo().startOffset,
+     *   { nextSectionType: univerAPI.Enum.SectionType.NEXT_PAGE }
+     * );
+     * if (!sectionBeforeChapter) {
+     *   throw new Error('The chapter heading is not at a valid top-level offset');
+     * }
+     *
+     * console.log({
+     *   insertedSection: sectionBeforeChapter.describe(),
+     *   chapterSection: document.getSectionAt(chapter.getInfo().startOffset)?.describe(),
+     * });
      * ```
      */
-    insertSectionBreak(offset: number, config: Partial<Omit<ISectionBreak, 'sectionId' | 'startIndex'>> = {}): FDocumentSection | null {
+    insertSectionBreak(offset: number, options: IFDocumentInsertSectionBreakOptions = {}): FDocumentSection | null {
         if (this._documentDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL) {
             throw new DocsSectionUnsupportedDocumentFlavorError();
         }
+        const { nextSectionType, ...config } = options;
         const sectionId = createSectionId(new Set((this.getBody().sectionBreaks ?? []).map((section) => section.sectionId)));
         const success = this._commandService.syncExecuteCommand(InsertDocumentSectionBreakCommand.id, {
             unitId: this.getId(),
             offset,
             sectionId,
             config,
+            nextSectionType,
         });
         return success ? this._injector.createInstance(FDocumentSection, this, sectionId) : null;
     }

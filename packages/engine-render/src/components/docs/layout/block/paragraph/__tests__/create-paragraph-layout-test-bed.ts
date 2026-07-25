@@ -110,6 +110,15 @@ function createLayoutContext(viewModel: DocumentViewModel): ILayoutContext {
         paragraphConfigCache: new Map(),
         sectionBreakConfigCache: new Map(),
         paragraphsOpenNewPage: new Set(),
+        paginationMetrics: {
+            constrainedParagraphs: 0,
+            noConstraintParagraphs: 0,
+            measuredLineCount: 0,
+            retryCount: 0,
+            movedLineCount: 0,
+            keepNextScanCount: 0,
+            peakCheckpointLineCount: 0,
+        },
         hyphen: Hyphen.getInstance(),
         languageDetector: LanguageDetector.getInstance(),
     } as ILayoutContext;

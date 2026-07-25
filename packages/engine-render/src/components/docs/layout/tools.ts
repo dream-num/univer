@@ -1618,6 +1618,23 @@ export interface IFloatObject {
 
 // The context state of the layout process, which is used to store some cache and intermediate states in the typesetting process,
 // as well as identifying information such as the pointer of the layout.
+export interface IDocumentPaginationMetrics {
+    /** Paragraphs that entered the Word-compatible pagination decision path. */
+    constrainedParagraphs: number;
+    /** Paragraphs that stayed on the no-constraint fast path. */
+    noConstraintParagraphs: number;
+    /** Already-shaped lines inspected by pagination checkpoints. */
+    measuredLineCount: number;
+    /** Bounded local pagination adjustments; at most one per paragraph or keep chain. */
+    retryCount: number;
+    /** Already-shaped lines moved by a pagination adjustment. */
+    movedLineCount: number;
+    /** Paragraphs inspected while walking backward through keep-next chains. */
+    keepNextScanCount: number;
+    /** Largest number of line references retained by one local checkpoint. */
+    peakCheckpointLineCount: number;
+}
+
 export interface ILayoutContext {
     // The view model of current layout document.
     viewModel: DocumentViewModel;
@@ -1648,6 +1665,7 @@ export interface ILayoutContext {
     paragraphConfigCache: Map<string, Map<number, IParagraphConfig>>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
     paragraphsOpenNewPage: Set<number>;
+    paginationMetrics?: IDocumentPaginationMetrics;
     // Use for hyphenation.
     hyphen: Hyphen;
     // Use for detect language for paragraph content.

@@ -19,7 +19,7 @@ import type { IHeaderFooterProps } from '@univerjs/docs';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, PageOrientType, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
-import { CreateHeaderFooterCommand, createSectionColumnProperties, DeleteDocumentSectionBreakCommand, getSectionContentWidth, getTopLevelSectionBreaks, HeaderFooterType, SetSectionHeaderFooterLinkCommand, UpdateDocumentSectionCommand } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, createSectionColumnProperties, DeleteDocumentSectionBreakCommand, getEffectiveSectionPageSetup, getSectionContentWidth, getTopLevelSectionBreaks, HeaderFooterType, SetSectionHeaderFooterLinkCommand, UpdateDocumentSectionCommand } from '@univerjs/docs';
 
 export interface IFDocumentSectionColumnOptions {
     /** Gap after each column except the last, in 96-DPI layout pixels. */
@@ -34,6 +34,30 @@ export type FDocumentSectionPageSetup = Pick<
     ISectionBreak,
     'pageNumberStart' | 'pageSize' | 'pageOrient' | 'marginTop' | 'marginBottom' | 'marginLeft' | 'marginRight'
 >;
+
+export interface IFDocumentSectionEffectivePageSetup {
+    /** Effective physical page size in 96-DPI layout pixels. */
+    pageSize: {
+        width: number;
+        height: number;
+    };
+    /** Effective page orientation after resolving the section override. */
+    pageOrient: PageOrientType;
+    /** Effective page margins in 96-DPI layout pixels. */
+    margins: {
+        top: number;
+        bottom: number;
+        left: number;
+        right: number;
+    };
+    /** Positive nominal content area after subtracting margins, in 96-DPI layout pixels. */
+    contentSize: {
+        width: number;
+        height: number;
+    };
+    /** Optional physical page-number value assigned to the first page of this section. */
+    pageNumberStart?: number;
+}
 
 export interface IFDocumentSectionDescription {
     sectionId: string;
@@ -259,11 +283,27 @@ export class FDocumentSection {
 
     /**
      * Sets how this section begins relative to the previous section.
+     *
+     * The first section has no preceding boundary, so setting its type does not
+     * create an initial blank page. Prefer `FDocument.insertSectionBreak` with
+     * `nextSectionType` when creating a new boundary; use this method when
+     * updating an existing section after resolving it again from the document.
+     *
+     * @param {SectionType} sectionType How this section begins.
+     * @returns {boolean} `true` when the section command was applied.
      * @example
      * ```ts
-     * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
-     *   fDocument.getSection(0)?.setSectionType(univerAPI.Enum.SectionType.NEXT_PAGE);
+     * const document = univerAPI.getActiveDocument();
+     * if (!document || document.isModern()) {
+     *   throw new Error('A Traditional document is required');
+     * }
+     *
+     * const secondSection = document.getSection(1);
+     * if (!secondSection) {
+     *   throw new Error('The second section does not exist');
+     * }
+     * if (!secondSection.setSectionType(univerAPI.Enum.SectionType.NEXT_PAGE)) {
+     *   throw new Error('Failed to update the second section');
      * }
      * ```
      */
@@ -278,6 +318,17 @@ export class FDocumentSection {
     /**
      * Returns this section's explicit page setup overrides.
      * Missing values inherit from the document style. Geometry values use 96-DPI layout pixels.
+     *
+     * Use `getEffectivePageSetup()` when an agent needs resolved page and content
+     * dimensions rather than only the overrides stored on this section.
+     *
+     * @returns {FDocumentSectionPageSetup} A cloned object containing only explicit section overrides.
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * const section = document?.getSection(0);
+     * console.log(section?.getPageSetup());
+     * ```
      */
     getPageSetup(): FDocumentSectionPageSetup {
         const {
@@ -301,8 +352,77 @@ export class FDocumentSection {
     }
 
     /**
+     * Returns nominal page geometry after resolving this section's overrides
+     * against document defaults. All geometry values use 96-DPI layout pixels.
+     *
+     * This synchronous model-only API works without `engine-render`. It does not
+     * report physical page count, remaining page space, or final coordinates.
+     *
+     * @returns {IFDocumentSectionEffectivePageSetup} A cloned, serializable page setup.
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) {
+     *   throw new Error('No active document');
+     * }
+     * if (document.isModern()) {
+     *   throw new Error('Traditional document sections are required');
+     * }
+     *
+     * const section = document.getSection(0);
+     * if (!section) {
+     *   throw new Error('The document has no traditional section');
+     * }
+     *
+     * const layout = section.getEffectivePageSetup();
+     * console.log({
+     *   pageWidth: layout.pageSize.width,
+     *   pageHeight: layout.pageSize.height,
+     *   contentWidth: layout.contentSize.width,
+     *   contentHeight: layout.contentSize.height,
+     *   margins: layout.margins,
+     * });
+     * ```
+     */
+    getEffectivePageSetup(): IFDocumentSectionEffectivePageSetup {
+        this._assertTraditionalDocument();
+        const documentStyle = this._document.getDocumentDataModel().getSnapshot().documentStyle;
+        return Tools.deepClone(getEffectiveSectionPageSetup(documentStyle, this.getConfig()));
+    }
+
+    /**
      * Updates this section's page setup through the document section command.
      * Geometry values use 96-DPI layout pixels.
+     *
+     * This method changes static page geometry; it does not choose where the
+     * section begins. Use `setSectionType()` for an existing boundary, or
+     * `insertSectionBreak(..., { nextSectionType })` while creating one.
+     *
+     * @param {FDocumentSectionPageSetup} pageSetup Explicit section overrides to patch.
+     * @returns {boolean} `true` when the section command was applied.
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * if (!document || document.isModern()) {
+     *   throw new Error('A Traditional document is required');
+     * }
+     *
+     * const section = document.getSection(1);
+     * if (!section) {
+     *   throw new Error('The second section does not exist');
+     * }
+     * const updated = section.setPageSetup({
+     *   pageSize: { width: 816, height: 1056 },
+     *   marginTop: 96,
+     *   marginBottom: 96,
+     *   marginLeft: 96,
+     *   marginRight: 96,
+     * });
+     * if (!updated) {
+     *   throw new Error('Failed to update section page setup');
+     * }
+     * console.log(section.getEffectivePageSetup());
+     * ```
      */
     setPageSetup(pageSetup: FDocumentSectionPageSetup): boolean {
         this._assertTraditionalDocument();

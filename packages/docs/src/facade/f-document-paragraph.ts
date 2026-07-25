@@ -17,8 +17,9 @@
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { getParagraphContentStartOffset, PresetListType, regexp, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { getParagraphContentStartOffset, ICommandService, PresetListType, regexp, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
+import { UpdateDocumentParagraphStyleCommand } from '@univerjs/docs';
 import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
@@ -67,7 +68,8 @@ export class FDocumentParagraph extends FBaseInitialable {
         protected readonly _document: FDocument,
         protected readonly _paragraphId: string,
         protected readonly _segmentId = '',
-        protected override readonly _injector: Injector
+        protected override readonly _injector: Injector,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super(_injector);
     }
@@ -314,77 +316,64 @@ export class FDocumentParagraph extends FBaseInitialable {
     }
 
     /**
-     * Apply paragraph style to a paragraph handle or text range.
+     * Applies a paragraph and optional text-style patch through one document command.
+     *
+     * Pagination values use `BooleanNumber.TRUE` or `BooleanNumber.FALSE`; explicit
+     * false is preserved and overrides inherited true. The paragraph and text-style
+     * changes share one undo/redo item. A stale paragraph handle returns `false`
+     * without applying a partial update.
+     *
+     * The Traditional renderer applies these Word-compatible pagination rules:
+     * use `pageBreakBefore` for a hard chapter-page boundary, `keepLines` for a
+     * short paragraph that should stay intact, `keepNext` for a heading or caption
+     * that should accompany the next paragraph, and `widowControl` for natural
+     * multi-line body text. Do not enable every rule on every paragraph. Modern
+     * Docs preserve the values in the model but do not apply them to physical pages.
+     *
      * `style.textStyle.fs` is a font size in points (pt), not CSS pixels.
      * @param {IParagraphStyle} style The Univer paragraph style patch.
-     * @returns {boolean} `true` if the style was applied.
+     * @returns {boolean} `true` when the complete patch was applied; otherwise `false`.
      * @example
      * ```ts
-     * const fDocument = univerAPI.getActiveDocument();
-     * const paragraph = fDocument.getParagraphs()[0];
-     * paragraph?.setText('Styled text');
-     * paragraph?.setStyle({
-     *   textStyle: {
-     *     cl: {
-     *       rgb: '#FF0000',
-     *     },
-     *     fs: 14,
-     *   },
-     *   horizontalAlign: 2,
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) {
+     *   throw new Error('No active document');
+     * }
+     * if (document.isModern()) {
+     *   throw new Error('Traditional document pagination is required');
+     * }
+     * const heading = document.findParagraphByText('Appendix');
+     * const following = document.findParagraphByText('Supporting details');
+     * if (!heading || !following) {
+     *   throw new Error('Expected paragraphs were not found');
+     * }
+     *
+     * const headingUpdated = heading.setStyle({
+     *   pageBreakBefore: univerAPI.Enum.BooleanNumber.TRUE,
+     *   keepLines: univerAPI.Enum.BooleanNumber.TRUE,
+     *   keepNext: univerAPI.Enum.BooleanNumber.TRUE,
      * });
-     * console.log(paragraph?.getInfo().paragraph.paragraphStyle);
+     * const followingUpdated = following.setStyle({
+     *   // Explicit FALSE terminates this authored keepNext chain even if a named
+     *   // style or document default enables it.
+     *   keepNext: univerAPI.Enum.BooleanNumber.FALSE,
+     *   widowControl: univerAPI.Enum.BooleanNumber.TRUE,
+     * });
+     * if (!headingUpdated || !followingUpdated) {
+     *   throw new Error('Failed to update paragraph pagination');
+     * }
      * ```
      */
     setStyle(style: IParagraphStyle): boolean {
-        const { paragraph, startOffset, endOffset } = this.getInfo();
-        let result = true;
-
-        if (style.textStyle && startOffset < endOffset) {
-            result = retainBodyRange(
-                {
-                    startOffset,
-                    endOffset,
-                    segmentId: this._segmentId,
-                },
-                {
-                    dataStream: '',
-                    textRuns: [{
-                        st: 0,
-                        ed: endOffset - startOffset,
-                        ts: style.textStyle,
-                    }],
-                },
-                UpdateDocsAttributeType.COVER,
-                this._document.getDocumentDataModel(),
-                this._injector
-            );
-        }
-
-        const updateBody: IDocumentBody = {
-            dataStream: '',
-            paragraphs: [{
-                ...paragraph,
-                startIndex: 0,
-                paragraphStyle: {
-                    ...paragraph.paragraphStyle,
-                    ...style,
-                },
-            }],
-        };
-
-        this._preserveExplicitParagraphIds(updateBody);
-
-        return retainBodyRange(
-            {
-                startOffset: endOffset,
-                endOffset: endOffset + 1,
-                segmentId: this._segmentId,
-            },
-            updateBody,
-            UpdateDocsAttributeType.REPLACE,
-            this._document.getDocumentDataModel(),
-            this._injector
-        ) && result;
+        const { startOffset, endOffset } = this.getInfo();
+        return this._commandService.syncExecuteCommand(UpdateDocumentParagraphStyleCommand.id, {
+            unitId: this._document.getId(),
+            segmentId: this._segmentId,
+            paragraphId: this._paragraphId,
+            startOffset,
+            endOffset,
+            style,
+        });
     }
 
     /**

@@ -70,6 +70,21 @@ describe('FDocument in Node', () => {
                 pageOrient: PageOrientType.LANDSCAPE,
             },
         });
+        expect(section?.getEffectivePageSetup()).toEqual({
+            pageNumberStart: 7,
+            pageSize: { width: 960, height: 720 },
+            pageOrient: PageOrientType.LANDSCAPE,
+            margins: {
+                top: 48,
+                bottom: 48,
+                left: 64,
+                right: 64,
+            },
+            contentSize: {
+                width: 832,
+                height: 624,
+            },
+        });
         expect(document?.save().body?.customRanges).toContainEqual(expect.objectContaining({
             startIndex: 3,
             endIndex: 3,

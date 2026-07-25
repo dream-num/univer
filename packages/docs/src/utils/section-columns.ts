@@ -14,8 +14,62 @@
  * limitations under the License.
  */
 
-import type { IDocumentStyle, ISectionBreak, ISectionColumnProperties } from '@univerjs/core';
-import { PAGE_SIZE, PaperType } from '@univerjs/core';
+import type { IDocumentStyle, ISectionBreak, ISectionColumnProperties, PageOrientType } from '@univerjs/core';
+import { PAGE_SIZE, PageOrientType as PageOrient, PaperType } from '@univerjs/core';
+
+export interface IEffectiveSectionPageSetup {
+    pageSize: {
+        width: number;
+        height: number;
+    };
+    pageOrient: PageOrientType;
+    margins: {
+        top: number;
+        bottom: number;
+        left: number;
+        right: number;
+    };
+    contentSize: {
+        width: number;
+        height: number;
+    };
+    pageNumberStart?: number;
+}
+
+/** Resolves nominal traditional page geometry without requiring a renderer. */
+export function getEffectiveSectionPageSetup(
+    documentStyle: IDocumentStyle | undefined,
+    section: ISectionBreak | undefined
+): IEffectiveSectionPageSetup {
+    const fallbackPageSize = PAGE_SIZE[PaperType.A4];
+    const pageSize = {
+        width: section?.pageSize?.width ?? documentStyle?.pageSize?.width ?? fallbackPageSize.width,
+        height: section?.pageSize?.height ?? documentStyle?.pageSize?.height ?? fallbackPageSize.height,
+    };
+    const margins = {
+        top: section?.marginTop ?? documentStyle?.marginTop ?? 72,
+        bottom: section?.marginBottom ?? documentStyle?.marginBottom ?? 72,
+        left: section?.marginLeft ?? documentStyle?.marginLeft ?? 72,
+        right: section?.marginRight ?? documentStyle?.marginRight ?? 72,
+    };
+    const contentSize = {
+        width: getSectionContentWidth(documentStyle, section),
+        height: pageSize.height - margins.top - margins.bottom,
+    };
+    if (![pageSize.width, pageSize.height, contentSize.width, contentSize.height]
+        .every((value) => Number.isFinite(value) && value > 0)) {
+        throw new RangeError('Effective section page setup must have positive finite page and content dimensions.');
+    }
+
+    const pageNumberStart = section?.pageNumberStart ?? documentStyle?.pageNumberStart;
+    return {
+        pageSize,
+        pageOrient: section?.pageOrient ?? documentStyle?.pageOrient ?? PageOrient.PORTRAIT,
+        margins,
+        contentSize,
+        ...(pageNumberStart == null ? {} : { pageNumberStart }),
+    };
+}
 
 /** Returns the usable horizontal layout width for a traditional section. */
 export function getSectionContentWidth(

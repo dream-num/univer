@@ -33,6 +33,8 @@ export type {
 } from './commands/commands/set-document-default-paragraph-style.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
+export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
+export type { IUpdateDocumentParagraphStyleCommandParams } from './commands/commands/update-document-paragraph-style.command';
 export { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
 export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentColumnBreakCommandParams, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
 export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -86,7 +88,8 @@ export {
 } from './utils/custom-range-factory';
 export { generateParagraphs } from './utils/paragraphs';
 export { replaceSelectionFactory } from './utils/replace-selection-factory';
-export { createSectionColumnProperties, getSectionContentWidth } from './utils/section-columns';
+export { createSectionColumnProperties, getEffectiveSectionPageSetup, getSectionContentWidth } from './utils/section-columns';
+export type { IEffectiveSectionPageSetup } from './utils/section-columns';
 export { getTopLevelSectionBreaks } from './utils/sections';
 export { buildDocTransform, docDrawingPositionToTransform, transformToDocDrawingPosition } from './utils/transform-position';
 export { consumeContentInsertRange, getContentInsertRange, isHeaderFooterSelection, normalizeTextRange } from './utils/util';

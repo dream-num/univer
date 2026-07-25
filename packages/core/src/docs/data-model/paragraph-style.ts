@@ -35,45 +35,24 @@ export interface IResolveDocumentParagraphStyleOptions {
     styles?: IDocStyles;
     /** Named paragraph style referenced by the paragraph. */
     paragraphStyleId?: string;
-    /** Monotonic style-model version used to invalidate the named-style resolution cache. */
-    stylesVersion?: number;
 }
-
-interface IResolvedNamedParagraphStyleCacheEntry {
-    version: number;
-    style: IParagraphStyle;
-}
-
-const _resolvedNamedParagraphStyleCache =
-    new WeakMap<IDocStyles, Map<string, IResolvedNamedParagraphStyleCacheEntry>>();
 
 function _definedStyle(style: Nullable<IParagraphStyle>): IParagraphStyle {
     if (style == null) {
         return {};
     }
 
-    return Object.fromEntries(
-        Object.entries(style).filter(([, value]) => value != null)
-    ) as IParagraphStyle;
+    const definedStyle = Tools.deepClone(style);
+    Tools.removeNull(definedStyle);
+    return definedStyle;
 }
 
 function _resolveNamedParagraphStyle(
     styles: IDocStyles | undefined,
-    styleId: string | undefined,
-    stylesVersion = 0
+    styleId: string | undefined
 ): IParagraphStyle {
     if (!styles || !styleId) {
         return {};
-    }
-
-    let cache = _resolvedNamedParagraphStyleCache.get(styles);
-    if (!cache) {
-        cache = new Map();
-        _resolvedNamedParagraphStyleCache.set(styles, cache);
-    }
-    const cached = cache.get(styleId);
-    if (cached?.version === stylesVersion) {
-        return Tools.deepClone(cached.style);
     }
 
     const visiting = new Set<string>();
@@ -94,12 +73,7 @@ function _resolveNamedParagraphStyle(
             ..._definedStyle(style.paragraphStyle),
         };
     };
-    const resolved = resolve(styleId);
-    cache.set(styleId, {
-        version: stylesVersion,
-        style: Tools.deepClone(resolved),
-    });
-    return resolved;
+    return resolve(styleId);
 }
 
 export function resolveDocumentParagraphStyle(
@@ -134,8 +108,7 @@ export function resolveDocumentParagraphStyle(
     const definedParagraphStyle = _definedStyle(paragraphStyle);
     const referencedParagraphStyle = _resolveNamedParagraphStyle(
         options.styles,
-        options.paragraphStyleId,
-        options.stylesVersion
+        options.paragraphStyleId
     );
     const namedStyleType = definedParagraphStyle.namedStyleType ?? referencedParagraphStyle.namedStyleType;
     const namedStyle = namedStyleType == null

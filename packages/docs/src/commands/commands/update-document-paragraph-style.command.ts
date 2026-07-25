@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IParagraphStyle, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph, IParagraphStyle, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     getParagraphContentStartOffset,
@@ -40,14 +40,104 @@ export interface IUpdateDocumentParagraphStyleCommandParams {
     style: IParagraphStyle;
 }
 
+function isValidParams(
+    params: IUpdateDocumentParagraphStyleCommandParams | undefined
+): params is IUpdateDocumentParagraphStyleCommandParams {
+    return Boolean(
+        params?.unitId &&
+        params.paragraphId &&
+        Number.isInteger(params.startOffset) &&
+        Number.isInteger(params.endOffset) &&
+        params.startOffset >= 0 &&
+        params.endOffset >= params.startOffset &&
+        params.style &&
+        Object.keys(params.style).length > 0
+    );
+}
+
+function getCurrentParagraph(
+    body: IDocumentBody,
+    params: IUpdateDocumentParagraphStyleCommandParams
+): IParagraph | null {
+    const matches = (body.paragraphs ?? []).filter((paragraph) =>
+        paragraph.paragraphId === params.paragraphId);
+    if (matches.length !== 1) {
+        return null;
+    }
+
+    const paragraph = matches[0];
+    return getParagraphContentStartOffset(body, paragraph) === params.startOffset &&
+        paragraph.startIndex === params.endOffset &&
+        body.dataStream[params.endOffset] === '\r'
+        ? paragraph
+        : null;
+}
+
+function createParagraphStyleTextX(
+    body: IDocumentBody,
+    paragraph: IParagraph,
+    params: IUpdateDocumentParagraphStyleCommandParams
+): { textX: TextX; initializesTextRuns: boolean } {
+    const textX = new TextX();
+    const initializesTextRuns = Boolean(
+        params.style.textStyle &&
+        params.startOffset < params.endOffset &&
+        body.textRuns == null
+    );
+    if (params.startOffset > 0) {
+        textX.push({ t: TextXActionType.RETAIN, len: params.startOffset });
+    }
+    if (params.style.textStyle && params.startOffset < params.endOffset && !initializesTextRuns) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: params.endOffset - params.startOffset,
+            coverType: UpdateDocsAttributeType.COVER,
+            body: {
+                dataStream: '',
+                textRuns: [{
+                    st: 0,
+                    ed: params.endOffset - params.startOffset,
+                    ts: Tools.deepClone(params.style.textStyle),
+                }],
+            },
+        });
+    } else if (params.startOffset < params.endOffset) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: params.endOffset - params.startOffset,
+        });
+    }
+
+    const paragraphBody: IDocumentBody = {
+        dataStream: '',
+        paragraphs: [{
+            ...Tools.deepClone(paragraph),
+            startIndex: 0,
+            paragraphStyle: {
+                ...Tools.deepClone(paragraph.paragraphStyle ?? {}),
+                ...Tools.deepClone(params.style),
+            },
+        }],
+    };
+    Object.defineProperty(paragraphBody, RESTORE_INSERTED_PARAGRAPH_IDS, {
+        value: true,
+        enumerable: true,
+    });
+    textX.push({
+        t: TextXActionType.RETAIN,
+        len: 1,
+        coverType: UpdateDocsAttributeType.REPLACE,
+        body: paragraphBody,
+    });
+
+    return { textX, initializesTextRuns };
+}
+
 export const UpdateDocumentParagraphStyleCommand: ICommand<IUpdateDocumentParagraphStyleCommandParams> = {
     id: 'doc.command.update-paragraph-style',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
-        if (!params?.unitId || !params.paragraphId || !Number.isInteger(params.startOffset) ||
-            !Number.isInteger(params.endOffset) || params.startOffset < 0 ||
-            params.endOffset < params.startOffset || !params.style ||
-            Object.keys(params.style).length === 0) {
+        if (!isValidParams(params)) {
             return false;
         }
 
@@ -63,78 +153,23 @@ export const UpdateDocumentParagraphStyleCommand: ICommand<IUpdateDocumentParagr
             return false;
         }
 
-        const matches = (body.paragraphs ?? []).filter((paragraph) =>
-            paragraph.paragraphId === params.paragraphId);
-        if (matches.length !== 1) {
-            return false;
-        }
-        const paragraph = matches[0];
-        const currentStartOffset = getParagraphContentStartOffset(body, paragraph);
-        if (currentStartOffset !== params.startOffset ||
-            paragraph.startIndex !== params.endOffset ||
-            body.dataStream[params.endOffset] !== '\r') {
+        const paragraph = getCurrentParagraph(body, params);
+        if (!paragraph) {
             return false;
         }
 
-        const textX = new TextX();
-        const initializesTextRuns = Boolean(
-            params.style.textStyle &&
-            params.startOffset < params.endOffset &&
-            body.textRuns == null
-        );
-        if (params.startOffset > 0) {
-            textX.push({ t: TextXActionType.RETAIN, len: params.startOffset });
-        }
-        if (params.style.textStyle && params.startOffset < params.endOffset && !initializesTextRuns) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: params.endOffset - params.startOffset,
-                coverType: UpdateDocsAttributeType.COVER,
-                body: {
-                    dataStream: '',
-                    textRuns: [{
-                        st: 0,
-                        ed: params.endOffset - params.startOffset,
-                        ts: Tools.deepClone(params.style.textStyle),
-                    }],
-                },
-            });
-        } else if (params.startOffset < params.endOffset) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: params.endOffset - params.startOffset,
-            });
-        }
-
-        const paragraphBody: IDocumentBody = {
-            dataStream: '',
-            paragraphs: [{
-                ...Tools.deepClone(paragraph),
-                startIndex: 0,
-                paragraphStyle: {
-                    ...Tools.deepClone(paragraph.paragraphStyle ?? {}),
-                    ...Tools.deepClone(params.style),
-                },
-            }],
-        };
-        (paragraphBody as IDocumentBody & Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS] = true;
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-            coverType: UpdateDocsAttributeType.REPLACE,
-            body: paragraphBody,
-        });
-
+        const { textX, initializesTextRuns } = createParagraphStyleTextX(body, paragraph, params);
         const jsonX = JSONX.getInstance();
         const path = getRichTextEditPath(documentDataModel, segmentId);
         let actions = jsonX.editOp(textX.serialize(), path);
         if (initializesTextRuns) {
+            const initializeTextRunsActions: JSONXActions = jsonX.replaceOp([...path, 'textRuns'], undefined, [{
+                st: params.startOffset,
+                ed: params.endOffset,
+                ts: Tools.deepClone(params.style.textStyle),
+            }]);
             actions = JSONX.compose(
-                jsonX.replaceOp([...path, 'textRuns'], undefined, [{
-                    st: params.startOffset,
-                    ed: params.endOffset,
-                    ts: Tools.deepClone(params.style.textStyle),
-                }]) as JSONXActions,
+                initializeTextRunsActions,
                 actions
             );
         }

@@ -298,15 +298,13 @@ function _applyBlockRangeLayoutParagraphStyle(
     documentStyle: Nullable<IDocumentStyle>,
     useLegacyModernDefaults: boolean,
     styles: IDocStyles | undefined,
-    paragraphStyleId: string | undefined,
-    stylesVersion: number | undefined
+    paragraphStyleId: string | undefined
 ): IParagraphStyle {
     const blockRanges = body?.blockRanges;
     const resolveOptions = {
         useLegacyModernDefaults,
         styles,
         paragraphStyleId,
-        stylesVersion,
     };
 
     if (!blockRanges?.length) {
@@ -745,8 +743,7 @@ export function lineBreaking(
         documentStyle,
         shouldApplyDocumentDefaults,
         documentSnapshot?.styles,
-        paragraph.styleId,
-        documentSnapshot?.stylesVersion
+        paragraph.styleId
     );
     const borderBottom = resolvedParagraphStyle.borderBottom;
 

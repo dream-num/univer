@@ -37,8 +37,6 @@ export interface IDocumentData extends IReferenceSource {
     documentStyle: IDocumentStyle;
     /** OOXML-compatible named document styles keyed by stable style id. */
     styles?: IDocStyles;
-    /** Monotonic version used to invalidate resolved named-style caches. */
-    stylesVersion?: number;
     settings?: IDocumentSettings;
     // The type of data depends on how the plug-in is defined
     resources?: IResources;

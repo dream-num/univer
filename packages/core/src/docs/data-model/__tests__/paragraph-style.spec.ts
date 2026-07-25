@@ -59,7 +59,6 @@ describe('resolveDocumentParagraphStyle pagination', () => {
             {
                 styles,
                 paragraphStyleId: 'heading',
-                stylesVersion: 1,
             }
         )).toMatchObject({
             keepNext: BooleanNumber.FALSE,
@@ -85,7 +84,7 @@ describe('resolveDocumentParagraphStyle pagination', () => {
         ).widowControl).toBeUndefined();
     });
 
-    it('terminates style cycles and invalidates cache by style version', () => {
+    it('terminates style cycles and reads current named-style values', () => {
         const styles: IDocStyles = {
             first: {
                 name: 'First',
@@ -104,7 +103,6 @@ describe('resolveDocumentParagraphStyle pagination', () => {
         expect(resolveDocumentParagraphStyle(traditionalDocumentStyle, {}, {
             styles,
             paragraphStyleId: 'first',
-            stylesVersion: 1,
         })).toMatchObject({
             keepNext: BooleanNumber.TRUE,
             keepLines: BooleanNumber.TRUE,
@@ -114,7 +112,6 @@ describe('resolveDocumentParagraphStyle pagination', () => {
         expect(resolveDocumentParagraphStyle(traditionalDocumentStyle, {}, {
             styles,
             paragraphStyleId: 'first',
-            stylesVersion: 2,
         })).toMatchObject({
             keepNext: BooleanNumber.FALSE,
             keepLines: BooleanNumber.TRUE,

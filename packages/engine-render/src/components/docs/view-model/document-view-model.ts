@@ -601,14 +601,20 @@ export class DocumentViewModel implements IDisposable {
     private _buildHeaderFooterViewModel() {
         const { headerModelMap, footerModelMap } = this._documentDataModel;
         const viewModels = [];
-        const tableSource = this.getSnapshot().tableSource;
+        const rootTableSource = this.getSnapshot().tableSource;
         for (const [headerId, headerModel] of headerModelMap) {
-            this._headerTreeMap.set(headerId, new DocumentViewModel(headerModel, tableSource));
+            this._headerTreeMap.set(headerId, new DocumentViewModel(headerModel, {
+                ...rootTableSource,
+                ...headerModel.getSnapshot().tableSource,
+            }));
             viewModels.push(this._headerTreeMap.get(headerId)!);
         }
 
         for (const [footerId, footerModel] of footerModelMap) {
-            this._footerTreeMap.set(footerId, new DocumentViewModel(footerModel, tableSource));
+            this._footerTreeMap.set(footerId, new DocumentViewModel(footerModel, {
+                ...rootTableSource,
+                ...footerModel.getSnapshot().tableSource,
+            }));
             viewModels.push(this._footerTreeMap.get(footerId)!);
         }
 

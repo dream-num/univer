@@ -15,7 +15,7 @@
  */
 
 import type { IResolvedSectionHeaderFooterReference, ISectionBreak, ISectionColumnProperties, SectionHeaderFooterKind, SectionHeaderFooterVariant } from '@univerjs/core';
-import type { IHeaderFooterProps } from '@univerjs/docs';
+import type { IEffectiveSectionPageSetup, IHeaderFooterProps } from '@univerjs/docs';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, PageOrientType, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
@@ -35,30 +35,6 @@ export type FDocumentSectionPageSetup = Pick<
     'pageNumberStart' | 'pageSize' | 'pageOrient' | 'marginTop' | 'marginBottom' | 'marginLeft' | 'marginRight'
 >;
 
-export interface IFDocumentSectionEffectivePageSetup {
-    /** Effective physical page size in 96-DPI layout pixels. */
-    pageSize: {
-        width: number;
-        height: number;
-    };
-    /** Effective page orientation after resolving the section override. */
-    pageOrient: PageOrientType;
-    /** Effective page margins in 96-DPI layout pixels. */
-    margins: {
-        top: number;
-        bottom: number;
-        left: number;
-        right: number;
-    };
-    /** Positive nominal content area after subtracting margins, in 96-DPI layout pixels. */
-    contentSize: {
-        width: number;
-        height: number;
-    };
-    /** Optional physical page-number value assigned to the first page of this section. */
-    pageNumberStart?: number;
-}
-
 export interface IFDocumentSectionDescription {
     sectionId: string;
     index: number;
@@ -72,6 +48,24 @@ export interface IFDocumentSectionDescription {
         linkedToPrevious: boolean;
     }>;
     config: ISectionBreak;
+}
+
+function validatePageSetup(pageSetup: FDocumentSectionPageSetup): void {
+    const { pageNumberStart, pageSize, pageOrient, marginTop, marginBottom, marginLeft, marginRight } = pageSetup;
+    if (pageNumberStart != null && (!Number.isInteger(pageNumberStart) || pageNumberStart < 1)) {
+        throw new RangeError('Section page number start must be a positive integer.');
+    }
+    if (pageSize && [pageSize.width, pageSize.height]
+        .some((size) => size != null && (!Number.isFinite(size) || size <= 0))) {
+        throw new RangeError('Section page size must be finite and positive.');
+    }
+    if (pageOrient != null && !Object.values(PageOrientType).includes(pageOrient)) {
+        throw new RangeError('Invalid section page orientation.');
+    }
+    if ([marginTop, marginBottom, marginLeft, marginRight]
+        .some((margin) => margin != null && (!Number.isFinite(margin) || margin < 0))) {
+        throw new RangeError('Section page margins must be finite and non-negative.');
+    }
 }
 
 /** Error thrown when a Traditional-only section API is used with another document flavor. */
@@ -134,8 +128,7 @@ export class FDocumentSection {
      * ```
      */
     getConfig(): ISectionBreak {
-        const { sectionBreak } = this._resolve();
-        return Tools.deepClone(sectionBreak);
+        return this._getConfigSnapshot();
     }
 
     /**
@@ -147,14 +140,7 @@ export class FDocumentSection {
      * ```
      */
     getRange(): IFDocumentTextRange {
-        const sectionBreaks = getTopLevelSectionBreaks(this._document.getBody());
-        const { index, sectionBreak } = this._resolve();
-
-        return {
-            startOffset: index === 0 ? 0 : sectionBreaks[index - 1].startIndex + 1,
-            endOffset: sectionBreak.startIndex,
-            segmentId: '',
-        };
+        return this._getRange(this._resolve().index);
     }
 
     /**
@@ -167,7 +153,7 @@ export class FDocumentSection {
      * ```
      */
     getColumns(): ISectionColumnProperties[] {
-        return Tools.deepClone(this.getConfig().columnProperties ?? []);
+        return Tools.deepClone(this._getConfigSnapshot().columnProperties ?? []);
     }
 
     /**
@@ -179,7 +165,8 @@ export class FDocumentSection {
      * ```
      */
     describe(): IFDocumentSectionDescription {
-        const config = this.getConfig();
+        const { index } = this._resolve();
+        const config = this._getConfigSnapshot();
         const columns = config.columnProperties ?? [];
         const headerFooter = {
             defaultHeader: this._describeHeaderFooterReference('header', 'default'),
@@ -191,8 +178,8 @@ export class FDocumentSection {
         };
         return {
             sectionId: this._sectionId,
-            index: this.getIndex(),
-            range: this.getRange(),
+            index,
+            range: this._getRange(index),
             columnCount: columns.length || 1,
             columns: Tools.deepClone(columns),
             columnSeparatorType: config.columnSeparatorType ?? ColumnSeparatorType.NONE,
@@ -227,7 +214,7 @@ export class FDocumentSection {
         }
 
         const gap = Math.max(0, options.gap ?? 18);
-        const config = this.getConfig();
+        const config = this._getConfigSnapshot();
         const columns = createSectionColumnProperties(
             this._document.getDocumentDataModel().getSnapshot().documentStyle,
             config,
@@ -271,7 +258,7 @@ export class FDocumentSection {
         }
         const contentWidth = getSectionContentWidth(
             this._document.getDocumentDataModel().getSnapshot().documentStyle,
-            this.getConfig()
+            this._getConfigSnapshot()
         );
         if (columns.reduce((sum, { width, paddingEnd }) => sum + width + paddingEnd, 0) > contentWidth) {
             throw new RangeError('Section columns exceed the available page content width.');
@@ -340,7 +327,7 @@ export class FDocumentSection {
             marginBottom,
             marginLeft,
             marginRight,
-        } = this.getConfig();
+        } = this._getConfigSnapshot();
         return Tools.deepClone({
             pageNumberStart,
             pageSize,
@@ -359,7 +346,7 @@ export class FDocumentSection {
      * This synchronous model-only API works without `engine-render`. It does not
      * report physical page count, remaining page space, or final coordinates.
      *
-     * @returns {IFDocumentSectionEffectivePageSetup} A cloned, serializable page setup.
+     * @returns {IEffectiveSectionPageSetup} A cloned, serializable page setup.
      * @example
      * ```ts
      * const document = univerAPI.getActiveDocument();
@@ -385,10 +372,10 @@ export class FDocumentSection {
      * });
      * ```
      */
-    getEffectivePageSetup(): IFDocumentSectionEffectivePageSetup {
+    getEffectivePageSetup(): IEffectiveSectionPageSetup {
         this._assertTraditionalDocument();
         const documentStyle = this._document.getDocumentDataModel().getSnapshot().documentStyle;
-        return Tools.deepClone(getEffectiveSectionPageSetup(documentStyle, this.getConfig()));
+        return Tools.deepClone(getEffectiveSectionPageSetup(documentStyle, this._getConfigSnapshot()));
     }
 
     /**
@@ -427,35 +414,15 @@ export class FDocumentSection {
      */
     setPageSetup(pageSetup: FDocumentSectionPageSetup): boolean {
         this._assertTraditionalDocument();
-        const { pageNumberStart, pageSize, pageOrient, marginTop, marginBottom, marginLeft, marginRight } = pageSetup;
-        if (pageNumberStart != null && (!Number.isInteger(pageNumberStart) || pageNumberStart < 1)) {
-            throw new RangeError('Section page number start must be a positive integer.');
-        }
-        if (pageSize && [pageSize.width, pageSize.height]
-            .some((size) => size != null && (!Number.isFinite(size) || size <= 0))) {
-            throw new RangeError('Section page size must be finite and positive.');
-        }
-        if (pageOrient != null && !Object.values(PageOrientType).includes(pageOrient)) {
-            throw new RangeError('Invalid section page orientation.');
-        }
-        if ([marginTop, marginBottom, marginLeft, marginRight]
-            .some((margin) => margin != null && (!Number.isFinite(margin) || margin < 0))) {
-            throw new RangeError('Section page margins must be finite and non-negative.');
-        }
-        const current = this.getConfig();
+        validatePageSetup(pageSetup);
+        const definedPageSetup = Tools.deepClone(pageSetup);
+        Tools.removeNull(definedPageSetup);
         const documentStyle = this._document.getDocumentDataModel().getSnapshot().documentStyle;
-        const effectivePageSize = pageSize ?? current.pageSize ?? documentStyle.pageSize;
-        const effectiveMarginTop = marginTop ?? current.marginTop ?? documentStyle.marginTop ?? 0;
-        const effectiveMarginBottom = marginBottom ?? current.marginBottom ?? documentStyle.marginBottom ?? 0;
-        const effectiveMarginLeft = marginLeft ?? current.marginLeft ?? documentStyle.marginLeft ?? 0;
-        const effectiveMarginRight = marginRight ?? current.marginRight ?? documentStyle.marginRight ?? 0;
-        if ((effectivePageSize?.width != null &&
-            effectiveMarginLeft + effectiveMarginRight >= effectivePageSize.width) ||
-            (effectivePageSize?.height != null &&
-                effectiveMarginTop + effectiveMarginBottom >= effectivePageSize.height)) {
-            throw new RangeError('Section page margins must leave a positive content area.');
-        }
-        return this._update(Tools.deepClone(pageSetup));
+        getEffectiveSectionPageSetup(documentStyle, {
+            ...this._getConfigSnapshot(),
+            ...definedPageSetup,
+        });
+        return this._update(definedPageSetup);
     }
 
     /**
@@ -620,7 +587,7 @@ export class FDocumentSection {
     private _ensureHeaderFooter(kind: SectionHeaderFooterKind, variant: SectionHeaderFooterVariant): string {
         this._assertTraditionalDocument();
         const { index } = this._resolve();
-        const config = this.getConfig();
+        const config = this._getConfigSnapshot();
         const key = getSectionHeaderFooterReferenceKey(kind, variant);
         const existing = config[key];
         if (typeof existing === 'string' && existing) {
@@ -706,6 +673,19 @@ export class FDocumentSection {
         if (this._document.getDocumentDataModel().getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL) {
             throw new DocsSectionUnsupportedDocumentFlavorError();
         }
+    }
+
+    private _getConfigSnapshot(): ISectionBreak {
+        return Tools.deepClone(this._resolve().sectionBreak);
+    }
+
+    private _getRange(index: number): IFDocumentTextRange {
+        const sectionBreaks = getTopLevelSectionBreaks(this._document.getBody());
+        return {
+            startOffset: index === 0 ? 0 : sectionBreaks[index - 1].startIndex + 1,
+            endOffset: sectionBreaks[index].startIndex,
+            segmentId: '',
+        };
     }
 
     private _resolve(): { index: number; sectionBreak: ISectionBreak } {

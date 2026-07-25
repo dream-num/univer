@@ -18,11 +18,10 @@ import './f-univer';
 import './f-enum';
 
 export { FDocument } from './f-document';
-export type { IFDocumentInsertSectionBreakOptions } from './f-document';
 export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
 export type { IFDocumentFindTextOptions, IFDocumentParagraphInfo } from './f-document-paragraph';
 export { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
-export type { FDocumentSectionPageSetup, IFDocumentSectionColumnOptions, IFDocumentSectionDescription, IFDocumentSectionEffectivePageSetup } from './f-document-section';
+export type { FDocumentSectionPageSetup, IFDocumentSectionColumnOptions, IFDocumentSectionDescription } from './f-document-section';
 export { FDocumentTextRange } from './f-document-text-range';
 export type { IFDocumentTextRangeDescription, IFDocumentTextStyleRun } from './f-document-text-range';
 export * from './f-enum';

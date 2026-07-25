@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentStyle, ISectionBreak, ISectionColumnProperties, PageOrientType } from '@univerjs/core';
-import { PAGE_SIZE, PageOrientType as PageOrient, PaperType } from '@univerjs/core';
+import { PAGE_SIZE, PageOrientType as PageOrient, PaperType, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN } from '@univerjs/core';
 
 export interface IEffectiveSectionPageSetup {
     pageSize: {
@@ -36,35 +36,64 @@ export interface IEffectiveSectionPageSetup {
     pageNumberStart?: number;
 }
 
+function resolveSectionValue<T>(
+    sectionValue: T | undefined,
+    documentValue: T | undefined,
+    fallback: T
+): T {
+    return sectionValue ?? documentValue ?? fallback;
+}
+
+function getEffectivePageSize(
+    documentStyle: IDocumentStyle | undefined,
+    section: ISectionBreak | undefined
+): IEffectiveSectionPageSetup['pageSize'] {
+    const fallback = PAGE_SIZE[PaperType.A4];
+    return {
+        width: resolveSectionValue(section?.pageSize?.width, documentStyle?.pageSize?.width, fallback.width),
+        height: resolveSectionValue(section?.pageSize?.height, documentStyle?.pageSize?.height, fallback.height),
+    };
+}
+
+function getEffectiveMargins(
+    documentStyle: IDocumentStyle | undefined,
+    section: ISectionBreak | undefined
+): IEffectiveSectionPageSetup['margins'] {
+    return {
+        top: resolveSectionValue(section?.marginTop, documentStyle?.marginTop, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN),
+        bottom: resolveSectionValue(section?.marginBottom, documentStyle?.marginBottom, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN),
+        left: resolveSectionValue(section?.marginLeft, documentStyle?.marginLeft, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN),
+        right: resolveSectionValue(section?.marginRight, documentStyle?.marginRight, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN),
+    };
+}
+
+function assertPositivePageSetup(
+    pageSize: IEffectiveSectionPageSetup['pageSize'],
+    contentSize: IEffectiveSectionPageSetup['contentSize']
+): void {
+    if (![pageSize.width, pageSize.height, contentSize.width, contentSize.height]
+        .every((value) => Number.isFinite(value) && value > 0)) {
+        throw new RangeError('Effective section page setup must leave a positive content area and use finite positive page dimensions.');
+    }
+}
+
 /** Resolves nominal traditional page geometry without requiring a renderer. */
 export function getEffectiveSectionPageSetup(
     documentStyle: IDocumentStyle | undefined,
     section: ISectionBreak | undefined
 ): IEffectiveSectionPageSetup {
-    const fallbackPageSize = PAGE_SIZE[PaperType.A4];
-    const pageSize = {
-        width: section?.pageSize?.width ?? documentStyle?.pageSize?.width ?? fallbackPageSize.width,
-        height: section?.pageSize?.height ?? documentStyle?.pageSize?.height ?? fallbackPageSize.height,
-    };
-    const margins = {
-        top: section?.marginTop ?? documentStyle?.marginTop ?? 72,
-        bottom: section?.marginBottom ?? documentStyle?.marginBottom ?? 72,
-        left: section?.marginLeft ?? documentStyle?.marginLeft ?? 72,
-        right: section?.marginRight ?? documentStyle?.marginRight ?? 72,
-    };
+    const pageSize = getEffectivePageSize(documentStyle, section);
+    const margins = getEffectiveMargins(documentStyle, section);
     const contentSize = {
         width: getSectionContentWidth(documentStyle, section),
         height: pageSize.height - margins.top - margins.bottom,
     };
-    if (![pageSize.width, pageSize.height, contentSize.width, contentSize.height]
-        .every((value) => Number.isFinite(value) && value > 0)) {
-        throw new RangeError('Effective section page setup must have positive finite page and content dimensions.');
-    }
+    assertPositivePageSetup(pageSize, contentSize);
 
     const pageNumberStart = section?.pageNumberStart ?? documentStyle?.pageNumberStart;
     return {
         pageSize,
-        pageOrient: section?.pageOrient ?? documentStyle?.pageOrient ?? PageOrient.PORTRAIT,
+        pageOrient: resolveSectionValue(section?.pageOrient, documentStyle?.pageOrient, PageOrient.PORTRAIT),
         margins,
         contentSize,
         ...(pageNumberStart == null ? {} : { pageNumberStart }),
@@ -76,10 +105,16 @@ export function getSectionContentWidth(
     documentStyle: IDocumentStyle | undefined,
     section: ISectionBreak | undefined
 ): number {
-    const pageWidth = section?.pageSize?.width ?? documentStyle?.pageSize?.width ?? PAGE_SIZE[PaperType.A4].width;
+    const pageWidth = resolveSectionValue(
+        section?.pageSize?.width,
+        documentStyle?.pageSize?.width,
+        PAGE_SIZE[PaperType.A4].width
+    );
     return Math.max(
         0,
-        pageWidth - (section?.marginLeft ?? documentStyle?.marginLeft ?? 72) - (section?.marginRight ?? documentStyle?.marginRight ?? 72)
+        pageWidth -
+        resolveSectionValue(section?.marginLeft, documentStyle?.marginLeft, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN) -
+        resolveSectionValue(section?.marginRight, documentStyle?.marginRight, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN)
     );
 }
 

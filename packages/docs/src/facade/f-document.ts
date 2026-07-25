@@ -183,7 +183,7 @@ export class FDocument extends FBaseInitialable {
      * ```
      */
     getDocumentFlavor(): DocumentFlavor {
-        return this._documentDataModel.getSnapshot().documentStyle.documentFlavor ?? DocumentFlavor.UNSPECIFIED;
+        return this._resolveDocumentFlavor();
     }
 
     /**
@@ -202,7 +202,7 @@ export class FDocument extends FBaseInitialable {
      * ```
      */
     isTraditional(): boolean {
-        return this.getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
+        return this._resolveDocumentFlavor() === DocumentFlavor.TRADITIONAL;
     }
 
     /**
@@ -220,7 +220,11 @@ export class FDocument extends FBaseInitialable {
      * ```
      */
     isModern(): boolean {
-        return this.getDocumentFlavor() === DocumentFlavor.MODERN;
+        return this._resolveDocumentFlavor() === DocumentFlavor.MODERN;
+    }
+
+    private _resolveDocumentFlavor(): DocumentFlavor {
+        return this._documentDataModel.getSnapshot().documentStyle.documentFlavor ?? DocumentFlavor.UNSPECIFIED;
     }
 
     /**

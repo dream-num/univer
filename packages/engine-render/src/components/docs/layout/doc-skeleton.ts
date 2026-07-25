@@ -24,7 +24,7 @@ import type {
 import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../../basics/interfaces';
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
-import type { ILayoutContext } from './tools';
+import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
 import { DataStreamTreeTokenType, PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import {
@@ -308,6 +308,8 @@ export class DocumentSkeleton extends Skeleton {
 
     private _initialWidth = 0;
 
+    private _paginationMetrics: Nullable<IDocumentPaginationMetrics> = null;
+
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService
@@ -344,12 +346,21 @@ export class DocumentSkeleton extends Skeleton {
 
         // const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
+        this._paginationMetrics = ctx.paginationMetrics ?? null;
         // console.log('skeleton calculate cost', +new Date() - start);
         this._dirty$.next(true);
     }
 
     getSkeletonData() {
         return this._skeletonData;
+    }
+
+    /**
+     * Returns a cloned snapshot of the most recent layout's bounded pagination counters.
+     * These diagnostics describe renderer work and are not part of the document model.
+     */
+    getPaginationMetrics(): Nullable<IDocumentPaginationMetrics> {
+        return this._paginationMetrics == null ? null : { ...this._paginationMetrics };
     }
 
     resetInitialWidth() {
@@ -1317,6 +1328,15 @@ export class DocumentSkeleton extends Skeleton {
             paragraphConfigCache: new Map(),
             sectionBreakConfigCache: new Map(),
             paragraphsOpenNewPage: new Set(),
+            paginationMetrics: {
+                constrainedParagraphs: 0,
+                noConstraintParagraphs: 0,
+                measuredLineCount: 0,
+                retryCount: 0,
+                movedLineCount: 0,
+                keepNextScanCount: 0,
+                peakCheckpointLineCount: 0,
+            },
             hyphen: this._hyphen,
             languageDetector: this._languageDetector,
         };

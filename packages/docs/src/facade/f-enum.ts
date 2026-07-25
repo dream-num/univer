@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, SectionType } from '@univerjs/core';
+import { ColumnSeparatorType, DocumentFlavor, SectionType } from '@univerjs/core';
 import { FEnum } from '@univerjs/core/facade';
 
 /** @ignore */
 export interface IFDocsEnumMixin {
+    /** Document layout flavors. */
+    DocumentFlavor: typeof DocumentFlavor;
     /** OOXML-compatible section start types. */
     SectionType: typeof SectionType;
     /** Section column separator types. */
@@ -26,6 +28,10 @@ export interface IFDocsEnumMixin {
 }
 
 export class FDocsEnumMixin extends FEnum implements IFDocsEnumMixin {
+    override get DocumentFlavor(): typeof DocumentFlavor {
+        return DocumentFlavor;
+    }
+
     override get SectionType(): typeof SectionType {
         return SectionType;
     }

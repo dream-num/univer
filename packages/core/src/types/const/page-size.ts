@@ -77,3 +77,6 @@ export const MODERN_DOCUMENT_WIDTH: Record<ModernDocumentWidthMode, number> = {
 };
 
 export const MODERN_DOCUMENT_DEFAULT_MARGIN = 50 / 0.75;
+
+/** Default margin for a paginated Traditional document, in 96-DPI layout pixels. */
+export const TRADITIONAL_DOCUMENT_DEFAULT_MARGIN = 72;

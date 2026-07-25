@@ -44,6 +44,7 @@ export interface IUIPartsService {
     uiVisibleChange$: Observable<{ ui: ComponentPartKey; visible: boolean }>;
 
     registerComponent(part: ComponentPartKey, componentFactory: () => ComponentType): IDisposable;
+    registerDisabledUIParts(parts: readonly ComponentPartKey[], disabled$: Observable<boolean>): IDisposable;
     getComponents(part: ComponentPartKey): Set<ComponentRenderer>;
 
     setUIVisible(part: ComponentPartKey, visible: boolean): void;
@@ -55,6 +56,7 @@ export const IUIPartsService = createIdentifier<IUIPartsService>('ui.parts.servi
 
 export class UIPartsService extends Disposable implements IUIPartsService {
     private _componentsByPart: Map<ComponentPartKey, Set<ComponentType>> = new Map();
+    private _disabledUIParts = new Map<ComponentPartKey, Set<symbol>>();
 
     private readonly _componentRegistered$ = new Subject<ComponentPartKey>();
     readonly componentRegistered$ = this._componentRegistered$.asObservable();
@@ -66,18 +68,62 @@ export class UIPartsService extends Disposable implements IUIPartsService {
         super.dispose();
 
         this._componentsByPart.clear();
+        this._disabledUIParts.clear();
         this._uiVisible.clear();
         this._componentRegistered$.complete();
         this._uiVisibleChange$.complete();
     }
 
     setUIVisible(part: ComponentPartKey, visible: boolean): void {
+        const wasVisible = this.isUIVisible(part);
         this._uiVisible.set(part, visible);
-        this._uiVisibleChange$.next({ ui: part, visible });
+        const isVisible = this.isUIVisible(part);
+        if (wasVisible !== isVisible) {
+            this._uiVisibleChange$.next({ ui: part, visible: isVisible });
+        }
     }
 
     isUIVisible(part: ComponentPartKey): boolean {
-        return this._uiVisible.get(part) ?? true;
+        return (this._uiVisible.get(part) ?? true) && !this._disabledUIParts.get(part)?.size;
+    }
+
+    registerDisabledUIParts(parts: readonly ComponentPartKey[], disabled$: Observable<boolean>): IDisposable {
+        const uniqueParts = [...new Set(parts)];
+        const registration = Symbol('disabled-ui-parts');
+        let disabled = false;
+
+        const update = (nextDisabled: boolean) => {
+            if (disabled === nextDisabled) {
+                return;
+            }
+            disabled = nextDisabled;
+
+            uniqueParts.forEach((part) => {
+                const wasVisible = this.isUIVisible(part);
+                const registrations = this._disabledUIParts.get(part) ?? new Set<symbol>();
+                if (disabled) {
+                    registrations.add(registration);
+                    this._disabledUIParts.set(part, registrations);
+                } else {
+                    registrations.delete(registration);
+                    if (registrations.size === 0) {
+                        this._disabledUIParts.delete(part);
+                    }
+                }
+                const isVisible = this.isUIVisible(part);
+                if (wasVisible !== isVisible) {
+                    this._uiVisibleChange$.next({ ui: part, visible: isVisible });
+                }
+            });
+        };
+
+        const subscription = disabled$.subscribe(update);
+        const disposable = toDisposable(() => {
+            subscription.unsubscribe();
+            update(false);
+        });
+        this.disposeWithMe(disposable);
+        return disposable;
     }
 
     registerComponent<T>(part: ComponentPartKey, componentFactory: () => React.ComponentType<T>): IDisposable {

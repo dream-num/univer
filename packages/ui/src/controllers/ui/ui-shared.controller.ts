@@ -17,7 +17,8 @@
 import type { IDisposable, Injector, IUniverInstanceService, LifecycleService } from '@univerjs/core';
 import type { IRenderManagerService } from '@univerjs/engine-render';
 import type { ILayoutService } from '../../services/layout/layout.service';
-import { Disposable, isInternalEditorID, LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
+import { Disposable, isInternalEditorID, LifecycleStages, LifecycleUnreachableError, Quantity } from '@univerjs/core';
+import { IWorkbenchService } from '../../services/workbench/workbench.service';
 
 const STEADY_TIMEOUT = 3000;
 
@@ -54,6 +55,11 @@ export abstract class SingleUnitUIController extends Disposable {
     }
 
     protected _bootstrapWorkbench() {
+        const initialSkeleton = this._injector.get(IWorkbenchService, Quantity.OPTIONAL)?.acquireSkeleton();
+        if (initialSkeleton) {
+            this.disposeWithMe(initialSkeleton);
+        }
+
         this.disposeWithMe(this.bootstrap(async (contentElement, containerElement) => {
             if (this._layoutService) {
                 this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
@@ -68,6 +74,7 @@ export abstract class SingleUnitUIController extends Disposable {
                     for (const [key] of allRenders) {
                         if (this._changeRenderUnit(key, contentElement)) break;
                     }
+                    requestAnimationFrame(() => requestAnimationFrame(() => initialSkeleton?.dispose()));
 
                     // Render as focus shifts.
                     this.disposeWithMe(this._instanceService.focused$.subscribe((unit) => {

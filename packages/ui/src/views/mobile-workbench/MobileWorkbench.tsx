@@ -17,16 +17,18 @@
 import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { LocaleService, ThemeService } from '@univerjs/core';
+import { LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
+import { IWorkbenchService } from '../../services/workbench/workbench.service';
 import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
+import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -65,6 +67,8 @@ export function MobileWorkbench(props: IUniverAppProps) {
     } = props;
 
     const localeService = useDependency(LocaleService);
+    const lifecycleService = useDependency(LifecycleService);
+    const workbenchService = useDependency(IWorkbenchService);
     const themeService = useDependency(ThemeService);
     const themeSwitcherService = useDependency(ThemeSwitcherService);
 
@@ -79,12 +83,15 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const toolbarComponents = useComponentsOfPart(BuiltInUIPart.TOOLBAR);
 
     const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
+    const lifecycleStage = useObservable(lifecycleService.lifecycle$, lifecycleService.stage);
+    const externalSkeletonVisible = useObservable(workbenchService.skeletonVisible$, undefined, true);
+    const ready = lifecycleStage >= LifecycleStages.Ready;
 
     useEffect(() => {
-        if (contentRef.current) {
+        if (ready && contentRef.current) {
             onRendered?.(contentRef.current);
         }
-    }, [onRendered]);
+    }, [ready, onRendered]);
 
     const locale = useObservable(
         () => localeService.localeChanged$.pipe(map(() => localeService.getLocales())),
@@ -119,89 +126,102 @@ export function MobileWorkbench(props: IUniverAppProps) {
         portalContainer.dir = direction;
     }, [direction, portalContainer]);
 
+    if (!ready) {
+        return (
+            <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
+                <WorkbenchSkeleton darkMode={darkMode} direction={direction} />
+            </ConfigProvider>
+        );
+    }
+
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
-            {/**
-              * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
-              * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
-              * bubbled to this element and refocus the input element.
-              */}
-            <div
-                data-u-comp="app-layout"
-                className={clsx(`
-                  univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-white
-                  dark:!univer-bg-gray-800
-                `, {
-                    'univer-dark': darkMode,
-                })}
-                tabIndex={-1}
-                onBlur={(e) => e.stopPropagation()}
-                onContextMenu={(e) => e.preventDefault()}
-                dir={direction}
-            >
-                {/* header */}
-                {header && toolbar && (
-                    <header
-                        data-u-comp="headerbar"
-                        className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
-                    >
-                        <ComponentContainer
-                            key="toolbar"
-                            components={toolbarComponents}
-                            sharedProps={{
-                                ribbonType,
-                                headerMenuComponents,
-                                headerMenu,
-                            }}
-                        />
-                    </header>
-                )}
-
-                {/* content */}
-                <section className="univer-relative univer-flex univer-min-h-0 univer-flex-1 univer-flex-col">
-                    <div
-                        className={`
-                          univer-grid univer-h-full univer-grid-cols-[auto_1fr_auto] univer-grid-rows-[100%]
-                          univer-overflow-hidden
-                        `}
-                    >
-                        <aside className="univer-h-full">
-                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                        </aside>
-
-                        <section
-                            className={clsx(`
-                              univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                              univer-overflow-hidden univer-bg-white
-                              dark:!univer-bg-gray-800
-                            `, borderBottomClassName)}
+            <div className="univer-relative univer-h-full univer-min-h-0">
+                {/**
+                  * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
+                  * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
+                  * bubbled to this element and refocus the input element.
+                  */}
+                <div
+                    data-u-comp="app-layout"
+                    className={clsx(`
+                      univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-white
+                      dark:!univer-bg-gray-800
+                    `, {
+                        'univer-dark': darkMode,
+                    })}
+                    tabIndex={-1}
+                    onBlur={(e) => e.stopPropagation()}
+                    onContextMenu={(e) => e.preventDefault()}
+                    dir={direction}
+                >
+                    {/* header */}
+                    {header && toolbar && (
+                        <header
+                            data-u-comp="headerbar"
+                            className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
                         >
-                            <header className="univer-w-screen">
-                                {header && <ComponentContainer key="header" components={headerComponents} />}
-                            </header>
+                            <ComponentContainer
+                                key="toolbar"
+                                components={toolbarComponents}
+                                sharedProps={{
+                                    ribbonType,
+                                    headerMenuComponents,
+                                    headerMenu,
+                                }}
+                            />
+                        </header>
+                    )}
+
+                    {/* content */}
+                    <section className="univer-relative univer-flex univer-min-h-0 univer-flex-1 univer-flex-col">
+                        <div
+                            className={`
+                              univer-grid univer-h-full univer-grid-cols-[auto_1fr_auto] univer-grid-rows-[100%]
+                              univer-overflow-hidden
+                            `}
+                        >
+                            <aside className="univer-h-full">
+                                <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
+                            </aside>
 
                             <section
-                                ref={contentRef}
-                                className="univer-relative univer-overflow-hidden"
-                                data-range-selector
-                                onContextMenu={(e) => e.preventDefault()}
+                                className={clsx(`
+                                  univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
+                                  univer-overflow-hidden univer-bg-white
+                                  dark:!univer-bg-gray-800
+                                `, borderBottomClassName)}
                             >
-                                <ComponentContainer key="content" components={contentComponents} />
+                                <header className="univer-w-screen">
+                                    {header && <ComponentContainer key="header" components={headerComponents} />}
+                                </header>
+
+                                <section
+                                    ref={contentRef}
+                                    className="univer-relative univer-overflow-hidden"
+                                    data-range-selector
+                                    onContextMenu={(e) => e.preventDefault()}
+                                >
+                                    <ComponentContainer key="content" components={contentComponents} />
+                                </section>
                             </section>
-                        </section>
 
-                        <aside className="univer-h-full">
-                            <Sidebar />
-                        </aside>
-                    </div>
+                            <aside className="univer-h-full">
+                                <Sidebar />
+                            </aside>
+                        </div>
 
-                    {/* footer */}
-                    {footer && (
-                        <footer>
-                            <ComponentContainer key="footer" components={footerComponents} />
-                        </footer>
-                    )}
-                </section>
+                        {/* footer */}
+                        {footer && (
+                            <footer>
+                                <ComponentContainer key="footer" components={footerComponents} />
+                            </footer>
+                        )}
+                    </section>
+                </div>
+                {externalSkeletonVisible && (
+                    <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
+                )}
             </div>
             <div dir={direction}>
                 <ComponentContainer key="global" components={globalComponents} />

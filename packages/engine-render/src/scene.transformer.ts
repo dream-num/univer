@@ -502,11 +502,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     // eslint-disable-next-line max-lines-per-function
     attachTo(applyObject: BaseObject) {
-        if (this.hoverEnabled) {
-            this.hoverEnterFunc && applyObject.onPointerEnter$.subscribeEvent(this.hoverEnterFunc);
-            this.hoverLeaveFunc && applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc);
-        }
-
         // First check if there is an old subscription to avoid duplicate subscriptions
         this.detachFrom(applyObject);
 
@@ -596,7 +591,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
             state.stopPropagation();
         });
 
-        this.disposeWithMe(toDisposable(observer));
+        if (this.hoverEnabled) {
+            this.hoverEnterFunc && observer.add(applyObject.onPointerEnter$.subscribeEvent(this.hoverEnterFunc));
+            this.hoverLeaveFunc && observer.add(applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc));
+        }
 
         this._subscriptionObjectMap.set(applyObject.oKey, observer);
 
@@ -615,6 +613,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     override dispose() {
         super.dispose();
+
+        this._subscriptionObjectMap.forEach((subscription) => subscription?.unsubscribe());
+        this._subscriptionObjectMap.clear();
 
         this._topScenePointerMoveSub?.unsubscribe();
         this._topScenePointerUpSub?.unsubscribe();

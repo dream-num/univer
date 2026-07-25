@@ -83,7 +83,6 @@ class TestRenderManagerService {
             },
         };
     }
-
 }
 
 function createImageFile(name: string): File {

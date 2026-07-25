@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
 import type { getDefaultRangePermission, IRangePermissionPoint } from '../services/permission/range-permission/util';
-import { Inject, IPermissionService, LRUMap, Range } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, LRUMap, Range } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { filter, map } from 'rxjs/operators';
 import { getAllRangePermissionPoint } from '../services/permission/range-permission/util';
@@ -25,17 +25,18 @@ import { RangeProtectionRuleModel } from './range-protection-rule.model';
 
 export type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
-export class RangeProtectionRenderModel {
+export class RangeProtectionRenderModel extends Disposable {
     private _cache = new LRUMap<string, ICellPermission[]>(10000);
     constructor(
         @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(IPermissionService) private _permissionService: IPermissionService
     ) {
+        super();
         this._init();
     }
 
     private _init() {
-        this._permissionService.permissionPointUpdate$.pipe(
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.pipe(
             filter((permission) => permission.type === UnitObject.SelectRange),
             filter((permission) => getAllRangePermissionPoint().some((F) => permission instanceof F)),
             map((permission) => permission as IRangePermissionPoint)
@@ -52,9 +53,9 @@ export class RangeProtectionRenderModel {
                         });
                     }
                 }
-            });
+            }));
 
-        this._selectionProtectionRuleModel.ruleChange$.subscribe((info) => {
+        this.disposeWithMe(this._selectionProtectionRuleModel.ruleChange$.subscribe((info) => {
             info.rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     const key = this._createKey(info.unitId, info.subUnitId, row, col);
@@ -69,7 +70,7 @@ export class RangeProtectionRenderModel {
                     });
                 });
             }
-        });
+        }));
     }
 
     private _createKey(unitId: string, subUnitId: string, row: number, col: number) {
@@ -104,6 +105,11 @@ export class RangeProtectionRenderModel {
     }
 
     public clear() {
+        this._cache.clear();
+    }
+
+    override dispose(): void {
+        super.dispose();
         this._cache.clear();
     }
 }

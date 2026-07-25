@@ -16,6 +16,7 @@
 
 import type { ComponentType } from '../../../common/component-manager';
 import { Injector } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../parts.service';
 
@@ -50,5 +51,17 @@ describe('UIPartsService', () => {
         expect(service.isUIVisible(BuiltInUIPart.HEADER)).toBe(false);
         expect(service.isUIVisible(BuiltInUIPart.FOOTER)).toBe(true);
         expect(changes).toEqual([{ ui: BuiltInUIPart.HEADER, visible: false }]);
+    });
+
+    it('disables registered UI parts synchronously and restores them on disposal', () => {
+        const disabled$ = new BehaviorSubject(false);
+        const disposable = service.registerDisabledUIParts([BuiltInUIPart.TOOLBAR], disabled$);
+
+        disabled$.next(true);
+        expect(service.isUIVisible(BuiltInUIPart.TOOLBAR)).toBe(false);
+
+        disposable.dispose();
+        expect(service.isUIVisible(BuiltInUIPart.TOOLBAR)).toBe(true);
+        expect((service as any)._collection._disposables).toHaveLength(0);
     });
 });

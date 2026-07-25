@@ -15,6 +15,7 @@
  */
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
+import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IWheelEvent } from './basics/i-events';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
@@ -118,6 +119,7 @@ const WHEEL_CROSS_AXIS_LOCK_RATIO = 2;
 
 export class Viewport {
     private _viewportKey: string = '';
+    private _transformChangeSubscription?: Subscription;
 
     /**
      * scrollX means scroll x value for scrollbar in viewMain
@@ -267,7 +269,7 @@ export class Viewport {
         this.resetCanvasSizeAndUpdateScroll();
         this.getBounding();
 
-        this.scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
+        this._transformChangeSubscription = this.scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
             this.markForceDirty(true);
         });
         this.markForceDirty(true);
@@ -1069,6 +1071,8 @@ export class Viewport {
     }
 
     dispose() {
+        this._transformChangeSubscription?.unsubscribe();
+        this._transformChangeSubscription = undefined;
         this.onMouseWheel$.complete();
         this.onScrollAfter$.complete();
         // this.onScrollBefore$.complete();

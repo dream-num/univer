@@ -828,7 +828,19 @@ export interface ITextStyle extends IStyleBase {
     pos?: number; // position
     sa?: number; // scale
     textFill?: IDocTextFill;
+    /**
+     * DrawingML-style glow around the rendered glyphs.
+     *
+     * This is primarily intended for embedded rich text such as Shape text. A standalone document product may
+     * preserve and render the value without exposing dedicated authoring controls.
+     */
     glow?: IGlowEffect;
+    /**
+     * DrawingML-style outer shadow around the rendered glyphs.
+     *
+     * This is primarily intended for embedded rich text such as Shape text. A standalone document product may
+     * preserve and render the value without exposing dedicated authoring controls.
+     */
     outerShadow?: IShadowEffect;
 }
 

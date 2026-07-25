@@ -156,16 +156,71 @@ export class FDocument extends FBaseInitialable {
     }
 
     /**
-     * Whether the document is a modern document or not.
-     * @returns {boolean} `true` if the document is a modern document, or `false` if it is not.
+     * Returns the document's explicit layout flavor.
+     *
+     * Use this method when all three states matter. Do not infer a Traditional
+     * document from `!isModern()`: that expression is also true for
+     * `DocumentFlavor.UNSPECIFIED`.
+     *
+     * @returns {DocumentFlavor} `TRADITIONAL`, `MODERN`, or `UNSPECIFIED`.
+     * @example
+     * ```typescript
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) {
+     *   throw new Error('No active document');
+     * }
+     *
+     * switch (document.getDocumentFlavor()) {
+     *   case univerAPI.Enum.DocumentFlavor.TRADITIONAL:
+     *     console.log('Word-compatible physical pagination is available');
+     *     break;
+     *   case univerAPI.Enum.DocumentFlavor.MODERN:
+     *     console.log('Use Modern Doc layout APIs such as ColumnGroup');
+     *     break;
+     *   default:
+     *     console.log('Resolve the unspecified flavor before using flavor-specific APIs');
+     * }
+     * ```
+     */
+    getDocumentFlavor(): DocumentFlavor {
+        return this._documentDataModel.getSnapshot().documentStyle.documentFlavor ?? DocumentFlavor.UNSPECIFIED;
+    }
+
+    /**
+     * Whether this is a Traditional document with Word-compatible physical pagination.
+     *
+     * Prefer this positive guard before calling section, column-break, page-setup,
+     * or paragraph-pagination APIs.
+     *
+     * @returns {boolean} `true` only for `DocumentFlavor.TRADITIONAL`.
+     * @example
+     * ```typescript
+     * const document = univerAPI.getActiveDocument();
+     * if (document?.isTraditional()) {
+     *   console.log(document.getSection(0)?.getEffectivePageSetup());
+     * }
+     * ```
+     */
+    isTraditional(): boolean {
+        return this.getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
+    }
+
+    /**
+     * Whether this is a Modern document.
+     *
+     * A `false` result can mean either Traditional or Unspecified. Use
+     * `isTraditional()` before Traditional-only APIs, or `getDocumentFlavor()`
+     * when all three states matter.
+     *
+     * @returns {boolean} `true` only for `DocumentFlavor.MODERN`.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * console.log(fDocument.isModern());
+     * console.log(fDocument?.isModern());
      * ```
      */
     isModern(): boolean {
-        return this._documentDataModel.getSnapshot().documentStyle.documentFlavor === DocumentFlavor.MODERN;
+        return this.getDocumentFlavor() === DocumentFlavor.MODERN;
     }
 
     /**
@@ -289,12 +344,18 @@ export class FDocument extends FBaseInitialable {
     }
 
     /**
-     * Updates document-level header/footer switches and margins in a traditional document.
-     * `marginHeader` and `marginFooter` use 96-DPI layout pixels.
+     * Updates document-level header/footer switches and margins.
+     *
+     * Traditional and Unspecified documents keep the legacy header/footer
+     * behavior. Modern documents reject this API. `marginHeader` and
+     * `marginFooter` use 96-DPI layout pixels.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (
+     *   fDocument &&
+     *   fDocument.getDocumentFlavor() !== univerAPI.Enum.DocumentFlavor.MODERN
+     * ) {
      *   fDocument.setHeaderFooterOptions({ marginHeader: 36, marginFooter: 36 });
      * }
      * ```
@@ -389,7 +450,8 @@ export class FDocument extends FBaseInitialable {
      * a table or block such as a callout, use that object's start offset instead
      * of an offset inside the object.
      *
-     * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
+     * Modern documents must use ColumnGroup. Unspecified documents must resolve
+     * their flavor first. Both throw `DocsSectionUnsupportedDocumentFlavorError`.
      * Numeric layout values in `options` are in 96-DPI layout pixels.
      *
      * @param {number} offset Top-level data-stream offset where the section break is inserted.
@@ -401,7 +463,7 @@ export class FDocument extends FBaseInitialable {
      * if (!document) {
      *   throw new Error('No active document');
      * }
-     * if (document.isModern()) {
+     * if (!document.isTraditional()) {
      *   throw new Error('Traditional document sections are required');
      * }
      *
@@ -446,11 +508,12 @@ export class FDocument extends FBaseInitialable {
     /**
      * Inserts a column-break token in a traditional document.
      * In a single-column section, the traditional renderer advances to the next physical page.
-     * Modern documents must use ColumnGroup and throw `DocsSectionUnsupportedDocumentFlavorError`.
+     * Modern documents must use ColumnGroup. Unspecified documents must resolve
+     * their flavor first. Both throw `DocsSectionUnsupportedDocumentFlavorError`.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   const paragraph = fDocument.findParagraphByText('Continue in next column');
      *   const offset = paragraph?.getInfo().startOffset;
      *   if (offset != null) {

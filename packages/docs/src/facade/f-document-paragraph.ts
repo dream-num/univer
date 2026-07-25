@@ -328,7 +328,8 @@ export class FDocumentParagraph extends FBaseInitialable {
      * short paragraph that should stay intact, `keepNext` for a heading or caption
      * that should accompany the next paragraph, and `widowControl` for natural
      * multi-line body text. Do not enable every rule on every paragraph. Modern
-     * Docs preserve the values in the model but do not apply them to physical pages.
+     * and Unspecified Docs preserve the values in the model but do not apply them
+     * to physical pages.
      *
      * `style.textStyle.fs` is a font size in points (pt), not CSS pixels.
      * @param {IParagraphStyle} style The Univer paragraph style patch.
@@ -339,7 +340,7 @@ export class FDocumentParagraph extends FBaseInitialable {
      * if (!document) {
      *   throw new Error('No active document');
      * }
-     * if (document.isModern()) {
+     * if (!document.isTraditional()) {
      *   throw new Error('Traditional document pagination is required');
      * }
      * const heading = document.findParagraphByText('Appendix');

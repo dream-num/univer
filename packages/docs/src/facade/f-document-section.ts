@@ -74,21 +74,22 @@ export interface IFDocumentSectionDescription {
     config: ISectionBreak;
 }
 
-/** Error thrown when traditional section APIs are used to mutate a modern document. */
+/** Error thrown when a Traditional-only section API is used with another document flavor. */
 export class DocsSectionUnsupportedDocumentFlavorError extends Error {
     constructor() {
-        super('Section column APIs are supported only in traditional documents. Use ColumnGroup APIs for modern documents.');
+        super('Section column APIs are supported only in traditional documents. Use ColumnGroup APIs for modern documents, or resolve an unspecified document flavor first.');
         this.name = 'DocsSectionUnsupportedDocumentFlavorError';
     }
 }
 
 /**
  * Facade wrapper for an OOXML-compatible traditional document section.
- * Modern documents use ColumnGroup APIs and cannot mutate this facade.
+ * Modern documents use ColumnGroup APIs. Unspecified documents must resolve
+ * their flavor before using this facade.
  * @example
  * ```ts
  * const fDocument = univerAPI.getActiveDocument();
- * if (fDocument && !fDocument.isModern()) {
+ * if (fDocument?.isTraditional()) {
  *   console.log(fDocument.getSection(0)?.describe());
  * }
  * ```
@@ -208,7 +209,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   fDocument.getSection(0)?.setColumns(2, { gap: 18, separator: true });
      * }
      * ```
@@ -252,7 +253,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   fDocument.getSection(0)?.setColumnProperties([
      *     { width: 240, paddingEnd: 18 },
      *     { width: 240, paddingEnd: 0 },
@@ -294,7 +295,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const document = univerAPI.getActiveDocument();
-     * if (!document || document.isModern()) {
+     * if (!document?.isTraditional()) {
      *   throw new Error('A Traditional document is required');
      * }
      *
@@ -365,7 +366,7 @@ export class FDocumentSection {
      * if (!document) {
      *   throw new Error('No active document');
      * }
-     * if (document.isModern()) {
+     * if (!document.isTraditional()) {
      *   throw new Error('Traditional document sections are required');
      * }
      *
@@ -403,7 +404,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const document = univerAPI.getActiveDocument();
-     * if (!document || document.isModern()) {
+     * if (!document?.isTraditional()) {
      *   throw new Error('A Traditional document is required');
      * }
      *
@@ -462,7 +463,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   const segmentId = fDocument.getSection(0)?.ensureHeader();
      *   if (segmentId) {
      *     fDocument.insertText(0, 'Quarterly report', segmentId);
@@ -479,7 +480,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   const segmentId = fDocument.getSection(0)?.ensureFooter('first');
      *   if (segmentId) {
      *     fDocument.insertText(0, 'Confidential', segmentId);
@@ -544,7 +545,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   fDocument.getSection(1)?.setHeaderLinkedToPrevious(false, 'default');
      * }
      * ```
@@ -558,7 +559,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   fDocument.getSection(1)?.setFooterLinkedToPrevious(true, 'even');
      * }
      * ```
@@ -573,7 +574,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   fDocument.getSection(0)?.setHeaderFooterOptions({
      *     marginHeader: 36,
      *     marginFooter: 36,
@@ -592,7 +593,7 @@ export class FDocumentSection {
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
-     * if (fDocument && !fDocument.isModern()) {
+     * if (fDocument?.isTraditional()) {
      *   const sections = fDocument.getSections();
      *   if (sections.length > 1) {
      *     sections[0].remove();

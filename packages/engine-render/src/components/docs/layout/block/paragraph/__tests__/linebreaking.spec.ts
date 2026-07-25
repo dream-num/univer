@@ -231,20 +231,23 @@ describe('linebreaking', () => {
         expect(paragraphLines(result[0], secondParagraph.endIndex).length).toBeGreaterThan(0);
     });
 
-    it('does not apply Word-compatible paragraph pagination to modern documents', () => {
+    it.each([
+        { name: 'modern', flavor: DocumentFlavor.MODERN },
+        { name: 'unspecified', flavor: DocumentFlavor.UNSPECIFIED },
+    ])('does not apply Word-compatible paragraph pagination to $name documents', ({ name, flavor }) => {
         const contents = ['First', 'Second'];
         const firstEnd = contents[0].length;
         const secondEnd = firstEnd + 1 + contents[1].length;
         const testBed = createSectionLayoutTestBed(contents, {
             documentStyle: {
-                documentFlavor: DocumentFlavor.MODERN,
+                documentFlavor: flavor,
             },
             body: {
                 paragraphs: [
-                    { startIndex: firstEnd, paragraphId: 'modern-first' },
+                    { startIndex: firstEnd, paragraphId: `${name}-first` },
                     {
                         startIndex: secondEnd,
-                        paragraphId: 'modern-second',
+                        paragraphId: `${name}-second`,
                         paragraphStyle: {
                             pageBreakBefore: BooleanNumber.TRUE,
                             keepLines: BooleanNumber.TRUE,

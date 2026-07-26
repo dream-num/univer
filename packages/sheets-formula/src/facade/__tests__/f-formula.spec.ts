@@ -368,7 +368,7 @@ describe('sheets-formula facade mixins', () => {
         await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
         await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
             unitData: {
-                unit1: {
+                test: {
                     sheet1: {
                         0: {
                             0: { v: 1 },
@@ -385,7 +385,7 @@ describe('sheets-formula facade mixins', () => {
         await commandService.executeCommand(
             SetRangeValuesMutation.id,
             {
-                unitId: 'unit1',
+                unitId: 'test',
                 subUnitId: 'sheet1',
                 cellValue: {},
             },
@@ -393,6 +393,26 @@ describe('sheets-formula facade mixins', () => {
                 applyFormulaCalculationResult: true,
             }
         );
+
+        await expect(waitForResult).resolves.toBeUndefined();
+    });
+
+    it('does not wait for a sheet application when the result targets an unknown unit', async () => {
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        const waitForResult = univerAPI.getFormula().onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {
+                'unknown-unit': {
+                    sheet1: {
+                        0: {
+                            0: { v: 1 },
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        });
 
         await expect(waitForResult).resolves.toBeUndefined();
     });

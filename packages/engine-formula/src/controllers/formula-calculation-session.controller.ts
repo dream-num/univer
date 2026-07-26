@@ -113,22 +113,20 @@ export class FormulaCalculationSessionController extends Disposable {
     }
 
     private _hasSheetResultToApply(result: ISetFormulaCalculationResultMutation): boolean {
-        return this._hasUnitResultToApply(result, [
-            UniverInstanceType.UNIVER_SHEET,
-            UniverInstanceType.UNRECOGNIZED,
-        ]);
+        return this._hasUnitResultToApply(result, UniverInstanceType.UNIVER_SHEET);
     }
 
     private _hasBaseResultToApply(result: ISetFormulaCalculationResultMutation): boolean {
-        return this._hasUnitResultToApply(result, [UniverInstanceType.UNIVER_BASE]);
+        return this._hasUnitResultToApply(result, UniverInstanceType.UNIVER_BASE);
     }
 
     private _hasUnitResultToApply(
         result: ISetFormulaCalculationResultMutation,
-        unitTypes: UniverInstanceType[]
+        unitType: UniverInstanceType
     ): boolean {
+        // Only registered host units have a matching result applicator. Unknown units must not keep the session pending.
         return Object.entries(result.unitData).some(([unitId, sheetData]) =>
-            unitTypes.includes(this._univerInstanceService.getUnitType(unitId))
+            this._univerInstanceService.getUnit(unitId, unitType) != null
             && sheetData != null
             && Object.values(sheetData).some((cellData) => cellData != null)
         );

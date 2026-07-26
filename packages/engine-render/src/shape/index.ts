@@ -20,7 +20,7 @@ export * from './control';
 export * from './dashedrect';
 export * from './drawing';
 export * from './image';
-export { Line } from './line';
+export { type ILineProps, Line } from './line';
 export * from './path';
 export * from './rect';
 export * from './regular-polygon';

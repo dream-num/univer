@@ -700,8 +700,9 @@ describe('engine scene viewport extra', () => {
         }
 
         expect(rotateLine.stroke).toBe('#d1d5db');
-        expect(rotateLine.width).toBe(0);
-        expect(rotateLine.left).toBe(rotate.left + rotate.width / 2);
+        expect(rotateLine.startX).toBe(rotateLine.endX);
+        expect(rotateLine.endY - rotateLine.startY).toBe(20);
+        expect(rotateLine.startX).toBe(rotate.left + rotate.width / 2);
         expect(rotate.radius).toBe(4);
         expect(rotateIcon.width).toBe(10);
         expect(rotateIcon.height).toBe(10);

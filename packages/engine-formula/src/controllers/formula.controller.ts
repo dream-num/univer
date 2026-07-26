@@ -18,7 +18,7 @@ import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { BaseFunction } from '../functions/base-function';
-import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
@@ -48,13 +48,22 @@ import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMut
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../functions';
 import { IFunctionService } from '../services/function.service';
+import { RegisterOtherFormulaService } from '../services/register-other-formula.service';
+
+type FormulaDataSyncController = Pick<
+    DataSyncPrimaryController,
+    'registerSyncingMutations' | 'syncUnitMutations'
+>;
 
 export class FormulaController extends Disposable {
+    private readonly _syncedOtherFormulaUnits = new Set<string>();
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFunctionService private readonly _functionService: IFunctionService,
         @IConfigService private readonly _configService: IConfigService,
-        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController: FormulaDataSyncController | undefined,
+        @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
     ) {
         super();
 
@@ -64,6 +73,23 @@ export class FormulaController extends Disposable {
     private _initialize(): void {
         this._registerCommands();
         this._registerFunctions();
+        this._syncOtherFormulaUnits();
+    }
+
+    private _syncOtherFormulaUnits(): void {
+        const dataSyncPrimaryController = this._dataSyncPrimaryController;
+        if (!dataSyncPrimaryController) {
+            return;
+        }
+
+        this.disposeWithMe(this._registerOtherFormulaService.formulaChangeWithRange$.subscribe(({ unitId }) => {
+            if (this._syncedOtherFormulaUnits.has(unitId)) {
+                return;
+            }
+
+            this._syncedOtherFormulaUnits.add(unitId);
+            this.disposeWithMe(dataSyncPrimaryController.syncUnitMutations(unitId));
+        }));
     }
 
     private _registerCommands(): void {

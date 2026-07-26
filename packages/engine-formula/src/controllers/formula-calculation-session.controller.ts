@@ -19,7 +19,7 @@ import type {
     ISetFormulaCalculationNotificationMutation,
     ISetFormulaCalculationResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
@@ -46,6 +46,7 @@ function isFormulaCalculationResult(
 export class FormulaCalculationSessionController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaCalculationSessionService) private readonly _sessionService: FormulaCalculationSessionService,
         @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
     ) {
@@ -100,6 +101,10 @@ export class FormulaCalculationSessionController extends Disposable {
             pendingApplications.push(FormulaResultApplicationType.SHEET);
         }
 
+        if (this._hasBaseResultToApply(params)) {
+            pendingApplications.push(FormulaResultApplicationType.BASE);
+        }
+
         if (this._hasOtherFormulaResultToApply(params)) {
             pendingApplications.push(FormulaResultApplicationType.OTHER_FORMULA);
         }
@@ -108,8 +113,22 @@ export class FormulaCalculationSessionController extends Disposable {
     }
 
     private _hasSheetResultToApply(result: ISetFormulaCalculationResultMutation): boolean {
-        return Object.values(result.unitData).some((sheetData) =>
-            sheetData != null && Object.values(sheetData).some((cellData) => cellData != null)
+        return this._hasUnitResultToApply(result, UniverInstanceType.UNIVER_SHEET);
+    }
+
+    private _hasBaseResultToApply(result: ISetFormulaCalculationResultMutation): boolean {
+        return this._hasUnitResultToApply(result, UniverInstanceType.UNIVER_BASE);
+    }
+
+    private _hasUnitResultToApply(
+        result: ISetFormulaCalculationResultMutation,
+        unitType: UniverInstanceType
+    ): boolean {
+        // Only registered host units have a matching result applicator. Unknown units must not keep the session pending.
+        return Object.entries(result.unitData).some(([unitId, sheetData]) =>
+            this._univerInstanceService.getUnit(unitId, unitType) != null
+            && sheetData != null
+            && Object.values(sheetData).some((cellData) => cellData != null)
         );
     }
 

@@ -22,7 +22,14 @@ import type {
     ISetOtherFormulaMutationParams,
 } from '../commands/mutations/set-other-formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
-import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
+import {
+    Disposable,
+    generateRandomId,
+    ICommandService,
+    Inject,
+    LifecycleService,
+    ObjectMatrix,
+} from '@univerjs/core';
 import { BehaviorSubject, bufferWhen, filter, skip, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -228,6 +235,20 @@ export class RegisterOtherFormulaService extends Disposable {
             ranges,
         });
         return formulaId;
+    }
+
+    getFormulaDirtyMap(unitId: string): Record<string, Record<string, boolean>> {
+        const unitMap = this._formulaCacheMap.get(unitId);
+        if (!unitMap) {
+            return {};
+        }
+
+        return Object.fromEntries(
+            Array.from(unitMap.entries(), ([subUnitId, formulas]) => [
+                subUnitId,
+                Object.fromEntries(Array.from(formulas.keys(), (formulaId) => [formulaId, true])),
+            ])
+        );
     }
 
     deleteFormula(unitId: string, subUnitId: string, formulaIdList: string[]) {

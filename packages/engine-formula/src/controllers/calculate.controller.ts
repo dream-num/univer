@@ -107,7 +107,7 @@ export class CalculateController extends Disposable {
     private async _calculate(
         formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
-        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtySuperTableMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT, rowData, isCalculateTreeModel = false } = formulaDirtyData;
+        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtySuperTableMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT, rowData, externalReferences, isCalculateTreeModel = false } = formulaDirtyData;
 
         const formulaData = this._formulaDataModel.getFormulaData();
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
@@ -129,6 +129,7 @@ export class CalculateController extends Disposable {
             maxIteration,
             isCalculateTreeModel,
             rowData,
+            externalReferences,
         });
     }
 

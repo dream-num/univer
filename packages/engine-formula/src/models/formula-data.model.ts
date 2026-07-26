@@ -940,6 +940,7 @@ const BASE_LEGACY_FIELD_REF_PATTERN = /\{([^}]+)\}/g;
 const BASE_TABLE_FIELD_REF_PATTERN = /\b([A-Z_]\w*)\[([^\]]+)\]/gi;
 const BASE_BRACKET_FIELD_REF_PATTERN = /(^|[^A-Za-z0-9_\]\[])\[([^\]]+)\]/g;
 const BASE_EXTERNAL_A1_REF_PATTERN = /(?:'\[[^\]]+\](?:[^']|'')+'|\[[^\]]+\][^\s'!]+)!\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?/gi;
+const BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX = /(?:'((?:[^']|'')+)'|\[[^\]]+\]|[A-Za-z0-9_.-]+)![^\s!\[\]]+\[/g;
 
 function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): string {
     const refs: string[] = [];
@@ -947,8 +948,7 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
         const index = refs.push(ref) - 1;
         return `__BASE_FORMULA_REF_${index}__`;
     };
-    const normalized = formula
-        .replace(BASE_EXTERNAL_A1_REF_PATTERN, (reference) => hold(reference))
+    const normalized = protectBaseExternalReferences(formula, hold)
         .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
         .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
             const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
@@ -956,6 +956,59 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
         })
         .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`);
     return normalized.replace(/__BASE_FORMULA_REF_(\d+)__/g, (_match, index: string) => refs[Number(index)] ?? '');
+}
+
+function protectBaseExternalReferences(formula: string, replace: (reference: string) => string): string {
+    const withProtectedA1 = formula.replace(BASE_EXTERNAL_A1_REF_PATTERN, (reference, offset: number) =>
+        isInsideBaseFormulaString(formula, offset) ? reference : replace(reference));
+    return protectBaseExternalStructuredReferences(withProtectedA1, replace);
+}
+
+function protectBaseExternalStructuredReferences(
+    formula: string,
+    replace: (reference: string) => string
+): string {
+    const spans: Array<{ start: number; end: number }> = [];
+    BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.exec(formula)) != null) {
+        if (isInsideBaseFormulaString(formula, match.index)) continue;
+        const openBracket = BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.lastIndex - 1;
+        let depth = 0;
+        for (let index = openBracket; index < formula.length; index++) {
+            if (formula[index] === '[') depth++;
+            if (formula[index] !== ']') continue;
+            depth--;
+            if (depth === 0) {
+                spans.push({ start: match.index, end: index + 1 });
+                BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.lastIndex = index + 1;
+                break;
+            }
+        }
+    }
+    if (spans.length === 0) return formula;
+
+    let result = '';
+    let offset = 0;
+    for (const span of spans) {
+        result += formula.slice(offset, span.start);
+        result += replace(formula.slice(span.start, span.end));
+        offset = span.end;
+    }
+    return result + formula.slice(offset);
+}
+
+function isInsideBaseFormulaString(formula: string, position: number): boolean {
+    let inString = false;
+    for (let index = 0; index < position; index++) {
+        if (formula[index] !== '"') continue;
+        if (inString && formula[index + 1] === '"') {
+            index++;
+            continue;
+        }
+        inString = !inString;
+    }
+    return inString;
 }
 
 function createEngineThisRowRef(table: ITableSnapshot, fieldName: string, snapshot: IBaseSnapshot): string {

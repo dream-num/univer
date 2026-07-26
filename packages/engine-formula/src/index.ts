@@ -29,6 +29,9 @@ export type {
     IFormulaDataItem,
     IFormulaDatasetConfig,
     IFormulaExecuteResultMap,
+    IFormulaExternalReferenceBinding,
+    IFormulaExternalReferenceResource,
+    IFormulaExternalReferences,
     IFormulaStringMap,
     IFormulaUnitNameMap,
     IFormulaUnitNameMapItem,
@@ -295,6 +298,11 @@ export type {
 export { IDependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
+export {
+    IFormulaExternalReferenceDataLoader,
+    NoopFormulaExternalReferenceDataLoader,
+} from './services/external-reference-data-loader.service';
+export type { IFormulaExternalReferenceLoadInput } from './services/external-reference-data-loader.service';
 export {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,

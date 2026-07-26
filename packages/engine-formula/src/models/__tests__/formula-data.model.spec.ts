@@ -1092,6 +1092,21 @@ describe('Test formula data model', () => {
                     '=SUM([Host.xlsx]Sheet1!$A$1:$B$10)'
                 );
             });
+
+            it('should preserve workbook-qualified structured references in Base formulas', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-external-table';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=SUM([Orders Base]!Orders[Amount])',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-external-table']?.['table-main']?.[0]?.[6]?.f).toBe(
+                    '=SUM([Orders Base]!Orders[Amount])'
+                );
+            });
         });
     });
 

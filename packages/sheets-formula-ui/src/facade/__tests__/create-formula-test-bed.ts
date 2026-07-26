@@ -52,6 +52,7 @@ import {
     IDescriptionService,
     IFeatureCalculationManagerService,
     IFormulaCurrentConfigService,
+    IFormulaExternalReferenceDataLoader,
     IFormulaRuntimeService,
     IFunctionService,
     IHyperlinkEngineFormulaService,
@@ -64,6 +65,7 @@ import {
     LambdaParameterNodeFactory,
     Lexer,
     LexerTreeBuilder,
+    NoopFormulaExternalReferenceDataLoader,
     OperatorNodeFactory,
     OtherFormulaManagerService,
     PrefixNodeFactory,
@@ -197,6 +199,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([LexerTreeBuilder]);
 
     injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+    injector.add([IFormulaExternalReferenceDataLoader, { useClass: NoopFormulaExternalReferenceDataLoader }]);
     injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
     injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
     injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);

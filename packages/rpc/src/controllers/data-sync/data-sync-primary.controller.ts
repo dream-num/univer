@@ -97,6 +97,17 @@ export class DataSyncPrimaryController extends RxDisposable {
         });
     }
 
+    /** Sync registered mutations for a unit without creating a replica unit. */
+    syncUnitMutations(unitId: string): IDisposable {
+        const alreadySyncing = this._syncingUnits.has(unitId);
+        this._syncingUnits.add(unitId);
+        return toDisposable(() => {
+            if (!alreadySyncing) {
+                this._syncingUnits.delete(unitId);
+            }
+        });
+    }
+
     private _initRPCChannels(): void {
         // for the worker to call
         this._rpcChannelService.registerChannel(RemoteSyncServiceName, fromModule(this._remoteSyncService));

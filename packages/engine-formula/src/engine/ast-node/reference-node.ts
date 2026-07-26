@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import {
     regexTestReferenceTableAllColumn,
@@ -28,6 +29,7 @@ import {
 } from '../../basics/regex';
 import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IFormulaExternalReferenceDataLoader } from '../../services/external-reference-data-loader.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
@@ -48,21 +50,50 @@ interface ITableReferenceDescriptor {
     columnStruct: string | undefined;
 }
 
+type ReferenceNodeCurrentConfigService = Pick<
+    IFormulaCurrentConfigService,
+    'getArrayFormulaCellData' | 'getArrayFormulaRange' | 'getSheetNameMap' | 'getUnitData' | 'getUnitStylesData'
+>;
+
+type ReferenceNodeRuntimeService = Pick<
+    IFormulaRuntimeService,
+    | 'currentColumn'
+    | 'currentRow'
+    | 'currentSubUnitId'
+    | 'currentUnitId'
+    | 'getRuntimeArrayFormulaCellData'
+    | 'getRuntimeFeatureCellData'
+    | 'getUnitArrayFormula'
+    | 'getUnitData'
+>;
+
+type ReferenceNodeSuperTableService = Pick<
+    ISuperTableService,
+    'getTableMap' | 'getTableOptionMap'
+>;
+
 export class ReferenceNode extends BaseAstNode {
     private _refOffsetX = 0;
     private _refOffsetY = 0;
 
     constructor(
-        private _currentConfigService: IFormulaCurrentConfigService,
-        private _runtimeService: IFormulaRuntimeService,
+        private _currentConfigService: ReferenceNodeCurrentConfigService,
+        private _runtimeService: ReferenceNodeRuntimeService,
         operatorString: string,
         private _referenceObjectType: ReferenceObjectType,
         private _unitReferenceResolver: IFormulaUnitReferenceResolver,
-        private _superTableService: ISuperTableService,
+        private _superTableService: ReferenceNodeSuperTableService,
+        private _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader,
         private _isPrepareMerge: boolean = false,
         private _tableReference?: ITableReferenceDescriptor
     ) {
         super(operatorString);
+        const unitQualifier = _tableReference
+            ? _tableReference.unitQualifier
+            : getReferenceObjectFromCache(operatorString, _referenceObjectType).getUnitQualifier();
+        if (unitQualifier) {
+            this.setAsync();
+        }
     }
 
     override get nodeType() {
@@ -125,10 +156,69 @@ export class ReferenceNode extends BaseAstNode {
         }
     }
 
+    override async executeAsync(): Promise<AstNodePromiseType> {
+        const hostUnitId = this._runtimeService.currentUnitId;
+        const unitQualifier = this._tableReference
+            ? this._tableReference.unitQualifier
+            : getReferenceObjectFromCache(this.getToken(), this._referenceObjectType).getUnitQualifier();
+        if (!unitQualifier) {
+            this.execute();
+            return AstNodePromiseType.SUCCESS;
+        }
+
+        const referenceKind = this._tableReference ? 'table' : 'a1';
+        const resolution = this._unitReferenceResolver.resolve({
+            hostUnitId,
+            qualifier: unitQualifier,
+            referenceKind,
+        });
+        if (typeof resolution === 'string') {
+            this.setValue(ErrorValueObject.create(resolution));
+            return AstNodePromiseType.ERROR;
+        }
+
+        if (resolution.externalReference) {
+            const token = this._getExternalLoadToken();
+            const error = await this._externalReferenceDataLoader.load({
+                hostUnitId,
+                qualifier: unitQualifier,
+                referenceKind,
+                token,
+                tableName: this._tableReference?.tableName,
+                columnStruct: this._tableReference?.columnStruct,
+                resolution,
+            });
+            if (error) {
+                this.setValue(ErrorValueObject.create(error));
+                return AstNodePromiseType.ERROR;
+            }
+        }
+
+        this.execute();
+        return AstNodePromiseType.SUCCESS;
+    }
+
+    /**
+     * A1 ranges are represented as two ReferenceNodes under a `:` UnionNode.
+     * The qualified left node owns the external read, so include the right
+     * boundary and materialize the whole rectangular range in one request.
+     */
+    private _getExternalLoadToken(): string {
+        const parent = this.getParent();
+        if (parent?.nodeType !== NodeType.UNION || parent.getToken() !== matchToken.COLON) {
+            return this.getToken();
+        }
+        const [left, right] = parent.getChildren();
+        if (left !== this || right == null) {
+            return this.getToken();
+        }
+        return `${this.getToken()}${matchToken.COLON}${right.getToken()}`;
+    }
+
     private _configureReferenceObject(
         referenceObject: BaseReferenceObject,
-        currentConfigService: IFormulaCurrentConfigService,
-        runtimeService: IFormulaRuntimeService
+        currentConfigService: ReferenceNodeCurrentConfigService,
+        runtimeService: ReferenceNodeRuntimeService
     ): void {
         referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
         referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);
@@ -165,7 +255,9 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
         @IFunctionService private readonly _functionService: IFunctionService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
-        @IFormulaUnitReferenceResolver private readonly _unitReferenceResolver: IFormulaUnitReferenceResolver
+        @IFormulaUnitReferenceResolver private readonly _unitReferenceResolver: IFormulaUnitReferenceResolver,
+        @IFormulaExternalReferenceDataLoader
+        private readonly _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader
     ) {
         super();
     }
@@ -234,7 +326,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         const runtimeService = this._formulaRuntimeService;
 
         const makeRef = (type: ReferenceObjectType) =>
-            new ReferenceNode(currentConfigService, runtimeService, tokenTrim, type, this._unitReferenceResolver, this._superTableService, isPrepareMerge);
+            new ReferenceNode(currentConfigService, runtimeService, tokenTrim, type, this._unitReferenceResolver, this._superTableService, this._externalReferenceDataLoader, isPrepareMerge);
 
         const tableMap = this._getTableMap();
         const isSuperTableDirect = tableMap?.has(tokenTrim) ?? false;
@@ -276,6 +368,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
                 ReferenceObjectType.COLUMN,
                 this._unitReferenceResolver,
                 this._superTableService,
+                this._externalReferenceDataLoader,
                 isPrepareMerge,
                 { unitQualifier, tableName, columnStruct }
             );

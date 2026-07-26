@@ -71,7 +71,7 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
-function createControllerTestBed() {
+function createControllerTestBed(initialFormulaComputing = CalculationMode.WHEN_EMPTY) {
     const dependencies: Dependency[] = [
         [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
         [FormulaCalculationTriggerService],
@@ -87,7 +87,7 @@ function createControllerTestBed() {
     const commandService = injector.get(ICommandService);
     const configService = injector.get(IConfigService);
 
-    configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing: CalculationMode.WHEN_EMPTY }, { merge: true });
+    configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing }, { merge: true });
     configService.setConfig(ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, true);
     configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, 7);
 
@@ -179,6 +179,18 @@ describe('TriggerCalculationController', () => {
                 rowData: testBed.formulaDataModel.getHiddenRowsFiltered(),
             }),
         });
+
+        testBed.executedDisposable.dispose();
+        testBed.testBed.univer.dispose();
+    });
+
+    it('should not enqueue an empty initial calculation in no-calculation mode', async () => {
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
+
+        await Promise.resolve();
+
+        expect(testBed.registerOtherFormulaService.calculateStarted$.getValue()).toBe(true);
+        expect(testBed.executedCommands.some(({ id }) => id === SetTriggerFormulaCalculationStartMutation.id)).toBe(false);
 
         testBed.executedDisposable.dispose();
         testBed.testBed.univer.dispose();

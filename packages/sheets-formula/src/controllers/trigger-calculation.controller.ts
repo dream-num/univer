@@ -302,8 +302,10 @@ export class TriggerCalculationController extends Disposable {
 
     private _initialExecuteFormula() {
         const calculationMode = this._getCalculationMode();
-        const params = this._getDirtyDataByCalculationMode(calculationMode);
-        this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, lo);
+        if (calculationMode !== CalculationMode.NO_CALCULATION) {
+            const params = this._getDirtyDataByCalculationMode(calculationMode);
+            this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, lo);
+        }
 
         this._registerOtherFormulaService.calculateStarted$.next(true);
     }

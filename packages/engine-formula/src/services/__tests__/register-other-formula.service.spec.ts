@@ -101,6 +101,19 @@ describe('RegisterOtherFormulaService', () => {
         expect(executedIds).toContain(SetOtherFormulaMutation.id);
     });
 
+    it('should expose all registered formulas for host-level dirty propagation', () => {
+        const { service } = createService();
+
+        const firstFormulaId = service.registerFormulaWithRange('unit-1', 'sheet-1', '=A1');
+        const secondFormulaId = service.registerFormulaWithRange('unit-1', 'sheet-2', '=B2');
+
+        expect(service.getFormulaDirtyMap('unit-1')).toEqual({
+            'sheet-1': { [firstFormulaId]: true },
+            'sheet-2': { [secondFormulaId]: true },
+        });
+        expect(service.getFormulaDirtyMap('missing-unit')).toEqual({});
+    });
+
     it('should cache formula results and resolve pending getFormulaValue', async () => {
         const { service, commandService } = createService();
 

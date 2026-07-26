@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { FunctionNode } from '../ast-node/function-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { ReferenceNode } from '../ast-node/reference-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
@@ -34,8 +33,13 @@ import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 
+type InterpreterRuntimeService = Pick<
+    IFormulaRuntimeService,
+    'currentColumn' | 'currentRow' | 'isStopExecution'
+>;
+
 export class Interpreter extends Disposable {
-    constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {
+    constructor(@IFormulaRuntimeService private readonly _runtimeService: InterpreterRuntimeService) {
         super();
     }
 
@@ -96,6 +100,9 @@ export class Interpreter extends Disposable {
         if (node == null) {
             return false;
         }
+        if (node.isAsync()) {
+            return true;
+        }
         const result: boolean[] = [];
         this._checkAsyncNode(node, result);
 
@@ -148,7 +155,7 @@ export class Interpreter extends Disposable {
             (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
-        if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
+        if (node.isAsync()) {
             await node.executeAsync();
         } else {
             node.execute();

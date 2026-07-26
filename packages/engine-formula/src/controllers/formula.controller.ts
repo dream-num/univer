@@ -50,6 +50,11 @@ import { ALL_IMPLEMENTED_FUNCTIONS } from '../functions';
 import { IFunctionService } from '../services/function.service';
 import { RegisterOtherFormulaService } from '../services/register-other-formula.service';
 
+type FormulaDataSyncController = Pick<
+    DataSyncPrimaryController,
+    'registerSyncingMutations' | 'syncUnitMutations'
+>;
+
 export class FormulaController extends Disposable {
     private readonly _syncedOtherFormulaUnits = new Set<string>();
 
@@ -57,7 +62,7 @@ export class FormulaController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFunctionService private readonly _functionService: IFunctionService,
         @IConfigService private readonly _configService: IConfigService,
-        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController: DataSyncPrimaryController | undefined,
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController: FormulaDataSyncController | undefined,
         @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
     ) {
         super();

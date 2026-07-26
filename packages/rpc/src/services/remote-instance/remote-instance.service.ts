@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IExecutionOptions, IMutationInfo, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
+import type { IBaseSnapshot, IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
+import { createIdentifier, ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     /** If this mutation is executed after it was sent from the peer univer instance (e.g. in a web worker). */
@@ -60,7 +60,7 @@ export interface IRemoteInstanceService {
     /** Tell other modules if the `IRemoteInstanceService` is ready to load files. */
     whenReady(): Promise<true>;
 
-    createInstance(params: { unitID: string; type: UniverInstanceType; snapshot: object }): Promise<boolean>;
+    createInstance(params: { unitID: string; type: UniverInstanceType; snapshot: IWorkbookData | IBaseSnapshot }): Promise<boolean>;
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }, options?: IExecutionOptions): Promise<boolean>;
 }
@@ -85,13 +85,23 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     async createInstance(params: {
         unitID: string;
         type: UniverInstanceType;
-        snapshot: object;
+        snapshot: IWorkbookData | IBaseSnapshot;
     }): Promise<boolean> {
         this._logService.debug(`[WebWorkerRemoteInstanceService]: Creating instance with id ${params.unitID}`);
         const { type, snapshot } = params;
         try {
-            this._univerInstanceService.createUnit(type, snapshot);
-            return true;
+            switch (type) {
+                case UniverInstanceType.UNIVER_SHEET:
+                    this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, snapshot);
+                    return true;
+                case UniverInstanceType.UNIVER_BASE:
+                    this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+                    return true;
+                default:
+                    throw new Error(
+                        `[WebWorkerRemoteInstanceService]: cannot create replica for document type: ${type}.`
+                    );
+            }
         } catch (err: unknown) {
             if (err instanceof Error) {
                 throw err;

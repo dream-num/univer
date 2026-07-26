@@ -271,15 +271,6 @@ export class RegisterOtherFormulaService extends Disposable {
         return cacheMap.get(formulaId);
     }
 
-    getFormulaDirtyMap(unitId: string): Record<string, Record<string, boolean>> {
-        const unitMap = this._formulaCacheMap.get(unitId);
-        if (!unitMap) return {};
-        return Object.fromEntries(Array.from(unitMap.entries(), ([subUnitId, formulas]) => [
-            subUnitId,
-            Object.fromEntries(Array.from(formulas.keys(), (formulaId) => [formulaId, true])),
-        ]));
-    }
-
     markFormulaDirty(unitId: string, subUnitId: string, formulaId: string) {
         const cache = this.getFormulaValueSync(unitId, subUnitId, formulaId);
         if (!cache) return;

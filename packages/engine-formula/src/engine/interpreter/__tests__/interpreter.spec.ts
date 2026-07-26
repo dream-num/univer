@@ -39,8 +39,10 @@ class AsyncReferenceLikeNode extends BaseAstNode {
 describe('Interpreter async nodes', () => {
     it('detects and awaits an async root node regardless of node type', async () => {
         const interpreter = new Interpreter({
+            currentColumn: 0,
+            currentRow: 0,
             isStopExecution: () => false,
-        } as never);
+        });
         const node = new AsyncReferenceLikeNode();
 
         expect(interpreter.checkAsyncNode(node)).toBe(true);

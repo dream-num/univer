@@ -50,17 +50,39 @@ interface ITableReferenceDescriptor {
     columnStruct: string | undefined;
 }
 
+type ReferenceNodeCurrentConfigService = Pick<
+    IFormulaCurrentConfigService,
+    'getArrayFormulaCellData' | 'getArrayFormulaRange' | 'getSheetNameMap' | 'getUnitData' | 'getUnitStylesData'
+>;
+
+type ReferenceNodeRuntimeService = Pick<
+    IFormulaRuntimeService,
+    | 'currentColumn'
+    | 'currentRow'
+    | 'currentSubUnitId'
+    | 'currentUnitId'
+    | 'getRuntimeArrayFormulaCellData'
+    | 'getRuntimeFeatureCellData'
+    | 'getUnitArrayFormula'
+    | 'getUnitData'
+>;
+
+type ReferenceNodeSuperTableService = Pick<
+    ISuperTableService,
+    'getTableMap' | 'getTableOptionMap'
+>;
+
 export class ReferenceNode extends BaseAstNode {
     private _refOffsetX = 0;
     private _refOffsetY = 0;
 
     constructor(
-        private _currentConfigService: IFormulaCurrentConfigService,
-        private _runtimeService: IFormulaRuntimeService,
+        private _currentConfigService: ReferenceNodeCurrentConfigService,
+        private _runtimeService: ReferenceNodeRuntimeService,
         operatorString: string,
         private _referenceObjectType: ReferenceObjectType,
         private _unitReferenceResolver: IFormulaUnitReferenceResolver,
-        private _superTableService: ISuperTableService,
+        private _superTableService: ReferenceNodeSuperTableService,
         private _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader,
         private _isPrepareMerge: boolean = false,
         private _tableReference?: ITableReferenceDescriptor
@@ -195,8 +217,8 @@ export class ReferenceNode extends BaseAstNode {
 
     private _configureReferenceObject(
         referenceObject: BaseReferenceObject,
-        currentConfigService: IFormulaCurrentConfigService,
-        runtimeService: IFormulaRuntimeService
+        currentConfigService: ReferenceNodeCurrentConfigService,
+        runtimeService: ReferenceNodeRuntimeService
     ): void {
         referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
         referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);

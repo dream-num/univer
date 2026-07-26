@@ -99,7 +99,7 @@ describe('data-sync controllers', () => {
                     return null;
                 }
                 return {
-                    type: UniverInstanceType.UNIVER_DOC,
+                    type: UniverInstanceType.UNIVER_BASE,
                     getUnitId: () => 'unit-2',
                     getSnapshot: () => ({ base: true }),
                 };
@@ -142,7 +142,7 @@ describe('data-sync controllers', () => {
         const unit2Disposable = controller.syncUnit('unit-2');
         expect(remoteInstanceImpl.createInstance).toHaveBeenCalledWith({
             unitID: 'unit-2',
-            type: UniverInstanceType.UNIVER_DOC,
+            type: UniverInstanceType.UNIVER_BASE,
             snapshot: { base: true },
         });
 

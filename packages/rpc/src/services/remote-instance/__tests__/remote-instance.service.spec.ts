@@ -138,9 +138,8 @@ describe('remote-instance.service', () => {
         await expect(service.createInstance({
             unitID: 'doc-1',
             type: UniverInstanceType.UNIVER_DOC,
-            snapshot: {},
-        })).resolves.toBe(true);
-        expect(createUnit).toHaveBeenCalledWith(UniverInstanceType.UNIVER_DOC, {});
+            snapshot: {} as never,
+        })).rejects.toThrow(`[WebWorkerRemoteInstanceService]: cannot create replica for document type: ${UniverInstanceType.UNIVER_DOC}.`);
 
         createUnit.mockImplementationOnce(() => {
             throw new Error('create error');

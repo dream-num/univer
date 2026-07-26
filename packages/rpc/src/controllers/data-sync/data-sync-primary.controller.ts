@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutation, IMutationInfo, UnitModel, Workbook } from '@univerjs/core';
+import type { BaseDataModel, IDisposable, IMutation, IMutationInfo, Workbook } from '@univerjs/core';
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {
     CommandType,
@@ -75,7 +75,8 @@ export class DataSyncPrimaryController extends RxDisposable {
     syncUnit(unitId: string): IDisposable {
         const alreadySyncing = this._syncingUnits.has(unitId);
         this._syncingUnits.add(unitId);
-        const unit = this._univerInstanceService.getUnit<UnitModel>(unitId);
+        const unit = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?? this._univerInstanceService.getUnit<BaseDataModel>(unitId, UniverInstanceType.UNIVER_BASE);
         if (!alreadySyncing && unit) {
             this._remoteInstanceService.createInstance({
                 unitID: unit.getUnitId(),
@@ -96,11 +97,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         });
     }
 
-    /**
-     * Sync mutations for a Unit without creating a replica Unit. Use this when the
-     * remote consumer owns derived state for the Unit but must not treat its
-     * snapshot as a workbook or another registered business model.
-     */
+    /** Sync registered mutations for a unit without creating a replica unit. */
     syncUnitMutations(unitId: string): IDisposable {
         const alreadySyncing = this._syncingUnits.has(unitId);
         this._syncingUnits.add(unitId);

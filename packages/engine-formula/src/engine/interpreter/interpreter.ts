@@ -33,8 +33,13 @@ import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 
+type InterpreterRuntimeService = Pick<
+    IFormulaRuntimeService,
+    'currentColumn' | 'currentRow' | 'isStopExecution'
+>;
+
 export class Interpreter extends Disposable {
-    constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {
+    constructor(@IFormulaRuntimeService private readonly _runtimeService: InterpreterRuntimeService) {
         super();
     }
 

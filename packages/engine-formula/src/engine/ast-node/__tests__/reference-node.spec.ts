@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IFormulaUnitReferenceResolver } from '../../../services/unit-reference-resolver.service';
 import { describe, expect, it, vi } from 'vitest';
 import { ReferenceObjectType } from '../../utils/value-object';
 import { BaseAstNode } from '../base-ast-node';
@@ -49,15 +50,19 @@ describe('ReferenceNode external range loading', () => {
                     referenceId: 'sales',
                 },
             }),
+        } satisfies IFormulaUnitReferenceResolver;
+        const superTableService = {
+            getTableMap: () => null,
+            getTableOptionMap: () => new Map(),
         };
         const left = new ReferenceNode(
-            currentConfig as never,
-            runtime as never,
+            currentConfig,
+            runtime,
             "'[Sales]Data'!A1",
             ReferenceObjectType.CELL,
-            resolver as never,
-            {} as never,
-            { load } as never,
+            resolver,
+            superTableService,
+            { load },
             true
         );
         const right = new BaseAstNode('B2');

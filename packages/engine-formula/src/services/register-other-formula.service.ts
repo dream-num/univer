@@ -237,6 +237,20 @@ export class RegisterOtherFormulaService extends Disposable {
         return formulaId;
     }
 
+    getFormulaDirtyMap(unitId: string): Record<string, Record<string, boolean>> {
+        const unitMap = this._formulaCacheMap.get(unitId);
+        if (!unitMap) {
+            return {};
+        }
+
+        return Object.fromEntries(
+            Array.from(unitMap.entries(), ([subUnitId, formulas]) => [
+                subUnitId,
+                Object.fromEntries(Array.from(formulas.keys(), (formulaId) => [formulaId, true])),
+            ])
+        );
+    }
+
     deleteFormula(unitId: string, subUnitId: string, formulaIdList: string[]) {
         const params: IRemoveOtherFormulaMutationParams = {
             unitId,

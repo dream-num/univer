@@ -118,6 +118,11 @@ export class FontAndBaseLine extends docExtension {
 
             this._fillText(ctx, glyph, spanPointWithFont);
         };
+        if (!glow && !outerShadow) {
+            drawText();
+            return;
+        }
+
         const effectFilter = createDrawingEffectFilter(glow, outerShadow);
         if (!effectFilter) {
             drawText();

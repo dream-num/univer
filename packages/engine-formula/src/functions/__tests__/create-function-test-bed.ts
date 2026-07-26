@@ -50,6 +50,10 @@ import { FormulaDataModel } from '../../models/formula-data.model';
 import { CalculateFormulaService, ICalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
+import {
+    IFormulaExternalReferenceDataLoader,
+    NoopFormulaExternalReferenceDataLoader,
+} from '../../services/external-reference-data-loader.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
@@ -178,6 +182,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }]);
+            injector.add([IFormulaExternalReferenceDataLoader, { useClass: NoopFormulaExternalReferenceDataLoader }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);

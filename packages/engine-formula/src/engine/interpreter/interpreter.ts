@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { FunctionNode } from '../ast-node/function-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { ReferenceNode } from '../ast-node/reference-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';

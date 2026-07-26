@@ -28,10 +28,10 @@ export type {
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
+    IFormulaExecuteResultMap,
     IFormulaExternalReferenceBinding,
     IFormulaExternalReferenceResource,
     IFormulaExternalReferences,
-    IFormulaExecuteResultMap,
     IFormulaStringMap,
     IFormulaUnitNameMap,
     IFormulaUnitNameMapItem,
@@ -289,11 +289,6 @@ export { CalculateFormulaService, ICalculateFormulaService } from './services/ca
 export { DEFAULT_INTERVAL_COUNT } from './services/calculate-formula.service';
 export { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
 export type { IFormulaDirtyData } from './services/current-data.service';
-export {
-    IFormulaExternalReferenceDataLoader,
-    NoopFormulaExternalReferenceDataLoader,
-} from './services/external-reference-data-loader.service';
-export type { IFormulaExternalReferenceLoadInput } from './services/external-reference-data-loader.service';
 export { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
 export type {
     IDefinedNameMapItem,
@@ -303,6 +298,11 @@ export type {
 export { IDependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
+export {
+    IFormulaExternalReferenceDataLoader,
+    NoopFormulaExternalReferenceDataLoader,
+} from './services/external-reference-data-loader.service';
+export type { IFormulaExternalReferenceLoadInput } from './services/external-reference-data-loader.service';
 export {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,

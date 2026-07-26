@@ -404,7 +404,7 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     private _getInlineDrawingAnchor(drawing: IDocDrawingBase, offsetX: number, offsetY: number): Nullable<IDrawingAnchor> {
-        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(drawing.unitId);
 
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
 
@@ -430,7 +430,7 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const docSelectionRenderService = this._renderManagerService.getRenderById(drawing.unitId)?.with(DocSelectionRenderService);
+        const docSelectionRenderService = this._renderManagerService.getRenderUnitById(drawing.unitId)?.with(DocSelectionRenderService);
 
         if (docSelectionRenderService == null) {
             return;
@@ -479,7 +479,7 @@ export class DocDrawingTransformerController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _getDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject): Nullable<IDrawingAnchor> {
-        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(drawing.unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
 
         const skeletonData = skeleton?.getSkeletonData();
@@ -522,7 +522,7 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const docSelectionRenderService = this._renderManagerService.getRenderById(drawing.unitId)?.with(DocSelectionRenderService);
+        const docSelectionRenderService = this._renderManagerService.getRenderUnitById(drawing.unitId)?.with(DocSelectionRenderService);
 
         if (docSelectionRenderService == null) {
             return;
@@ -747,7 +747,7 @@ export class DocDrawingTransformerController extends Disposable {
     // Limit the drawing to the page area, mainly in the vertical direction,
     // and the upper and lower limits cannot exceed the page margin area.
     private _limitDrawingInPage(drawing: IDocDrawingBase, object: BaseObject) {
-        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(drawing.unitId);
         const { left, top, width, height, angle } = object;
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
 
@@ -843,7 +843,7 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const renderObject = this._renderManagerService.getRenderUnitById(unitId);
 
         const scene = renderObject?.scene;
 
@@ -868,7 +868,7 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     private _createOrUpdateInlineAnchor(unitId: string, pointsGroup: IPoint[][]) {
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         if (currentRender == null) {
             return;
         }
@@ -911,7 +911,7 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     private _getPageContentSize(drawing: IDocDrawingBase) {
-        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(drawing.unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
         const MAX_WIDTH = 500;
         const MAX_HEIGHT = 500;

@@ -32,37 +32,29 @@ export interface IRibbonGridPlacement {
 export function placeRibbonGridItems(items: IMenuSchema[]): IRibbonGridPlacement[] {
     const occupied = new Set<string>();
     const placements = new Map<IMenuSchema, IRibbonGridPlacement>();
-    const fallbackItems: IMenuSchema[] = [];
-    let maxExplicitColumn = 0;
+    const fallbackItems: Array<{ item: IMenuSchema; layout?: IRibbonGridPlacement }> = [];
 
     for (const item of items) {
         const layout = item.gridLayout;
         if (!layout) {
-            fallbackItems.push(item);
+            fallbackItems.push({ item });
             continue;
         }
 
         const rowSpan = layout.rowSpan ?? 1;
         const columnSpan = layout.columnSpan ?? 1;
         const cells = getCells(layout.row, layout.column, rowSpan, columnSpan);
-        const valid = cells.length > 0
-            && layout.row + rowSpan - 1 <= RIBBON_GRID_ROWS
-            && (layout.width === undefined || (Number.isFinite(layout.width) && layout.width > 0))
-            && (layout.iconSize === undefined || (Number.isFinite(layout.iconSize) && layout.iconSize > 0))
-            && cells.every((cell) => !occupied.has(cell));
 
-        if (!valid) {
+        if (!isValidGridGeometry(layout, rowSpan, cells)) {
             // eslint-disable-next-line node/prefer-global/process
             if (process.env.NODE_ENV !== 'production') {
                 globalThis.console.warn(`[RibbonGrid] Invalid gridLayout for "${item.key}"; using fallback placement.`);
             }
-            fallbackItems.push(item);
+            fallbackItems.push({ item });
             continue;
         }
 
-        cells.forEach((cell) => occupied.add(cell));
-        maxExplicitColumn = Math.max(maxExplicitColumn, layout.column + columnSpan - 1);
-        placements.set(item, {
+        const placement = {
             item,
             row: layout.row,
             column: layout.column,
@@ -71,28 +63,52 @@ export function placeRibbonGridItems(items: IMenuSchema[]): IRibbonGridPlacement
             showLabel: layout.showLabel ?? false,
             width: layout.width,
             iconSize: layout.iconSize,
-        });
+        };
+        if (cells.some((cell) => occupied.has(cell))) {
+            fallbackItems.push({ item, layout: placement });
+            continue;
+        }
+
+        cells.forEach((cell) => occupied.add(cell));
+        placements.set(item, placement);
     }
 
-    let fallbackRow = 1;
-    let fallbackColumn = maxExplicitColumn + 1;
-    for (const item of fallbackItems) {
+    for (const { item, layout } of fallbackItems) {
+        const rowSpan = layout?.rowSpan ?? 1;
+        const columnSpan = layout?.columnSpan ?? 1;
+        const { row, column, cells } = findFirstAvailableCells(occupied, rowSpan, columnSpan);
+        cells.forEach((cell) => occupied.add(cell));
         placements.set(item, {
             item,
-            row: fallbackRow,
-            column: fallbackColumn,
-            rowSpan: 1,
-            columnSpan: 1,
-            showLabel: false,
+            row,
+            column,
+            rowSpan,
+            columnSpan,
+            showLabel: layout?.showLabel ?? false,
+            width: layout?.width,
+            iconSize: layout?.iconSize,
         });
-        fallbackRow += 1;
-        if (fallbackRow > RIBBON_GRID_ROWS) {
-            fallbackRow = 1;
-            fallbackColumn += 1;
-        }
     }
 
     return items.map((item) => placements.get(item)!);
+}
+
+function isValidGridGeometry(layout: NonNullable<IMenuSchema['gridLayout']>, rowSpan: number, cells: string[]) {
+    return cells.length > 0
+        && layout.row + rowSpan - 1 <= RIBBON_GRID_ROWS
+        && (layout.width === undefined || (Number.isFinite(layout.width) && layout.width > 0))
+        && (layout.iconSize === undefined || (Number.isFinite(layout.iconSize) && layout.iconSize > 0));
+}
+
+function findFirstAvailableCells(occupied: Set<string>, rowSpan: number, columnSpan: number) {
+    for (let column = 1; ; column++) {
+        for (let row = 1; row + rowSpan - 1 <= RIBBON_GRID_ROWS; row++) {
+            const cells = getCells(row, column, rowSpan, columnSpan);
+            if (cells.every((cell) => !occupied.has(cell))) {
+                return { row, column, cells };
+            }
+        }
+    }
 }
 
 function getCells(row: number, column: number, rowSpan: number, columnSpan: number): string[] {

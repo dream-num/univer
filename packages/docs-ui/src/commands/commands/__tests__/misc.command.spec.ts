@@ -1720,7 +1720,7 @@ describe('misc document commands', () => {
         const sidebarService = get(ISidebarService) as TestSidebarService;
         sidebarService.open({ visible: true });
 
-        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        const render = get(IRenderManagerService).getRenderUnitById('test-doc')!;
         let clearedSelectedObjects = false;
         let markedDirty = false;
         const mutableRender = render as unknown as {
@@ -1803,7 +1803,7 @@ describe('misc document commands', () => {
         commandService.registerCommand(CloseHeaderFooterCommand);
         commandService.registerCommand(SidebarDocHeaderFooterPanelOperation);
 
-        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        const render = get(IRenderManagerService).getRenderUnitById('test-doc')!;
         const mutableRender = render as unknown as {
             scene: { getTransformerByCreate?: () => { clearSelectedObjects: () => void } };
             mainComponent: unknown;
@@ -1905,7 +1905,7 @@ describe('misc document commands', () => {
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(1);
 
-        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        const render = get(IRenderManagerService).getRenderUnitById('test-doc')!;
         const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
         const line = {
             top: 10,

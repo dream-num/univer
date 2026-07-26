@@ -16,7 +16,7 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import { generateRandomId } from '../../shared/random-id';
-import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, PAGE_SIZE } from '../../types/const';
+import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, PAGE_SIZE, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN } from '../../types/const';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor, PaperType } from '../../types/interfaces';
@@ -66,10 +66,10 @@ export function getEmptySnapshot(
         documentStyle: {
             pageSize: PAGE_SIZE[PaperType.A4],
             documentFlavor,
-            marginTop: 72,
-            marginBottom: 72,
-            marginRight: 72,
-            marginLeft: 72,
+            marginTop: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
+            marginBottom: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
+            marginRight: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
+            marginLeft: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
             autoHyphenation: BooleanNumber.TRUE,
             doNotHyphenateCaps: BooleanNumber.FALSE,
             consecutiveHyphenLimit: 2,

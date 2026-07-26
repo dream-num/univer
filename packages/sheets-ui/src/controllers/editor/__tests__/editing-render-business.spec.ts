@@ -191,7 +191,7 @@ function createController() {
         getWorkbookSelections: vi.fn(() => workbookSelections),
     };
     controller._renderManagerService = {
-        getRenderById: vi.fn(() => ({
+        getRenderUnitById: vi.fn(() => ({
             scene: {
                 getViewport: vi.fn((key) => key === VIEWPORT_KEY.VIEW_MAIN
                     ? { scrollToViewportPos: vi.fn() }
@@ -345,7 +345,7 @@ describe('EditingRenderController business methods', () => {
 
             return workbook;
         });
-        controller._renderManagerService.getRenderById.mockImplementation((unitId: string) => ({
+        controller._renderManagerService.getRenderUnitById.mockImplementation((unitId: string) => ({
             with: vi.fn(() => {
                 if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
                     return { sync: cellEditorSelectionSync };

@@ -74,7 +74,7 @@ export class DocMenuStyleService extends Disposable {
         }
 
         const unitId = docDataModel?.getUnitId();
-        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const docSkeletonManagerService = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         const docViewModel = docSkeletonManagerService?.getViewModel();
 
         if (docViewModel == null) {

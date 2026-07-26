@@ -381,5 +381,35 @@ describe('DocumentViewModel', () => {
 
             expect(headerViewModel.getTableByStartIndex(0)?.tableSource).toBe(tableSource);
         });
+
+        it('prefers a segment table source when its id also exists in the document body', () => {
+            const tableDataStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}F${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`;
+            const footerTableSource = { tableId: 'table-1', tableRows: [{ tableCells: [{ margin: {} }] }] };
+            const footerModel = createDocumentDataModel({
+                body: {
+                    dataStream: `${tableDataStream}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                    tables: [{ tableId: 'table-1', startIndex: 0, endIndex: tableDataStream.length }],
+                },
+                snapshot: {
+                    tableSource: {
+                        'table-1': footerTableSource,
+                    },
+                },
+            });
+            const bodyTableSource = { tableId: 'table-1', tableRows: [{ tableCells: [] }] };
+            const model = createDocumentDataModel({
+                snapshot: {
+                    tableSource: {
+                        'table-1': bodyTableSource,
+                    },
+                },
+                footerModelMap: new Map([['f1', footerModel]]),
+            });
+
+            const viewModel = new DocumentViewModel(model);
+            const footerViewModel = viewModel.getSelfOrHeaderFooterViewModel('f1');
+
+            expect(footerViewModel.getTableByStartIndex(0)?.tableSource).toBe(footerTableSource);
+        });
     });
 });

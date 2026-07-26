@@ -63,7 +63,7 @@ class TestEditorService {
 }
 
 class TestRenderManagerService {
-    getRenderById() {
+    getRenderUnitById() {
         return undefined;
     }
 }

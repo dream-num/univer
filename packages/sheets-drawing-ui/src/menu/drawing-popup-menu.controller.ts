@@ -127,7 +127,7 @@ export class DrawingPopupMenuController extends RxDisposable {
     }
 
     private _popupMenuListener(unitId: string) {
-        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
         if (!scene) {
             return;
         }

@@ -46,7 +46,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
 
     const drawingParam = drawings[0];
     const transformer = drawingParam
-        ? renderManagerService.getRenderById(drawingParam.unitId)?.scene?.getTransformerByCreate()
+        ? renderManagerService.getRenderUnitById(drawingParam.unitId)?.scene?.getTransformerByCreate()
         : undefined;
     const groupState = useObservable(
         transformer

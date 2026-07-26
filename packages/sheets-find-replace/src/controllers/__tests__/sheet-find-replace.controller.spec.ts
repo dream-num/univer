@@ -134,7 +134,7 @@ function createModel(
         workbook,
         skeletonService as any,
         {} as any,
-        (overrides.renderManagerService ?? { getRenderById: vi.fn(() => null) }) as any,
+        (overrides.renderManagerService ?? { getRenderUnitById: vi.fn(() => null) }) as any,
         commandService as any,
         contextService as any,
         (overrides.themeService ?? { getColorFromTheme: vi.fn(() => '#ff0') }) as any,
@@ -158,7 +158,7 @@ describe('SheetsFindReplaceController integration', () => {
             getCurrentSkeleton: vi.fn(() => null),
         };
         const renderManagerService = {
-            getRenderById: vi.fn(() => ({ with: vi.fn(() => skeletonService) })),
+            getRenderUnitById: vi.fn(() => ({ with: vi.fn(() => skeletonService) })),
         };
         const commandService = {
             registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
@@ -232,7 +232,7 @@ describe('SheetsFindReplaceController integration', () => {
         const injector = {
             createInstance: vi.fn((Ctor: any) => new Ctor(
                 { getCurrentUnitOfType: vi.fn(() => null) },
-                { getRenderById: vi.fn() },
+                { getRenderUnitById: vi.fn() },
                 injector
             )),
         };
@@ -419,7 +419,7 @@ describe('SheetFindModel search and replace', () => {
         };
         const { model } = createModel(workbook, undefined, {
             skeletonService,
-            renderManagerService: { getRenderById: vi.fn(() => ({ scene })) },
+            renderManagerService: { getRenderUnitById: vi.fn(() => ({ scene })) },
             themeService: { getColorFromTheme: vi.fn(() => '#ff0') },
         });
 

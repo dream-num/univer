@@ -338,7 +338,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             extra: params.extra,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
-        const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
+        const selectionService = renderManagerService.getRenderUnitById(unitId)?.with(ISheetSelectionRenderService);
         selectionService?.refreshSelectionMoveEnd();
         return rs;
     },

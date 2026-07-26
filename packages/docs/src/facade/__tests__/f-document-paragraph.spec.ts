@@ -16,8 +16,9 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { DataStreamTreeTokenType, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUndoRedoService, PresetListType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
+import { UpdateDocumentParagraphStyleCommand } from '../../commands/commands/update-document-paragraph-style.command';
 import {
     createBulletDocument,
     createDocumentData,
@@ -122,6 +123,75 @@ describe('FDocumentParagraph', () => {
                 },
             },
         ]);
+    });
+
+    it('updates paragraph and text style as one undoable command and preserves explicit false', () => {
+        const testBed = createTestBed(createSimpleDocument());
+        univer = testBed.univer;
+        testBed.get(IUndoRedoService);
+        document = testBed.univerAPI.getActiveDocument()!;
+        const paragraph = document.getParagraphs()[0];
+
+        expect(paragraph.setStyle({
+            textStyle: {
+                bl: BooleanNumber.TRUE,
+            },
+            keepNext: BooleanNumber.FALSE,
+            keepLines: BooleanNumber.TRUE,
+            widowControl: BooleanNumber.FALSE,
+            pageBreakBefore: BooleanNumber.TRUE,
+        })).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toMatchObject({
+            keepNext: BooleanNumber.FALSE,
+            keepLines: BooleanNumber.TRUE,
+            widowControl: BooleanNumber.FALSE,
+            pageBreakBefore: BooleanNumber.TRUE,
+        });
+        expect(document.save().body?.textRuns).toEqual([{
+            st: 0,
+            ed: 5,
+            ts: { bl: BooleanNumber.TRUE },
+        }]);
+
+        expect(document.undo()).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toBeUndefined();
+        expect(document.save().body?.textRuns).toBeUndefined();
+
+        expect(document.redo()).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toMatchObject({
+            keepNext: BooleanNumber.FALSE,
+            keepLines: BooleanNumber.TRUE,
+            widowControl: BooleanNumber.FALSE,
+            pageBreakBefore: BooleanNumber.TRUE,
+        });
+        const saved = document.save();
+        createDocumentFacade(saved);
+        expect(document.getParagraphs()[0].getInfo().paragraph.paragraphStyle).toMatchObject({
+            keepNext: BooleanNumber.FALSE,
+            keepLines: BooleanNumber.TRUE,
+            widowControl: BooleanNumber.FALSE,
+            pageBreakBefore: BooleanNumber.TRUE,
+        });
+    });
+
+    it('rejects a stale paragraph range without a partial style update', () => {
+        const testBed = createTestBed(createSimpleDocument());
+        univer = testBed.univer;
+        document = testBed.univerAPI.getActiveDocument()!;
+        const paragraph = document.getParagraphs()[0];
+        const { startOffset, endOffset } = paragraph.getInfo();
+
+        expect(document.insertParagraph(0, 'Before').getText()).toBe('Before');
+        expect(testBed.get(ICommandService).syncExecuteCommand(UpdateDocumentParagraphStyleCommand.id, {
+            unitId: document.getId(),
+            paragraphId: paragraph.getId(),
+            startOffset,
+            endOffset,
+            style: {
+                keepNext: BooleanNumber.TRUE,
+            },
+        })).toBe(false);
+        expect(paragraph.getInfo().paragraph.paragraphStyle?.keepNext).toBeUndefined();
     });
 
     it('reads and updates a text range across existing style-run boundaries', () => {

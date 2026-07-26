@@ -70,7 +70,7 @@ describe('ImageCropperController', () => {
             getObject: vi.fn(() => image),
             getTransformerByCreate: vi.fn(() => transformer),
         };
-        const renderManagerService = { getRenderById: vi.fn(() => ({ scene })) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
 
         const controller = new ImageCropperController(
             commandService as never,
@@ -113,7 +113,7 @@ describe('ImageCropperController', () => {
             getObject: vi.fn(() => ({ not: 'image' })),
             getTransformerByCreate: vi.fn(() => ({ changeStart$: new Subject(), changeEnd$: new Subject(), clearControl$: new Subject() })),
         };
-        const renderManagerService = { getRenderById: vi.fn(() => ({ scene })) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
 
         const controller = new ImageCropperController(
             commandService as never,
@@ -174,7 +174,7 @@ describe('ImageCropperController', () => {
                 return { attachTransformerTo: vi.fn() };
             }),
         };
-        const renderManagerService = { getRenderById: vi.fn(() => ({ scene })) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
 
         const controller = new ImageCropperController(
             commandService as never,

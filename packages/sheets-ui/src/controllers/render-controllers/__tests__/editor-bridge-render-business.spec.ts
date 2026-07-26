@@ -120,7 +120,7 @@ function createController(options?: {
     };
     const renderManagerService = {
         created$: new Subject<any>(),
-        getRenderById: vi.fn((unitId: string) => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+        getRenderUnitById: vi.fn((unitId: string) => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
             ? {
                 unitId,
                 with: vi.fn((token) => token === DocSelectionRenderService ? docSelectionRenderService : null),

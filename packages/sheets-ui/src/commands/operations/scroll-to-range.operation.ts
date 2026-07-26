@@ -34,7 +34,7 @@ export const ScrollToRangeOperation: ICommand<IScrollToCellCommandParams> = {
             return false;
         }
 
-        const renderUnit = renderManagerService.getRenderById(unitId);
+        const renderUnit = renderManagerService.getRenderUnitById(unitId);
         if (!renderUnit) {
             return false;
         }

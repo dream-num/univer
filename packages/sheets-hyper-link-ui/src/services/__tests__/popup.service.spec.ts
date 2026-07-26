@@ -101,7 +101,7 @@ class TestDocSelectionManagerService {
 class TestRenderManagerService {
     render: any = null;
 
-    getRenderById(): any {
+    getRenderUnitById(): any {
         return this.render;
     }
 }

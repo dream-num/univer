@@ -243,7 +243,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         };
         // canvasOffset will be used in slide-editing.render-controller.ts@_handleEditorVisible
         // const mainScene = this._mainScene;
-        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
         const mainScene = renderUnit?.scene;
         const mainViewport = mainScene?.getViewport(SLIDE_KEY.VIEW);
         const slideMainRect = mainScene?.getObject(SLIDE_KEY.COMPONENT);

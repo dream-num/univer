@@ -117,7 +117,7 @@ class TestRenderManagerService {
         return this.renderers.has(unitId);
     }
 
-    getRenderById(unitId: string) {
+    getRenderUnitById(unitId: string) {
         return this.renderers.get(unitId) ?? null;
     }
 

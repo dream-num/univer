@@ -103,7 +103,7 @@ function createServiceTestBed() {
         } as never,
         commandService as never,
         {
-            getRenderById: vi.fn(() => currentRender),
+            getRenderUnitById: vi.fn(() => currentRender),
         } as never,
         {
             getActiveTextRange: vi.fn(() => activeRange),

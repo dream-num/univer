@@ -92,7 +92,6 @@ function createController(options: {
             getUnit: vi.fn(() => unit),
         } as never,
         {
-            getRenderById: vi.fn(() => ({ mainComponent: document })),
             getRenderUnitById: vi.fn(() => ({ mainComponent: document })),
         } as never,
         {

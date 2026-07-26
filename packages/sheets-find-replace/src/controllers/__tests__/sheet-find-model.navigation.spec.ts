@@ -34,7 +34,7 @@ describe('SheetFindModel navigation', () => {
             getCurrent: () => null,
         };
 
-        const renderManagerService = { getRenderById: vi.fn(() => null) };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => null) };
         const commandService = { executeCommand: vi.fn(), onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })) };
         const contextService = { setContextValue: vi.fn() };
         const themeService = { getColorFromTheme: vi.fn(() => '#fff') };

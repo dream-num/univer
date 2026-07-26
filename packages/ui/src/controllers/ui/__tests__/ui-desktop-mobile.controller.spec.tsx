@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LifecycleStages } from '@univerjs/core';
+import { Injector, LifecycleStages } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -39,14 +39,14 @@ vi.mock('@univerjs/design', async (importOriginal) => {
 
 function createCommonDeps() {
     return {
-        injector: {},
+        injector: new Injector(),
         lifecycleService: {
             onStage: vi.fn().mockResolvedValue(undefined),
             stage: LifecycleStages.Starting,
         },
         renderManagerService: {
             getRenderAll: vi.fn(() => new Map()),
-            getRenderById: vi.fn(() => null),
+            getRenderUnitById: vi.fn(() => null),
             created$: new Subject<any>(),
             disposed$: new Subject<string>(),
         },

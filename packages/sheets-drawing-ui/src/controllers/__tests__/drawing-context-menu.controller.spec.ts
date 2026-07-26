@@ -42,7 +42,7 @@ function createController(options?: {
     const controller = new DrawingContextMenuController(
         { getDrawingOKey: vi.fn(options?.drawingLookup ?? (() => ({ unitId: 'u1' }))) } as any,
         contextMenuService as any,
-        { getRenderById: vi.fn(() => ({ scene })) } as any,
+        { getRenderUnitById: vi.fn(() => ({ scene })) } as any,
         { getAllUnitsForType: vi.fn(() => [{ getUnitId: () => 'unit-1' }]) } as any,
         drawingContextMenuService
     );

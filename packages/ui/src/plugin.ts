@@ -74,6 +74,7 @@ import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
+import { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 
@@ -121,6 +122,7 @@ export class UniverUIPlugin extends Plugin {
             [ZIndexManager],
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
+            [IWorkbenchService, { useClass: WorkbenchService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IRibbonService, { useClass: DesktopRibbonService }],
             [IRibbonOverrideService, { useClass: RibbonOverrideService }],

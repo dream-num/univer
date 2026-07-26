@@ -130,7 +130,6 @@ function createController() {
         drawingManagerService as never,
         docDrawingService as never,
         {
-            getRenderById: vi.fn(() => renderObject),
             getRenderUnitById: vi.fn(() => renderObject),
         } as never,
         { refreshDrawings } as never

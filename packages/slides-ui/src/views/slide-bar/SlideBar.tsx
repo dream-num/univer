@@ -65,7 +65,7 @@ export function SlideSideBar() {
         divRefs.forEach((ref, index) => {
             if (ref.current) {
                 const slide = slideList[index];
-                renderManagerService.getRenderById(slide.id)?.engine.setContainer(ref.current);
+                renderManagerService.getRenderUnitById(slide.id)?.engine.setContainer(ref.current);
             }
         });
 

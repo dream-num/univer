@@ -51,11 +51,11 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
 
         const unitId = docDataModel.getUnitId();
 
-        const skeleton = renderManagerService.getRenderById(unitId)
+        const skeleton = renderManagerService.getRenderUnitById(unitId)
             ?.with(DocSkeletonManagerService)
             .getSkeleton();
 
-        const docSelectionRenderService = renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+        const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
 
         if (skeleton == null || docSelectionRenderService == null) {
             return false;

@@ -15,6 +15,7 @@
  */
 
 import type { ImageSourceType } from '../services/image-io/image-io.service';
+import type { IResources } from '../services/resource-manager/type';
 import type { CellValueType, LocaleType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
 
@@ -134,7 +135,7 @@ export interface IBaseSnapshot {
     createdAt: number;
     updatedAt: number;
     createdBy?: string;
-    resources?: Array<{ id?: string; name: string; data: string }>;
+    resources?: IResources;
 }
 
 export interface ITableSnapshot {

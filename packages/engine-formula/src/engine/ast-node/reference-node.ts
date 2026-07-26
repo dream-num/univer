@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
-import { Optional } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import {
@@ -62,7 +61,7 @@ export class ReferenceNode extends BaseAstNode {
         private _referenceObjectType: ReferenceObjectType,
         private _unitReferenceResolver: IFormulaUnitReferenceResolver,
         private _superTableService: ISuperTableService,
-        private _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader | undefined,
+        private _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader,
         private _isPrepareMerge: boolean = false,
         private _tableReference?: ITableReferenceDescriptor
     ) {
@@ -158,7 +157,7 @@ export class ReferenceNode extends BaseAstNode {
 
         if (resolution.externalReference) {
             const token = this._getExternalLoadToken();
-            const error = await this._externalReferenceDataLoader?.load({
+            const error = await this._externalReferenceDataLoader.load({
                 hostUnitId,
                 qualifier: unitQualifier,
                 referenceKind,
@@ -235,8 +234,8 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         @IFunctionService private readonly _functionService: IFunctionService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
         @IFormulaUnitReferenceResolver private readonly _unitReferenceResolver: IFormulaUnitReferenceResolver,
-        @Optional(IFormulaExternalReferenceDataLoader)
-        private readonly _externalReferenceDataLoader?: IFormulaExternalReferenceDataLoader
+        @IFormulaExternalReferenceDataLoader
+        private readonly _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader
     ) {
         super();
     }

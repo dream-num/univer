@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
 import type { ISetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type {
@@ -27,13 +27,9 @@ import {
     generateRandomId,
     ICommandService,
     Inject,
-    IUniverInstanceService,
     LifecycleService,
     ObjectMatrix,
-    Optional,
-    UniverInstanceType,
 } from '@univerjs/core';
-import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { BehaviorSubject, bufferWhen, filter, skip, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -53,7 +49,6 @@ export enum OtherFormulaBizType {
 
 export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();
-    private readonly _unitSyncDisposables = new Map<string, IDisposable>();
 
     private _formulaChangeWithRange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string; ranges: IRange[] }>();
     public formulaChangeWithRange$ = this._formulaChangeWithRange$.asObservable();
@@ -70,9 +65,7 @@ export class RegisterOtherFormulaService extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController,
-        @Optional(IUniverInstanceService) private readonly _univerInstanceService?: IUniverInstanceService
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         super();
         this._initFormulaRegister();
@@ -82,8 +75,6 @@ export class RegisterOtherFormulaService extends Disposable {
     override dispose(): void {
         super.dispose();
 
-        this._unitSyncDisposables.forEach((disposable) => disposable.dispose());
-        this._unitSyncDisposables.clear();
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
         this._otherFormulaResultApplied$.complete();
@@ -228,16 +219,6 @@ export class RegisterOtherFormulaService extends Disposable {
         const formulaId = this._createFormulaId(unitId, subUnitId, bizType, bizId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 
-        const unitType = this._univerInstanceService?.getUnitType(unitId);
-        const isAutomaticallySyncedUnit = unitType === UniverInstanceType.UNIVER_SHEET
-            || unitType === UniverInstanceType.UNIVER_BASE;
-        if (!isAutomaticallySyncedUnit && !this._unitSyncDisposables.has(unitId)) {
-            const disposable = this._dataSyncPrimaryController?.syncUnit(unitId);
-            if (disposable) {
-                this._unitSyncDisposables.set(unitId, disposable);
-            }
-        }
-
         cacheMap.set(formulaId, {
             result: undefined,
             status: FormulaResultStatus.WAIT,
@@ -265,12 +246,6 @@ export class RegisterOtherFormulaService extends Disposable {
         this._commandService.executeCommand(RemoveOtherFormulaMutation.id, params, { onlyLocal: true });
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         formulaIdList.forEach((id) => cacheMap.delete(id));
-        const hasRemainingFormula = [...(this._formulaCacheMap.get(unitId)?.values() ?? [])]
-            .some((subUnitMap) => subUnitMap.size > 0);
-        if (!hasRemainingFormula) {
-            this._unitSyncDisposables.get(unitId)?.dispose();
-            this._unitSyncDisposables.delete(unitId);
-        }
     }
 
     getFormulaValue(unitId: string, subUnitId: string, formulaId: string): Promise<Nullable<IOtherFormulaResult>> {

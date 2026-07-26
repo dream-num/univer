@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BaseDataModel, IDisposable, IMutation, IMutationInfo, Workbook } from '@univerjs/core';
+import type { IDisposable, IMutation, IMutationInfo, UnitModel, Workbook } from '@univerjs/core';
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {
     CommandType,
@@ -75,8 +75,7 @@ export class DataSyncPrimaryController extends RxDisposable {
     syncUnit(unitId: string): IDisposable {
         const alreadySyncing = this._syncingUnits.has(unitId);
         this._syncingUnits.add(unitId);
-        const unit = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
-            ?? this._univerInstanceService.getUnit<BaseDataModel>(unitId, UniverInstanceType.UNIVER_BASE);
+        const unit = this._univerInstanceService.getUnit<UnitModel>(unitId);
         if (!alreadySyncing && unit) {
             this._remoteInstanceService.createInstance({
                 unitID: unit.getUnitId(),

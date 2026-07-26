@@ -96,6 +96,9 @@ export class Interpreter extends Disposable {
         if (node == null) {
             return false;
         }
+        if (node.isAsync()) {
+            return true;
+        }
         const result: boolean[] = [];
         this._checkAsyncNode(node, result);
 
@@ -148,7 +151,7 @@ export class Interpreter extends Disposable {
             (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
-        if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
+        if (node.isAsync()) {
             await node.executeAsync();
         } else {
             node.execute();

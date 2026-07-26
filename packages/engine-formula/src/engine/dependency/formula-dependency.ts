@@ -295,7 +295,9 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                     continue;
                 }
 
-                const { rowCount = Infinity, columnCount = Infinity } = this._currentConfigService.getSheetRowColumnCount(unitId, subUnitId) || {};
+                const sheetSize = this._currentConfigService.getSheetRowColumnCount(unitId, subUnitId);
+                const rowCount = sheetSize.rowCount > 0 ? sheetSize.rowCount : Infinity;
+                const columnCount = sheetSize.columnCount > 0 ? sheetSize.columnCount : Infinity;
 
                 const subFormulaDataKeys = Object.keys(subFormulaData);
                 for (const subFormulaDataId of subFormulaDataKeys) {

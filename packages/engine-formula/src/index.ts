@@ -28,6 +28,9 @@ export type {
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
+    IFormulaExternalReferenceBinding,
+    IFormulaExternalReferenceResource,
+    IFormulaExternalReferences,
     IFormulaExecuteResultMap,
     IFormulaStringMap,
     IFormulaUnitNameMap,
@@ -286,6 +289,11 @@ export { CalculateFormulaService, ICalculateFormulaService } from './services/ca
 export { DEFAULT_INTERVAL_COUNT } from './services/calculate-formula.service';
 export { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
 export type { IFormulaDirtyData } from './services/current-data.service';
+export {
+    IFormulaExternalReferenceDataLoader,
+    NoopFormulaExternalReferenceDataLoader,
+} from './services/external-reference-data-loader.service';
+export type { IFormulaExternalReferenceLoadInput } from './services/external-reference-data-loader.service';
 export { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
 export type {
     IDefinedNameMapItem,

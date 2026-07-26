@@ -24,6 +24,7 @@ import type {
     IDirtyUnitSuperTableMap,
     IFormulaData,
     IFormulaDatasetConfig,
+    IFormulaExternalReferences,
     IFormulaUnitNameMap,
     IRuntimeUnitDataType,
     IUnitData,
@@ -58,6 +59,7 @@ export interface IFormulaDirtyData {
     maxIteration?: number;
     isCalculateTreeModel?: boolean; // whether to calculate the dependency tree model
     rowData?: IUnitRowData; // Include rows hidden by filters
+    externalReferences?: IFormulaExternalReferences;
 }
 
 export interface IFormulaCurrentConfigService {
@@ -75,6 +77,10 @@ export interface IFormulaCurrentConfigService {
     getSheetNameMap(): IUnitSheetNameMap;
 
     getUnitNameMap(): IFormulaUnitNameMap;
+
+    getExternalReferences(): IFormulaExternalReferences;
+
+    getCalculationGeneration(): number;
 
     isForceCalculate(): boolean;
 
@@ -149,6 +155,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _unitNameMap: IFormulaUnitNameMap = {};
 
+    private _externalReferences: IFormulaExternalReferences = {};
+
+    private _calculationGeneration = 0;
+
     private _forceCalculate: boolean = false;
 
     private _clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
@@ -190,6 +200,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._formulaData = {};
         this._sheetNameMap = {};
         this._unitNameMap = {};
+        this._externalReferences = {};
         this._clearDependencyTreeCache = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
@@ -247,6 +258,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getUnitNameMap() {
         return this._unitNameMap;
+    }
+
+    getExternalReferences() {
+        return this._externalReferences;
+    }
+
+    getCalculationGeneration() {
+        return this._calculationGeneration;
     }
 
     isForceCalculate() {
@@ -334,6 +353,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     load(config: IFormulaDatasetConfig) {
+        this._calculationGeneration++;
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
             this._unitData = config.allUnitData;
             this._unitStylesData = config.unitStylesData;
@@ -378,6 +398,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._dirtyUnitOtherFormulaMap = config.dirtyUnitOtherFormulaMap;
 
+        this._externalReferences = config.externalReferences ?? {};
+
         this._excludedCell = config.excludedCell;
 
         this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
@@ -412,6 +434,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
             dirtyUnitFeatureMap: this._dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: this._dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache: this._clearDependencyTreeCache,
+            externalReferences: this._externalReferences,
         };
     }
 

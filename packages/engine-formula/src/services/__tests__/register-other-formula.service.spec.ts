@@ -21,10 +21,13 @@ import {
     ICommandService,
     IConfigService,
     ILogService,
+    IUniverInstanceService,
     Injector,
     LifecycleService,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
+import { describe, expect, it, vi } from 'vitest';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../../commands/mutations/set-formula-calculation.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../../commands/mutations/set-other-formula.mutation';
@@ -34,7 +37,10 @@ import { OtherFormulaBizType, RegisterOtherFormulaService } from '../register-ot
 
 type FormulaResultMatrix = Record<number, Record<number, Array<{ v?: unknown }>>>;
 
-function createService(): {
+function createService(
+    dataSyncPrimaryController?: Pick<DataSyncPrimaryController, 'syncUnit'>,
+    unitType?: UniverInstanceType
+): {
     service: RegisterOtherFormulaService;
     commandService: ICommandService;
     activeDirtyManagerService: IActiveDirtyManagerService;
@@ -45,6 +51,16 @@ function createService(): {
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
     injector.add([LifecycleService]);
+    if (dataSyncPrimaryController) {
+        injector.add([DataSyncPrimaryController, { useValue: dataSyncPrimaryController }]);
+    }
+    if (unitType != null) {
+        injector.add([IUniverInstanceService, {
+            useValue: {
+                getUnitType: () => unitType,
+            } as never,
+        }]);
+    }
     injector.add([RegisterOtherFormulaService]);
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(SetOtherFormulaMutation);
@@ -99,6 +115,36 @@ describe('RegisterOtherFormulaService', () => {
         await flushCommandChain();
 
         expect(executedIds).toContain(SetOtherFormulaMutation.id);
+    });
+
+    it('should keep non-sheet host mutations synced while it has registered formulas', () => {
+        const dispose = vi.fn();
+        const syncUnit = vi.fn(() => ({ dispose }));
+        const { service } = createService({ syncUnit } as never);
+
+        const firstFormulaId = service.registerFormulaWithRange('doc-1', 'body', '=1');
+        const secondFormulaId = service.registerFormulaWithRange('doc-1', 'body', '=2');
+
+        expect(syncUnit).toHaveBeenCalledTimes(1);
+        expect(syncUnit).toHaveBeenCalledWith('doc-1');
+
+        service.deleteFormula('doc-1', 'body', [firstFormulaId]);
+        expect(dispose).not.toHaveBeenCalled();
+
+        service.deleteFormula('doc-1', 'body', [secondFormulaId]);
+        expect(dispose).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+        UniverInstanceType.UNIVER_SHEET,
+        UniverInstanceType.UNIVER_BASE,
+    ])('should reuse automatic worker sync for unit type %s', (unitType) => {
+        const syncUnit = vi.fn(() => ({ dispose: vi.fn() }));
+        const { service } = createService({ syncUnit } as never, unitType);
+
+        service.registerFormulaWithRange('unit-1', 'sub-unit-1', '=1');
+
+        expect(syncUnit).not.toHaveBeenCalled();
     });
 
     it('should cache formula results and resolve pending getFormulaValue', async () => {

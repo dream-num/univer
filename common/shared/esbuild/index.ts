@@ -30,7 +30,7 @@ export function ignoreGlobalCssPlugin(): IEsbuildPlugin {
         name: 'ignore-global-css',
         setup(build: IPluginBuild) {
             build.onResolve({ filter: /\/global\.css$/ }, (args: IResolveArgs) => {
-                if (args.importer.includes('packages')) {
+                if (isPackageSourceImporter(args.importer)) {
                     return {
                         path: args.path,
                         namespace: 'ignore-global-css',
@@ -46,6 +46,11 @@ export function ignoreGlobalCssPlugin(): IEsbuildPlugin {
             });
         },
     };
+}
+
+function isPackageSourceImporter(importer: string): boolean {
+    const normalized = importer.replaceAll('\\', '/');
+    return /(?:^|\/)(?:packages|packages-experimental)\/[^/]+\/src(?:\/|$)/.test(normalized);
 }
 
 export function removeClassnameNewlinesPlugin(): IEsbuildPlugin {

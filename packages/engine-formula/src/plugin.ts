@@ -48,6 +48,10 @@ import { FormulaDataModel } from './models/formula-data.model';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
+import {
+    IFormulaExternalReferenceDataLoader,
+    NoopFormulaExternalReferenceDataLoader,
+} from './services/external-reference-data-loader.service';
 import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
 import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
 import {
@@ -195,6 +199,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [IDependencyManagerService, { useClass: DependencyManagerService }],
                 [IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }],
                 [IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }],
+                [IFormulaExternalReferenceDataLoader, { useClass: NoopFormulaExternalReferenceDataLoader }],
             ];
 
             dependencies.forEach((dependency) => this._injector.add(dependency));

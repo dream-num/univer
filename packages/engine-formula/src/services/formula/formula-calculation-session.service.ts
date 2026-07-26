@@ -34,6 +34,7 @@ export interface IFormulaCalculationSessionState {
 
 export enum FormulaResultApplicationType {
     SHEET = 'sheet',
+    BASE = 'base',
     OTHER_FORMULA = 'other-formula',
 }
 

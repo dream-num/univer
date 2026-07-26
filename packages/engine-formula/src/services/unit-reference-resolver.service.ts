@@ -30,6 +30,12 @@ export interface IFormulaUnitReferenceResolveInput {
 export interface IFormulaUnitReferenceResolution {
     unitId: string;
     unitType?: FormulaUnitType;
+    externalReference?: {
+        kind: 'host' | 'ooxml';
+        qualifier: string;
+        referenceId?: string;
+        slot?: number;
+    };
 }
 
 export interface IFormulaUnitReferenceResolver {

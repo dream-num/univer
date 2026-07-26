@@ -134,6 +134,7 @@ export interface IBaseSnapshot {
     createdAt: number;
     updatedAt: number;
     createdBy?: string;
+    resources?: Array<{ id?: string; name: string; data: string }>;
 }
 
 export interface ITableSnapshot {

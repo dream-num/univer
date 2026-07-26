@@ -105,6 +105,22 @@ export interface IFormulaUnitNameMap {
     [unitId: string]: IFormulaUnitNameMapItem;
 }
 
+export interface IFormulaExternalReferenceBinding {
+    qualifier: string;
+    sourceUnitId: string;
+    sourceUnitType: FormulaUnitType;
+}
+
+export interface IFormulaExternalReferenceResource {
+    schemaVersion: number;
+    references: Record<string, IFormulaExternalReferenceBinding>;
+}
+
+/** Host-scoped External Reference resources keyed by the Host unitId. */
+export interface IFormulaExternalReferences {
+    [hostUnitId: string]: IFormulaExternalReferenceResource;
+}
+
 export interface IUnitSheetIdToNameMap {
     [unitId: string]: Nullable<{ [sheetId: string]: string }>;
 }
@@ -247,6 +263,7 @@ export interface IFormulaDatasetConfig {
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
     unitNameMap?: IFormulaUnitNameMap;
+    externalReferences?: IFormulaExternalReferences;
     maxIteration?: number;
     isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters

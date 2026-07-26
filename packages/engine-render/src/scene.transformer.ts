@@ -34,6 +34,7 @@ import { degToRad, precisionTo, radToDeg } from './basics/tools';
 import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
+import { Line } from './shape/line';
 import { Rect } from './shape/rect';
 import { RegularPolygon } from './shape/regular-polygon';
 
@@ -1867,14 +1868,15 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 applyObject
             );
             if (rotateEnabled) {
-                const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
+                const rotateLine = new Line(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
                     zIndex: zIndex - 1,
                     evented: false,
-                    left: lineLeft,
-                    top: lineTop,
-                    height: rotateAnchorOffset,
-                    width: 1,
+                    startX: lineLeft,
+                    startY: lineTop,
+                    endX: lineLeft,
+                    endY: lineTop + rotateAnchorOffset,
                     strokeWidth: borderStrokeWidth,
+                    strokeLineCap: 'butt',
                     stroke: rotateStroke ?? borderStroke,
                 });
 

@@ -56,6 +56,7 @@ import {
     IFeatureCalculationManagerService,
     IFormulaCurrentConfigService,
     IFormulaDependencyGenerator,
+    IFormulaExternalReferenceDataLoader,
     IFormulaRuntimeService,
     IFormulaUnitReferenceResolver,
     IFunctionService,
@@ -68,6 +69,7 @@ import {
     LambdaParameterNodeFactory,
     Lexer,
     LexerTreeBuilder,
+    NoopFormulaExternalReferenceDataLoader,
     OperatorNodeFactory,
     OtherFormulaManagerService,
     PrefixNodeFactory,
@@ -199,6 +201,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([IFormulaExternalReferenceDataLoader, { useClass: NoopFormulaExternalReferenceDataLoader }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }]);

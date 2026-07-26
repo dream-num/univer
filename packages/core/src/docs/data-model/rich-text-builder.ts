@@ -126,7 +126,9 @@ export function normalizeData(data: IDocumentData) {
  * Agent-friendly text style aliases accepted by `RichTextBuilder.span()`.
  *
  * The readable aliases can be combined in one object and apply only to the appended span. Native `ITextStyle` fields
- * remain available for advanced document integrations.
+ * remain available for advanced document integrations. Drawing effects such as `glow` and `outerShadow` are
+ * especially useful when the resulting rich text is attached to a Shape; standalone document products may not expose
+ * dedicated controls for them.
  *
  * @example
  * ```ts
@@ -137,6 +139,14 @@ export function normalizeData(data: IDocumentData) {
  *     italic: true,
  *     color: '#dc2626',
  *     background: '#fee2e2',
+ *     glow: { color: '#f97316', radius: 6 },
+ *     outerShadow: {
+ *       color: '#000000',
+ *       opacity: 0.35,
+ *       blurRadius: 4,
+ *       distance: 3,
+ *       direction: 45,
+ *     },
  *   });
  * ```
  */

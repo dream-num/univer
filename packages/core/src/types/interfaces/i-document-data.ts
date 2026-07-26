@@ -20,7 +20,7 @@ import type { ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IDrawingParam } from './i-drawing';
 import type { IMention } from './i-mention';
-import type { IColorStyle, IStyleBase } from './i-style-data';
+import type { IColorStyle, IGlowEffect, IShadowEffect, IStyleBase } from './i-style-data';
 
 // Attention: all dimensional units, unless otherwise stated, refer to pt，1 pt = 1 / 72 in
 /**
@@ -833,6 +833,20 @@ export interface ITextStyle extends IStyleBase {
     pos?: number; // position
     sa?: number; // scale
     textFill?: IDocTextFill;
+    /**
+     * DrawingML-style glow around the rendered glyphs.
+     *
+     * This is primarily intended for embedded rich text such as Shape text. A standalone document product may
+     * preserve and render the value without exposing dedicated authoring controls.
+     */
+    glow?: IGlowEffect;
+    /**
+     * DrawingML-style outer shadow around the rendered glyphs.
+     *
+     * This is primarily intended for embedded rich text such as Shape text. A standalone document product may
+     * preserve and render the value without exposing dedicated authoring controls.
+     */
+    outerShadow?: IShadowEffect;
 }
 
 export interface IIndentStart {

@@ -52,6 +52,7 @@ function createContext(): MockRenderContext {
     };
     return {
         fillStyle: '',
+        filter: 'none',
         font: '10px Arial',
         save: vi.fn(),
         restore: vi.fn(),
@@ -113,6 +114,48 @@ function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkel
 }
 
 describe('docs font and baseline extension', () => {
+    it('renders public glow and outer shadow fields in one text draw', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        let filterDuringDraw = '';
+        TestContext.fillText.mockImplementation(() => {
+            filterDuringDraw = TestContext.filter;
+        });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#223344' },
+                glow: {
+                    color: '#5b9bd5',
+                    radius: 4,
+                },
+                outerShadow: {
+                    color: '#000000',
+                    opacity: 0.4,
+                    blurRadius: 3,
+                    distance: 2,
+                    direction: 0,
+                },
+            },
+        }));
+
+        expect(TestContext.fillText).toHaveBeenCalledTimes(1);
+        expect(filterDuringDraw).toContain('drop-shadow(0px 0px 2px #5b9bd5)');
+        expect(filterDuringDraw).toContain('drop-shadow(2px 0px 3px rgba(0,0,0,0.4))');
+        expect(TestContext.save).toHaveBeenCalledTimes(1);
+        expect(TestContext.restore).toHaveBeenCalledTimes(1);
+    });
+
     it('handles text drawing with baseline offsets and vertical text branch', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();

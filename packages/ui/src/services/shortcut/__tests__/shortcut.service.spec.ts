@@ -25,7 +25,7 @@ import { ILayoutService } from '../../layout/layout.service';
 import { IPlatformService } from '../../platform/platform.service';
 import { IUIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, MetaKeys } from '../keycode';
-import { ShortcutService } from '../shortcut.service';
+import { NativeTextEditorShortcutBehavior, ShortcutService } from '../shortcut.service';
 
 function createKeyboardEvent(
     keyCode: number,
@@ -164,6 +164,12 @@ describe('ShortcutService', () => {
             priority: 10,
             preconditions: () => false,
         };
+        const eventBlocked = {
+            id: 'cmd.event-blocked',
+            binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+            priority: 11,
+            eventPreconditions: () => false,
+        };
         const highAllowed = {
             id: 'cmd.high',
             binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
@@ -173,6 +179,7 @@ describe('ShortcutService', () => {
 
         service.registerShortcut(low);
         service.registerShortcut(highBlocked);
+        service.registerShortcut(eventBlocked);
         service.registerShortcut(highAllowed);
 
         const event = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
@@ -319,6 +326,7 @@ describe('ShortcutService', () => {
         service.registerShortcut({
             id: 'cmd.select-all',
             binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+            nativeTextEditorBehavior: NativeTextEditorShortcutBehavior.ALLOW_NATIVE,
         });
 
         const event = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
@@ -331,6 +339,63 @@ describe('ShortcutService', () => {
         expect(candidate).toBeUndefined();
         expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(false);
+        service.dispose();
+    });
+
+    it('lets an explicit shortcut override native select-all in an embedded text editor', () => {
+        const embedRoot = document.createElement('div');
+        embedRoot.setAttribute('data-embed-interaction-boundary-owner', 'embed-1');
+        embedRoot.setAttribute(EMBED_CHILD_UNIT_ID_ATTRIBUTE, 'child-doc');
+        const textEditor = document.createElement('div');
+        textEditor.contentEditable = 'true';
+        Object.defineProperty(textEditor, 'isContentEditable', {
+            configurable: true,
+            get: () => true,
+        });
+        embedRoot.appendChild(textEditor);
+        const otherTextEditor = document.createElement('div');
+        otherTextEditor.contentEditable = 'true';
+        embedRoot.appendChild(otherTextEditor);
+
+        const scopedExecuteCommand = vi.fn(() => Promise.resolve(true));
+        const scopedContextService = {
+            getContextValue: vi.fn(),
+        };
+        const scopedCommandService = {
+            executeCommand: scopedExecuteCommand,
+        };
+        const runtimeScope = {
+            has: vi.fn(() => true),
+            get: vi.fn((identifier: unknown) => identifier === IContextService ? scopedContextService : scopedCommandService),
+        };
+        const { service, executeCommand, getRuntimeScope } = createService();
+        getRuntimeScope.mockReturnValue(runtimeScope);
+        service.registerShortcut({
+            id: 'doc.command.select-all',
+            binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+            eventPreconditions: (event) => event.target === textEditor,
+            nativeTextEditorBehavior: NativeTextEditorShortcutBehavior.OVERRIDE_NATIVE,
+        });
+
+        const event = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
+        Object.defineProperty(event, 'target', {
+            configurable: true,
+            get: () => textEditor,
+        });
+        window.dispatchEvent(event);
+
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-doc');
+        expect(scopedExecuteCommand).toHaveBeenCalledWith('doc.command.select-all', undefined);
+        expect(executeCommand).not.toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(true);
+
+        const otherEvent = createKeyboardEvent(KeyCode.A, { ctrlKey: true });
+        Object.defineProperty(otherEvent, 'target', {
+            configurable: true,
+            get: () => otherTextEditor,
+        });
+
+        expect(service.dispatch(otherEvent)).toBeUndefined();
         service.dispose();
     });
 

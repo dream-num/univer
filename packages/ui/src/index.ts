@@ -120,7 +120,7 @@ export { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtim
 export type { IUIRuntimeScope } from './services/runtime-scope/ui-runtime-scope.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
-export { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
+export { IShortcutService, NativeTextEditorShortcutBehavior, ShortcutService } from './services/shortcut/shortcut.service';
 export type { IShortcutItem } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';

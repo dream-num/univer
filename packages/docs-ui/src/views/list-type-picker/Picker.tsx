@@ -29,7 +29,10 @@ interface IListTypePickerProps extends IListTypePickerBaseProps {
 export const ListTypePicker = (props: IListTypePickerProps) => {
     const { value, onChange, options } = props;
     return (
-        <div className="univer-grid univer-grid-cols-3 univer-gap-2 univer-p-1.5">
+        <div
+            className="univer-grid univer-grid-cols-3 univer-gap-2 univer-p-1.5"
+            data-u-editor-interaction-boundary="true"
+        >
             {options.map((item) => {
                 return (
                     <a

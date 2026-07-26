@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { KeyCode, MetaKeys } from '@univerjs/ui';
+import type { KeyCode, MetaKeys, NativeTextEditorShortcutBehavior } from '@univerjs/ui';
 import type { Editor } from '../../../services/editor/editor';
 import { CommandType, DisposableCollection, generateRandomId, ICommandService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -22,7 +22,11 @@ import { IShortcutService, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 
 export interface IKeyboardEventConfig {
-    keyCodes: { keyCode: KeyCode; metaKey?: MetaKeys }[];
+    keyCodes: {
+        keyCode: KeyCode;
+        metaKey?: MetaKeys;
+        nativeTextEditorBehavior?: NativeTextEditorShortcutBehavior;
+    }[];
     handler: (keyCode: KeyCode, metaKey?: MetaKeys) => void;
 }
 
@@ -52,6 +56,12 @@ export function useKeyboardEvent(isNeed: boolean, config?: IKeyboardEventConfig,
             return {
                 id: operationId,
                 binding: keyCode.metaKey ? keyCode.keyCode | keyCode.metaKey : keyCode.keyCode,
+                eventPreconditions: keyCode.nativeTextEditorBehavior == null
+                    ? undefined
+                    : (event: KeyboardEvent) =>
+                        event.target instanceof HTMLElement &&
+                        event.target.id === `__editor_${editorId}`,
+                nativeTextEditorBehavior: keyCode.nativeTextEditorBehavior,
                 preconditions: () => true,
                 priority: 901,
                 staticParameters: {

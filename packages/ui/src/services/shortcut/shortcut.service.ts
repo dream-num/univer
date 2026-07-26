@@ -26,6 +26,15 @@ import { IUIRuntimeScopeService } from '../runtime-scope/ui-runtime-scope.servic
 import { KeyCode, KeyCodeToChar, MetaKeys } from './keycode';
 
 /**
+ * Defines whether a Univer shortcut should yield to the browser's native behavior
+ * when the keyboard event originates from an editable text element.
+ */
+export enum NativeTextEditorShortcutBehavior {
+    ALLOW_NATIVE,
+    OVERRIDE_NATIVE,
+}
+
+/**
  * A shortcut item that could be registered to the {@link IShortcutService}.
  */
 export interface IShortcutItem<P extends object = object> {
@@ -43,6 +52,11 @@ export interface IShortcutItem<P extends object = object> {
      * would be passed to the callback.
      */
     preconditions?: (contextService: IContextService) => boolean;
+
+    /**
+     * A callback that examines the keyboard event before this shortcut is selected.
+     */
+    eventPreconditions?: (event: KeyboardEvent) => boolean;
 
     /**
      * The binding of the shortcut. It should be a combination of {@link KeyCode} and {@link MetaKeys}.
@@ -64,6 +78,12 @@ export interface IShortcutItem<P extends object = object> {
      * The binding of the shortcut for Linux. If the property is not specified, the default binding would be used.
      */
     linux?: number;
+
+    /**
+     * Controls whether this shortcut can override the browser's native behavior
+     * for editable text elements. Native behavior is preserved by default.
+     */
+    nativeTextEditorBehavior?: NativeTextEditorShortcutBehavior;
 
     /**
      * The group of the menu item should belong to. The shortcut item would be rendered in the
@@ -296,10 +316,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return undefined;
         }
 
-        if (this._shouldLetEmbedTextEditorHandleNativeShortcut(e, binding)) {
-            return undefined;
-        }
-
         const shortcuts = this._shortCutMapping.get(binding);
         if (shortcuts === undefined) {
             return undefined;
@@ -308,7 +324,17 @@ export class ShortcutService extends Disposable implements IShortcutService {
         const contextService = this._getRuntimeService<IContextService>(e, IContextService) ?? this._contextService;
         const candidateShortcut = Array.from(shortcuts)
             .sort((s1, s2) => (s2.priority ?? 0) - (s1.priority ?? 0))
-            .find((s) => s.preconditions?.(contextService) ?? true);
+            .find((s) =>
+                (s.eventPreconditions?.(e) ?? true) &&
+                (s.preconditions?.(contextService) ?? true)
+            );
+
+        if (
+            this._shouldLetEmbedTextEditorHandleNativeShortcut(e, binding) &&
+            candidateShortcut?.nativeTextEditorBehavior !== NativeTextEditorShortcutBehavior.OVERRIDE_NATIVE
+        ) {
+            return undefined;
+        }
 
         return candidateShortcut;
     }

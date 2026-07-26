@@ -23,6 +23,7 @@ import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import { GlyphType } from '../../../basics';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
+import { combineDrawingEffectFilter, createDrawingEffectFilter } from '../../../basics/drawing-effect';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape } from '../../../shape';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -97,7 +98,7 @@ export class FontAndBaseLine extends docExtension {
             }
         }
 
-        const { cl: colorStyle, va: baselineOffset, textFill } = textStyle;
+        const { cl: colorStyle, va: baselineOffset, textFill, glow, outerShadow } = textStyle;
         const fontColor = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
 
         if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
@@ -106,15 +107,32 @@ export class FontAndBaseLine extends docExtension {
             spanPointWithFont.y += bBox.sbo;
         }
 
-        if (this._fillTextWithTextFill(ctx, glyph, spanPointWithFont, textFill, fontColor)) {
+        const drawText = () => {
+            if (this._fillTextWithTextFill(ctx, glyph, spanPointWithFont, textFill, fontColor)) {
+                return;
+            }
+
+            if (fontColor && this._preFontColor !== fontColor) {
+                ctx.fillStyle = fontColor;
+            }
+
+            this._fillText(ctx, glyph, spanPointWithFont);
+        };
+        if (!glow && !outerShadow) {
+            drawText();
             return;
         }
 
-        if (fontColor && this._preFontColor !== fontColor) {
-            ctx.fillStyle = fontColor;
+        const effectFilter = createDrawingEffectFilter(glow, outerShadow);
+        if (!effectFilter) {
+            drawText();
+            return;
         }
 
-        this._fillText(ctx, glyph, spanPointWithFont);
+        ctx.save();
+        ctx.filter = combineDrawingEffectFilter(ctx.filter, effectFilter);
+        drawText();
+        ctx.restore();
     }
 
     private _fillTextWithTextFill(

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IGroupBaseBound } from '@univerjs/core';
+import type { IGlowEffect, IGroupBaseBound } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
 import { RENDER_CLASS_TYPE, Transform } from './basics';
+import { combineDrawingEffectFilter, createDrawingEffectFilter } from './basics/drawing-effect';
 import { Group } from './group';
 
 export interface IDrawingGroupShadow {
@@ -45,8 +46,15 @@ export class DrawingGroupObject extends Group {
 
     private _outerShadow?: IDrawingGroupShadow;
 
+    private _glow?: IGlowEffect;
+
     setOuterShadow(shadow?: IDrawingGroupShadow): void {
         this._outerShadow = shadow;
+        this.makeDirty(true);
+    }
+
+    setGlow(glow?: IGlowEffect): void {
+        this._glow = glow;
         this.makeDirty(true);
     }
 
@@ -103,6 +111,10 @@ export class DrawingGroupObject extends Group {
         const centerX = realLeft + realWidth / 2;
         const centerY = realTop + realHeight / 2;
         ctx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
+        const effectFilter = createDrawingEffectFilter(this._glow, undefined);
+        if (effectFilter) {
+            ctx.filter = combineDrawingEffectFilter(ctx.filter, effectFilter);
+        }
         if (this._outerShadow) {
             ctx.shadowColor = this._outerShadow.shadowColor;
             ctx.shadowBlur = this._outerShadow.shadowBlur;

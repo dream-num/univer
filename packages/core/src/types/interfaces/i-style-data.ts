@@ -106,6 +106,52 @@ export interface IColor {
 }
 
 /**
+ * Glow applied around drawing content.
+ *
+ * Dimensional values use the owning unit's drawing coordinate system.
+ */
+export interface IGlowEffect {
+    /** Glow color as a CSS color string. */
+    color: string;
+    /** Glow radius. */
+    radius?: number;
+}
+
+export type OuterShadowAlignment = 'tl' | 't' | 'tr' | 'l' | 'ctr' | 'r' | 'bl' | 'b' | 'br';
+
+/**
+ * Outer shadow applied to drawing content.
+ *
+ * Dimensional values use the owning unit's drawing coordinate system.
+ */
+export interface IShadowEffect {
+    /** Shadow color as a CSS color string. */
+    color: string;
+    /** OOXML preset shadow token, when the effect originated from `prstShdw`. */
+    preset?: string;
+    /** Shadow opacity, from 0 (transparent) to 1 (opaque). */
+    opacity?: number;
+    /** Blur radius. */
+    blurRadius?: number;
+    /** Direction in degrees, with 0 pointing right and 90 pointing down. */
+    direction?: number;
+    /** Offset distance from the source. */
+    distance?: number;
+    /** Horizontal scale factor; 1 means 100%. */
+    sx?: number;
+    /** Vertical scale factor; 1 means 100%. */
+    sy?: number;
+    /** Horizontal skew angle in degrees. */
+    skewX?: number;
+    /** Vertical skew angle in degrees. */
+    skewY?: number;
+    /** Alignment point used while scaling or skewing the shadow. */
+    alignment?: OuterShadowAlignment;
+    /** Whether the shadow rotates together with its source. */
+    rotateWithShape?: boolean;
+}
+
+/**
  * Style properties of border
  */
 export interface IBorderStyleData {

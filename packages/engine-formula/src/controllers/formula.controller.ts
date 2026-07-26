@@ -83,7 +83,7 @@ export class FormulaController extends Disposable {
             }
 
             this._syncedOtherFormulaUnits.add(unitId);
-            this.disposeWithMe(dataSyncPrimaryController.syncUnit(unitId));
+            this.disposeWithMe(dataSyncPrimaryController.syncUnitMutations(unitId));
         }));
     }
 

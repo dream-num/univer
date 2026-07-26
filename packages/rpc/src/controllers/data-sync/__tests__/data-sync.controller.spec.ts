@@ -193,6 +193,17 @@ describe('data-sync controllers', () => {
         await flushPromises();
         expect(remoteInstanceImpl.syncMutation).toHaveBeenCalledTimes(2);
 
+        const unit3Disposable = controller.syncUnitMutations('unit-3');
+        commandCallback?.({
+            id: 'm-sync',
+            type: CommandType.MUTATION,
+            params: { unitId: 'unit-3' },
+        }, {});
+        await flushPromises();
+        expect(remoteInstanceImpl.createInstance).toHaveBeenCalledTimes(2);
+        expect(remoteInstanceImpl.syncMutation).toHaveBeenCalledTimes(3);
+        unit3Disposable.dispose();
+
         controller.dispose();
     });
 

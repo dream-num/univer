@@ -96,6 +96,21 @@ export class DataSyncPrimaryController extends RxDisposable {
         });
     }
 
+    /**
+     * Sync mutations for a Unit without creating a replica Unit. Use this when the
+     * remote consumer owns derived state for the Unit but must not treat its
+     * snapshot as a workbook or another registered business model.
+     */
+    syncUnitMutations(unitId: string): IDisposable {
+        const alreadySyncing = this._syncingUnits.has(unitId);
+        this._syncingUnits.add(unitId);
+        return toDisposable(() => {
+            if (!alreadySyncing) {
+                this._syncingUnits.delete(unitId);
+            }
+        });
+    }
+
     private _initRPCChannels(): void {
         // for the worker to call
         this._rpcChannelService.registerChannel(RemoteSyncServiceName, fromModule(this._remoteSyncService));

@@ -47,6 +47,7 @@ function createContext() {
         shadowBlur: 0,
         shadowOffsetX: 0,
         shadowOffsetY: 0,
+        filter: 'none',
     } as any;
 }
 
@@ -132,8 +133,12 @@ describe('drawing group', () => {
         drawingGroup.setOuterShadow({
             shadowColor: 'rgba(0, 0, 0, 0.5)',
             shadowBlur: 12,
-            shadowOffsetX: -4,
-            shadowOffsetY: 4,
+            shadowOffsetX: 4,
+            shadowOffsetY: 0,
+        });
+        drawingGroup.setGlow({
+            color: '#5b9bd5',
+            radius: 4,
         });
 
         const ctx = createContext();
@@ -143,10 +148,10 @@ describe('drawing group', () => {
 
         expect(ctx.transform).toHaveBeenCalled();
         expect(childRenderSpy).toHaveBeenCalled();
+        expect(ctx.filter).toContain('drop-shadow(0px 0px 2px #5b9bd5)');
         expect(ctx.shadowColor).toBe('rgba(0, 0, 0, 0.5)');
         expect(ctx.shadowBlur).toBe(12);
-        expect(ctx.shadowOffsetX).toBe(-4);
-        expect(ctx.shadowOffsetY).toBe(4);
+        expect(ctx.shadowOffsetX).toBe(4);
     });
 
     it('maps children of nested drawing groups through the parent rendered bound', () => {

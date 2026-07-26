@@ -22,6 +22,7 @@ import { Engine } from '../engine';
 import { Group } from '../group';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../scene';
 import { Transformer } from '../scene.transformer';
+import { Line } from '../shape/line';
 import { Rect } from '../shape/rect';
 import { ScrollBar } from '../shape/scroll-bar';
 import { Viewport } from '../viewport';
@@ -689,11 +690,19 @@ describe('engine scene viewport extra', () => {
         transformer.setSelectedControl(rect);
         const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
         const controlObjects = control.getObjects();
-        const rotateLine = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__')) as Rect;
+        const rotateLine = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__'));
         const rotate = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotate__') && !o.oKey.includes('_ICON_')) as Rect;
         const rotateIcon = controlObjects.find((o) => o.oKey.includes('_ICON_')) as Rect;
 
+        expect(rotateLine).toBeInstanceOf(Line);
+        if (!(rotateLine instanceof Line)) {
+            throw new TypeError('Rotate line should use the Line render primitive');
+        }
+
         expect(rotateLine.stroke).toBe('#d1d5db');
+        expect(rotateLine.startX).toBe(rotateLine.endX);
+        expect(rotateLine.endY - rotateLine.startY).toBe(20);
+        expect(rotateLine.startX).toBe(rotate.left + rotate.width / 2);
         expect(rotate.radius).toBe(4);
         expect(rotateIcon.width).toBe(10);
         expect(rotateIcon.height).toBe(10);

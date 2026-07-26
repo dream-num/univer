@@ -16,6 +16,14 @@
 
 export * from './base-object';
 export * from './basics';
+export {
+    combineDrawingEffectFilter,
+    createDrawingEffectFilter,
+    resolveDrawingEffectMasks,
+    resolveGlowEffect,
+    resolveOuterShadowEffect,
+} from './basics/drawing-effect';
+export type { IResolvedDrawingShadow } from './basics/drawing-effect';
 export { getOffsetRectForDom } from './basics/position';
 export * from './canvas';
 export * from './components';

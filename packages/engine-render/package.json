@@ -26,7 +26,6 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./basics/drawing-effect": "./src/basics/drawing-effect.ts",
         "./*": "./src/*"
     },
     "main": "./src/index.ts",

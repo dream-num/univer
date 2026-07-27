@@ -2006,9 +2006,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
       postcss:
         specifier: ^8.5.23
         version: 8.5.23

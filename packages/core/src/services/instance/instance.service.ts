@@ -119,9 +119,6 @@ export interface IUniverInstanceService {
     getUnit<T extends UnitModel>(id: string, type?: UniverInstanceType): Nullable<T>;
     getAllUnitsForType<T>(type: UniverInstanceType): T[];
     getUnitType(unitId: string): UniverInstanceType;
-
-    /** @deprecated */
-    getUniverSheetInstance(unitId: string): Nullable<Workbook>;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
@@ -255,10 +252,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     getUnitCreateOptions(unitId: string): Nullable<ICreateUnitOptions> {
         return this._unitCreateOptions.get(unitId) ?? null;
-    }
-
-    getUniverSheetInstance(unitId: string): Nullable<Workbook> {
-        return this.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     }
 
     getAllUnitsForType<T>(type: UniverInstanceType): T[] {

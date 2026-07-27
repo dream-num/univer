@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, set, ThemeService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, set, ThemeService, UniverInstanceType } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -106,7 +106,7 @@ describe('Test clipboard', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
@@ -118,7 +118,7 @@ describe('Test clipboard', () => {
 
     describe('Copy area where have filtered out rows', () => {
         it('Paste content should not have filtered out rows', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId('sheet1')!;
             worksheet.__interceptViewModel((viewModel) => {
                 viewModel.registerRowFilteredInterceptor({
                     getRowFiltered(row: number): boolean {

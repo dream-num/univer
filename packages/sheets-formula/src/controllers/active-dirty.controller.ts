@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
@@ -36,6 +36,7 @@ import {
     Inject,
     IUniverInstanceService,
     ObjectMatrix,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
@@ -386,7 +387,7 @@ export class ActiveDirtyController extends Disposable {
 
         const dirtyRanges: IUnitRange[] = [];
 
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
 
         const worksheet = workbook?.getSheetBySheetId(sheetId);
 

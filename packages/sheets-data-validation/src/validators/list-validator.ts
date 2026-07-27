@@ -218,7 +218,7 @@ export class ListValidator extends BaseSheetValidator {
     }
 
     private _getUnitAndSubUnit(currentUnitId?: string, currentSubUnitId?: string): { unitId: string; subUnitId: string } | null {
-        const workbook = (currentUnitId ? this._univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined)
+        const workbook = (currentUnitId ? this._univerInstanceService.getUnit<Workbook>(currentUnitId, UniverInstanceType.UNIVER_SHEET) : undefined)
             ?? this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return null;
 

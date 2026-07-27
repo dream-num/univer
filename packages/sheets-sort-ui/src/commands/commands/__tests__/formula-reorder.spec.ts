@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService, UniverInstanceType } from '@univerjs/core';
 import { ReorderRangeCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSortUIService } from '../../../services/sheets-sort-ui.service';
@@ -54,7 +54,7 @@ describe('Test "Sort Range Commands"', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();

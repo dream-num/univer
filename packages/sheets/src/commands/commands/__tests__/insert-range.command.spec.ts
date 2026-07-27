@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -24,6 +24,7 @@ import {
     RedoCommand,
     Tools,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
@@ -212,7 +213,7 @@ describe('Test insert range commands', () => {
             endRow: number,
             endColumn: number
         ): Nullable<ICellData> => {
-            const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService)?.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             const value = worksheet?.getRange(startRow, startColumn, endRow, endColumn);
             return value?.getValue();
         };
@@ -224,7 +225,7 @@ describe('Test insert range commands', () => {
             endColumn: number
         ): Nullable<IStyleData> => {
             const value = getValueByPosition(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
             if (value && styles) {
                 return styles.getStyleByCell(value);
             }
@@ -253,7 +254,7 @@ describe('Test insert range commands', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
@@ -265,7 +266,7 @@ describe('Test insert range commands', () => {
             endColumn: number
         ): IRange[] | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getMergeData()
                 .filter((rect) => Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect));
@@ -543,7 +544,7 @@ describe('Test insert range commands', () => {
                     range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 0 },
                 })).resolves.toBe(true);
 
-                const worksheet = localGet(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+                const worksheet = localGet(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId('sheet1')!;
                 expect(worksheet.getRowCount()).toBe(13);
                 expect(worksheet.getRowHeight(2)).toBe(40);
                 expect(worksheet.getCell(4, 0)?.v).toBe('A2');

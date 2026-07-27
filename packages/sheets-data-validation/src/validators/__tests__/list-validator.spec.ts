@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, LocaleService } from '@univerjs/core';
+import type { ICellData, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     DataValidationRenderMode,
     DataValidationType,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Univer,
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
@@ -29,33 +33,14 @@ import { DataValidationListCacheService } from '../../services/dv-list-cache.ser
 import { getRuleFormulaResultSet, isValidListFormula, ListValidator } from '../list-validator';
 import { getDataValidationCellValue, getSheetRangeValueSet, getTransformedFormula } from '../util';
 
-function createWorksheet() {
-    return {
-        getSheetId: () => 'sheet1',
-        getName: () => 'Sheet1',
-        getCellRaw: vi.fn((row: number, col: number) => {
-            const cells: Record<string, any> = {
-                '0,0': { v: 'Red' },
-                '0,1': { v: 'Green,Blue' },
-                '1,0': { v: '' },
-                '1,1': { v: 10 },
-            };
-            return cells[`${row},${col}`];
-        }),
-    };
-}
+const univers: Univer[] = [];
 
 function createContext() {
-    const worksheet = createWorksheet();
-    const workbook = {
-        getUnitId: () => 'unit1',
-        getActiveSheet: () => worksheet,
-        getSheetBySheetId: vi.fn((sheetId: string) => (sheetId === 'sheet1' ? worksheet : undefined)),
-        getSheetBySheetName: vi.fn((sheetName: string) => (sheetName === 'Sheet1' ? worksheet : undefined)),
-    };
-    const localeService = {
-        t: vi.fn((key: string) => key),
-    } as unknown as LocaleService;
+    const univer = new Univer();
+    univers.push(univer);
+    const injector = univer.__getInjector();
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.ZH_CN]: {} } as never);
     const formulaService = {
         getRuleFormulaResult: vi.fn(async () => ([{
             result: [[[
@@ -72,32 +57,31 @@ function createContext() {
         })),
     };
     const lexerTreeBuilder = new LexerTreeBuilder();
-    const univerInstanceService = {
-        getUnit: vi.fn(() => workbook),
-        getUniverSheetInstance: vi.fn(() => workbook),
-        getCurrentUnitOfType: vi.fn((type: UniverInstanceType) => (type === UniverInstanceType.UNIVER_SHEET ? workbook : undefined)),
-    };
-    const injector = {
-        get(token: unknown) {
-            if (token === DataValidationFormulaService) {
-                return formulaService;
-            }
-            if (token === DataValidationListCacheService) {
-                return listCacheService;
-            }
-            if (token === LexerTreeBuilder) {
-                return lexerTreeBuilder;
-            }
-            if (String(token) === 'univer.current') {
-                return univerInstanceService;
-            }
-
-            throw new Error(`Unknown token: ${String(token)}`);
+    injector.add([DataValidationFormulaService, { useValue: formulaService as never }]);
+    injector.add([DataValidationListCacheService, { useValue: listCacheService as never }]);
+    injector.add([LexerTreeBuilder, { useValue: lexerTreeBuilder }]);
+    injector.add([ListValidator]);
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit1',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: 'Test workbook',
+        styles: {},
+        sheetOrder: ['sheet1'],
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'Sheet1',
+                cellData: {
+                    0: { 0: { v: 'Red' }, 1: { v: 'Green,Blue' } },
+                    1: { 0: { v: '' }, 1: { v: 10 } },
+                },
+            },
         },
-    } as unknown as Injector;
+    });
+    const univerInstanceService = injector.get(IUniverInstanceService);
 
     return {
-        worksheet,
         workbook,
         localeService,
         formulaService,
@@ -105,12 +89,13 @@ function createContext() {
         lexerTreeBuilder,
         univerInstanceService,
         injector,
-        validator: new ListValidator(localeService, injector),
+        validator: injector.get(ListValidator),
     };
 }
 
 describe('list-validator helpers', () => {
     afterEach(() => {
+        univers.splice(0).forEach((univer) => univer.dispose());
         vi.restoreAllMocks();
     });
 
@@ -256,20 +241,30 @@ describe('list-validator helpers', () => {
         expect(listCacheService.getOrCompute).toHaveBeenCalled();
     });
 
-    it('returns empty lists when no workbook or worksheet can be resolved', async () => {
-        const context = createContext();
-        context.univerInstanceService.getUniverSheetInstance.mockReturnValueOnce(undefined as any);
-        context.univerInstanceService.getCurrentUnitOfType.mockReturnValueOnce(undefined as any);
+    it('returns empty lists when no workbook can be resolved', async () => {
+        const testBed = createContext();
+        testBed.univerInstanceService.disposeUnit('unit1');
 
-        expect(context.validator.getList({ formula1: 'A,B' } as any, 'missing', 'sheet1')).toEqual([]);
-        context.univerInstanceService.getUniverSheetInstance.mockReturnValue({
-            getSheetBySheetId: () => undefined,
-            getActiveSheet: () => undefined,
-        } as any);
-        context.univerInstanceService.getCurrentUnitOfType.mockReturnValue(undefined as any);
-        expect(context.validator.getListWithColor({ formula1: 'A,B' } as any, 'unit1', 'missing')).toEqual([]);
-        expect(context.validator.getListWithColorMap({ formula1: 'A,B' } as any, 'unit1', 'missing')).toEqual({});
-        await expect(context.validator.getListAsync({ formula1: 'A,B' } as any, 'unit1', 'missing')).resolves.toEqual([]);
+        expect(testBed.validator.getList({ formula1: 'A,B' } as any, 'missing', 'sheet1')).toEqual([]);
+        expect(testBed.validator.getListWithColor({ formula1: 'A,B' } as any, 'missing', 'sheet1')).toEqual([]);
+        expect(testBed.validator.getListWithColorMap({ formula1: 'A,B' } as any, 'missing', 'sheet1')).toEqual({});
+        await expect(testBed.validator.getListAsync({ formula1: 'A,B' } as any, 'missing', 'sheet1')).resolves.toEqual([]);
+    });
+
+    it('falls back to the active worksheet when the requested worksheet is missing', async () => {
+        const { validator, workbook } = createContext();
+        const rule = { formula1: 'A,B' } as any;
+
+        expect(workbook.getSheetBySheetId('missing')).toBeUndefined();
+        expect(validator.getListWithColor(rule, 'unit1', 'missing')).toEqual([
+            { label: 'Red', color: '#ff0000' },
+            { label: 'Green', color: '#00ff00' },
+        ]);
+        expect(validator.getListWithColorMap(rule, 'unit1', 'missing')).toEqual({
+            Red: '#ff0000',
+            Green: '#00ff00',
+        });
+        await expect(validator.getListAsync(rule, 'unit1', 'missing')).resolves.toEqual(['A', 'B']);
     });
 
     it('extracts values from sheet ranges and single cells', () => {

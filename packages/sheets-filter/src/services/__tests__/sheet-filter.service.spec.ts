@@ -30,12 +30,14 @@ import {
     UniverInstanceService,
     Workbook,
 } from '@univerjs/core';
-import { of } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { SheetsFilterService } from '../sheet-filter.service';
+
+const injectors: Injector[] = [];
 
 function createService() {
     const injector = new Injector();
+    injectors.push(injector);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
@@ -57,16 +59,6 @@ function createService() {
 
 function createServiceWithCapturedResource() {
     let resourceConfig: any;
-    const sheet = {
-        getUnitId: () => 'unit-1',
-        getSheetId: () => 'sheet-1',
-    };
-    const workbook = {
-        getUnitId: () => 'unit-1',
-        getSheetBySheetId: (sheetId: string) => (sheetId === 'sheet-1' ? sheet : null),
-        getActiveSheet: () => sheet,
-        activeSheet$: of(sheet),
-    };
 
     class TestResourceManagerService {
         registerPluginResource(config: unknown) {
@@ -75,24 +67,32 @@ function createServiceWithCapturedResource() {
         }
     }
 
-    class TestUniverInstanceService {
-        getUniverSheetInstance = (unitId: string) => (unitId === 'unit-1' ? workbook : null);
-        getCurrentUnitOfType = () => workbook;
-        getCurrentTypeOfUnit$ = () => of(workbook);
-    }
-
     class TestCommandService {
         onCommandExecuted = () => ({ dispose: () => undefined });
     }
 
     const injector = new Injector();
+    injectors.push(injector);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IResourceManagerService, { useClass: TestResourceManagerService as never }]);
-    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([SheetsFilterService]);
 
+    const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
+    const workbook = injector.createInstance(Workbook, {
+        id: 'unit-1',
+        sheets: { 'sheet-1': { id: 'sheet-1' } },
+        sheetOrder: ['sheet-1'],
+    });
+    univerInstanceService.__addUnit(workbook);
+    univerInstanceService.focusUnit('unit-1');
+
     return { service: injector.get(SheetsFilterService), getResourceConfig: () => resourceConfig };
 }
+
+afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
 
 describe('SheetsFilterService', () => {
     it('creates and removes filter models for workbook sheets', () => {

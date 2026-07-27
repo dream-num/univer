@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, IStyleData, Nullable, RichTextValue } from '@univerjs/core';
+import type { ICellData, IDocumentData, Injector, IStyleData, Nullable, RichTextValue, Workbook } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import {
     AbsoluteRefType,
@@ -26,6 +26,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     TestConfirmService,
+    UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -140,7 +141,7 @@ describe('Test FRange', () => {
             endColumn: number
         ): Nullable<ICellData> =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValue();
@@ -152,7 +153,7 @@ describe('Test FRange', () => {
             endColumn: number
         ): Nullable<IStyleData> => {
             const value = getValueByPosition(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
             if (value && styles) {
                 return styles.getStyleByCell(value);
             }

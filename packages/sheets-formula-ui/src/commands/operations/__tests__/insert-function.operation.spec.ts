@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IInsertFunctionOperationParams } from '../insert-function.operation';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -25,6 +25,7 @@ import {
     RANGE_TYPE,
     RedoCommand,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import {
@@ -99,7 +100,7 @@ describe('Test insert function operation', () => {
 
                 function getValues() {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(2, 1, 3, 1)
                         .getValues();
@@ -136,7 +137,7 @@ describe('Test insert function operation', () => {
 
                 function getValues() {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(1, 2, 1, 3)
                         .getValues();
@@ -209,7 +210,7 @@ describe('Test insert function operation', () => {
 
                 function getValues(range: { startRow: number; startColumn: number; endRow: number; endColumn: number }) {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(range.startRow, range.startColumn, range.endRow, range.endColumn)
                         .getValues();

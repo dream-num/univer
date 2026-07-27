@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { BooleanNumber, IAccessor, IMutation, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetHideMutationParams {
@@ -45,7 +45,7 @@ export const SetWorksheetHideMutation: IMutation<ISetWorksheetHideMutationParams
     id: 'sheet.mutation.set-worksheet-hidden',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+        const universheet = accessor.get(IUniverInstanceService).getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (universheet == null) {
             return false;

@@ -830,7 +830,7 @@ export class SheetClipboardController extends RxDisposable {
     }
 
     private _getWorksheet(unitId: string, subUnitId: string): Worksheet {
-        const worksheet = this._instanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+        const worksheet = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
 
         if (!worksheet) {
             throw new Error(

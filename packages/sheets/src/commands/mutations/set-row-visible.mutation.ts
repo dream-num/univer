@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation, IRange } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, IMutation, IRange, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface ISetRowVisibleMutationParams {
     unitId: string;
@@ -25,7 +25,7 @@ export interface ISetRowVisibleMutationParams {
 
 export const SetRowVisibleUndoMutationFactory = (accessor: IAccessor, params: ISetRowVisibleMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+    const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -43,7 +43,7 @@ export const SetRowVisibleMutation: IMutation<ISetRowVisibleMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
@@ -72,7 +72,7 @@ export interface ISetRowHiddenMutationParams {
 
 export const SetRowHiddenUndoMutationFactory = (accessor: IAccessor, params: ISetRowHiddenMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+    const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -90,7 +90,7 @@ export const SetRowHiddenMutation: IMutation<ISetRowHiddenMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

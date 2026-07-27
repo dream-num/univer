@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import {
     CellValueType,
@@ -25,6 +25,7 @@ import {
     RedoCommand,
     TestConfirmService,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
@@ -84,7 +85,7 @@ describe('Test clear selection content commands', () => {
 
                 function getValue(): Nullable<ICellData> {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -129,7 +130,7 @@ describe('Test clear selection content commands', () => {
 
                 function getValue(): Nullable<ICellData> {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -137,7 +138,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -188,7 +189,7 @@ describe('Test clear selection content commands', () => {
 
                 function getValue(): Nullable<ICellData> {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -196,7 +197,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -204,7 +205,7 @@ describe('Test clear selection content commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;
@@ -280,7 +281,7 @@ describe('Test clear selection content commands', () => {
 
                 function getValue(): Nullable<ICellData> {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -288,7 +289,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -331,7 +332,7 @@ describe('Test clear selection content commands', () => {
 
                 function getValue(): Nullable<ICellData> {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -339,7 +340,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -347,7 +348,7 @@ describe('Test clear selection content commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;

@@ -148,7 +148,7 @@ describe('Test add worksheet merge commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;
@@ -195,7 +195,7 @@ describe('Test add worksheet merge commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;
@@ -240,7 +240,7 @@ describe('Test add worksheet merge commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;
@@ -273,7 +273,7 @@ describe('Test add worksheet merge commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;
@@ -328,7 +328,7 @@ describe('Test add worksheet merge commands', () => {
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig()
                         .mergeData;

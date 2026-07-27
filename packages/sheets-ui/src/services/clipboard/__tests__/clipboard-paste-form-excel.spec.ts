@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     DEFAULT_TEXT_FORMAT_EXCEL,
@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     LocaleType,
     RANGE_TYPE,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -127,7 +128,7 @@ describe('Test clipboard', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
@@ -139,7 +140,7 @@ describe('Test clipboard', () => {
             endColumn: number
         ): Array<Array<Nullable<IStyleData>>> | undefined => {
             const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
             if (values && styles) {
                 return values.map((row) => row.map((cell) => styles.getStyleByCell(cell)));
             }
@@ -172,7 +173,7 @@ describe('Test clipboard', () => {
             });
         });
         it('test style with paste cell style', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste(excelSample);
             expect(res).toBeTruthy();
@@ -193,7 +194,7 @@ describe('Test clipboard', () => {
         });
 
         it('test style with paste rich text style', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste(excelSample);
             expect(res).toBeTruthy();
@@ -234,7 +235,7 @@ describe('Test clipboard', () => {
         });
 
         it('test numfmt with paste', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste(excelSample);
             expect(res).toBeTruthy();
@@ -243,7 +244,7 @@ describe('Test clipboard', () => {
         });
 
         it('test formula with paste', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste('', '=SUM(A1');
             expect(res).toBeTruthy();
@@ -252,7 +253,7 @@ describe('Test clipboard', () => {
         });
 
         it('test paste to range K1:L1, K1 has style, L1 has text format', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 
             // set selection to K1:L1
@@ -308,7 +309,7 @@ describe('Test clipboard', () => {
         });
 
         it('copy number 123456789123456789', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 
             // set selection to K1:L1
@@ -338,7 +339,7 @@ describe('Test clipboard', () => {
         });
 
         it('copy value is 1,234.57, the format "#,##0.00", the origin value 1234.567', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 
             // set selection to K1:L1
@@ -368,7 +369,7 @@ describe('Test clipboard', () => {
         });
 
         it('copy value is $ 23,123.00, the format "$#,##0.00", the origin value 23123', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 
             // set selection to K1:L1
@@ -398,7 +399,7 @@ describe('Test clipboard', () => {
         });
 
         it('copy value is `  1   3   `, no specific format', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 
             // set selection to K1:L1
@@ -429,7 +430,7 @@ describe('Test clipboard', () => {
         });
 
         it('copy value is (30), (30,303,003,030), 3.14, 2015/2/2, 3000%, ¥ 1,234.57', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 
             // set selection to K1:L1

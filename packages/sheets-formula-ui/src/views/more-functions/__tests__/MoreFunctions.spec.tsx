@@ -283,10 +283,6 @@ class TestUniverInstanceService {
     getUnitType() {
         return UniverInstanceType.UNIVER_SHEET;
     }
-
-    getUniverSheetInstance() {
-        return this._workbook;
-    }
 }
 
 class SelectionState {

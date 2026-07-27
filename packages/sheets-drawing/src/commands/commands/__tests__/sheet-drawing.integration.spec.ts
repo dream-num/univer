@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
 import {
     ArrangeTypeEnum,
@@ -24,6 +24,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DRAWING_COPY_CONTEXT_KEY, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
@@ -542,7 +543,7 @@ describe('sheet drawing integration', () => {
             subUnitId: 'sheet1',
         })).toBe(true);
 
-        const workbook = get(IUniverInstanceService).getUniverSheetInstance('test')!;
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
         let copiedSheetId = '';
         const sheets = workbook.getSheets();
         for (const sheet of sheets) {
@@ -593,7 +594,7 @@ describe('sheet drawing integration', () => {
             subUnitId: 'sheet1',
         })).toBe(true);
 
-        const workbook = get(IUniverInstanceService).getUniverSheetInstance('test')!;
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
         const copiedSheetId = workbook.getSheets()
             .map((sheet) => sheet.getSheetId())
             .find((sheetId) => sheetId !== 'sheet1' && sheetId !== 'sheet2')!;

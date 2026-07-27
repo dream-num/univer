@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -91,14 +91,14 @@ describe('Test clipboard', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
         getStyles = (key) => {
             if (!key) return;
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
             return styles?.get(key);
         };
     });
@@ -129,7 +129,7 @@ describe('Test clipboard', () => {
             });
         });
         it('test font style paste from excel', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste(alignmentSampleByExcel);
             expect(res).toBeTruthy();
@@ -143,7 +143,7 @@ describe('Test clipboard', () => {
         });
 
         it('test font style paste from google', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste(alignmentSampleByGoogle);
             expect(res).toBeTruthy();
@@ -156,7 +156,7 @@ describe('Test clipboard', () => {
         });
 
         it('test font style paste from univer', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const res = await sheetClipboardService.legacyPaste(alignmentSampleByUniver);
             expect(res).toBeTruthy();

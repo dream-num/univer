@@ -125,7 +125,7 @@ function _resolveMoveRangeContext(accessor: IAccessor, params: IMoveRangeCommand
         return null;
     }
 
-    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
     const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
 

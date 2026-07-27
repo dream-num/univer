@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import type { IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
-import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools } from '@univerjs/core';
+import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools, UniverInstanceType } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { RefRangeService } from '@univerjs/sheets';
 import { FilterBy, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
@@ -440,7 +440,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         const generateFilterValuesService = injector.get(ISheetsGenerateFilterValuesService, Quantity.OPTIONAL);
 
         const { unitId, subUnitId } = filterModel;
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) throw new Error(`[ByValuesModel]: Workbook not found for filter model with unitId: ${unitId}!`);
 
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
@@ -702,7 +702,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
         const univerInstanceService = injector.get(IUniverInstanceService);
 
         const { unitId, subUnitId } = filterModel;
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) throw new Error(`[ByColorsModel]: Workbook not found for filter model with unitId: ${unitId}!`);
 
         const worksheet = workbook?.getSheetBySheetId(subUnitId);

@@ -92,7 +92,7 @@ describe("Test commands used for updating cells' styles", () => {
 
         function getFontColor(row: number, col: number) {
             return get(IUniverInstanceService)
-                .getUniverSheetInstance('test')!
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!
                 .getSheetBySheetId('sheet1')!
                 .getRange(row, col)
                 .getFontColor();
@@ -154,7 +154,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getFontBold(): FontWeight | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontWeight();
@@ -209,7 +209,7 @@ describe("Test commands used for updating cells' styles", () => {
                     endColumn: number
                 ): FontItalic | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(startRow, startColumn, endRow, endColumn)
                         .getFontStyle();
@@ -254,7 +254,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getFontUnderline(): ITextDecoration | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getUnderline();
@@ -306,7 +306,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getFontThroughLine(): ITextDecoration | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getStrikeThrough();
@@ -349,7 +349,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getFontSize(): number | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontSize();
@@ -390,7 +390,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getFontFamily(): string | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontFamily();
@@ -440,28 +440,28 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getFontColor(): string | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontColor();
                 }
                 function getFontThroughLine(): ITextDecoration | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getStrikeThrough();
                 }
                 function getFontUnderline(): ITextDecoration | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getUnderline();
                 }
                 function getFontOverline(): ITextDecoration | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getOverline();
@@ -528,7 +528,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getBackgroundColor(): string | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getBackground();
@@ -571,7 +571,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getVerticalAlignment(): VerticalAlign | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getVerticalAlignment();
@@ -614,7 +614,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getHorizontalAlignment(): HorizontalAlign | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getHorizontalAlignment();
@@ -659,7 +659,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getTextWrap(): BooleanNumber | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getWrap();
@@ -702,7 +702,7 @@ describe("Test commands used for updating cells' styles", () => {
             ]);
 
             const getShrinkToFit = () => get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getComposedCellStyle(0, 0)
                 ?.stf;
@@ -738,7 +738,7 @@ describe("Test commands used for updating cells' styles", () => {
             ]);
 
             const getShrinkToFit = () => get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getComposedCellStyle(0, 0)
                 ?.stf;
@@ -764,7 +764,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 function getTextRotation(): ITextRotation | undefined {
                     return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
+                        .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getTextRotation();

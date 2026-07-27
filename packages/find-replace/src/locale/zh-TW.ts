@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: '取代',
             'replace-all': '全部取代',
             'case-sensitive': '區分大小寫',
-            'find-placeholder': '在此工作表中尋找',
+            'find-placeholder': '尋找',
             'advanced-finding': '進階搜尋與取代',
             'replace-placeholder': '輸入取代字串',
             'match-the-whole-cell': '完全符合儲存格內容',
+            'match-the-whole-word': '全詞匹配',
             'find-direction': {
                 title: '尋找方向',
                 row: '按列搜尋',

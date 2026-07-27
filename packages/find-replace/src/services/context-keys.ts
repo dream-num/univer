@@ -25,3 +25,6 @@ export const FIND_REPLACE_DIALOG_FOCUS = 'FIND_REPLACE_DIALOG_FOCUS';
  * If the find replace feature is activated and the replace is revealed.
  */
 export const FIND_REPLACE_REPLACE_REVEALED = 'FIND_REPLACE_REPLACE_REVEALED';
+
+/** If the focused unit has a find-replace provider. */
+export const FIND_REPLACE_AVAILABLE = 'FIND_REPLACE_AVAILABLE';

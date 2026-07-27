@@ -14,18 +14,36 @@
  * limitations under the License.
  */
 
-import type { IFindMatch, IFindMoveParams, IFindQuery, IReplaceAllResult } from '../find-replace.service';
-import { awaitTime, ICommandService, IContextService, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import type { UnitModel } from '@univerjs/core';
+import type {
+    IFindMatch,
+    IFindMoveParams,
+    IFindQuery,
+    IFindReplaceProviderCapabilities,
+    IReplaceAllResult,
+} from '../find-replace.service';
+import {
+    awaitTime,
+    ICommandService,
+    IContextService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { firstValueFrom, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { FindBy, FindDirection, FindModel, FindReplaceService, FindScope } from '../find-replace.service';
 
 class TestUniverInstanceService {
-    readonly focused$ = new Subject<unknown>();
-    focusedUnitId: string | null = 'u1';
+    readonly focused$ = new Subject<string | null>();
+    focusedUnit = {
+        getUnitId: () => 'u1',
+        type: UniverInstanceType.UNIVER_DOC,
+    } as UnitModel;
 
     getFocusedUnit() {
-        return this.focusedUnitId ? { getUnitId: () => this.focusedUnitId } : null;
+        return this.focusedUnit;
     }
 }
 
@@ -103,12 +121,26 @@ class TestFindModel extends FindModel {
 }
 
 class TestFindReplaceProvider {
+    capabilities: IFindReplaceProviderCapabilities = {
+        caseSensitive: true,
+        matchesTheWholeWord: true,
+        matchesTheWholeCell: false,
+        findDirection: false,
+        findScope: false,
+        findBy: false,
+    };
+
+    supportedType = UniverInstanceType.UNIVER_DOC;
     readonly queries: IFindQuery[] = [];
     readonly models: TestFindModel[] = [];
     modelConfigs: ITestModelConfig[] = [];
     terminateCount = 0;
 
     constructor(@Inject(Injector) private readonly _injector: Injector) {}
+
+    isSupported(unit: UnitModel): boolean {
+        return unit.type === this.supportedType;
+    }
 
     async find(query: IFindQuery): Promise<FindModel[]> {
         this.queries.push(query);
@@ -145,6 +177,34 @@ function createService(registerProvider = true) {
 }
 
 describe('FindReplaceService', () => {
+    it('selects the provider supporting the focused unit', async () => {
+        const { service, provider, univerInstanceService } = createService();
+        univerInstanceService.focusedUnit = {
+            getUnitId: () => 'doc-1',
+            type: UniverInstanceType.UNIVER_DOC,
+        } as UnitModel;
+        univerInstanceService.focused$.next('doc-1');
+
+        expect(service.start()).toBe(true);
+        await expect(firstValueFrom(service.providerCapabilities$)).resolves.toEqual(provider.capabilities);
+        expect(provider.queries).toHaveLength(0);
+
+        service.terminate();
+        service.dispose();
+    });
+
+    it('does not start when no provider supports the focused unit', () => {
+        const { service, univerInstanceService } = createService();
+        univerInstanceService.focusedUnit = {
+            getUnitId: () => 'slide-1',
+            type: UniverInstanceType.UNIVER_SLIDE,
+        } as UnitModel;
+        univerInstanceService.focused$.next('slide-1');
+
+        expect(service.start()).toBe(false);
+        service.dispose();
+    });
+
     it('should start session and move to next match', async () => {
         const { service, provider } = createService();
         const match1: IFindMatch = { provider: 'p', unitId: 'u1', range: { i: 1 }, replaceable: true } as any;
@@ -190,6 +250,7 @@ describe('FindReplaceService', () => {
         expect(provider.queries.at(-1)).toMatchObject({
             findString: 'invoice',
             replaceRevealed: true,
+            matchesTheWholeWord: false,
         });
         expect(service.getCurrentMatch()).toEqual(match);
         expect(focusSignals).toEqual([1]);

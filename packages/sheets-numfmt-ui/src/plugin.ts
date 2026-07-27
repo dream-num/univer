@@ -27,9 +27,11 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -40,7 +42,13 @@ import { SheetNumfmtUIController } from './controllers/ui.controller';
 import { UserHabitController } from './controllers/user-habit.controller';
 import { NumfmtMenuController } from './menu/numfmt.menu.controller';
 
-@DependentOn(UniverSheetsUIPlugin, UniverSheetsNumfmtPlugin)
+@DependentOn(
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverSheetsNumfmtPlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsNumfmtUIPlugin extends Plugin {
     static override pluginName = 'SHEET_NUMFMT_UI_PLUGIN';
     static override packageName = pkg.name;

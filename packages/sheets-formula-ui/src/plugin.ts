@@ -27,9 +27,12 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { BuiltInUIPart, connectInjector, IUIPartsService } from '@univerjs/ui';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { BuiltInUIPart, connectInjector, IUIPartsService, UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
@@ -52,7 +55,14 @@ import { GlobalRangeSelector } from './views/range-selector/Global';
 /**
  * The configuration of the formula UI plugin.
  */
-@DependentOn(UniverSheetsFormulaPlugin)
+@DependentOn(
+    UniverFormulaEnginePlugin,
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverSheetsFormulaPlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsFormulaUIPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override packageName = pkg.name;

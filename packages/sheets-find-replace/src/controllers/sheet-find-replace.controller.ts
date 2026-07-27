@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
+import type {
+    ICellData,
+    IDisposable,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    Nullable,
+    UnitModel,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
+import type {
+    IFindComplete,
+    IFindMatch,
+    IFindMoveParams,
+    IFindQuery,
+    IFindReplaceProvider,
+    IReplaceAllResult,
+} from '@univerjs/find-replace';
 import type {
     ISelectionWithStyle,
     ISelectRangeCommandParams,
@@ -976,6 +992,15 @@ export class SheetFindModel extends FindModel {
  * It also adds the search results to the search view by highlighting them.
  */
 class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvider {
+    readonly capabilities = {
+        caseSensitive: true,
+        matchesTheWholeWord: false,
+        matchesTheWholeCell: true,
+        findDirection: true,
+        findScope: true,
+        findBy: true,
+    };
+
     /**
      * Hold all find results in this kind of univer business instances (Workbooks).
      */
@@ -987,6 +1012,10 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+    }
+
+    isSupported(unit: UnitModel): boolean {
+        return unit.type === UniverInstanceType.UNIVER_SHEET;
     }
 
     async find(query: IFindQuery): Promise<SheetFindModel[]> {

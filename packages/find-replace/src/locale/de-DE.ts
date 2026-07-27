@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'Ersetzen',
             'replace-all': 'Alle ersetzen',
             'case-sensitive': 'Groß-/Kleinschreibung beachten',
-            'find-placeholder': 'In diesem Blatt suchen',
+            'find-placeholder': 'Suchen',
             'advanced-finding': 'Erweitertes Suchen & Ersetzen',
             'replace-placeholder': 'Ersetzungstext eingeben',
             'match-the-whole-cell': 'Ganze Zelle vergleichen',
+            'match-the-whole-word': 'Nur ganzes Wort',
             'find-direction': {
                 title: 'Suchrichtung',
                 row: 'Nach Zeile suchen',

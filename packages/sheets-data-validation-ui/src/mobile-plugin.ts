@@ -16,8 +16,13 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsDataValidationUIConfig } from './config/config';
-import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
+import { UniverMobileUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import {
     AddSheetDataValidationAndOpenCommand,
@@ -43,6 +48,14 @@ import { SheetsDataValidationUIController } from './controllers/ui.controller';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 
+@DependentOn(
+    UniverDataValidationPlugin,
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverMobileUIPlugin,
+    UniverSheetsMobileUIPlugin,
+    UniverSheetsDataValidationPlugin
+)
 export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
     static override pluginName: string = 'SHEET_DATA_VALIDATION_UI_PLUGIN';
     static override packageName = pkg.name;

@@ -15,7 +15,8 @@
  */
 
 import type { IUniverSheetsTableConfig } from './config/config';
-import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { AddSheetTableCommand } from './commands/commands/add-sheet-table.command';
 import { AddTableThemeCommand } from './commands/commands/add-table-theme.command';
@@ -39,6 +40,7 @@ import { TableFilterController } from './controllers/table-filter.controller';
 import { TableManager } from './models/table-manager';
 import { SheetTableService } from './services/table.service';
 
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsTablePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override packageName = pkg.name;

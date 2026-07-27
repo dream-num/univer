@@ -233,7 +233,7 @@ import {
     NormalTextHeadingShortcut,
 } from './shortcuts/heading.shortcut';
 
-@DependentOn(UniverRenderEnginePlugin, UniverDocsPlugin)
+@DependentOn(UniverDocsPlugin, UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = 'DOC_UI_PLUGIN';
     static override packageName = pkg.name;

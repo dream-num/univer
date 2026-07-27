@@ -1027,6 +1027,43 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.11.1)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
+  packages/docs-find-replace:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/find-replace':
+        specifier: workspace:*
+        version: link:../find-replace
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-istanbul@4.1.10)(happy-dom@20.11.1)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+
   packages/docs-hyper-link:
     dependencies:
       '@univerjs/core':

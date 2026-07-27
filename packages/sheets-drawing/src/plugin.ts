@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsDrawingConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
@@ -25,7 +26,7 @@ import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers
 import { SheetDrawingTransformPlanService } from './services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 
-@DependentOn(UniverDrawingPlugin)
+@DependentOn(UniverDrawingPlugin, UniverSheetsPlugin)
 export class UniverSheetsDrawingPlugin extends Plugin {
     static override pluginName = SHEET_DRAWING_PLUGIN;
     static override packageName = pkg.name;

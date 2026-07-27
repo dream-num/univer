@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConditionalFormattingConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { AddCfCommand } from './commands/commands/add-cf.command';
@@ -42,7 +43,7 @@ import { ConditionalFormattingRangeTransformService } from './services/condition
 import { ConditionalFormattingStyleComposer } from './services/conditional-formatting-style-composer.service';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
 
-@DependentOn(UniverFormulaEnginePlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override packageName = pkg.name;

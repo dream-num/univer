@@ -17,8 +17,12 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsThreadCommentUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -28,7 +32,14 @@ import { DocThreadCommentRenderController } from './controllers/render-controlle
 import { DocThreadCommentUIController } from './controllers/ui.controller';
 import { DocThreadCommentService } from './services/doc-thread-comment.service';
 
-@DependentOn(UniverThreadCommentUIPlugin)
+@DependentOn(
+    UniverDocsPlugin,
+    UniverThreadCommentPlugin,
+    UniverRenderEnginePlugin,
+    UniverUIPlugin,
+    UniverDocsUIPlugin,
+    UniverThreadCommentUIPlugin
+)
 export class UniverDocsThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override packageName = pkg.name;

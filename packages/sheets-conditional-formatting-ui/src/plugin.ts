@@ -27,8 +27,12 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
@@ -56,7 +60,14 @@ import { ConditionalFormattingViewportController } from './controllers/cf.viewpo
 import { ComponentsController } from './controllers/components.controller';
 import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
 
-@DependentOn(UniverSheetsConditionalFormattingPlugin, UniverSheetsFormulaPlugin)
+@DependentOn(
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverSheetsFormulaPlugin,
+    UniverSheetsConditionalFormattingPlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_UI_PLUGIN`;
     static override packageName = pkg.name;

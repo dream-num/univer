@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'Thay thế',
             'replace-all': 'Thay thế Tất cả',
             'case-sensitive': 'Phân biệt chữ hoa chữ thường',
-            'find-placeholder': 'Tìm trong Trang tính này',
+            'find-placeholder': 'Tìm',
             'advanced-finding': 'Tìm kiếm & Thay thế Nâng cao',
             'replace-placeholder': 'Nhập chuỗi thay thế',
             'match-the-whole-cell': 'Khớp toàn bộ ô',
+            'match-the-whole-word': 'Khớp toàn bộ từ',
             'find-direction': {
                 title: 'Hướng tìm kiếm',
                 row: 'Tìm theo hàng',

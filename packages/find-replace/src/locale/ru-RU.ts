@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'Заменить',
             'replace-all': 'Заменить все',
             'case-sensitive': 'Учитывать регистр',
-            'find-placeholder': 'Найти на этом листе',
+            'find-placeholder': 'Найти',
             'advanced-finding': 'Расширенный поиск и замена',
             'replace-placeholder': 'Введите строку для замены',
             'match-the-whole-cell': 'Соответствие всей ячейке',
+            'match-the-whole-word': 'Только слово целиком',
             'find-direction': {
                 title: 'Направление поиска',
                 row: 'Искать по строкам',

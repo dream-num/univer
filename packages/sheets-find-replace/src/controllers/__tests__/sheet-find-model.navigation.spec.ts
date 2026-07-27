@@ -70,6 +70,7 @@ describe('SheetFindModel navigation', () => {
             findString: 'a',
             caseSensitive: false,
             matchesTheWholeCell: false,
+            matchesTheWholeWord: false,
             findDirection: FindDirection.ROW,
             findScope: FindScope.SUBUNIT,
             findBy: FindBy.VALUE,

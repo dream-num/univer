@@ -17,8 +17,13 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsThreadCommentUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -32,7 +37,15 @@ import { SheetsThreadCommentController } from './controllers/sheets-thread-comme
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { PLUGIN_NAME } from './types/const';
 
-@DependentOn(UniverThreadCommentUIPlugin, UniverSheetsThreadCommentPlugin)
+@DependentOn(
+    UniverRenderEnginePlugin,
+    UniverThreadCommentPlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverThreadCommentUIPlugin,
+    UniverSheetsThreadCommentPlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override packageName = pkg.name;

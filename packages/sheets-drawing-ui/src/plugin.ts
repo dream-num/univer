@@ -30,8 +30,11 @@ import {
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -55,7 +58,16 @@ import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-m
 import { DrawingContextMenuService, IDrawingContextMenuService } from './services/drawing-context-menu.service';
 import { SheetDrawingHitTestService } from './services/sheet-drawing-hit-test.service';
 
-@DependentOn(UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
+@DependentOn(
+    UniverDrawingPlugin,
+    UniverRenderEnginePlugin,
+    UniverDocsDrawingPlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverSheetsDrawingPlugin,
+    UniverDrawingUIPlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = 'SHEET_IMAGE_UI_PLUGIN';

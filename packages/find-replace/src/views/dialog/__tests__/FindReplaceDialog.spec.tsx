@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, Nullable } from '@univerjs/core';
-import type { Root } from 'react-dom/client';
-import type { TestMessageService } from '../../../__tests__/create-test-bed';
-import type {
-    IFindMatch,
-    IFindMoveParams,
-    IFindQuery,
-    IFindReplaceState,
-    IReplaceAllResult,
-} from '../../../services/find-replace.service';
-import { awaitTime, ICommandService, toDisposable } from '@univerjs/core';
+import { awaitTime, ICommandService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { ILayoutService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -60,6 +50,18 @@ interface ICellRange {
     id: string;
 }
 
+interface IObservedFindState {
+    matchesCount: number;
+    matchesPosition: number;
+}
+
+type FindProvider = Parameters<IFindReplaceService['registerFindReplaceProvider']>[0];
+type FindQuery = Parameters<FindProvider['find']>[0];
+type FindCapabilities = FindProvider['capabilities'];
+type FindMoveParams = Parameters<FindModel['moveToNextMatch']>[0];
+type FindMatch = NonNullable<ReturnType<FindModel['moveToNextMatch']>> & { range: ICellRange };
+type ReplaceAllResult = Awaited<ReturnType<FindModel['replaceAll']>>;
+
 const INITIAL_ROWS: ICellText[] = [
     { id: 'A1', text: 'apple' },
     { id: 'A2', text: 'pineapple' },
@@ -73,9 +75,9 @@ const REPLACE_ALL_LABEL = 'find-replace.dialog.replace-all';
 const ADVANCED_LABEL = 'find-replace.dialog.advanced-finding';
 
 class TextFindModel extends FindModel {
-    private readonly _matchesUpdate$ = new BehaviorSubject<IFindMatch<ICellRange>[]>([]);
-    private readonly _activelyChangingMatch$ = new Subject<IFindMatch<ICellRange>>();
-    private _matches: IFindMatch<ICellRange>[] = [];
+    private readonly _matchesUpdate$ = new BehaviorSubject<FindMatch[]>([]);
+    private readonly _activelyChangingMatch$ = new Subject<FindMatch>();
+    private _matches: FindMatch[] = [];
     private _position = -1;
 
     override readonly unitId = 'test';
@@ -84,7 +86,7 @@ class TextFindModel extends FindModel {
 
     constructor(
         private readonly _rows: ICellText[],
-        private readonly _query: IFindQuery
+        private readonly _query: FindQuery
     ) {
         super();
         this._refreshMatches();
@@ -96,11 +98,11 @@ class TextFindModel extends FindModel {
         super.dispose();
     }
 
-    override getMatches(): IFindMatch<ICellRange>[] {
+    override getMatches(): FindMatch[] {
         return this._matches;
     }
 
-    override moveToNextMatch(params?: IFindMoveParams): IFindMatch<ICellRange> | null {
+    override moveToNextMatch(params?: FindMoveParams): FindMatch | null {
         if (this._matches.length === 0) {
             return null;
         }
@@ -121,7 +123,7 @@ class TextFindModel extends FindModel {
         return this._emitCurrent();
     }
 
-    override moveToPreviousMatch(params?: IFindMoveParams): IFindMatch<ICellRange> | null {
+    override moveToPreviousMatch(params?: FindMoveParams): FindMatch | null {
         if (this._matches.length === 0) {
             return null;
         }
@@ -154,7 +156,7 @@ class TextFindModel extends FindModel {
         return true;
     }
 
-    override async replaceAll(replaceString: string): Promise<IReplaceAllResult> {
+    override async replaceAll(replaceString: string): Promise<ReplaceAllResult> {
         const ids = new Set(this._matches.map((match) => match.range.id));
         this._rows.forEach((row) => {
             if (ids.has(row.id)) {
@@ -173,7 +175,7 @@ class TextFindModel extends FindModel {
         }
     }
 
-    private _emitCurrent(): IFindMatch<ICellRange> {
+    private _emitCurrent(): FindMatch {
         const match = this._matches[this._position];
         this._activelyChangingMatch$.next(match);
         return match;
@@ -200,10 +202,23 @@ class TextFindModel extends FindModel {
 }
 
 class TestFindReplaceProvider {
-    readonly rows = INITIAL_ROWS.map((row) => ({ ...row }));
-    readonly queries: IFindQuery[] = [];
+    capabilities: FindCapabilities = {
+        caseSensitive: true,
+        matchesTheWholeWord: false,
+        matchesTheWholeCell: true,
+        findDirection: true,
+        findScope: true,
+        findBy: true,
+    };
 
-    async find(query: IFindQuery): Promise<FindModel[]> {
+    readonly rows = INITIAL_ROWS.map((row) => ({ ...row }));
+    readonly queries: FindQuery[] = [];
+
+    isSupported(unit: { type: UniverInstanceType }): boolean {
+        return unit.type === UniverInstanceType.UNIVER_SHEET;
+    }
+
+    async find(query: FindQuery): Promise<FindModel[]> {
         this.queries.push({ ...query });
         return [new TextFindModel(this.rows, query)];
     }
@@ -224,19 +239,19 @@ class TestLayoutService {
         this._focused = true;
     }
 
-    registerFocusHandler(): IDisposable {
+    registerFocusHandler(): ReturnType<typeof toDisposable> {
         return toDisposable(() => undefined);
     }
 
-    registerRootContainerElement(): IDisposable {
+    registerRootContainerElement(): ReturnType<typeof toDisposable> {
         return toDisposable(() => undefined);
     }
 
-    registerContentElement(): IDisposable {
+    registerContentElement(): ReturnType<typeof toDisposable> {
         return toDisposable(() => undefined);
     }
 
-    registerContainerElement(): IDisposable {
+    registerContainerElement(): ReturnType<typeof toDisposable> {
         return toDisposable(() => undefined);
     }
 
@@ -253,7 +268,7 @@ class TestLayoutService {
     }
 }
 
-function createDialogTestBed() {
+function createDialogTestBed(capabilities?: FindCapabilities) {
     const testBed = createTestBed(undefined, [
         [IFindReplaceService, { useClass: FindReplaceService }],
         [ILayoutService, { useClass: TestLayoutService as never }],
@@ -269,6 +284,7 @@ function createDialogTestBed() {
     ].forEach((command) => commandService.registerCommand(command));
 
     const provider = testBed.get(TestFindReplaceProvider);
+    if (capabilities) provider.capabilities = capabilities;
     const findReplaceService = testBed.get(IFindReplaceService);
     findReplaceService.registerFindReplaceProvider(provider);
 
@@ -280,7 +296,7 @@ function createDialogTestBed() {
     };
 }
 
-function renderDialog(injector: Injector) {
+function renderDialog(injector: ReturnType<ReturnType<typeof createTestBed>['univer']['__getInjector']>) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -329,7 +345,7 @@ async function flushSearch() {
 }
 
 describe('FindReplaceDialog', () => {
-    let root: Root | undefined;
+    let root: ReturnType<typeof createRoot> | undefined;
     let container: HTMLElement | undefined;
 
     afterEach(() => {
@@ -393,6 +409,29 @@ describe('FindReplaceDialog', () => {
         expect(getInputs(container!)).toHaveLength(2);
     });
 
+    it('shows only controls supported by the active provider', async () => {
+        const testBed = createDialogTestBed({
+            caseSensitive: true,
+            matchesTheWholeWord: true,
+            matchesTheWholeCell: false,
+            findDirection: false,
+            findScope: false,
+            findBy: false,
+        });
+
+        await act(async () => {
+            testBed.commandService.syncExecuteCommand(OpenReplaceDialogOperation.id);
+        });
+        const rendered = renderDialog(testBed.univer.__getInjector());
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('find-replace.dialog.case-sensitive');
+        expect(container.textContent).toContain('find-replace.dialog.match-the-whole-word');
+        expect(container.textContent).not.toContain('find-replace.dialog.find-direction.title');
+        expect(container.textContent).not.toContain('find-replace.dialog.match-the-whole-cell');
+    });
+
     it('replaces the selected result and then replaces all remaining results', async () => {
         const testBed = createDialogTestBed();
         await act(async () => {
@@ -426,7 +465,7 @@ describe('FindReplaceDialog', () => {
         await flushSearch();
 
         expect(testBed.provider.rows.map((row) => row.text)).toEqual(['orange', 'orange', 'orange', 'banana']);
-        expect((testBed.get(IMessageService) as TestMessageService).messages.at(-1)?.content).toBe('find-replace.replace.all-success');
+        expect((testBed.get(IMessageService) as unknown as { messages: Array<{ content: string }> }).messages.at(-1)?.content).toBe('find-replace.replace.all-success');
     });
 
     it('moves to the next result when finding the same replace dialog input again', async () => {
@@ -489,6 +528,66 @@ describe('FindReplaceDialog', () => {
         expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A3' });
     });
 
+    it('reruns completed searches when case or whole-word matching changes', async () => {
+        const testBed = createDialogTestBed({
+            caseSensitive: true,
+            matchesTheWholeWord: true,
+            matchesTheWholeCell: false,
+            findDirection: false,
+            findScope: false,
+            findBy: false,
+        });
+        await act(async () => {
+            testBed.commandService.syncExecuteCommand(OpenReplaceDialogOperation.id);
+        });
+
+        const rendered = renderDialog(testBed.univer.__getInjector());
+        root = rendered.root;
+        container = rendered.container;
+        const checkboxes = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+
+        await act(async () => {
+            setInputValue(getInputs(container!)[0], 'apple');
+            checkboxes.forEach((checkbox) => checkbox.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        });
+        expect(testBed.provider.queries).toHaveLength(0);
+
+        await act(async () => {
+            getButton(container!, FIND_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+        expect(testBed.provider.queries).toHaveLength(1);
+
+        await act(async () => {
+            checkboxes[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+        expect(testBed.provider.queries).toHaveLength(2);
+        expect(testBed.provider.queries.at(-1)).toMatchObject({ caseSensitive: false, matchesTheWholeWord: true });
+
+        await act(async () => {
+            checkboxes[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+        expect(testBed.provider.queries).toHaveLength(3);
+        expect(testBed.provider.queries.at(-1)).toMatchObject({ caseSensitive: false, matchesTheWholeWord: false });
+
+        await act(async () => {
+            setInputValue(getInputs(container!)[0], 'kiwi');
+            getButton(container!, FIND_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+        expect(testBed.provider.queries).toHaveLength(4);
+        expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 0, matchesPosition: 0 });
+
+        await act(async () => {
+            checkboxes[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+        expect(testBed.provider.queries).toHaveLength(5);
+        expect(testBed.provider.queries.at(-1)).toMatchObject({ findString: 'kiwi', caseSensitive: true });
+    });
+
     it('warns and keeps replace actions disabled when a replace dialog search has no results', async () => {
         const testBed = createDialogTestBed();
         await act(async () => {
@@ -513,15 +612,15 @@ describe('FindReplaceDialog', () => {
         });
         expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 0, matchesPosition: 0 });
         expect(readCurrentMatch(testBed.findReplaceService)).toBeNull();
-        expect((testBed.get(IMessageService) as TestMessageService).messages.at(-1)?.content).toBe('find-replace.dialog.no-match');
+        expect((testBed.get(IMessageService) as unknown as { messages: Array<{ content: string }> }).messages.at(-1)?.content).toBe('find-replace.dialog.no-match');
         expect(getButton(container!, REPLACE_LABEL).disabled).toBe(true);
         expect(getButton(container!, REPLACE_ALL_LABEL).disabled).toBe(true);
         expect(testBed.provider.rows.map((row) => row.text)).toEqual(INITIAL_ROWS.map((row) => row.text));
     });
 });
 
-function readState(findReplaceService: IFindReplaceService): IFindReplaceState {
-    let value!: IFindReplaceState;
+function readState(findReplaceService: IFindReplaceService): IObservedFindState {
+    let value!: IObservedFindState;
     const subscription = findReplaceService.state$.subscribe((state) => {
         value = state;
     });
@@ -529,10 +628,10 @@ function readState(findReplaceService: IFindReplaceService): IFindReplaceState {
     return value;
 }
 
-function readCurrentMatch(findReplaceService: IFindReplaceService): Nullable<IFindMatch> {
-    let value: Nullable<IFindMatch> = null;
+function readCurrentMatch(findReplaceService: IFindReplaceService): FindMatch | null {
+    let value: FindMatch | null = null;
     const subscription = findReplaceService.currentMatch$.subscribe((match) => {
-        value = match;
+        value = match == null ? null : match as FindMatch;
     });
     subscription.unsubscribe();
     return value;

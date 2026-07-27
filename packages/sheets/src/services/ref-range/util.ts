@@ -23,7 +23,7 @@ import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
-import type { IRemoveRowColCommandInterceptParams, IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
+import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
 import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
@@ -1633,8 +1633,8 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
             };
         }
         case EffectRefRangId.RemoveRowCommandId: {
-            const params = command.params as IRemoveRowColCommandParams;
-            const target = getSheetCommandTarget(univerInstanceService);
+            const params = command.params as IRemoveRowColCommandInterceptParams;
+            const target = getSheetCommandTarget(univerInstanceService, params);
             if (!target) return;
 
             const { worksheet, unitId, subUnitId } = target;
@@ -1654,8 +1654,8 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
             };
         }
         case EffectRefRangId.RemoveColCommandId: {
-            const params = command.params as IRemoveRowColCommandParams;
-            const target = getSheetCommandTarget(univerInstanceService);
+            const params = command.params as IRemoveRowColCommandInterceptParams;
+            const target = getSheetCommandTarget(univerInstanceService, params);
             if (!target) return;
 
             const { worksheet, unitId, subUnitId } = target;

@@ -40,6 +40,7 @@ import {
     NamedStyleType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { getDocsTableRenderViewport, getDocsTableViewportLeft, getTableIdAndSliceIndex } from '@univerjs/engine-render';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 const PLACEHOLDER_COLOR = 'rgba(0, 0, 0, 0.35)';
@@ -49,6 +50,10 @@ const DEFAULT_PLACEHOLDER_FONT_FAMILY = 'Arial';
 const LIST_PLACEHOLDER_GAP = 4;
 
 export interface IParagraphPlaceholderLayout {
+    clipBottom?: number;
+    clipLeft?: number;
+    clipRight?: number;
+    clipTop?: number;
     fontFamily: string;
     fontSize: number;
     fontWeight: string;
@@ -66,6 +71,16 @@ interface IParagraphPlaceholderLocale {
     heading5: string;
     listItem: string;
     normalText: string;
+}
+
+interface IParagraphPlaceholderLayoutOptions {
+    docsLeft?: number;
+    unitId?: string;
+}
+
+interface IParagraphPlaceholderClip {
+    left: number;
+    right: number;
 }
 
 export class DocParagraphPlaceholderRenderController extends Disposable implements IRenderModule {
@@ -105,7 +120,18 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
             return;
         }
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, this._getLocale(), pageLeft, pageTop, activeRange.startOffset);
+        const placeholders = getParagraphPlaceholderLayouts(
+            page,
+            body,
+            this._getLocale(),
+            pageLeft,
+            pageTop,
+            activeRange.startOffset,
+            {
+                docsLeft: (this._context.mainComponent as Documents | undefined)?.getOffsetConfig().docsLeft,
+                unitId: this._context.unitId,
+            }
+        );
         if (!placeholders.length) {
             return;
         }
@@ -148,14 +174,30 @@ export function getParagraphPlaceholderLayouts(
     locale: IParagraphPlaceholderLocale,
     pageLeft = 0,
     pageTop = 0,
-    activeOffset?: number
+    activeOffset?: number,
+    options?: IParagraphPlaceholderLayoutOptions
 ): IParagraphPlaceholderLayout[] {
     const paragraphs = new Map((body.paragraphs ?? []).map((paragraph) => [paragraph.startIndex, paragraph]));
     const layouts: IParagraphPlaceholderLayout[] = [];
 
-    const visitSection = (section: IDocumentSkeletonSection, originLeft: number, originTop: number) => {
+    const visitSection = (
+        section: IDocumentSkeletonSection,
+        originLeft: number,
+        originTop: number,
+        clip?: IParagraphPlaceholderClip
+    ) => {
         for (const column of section.columns) {
-            visitColumn(column, body, paragraphs, locale, layouts, originLeft + column.left, originTop + section.top, activeOffset);
+            visitColumn(
+                column,
+                body,
+                paragraphs,
+                locale,
+                layouts,
+                originLeft + column.left,
+                originTop + section.top,
+                activeOffset,
+                clip
+            );
         }
     };
 
@@ -163,14 +205,42 @@ export function getParagraphPlaceholderLayouts(
         visitSection(section, pageLeft + page.marginLeft, pageTop + page.marginTop);
     }
 
-    page.skeTables?.forEach((table) => {
+    page.skeTables?.forEach((table, tableId) => {
+        const sourceTableId = getTableIdAndSliceIndex(table.tableId ?? tableId).tableId;
+        const viewport = getDocsTableRenderViewport(options?.unitId ?? '', sourceTableId);
+        const hasHorizontalViewport = viewport != null &&
+            (viewport.leadingInsetLeft ?? 0) +
+            viewport.contentWidth +
+            (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
+        const tableLeft = pageLeft + page.marginLeft + table.left;
+        const tableViewportLeft = hasHorizontalViewport
+            ? getDocsTableViewportLeft(
+                viewport,
+                tableLeft - (viewport.leadingInsetLeft ?? 0),
+                options?.docsLeft
+            )
+            : tableLeft;
+        const tableViewportRight = tableViewportLeft +
+            (hasHorizontalViewport ? viewport.viewportWidth : table.width);
+        const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+
         for (const row of table.rows) {
             for (const cell of row.cells) {
+                const cellLeft = tableLeft + cell.left - tableScrollLeft;
+                const cellContentLeft = cellLeft + cell.marginLeft;
+                const cellContentRight = cellLeft + cell.pageWidth - cell.marginRight;
+                const clipLeft = Math.max(cellContentLeft, tableViewportLeft);
+                const clipRight = Math.min(cellContentRight, tableViewportRight);
+                if (clipRight <= clipLeft) {
+                    continue;
+                }
+
                 for (const section of cell.sections) {
                     visitSection(
                         section,
-                        pageLeft + page.marginLeft + table.left + cell.left + cell.marginLeft,
-                        pageTop + page.marginTop + table.top + row.top + cell.marginTop
+                        cellContentLeft,
+                        pageTop + page.marginTop + table.top + row.top + cell.marginTop,
+                        { left: clipLeft, right: clipRight }
                     );
                 }
             }
@@ -188,7 +258,8 @@ function visitColumn(
     layouts: IParagraphPlaceholderLayout[],
     originLeft: number,
     originTop: number,
-    activeOffset?: number
+    activeOffset?: number,
+    clip?: IParagraphPlaceholderClip
 ): void {
     for (const line of column.lines) {
         if (!line.paragraphStart) {
@@ -211,7 +282,7 @@ function visitColumn(
             continue;
         }
 
-        layouts.push(getLinePlaceholderLayout(line, paragraph, text, originLeft, originTop));
+        layouts.push(getLinePlaceholderLayout(line, paragraph, text, originLeft, originTop, clip));
     }
 }
 
@@ -245,7 +316,8 @@ function getLinePlaceholderLayout(
     paragraph: IParagraph,
     text: string,
     originLeft: number,
-    originTop: number
+    originTop: number,
+    clip?: IParagraphPlaceholderClip
 ): IParagraphPlaceholderLayout {
     const divide = line.divides[0];
     const glyphs = divide?.glyphGroup ?? [];
@@ -257,14 +329,23 @@ function getLinePlaceholderLayout(
     const fontWeight = textStyle?.bl ? 'bold' : 'normal';
     const lineStartX = originLeft + (divide?.left ?? 0) + (divide?.paddingLeft ?? 0);
     const listOffset = paragraph.bullet && firstGlyph ? firstGlyph.left + firstGlyph.width + LIST_PLACEHOLDER_GAP : 0;
+    const x = lineStartX + listOffset;
+    const naturalMaxWidth = Math.max(0, (divide?.width ?? line.width ?? 0) - listOffset);
+    const clipLeft = Math.max(x, clip?.left ?? x);
+    const clipRight = Math.min(x + naturalMaxWidth, clip?.right ?? x + naturalMaxWidth);
+    const clipTop = originTop + line.top;
 
     return {
+        clipBottom: clipTop + line.lineHeight,
+        clipLeft,
+        clipRight,
+        clipTop,
         fontFamily,
         fontSize,
         fontWeight,
-        maxWidth: Math.max(0, (divide?.width ?? line.width ?? 0) - listOffset),
+        maxWidth: Math.max(0, clipRight - clipLeft),
         text,
-        x: lineStartX + listOffset,
+        x,
         y: originTop + line.top + line.marginTop + line.paddingTop + line.asc,
     };
 }
@@ -319,14 +400,28 @@ function getLineFontFamily(line: IDocumentSkeletonLine): Nullable<string> {
     return null;
 }
 
-function drawParagraphPlaceholders(ctx: UniverRenderingContext, placeholders: IParagraphPlaceholderLayout[]): void {
+export function drawParagraphPlaceholders(ctx: UniverRenderingContext, placeholders: IParagraphPlaceholderLayout[]): void {
     ctx.save();
     ctx.fillStyle = PLACEHOLDER_COLOR;
     ctx.textBaseline = 'alphabetic';
 
     for (const placeholder of placeholders) {
+        const clipLeft = placeholder.clipLeft ?? placeholder.x;
+        const clipRight = placeholder.clipRight ?? placeholder.x + placeholder.maxWidth;
+        const clipTop = placeholder.clipTop ?? placeholder.y - placeholder.fontSize;
+        const clipBottom = placeholder.clipBottom ?? placeholder.y + placeholder.fontSize;
+        if (clipRight <= clipLeft || clipBottom <= clipTop) {
+            continue;
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rectByPrecision(clipLeft, clipTop, clipRight - clipLeft, clipBottom - clipTop);
+        ctx.closePath();
+        ctx.clip();
         ctx.font = `${placeholder.fontWeight} ${placeholder.fontSize}px ${placeholder.fontFamily}`;
-        ctx.fillText(placeholder.text, placeholder.x, placeholder.y, placeholder.maxWidth || undefined);
+        ctx.fillText(placeholder.text, placeholder.x, placeholder.y);
+        ctx.restore();
     }
 
     ctx.restore();

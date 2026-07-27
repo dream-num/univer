@@ -361,6 +361,81 @@ describe('documents render', () => {
         setDocsTableRenderViewportProvider(null);
     });
 
+    it('hit tests table content and controls that overflow the document bounds', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachTable(bodyPage);
+        const table = bodyPage.skeTables.get('table-1')!;
+        table.width = 260;
+        table.rows[0].cells[0].pageWidth = 260;
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        const documents = new Documents('docs-overflow-hit', {
+            getSkeletonData: () => skeletonData,
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 200,
+            height: 420,
+        });
+        scene.addObject(documents, 1);
+
+        expect(documents.isHit(Vector2.create(250, 50))).toBe(true);
+        expect(documents.isHit(Vector2.create(250, 12))).toBe(true);
+        expect(documents.isHit(Vector2.create(250, 130))).toBe(false);
+
+        documents.dispose();
+    });
+
+    it('hit tests a horizontally projected table to the left of the document bounds', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachTable(bodyPage);
+        const table = bodyPage.skeTables.get('table-1')!;
+        table.width = 260;
+        table.rows[0].cells[0].pageWidth = 260;
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        const documents = new Documents('docs-left-overflow-hit', {
+            getSkeletonData: () => skeletonData,
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 200,
+            height: 420,
+        });
+        scene.addObject(documents, 1);
+        setDocsTableRenderViewportProvider((unitId, tableId) => unitId === 'docs-left-overflow-hit' && tableId === 'table-1'
+            ? {
+                contentWidth: 260,
+                leadingInsetLeft: 80,
+                scrollLeft: 0,
+                viewportLeft: -20,
+                viewportWidth: 200,
+            }
+            : null);
+
+        expect(documents.isHit(Vector2.create(-40, 50))).toBe(true);
+        expect(documents.isHit(Vector2.create(-40, 12))).toBe(true);
+        expect(documents.isHit(Vector2.create(-70, 50))).toBe(false);
+
+        documents.dispose();
+    });
+
     it('uses explicit table cell border width inside table render path', () => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-border', skeleton, {

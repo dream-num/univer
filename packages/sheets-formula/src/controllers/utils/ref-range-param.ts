@@ -26,7 +26,7 @@ import type {
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
-    IRemoveRowColCommandParams,
+    IRemoveRowColCommandInterceptParams,
     IRemoveSheetCommandParams,
     ISetWorkbookNameCommandParams,
     ISetWorksheetNameCommandParams,
@@ -104,10 +104,10 @@ export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo
             result = handleRefInsertRangeMoveDown(command as ICommandInfo<IInsertRangeMoveDownCommandParams>, workbook);
             break;
         case RemoveRowCommand.id:
-            result = handleRefRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>, workbook);
+            result = handleRefRemoveRow(command as ICommandInfo<IRemoveRowColCommandInterceptParams>, workbook);
             break;
         case RemoveColCommand.id:
-            result = handleRefRemoveCol(command as ICommandInfo<IRemoveRowColCommandParams>, workbook);
+            result = handleRefRemoveCol(command as ICommandInfo<IRemoveRowColCommandInterceptParams>);
             break;
         case DeleteRangeMoveUpCommand.id:
             result = handleRefDeleteRangeMoveUp(command as ICommandInfo<IDeleteRangeMoveUpCommandParams>, workbook);
@@ -324,12 +324,11 @@ function handleRefInsertRangeMoveDown(command: ICommandInfo<IInsertRangeMoveDown
     };
 }
 
-function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, workbook: Workbook) {
+function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandInterceptParams>, workbook: Workbook) {
     const { params } = command;
     if (!params) return null;
 
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
+    const { range, unitId, subUnitId: sheetId } = params;
 
     return {
         type: FormulaReferenceMoveType.RemoveRow,
@@ -340,12 +339,11 @@ function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, w
     };
 }
 
-function handleRefRemoveCol(command: ICommandInfo<IRemoveRowColCommandParams>, workbook: Workbook) {
+function handleRefRemoveCol(command: ICommandInfo<IRemoveRowColCommandInterceptParams>) {
     const { params } = command;
     if (!params) return null;
 
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
+    const { range, unitId, subUnitId: sheetId } = params;
 
     return {
         type: FormulaReferenceMoveType.RemoveColumn,

@@ -195,7 +195,7 @@ describe('getReferenceMoveParams', () => {
         });
         expect(getReferenceMoveParams(workbook, {
             id: RemoveRowCommand.id,
-            params: { range },
+            params: { range, unitId: 'test', subUnitId: 'sheet1' },
         })).toEqual({
             type: FormulaReferenceMoveType.RemoveRow,
             unitId: 'test',
@@ -205,7 +205,7 @@ describe('getReferenceMoveParams', () => {
         });
         expect(getReferenceMoveParams(workbook, {
             id: RemoveColCommand.id,
-            params: { range },
+            params: { range, unitId: 'test', subUnitId: 'sheet1' },
         })).toEqual({
             type: FormulaReferenceMoveType.RemoveColumn,
             unitId: 'test',

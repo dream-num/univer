@@ -27,6 +27,7 @@ export interface IUniverEslintConfigOptions {
 export const createUniverEslintConfig = (options: IUniverEslintConfigOptions = {}) => {
     const configs: Linter.Config[] = [
         {
+            files: ['**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}'],
             plugins: {
                 'react-hooks': reactHooks as unknown as ESLint.Plugin,
             },

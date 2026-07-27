@@ -60,7 +60,7 @@ export class SheetTableFormulaController extends Disposable {
                         sheetId: subUnitId,
                         range,
                     },
-                });
+                }, { onlyLocal: true });
             })
         );
         this.disposeWithMe(
@@ -70,7 +70,7 @@ export class SheetTableFormulaController extends Disposable {
                 this._commandService.executeCommand<ISetSuperTableMutationSearchParam>(RemoveSuperTableMutation.id, {
                     unitId,
                     tableName: oldTableName,
-                });
+                }, { onlyLocal: true });
 
                 const table = this._tableManager.getTableById(unitId, tableId);
                 if (!table) {
@@ -98,6 +98,6 @@ export class SheetTableFormulaController extends Disposable {
                 sheetId: tableInfo.subUnitId,
                 titleMap,
             },
-        });
+        }, { onlyLocal: true });
     }
 }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBorderData, Injector, IRange, Univer } from '@univerjs/core';
-import { BorderStyleTypes, BorderType, ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
+import type { IBorderData, Injector, IRange, Univer, Workbook } from '@univerjs/core';
+import { BorderStyleTypes, BorderType, ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
@@ -45,7 +45,7 @@ describe('Test style commands', () => {
         get = testBed.get;
         getBorder = ({ startRow, startColumn }: IRange): IBorderData | undefined => {
             return get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn)
                 .getBorder();

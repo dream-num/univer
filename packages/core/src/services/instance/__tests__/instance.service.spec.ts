@@ -124,6 +124,10 @@ describe('UniverInstanceService', () => {
         logService.dispose();
     });
 
+    it('does not expose the legacy sheet-specific lookup API', () => {
+        expect(service).not.toHaveProperty('getUniverSheetInstance');
+    });
+
     it('should create units, set current unit and expose lookup APIs', () => {
         const added: string[] = [];
         service.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => {

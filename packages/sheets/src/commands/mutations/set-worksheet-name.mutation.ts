@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, IMutation, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetNameMutationParams {
@@ -45,7 +45,7 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
     id: 'sheet.mutation.set-worksheet-name',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+        const universheet = accessor.get(IUniverInstanceService).getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (universheet == null) {
             return false;

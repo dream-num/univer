@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IConfirmService,
@@ -23,6 +23,7 @@ import {
     LocaleType,
     RANGE_TYPE,
     TestConfirmService,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import enUS from '../../../locale/en-US';
@@ -154,7 +155,7 @@ describe('add-merge-command', () => {
     let commandService: ICommandService;
 
     function getWorksheet(getter: Injector['get'] = get) {
-        const workbook = getter(IUniverInstanceService).getUniverSheetInstance('test');
+        const workbook = getter(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             throw new Error('Expected workbook test to exist.');
         }

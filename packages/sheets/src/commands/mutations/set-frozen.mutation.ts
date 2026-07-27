@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, IMutation, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface ISetFrozenMutationParams {
     unitId: string;
@@ -40,7 +40,7 @@ export const SetFrozenMutationFactory = (
     params: ISetFrozenMutationParams
 ): ISetFrozenMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+    const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -65,7 +65,7 @@ export const SetFrozenMutation: IMutation<ISetFrozenMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFrozenMutationParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

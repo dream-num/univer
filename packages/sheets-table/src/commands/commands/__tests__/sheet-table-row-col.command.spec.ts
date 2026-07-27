@@ -142,10 +142,6 @@ class TestUniverInstanceService {
     getCurrentUnitOfType() {
         return this._workbook;
     }
-
-    getUniverSheetInstance(unitId: string) {
-        return this.getUnit(unitId);
-    }
 }
 
 function createSheetContext(options: ICreateSheetContextOptions = {}) {

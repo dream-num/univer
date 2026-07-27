@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Injector, IRange, Univer } from '@univerjs/core';
-import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
+import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, RANGE_TYPE, TestConfirmService, UniverInstanceType } from '@univerjs/core';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -86,7 +86,7 @@ describe('Test hide row col confirm commands', () => {
 
             function getHiddenRows(): IRange[] | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getRowManager()
                     .getHiddenRows();
@@ -117,7 +117,7 @@ describe('Test hide row col confirm commands', () => {
 
             function getHiddenRows(): IRange[] | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getRowManager()
                     .getHiddenRows();
@@ -141,7 +141,7 @@ describe('Test hide row col confirm commands', () => {
 
             function getHiddenCols(): IRange[] | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getColumnManager()
                     .getHiddenCols();
@@ -172,7 +172,7 @@ describe('Test hide row col confirm commands', () => {
 
             function getHiddenCols(): IRange[] | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getColumnManager()
                     .getHiddenCols();

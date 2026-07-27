@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { BooleanNumber, IAccessor, IMutation, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 
 export interface ISetWorksheetRightToLeftMutationParams {
     rightToLeft: BooleanNumber;
@@ -27,7 +27,7 @@ export const SetWorksheetRightToLeftUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRightToLeftMutationParams
 ): ISetWorksheetRightToLeftMutationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+    const workbook = accessor.get(IUniverInstanceService).getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook!.getSheetBySheetId(params.subUnitId);
     const config = worksheet!.getConfig();
 
@@ -43,7 +43,7 @@ export const SetWorksheetRightToLeftMutation: IMutation<ISetWorksheetRightToLeft
     id: 'sheet.mutation.set-worksheet-right-to-left',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+        const workbook = accessor.get(IUniverInstanceService).getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;

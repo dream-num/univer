@@ -76,7 +76,7 @@ function createServiceWithCapturedResource() {
     }
 
     class TestUniverInstanceService {
-        getUniverSheetInstance = (unitId: string) => (unitId === 'unit-1' ? workbook : null);
+        getUnit = (unitId: string) => (unitId === 'unit-1' ? workbook : null);
         getCurrentUnitOfType = () => workbook;
         getCurrentTypeOfUnit$ = () => of(workbook);
     }

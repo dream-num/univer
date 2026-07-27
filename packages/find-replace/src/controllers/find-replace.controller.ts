@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import {
     ICommandService,
@@ -23,6 +23,7 @@ import {
     LocaleService,
     RxDisposable,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
@@ -129,7 +130,7 @@ export class FindReplaceController extends RxDisposable {
 
         this._closingListenerDisposable = toDisposable(
             this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((focused) => {
-                if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
+                if (!focused || !this._univerInstanceService.getUnit<Workbook>(focused, UniverInstanceType.UNIVER_SHEET)) {
                     this.closePanel();
                 }
             })

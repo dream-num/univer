@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer } from '@univerjs/core';
-import { BorderStyleTypes, CellValueType, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import { BorderStyleTypes, CellValueType, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetRangeCustomMetadataCommand } from '../set-range-custom-metadata.command';
@@ -84,7 +84,7 @@ describe('SetRangeCustomMetadataCommand', () => {
             },
         });
 
-        const workbook = univerInstanceService.getUniverSheetInstance('test')!;
+        const workbook = univerInstanceService.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
         const cell = workbook.getSheetBySheetId('sheet1')!.getCellRaw(0, 2);
         const style = workbook.getStyles().getStyleByCell(cell);
 

@@ -74,7 +74,6 @@ function createContext() {
     const lexerTreeBuilder = new LexerTreeBuilder();
     const univerInstanceService = {
         getUnit: vi.fn(() => workbook),
-        getUniverSheetInstance: vi.fn(() => workbook),
         getCurrentUnitOfType: vi.fn((type: UniverInstanceType) => (type === UniverInstanceType.UNIVER_SHEET ? workbook : undefined)),
     };
     const injector = {
@@ -258,11 +257,11 @@ describe('list-validator helpers', () => {
 
     it('returns empty lists when no workbook or worksheet can be resolved', async () => {
         const context = createContext();
-        context.univerInstanceService.getUniverSheetInstance.mockReturnValueOnce(undefined as any);
+        context.univerInstanceService.getUnit.mockReturnValueOnce(undefined as any);
         context.univerInstanceService.getCurrentUnitOfType.mockReturnValueOnce(undefined as any);
 
         expect(context.validator.getList({ formula1: 'A,B' } as any, 'missing', 'sheet1')).toEqual([]);
-        context.univerInstanceService.getUniverSheetInstance.mockReturnValue({
+        context.univerInstanceService.getUnit.mockReturnValue({
             getSheetBySheetId: () => undefined,
             getActiveSheet: () => undefined,
         } as any);

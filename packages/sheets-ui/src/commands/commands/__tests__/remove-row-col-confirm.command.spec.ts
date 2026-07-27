@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
-import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, RANGE_TYPE, TestConfirmService, UniverInstanceType } from '@univerjs/core';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -99,7 +99,7 @@ describe('Test remove row col confirm commands', () => {
 
             function getRowCount(): number | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getRowCount();
             }
@@ -121,7 +121,7 @@ describe('Test remove row col confirm commands', () => {
 
             function getRowCount(): number | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getRowCount();
             }
@@ -145,7 +145,7 @@ describe('Test remove row col confirm commands', () => {
 
             function getColumnCount(): number | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getColumnCount();
             }
@@ -167,7 +167,7 @@ describe('Test remove row col confirm commands', () => {
 
             function getColumnCount(): number | undefined {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
+                    .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                     ?.getSheetBySheetId('sheet1')
                     ?.getColumnCount();
             }

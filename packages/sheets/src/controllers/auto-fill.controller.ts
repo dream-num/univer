@@ -27,6 +27,7 @@ import {
     ObjectMatrix,
     Rectangle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { discreteRangeToRange } from '../basics/utils';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
@@ -484,7 +485,7 @@ export class AutoFillController extends Disposable {
         if (hasStyle) {
             const deleteMergeRanges: IRange[] = [];
             const mergeData = this._univerInstanceService
-                .getUniverSheetInstance(unitId)
+                .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId(subUnitId)
                 ?.getMergeData();
 

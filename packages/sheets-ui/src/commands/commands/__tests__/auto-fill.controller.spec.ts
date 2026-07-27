@@ -384,7 +384,7 @@ describe('Test auto fill rules in controller', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
@@ -396,7 +396,7 @@ describe('Test auto fill rules in controller', () => {
             endColumn: number
         ): Array<Array<Nullable<IStyleData>>> | undefined => {
             const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
             if (values && styles) {
                 return values.map((row) => row.map((cell) => styles.getStyleByCell(cell)));
             }

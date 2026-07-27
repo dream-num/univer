@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -23,6 +23,7 @@ import {
     set,
     ThemeService,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -106,7 +107,7 @@ describe('Test auto fill with formula', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();

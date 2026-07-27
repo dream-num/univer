@@ -47,7 +47,7 @@ function createAccessor(instanceService: unknown): IAccessor {
 describe('worksheet meta mutations', () => {
     it('SetGridlinesColorUndoMutationFactory should read current sheet and throw on null sheet', () => {
         const goodAccessor = createAccessor({
-            getUniverSheetInstance: vi.fn(() => ({})),
+            getUnit: vi.fn(() => ({})),
         });
         expect(
             SetGridlinesColorUndoMutationFactory(goodAccessor, {
@@ -62,7 +62,7 @@ describe('worksheet meta mutations', () => {
         });
 
         const badAccessor = createAccessor({
-            getUniverSheetInstance: vi.fn(() => null),
+            getUnit: vi.fn(() => null),
         });
         expect(() =>
             SetGridlinesColorUndoMutationFactory(badAccessor, {
@@ -120,7 +120,6 @@ describe('worksheet meta mutations', () => {
 
         const accessor = createAccessor({
             getUnit: vi.fn(() => workbook),
-            getUniverSheetInstance: vi.fn(() => workbook),
         });
 
         expect(
@@ -145,7 +144,7 @@ describe('worksheet meta mutations', () => {
         expect(worksheetConfig.hidden).toBe(0);
 
         const noWorkbookAccessor = createAccessor({
-            getUniverSheetInstance: vi.fn(() => null),
+            getUnit: vi.fn(() => null),
         });
         expect(
             SetWorksheetHideMutation.handler(noWorkbookAccessor, {
@@ -156,7 +155,7 @@ describe('worksheet meta mutations', () => {
         ).toBe(false);
 
         const noSheetAccessor = createAccessor({
-            getUniverSheetInstance: vi.fn(() => ({
+            getUnit: vi.fn(() => ({
                 getSheetBySheetId: vi.fn(() => null),
             })),
         });
@@ -193,7 +192,6 @@ describe('worksheet meta mutations', () => {
 
         const accessor = createAccessor({
             getUnit: vi.fn(() => workbook),
-            getUniverSheetInstance: vi.fn(() => workbook),
         });
 
         expect(
@@ -218,7 +216,7 @@ describe('worksheet meta mutations', () => {
         expect(worksheetConfig.name).toBe('new-name');
 
         const noWorkbookAccessor = createAccessor({
-            getUniverSheetInstance: vi.fn(() => null),
+            getUnit: vi.fn(() => null),
         });
         expect(
             SetWorksheetNameMutation.handler(noWorkbookAccessor, {
@@ -229,7 +227,7 @@ describe('worksheet meta mutations', () => {
         ).toBe(false);
 
         const noSheetAccessor = createAccessor({
-            getUniverSheetInstance: vi.fn(() => ({
+            getUnit: vi.fn(() => ({
                 getSheetBySheetId: vi.fn(() => null),
             })),
         });

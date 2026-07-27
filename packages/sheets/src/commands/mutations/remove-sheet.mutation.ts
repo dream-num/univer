@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation } from '@univerjs/core';
+import type { IAccessor, IMutation, Workbook } from '@univerjs/core';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 /**
@@ -59,7 +59,7 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { subUnitId, unitId } = params;
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }

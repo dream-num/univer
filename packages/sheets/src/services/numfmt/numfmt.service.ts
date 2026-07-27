@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { INumfmtService } from './type';
 
 import {
@@ -23,6 +23,7 @@ import {
     IResourceManagerService,
     IUniverInstanceService,
     Range,
+    UniverInstanceType,
 } from '@univerjs/core';
 
 export class NumfmtService extends Disposable implements INumfmtService {
@@ -35,7 +36,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
     }
 
     getValue(unitId: string, subUnitId: string, row: number, col: number) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }
@@ -55,7 +56,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
     }
 
     deleteValues(unitId: string, subUnitId: string, values: IRange[]) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }
@@ -86,7 +87,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         subUnitId: string,
         values: Array<{ ranges: IRange[]; pattern: string }>
     ) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }

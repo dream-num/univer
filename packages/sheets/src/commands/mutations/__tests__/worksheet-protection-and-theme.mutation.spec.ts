@@ -163,7 +163,7 @@ describe('worksheet count and direction mutations', () => {
             getSheetBySheetId: (subUnitId: string) => subUnitId === 'sheet-1' ? worksheet : null,
         };
         const univerInstanceService = {
-            getUniverSheetInstance: (unitId: string) => unitId === 'unit-1' ? workbook : null,
+            getUnit: (unitId: string) => unitId === 'unit-1' ? workbook : null,
         };
         const accessor = createAccessor(new Map<unknown, unknown>([[IUniverInstanceService, univerInstanceService]]));
 

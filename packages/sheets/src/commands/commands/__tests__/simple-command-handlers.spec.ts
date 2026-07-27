@@ -80,7 +80,6 @@ function createUniverInstanceService(worksheet: unknown) {
     const workbook = createWorkbook(worksheet);
     return {
         getUnit: (unitId: string) => unitId === 'unit-1' ? workbook : null,
-        getUniverSheetInstance: (unitId: string) => unitId === 'unit-1' ? workbook : null,
         getCurrentUnitOfType: () => workbook,
     };
 }

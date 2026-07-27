@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable, Workbook } from '@univerjs/core';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, sequenceExecute } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { handleNumfmtInCell, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
@@ -48,7 +48,7 @@ export class CalculateResultApplyController extends Disposable {
 
                 for (let i = 0; i < unitIds.length; i++) {
                     const unitId = unitIds[i];
-                    const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                     if (!workbook) {
                         continue;
                     }
@@ -109,7 +109,7 @@ export class CalculateResultApplyController extends Disposable {
      * @returns
      */
     private _getMergedCellData(unitId: string, sheetId: string, cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const styles = workbook?.getStyles();
 
         const worksheet = workbook?.getSheetBySheetId(sheetId);

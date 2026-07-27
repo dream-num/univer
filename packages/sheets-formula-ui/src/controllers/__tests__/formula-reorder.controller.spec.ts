@@ -32,7 +32,7 @@ function createController(options?: { worksheet?: any }) {
     };
     const controller = new FormulaReorderController(
         sheetInterceptorService as any,
-        { getUniverSheetInstance: vi.fn(() => workbook) } as any,
+        { getUnit: vi.fn(() => workbook) } as any,
         { getFormulaStringByCell: vi.fn(() => '=A2') } as any,
         { moveFormulaRefOffset: vi.fn(() => '=A1') } as any
     );

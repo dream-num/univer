@@ -25,7 +25,7 @@ import type {
     Styles,
     Workbook,
 } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellType } from '../../basics/cell-type';
 import { getCellValue, setNull } from '../../basics/cell-value';
@@ -64,7 +64,7 @@ export const SetRangeValuesUndoMutationFactory = (
 ): ISetRangeValuesMutationParams => {
     const { unitId, subUnitId, cellValue, isOverrideStyle } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
 
     if (workbook == null) {
         throw new Error('workbook is null error!');

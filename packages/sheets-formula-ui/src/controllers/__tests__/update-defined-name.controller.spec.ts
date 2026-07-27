@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRangeMoveDownCommandParams, IInsertRangeMoveRightCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
-import { Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import { Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService, RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { UpdateDefinedNameController } from '@univerjs/sheets-formula';
@@ -132,7 +132,7 @@ describe('Test update defined name', () => {
             sheetId: string = 'sheet1'
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId(sheetId)
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();

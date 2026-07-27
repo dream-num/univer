@@ -42,7 +42,7 @@ describe('SheetsDataValidationRenderController', () => {
                     })),
                 })),
             } as never,
-            { getUniverSheetInstance: vi.fn() } as never,
+            { getUnit: vi.fn() } as never,
             { getUndoRedoParamsOfAutoHeight: vi.fn(() => ({ redos: [] })) } as never,
             { activeDropdown: null, hideDropdown: vi.fn(), showDropdown: vi.fn() } as never,
             {

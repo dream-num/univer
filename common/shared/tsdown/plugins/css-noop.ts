@@ -58,6 +58,7 @@ export function createCssNoopInputOptions(inputOptions?: TInputOptions): TInputO
 
         if (!inputOptions) {
             return {
+                ...defaultOptions,
                 plugins: prependCssNoopPlugin(defaultPlugins),
             };
         }
@@ -74,6 +75,7 @@ export function createCssNoopInputOptions(inputOptions?: TInputOptions): TInputO
             }
 
             return {
+                ...defaultOptionsWithCssNoop,
                 ...resolvedOptions,
                 plugins: prependCssNoopPlugin(toPluginArray(resolvedOptions.plugins ?? defaultOptionsWithCssNoop.plugins)),
             };
@@ -82,6 +84,7 @@ export function createCssNoopInputOptions(inputOptions?: TInputOptions): TInputO
         const inputOptionsObject = inputOptions as TInputOptionsObject & { plugins?: unknown };
 
         return {
+            ...defaultOptions,
             ...inputOptionsObject,
             plugins: prependCssNoopPlugin([
                 ...toPluginArray(inputOptionsObject.plugins),

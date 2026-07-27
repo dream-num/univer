@@ -170,6 +170,71 @@ function getSparseExtensionDiffRanges(uKey: string, flags: ISparseExtensionFeatu
     }
 }
 
+interface IBlitRect {
+    sx: number;
+    sy: number;
+    sw: number;
+    sh: number;
+    dx: number;
+    dy: number;
+    dw: number;
+    dh: number;
+}
+
+/**
+ * Clip a blit source rectangle to the source canvas bounds and shrink the destination
+ * rectangle proportionally, as required by the HTML spec:
+ * https://html.spec.whatwg.org/multipage/canvas.html#drawing-images
+ * ("the source rectangle must be clipped to the source image and the destination
+ * rectangle must be clipped in the same proportion").
+ *
+ * renderByViewports() blits a region larger than the cache canvas (viewport size plus
+ * the row/column header margins, while frozen viewports use bufferEdge=0 on their long
+ * axis) and relies on this behavior: compliant browsers treat the overflow as
+ * transparent padding. WebKit only implements it since Safari 18 ("Fixed drawImage to
+ * not alter the input source or the destination rectangles"), so on Safari < 18 the
+ * overflowed blit is dropped or distorted and frozen viewports lose their content.
+ *
+ * Returns null when the source rectangle lies entirely outside the canvas, meaning
+ * nothing visible remains to be drawn.
+ */
+function clipBlitRectToBounds(rect: IBlitRect, sourceWidth: number, sourceHeight: number): Nullable<IBlitRect> {
+    let { sx, sy, sw, sh, dx, dy, dw, dh } = rect;
+
+    if (sx < 0) {
+        const cut = Math.min(-sx, sw);
+        const ratio = cut / sw;
+        dx += dw * ratio;
+        dw -= dw * ratio;
+        sw -= cut;
+        sx = 0;
+    }
+    if (sy < 0) {
+        const cut = Math.min(-sy, sh);
+        const ratio = cut / sh;
+        dy += dh * ratio;
+        dh -= dh * ratio;
+        sh -= cut;
+        sy = 0;
+    }
+    if (sx + sw > sourceWidth) {
+        const clamped = Math.max(sourceWidth - sx, 0);
+        dw *= clamped / sw;
+        sw = clamped;
+    }
+    if (sy + sh > sourceHeight) {
+        const clamped = Math.max(sourceHeight - sy, 0);
+        dh *= clamped / sh;
+        sh = clamped;
+    }
+
+    if (sw <= 0 || sh <= 0) {
+        return null;
+    }
+
+    return { sx, sy, sw, sh, dx, dy, dw, dh };
+}
+
 export class Spreadsheet extends SheetComponent {
     private _backgroundExtension!: Background;
 
@@ -620,6 +685,18 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
+        let blitRect: IBlitRect = { sx, sy, sw, sh, dx, dy, dw, dh };
+        if (sw > 0 && sh > 0 && dw > 0 && dh > 0) {
+            // The blit may request a source rect larger than the cache canvas (see
+            // clipBlitRectToBounds). Clip it to the canvas bounds so the drawImage
+            // call below behaves the same on every browser, including Safari < 18.
+            const clipped = clipBlitRectToBounds(blitRect, cacheCanvas.getWidth(), cacheCanvas.getHeight());
+            if (!clipped) {
+                return;
+            }
+            blitRect = clipped;
+        }
+
         const pixelRatio = cacheCanvas.getPixelRatio();
         const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
@@ -630,14 +707,14 @@ export class Spreadsheet extends SheetComponent {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(
             cacheCanvas.getCanvasEle(),
-            sx * pixelRatio,
-            sy * pixelRatio,
-            sw * pixelRatio,
-            sh * pixelRatio,
-            dx * pixelRatio,
-            dy * pixelRatio,
-            dw * pixelRatio,
-            dh * pixelRatio
+            blitRect.sx * pixelRatio,
+            blitRect.sy * pixelRatio,
+            blitRect.sw * pixelRatio,
+            blitRect.sh * pixelRatio,
+            blitRect.dx * pixelRatio,
+            blitRect.dy * pixelRatio,
+            blitRect.dw * pixelRatio,
+            blitRect.dh * pixelRatio
         );
         ctx.restore();
         cacheCtx.restore();

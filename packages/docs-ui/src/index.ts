@@ -200,7 +200,10 @@ export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
-export type { IDocClipboardHook } from './services/clipboard/clipboard.service';
+export type {
+    IDocClipboardCopyContentContext,
+    IDocClipboardHook,
+} from './services/clipboard/clipboard.service';
 export {
     DocClipboardPasteAdapterService,
     IDocClipboardPasteAdapterService,

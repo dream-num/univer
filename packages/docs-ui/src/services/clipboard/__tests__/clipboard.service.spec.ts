@@ -845,3 +845,59 @@ describe('DocClipboardService table copy helpers', () => {
         testBed.univer.dispose();
     });
 });
+
+describe('DocClipboardService copy text hooks', () => {
+    it('uses onCopyContent for plain text while preserving the internal document fragment', async () => {
+        const clipboard = new TestClipboardInterfaceService();
+        const documentData: IDocumentData = {
+            id: 'copy-content-hook-doc',
+            body: {
+                dataStream: 'A\uFFFCC\r\n',
+                paragraphs: [{
+                    paragraphId: 'para_docs_ui_clipboard_copy_hook',
+                    startIndex: 3,
+                }],
+                customRanges: [{
+                    startIndex: 1,
+                    endIndex: 1,
+                    rangeId: 'formula-1',
+                    rangeType: 0,
+                    wholeEntity: true,
+                }],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useValue: clipboard }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: documentData.id,
+            subUnitId: '',
+        });
+        const service = testBed.get(IDocClipboardService);
+        service.addClipboardHook({
+            onCopyContent: (start, end, context) => {
+                expect([start, end]).toEqual([0, 3]);
+                expect(context.unitId).toBe(documentData.id);
+                expect(context.segmentId).toBe('');
+                expect(context.body.dataStream).toBe(documentData.body?.dataStream);
+                return 'A42C';
+            },
+        });
+
+        expect(await service.copy(SliceBodyType.copy, [{
+            startOffset: 0,
+            endOffset: 3,
+            collapsed: false,
+            segmentId: '',
+        }])).toBe(true);
+        expect(clipboard.writes[0].text).toBe('A42C');
+        const internalJson = clipboard.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME];
+        expect(parseInternalClipboardFragment(internalJson)?.body?.dataStream)
+            .toContain('\uFFFC');
+
+        testBed.univer.dispose();
+    });
+});

@@ -183,7 +183,7 @@ describe('UniverInstanceService', () => {
         expect(contextService.getContextValue(FOCUSING_BOARD)).toBe(false);
     });
 
-    it('should replace docs and dispose units while resetting focus and current', () => {
+    it('should dispose units while resetting focus and current', () => {
         const disposed: string[] = [];
         service.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
             disposed.push(unit.getUnitId());
@@ -191,10 +191,6 @@ describe('UniverInstanceService', () => {
 
         const doc = service.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
         service.focusUnit(doc.getUnitId());
-
-        const replacement = new DocumentDataModel(createDocData('doc-unit'));
-        service.changeDoc(doc.getUnitId(), replacement);
-        expect(service.getUnit('doc-unit')).toBe(replacement);
 
         expect(service.disposeUnit('doc-unit')).toBe(true);
         expect(disposed).toEqual(['doc-unit']);

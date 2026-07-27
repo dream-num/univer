@@ -16,8 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
-import { IConfigService, Inject, Injector, IUniverInstanceService, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderingEngine } from '@univerjs/engine-render';
+import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IRenderingEngine, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { defaultPluginConfig, SLIDES_PLUGIN_CONFIG_KEY } from './config/config';
 import { SlideDataModel } from './data-model/slide-data-model';
@@ -26,6 +26,7 @@ import { SlideDataModel } from './data-model/slide-data-model';
 
 export interface IUniverSlidesConfig {}
 
+@DependentOn(UniverRenderEnginePlugin)
 export class UniverSlidesPlugin extends Plugin {
     static override pluginName = 'UNIVER_SLIDES_PLUGIN';
     static override packageName = pkg.name;

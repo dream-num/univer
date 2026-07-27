@@ -30,9 +30,12 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, UniverUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -123,7 +126,14 @@ import { SheetsRenderService } from './services/sheets-render.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 
-@DependentOn(UniverSheetsPlugin)
+@DependentOn(
+    UniverDocsPlugin,
+    UniverFormulaEnginePlugin,
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverDocsUIPlugin
+)
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override packageName = pkg.name;

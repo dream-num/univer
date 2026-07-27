@@ -16,13 +16,15 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverFindReplaceConfig } from './config/config';
-import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
+@DependentOn(UniverUIPlugin)
 export class UniverFindReplacePlugin extends Plugin {
     static override pluginName = 'UNIVER_FIND_REPLACE_PLUGIN';
     static override packageName = pkg.name;

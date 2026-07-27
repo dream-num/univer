@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'استبدال',
             'replace-all': 'استبدال الكل',
             'case-sensitive': 'حساس لحالة الأحرف',
-            'find-placeholder': 'البحث في هذه الورقة',
+            'find-placeholder': 'البحث',
             'advanced-finding': 'بحث واستبدال متقدم',
             'replace-placeholder': 'أدخل نص الاستبدال',
             'match-the-whole-cell': 'تطابق الخلية بأكملها',
+            'match-the-whole-word': 'مطابقة الكلمة بالكامل',
             'find-direction': {
                 title: 'اتجاه البحث',
                 row: 'البحث حسب الصف',

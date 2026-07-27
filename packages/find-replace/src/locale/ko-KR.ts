@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: '바꾸기',
             'replace-all': '모두 바꾸기',
             'case-sensitive': '대/소문자 구분',
-            'find-placeholder': '이 시트에서 찾기',
+            'find-placeholder': '찾기',
             'advanced-finding': '고급 검색 및 바꾸기',
             'replace-placeholder': '바꿀 문자열 입력',
             'match-the-whole-cell': '전체 셀 내용 일치',
+            'match-the-whole-word': '단어 단위로 일치',
             'find-direction': {
                 title: '검색 방향',
                 row: '행 기준 검색',

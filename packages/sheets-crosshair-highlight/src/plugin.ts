@@ -16,8 +16,11 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsCrosshairHighlightConfig } from './config/config';
-import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -25,6 +28,7 @@ import { SheetsCrosshairHighlightController } from './controllers/crosshair.cont
 import { SheetsCrosshairHighlightService } from './services/crosshair.service';
 import { SheetCrosshairHighlightRenderController } from './views/widgets/crosshair-highlight.render-controller';
 
+@DependentOn(UniverRenderEnginePlugin, UniverSheetsPlugin, UniverUIPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
     static override pluginName: string = 'SHEET_CROSSHAIR_HIGHLIGHT_PLUGIN';
     static override packageName = pkg.name;

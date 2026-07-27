@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable, UnitModel } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import {
     createIdentifier,
@@ -29,7 +29,7 @@ import {
 } from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, debounceTime, Subject, throttleTime } from 'rxjs';
-import { FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
+import { FIND_REPLACE_AVAILABLE, FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
 
 export type FindProgressFn = () => void;
 
@@ -97,7 +97,18 @@ export abstract class FindModel extends Disposable {
 /**
  * A provider should be implemented by a business to provide the find results.
  */
+export interface IFindReplaceProviderCapabilities {
+    caseSensitive: boolean;
+    matchesTheWholeWord: boolean;
+    matchesTheWholeCell: boolean;
+    findDirection: boolean;
+    findScope: boolean;
+    findBy: boolean;
+}
+
 export interface IFindReplaceProvider {
+    readonly capabilities: IFindReplaceProviderCapabilities;
+    isSupported(unit: UnitModel): boolean;
     find(query: IFindQuery): Promise<FindModel[]>;
     terminate(): void;
 }
@@ -116,6 +127,7 @@ export interface IFindReplaceService {
     readonly replaceables$: Observable<IReplaceableMatch[]>;
 
     readonly focusSignal$: Observable<void>;
+    readonly providerCapabilities$: Observable<Nullable<IFindReplaceProviderCapabilities>>;
 
     readonly revealed: boolean;
     readonly replaceRevealed: boolean;
@@ -156,6 +168,7 @@ export interface IFindReplaceService {
     changeReplaceString(value: string): void;
     changeCaseSensitive(sensitive: boolean): void;
     changeMatchesTheWholeCell(wholeCell: boolean): void;
+    changeMatchesTheWholeWord(wholeWord: boolean): void;
     changeFindScope(scope: FindScope): void;
     changeFindDirection(direction: FindDirection): void;
     changeFindBy(findBy: FindBy): void;
@@ -187,6 +200,7 @@ export interface IFindQuery extends Pick<
     | 'findDirection'
     | 'findScope'
     | 'matchesTheWholeCell'
+    | 'matchesTheWholeWord'
 > { }
 
 /**
@@ -198,6 +212,7 @@ function shouldStateUpdateTriggerResearch(statusUpdate: Partial<IFindReplaceStat
     if (typeof statusUpdate.inputtingFindString !== 'undefined') return true;
     if (typeof statusUpdate.findDirection !== 'undefined') return true;
     if (typeof statusUpdate.matchesTheWholeCell !== 'undefined') return true;
+    if (typeof statusUpdate.matchesTheWholeWord !== 'undefined') return true;
     if (typeof statusUpdate.caseSensitive !== 'undefined') return true;
     if (typeof statusUpdate.findScope !== 'undefined') return true;
     if (typeof statusUpdate.findBy !== 'undefined') return true;
@@ -293,6 +308,7 @@ export class FindReplaceModel extends Disposable {
                 replaceRevealed: this._state.replaceRevealed,
                 caseSensitive: this._state.caseSensitive,
                 matchesTheWholeCell: this._state.matchesTheWholeCell,
+                matchesTheWholeWord: this._state.matchesTheWholeWord,
             })))
         ).flat());
 
@@ -520,6 +536,7 @@ export interface IFindReplaceState {
 
     caseSensitive: boolean;
     matchesTheWholeCell: boolean;
+    matchesTheWholeWord: boolean;
     findDirection: FindDirection;
     findScope: FindScope;
     findBy: FindBy;
@@ -537,6 +554,7 @@ export function createInitFindReplaceState(): IFindReplaceState {
         matchesCount: 0,
         matchesPosition: 0,
         matchesTheWholeCell: false,
+        matchesTheWholeWord: false,
         replaceRevealed: false,
         replaceString: '',
         revealed: true,
@@ -567,6 +585,7 @@ export class FindReplaceState {
     private _matchesCount = 0;
     private _caseSensitive = true;
     private _matchesTheWholeCell = false;
+    private _matchesTheWholeWord = false;
     private _findDirection = FindDirection.ROW;
     private _findScope = FindScope.SUBUNIT;
     private _findBy = FindBy.VALUE;
@@ -581,6 +600,7 @@ export class FindReplaceState {
     get replaceString(): string { return this._replaceString; }
     get caseSensitive(): boolean { return this._caseSensitive; }
     get matchesTheWholeCell(): boolean { return this._matchesTheWholeCell; }
+    get matchesTheWholeWord(): boolean { return this._matchesTheWholeWord; }
     get findDirection(): FindDirection { return this._findDirection; }
     get findScope(): FindScope { return this._findScope; }
     get findBy(): FindBy { return this._findBy; }
@@ -657,6 +677,12 @@ export class FindReplaceState {
             changed = true;
         }
 
+        if (typeof changes.matchesTheWholeWord !== 'undefined' && changes.matchesTheWholeWord !== this._matchesTheWholeWord) {
+            this._matchesTheWholeWord = changes.matchesTheWholeWord;
+            changedState.matchesTheWholeWord = changes.matchesTheWholeWord;
+            changed = true;
+        }
+
         if (typeof changes.inputtingFindString !== 'undefined' && changes.inputtingFindString !== this._inputtingFindString) {
             this._inputtingFindString = changes.inputtingFindString;
             changedState.inputtingFindString = changes.inputtingFindString;
@@ -681,6 +707,7 @@ export class FindReplaceState {
                 matchesCount: this._matchesCount,
                 matchesPosition: this._matchesPosition,
                 matchesTheWholeCell: this._matchesTheWholeCell,
+                matchesTheWholeWord: this._matchesTheWholeWord,
                 replaceRevealed: this._replaceRevealed,
                 revealed: this._revealed,
             });
@@ -709,13 +736,23 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     private readonly _focusSignal$ = new Subject<void>();
     readonly focusSignal$ = this._focusSignal$.asObservable();
 
+    private readonly _providerCapabilities$ = new BehaviorSubject<Nullable<IFindReplaceProviderCapabilities>>(null);
+    readonly providerCapabilities$ = this._providerCapabilities$.asObservable();
+    private _activeProvider: Nullable<IFindReplaceProvider> = null;
+
     get stateUpdates$() { return this._state.stateUpdates$; }
     get state$() { return this._state.state$; }
     get revealed(): boolean { return this._state.revealed; }
     get replaceRevealed(): boolean { return this._state.replaceRevealed; }
 
-    constructor(@Inject(Injector) private readonly _injector: Injector, @IContextService private readonly _contextService: IContextService) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @IContextService private readonly _contextService: IContextService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+    ) {
         super();
+
+        this.disposeWithMe(toDisposable(this._univerInstanceService.focused$.subscribe(() => this._syncActiveProvider())));
     }
 
     override dispose(): void {
@@ -728,6 +765,8 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
         this._replaceables$.complete();
 
         this._focusSignal$.complete();
+
+        this._providerCapabilities$.complete();
     }
 
     getProviders(): Set<IFindReplaceProvider> {
@@ -764,6 +803,10 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
 
     changeMatchesTheWholeCell(matchesTheWholeCell: boolean): void {
         this._state.changeState({ matchesTheWholeCell });
+    }
+
+    changeMatchesTheWholeWord(matchesTheWholeWord: boolean): void {
+        this._state.changeState({ matchesTheWholeWord });
     }
 
     changeCaseSensitive(caseSensitive: boolean): void {
@@ -839,11 +882,11 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     }
 
     start(revealReplace = false): boolean {
-        if (this._providers.size === 0) {
+        if (!this._activeProvider) {
             return false;
         }
 
-        this._model = this._injector.createInstance(FindReplaceModel, this._state, this._providers);
+        this._model = this._injector.createInstance(FindReplaceModel, this._state, new Set([this._activeProvider]));
         this._modelDisposables = new DisposableCollection();
         this._modelDisposables.add(toDisposable(this._model.currentMatch$.subscribe((match) => this._currentMatch$.next(match))));
         this._modelDisposables.add(toDisposable(this._model.replaceables$.subscribe((replaceables) => this._replaceables$.next(replaceables))));
@@ -875,7 +918,24 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
 
     registerFindReplaceProvider(provider: IFindReplaceProvider): IDisposable {
         this._providers.add(provider);
-        return toDisposable(() => this._providers.delete(provider));
+        this._syncActiveProvider();
+        return toDisposable(() => {
+            this._providers.delete(provider);
+            this._syncActiveProvider();
+        });
+    }
+
+    private _syncActiveProvider(): void {
+        const unit = this._univerInstanceService.getFocusedUnit();
+        const provider = unit == null
+            ? null
+            : Array.from(this._providers).find((candidate) => candidate.isSupported(unit)) ?? null;
+        if (provider === this._activeProvider) return;
+
+        if (this.revealed) this.terminate();
+        this._activeProvider = provider;
+        this._providerCapabilities$.next(provider?.capabilities ?? null);
+        this._contextService.setContextValue(FIND_REPLACE_AVAILABLE, provider != null);
     }
 
     private _toggleRevealReplace(revealReplace: boolean): void {

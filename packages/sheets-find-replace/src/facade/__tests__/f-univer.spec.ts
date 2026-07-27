@@ -105,7 +105,20 @@ class TestWorkbookFindModel extends FindModel {
 }
 
 class TestWorkbookFindReplaceProvider {
+    readonly capabilities = {
+        caseSensitive: true,
+        matchesTheWholeWord: false,
+        matchesTheWholeCell: true,
+        findDirection: true,
+        findScope: true,
+        findBy: true,
+    };
+
     constructor(@Inject(Injector) private readonly _injector: Injector) {}
+
+    isSupported(): boolean {
+        return true;
+    }
 
     find(query: IFindQuery): Promise<FindModel[]> {
         return Promise.resolve([this._injector.createInstance(TestWorkbookFindModel, query)]);

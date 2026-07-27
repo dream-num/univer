@@ -24,7 +24,7 @@ import { defaultPluginConfig, SHEETS_SORT_PLUGIN_CONFIG_KEY } from './config/con
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
 
-@DependentOn(UniverSheetsPlugin, UniverFormulaEnginePlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsSortPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = 'SHEET_SORT_PLUGIN';

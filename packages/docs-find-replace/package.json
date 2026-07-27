@@ -1,0 +1,84 @@
+{
+    "name": "@univerjs/docs-find-replace",
+    "version": "1.0.0-alpha.7",
+    "private": false,
+    "description": "Find and replace support for Univer Docs.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "keywords": [
+        "univer",
+        "docs",
+        "find-replace",
+        "plugin"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "main": "./src/index.ts",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/es/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "typecheck": "tsc --noEmit",
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
+    },
+    "peerDependencies": {
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "rxjs": ">=7.0.0"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/find-replace": "workspace:*",
+        "@univerjs/ui": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "react": "18.3.1",
+        "rxjs": "^7.8.2",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.10"
+    }
+}

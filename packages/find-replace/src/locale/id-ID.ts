@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'Ganti',
             'replace-all': 'Ganti Semua',
             'case-sensitive': 'Sensitif Huruf',
-            'find-placeholder': 'Cari di Lembar ini',
+            'find-placeholder': 'Cari',
             'advanced-finding': 'Pencarian & Penggantian Lanjutan',
             'replace-placeholder': 'Masukkan String Pengganti',
             'match-the-whole-cell': 'Cocokkan Seluruh Sel',
+            'match-the-whole-word': 'Cocokkan seluruh kata',
             'find-direction': {
                 title: 'Arah Cari',
                 row: 'Cari per Baris',

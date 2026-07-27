@@ -27,7 +27,11 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    DocSelectionManagerService,
+    DocTextResolverService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FindModel } from '@univerjs/find-replace';
@@ -61,7 +65,9 @@ export class DocsFindModel extends FindModel {
         @Inject(DocSelectionManagerService) private readonly _selectionManager: DocSelectionManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(DocTextResolverService)
+        private readonly _textResolverService: DocTextResolverService
     ) {
         super();
         this.unitId = _doc.getUnitId();
@@ -190,7 +196,12 @@ export class DocsFindModel extends FindModel {
         }
 
         const previousStart = this.currentMatch?.range.startOffset;
-        this._matches = findDocRanges(body, this._query, !!this._doc.getSnapshot().disabled)
+        this._matches = findDocRanges(
+            body,
+            this._query,
+            !!this._doc.getSnapshot().disabled,
+            this._textResolverService.resolve(this.unitId, body)
+        )
             .map((range) => ({
                 provider: DOCS_FIND_REPLACE_PROVIDER,
                 unitId: this.unitId,

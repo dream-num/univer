@@ -80,6 +80,13 @@ export {
 } from './services/doc-state-change-manager.service';
 export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
+export { DocTextResolverService } from './services/doc-text-resolver.service';
+export type {
+    IDocTextReplacement,
+    IDocTextResolver,
+    IResolvedDocText,
+    IResolvedDocTextCharacter,
+} from './services/doc-text-resolver.service';
 export {
     addCustomRangeBySelectionFactory,
     addCustomRangeFactory,

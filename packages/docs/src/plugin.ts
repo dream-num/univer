@@ -41,6 +41,7 @@ import { DocContentInsertService } from './services/doc-content-insert.service';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
+import { DocTextResolverService } from './services/doc-text-resolver.service';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = 'DOCS_PLUGIN';
@@ -100,6 +101,7 @@ export class UniverDocsPlugin extends Plugin {
                 [DocStateChangeManagerService],
                 [DocBlockMoveValidatorService],
                 [DocContentInsertService],
+                [DocTextResolverService],
                 [DocCustomRangeController],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));

@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import { IConfigService } from '@univerjs/core';
-import { isBrowser, resizeObserverCtor } from '@univerjs/design';
+import { isBrowser } from '@univerjs/design';
 import { useEffect, useMemo } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 import { useEvent } from './event';
@@ -65,10 +65,10 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
 
         updater();
 
-        const resizeObserver = resizeObserverCtor(updater);
+        const resizeObserver = new ResizeObserver(updater);
         resizeObserver.observe(element);
         return () => {
-            resizeObserver.unobserve(element);
+            resizeObserver.disconnect();
         };
     }, [element, container]);
 }

@@ -17,9 +17,10 @@
 import type { IDocumentBody, IParagraph } from '@univerjs/core';
 import type { IDocumentSkeletonLine, IDocumentSkeletonPage } from '@univerjs/engine-render';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, NamedStyleType } from '@univerjs/core';
-import { DocumentSkeletonPageType, GlyphType, LineType } from '@univerjs/engine-render';
-import { describe, expect, it } from 'vitest';
+import { DocumentSkeletonPageType, GlyphType, LineType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+    drawParagraphPlaceholders,
     getParagraphPlaceholderLayouts,
     shouldRenderParagraphPlaceholder,
 } from '../doc-paragraph-placeholder.render-controller';
@@ -178,6 +179,35 @@ function createPage(lines: IDocumentSkeletonLine[]): IDocumentSkeletonPage {
     return page;
 }
 
+function createPageWithTableCell(lines: IDocumentSkeletonLine[]): IDocumentSkeletonPage {
+    const page = createPage([]);
+    const cell = createPage(lines);
+    Object.assign(cell, {
+        left: 300,
+        marginBottom: 4,
+        marginLeft: 5,
+        marginRight: 5,
+        marginTop: 4,
+        pageHeight: 50,
+        pageWidth: 100,
+    });
+    page.skeTables.set('table-1', {
+        height: 58,
+        left: 80,
+        rows: [{
+            cells: [cell],
+            height: 58,
+            index: 0,
+            top: 0,
+        }],
+        tableId: 'table-1',
+        top: 20,
+        width: 500,
+    } as any);
+
+    return page;
+}
+
 function createBody(dataStream: string, paragraphs: IParagraph[]): IDocumentBody {
     return {
         dataStream,
@@ -194,6 +224,10 @@ function createDocumentModel(documentFlavor: DocumentFlavor) {
         }),
     } as any;
 }
+
+afterEach(() => {
+    setDocsTableRenderViewportProvider(null);
+});
 
 describe('doc paragraph placeholder render controller', () => {
     it('only enables placeholder rendering for modern docs when config is enabled', () => {
@@ -299,5 +333,51 @@ describe('doc paragraph placeholder render controller', () => {
             text: '请输入文字或按"/"启用命令',
             y: 145,
         });
+    });
+
+    it('projects a table-cell placeholder with the table horizontal scroll', () => {
+        const page = createPageWithTableCell([createLine(0)]);
+        const body = createBody('\r\n', [{ startIndex: 0, paragraphId: 'para_placeholder_scrolled_table' }]);
+        setDocsTableRenderViewportProvider(() => ({
+            contentWidth: 500,
+            leadingInsetLeft: 30,
+            scrollLeft: 250,
+            viewportWidth: 220,
+        }));
+
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 10, 0, 0);
+
+        expect(placeholders).toMatchObject([{
+            clipLeft: 206,
+            clipRight: 275,
+            maxWidth: 69,
+            x: 206,
+        }]);
+    });
+
+    it('clips long placeholder text instead of scaling its glyphs to maxWidth', () => {
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            fillText: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+
+        drawParagraphPlaceholders(ctx, [{
+            fontFamily: 'Arial',
+            fontSize: 16,
+            fontWeight: 'normal',
+            maxWidth: 80,
+            text: 'Type text or press "/" for commands',
+            x: 20,
+            y: 40,
+        }]);
+
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 24, 80, 32);
+        expect(ctx.clip).toHaveBeenCalledOnce();
+        expect(ctx.fillText).toHaveBeenCalledWith('Type text or press "/" for commands', 20, 40);
     });
 });

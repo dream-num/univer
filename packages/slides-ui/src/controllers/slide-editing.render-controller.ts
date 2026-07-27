@@ -68,6 +68,7 @@ import {
     IEditorService,
     MoveCursorOperation,
     MoveSelectionOperation,
+    ReplaceSnapshotCommand,
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import {
@@ -249,7 +250,17 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._instanceSrv.changeDoc(editorUnitId, documentModel!);
+            const snapshot = documentModel!.getSnapshot();
+            const editorDocument = this._instanceSrv.getUnit(editorUnitId, UniverInstanceType.UNIVER_DOC);
+            if (editorDocument == null) {
+                this._instanceSrv.createUnit(UniverInstanceType.UNIVER_DOC, snapshot);
+            } else {
+                this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
+                    unitId: editorUnitId,
+                    snapshot,
+                });
+            }
+            this._instanceSrv.setCurrentUnitForType(editorUnitId);
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
             this._textSelectionManagerService.replaceTextRanges([{
                 startOffset: 0,

@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'جایگزینی',
             'replace-all': 'جایگزینی همه',
             'case-sensitive': 'حساس به حروف بزرگ و کوچک',
-            'find-placeholder': 'جستجو در این شیت',
+            'find-placeholder': 'جستجو',
             'advanced-finding': 'جستجو و جایگزینی پیشرفته',
             'replace-placeholder': 'رشته جایگزینی را وارد کنید',
             'match-the-whole-cell': 'تطابق کل سلول',
+            'match-the-whole-word': 'تطبیق کل کلمه',
             'find-direction': {
                 title: 'جهت جستجو',
                 row: 'جستجو بر اساس ردیف',

@@ -16,6 +16,7 @@
 
 import type { IUniverSheetsHyperLinkConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './config/config';
@@ -28,7 +29,7 @@ import { HyperLinkModel } from './models/hyper-link.model';
 import { SheetsHyperLinkParserService } from './services/parser.service';
 import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
 
-@DependentOn(UniverSheetsPlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsHyperLinkPlugin extends Plugin {
     static override pluginName = SHEET_HYPER_LINK_PLUGIN;
     static override packageName = pkg.name;

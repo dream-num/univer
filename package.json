@@ -75,7 +75,7 @@
         "eslint-plugin-react-hooks": "^7.1.1",
         "eslint-plugin-react-refresh": "^0.5.3",
         "husky": "^9.1.7",
-        "lint-staged": "^17.0.8",
+        "lint-staged": "^17.2.0",
         "posthog-node": "^5.46.1",
         "react": "19.2.8",
         "react-dom": "19.2.8",

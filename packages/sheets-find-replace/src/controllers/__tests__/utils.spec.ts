@@ -238,6 +238,7 @@ describe('test "hitCell" method', () => {
                     findDirection: FindDirection.COLUMN,
                     findScope: FindScope.SUBUNIT,
                     matchesTheWholeCell: false,
+                    matchesTheWholeWord: false,
                     replaceRevealed: false,
                 };
 
@@ -260,6 +261,7 @@ describe('test "hitCell" method', () => {
                 findDirection: FindDirection.COLUMN,
                 findScope: FindScope.SUBUNIT,
                 matchesTheWholeCell: false,
+                matchesTheWholeWord: false,
                 replaceRevealed: false,
             };
 

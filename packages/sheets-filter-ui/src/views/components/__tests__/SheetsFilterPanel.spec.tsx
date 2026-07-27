@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IDisposable, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IDisposable, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IUniverSheetsFilterConfig } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { Root } from 'react-dom/client';
@@ -34,20 +34,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    ActiveDirtyManagerService,
-    IActiveDirtyManagerService,
-    ISheetRowFilteredService,
-    SheetRowFilteredService,
-} from '@univerjs/engine-formula';
-import {
-    MarkDirtyFilterChangeMutation,
-    RefRangeService,
-    SheetInterceptorService,
-    SheetRangeThemeModel,
-    SheetsSelectionsService,
-    ZebraCrossingCacheController,
-} from '@univerjs/sheets';
 import { FilterBy, SheetsFilterService, SheetsFilterSyncController, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { ILayoutService, IMessageService, IUIPartsService, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
@@ -149,19 +135,10 @@ function createFilterPanelViewTestBed(workbookData: IWorkbookData, filterConfig?
         }
 
         override onStarting(): void {
-            ([
-                [SheetInterceptorService],
-                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
-                [RefRangeService],
-                [SheetsSelectionsService],
-                [SheetRangeThemeModel],
-                [ZebraCrossingCacheController],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
-                [ILayoutService, { useClass: TestLayoutService as never }],
-                [IMessageService, { useClass: TestMessageService as never }],
-                [IUIPartsService, { useClass: UIPartsService }],
-            ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
+            this._injector.add([ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }]);
+            this._injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+            this._injector.add([IMessageService, { useClass: TestMessageService as never }]);
+            this._injector.add([IUIPartsService, { useClass: UIPartsService }]);
         }
     }
 
@@ -184,7 +161,6 @@ function createFilterPanelViewTestBed(workbookData: IWorkbookData, filterConfig?
         CloseFilterPanelOperation,
         ChangeFilterByOperation,
         SetCellEditVisibleOperation,
-        MarkDirtyFilterChangeMutation,
     ].forEach((command) => commandService.registerCommand(command));
 
     return {

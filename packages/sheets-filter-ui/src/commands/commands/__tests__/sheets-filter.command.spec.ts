@@ -14,18 +14,51 @@
  * limitations under the License.
  */
 
-import type { Dependency, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IDisposable, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
-import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
-import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
-import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
-import { MarkDirtyFilterChangeMutation, RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
-import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
+import {
+    ICommandService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Plugin,
+    RANGE_TYPE,
+    RedoCommand,
+    toDisposable,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    ClearSheetsFilterCriteriaCommand,
+    ReCalcSheetsFilterCommand,
+    SetSheetsFilterCriteriaCommand,
+    SetSheetsFilterRangeMutation,
+    SheetsFilterService,
+    SmartToggleSheetsFilterCommand,
+    UniverSheetsFilterPlugin,
+} from '@univerjs/sheets-filter';
 import { IMessageService } from '@univerjs/ui';
-import { MockMessageService } from '@univerjs/ui/services/message/__tests__/mock-message.service.js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+class MockMessageService {
+    show(): IDisposable {
+        return toDisposable(() => undefined);
+    }
+
+    remove(): void {}
+
+    removeAll(): void {}
+
+    setContainer(): void {}
+
+    getContainer(): undefined {
+        return undefined;
+    }
+}
 
 function testWorkbookDataFactory(): IWorkbookData {
     return {
@@ -89,41 +122,17 @@ function createFilterCommandTestBed() {
         }
 
         override onStarting(): void {
-            ([
-                [RefRangeService],
-                [SheetInterceptorService],
-                [SheetsSelectionsService],
-                [WorksheetPermissionService],
-                [WorksheetProtectionPointModel],
-                [WorkbookPermissionService],
-                [IAuthzIoService, { useClass: AuthzIoLocalService }],
-                [WorksheetProtectionRuleModel],
-                [RangeProtectionRuleModel],
-                [IMessageService, { useClass: MockMessageService }],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
-                [SheetRangeThemeModel],
-                [ZebraCrossingCacheController],
-            ] as Dependency[]).forEach((d) => this._injector.add(d));
-
-            this._injector.get(SheetInterceptorService);
-            this._injector.get(WorkbookPermissionService);
-            this._injector.get(WorksheetPermissionService);
+            this._injector.add([IMessageService, { useClass: MockMessageService }]);
         }
     }
 
     univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(SheetsFilterCommandTestPlugin);
 
+    get(LocaleService).load({});
     univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, testWorkbookDataFactory());
 
-    const commandService = get(ICommandService);
-    [
-        SetRangeValuesCommand,
-        SetRangeValuesMutation,
-        SmartToggleSheetsFilterCommand,
-        MarkDirtyFilterChangeMutation,
-    ].forEach((command) => commandService.registerCommand(command));
+    get(ICommandService).registerCommand(SmartToggleSheetsFilterCommand);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
@@ -169,7 +178,7 @@ describe('test sheets filter commands', () => {
         ]);
     }
 
-    function getFilterModel(): FilterModel {
+    function getFilterModel() {
         return sheetsFilterService.getFilterModel('test', 'sheet1')!;
     }
 
@@ -179,7 +188,7 @@ describe('test sheets filter commands', () => {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 range: { startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 },
-            } as ISetSheetsFilterRangeMutationParams));
+            }));
             expect(getFilterModel()).toBeTruthy();
 
             expect(await commandService.executeCommand(SmartToggleSheetsFilterCommand.id)).toBeTruthy();
@@ -225,7 +234,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 0,
                 criteria: null,
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeFalsy();
+            })).toBeFalsy();
         });
 
         it('should set filter criteria works', async () => {
@@ -240,7 +249,7 @@ describe('test sheets filter commands', () => {
                 criteria: {
                     filters: { filters: ['1'] },
                 },
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
+            })).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set([2, 3, 4, 5]));
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -255,7 +264,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 0,
                 criteria: null,
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
+            })).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set());
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -278,7 +287,7 @@ describe('test sheets filter commands', () => {
                 criteria: {
                     filters: { filters: ['1'] },
                 },
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
+            })).toBeTruthy();
             expect(await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
@@ -286,7 +295,7 @@ describe('test sheets filter commands', () => {
                 criteria: {
                     filters: { filters: ['b'] },
                 },
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
+            })).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set([1, 2, 3, 4, 5]));
 
             expect(await commandService.executeCommand(ClearSheetsFilterCriteriaCommand.id, {
@@ -315,7 +324,7 @@ describe('test sheets filter commands', () => {
                 criteria: {
                     filters: { filters: ['1'] },
                 },
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
+            })).toBeTruthy();
             expect(await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
@@ -323,7 +332,7 @@ describe('test sheets filter commands', () => {
                 criteria: {
                     filters: { filters: ['b'] },
                 },
-            } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
+            })).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set([1, 2, 3, 4, 5]));
 
             expect(await commandService.executeCommand(SetRangeValuesCommand.id, {

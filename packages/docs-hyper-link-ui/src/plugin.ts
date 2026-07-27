@@ -17,8 +17,11 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsHyperLinkUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -29,7 +32,13 @@ import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
 
-@DependentOn(UniverDocsHyperLinkPlugin)
+@DependentOn(
+    UniverDocsPlugin,
+    UniverRenderEnginePlugin,
+    UniverDocsHyperLinkPlugin,
+    UniverUIPlugin,
+    UniverDocsUIPlugin
+)
 export class UniverDocsHyperLinkUIPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_UI_PLUGIN;
     static override packageName = pkg.name;

@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { SlideDataModel } from '@univerjs/slides';
 import type { IUniverSlidesUIConfig } from './config/config';
 import {
+    DependentOn,
     IConfigService,
     Inject,
     Injector,
@@ -27,7 +28,12 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSlidesPlugin } from '@univerjs/slides';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { CanvasView } from './controllers/canvas-view';
@@ -42,6 +48,14 @@ import { ISlideEditorManagerService, SlideEditorManagerService } from './service
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 import { SlideRenderService } from './services/slide-render.service';
 
+@DependentOn(
+    UniverDocsPlugin,
+    UniverDrawingPlugin,
+    UniverRenderEnginePlugin,
+    UniverSlidesPlugin,
+    UniverUIPlugin,
+    UniverDocsUIPlugin
+)
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = 'UNIVER_SLIDES_UI_PLUGIN';
     static override packageName = pkg.name;

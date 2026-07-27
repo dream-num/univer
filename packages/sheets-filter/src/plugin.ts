@@ -16,7 +16,9 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFilterConfig } from './config/config';
-import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
@@ -24,6 +26,7 @@ import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SheetsFilterFormulaService } from './services/sheet-filter-formula.service';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
 
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsFilterPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = SHEET_FILTER_SNAPSHOT_ID;

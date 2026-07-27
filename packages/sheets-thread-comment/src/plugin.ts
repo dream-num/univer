@@ -27,6 +27,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
@@ -35,7 +36,7 @@ import { SheetsThreadCommentResourceController } from './controllers/sheets-thre
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SHEET_THREAD_COMMENT_BASE } from './types/const';
 
-@DependentOn(UniverThreadCommentPlugin)
+@DependentOn(UniverThreadCommentPlugin, UniverSheetsPlugin)
 export class UniverSheetsThreadCommentPlugin extends Plugin {
     static override pluginName = SHEET_THREAD_COMMENT_BASE;
     static override packageName = pkg.name;

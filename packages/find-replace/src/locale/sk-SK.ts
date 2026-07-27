@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'Nahradiť',
             'replace-all': 'Nahradiť všetko',
             'case-sensitive': 'Rozlišovať veľké a malé písmená',
-            'find-placeholder': 'Hľadať v tomto hárku',
+            'find-placeholder': 'Hľadať',
             'advanced-finding': 'Pokročilé hľadanie a nahradenie',
             'replace-placeholder': 'Zadajte reťazec na nahradenie',
             'match-the-whole-cell': 'Zhoda s celou bunkou',
+            'match-the-whole-word': 'Hľadať iba celé slová',
             'find-direction': {
                 title: 'Smer hľadania',
                 row: 'Hľadať podľa riadkov',

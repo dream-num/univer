@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: 'Remplacer',
             'replace-all': 'Remplacer tout',
             'case-sensitive': 'Sensible à la casse',
-            'find-placeholder': 'Rechercher dans cette feuille',
+            'find-placeholder': 'Rechercher',
             'advanced-finding': 'Recherche et remplacement avancés',
             'replace-placeholder': 'Saisir la chaîne de remplacement',
             'match-the-whole-cell': 'Correspondance de la cellule entière',
+            'match-the-whole-word': 'Mot entier',
             'find-direction': {
                 title: 'Direction de la recherche',
                 row: 'Rechercher par ligne',

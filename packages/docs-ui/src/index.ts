@@ -216,8 +216,11 @@ export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
-export { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from './services/doc-embed-integration.service';
-export type { IDocEmbedInteractionBoundaryService as IDocEmbedInteractionBoundaryServiceType, IDocEmbedRuntimeFocusCoordinator as IDocEmbedRuntimeFocusCoordinatorType } from './services/doc-embed-integration.service';
+export {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from './services/doc-embed-integration.service';
 export {
     DocEventManagerService,
     getListMarkerFallbackBound,
@@ -245,7 +248,7 @@ export type { IEditorInputConfig } from './services/selection/doc-selection-rend
 export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 export type { IDocRange } from './services/selection/range-interface';
 export { convertPositionsToRectRanges, RectRange } from './services/selection/rect-range';
-export { getCanvasOffsetByEngine } from './services/selection/selection-utils';
+export { getCanvasOffsetByEngine, getTextRangeFromCharIndex } from './services/selection/selection-utils';
 export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './services/selection/text-range';
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';

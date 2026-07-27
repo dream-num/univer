@@ -25,6 +25,34 @@ afterEach(() => {
 });
 
 describe('Popup', () => {
+    it('should switch Tailwind transition state with visibility', () => {
+        const mountContainer = document.createElement('div');
+        document.body.appendChild(mountContainer);
+
+        const { rerender } = render(
+            <ConfigProvider mountContainer={mountContainer}>
+                <Popup visible={false}>
+                    <div>popup-content</div>
+                </Popup>
+            </ConfigProvider>
+        );
+
+        const popup = mountContainer.querySelector('section') as HTMLElement;
+        expect(popup).toHaveClass('univer-scale-y-0', 'univer-opacity-0');
+
+        rerender(
+            <ConfigProvider mountContainer={mountContainer}>
+                <Popup visible>
+                    <div>popup-content</div>
+                </Popup>
+            </ConfigProvider>
+        );
+
+        expect(popup).toHaveClass('univer-scale-y-100', 'univer-opacity-100');
+
+        mountContainer.remove();
+    });
+
     it('should clamp popup offset and support resize/contextmenu', async () => {
         const mountContainer = document.createElement('div');
         document.body.appendChild(mountContainer);
